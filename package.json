@@ -1,7 +1,7 @@
 {
-  "name": "@withfig/autocomplete",
-  "version": "2.692.3",
-  "description": "Fig Autocomplete Specs",
+  "name": "@tabsmith/autocomplete-specs",
+  "version": "1.0.0",
+  "description": "Autocomplete specs for tabsmith",
   "schemaVersion": "v7",
   "main": "./build/index",
   "types": "./build/index.d.ts",
@@ -75,8 +75,8 @@
   ],
   "author": "",
   "license": "ISC",
-  "bugs": "https://github.com/withfig/autocomplete/issues",
-  "repository": "https://github.com/withfig/autocomplete",
+  "bugs": "https://github.com/PedroLaRosa/autocomplete/issues",
+  "repository": "https://github.com/PedroLaRosa/autocomplete",
   "devDependencies": {
     "@fig/eslint-config-autocomplete": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
@@ -97,5 +97,8 @@
     "semver": "^7.6.3",
     "strip-json-comments": "^5.0.1",
     "yaml": "^2.7.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
