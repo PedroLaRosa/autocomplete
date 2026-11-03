@@ -96,7 +96,7 @@
     "@fig/autocomplete-helpers": "^1.0.7",
     "semver": "^7.6.3",
     "strip-json-comments": "^5.0.1",
-    "yaml": "^2.7.0"
+    "yaml": "^2.9.1"
   },
   "publishConfig": {
     "access": "public"
