@@ -1,5 +1,3 @@
-/* eslint-disable @withfig/fig-linter/no-useless-insertvalue */
-
 /** A version of Fig.Subcommand with a predictable name prop */
 interface TwilioSubcommand extends Fig.Subcommand {
   name: string;

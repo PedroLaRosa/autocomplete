@@ -19,7 +19,6 @@ const completionSpec: Fig.Spec = {
     {
       name: "-",
       // Run the suggestion directory on insert
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-insertvalue
       insertValue: "-\n",
       description: "Run the last command",
       type: "shortcut",
