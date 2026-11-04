@@ -12,7 +12,6 @@ const wholeTldrPages: Fig.Generator = {
   custom: async (tokens, executeShellCommand, context) => {
     const { stdout } = await executeShellCommand({
       command: "ls",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
       args: [
         "-Al",
         ...[android, common, linux, osx, sunos, windows].map((path) =>

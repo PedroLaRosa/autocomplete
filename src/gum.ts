@@ -45,14 +45,12 @@ const styleOptions: Fig.Option[] = [
 ];
 
 const styleOptionGenerator = (element: string) =>
-  styleOptions.map(
-    (style): Fig.Option => ({
-      ...style,
-      name: (style.name as string).replace("--", `--${element}.`),
-      description: `${style.description} for ${element}`,
-      priority: 45,
-    })
-  );
+  styleOptions.map((style): Fig.Option => ({
+    ...style,
+    name: (style.name as string).replace("--", `--${element}.`),
+    description: `${style.description} for ${element}`,
+    priority: 45,
+  }));
 
 const completionSpec: Fig.Spec = {
   name: "gum",

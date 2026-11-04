@@ -10,6 +10,10 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 100
+    ignore:
+      # @types/node >=24 drops the Array#at shim the specs rely on under lib ES2018; track the Node 22 floor
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       typescript-eslint:
         patterns:

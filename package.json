@@ -10,10 +10,10 @@
     "./dynamic": "./build/dynamic/index.js"
   },
   "type": "module",
-  "packageManager": "pnpm@9.1.0+sha256.22e36fba7f4880ecf749a5ca128b8435da085ecd49575e7fb9e64d6bf4fad394",
+  "packageManager": "pnpm@12.16.1+sha512.091d1dee7927575661b25dab3c2ae31cafc1c54d6b71ed6a6600cf0c1cb10434a447eae14015f1b23e2e6bedeed79df94a932e2164d2832280dce3fb32f656d1",
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=9"
+    "node": ">=22.22.1",
+    "pnpm": ">=12"
   },
   "browserslist": [
     "safari >= 15",
@@ -23,13 +23,13 @@
     "maintained node versions"
   ],
   "scripts": {
-    "dev": "npx @withfig/autocomplete-tools dev",
-    "create-spec": "npx @withfig/autocomplete-tools create-spec",
-    "build": "npx @withfig/autocomplete-tools compile",
-    "lint": "eslint '**/*.ts' && npx prettier --check '**/*.ts' --parser typescript",
-    "lint:fix": "eslint '**/*.ts' --fix && npx prettier --write '**/*.ts' --parser typescript",
+    "dev": "autocomplete-tools dev",
+    "create-spec": "autocomplete-tools create-spec",
+    "build": "autocomplete-tools compile",
+    "lint": "eslint '**/*.ts' && prettier --check '**/*.ts' --parser typescript",
+    "lint:fix": "eslint '**/*.ts' --fix && prettier --write '**/*.ts' --parser typescript",
     "test": "tsc --noEmit && echo 'All specs passed validation. You are ready to push!'",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "fig": {
     "dev": {
@@ -78,23 +78,25 @@
   "bugs": "https://github.com/PedroLaRosa/autocomplete/issues",
   "repository": "https://github.com/PedroLaRosa/autocomplete",
   "devDependencies": {
-    "@fig/eslint-config-autocomplete": "^2.0.0",
+    "@types/node": "^22.20.5",
     "@typescript-eslint/eslint-plugin": "^8.72.1",
     "@typescript-eslint/parser": "^8.72.1",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "@withfig/autocomplete-tools": "^2.11.0",
     "@withfig/autocomplete-types": "^1.31.0",
-    "danger": "^11.3.1",
-    "eslint": "^8.57.1",
-    "eslint-plugin-compat": "4.2.0",
+    "@withfig/eslint-plugin-fig-linter": "^1.4.1",
+    "danger": "^14.1.0",
+    "eslint": "^10.14.0",
+    "eslint-plugin-compat": "^7.0.2",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "prettier": "^3.4.2",
-    "typescript": "~5.5.4"
+    "prettier": "^3.9.10",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "dependencies": {
     "@fig/autocomplete-generators": "^2.4.0",
-    "@fig/autocomplete-helpers": "^1.0.7",
-    "semver": "^7.8.5",
+    "@fig/autocomplete-helpers": "^2.0.0",
+    "semver": "^7.8.6",
     "strip-json-comments": "^5.0.3",
     "yaml": "^2.9.1"
   },

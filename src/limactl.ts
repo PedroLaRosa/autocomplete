@@ -261,13 +261,11 @@ completionSpec.subcommands.push({
     name: "command",
     isOptional: true,
     suggestions: [
-      ...completionSpec.subcommands.map(
-        (subcommand): Fig.Suggestion => ({
-          name: subcommand.name,
-          description: subcommand.description,
-          type: "subcommand",
-        })
-      ),
+      ...completionSpec.subcommands.map((subcommand): Fig.Suggestion => ({
+        name: subcommand.name,
+        description: subcommand.description,
+        type: "subcommand",
+      })),
       {
         name: "help",
         description: HELP_COMMAND_DESCRIPTION,
