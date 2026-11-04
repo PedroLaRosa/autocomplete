@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const DOTNET_ICON =
   "https://upload.wikimedia.org/wikipedia/commons/7/7d/Microsoft_.NET_logo.svg";

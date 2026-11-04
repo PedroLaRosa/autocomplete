@@ -1,4 +1,4 @@
-import { createVersionedSpec } from "@fig/autocomplete-helpers";
+import { createVersionedSpec } from "@tabsmith/autocomplete-helpers";
 const versionFiles = ["2.0.0", "3.0.0"];
 export const getVersionCommand: Fig.GetVersionCommand = async (
   executeShellCommand
@@ -6,7 +6,7 @@ export const getVersionCommand: Fig.GetVersionCommand = async (
   const versionRegex = /\d+\.\d+\.\d+/;
   const { stdout } = await executeShellCommand({
     command: "shopify",
-    // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+    // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
     args: ["version"],
   });
   return stdout.match(versionRegex)?.[0] ?? "";

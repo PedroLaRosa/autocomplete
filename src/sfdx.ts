@@ -2111,7 +2111,7 @@ const completionSpec: Fig.Spec = {
             "Set the authenticated org as the default dev hub org for scratch org creation",
         },
         {
-          // eslint-disable-next-line @withfig/fig-linter/no-duplicate-options-subcommands
+          // eslint-disable-next-line @tabsmith/fig-linter/no-duplicate-options-subcommands
           name: ["-s", "--setdefaultusername"],
           description:
             "Set the authenticated org as the default username that all commands run against",

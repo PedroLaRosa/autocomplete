@@ -1,4 +1,4 @@
-/* eslint-disable @withfig/fig-linter/no-missing-default-export */
+/* eslint-disable @tabsmith/fig-linter/no-missing-default-export */
 
 /*
 https://github.com/denoland/deno_doc/blob/efe4939ebbcdcd36ac1a2969e3a9db72fcfe49db/lib/types.d.ts

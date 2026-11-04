@@ -291,7 +291,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--display",
               description:
-                // eslint-disable-next-line @withfig/fig-linter/conventional-descriptions
+                // eslint-disable-next-line @tabsmith/fig-linter/conventional-descriptions
                 "iOS: supports 'internal' or 'external'. Default is 'internal'. tvOS: supports only 'external' watchOS: supports only 'internal'",
               requiresSeparator: "=",
             },
@@ -325,7 +325,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--display",
               description:
-                // eslint-disable-next-line @withfig/fig-linter/conventional-descriptions
+                // eslint-disable-next-line @tabsmith/fig-linter/conventional-descriptions
                 "iOS: supports 'internal' or 'external'. Default is 'internal'. tvOS: supports only 'external' watchOS: supports only 'internal'. You may also specify a port by UUID",
               requiresSeparator: "=",
             },

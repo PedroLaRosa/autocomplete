@@ -2,7 +2,7 @@ import {
   valueList,
   keyValueList,
   KeyValueSuggestions,
-} from "@fig/autocomplete-generators";
+} from "@tabsmith/autocomplete-generators";
 
 /** The output of processing `scc --languages` */
 interface SccLanguages {
@@ -38,7 +38,7 @@ const generateLanguages: KeyValueSuggestions = async (
 ) => {
   const { stdout } = await executeShellCommand({
     command: "scc",
-    // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+    // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
     args: ["--language"],
   });
   const { languages } = processSccLanguages(stdout);
@@ -131,7 +131,7 @@ const completionSpec: Fig.Spec = {
           keys: async (_, executeShellCommand) => {
             const { stdout } = await executeShellCommand({
               command: "scc",
-              // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+              // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
               args: ["--language"],
             });
             const { extensions } = processSccLanguages(stdout);
@@ -188,7 +188,7 @@ const completionSpec: Fig.Spec = {
           values: async (_, executeShellCommand) => {
             const { stdout } = await executeShellCommand({
               command: "ls",
-              // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+              // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
               args: ["-lAF1"],
             });
             const suggestions: Fig.Suggestion[] = stdout
@@ -231,7 +231,7 @@ const completionSpec: Fig.Spec = {
           values: async (_, executeShellCommand) => {
             const { stdout } = await executeShellCommand({
               command: "scc",
-              // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+              // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
               args: ["--language"],
             });
             const { extensions } = processSccLanguages(stdout);

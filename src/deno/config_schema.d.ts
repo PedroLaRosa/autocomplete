@@ -1,4 +1,4 @@
-/* eslint-disable @withfig/fig-linter/no-missing-default-export */
+/* eslint-disable @tabsmith/fig-linter/no-missing-default-export */
 
 // This file was generated automatically from the source schema:
 // https://github.com/denoland/deno/blob/7c27222/cli/schemas/config-file.v1.json

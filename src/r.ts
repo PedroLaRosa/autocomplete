@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const compileFiles = filepaths({
   extensions: ["c", "cc", "cpp", "m", "mm", "M", "f", "f90", "f95"],

@@ -78,27 +78,27 @@
   "bugs": "https://github.com/PedroLaRosa/autocomplete/issues",
   "repository": "https://github.com/PedroLaRosa/autocomplete",
   "devDependencies": {
-    "@types/node": "^22.20.5",
-    "@typescript-eslint/eslint-plugin": "^8.72.1",
-    "@typescript-eslint/parser": "^8.72.1",
-    "@typescript/native": "npm:typescript@^7.0.2",
-    "@withfig/autocomplete-tools": "^2.11.0",
-    "@withfig/autocomplete-types": "^1.31.0",
-    "@withfig/eslint-plugin-fig-linter": "^1.4.1",
-    "danger": "^14.1.0",
-    "eslint": "^10.14.0",
-    "eslint-plugin-compat": "^7.0.2",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.6.0",
-    "prettier": "^3.9.10",
-    "typescript": "npm:@typescript/typescript6@^6.0.2"
+    "@tabsmith/autocomplete-tools": "2.11.0",
+    "@tabsmith/autocomplete-types": "1.31.0",
+    "@tabsmith/eslint-plugin-fig-linter": "1.4.1",
+    "@types/node": "22.20.5",
+    "@typescript-eslint/eslint-plugin": "8.72.1",
+    "@typescript-eslint/parser": "8.72.1",
+    "@typescript/native": "npm:typescript@7.0.2",
+    "danger": "14.1.0",
+    "eslint": "10.14.0",
+    "eslint-plugin-compat": "7.0.2",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
+    "prettier": "3.9.10",
+    "typescript": "npm:@typescript/typescript6@6.0.2"
   },
   "dependencies": {
-    "@fig/autocomplete-generators": "^2.4.0",
-    "@fig/autocomplete-helpers": "^2.0.0",
-    "semver": "^7.8.6",
-    "strip-json-comments": "^5.0.3",
-    "yaml": "^2.9.1"
+    "@tabsmith/autocomplete-generators": "2.4.0",
+    "@tabsmith/autocomplete-helpers": "2.0.0",
+    "semver": "7.8.6",
+    "strip-json-comments": "5.0.3",
+    "yaml": "2.9.1"
   },
   "publishConfig": {
     "access": "public"

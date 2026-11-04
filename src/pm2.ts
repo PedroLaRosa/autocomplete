@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const generators: Record<string, Fig.Generator> = {
   jsonFileGenerator: filepaths({ extensions: ["json"] }),

@@ -1,6 +1,6 @@
-/* eslint-disable @withfig/fig-linter/no-missing-default-export */
+/* eslint-disable @tabsmith/fig-linter/no-missing-default-export */
 
-import { filepaths, valueList } from "@fig/autocomplete-generators";
+import { filepaths, valueList } from "@tabsmith/autocomplete-generators";
 import stripJsonComments from "strip-json-comments";
 
 import type { DenoConfigurationFileSchema } from "./config_schema";
@@ -618,7 +618,7 @@ async function getDenoConfig(
   if (configPath) {
     const { stdout } = await executeShellCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: [configPath],
     });
     jsonString = stdout;

@@ -1,4 +1,4 @@
-import { valueList, filepaths } from "@fig/autocomplete-generators";
+import { valueList, filepaths } from "@tabsmith/autocomplete-generators";
 
 const completionSpec: Fig.Spec = {
   name: "codesign",

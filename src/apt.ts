@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const packages: Fig.Generator = {
   // only trigger when the token length transitions to or from 0
@@ -13,7 +13,7 @@ const packages: Fig.Generator = {
     }
     const { stdout } = await executeShellCommand({
       command: "apt",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: ["list"],
     });
 

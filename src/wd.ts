@@ -2,7 +2,7 @@ const warpPointsGenerator: Fig.Generator = {
   custom: async (_, executeCommand, context) => {
     const { stdout } = await executeCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: [`${context.environmentVariables["HOME"]}/.warprc`],
     });
 

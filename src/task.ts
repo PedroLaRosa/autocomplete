@@ -7,7 +7,7 @@ const completionSpec: Fig.Spec = {
   generateSpec: async (_tokens, executeShellCommand) => {
     const { stdout } = await executeShellCommand({
       command: "task",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: ["--version"],
     });
     return stdout.includes("Task") ? goTask : taskWarrior;

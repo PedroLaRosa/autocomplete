@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 const dtmGenerators: Record<string, Fig.Generator> = {
   plugins: {
     script: ["dtm", "list", "plugins"],

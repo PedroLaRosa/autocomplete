@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 import { gitGenerators } from "./git";
 
 const targetSuggestions: string[] = [

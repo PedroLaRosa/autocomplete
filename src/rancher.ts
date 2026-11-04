@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const serverList: Fig.Generator = {
   script: ["rancher", "server", "ls"],

@@ -1,4 +1,4 @@
-import { keyValue } from "@fig/autocomplete-generators";
+import { keyValue } from "@tabsmith/autocomplete-generators";
 
 const completionSpec: Fig.Spec = {
   name: "file",

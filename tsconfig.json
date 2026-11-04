@@ -12,7 +12,7 @@
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true,
     "types": [
-      "@withfig/autocomplete-types",
+      "@tabsmith/autocomplete-types",
       "node"
     ]
   },

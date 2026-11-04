@@ -2,7 +2,7 @@ const repoGenerator: Fig.Generator = {
   custom: async (_, executeCommand, context) => {
     const { stdout } = await executeCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: [`${context.environmentVariables["HOME"]}/.projj/cache.json`],
     });
     const cache = JSON.parse(stdout);
@@ -17,7 +17,7 @@ const hookGenerator: Fig.Generator = {
   custom: async (_, executeCommand, context) => {
     const { stdout } = await executeCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: [`${context.environmentVariables["HOME"]}/.projj/config.json`],
     });
     const cache = JSON.parse(stdout);

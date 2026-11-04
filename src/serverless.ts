@@ -406,7 +406,7 @@ const completionSpec: Fig.Spec = {
   generateSpec: async (tokens, executeShellCommand) => {
     const { stdout } = await executeShellCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: ["serverless-compose.yml"],
     });
     const servicesObject = YAML.parse(stdout).services;

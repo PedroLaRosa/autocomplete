@@ -40,7 +40,7 @@ const completionSpec: Fig.Spec = {
   generateSpec: async (tokens, executeShellCommand) => {
     const { stdout: jsonList } = await executeShellCommand({
       command: "drush",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: ["--format=json"],
     });
     const subcommands: Fig.Subcommand[] = [];

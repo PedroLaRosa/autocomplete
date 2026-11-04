@@ -1,4 +1,4 @@
-import { ai } from "@fig/autocomplete-generators";
+import { ai } from "@tabsmith/autocomplete-generators";
 
 const filterMessages = (out: string): string => {
   return out.startsWith("warning:") || out.startsWith("error:")

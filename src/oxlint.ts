@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const CATEGORY_EMOJI = "📦";
 const LINT_RULE_EMOJI = "🚨";
@@ -69,7 +69,7 @@ const lintRuleGenerator: Fig.Generator = {
       // provide rule suggestions
       const hasOxlint = await executeCommand({
         command: "which",
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays -- must be an array
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays -- must be an array
         args: ["oxlint"],
       });
       if (hasOxlint.status !== 0) return [];
@@ -77,7 +77,7 @@ const lintRuleGenerator: Fig.Generator = {
       out = (
         await executeCommand({
           command: "oxlint",
-          // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays -- must be an array
+          // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays -- must be an array
           args: ["--rules"],
         })
       ).stdout;

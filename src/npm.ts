@@ -120,13 +120,13 @@ const workspaceGenerator: Fig.Generator = {
   custom: async (tokens, executeShellCommand) => {
     const { stdout: npmPrefix } = await executeShellCommand({
       command: "npm",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: ["prefix"],
     });
 
     const { stdout: out } = await executeShellCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: [`${npmPrefix}/package.json`],
     });
 
@@ -161,12 +161,12 @@ export const dependenciesGenerator: Fig.Generator = {
     if (!tokens.includes("-g") && !tokens.includes("--global")) {
       const { stdout: npmPrefix } = await executeShellCommand({
         command: "npm",
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
         args: ["prefix"],
       });
       const { stdout: out } = await executeShellCommand({
         command: "cat",
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
         args: [`${npmPrefix}/package.json`],
       });
       const packageContent = JSON.parse(out);

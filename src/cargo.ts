@@ -1,4 +1,4 @@
-import { filepaths, keyValue } from "@fig/autocomplete-generators";
+import { filepaths, keyValue } from "@tabsmith/autocomplete-generators";
 
 const rustEditions: Fig.Suggestion[] = [
   {
@@ -421,14 +421,14 @@ const configPairs: Record<
     tomlSuggestions: [
       {
         name: '\\"always\\"',
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-insertvalue
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-insertvalue
         insertValue: '\\"always\\"',
         description:
           "Always display a notification when a command (e.g. cargo build) produces a future incompat report",
       },
       {
         name: '\\"never\\"',
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-insertvalue
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-insertvalue
         insertValue: '\\"never\\"',
         description: "Never display a notification",
       },
@@ -5834,7 +5834,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           command: "rustup",
           args: ["toolchain", "list"],
         }),
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
         executeShellCommand({ command: "cargo", args: ["--list"] }),
       ]);
 

@@ -110,7 +110,7 @@ const completionSpec: Fig.Spec = {
       }),
       executeShellCommand({
         command: "ls",
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
         args: ["symfony.lock"],
       }),
     ]);

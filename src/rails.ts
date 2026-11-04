@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const RB_ICON =
   "https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/icons/file_type_ruby.svg";
@@ -638,7 +638,7 @@ export const railsCommandsGenerator: Fig.Generator = {
     try {
       const { stdout: helpText } = await executeShellCommand({
         command: "rails",
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
         args: ["--tasks"],
       });
 
