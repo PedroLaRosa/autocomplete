@@ -2,7 +2,7 @@ const listTargets: Fig.Generator = {
   custom: async (tokens, executeShellCommand, context) => {
     const { stdout } = await executeShellCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: [`${context.environmentVariables["HOME"]}/.config/goto`],
     });
 

@@ -1,3 +1,12 @@
 allowBuilds:
   core-js: false # via danger; postinstall is only a funding banner
-  esbuild: true # via @withfig/autocomplete-tools; keeps pnpm 9 behavior
+  esbuild: true # via @tabsmith/autocomplete-tools; keeps pnpm 9 behavior
+minimumReleaseAgeExclude:
+  - '@tabsmith/autocomplete-generators@2.4.0'
+  - '@tabsmith/autocomplete-helpers@2.0.0'
+  - '@tabsmith/autocomplete-merge@1.4.0'
+  - '@tabsmith/autocomplete-tools@2.11.0'
+  - '@tabsmith/autocomplete-types@1.31.0'
+  - '@tabsmith/create-completion-spec@1.1.9'
+  - '@tabsmith/eslint-plugin-fig-linter@1.4.1'
+saveExact: true # pin new deps; no ^/~ ranges

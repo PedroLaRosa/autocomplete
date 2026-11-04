@@ -2,7 +2,7 @@ import {
   keyValueList,
   filepaths,
   valueList,
-} from "@fig/autocomplete-generators";
+} from "@tabsmith/autocomplete-generators";
 import {
   npmScriptsGenerator,
   npmSearchGenerator,

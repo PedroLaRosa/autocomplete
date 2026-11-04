@@ -4,7 +4,7 @@ export const yarnScriptParserDirectives: Fig.Arg["parserDirectives"] = {
   alias: async (token, executeShellCommand) => {
     const npmPrefix = await executeShellCommand({
       command: "npm",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: ["prefix"],
     });
     if (npmPrefix.status !== 0) {
@@ -12,7 +12,7 @@ export const yarnScriptParserDirectives: Fig.Arg["parserDirectives"] = {
     }
     const packageJson = await executeShellCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: [`${npmPrefix.stdout.trim()}/package.json`],
     });
     const script: string = JSON.parse(packageJson.stdout).scripts?.[token];
@@ -59,7 +59,7 @@ const getGlobalPackagesGenerator: Fig.Generator = {
 
     const { stdout } = await executeCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: [`${yarnGlobalDir.trim()}/package.json`],
     });
 
@@ -1509,7 +1509,7 @@ const completionSpec: Fig.Spec = {
         const version = (
           await executeShellCommand({
             command: "yarn",
-            // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+            // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
             args: ["--version"],
           })
         ).stdout;

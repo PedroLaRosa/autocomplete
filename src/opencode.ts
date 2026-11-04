@@ -1,4 +1,4 @@
-import { valueList } from "@fig/autocomplete-generators";
+import { valueList } from "@tabsmith/autocomplete-generators";
 
 // Source: OpenCode 1 (anomalyco/opencode, npm `opencode-ai`) v1.19.5,
 // packages/opencode/src/index.ts and packages/opencode/src/cli/cmd/

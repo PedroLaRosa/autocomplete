@@ -1,6 +1,6 @@
 // Flutter version 2.0.1
 
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const flutterGenerators: Record<string, Fig.Generator> = {
   emulators: {

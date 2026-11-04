@@ -1,4 +1,4 @@
-import { valueList } from "@fig/autocomplete-generators";
+import { valueList } from "@tabsmith/autocomplete-generators";
 
 const modifiers: Fig.Suggestion[] = [
   { name: ["after", "a"], description: "Attribute modifier" },

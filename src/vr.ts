@@ -6,7 +6,7 @@ const scriptGenerator: Fig.Generator = {
   },
   script: {
     command: "vr",
-    // eslint-disable-next-line @withfig/fig-linter/no-empty-array-values
+    // eslint-disable-next-line @tabsmith/fig-linter/no-empty-array-values
     args: [],
     env: {
       NO_COLOR: "1",

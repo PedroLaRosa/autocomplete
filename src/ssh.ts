@@ -32,7 +32,7 @@ const getConfigLines = async (
 
   const { stdout } = await executeShellCommand({
     command: "cat",
-    // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+    // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
     args: [absolutePath],
   });
   const configLines = stdout.split("\n").map((line) => line.trim());
@@ -57,7 +57,7 @@ export const knownHosts: Fig.Generator = {
   custom: async (tokens, executeCommand, context) => {
     const { stdout } = await executeCommand({
       command: "cat",
-      // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
       args: [`${context.environmentVariables["HOME"]}/.ssh/known_hosts`],
     });
 

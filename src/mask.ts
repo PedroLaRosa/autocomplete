@@ -14,14 +14,14 @@ const completionSpec: Fig.Spec = {
     if (maskfileLocationIdx < 0 || maskfileLocationIdx + 3 > tokens.length) {
       const { stdout } = await executeShellCommand({
         command: "cat",
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
         args: ["maskfile.md"],
       });
       out = stdout;
     } else {
       const { stdout } = await executeShellCommand({
         command: "cat",
-        // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
         args: [tokens[maskfileLocationIdx + 1]],
       });
       out = stdout;

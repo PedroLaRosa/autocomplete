@@ -1,5 +1,5 @@
 // REFERENCE: https://pipenv.pypa.io/en/stable/cli/
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 import { packageList } from "./pip";
 
 const completionSpec: Fig.Spec = {

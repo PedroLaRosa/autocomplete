@@ -1,4 +1,4 @@
-import { createVersionedSpec } from "@fig/autocomplete-helpers";
+import { createVersionedSpec } from "@tabsmith/autocomplete-helpers";
 import { clean } from "semver";
 const versionFiles = ["0.9.0", "0.10.0"];
 
@@ -7,7 +7,7 @@ export const getVersionCommand: Fig.GetVersionCommand = async (
 ) => {
   const { stdout } = await executeShellCommand({
     command: "infracost",
-    // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+    // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
     args: ["--version"],
   });
   return clean(stdout.slice(stdout.indexOf(" ") + 1));

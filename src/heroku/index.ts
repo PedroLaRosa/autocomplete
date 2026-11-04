@@ -1,4 +1,4 @@
-import { createVersionedSpec } from "@fig/autocomplete-helpers";
+import { createVersionedSpec } from "@tabsmith/autocomplete-helpers";
 
 const versionRegex = /heroku\/([0-9]+\.[0-9]+\.[0.9]+)/;
 const versionFiles = ["8.0.0", "8.6.0"];
@@ -8,7 +8,7 @@ export const getVersionCommand: Fig.GetVersionCommand = async (
 ) => {
   const { stdout } = await executeShellCommand({
     command: "heroku",
-    // eslint-disable-next-line @withfig/fig-linter/no-useless-arrays
+    // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
     args: ["--version"],
   });
 

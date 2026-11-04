@@ -1,4 +1,4 @@
-import { filepaths, keyValue } from "@fig/autocomplete-generators";
+import { filepaths, keyValue } from "@tabsmith/autocomplete-generators";
 
 const filterMessages = (out: string): string => {
   return out.startsWith("warning:") || out.startsWith("error:")

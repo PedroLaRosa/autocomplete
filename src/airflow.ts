@@ -1,4 +1,4 @@
-import { keyValueList } from "@fig/autocomplete-generators";
+import { keyValueList } from "@tabsmith/autocomplete-generators";
 
 const completionSpec: Fig.Spec = {
   name: "airflow",

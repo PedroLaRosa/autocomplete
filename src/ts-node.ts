@@ -1,5 +1,5 @@
 import { dependenciesGenerator } from "./npm";
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const completionSpec: Fig.Spec = {
   name: "ts-node",

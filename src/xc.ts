@@ -32,7 +32,7 @@ const completionSpec: Fig.Spec = {
     ];
     const { stdout } = await executeShellCommand({
       command: "xc",
-      // eslint-disable-next-line @withfig/fig-linter/no-empty-array-values
+      // eslint-disable-next-line @tabsmith/fig-linter/no-empty-array-values
       args: [],
     });
     const subcommands: Fig.Subcommand[] = stdout

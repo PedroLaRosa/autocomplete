@@ -1,4 +1,4 @@
-import { filepaths } from "@fig/autocomplete-generators";
+import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const PRIORITY_TOP_THRESHOLD = 76;
 const PRIORITY_BOTTOM_THRESHOLD = 49;

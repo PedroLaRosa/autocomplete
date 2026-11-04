@@ -1,4 +1,4 @@
-import { valueList } from "@fig/autocomplete-generators";
+import { valueList } from "@tabsmith/autocomplete-generators";
 
 // Source: earendil-works/pi (formerly badlogic/pi-mono) v1.5.0,
 // packages/coding-agent/src/{cli/args.ts,cli/auth-command.ts,package-manager-cli.ts,extensions/mcp/cli.ts}
