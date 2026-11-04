@@ -7,6 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  id-token: write # npm trusted publishing (OIDC), no NPM_TOKEN needed
+  contents: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -20,7 +24,4 @@ jobs:
       - run: pnpm build
       # ponytail: version = 1.0.<run number>; bump the 1.0 in package.json for breaking changes
       - run: npm pkg set version=1.0.${{ github.run_number }}
-      - uses: JS-DevTools/npm-publish@v4
-        with:
-          access: public
-          token: ${{ secrets.NPM_TOKEN }}
+      - run: npm publish
