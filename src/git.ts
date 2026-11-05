@@ -3869,6 +3869,22 @@ const addOptions: Fig.Option[] = [
       "Interactively choose hunks of patch between the index and the work tree and add them to the index. This gives the user a chance to review the difference before adding modified contents to the index",
   },
   {
+    name: ["-U", "--unified"],
+    description:
+      "Generate diffs with <n> lines of context in interactive patch mode",
+    args: {
+      name: "n",
+    },
+  },
+  {
+    name: "--inter-hunk-context",
+    description:
+      "Show the context between diff hunks, up to <n> lines, in interactive patch mode",
+    args: {
+      name: "n",
+    },
+  },
+  {
     name: ["-e", "--edit"],
     description:
       "Open the diff vs. the index in an editor and let the user edit it. After the editor was closed, adjust the hunk headers and apply the patch to the index",
@@ -3912,6 +3928,11 @@ const addOptions: Fig.Option[] = [
     name: "--no-warn-embedded-repo",
     description:
       "By default, git add will warn when adding an embedded repository to the index without using git submodule add to create an entry in .gitmodules. This option will suppress the warning (e.g., if you are manually performing operations on submodules)",
+  },
+  {
+    name: "--sparse",
+    description:
+      "Allow updating index entries outside of the sparse-checkout cone",
   },
   {
     name: "--renormalize",
@@ -4208,6 +4229,21 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--add-virtual-file",
+          description:
+            "Add the specified contents to the archive as a file at <path>",
+          args: {
+            name: "path:content",
+          },
+        },
+        {
+          name: "--mtime",
+          description: "Set modification time of archive entries",
+          args: {
+            name: "time",
+          },
+        },
+        {
           name: "--worktree-attributes",
           description: "Read .gitattributes in working directory",
         },
@@ -4383,6 +4419,14 @@ const completionSpec: Fig.Spec = {
             isOptional: true,
           },
         },
+        {
+          name: "--diff-algorithm",
+          description: "Choose a diff algorithm",
+          args: {
+            name: "algorithm",
+            suggestions: ["patience", "minimal", "histogram", "myers"],
+          },
+        },
       ],
     },
     {
@@ -4451,6 +4495,26 @@ const completionSpec: Fig.Spec = {
           name: ["-p", "--patch"],
           description:
             "Use the interactive patch selection interface to chose which changes to commi",
+        },
+        {
+          name: "--interactive",
+          description: "Interactively add files to the index before committing",
+        },
+        {
+          name: ["-U", "--unified"],
+          description:
+            "Generate diffs with <n> lines of context in interactive patch mode",
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: "--inter-hunk-context",
+          description:
+            "Show the context between diff hunks, up to <n> lines, in interactive patch mode",
+          args: {
+            name: "n",
+          },
         },
         {
           name: ["-C", "--reuse-message"],
@@ -4559,6 +4623,14 @@ const completionSpec: Fig.Spec = {
           name: "--no-signoff",
           description:
             "Don't add a Signed-off-by trailer by the committer at the end of the commit l",
+        },
+        {
+          name: "--trailer",
+          description: "Add a custom trailer to the commit message",
+          isRepeatable: true,
+          args: {
+            name: "token[(=|:)value]",
+          },
         },
         {
           name: ["-n", "--no-verify"],
@@ -5034,17 +5106,24 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-m", "--merge"],
           description:
-            "Use merging strategies to rebase. When the recursive (default) merge strategy is used, this allows rebase to be aware of renames on the upstream side. This is the default. Note that a rebase merge works by replaying each commit from the working branch on top of the <upstream> branch. Because of this, when a merge conflict happens, the side reported as ours is the so-far rebased series, starting with <upstream>, and theirs is the working branch. In other words, the sides are swapped",
+            "Use merging strategies to rebase. When the ort (default) merge strategy is used, this allows rebase to be aware of renames on the upstream side. This is the default. Note that a rebase merge works by replaying each commit from the working branch on top of the <upstream> branch. Because of this, when a merge conflict happens, the side reported as ours is the so-far rebased series, starting with <upstream>, and theirs is the working branch. In other words, the sides are swapped",
         },
         {
           name: ["-s", "--strategy"],
           isRepeatable: true,
           description:
-            "Use the given merge strategy. If there is no -s option git merge-recursive is used instead. This implies --merge. Because git rebase replays each commit from the working branch on top of the <upstream> branch using the given strategy, using the ours strategy simply empties all patches from the <branch>, which makes little sense",
+            "Use the given merge strategy. If there is no -s option the ort strategy is used instead. This implies --merge. Because git rebase replays each commit from the working branch on top of the <upstream> branch using the given strategy, using the ours strategy simply empties all patches from the <branch>, which makes little sense",
           args: {
             name: "strategy",
             isVariadic: true,
-            suggestions: ["resolve", "recursive", "octopus", "ours", "subtree"],
+            suggestions: [
+              "ort",
+              "resolve",
+              "recursive",
+              "octopus",
+              "ours",
+              "subtree",
+            ],
           },
         },
         {
@@ -5175,6 +5254,24 @@ const completionSpec: Fig.Spec = {
           name: "--signoff",
           description:
             "Add a Signed-off-by trailer to all the rebased commits. Note that if --interactive is given then only commits marked to be picked, edited or reworded will have the trailer added",
+        },
+        {
+          name: "--trailer",
+          description:
+            "Append the given trailer to every rebased commit message",
+          isRepeatable: true,
+          args: {
+            name: "token[(=|:)value]",
+          },
+        },
+        {
+          name: "--update-refs",
+          description:
+            "Automatically force-update any branches that point to commits that are being rebased",
+        },
+        {
+          name: "--no-update-refs",
+          description: "Do not update branches that point to rebased commits",
         },
         {
           name: ["-i", "--interactive"],
@@ -5434,7 +5531,7 @@ const completionSpec: Fig.Spec = {
             "Turn on rename detection regardless of user configuration",
         },
         {
-          name: "--find-renames",
+          name: ["-M", "--find-renames"],
           description:
             "Turn on rename detection, optionally setting the similarity threshold",
           args: {
@@ -5520,19 +5617,215 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "commit",
         isOptional: true,
+        isVariadic: true,
         generators: gitGenerators.commits,
       },
+      options: [
+        {
+          name: "--continue",
+          description:
+            "Continue the operation in progress using the information in .git/sequencer",
+        },
+        {
+          name: "--skip",
+          description:
+            "Skip the current commit and continue with the rest of the sequence",
+        },
+        {
+          name: "--quit",
+          description: "Forget about the current operation in progress",
+        },
+        {
+          name: "--abort",
+          description:
+            "Cancel the operation and return to the pre-sequence state",
+        },
+        {
+          name: ["-e", "--edit"],
+          description: "Edit the commit message prior to committing the revert",
+        },
+        {
+          name: "--no-edit",
+          description: "Do not start the commit message editor",
+        },
+        {
+          name: "--cleanup",
+          description:
+            "Determines how the commit message will be cleaned up before committing",
+          args: {
+            name: "mode",
+            suggestions: [
+              "strip",
+              "whitespace",
+              "verbatim",
+              "scissors",
+              "default",
+            ],
+          },
+        },
+        {
+          name: ["-m", "--mainline"],
+          description:
+            "Specifies the parent number (starting from 1) of the mainline when reverting a merge commit",
+          args: {
+            name: "parent-number",
+          },
+        },
+        {
+          name: ["-n", "--no-commit"],
+          description:
+            "Apply the reverts to the working tree and the index without making any commit",
+        },
+        {
+          name: ["-s", "--signoff"],
+          description:
+            "Add a Signed-off-by trailer at the end of the commit message",
+        },
+        {
+          name: ["-S", "--gpg-sign"],
+          exclusiveOn: ["--no-gpg-sign"],
+          description: "GPG-sign commits",
+          args: {
+            name: "keyid",
+            description: "Must be stuck to the option without a space",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--no-gpg-sign",
+          exclusiveOn: ["-S", "--gpg-sign"],
+          description:
+            "Useful to countermand both commit.gpgSign configuration variable, and earlier --gpg-sign",
+        },
+        {
+          name: "--strategy",
+          description: "Use the given merge strategy. Should only be used once",
+          args: {
+            name: "strategy",
+            suggestions: [
+              "ort",
+              "resolve",
+              "recursive",
+              "octopus",
+              "ours",
+              "subtree",
+            ],
+          },
+        },
+        {
+          name: ["-X", "--strategy-option"],
+          description:
+            "Pass the merge strategy-specific option through to the merge strategy",
+          args: {
+            name: "option",
+          },
+        },
+        {
+          name: "--rerere-autoupdate",
+          exclusiveOn: ["--no-rerere-autoupdate"],
+          description:
+            "Allow the rerere mechanism to update the index with the result of auto-conflict resolution if possible",
+        },
+        {
+          name: "--no-rerere-autoupdate",
+          exclusiveOn: ["--rerere-autoupdate"],
+          description:
+            "Do not allow the rerere mechanism to update the index with the result of auto-conflict resolution if possible",
+        },
+        {
+          name: "--reference",
+          description:
+            "Refer to the reverted commit in the 'reference' format (abbreviated hash, subject and date) in the message body",
+        },
+      ],
     },
     {
       name: "ls-remote",
       description: "List references in a remote repository",
+      args: [
+        {
+          name: "repository",
+          isOptional: true,
+          generators: gitGenerators.remotes,
+          filterStrategy: "fuzzy",
+        },
+        {
+          name: "patterns",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
+      options: [
+        {
+          name: ["-b", "--branches"],
+          description: "Limit to only refs/heads",
+        },
+        {
+          name: "--heads",
+          description: "Deprecated synonym for --branches",
+          deprecated: true,
+        },
+        {
+          name: ["-t", "--tags"],
+          description: "Limit to only refs/tags",
+        },
+        {
+          name: "--refs",
+          description: "Do not show peeled tags or pseudorefs like HEAD",
+        },
+        {
+          name: ["-q", "--quiet"],
+          description: "Do not print remote URL to stderr",
+        },
+        {
+          name: "--upload-pack",
+          requiresSeparator: true,
+          description: "Path of git-upload-pack on the remote host",
+          args: {
+            name: "exec",
+          },
+        },
+        {
+          name: "--exit-code",
+          description:
+            "Exit with status 2 when no matching refs are found in the remote repository",
+        },
+        {
+          name: "--get-url",
+          description:
+            "Expand the URL of the given remote repository taking into account any url.<base>.insteadOf config setting and exit",
+        },
+        {
+          name: "--symref",
+          description:
+            "In addition to the object pointed by it, show the underlying ref pointed by it when showing a symbolic ref",
+        },
+        {
+          name: "--sort",
+          requiresSeparator: true,
+          description:
+            "Sort based on the key given. Prefix - to sort in descending order of the value",
+          args: {
+            name: "key",
+          },
+        },
+        {
+          name: ["-o", "--server-option"],
+          description:
+            "Transmit the given string to the server when communicating using protocol version 2",
+          isRepeatable: true,
+          args: {
+            name: "option",
+          },
+        },
+      ],
     },
     {
       name: "push",
       description: "Update remote refs",
       options: [
         {
-          name: "--all",
+          name: ["--all", "--branches"],
           description:
             "Push all branches (i.e. refs under refs/heads/); cannot be used with other <refspec>",
         },
@@ -5697,6 +5990,17 @@ const completionSpec: Fig.Spec = {
             isOptional: true,
           },
         },
+        {
+          name: "--force-if-includes",
+          description:
+            "Force an update only if the tip of the remote-tracking ref has been integrated locally. Used with --force-with-lease",
+          exclusiveOn: ["--no-force-if-includes"],
+        },
+        {
+          name: "--no-force-if-includes",
+          description: "Disable --force-if-includes",
+          exclusiveOn: ["--force-if-includes"],
+        },
       ],
       args: [
         {
@@ -5727,7 +6031,7 @@ const completionSpec: Fig.Spec = {
             name: "remote",
             generators: gitGenerators.remotes,
             filterStrategy: "fuzzy",
-            suggestions: ["false", "true", "merges", "preserve", "interactive"],
+            suggestions: ["false", "true", "merges", "interactive"],
           },
         },
         { name: "--no-rebase", description: "Override earlier --rebase" },
@@ -5851,7 +6155,14 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "strategy",
             isVariadic: true,
-            suggestions: ["resolve", "recursive", "octopus", "ours", "subtree"],
+            suggestions: [
+              "ort",
+              "resolve",
+              "recursive",
+              "octopus",
+              "ours",
+              "subtree",
+            ],
           },
         },
         {
@@ -5895,11 +6206,17 @@ const completionSpec: Fig.Spec = {
           name: "--summary",
           description:
             "Synonym to --stat ; this is deprecated and will be removed in the future",
+          deprecated: true,
         },
         {
           name: "--no-summary",
           description:
             "Synonym to --no-stat ; this is deprecated and will be removed in the future",
+          deprecated: true,
+        },
+        {
+          name: "--compact-summary",
+          description: "Show a compact-summary at the end of the merge",
         },
         {
           name: ["-q", "--quiet"],
@@ -6157,6 +6474,227 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--name-status",
+          description: "Show only names and status of changed files",
+        },
+        {
+          name: "--compact-summary",
+          description:
+            "Output a condensed summary of extended header information in diffstat",
+        },
+        {
+          name: "--summary",
+          description:
+            "Output a condensed summary of extended header information such as creations, renames and mode changes",
+        },
+        {
+          name: "--raw",
+          description: "Generate the diff in raw format",
+        },
+        {
+          name: ["-U", "--unified"],
+          description: "Generate diffs with <n> lines of context",
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: "--word-diff",
+          description:
+            "Show a word diff, using <mode> to delimit changed words",
+          requiresSeparator: true,
+          args: {
+            name: "mode",
+            isOptional: true,
+            suggestions: ["color", "plain", "porcelain", "none"],
+          },
+        },
+        {
+          name: "--color-words",
+          description:
+            "Equivalent to --word-diff=color plus (if a regex was specified) --word-diff-regex=<regex>",
+          requiresSeparator: true,
+          args: {
+            name: "regex",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--color-moved",
+          description: "Moved lines of code are colored differently",
+          requiresSeparator: true,
+          args: {
+            name: "mode",
+            isOptional: true,
+            suggestions: [
+              "no",
+              "default",
+              "plain",
+              "blocks",
+              "zebra",
+              "dimmed-zebra",
+            ],
+          },
+        },
+        {
+          name: "--color",
+          description: "Show colored diff",
+          requiresSeparator: true,
+          args: {
+            name: "when",
+            isOptional: true,
+            suggestions: ["always", "never", "auto"],
+          },
+        },
+        {
+          name: "--no-color",
+          description: "Turn off colored diff",
+        },
+        {
+          name: ["-w", "--ignore-all-space"],
+          description: "Ignore whitespace when comparing lines",
+        },
+        {
+          name: ["-b", "--ignore-space-change"],
+          description: "Ignore changes in amount of whitespace",
+        },
+        {
+          name: "--ignore-blank-lines",
+          description: "Ignore changes whose lines are all blank",
+        },
+        {
+          name: "--diff-algorithm",
+          description: "Choose a diff algorithm",
+          requiresSeparator: true,
+          args: {
+            name: "algorithm",
+            suggestions: ["patience", "minimal", "histogram", "myers"],
+          },
+        },
+        {
+          name: "--histogram",
+          description: 'Generate a diff using the "histogram diff" algorithm',
+        },
+        {
+          name: "--patience",
+          description: 'Generate a diff using the "patience diff" algorithm',
+        },
+        {
+          name: ["-M", "--find-renames"],
+          description: "Detect renames",
+          requiresSeparator: true,
+          args: {
+            name: "n",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--diff-filter",
+          description:
+            "Select only files that are Added (A), Copied (C), Deleted (D), Modified (M), Renamed (R), have their type changed (T), are Unmerged (U), are Unknown (X), or have had their pairing Broken (B). Lowercase letters exclude",
+          requiresSeparator: true,
+          args: {
+            name: "ACDMRTUXB",
+          },
+        },
+        {
+          name: "-S",
+          description:
+            "Look for differences that change the number of occurrences of the specified string",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "-G",
+          description:
+            "Look for differences whose patch text contains added/removed lines that match <regex>",
+          args: {
+            name: "regex",
+          },
+        },
+        {
+          name: ["-W", "--function-context"],
+          description: "Show whole function as context lines for each change",
+        },
+        {
+          name: "-R",
+          description:
+            "Swap two inputs; that is, show differences from index or on-disk file to tree contents",
+        },
+        {
+          name: "--relative",
+          description:
+            "When run from a subdirectory, exclude changes outside the directory and show pathnames relative to it",
+          requiresSeparator: true,
+          args: {
+            name: "path",
+            isOptional: true,
+            template: "folders",
+          },
+        },
+        {
+          name: "--merge-base",
+          description:
+            "Use the merge base of the given commit and HEAD (or the two given commits) instead of the commit itself",
+        },
+        {
+          name: "--no-index",
+          description:
+            "Compare the two given paths on the filesystem, outside of a Git repository",
+        },
+        {
+          name: "--check",
+          description:
+            "Warn if changes introduce conflict markers or whitespace errors",
+        },
+        {
+          name: "--exit-code",
+          description:
+            "Exit with 1 if there were differences and 0 if there were no differences",
+        },
+        {
+          name: "--quiet",
+          description: "Disable all output of the program. Implies --exit-code",
+        },
+        {
+          name: "--no-ext-diff",
+          description: "Disallow external diff drivers",
+        },
+        {
+          name: "--submodule",
+          description: "Specify how differences in submodules are shown",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            isOptional: true,
+            suggestions: ["short", "log", "diff"],
+          },
+        },
+        {
+          name: "--max-depth",
+          description:
+            "For each pathspec, descend at most <depth> levels of directories. Only supported for diffs between tree objects",
+          requiresSeparator: true,
+          args: {
+            name: "depth",
+          },
+        },
+        {
+          name: "--output",
+          description: "Output to a specific file instead of stdout",
+          requiresSeparator: true,
+          args: {
+            name: "file",
+            template: "filepaths",
+          },
+        },
+        {
+          name: "-z",
+          description:
+            "Use NULs as output field terminators with --raw, --numstat, --name-only or --name-status",
+        },
+        {
           name: "--",
           description:
             "Separates paths from options for disambiguation purposes",
@@ -6205,9 +6743,22 @@ const completionSpec: Fig.Spec = {
             "Keep the changes in your working tree but not on the index",
         },
         {
-          name: "-N",
+          name: ["-N", "--intent-to-add"],
           description: "Mark removed paths as intent-to-add",
           dependsOn: ["--mixed"],
+        },
+        {
+          name: "--no-refresh",
+          description: "Skip refreshing the index after a mixed reset",
+        },
+        {
+          name: "--recurse-submodules",
+          description:
+            "Also reset the working tree of all active submodules according to the commit recorded in the superproject",
+        },
+        {
+          name: "--no-recurse-submodules",
+          description: "Do not reset the working tree of submodules",
         },
         {
           name: "--merge",
@@ -6245,6 +6796,22 @@ const completionSpec: Fig.Spec = {
           name: ["-p", "--patch"],
           description:
             "Interactively select hunks in the difference between the index and <tree-ish>",
+        },
+        {
+          name: ["-U", "--unified"],
+          description:
+            "Generate diffs with <n> lines of context in interactive patch mode",
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: "--inter-hunk-context",
+          description:
+            "Show the context between diff hunks, up to <n> lines, in interactive patch mode",
+          args: {
+            name: "n",
+          },
         },
       ],
       args: {
@@ -6312,6 +6879,262 @@ const completionSpec: Fig.Spec = {
             name: "pattern",
           },
         },
+        {
+          name: "--committer",
+          description: "Search for commits by a particular committer",
+          requiresSeparator: true,
+          args: {
+            name: "pattern",
+          },
+        },
+        {
+          name: ["-i", "--regexp-ignore-case"],
+          description:
+            "Match the regular expression limiting patterns without regard to letter case",
+        },
+        {
+          name: "--invert-grep",
+          description:
+            "Limit the commits output to ones with a log message that does not match the pattern specified with --grep",
+        },
+        {
+          name: "--all-match",
+          description:
+            "Limit the commits output to ones that match all given --grep, instead of ones that match at least one",
+        },
+        {
+          name: ["-n", "--max-count"],
+          description: "Limit the number of commits to output",
+          args: {
+            name: "number",
+          },
+        },
+        {
+          name: "--skip",
+          description:
+            "Skip <number> commits before starting to show the commit output",
+          requiresSeparator: true,
+          args: {
+            name: "number",
+          },
+        },
+        {
+          name: ["--since", "--after"],
+          description: "Show commits more recent than a specific date",
+          requiresSeparator: true,
+          args: {
+            name: "date",
+          },
+        },
+        {
+          name: "--since-as-filter",
+          description:
+            "Show all commits more recent than a specific date, visiting all commits in the range rather than stopping at the first older one",
+          requiresSeparator: true,
+          args: {
+            name: "date",
+          },
+        },
+        {
+          name: ["--until", "--before"],
+          description: "Show commits older than a specific date",
+          requiresSeparator: true,
+          args: {
+            name: "date",
+          },
+        },
+        {
+          name: "--merges",
+          description: "Print only merge commits",
+        },
+        {
+          name: "--no-merges",
+          description: "Do not print commits with more than one parent",
+        },
+        {
+          name: "--first-parent",
+          description:
+            "When finding commits to include, follow only the first parent commit upon seeing a merge commit",
+        },
+        {
+          name: "--exclude-first-parent-only",
+          description:
+            "When finding commits to exclude (with a ^), follow only the first parent commit upon seeing a merge commit",
+        },
+        {
+          name: "--all",
+          description:
+            "Pretend as if all the refs in refs/, along with HEAD, are listed on the command line",
+        },
+        {
+          name: "--branches",
+          description:
+            "Pretend as if all the refs in refs/heads are listed on the command line",
+          requiresSeparator: true,
+          args: {
+            name: "pattern",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--tags",
+          description:
+            "Pretend as if all the refs in refs/tags are listed on the command line",
+          requiresSeparator: true,
+          args: {
+            name: "pattern",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--remotes",
+          description:
+            "Pretend as if all the refs in refs/remotes are listed on the command line",
+          requiresSeparator: true,
+          args: {
+            name: "pattern",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--graph",
+          description:
+            "Draw a text-based graphical representation of the commit history on the left hand side of the output",
+        },
+        {
+          name: "--decorate",
+          description: "Print out the ref names of any commits that are shown",
+          requiresSeparator: true,
+          args: {
+            name: "style",
+            isOptional: true,
+            suggestions: ["short", "full", "auto", "no"],
+          },
+        },
+        {
+          name: "--no-decorate",
+          description: "Do not print out ref names",
+        },
+        {
+          name: "--abbrev-commit",
+          description:
+            "Show a prefix that names the commit object uniquely instead of the full hexadecimal commit object name",
+        },
+        {
+          name: ["--pretty", "--format"],
+          description:
+            "Pretty-print the contents of the commit logs in a given format",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            isOptional: true,
+            suggestions: [
+              "oneline",
+              "short",
+              "medium",
+              "full",
+              "fuller",
+              "reference",
+              "email",
+              "raw",
+              "format:",
+            ],
+          },
+        },
+        {
+          name: "--date",
+          description: "Format dates shown in human-readable format",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            suggestions: [
+              "relative",
+              "local",
+              "iso",
+              "iso-strict",
+              "rfc",
+              "short",
+              "raw",
+              "human",
+              "unix",
+              "default",
+              "format:",
+            ],
+          },
+        },
+        {
+          name: "--reverse",
+          description: "Output the commits chosen to be shown in reverse order",
+        },
+        {
+          name: ["-g", "--walk-reflogs"],
+          description:
+            "Walk reflog entries instead of the commit ancestry chain",
+        },
+        {
+          name: "--name-only",
+          description: "Show only names of changed files",
+        },
+        {
+          name: "--name-status",
+          description: "Show only names and status of changed files",
+        },
+        {
+          name: "--shortstat",
+          description:
+            "Output only the last line of the --stat format containing total number of modified files",
+        },
+        {
+          name: ["-s", "--no-patch"],
+          description: "Suppress all output from the diff machinery",
+        },
+        {
+          name: "-S",
+          description:
+            "Look for differences that change the number of occurrences of the specified string",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "-G",
+          description:
+            "Look for differences whose patch text contains added/removed lines that match <regex>",
+          args: {
+            name: "regex",
+          },
+        },
+        {
+          name: "-L",
+          description:
+            "Trace the evolution of the line range given by <start>,<end>, or by the function name regex <funcname>, within the <file>",
+          isRepeatable: true,
+          args: {
+            name: "start,end:file",
+          },
+        },
+        {
+          name: "--diff-merges",
+          description: "Specify diff format to be used for merge commits",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            suggestions: [
+              "off",
+              "on",
+              "first-parent",
+              "separate",
+              "combined",
+              "dense-combined",
+              "remerge",
+            ],
+          },
+        },
+        {
+          name: "--remerge-diff",
+          description:
+            "Produce remerge-diff output for merge commits. Shortcut for --diff-merges=remerge -p",
+        },
       ],
       args: [
         {
@@ -6340,14 +7163,14 @@ const completionSpec: Fig.Spec = {
           args: [{ name: "name" }, { name: "repository url" }],
           options: [
             {
-              name: "-t",
+              name: ["-t", "--track"],
               description: "A refspec to track only <branch> is created",
               args: {
                 name: "branch",
               },
             },
             {
-              name: "-m",
+              name: ["-m", "--master"],
               description:
                 "A symbolic-ref refs/remotes/<name>/HEAD is set up to point at remote’s <master> branch",
               args: {
@@ -6355,7 +7178,7 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
-              name: "-f",
+              name: ["-f", "--fetch"],
               description:
                 "Git fetch <name> is run immediately after the remote information is set up",
             },
@@ -6440,7 +7263,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "rename",
-          description: "Removes given remote [name]",
+          description: "Rename the remote named <old> to <new>",
           args: [
             {
               name: "old remote",
@@ -6449,6 +7272,16 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "new remote name",
+            },
+          ],
+          options: [
+            {
+              name: "--progress",
+              description: "Report progress while renaming",
+            },
+            {
+              name: "--no-progress",
+              description: "Do not report progress while renaming",
             },
           ],
         },
@@ -6689,9 +7522,39 @@ const completionSpec: Fig.Spec = {
           description: "Keep downloaded pack",
         },
         {
-          name: "--multiple",
+          name: ["-m", "--multiple"],
           description:
             "Allow several <repository> and <group> arguments to be specified. No <refspec>s may be specified",
+        },
+        {
+          name: "--prefetch",
+          description:
+            "Modify the configured refspec to place all refs into the refs/prefetch/ namespace",
+        },
+        {
+          name: "--porcelain",
+          description:
+            "Print the output to standard output in an easy-to-parse format for scripts",
+        },
+        {
+          name: "--refetch",
+          description:
+            "Fetch all objects as a fresh clone would, instead of negotiating with the server to avoid transferring commits and objects already present locally",
+        },
+        {
+          name: "--negotiate-only",
+          description:
+            "Do not fetch anything from the server, and instead print the ancestors of the provided --negotiation-tip arguments, which we have in common with the server",
+        },
+        {
+          name: "--filter",
+          description:
+            "Request a subset of objects from the server (partial clone), e.g. blob:none or tree:0",
+          requiresSeparator: true,
+          args: {
+            name: "filter-spec",
+            suggestions: ["blob:none", "blob:limit=", "tree:0"],
+          },
         },
         {
           name: ["--auto-maintenance", "--auto-gc"],
@@ -6867,6 +7730,27 @@ const completionSpec: Fig.Spec = {
                 "Interactively select hunks from the diff between HEAD and the working tree to be stashed",
             },
             {
+              name: ["-U", "--unified"],
+              description:
+                "Generate diffs with <n> lines of context in interactive patch mode",
+              args: {
+                name: "n",
+              },
+            },
+            {
+              name: "--inter-hunk-context",
+              description:
+                "Show the context between diff hunks, up to <n> lines, in interactive patch mode",
+              args: {
+                name: "n",
+              },
+            },
+            {
+              name: ["-S", "--staged"],
+              description:
+                "Stash only the changes that are currently staged, then remove them from the index and working tree",
+            },
+            {
               name: ["-k", "--keep-index"],
               description:
                 "All changed already added to the index are left intact",
@@ -6892,7 +7776,22 @@ const completionSpec: Fig.Spec = {
                 name: "message",
               },
             },
-            { name: "--pathspec-from-file", description: "" }, // TODO: pathspec file nul and add description
+            {
+              name: "--pathspec-from-file",
+              requiresSeparator: true,
+              description:
+                "Pathspec is passed in <file> instead of commandline args",
+              args: {
+                name: "file",
+                template: "filepaths",
+                suggestions: ["-"],
+              },
+            },
+            {
+              name: "--pathspec-file-nul",
+              description: "Pathspec elements are separated with NUL character",
+              dependsOn: ["--pathspec-from-file"],
+            },
             {
               name: "--",
               description:
@@ -6910,15 +7809,33 @@ const completionSpec: Fig.Spec = {
             generators: gitGenerators.stashes,
             filterStrategy: "fuzzy",
           },
+          options: [
+            {
+              name: ["-u", "--include-untracked"],
+              description:
+                "Show the untracked files in the stash entry as part of the diff",
+            },
+            {
+              name: "--only-untracked",
+              description:
+                "Show only the untracked files in the stash entry as part of the diff",
+            },
+          ],
         },
         {
           name: "save",
-          description: "Temporarily stores all the modified tracked files",
+          description:
+            "Temporarily stores all the modified tracked files (deprecated in favour of git stash push)",
+          deprecated: true,
           options: [
             {
               name: ["-p", "--patch"],
               description:
                 "Interactively select hunks from the diff between HEAD and the working tree to be stashed",
+            },
+            {
+              name: ["-S", "--staged"],
+              description: "Stash only the changes that are currently staged",
             },
             {
               name: ["-k", "--keep-index"],
@@ -7064,6 +7981,44 @@ const completionSpec: Fig.Spec = {
               generators: gitGenerators.commits,
             },
           ],
+        },
+        {
+          name: "export",
+          description:
+            "Export the specified stashes, or all of them, to a chain of commits that can be transferred with fetch and push",
+          options: [
+            {
+              name: "--print",
+              description:
+                "Create the chain of commits without storing it in a ref and print its object ID",
+              exclusiveOn: ["--to-ref"],
+            },
+            {
+              name: "--to-ref",
+              description:
+                "Create the chain of commits and store it to the specified ref",
+              exclusiveOn: ["--print"],
+              args: {
+                name: "ref",
+              },
+            },
+          ],
+          args: {
+            name: "stash",
+            isOptional: true,
+            isVariadic: true,
+            generators: gitGenerators.stashes,
+            filterStrategy: "fuzzy",
+          },
+        },
+        {
+          name: "import",
+          description:
+            "Import stashes from a commit created by export and add them to the list of stashes",
+          args: {
+            name: "commit",
+            generators: gitGenerators.commits,
+          },
         },
       ],
     },
@@ -7265,13 +8220,58 @@ const completionSpec: Fig.Spec = {
             "Don’t clone any tags, and set remote.<remote>.tagOpt=--no-tags in the config, ensuring that future git pull and git fetch operations won’t follow any tags. Subsequent explicit tag fetches will still work, (see git-fetch[1])",
         },
         {
-          name: "--recurse-submodules",
+          name: ["--recurse-submodules", "--recursive"],
           description:
             "After the clone is created, initialize and clone submodules within based on the provided pathspec. If no pathspec is provided, all submodules are initialized and cloned. This option can be given multiple times for pathspecs consisting of multiple entries",
           args: {
             isOptional: true,
             name: "pathspec",
           },
+        },
+        {
+          name: "--also-filter-submodules",
+          description:
+            "Also apply the partial clone filter to any submodules in the repository. Requires --filter and --recurse-submodules",
+        },
+        {
+          name: "--reject-shallow",
+          description: "Fail if the source repository is a shallow repository",
+        },
+        {
+          name: "--revision",
+          description:
+            "Create a new repository, and fetch the history leading to the given revision <rev> (and nothing else), without creating any remote-tracking branch, and without creating any local branch, and detach HEAD to <rev>",
+          requiresSeparator: true,
+          args: {
+            name: "rev",
+          },
+        },
+        {
+          name: "--ref-format",
+          description:
+            "Specify the given ref storage format for the repository",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            suggestions: ["files", "reftable"],
+          },
+        },
+        {
+          name: "--bundle-uri",
+          description:
+            "Before fetching from the remote, fetch a bundle from the given <uri> and unbundle the data into the local repository",
+          requiresSeparator: true,
+          args: {
+            name: "uri",
+          },
+        },
+        {
+          name: ["-4", "--ipv4"],
+          description: "Use IPv4 addresses only, ignoring IPv6 addresses",
+        },
+        {
+          name: ["-6", "--ipv6"],
+          description: "Use IPv6 addresses only, ignoring IPv4 addresses",
         },
         {
           name: "--shallow-submodules",
@@ -7407,6 +8407,16 @@ const completionSpec: Fig.Spec = {
             ],
           },
         },
+        {
+          name: "--ref-format",
+          description:
+            "Specify the given ref storage format for the repository",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            suggestions: ["files", "reftable"],
+          },
+        },
       ],
     },
     {
@@ -7443,6 +8453,11 @@ const completionSpec: Fig.Spec = {
           name: ["-v", "--verbose"],
           description: "Report the names of files as they are moved",
         },
+        {
+          name: "--sparse",
+          description:
+            "Allow updating index entries outside of the sparse-checkout cone",
+        },
       ],
     },
     {
@@ -7476,6 +8491,35 @@ const completionSpec: Fig.Spec = {
             "Don’t actually remove any file(s). Instead, just show if they exist in the index and would otherwise be removed by the command",
         },
         { name: "-r", description: "Allow recursive removal" },
+        {
+          name: ["-q", "--quiet"],
+          description: "Do not list removed files",
+        },
+        {
+          name: "--ignore-unmatch",
+          description: "Exit with a zero status even if no files matched",
+        },
+        {
+          name: "--sparse",
+          description:
+            "Allow updating index entries outside of the sparse-checkout cone",
+        },
+        {
+          name: "--pathspec-from-file",
+          requiresSeparator: true,
+          description:
+            "Pathspec is passed in <file> instead of commandline args",
+          args: {
+            name: "file",
+            template: "filepaths",
+            suggestions: ["-"],
+          },
+        },
+        {
+          name: "--pathspec-file-nul",
+          description: "Pathspec elements are separated with NUL character",
+          dependsOn: ["--pathspec-from-file"],
+        },
       ],
     },
     {
@@ -7617,6 +8661,10 @@ const completionSpec: Fig.Spec = {
               name: "--term-good",
               description: "You can get just the old (respectively new) term",
             },
+            {
+              name: ["--term-new", "--term-bad"],
+              description: "You can get just the new term",
+            },
           ],
         },
         {
@@ -7677,8 +8725,352 @@ const completionSpec: Fig.Spec = {
         template: ["filepaths", "folders"],
       },
     },
-    { name: "grep", description: "Print lines matching a pattern" },
-    { name: "show", description: "Show various types of objects" },
+    {
+      name: "grep",
+      description: "Print lines matching a pattern",
+      args: [
+        {
+          name: "pattern",
+        },
+        {
+          name: "rev or path",
+          isOptional: true,
+          isVariadic: true,
+          template: "filepaths",
+        },
+      ],
+      options: [
+        {
+          name: "--cached",
+          description:
+            "Instead of searching tracked files in the working tree, search blobs registered in the index file",
+        },
+        {
+          name: "--no-index",
+          description:
+            "Search files in the current directory that is not managed by Git",
+        },
+        {
+          name: "--untracked",
+          description:
+            "In addition to searching in the tracked files in the working tree, search also in untracked files",
+        },
+        {
+          name: "--exclude-standard",
+          description:
+            "Do not pay attention to ignored files specified via the .gitignore mechanism",
+        },
+        {
+          name: "--recurse-submodules",
+          description:
+            "Recursively search in each submodule that is active and checked out in the repository",
+        },
+        {
+          name: ["-v", "--invert-match"],
+          description: "Select non-matching lines",
+        },
+        {
+          name: ["-i", "--ignore-case"],
+          description:
+            "Ignore case differences between the patterns and the files",
+        },
+        {
+          name: ["-w", "--word-regexp"],
+          description: "Match the pattern only at word boundary",
+        },
+        {
+          name: ["-a", "--text"],
+          description: "Process binary files as if they were text",
+        },
+        {
+          name: "-I",
+          description: "Don't match the pattern in binary files",
+        },
+        {
+          name: "--max-depth",
+          description:
+            "For each <pathspec> given on command line, descend at most <depth> levels of directories. A value of -1 means no limit",
+          args: {
+            name: "depth",
+          },
+        },
+        {
+          name: ["-E", "--extended-regexp"],
+          description: "Use POSIX extended regexp for patterns",
+        },
+        {
+          name: ["-G", "--basic-regexp"],
+          description: "Use POSIX basic regexp for patterns (default)",
+        },
+        {
+          name: ["-F", "--fixed-strings"],
+          description:
+            "Use fixed strings for patterns (don't interpret pattern as a regex)",
+        },
+        {
+          name: ["-P", "--perl-regexp"],
+          description: "Use Perl-compatible regular expressions for patterns",
+        },
+        {
+          name: ["-n", "--line-number"],
+          description: "Prefix the line number to matching lines",
+        },
+        {
+          name: "--column",
+          description:
+            "Prefix the 1-indexed byte-offset of the first match from the start of the matching line",
+        },
+        {
+          name: "-h",
+          description: "Don't show filenames",
+        },
+        {
+          name: "-H",
+          description: "Show filenames",
+        },
+        {
+          name: "--full-name",
+          description:
+            "Show pathnames relative to the project top directory instead of the current directory",
+        },
+        {
+          name: ["-l", "--files-with-matches", "--name-only"],
+          description: "Show only the names of files that contain matches",
+        },
+        {
+          name: ["-L", "--files-without-match"],
+          description:
+            "Show only the names of files that do not contain matches",
+        },
+        {
+          name: ["-z", "--null"],
+          description: "Use \\0 as the delimiter for pathnames in the output",
+        },
+        {
+          name: ["-o", "--only-matching"],
+          description:
+            "Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line",
+        },
+        {
+          name: ["-c", "--count"],
+          description:
+            "Instead of showing every matched line, show the number of lines that match",
+        },
+        {
+          name: "--color",
+          description: "Show colored matches",
+          requiresSeparator: true,
+          args: {
+            name: "when",
+            isOptional: true,
+            suggestions: ["always", "never", "auto"],
+          },
+        },
+        {
+          name: "--break",
+          description:
+            "Print an empty line between matches from different files",
+        },
+        {
+          name: "--heading",
+          description:
+            "Show the filename above the matches in that file instead of at the start of each shown line",
+        },
+        {
+          name: ["-C", "--context"],
+          description:
+            "Show <num> leading and trailing lines, and place a line containing -- between contiguous groups of matches",
+          args: {
+            name: "num",
+          },
+        },
+        {
+          name: ["-B", "--before-context"],
+          description: "Show <num> leading lines",
+          args: {
+            name: "num",
+          },
+        },
+        {
+          name: ["-A", "--after-context"],
+          description: "Show <num> trailing lines",
+          args: {
+            name: "num",
+          },
+        },
+        {
+          name: ["-m", "--max-count"],
+          description: "Limit the amount of matches per file",
+          args: {
+            name: "num",
+          },
+        },
+        {
+          name: "--threads",
+          description: "Number of grep worker threads to use",
+          args: {
+            name: "num",
+          },
+        },
+        {
+          name: ["-p", "--show-function"],
+          description:
+            "Show the preceding line that contains the function name of the match",
+        },
+        {
+          name: ["-W", "--function-context"],
+          description:
+            "Show the surrounding text from the previous line containing a function name up to the one before the next function name",
+        },
+        {
+          name: "-f",
+          description: "Read patterns from <file>, one per line",
+          args: {
+            name: "file",
+            template: "filepaths",
+          },
+        },
+        {
+          name: "-e",
+          description:
+            "The next parameter is the pattern. Useful for patterns beginning with -",
+          isRepeatable: true,
+          args: {
+            name: "pattern",
+          },
+        },
+        {
+          name: "--and",
+          description: "Both patterns combined with --and must match",
+          isRepeatable: true,
+        },
+        {
+          name: "--or",
+          description: "Either pattern may match (the default)",
+          isRepeatable: true,
+        },
+        {
+          name: "--not",
+          description: "Negate the following pattern",
+          isRepeatable: true,
+        },
+        {
+          name: "--all-match",
+          description:
+            "When giving multiple pattern expressions combined with --or, limit the match to files that have lines to match all of them",
+        },
+        {
+          name: ["-q", "--quiet"],
+          description:
+            "Do not output matched lines; instead, exit with status 0 when there is a match and with non-zero status when there isn't",
+        },
+        {
+          name: ["-O", "--open-files-in-pager"],
+          description: "Open the matching files in the pager",
+          requiresSeparator: true,
+          args: {
+            name: "pager",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--",
+          description:
+            "Signals the end of options; the rest of the parameters are <pathspec> limiters",
+        },
+      ],
+    },
+    {
+      name: "show",
+      description: "Show various types of objects",
+      args: {
+        name: "object",
+        isOptional: true,
+        isVariadic: true,
+        suggestions: headSuggestions,
+        generators: [gitGenerators.commits, gitGenerators.tags],
+      },
+      options: [
+        {
+          name: "--stat",
+          description: "Generate a diffstat",
+        },
+        {
+          name: "--name-only",
+          description: "Show only names of changed files",
+        },
+        {
+          name: "--name-status",
+          description: "Show only names and status of changed files",
+        },
+        {
+          name: ["-s", "--no-patch"],
+          description: "Suppress diff output",
+        },
+        {
+          name: "--oneline",
+          description: "Show each commit as a single line",
+        },
+        {
+          name: ["--pretty", "--format"],
+          description:
+            "Pretty-print the contents of the commit logs in a given format",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            isOptional: true,
+            suggestions: [
+              "oneline",
+              "short",
+              "medium",
+              "full",
+              "fuller",
+              "reference",
+              "email",
+              "raw",
+              "format:",
+            ],
+          },
+        },
+        {
+          name: "--word-diff",
+          description:
+            "Show a word diff, using <mode> to delimit changed words",
+          requiresSeparator: true,
+          args: {
+            name: "mode",
+            isOptional: true,
+            suggestions: ["color", "plain", "porcelain", "none"],
+          },
+        },
+        {
+          name: "--diff-merges",
+          description: "Specify diff format to be used for merge commits",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            suggestions: [
+              "off",
+              "on",
+              "first-parent",
+              "separate",
+              "combined",
+              "dense-combined",
+              "remerge",
+            ],
+          },
+        },
+        {
+          name: "--remerge-diff",
+          description:
+            "Produce remerge-diff output for merge commits. Shortcut for --diff-merges=remerge -p",
+        },
+        {
+          name: "--show-signature",
+          description: "Check the validity of a signed commit",
+        },
+      ],
+    },
     {
       name: "branch",
       description: "List, create, or delete branches",
@@ -7801,6 +9193,16 @@ const completionSpec: Fig.Spec = {
           name: "--format",
           description: "Format to use for the output",
           args: { name: "format" },
+        },
+        {
+          name: "--omit-empty",
+          description:
+            "Do not print a newline after formatted refs where the format expands to the empty string",
+        },
+        {
+          name: "--recurse-submodules",
+          description:
+            "Create the branch in the superproject and all submodules (experimental)",
         },
         {
           name: ["-r", "--remotes"],
@@ -8036,6 +9438,22 @@ const completionSpec: Fig.Spec = {
             "Interactively select hunks in the difference between the <tree-ish> (or the index, if unspecified) and the working tree",
         },
         {
+          name: ["-U", "--unified"],
+          description:
+            "Generate diffs with <n> lines of context in interactive patch mode",
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: "--inter-hunk-context",
+          description:
+            "Show the context between diff hunks, up to <n> lines, in interactive patch mode",
+          args: {
+            name: "n",
+          },
+        },
+        {
           name: "--ignore-other-worktrees",
           description:
             "Git checkout refuses when the wanted ref is already checked out by another worktree. This option makes it check the ref out anyway. In other words, the ref can be held by more than one worktree",
@@ -8240,14 +9658,47 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--keep-redundant-commits",
-          description: "Creates an empty commit object. Implies --allow-empty",
+          description:
+            "Creates an empty commit object. Implies --allow-empty. Deprecated: use --empty=keep instead",
+          deprecated: true,
+        },
+        {
+          name: "--empty",
+          description:
+            "How to handle commits being cherry-picked that are redundant with changes already in the current history",
+          requiresSeparator: true,
+          args: {
+            name: "action",
+            suggestions: [
+              {
+                name: "stop",
+                description:
+                  "Stop when the commit is applied, allowing you to examine the commit",
+              },
+              {
+                name: "drop",
+                description: "The commit will be dropped",
+              },
+              {
+                name: "keep",
+                description: "The commit will be kept",
+              },
+            ],
+          },
         },
         {
           name: "--strategy",
           description: "Use the given merge strategy. Should only be used once",
           args: {
             name: "strategy",
-            suggestions: ["resolve", "recursive", "octopus", "ours", "subtree"],
+            suggestions: [
+              "ort",
+              "resolve",
+              "recursive",
+              "octopus",
+              "ours",
+              "subtree",
+            ],
           },
         },
         {
@@ -8803,7 +10254,14 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "strategy",
             isVariadic: true,
-            suggestions: ["resolve", "recursive", "octopus", "ours", "subtree"],
+            suggestions: [
+              "ort",
+              "resolve",
+              "recursive",
+              "octopus",
+              "ours",
+              "subtree",
+            ],
           },
         },
         {
@@ -8847,11 +10305,17 @@ const completionSpec: Fig.Spec = {
           name: "--summary",
           description:
             "Synonym to --stat ; this is deprecated and will be removed in the future",
+          deprecated: true,
         },
         {
           name: "--no-summary",
           description:
             "Synonym to --no-stat ; this is deprecated and will be removed in the future",
+          deprecated: true,
+        },
+        {
+          name: "--compact-summary",
+          description: "Show a compact-summary at the end of the merge",
         },
         {
           name: ["-q", "--quiet"],
@@ -8884,11 +10348,19 @@ const completionSpec: Fig.Spec = {
             "By default, git merge command refuses to merge histories that do not share a common ancestor. This option can be used to override this safety when merging histories of two projects that started their lives independently. As that is a very rare occasion, no configuration variable to enable this by default exists and will not be added",
         },
         {
-          name: "-m",
+          name: ["-m", "--message"],
           description:
             "Set the commit message to be used for the merge commit (in case one is created). If --log is specified, a shortlog of the commits being merged will be appended to the specified message. The git fmt-merge-msg command can be used to give a good default for automated git merge invocations. The automated message can include the branch description",
           args: {
             name: "message",
+          },
+        },
+        {
+          name: "--into-name",
+          description:
+            "Prepare the default merge message as if merging to the branch <branch>, instead of the name of the real branch to which the merge is made",
+          args: {
+            name: "branch",
           },
         },
         {
@@ -8968,6 +10440,51 @@ const completionSpec: Fig.Spec = {
           args: { name: "message" },
         },
         {
+          name: ["-F", "--file"],
+          description: "Read the tag message from the given file",
+          args: { name: "file", template: "filepaths" },
+        },
+        {
+          name: "--trailer",
+          description: "Add a custom trailer to the tag message",
+          isRepeatable: true,
+          args: { name: "token[(=|:)value]" },
+        },
+        {
+          name: ["-e", "--edit"],
+          description: "Further edit the message taken from -m or -F",
+        },
+        {
+          name: ["-s", "--sign"],
+          description:
+            "Make a cryptographically signed tag, using the default signing key",
+        },
+        {
+          name: ["-u", "--local-user"],
+          description:
+            "Make a cryptographically signed tag, using the given key",
+          args: { name: "key-id" },
+        },
+        {
+          name: "--cleanup",
+          description:
+            "Set how the tag message is cleaned up before being stored",
+          requiresSeparator: true,
+          args: {
+            name: "mode",
+            suggestions: ["verbatim", "whitespace", "strip"],
+          },
+        },
+        {
+          name: ["-f", "--force"],
+          description:
+            "Replace an existing tag with the given name (instead of failing)",
+        },
+        {
+          name: "--create-reflog",
+          description: "Create a reflog for the tag",
+        },
+        {
           name: "--points-at",
           description: "List tags of the given object",
           args: {
@@ -8975,6 +10492,102 @@ const completionSpec: Fig.Spec = {
             generators: gitGenerators.commits,
             suggestions: headSuggestions,
           },
+        },
+        {
+          name: "--contains",
+          description: "Only list tags which contain the specified commit",
+          args: {
+            name: "commit",
+            isOptional: true,
+            generators: gitGenerators.commits,
+            suggestions: headSuggestions,
+          },
+        },
+        {
+          name: "--no-contains",
+          description:
+            "Only list tags which don't contain the specified commit",
+          args: {
+            name: "commit",
+            isOptional: true,
+            generators: gitGenerators.commits,
+            suggestions: headSuggestions,
+          },
+        },
+        {
+          name: "--merged",
+          description:
+            "Only list tags whose commits are reachable from the specified commit",
+          args: {
+            name: "commit",
+            isOptional: true,
+            generators: gitGenerators.commits,
+            suggestions: headSuggestions,
+          },
+        },
+        {
+          name: "--no-merged",
+          description:
+            "Only list tags whose commits are not reachable from the specified commit",
+          args: {
+            name: "commit",
+            isOptional: true,
+            generators: gitGenerators.commits,
+            suggestions: headSuggestions,
+          },
+        },
+        {
+          name: "--sort",
+          description:
+            "Sort based on the key given. Prefix - to sort in descending order of the value",
+          requiresSeparator: true,
+          args: {
+            name: "key",
+            suggestions: [
+              "refname",
+              "-refname",
+              "version:refname",
+              "-version:refname",
+              "creatordate",
+              "-creatordate",
+            ],
+          },
+        },
+        {
+          name: "--format",
+          description:
+            "A string that interpolates %(fieldname) from a tag ref being shown and the object it points at",
+          requiresSeparator: true,
+          args: { name: "format" },
+        },
+        {
+          name: "--omit-empty",
+          description:
+            "Do not print a newline after formatted refs where the format expands to the empty string",
+        },
+        {
+          name: "--column",
+          description: "Display tag listing in columns",
+          requiresSeparator: true,
+          args: { name: "options", isOptional: true },
+        },
+        {
+          name: "--no-column",
+          description: "Do not display tag listing in columns",
+        },
+        {
+          name: "--color",
+          description: "Respect any colors specified in the --format option",
+          requiresSeparator: true,
+          args: {
+            name: "when",
+            isOptional: true,
+            suggestions: ["always", "never", "auto"],
+          },
+        },
+        {
+          name: ["-i", "--ignore-case"],
+          description: "Sorting and filtering tags are case insensitive",
         },
       ],
       args: {
@@ -9000,6 +10613,22 @@ const completionSpec: Fig.Spec = {
           name: ["-p", "--patch"],
           description:
             "Interactively select hunks in the difference between the restore source and the restore location",
+        },
+        {
+          name: ["-U", "--unified"],
+          description:
+            "Generate diffs with <n> lines of context in interactive patch mode",
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: "--inter-hunk-context",
+          description:
+            "Show the context between diff hunks, up to <n> lines, in interactive patch mode",
+          args: {
+            name: "n",
+          },
         },
         {
           name: ["-W", "--worktree"],
@@ -9243,6 +10872,16 @@ const completionSpec: Fig.Spec = {
             "Git switch refuses when the wanted ref is already checked out by another worktree",
         },
         {
+          name: "--overwrite-ignore",
+          description:
+            "Silently overwrite ignored files when switching branches. This is the default behavior",
+        },
+        {
+          name: "--no-overwrite-ignore",
+          description:
+            "Abort the operation when the new branch contains ignored files",
+        },
+        {
           name: "--recurse-submodules",
           exclusiveOn: ["--no-recurse-submodules"],
           description:
@@ -9311,6 +10950,54 @@ const completionSpec: Fig.Spec = {
                 name: "new-branch",
               },
             },
+            {
+              name: "--orphan",
+              description:
+                "With add, make the new working tree and index empty, associating the working tree with a new unborn branch named <new-branch>",
+            },
+            {
+              name: "--reason",
+              description:
+                "With add --lock, an explanation why the working tree is locked",
+              dependsOn: ["--lock"],
+              args: {
+                name: "reason",
+              },
+            },
+            {
+              name: ["-q", "--quiet"],
+              description: "With add, suppress feedback messages",
+            },
+            {
+              name: "--track",
+              description:
+                "When creating a new branch, if <commit-ish> is a branch, mark it as upstream from the new branch",
+            },
+            {
+              name: "--no-track",
+              description: "Do not set up upstream tracking for the new branch",
+            },
+            {
+              name: "--guess-remote",
+              description:
+                "With worktree add <path>, without <commit-ish>, base the new branch on a remote-tracking branch matching the name of <path>, if one exists",
+            },
+            {
+              name: "--relative-paths",
+              description:
+                "Link worktrees using relative paths instead of absolute paths",
+            },
+          ],
+          args: [
+            {
+              name: "path",
+              template: "folders",
+            },
+            {
+              name: "commit-ish",
+              isOptional: true,
+              generators: [gitGenerators.localBranches, gitGenerators.commits],
+            },
           ],
         },
         {
@@ -9321,6 +11008,12 @@ const completionSpec: Fig.Spec = {
               name: "--porcelain",
               description:
                 "With list, output in an easy-to-parse format for scripts. This format will remain stable across Git versions and regardless of user configuration. See below for details",
+            },
+            {
+              name: "-z",
+              description:
+                "Terminate each line with a NUL rather than a newline when --porcelain is specified",
+              dependsOn: ["--porcelain"],
             },
             {
               name: ["-v", "--verbose"],
@@ -9377,6 +11070,11 @@ const completionSpec: Fig.Spec = {
               description:
                 "Move refuses to move a locked working tree unless --force is specified twice. If the destination is already assigned to some other working tree but is missing (for instance, if <new-path> was deleted manually), then --force allows the move to proceed; use --force twice if the destination is locked",
             },
+            {
+              name: "--relative-paths",
+              description:
+                "Link worktrees using relative paths instead of absolute paths",
+            },
           ],
         },
         {
@@ -9425,7 +11123,16 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "path",
             template: "filepaths",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [
+            {
+              name: "--relative-paths",
+              description:
+                "Link worktrees using relative paths instead of absolute paths",
+            },
+          ],
         },
         {
           name: "unlock",
@@ -9513,6 +11220,34 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-3", "--3way"],
           description: "Attempt three-way merge if a patch does not apply",
+        },
+        {
+          name: "--ours",
+          description:
+            "With --3way, resolve conflicts using our version instead of leaving conflict markers",
+          dependsOn: ["--3way"],
+        },
+        {
+          name: "--theirs",
+          description:
+            "With --3way, resolve conflicts using their version instead of leaving conflict markers",
+          dependsOn: ["--3way"],
+        },
+        {
+          name: "--union",
+          description:
+            "With --3way, resolve conflicts using a union of both versions instead of leaving conflict markers",
+          dependsOn: ["--3way"],
+        },
+        {
+          name: ["-q", "--quiet"],
+          description:
+            "Suppress stderr output. Messages about patch status and progress will not be printed",
+        },
+        {
+          name: "--allow-empty",
+          description:
+            "Don't return an error for patches containing no diff. This includes empty patches and patches with commit text only",
         },
         {
           name: "--build-fake-ancestor",
@@ -9794,6 +11529,1897 @@ const completionSpec: Fig.Spec = {
             'Every time a client connects, first run an external command specified by the <path> with service name (e.g. "upload-pack"), path to the repository, hostname (%H), canonical hostname (%CH), IP address (%IP), and TCP port (%P) as its command-line arguments. The external command can decide to decline the service by exiting with a non-zero status (or to allow it by exiting with a zero status). It can also look at the $REMOTE_ADDR and $REMOTE_PORT environment variables to learn about the requestor when making this decision.\n\nThe external command can optionally write a single line to its standard output to be sent to the requestor as an error message when it declines the service',
           requiresSeparator: true,
           args: { name: "path", template: "filepaths" },
+        },
+      ],
+    },
+    {
+      name: "am",
+      description: "Apply a series of patches from a mailbox",
+      args: {
+        name: "mbox | Maildir",
+        isOptional: true,
+        isVariadic: true,
+        template: "filepaths",
+      },
+      options: [
+        {
+          name: "--continue",
+          description: "Continue applying patches after resolving a conflict",
+        },
+        {
+          name: ["-r", "--resolved"],
+          description: "Synonym for --continue",
+        },
+        {
+          name: "--skip",
+          description: "Skip the current patch",
+        },
+        {
+          name: "--abort",
+          description:
+            "Restore the original branch and abort the patching operation",
+        },
+        {
+          name: "--quit",
+          description: "Abort the patching operation but keep HEAD where it is",
+        },
+        {
+          name: "--retry",
+          description: "Try to apply the current patch again",
+        },
+        {
+          name: "--show-current-patch",
+          description: "Show the message at which git am stopped",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            isOptional: true,
+            suggestions: ["diff", "raw"],
+          },
+        },
+        {
+          name: ["-i", "--interactive"],
+          description: "Run interactively",
+        },
+        {
+          name: ["-3", "--3way"],
+          description:
+            "When the patch does not apply cleanly, fall back on 3-way merge",
+        },
+        {
+          name: ["-s", "--signoff"],
+          description: "Add a Signed-off-by trailer to the commit message",
+        },
+        {
+          name: ["-k", "--keep"],
+          description: "Pass -k flag to git mailinfo",
+        },
+        {
+          name: "--keep-non-patch",
+          description: "Pass -b flag to git mailinfo",
+        },
+        {
+          name: ["-m", "--message-id"],
+          description:
+            "Pass the -m flag to git mailinfo, so that the Message-ID header is added to the commit message",
+        },
+        {
+          name: ["-c", "--scissors"],
+          description: "Remove everything in body before a scissors line",
+        },
+        {
+          name: ["-q", "--quiet"],
+          description: "Be quiet. Only print error messages",
+        },
+        {
+          name: ["-n", "--no-verify"],
+          description: "Bypass the pre-applypatch and applypatch-msg hooks",
+        },
+        {
+          name: "--empty",
+          description: "How to handle an e-mail message lacking a patch",
+          requiresSeparator: true,
+          args: {
+            name: "action",
+            suggestions: ["stop", "drop", "keep"],
+          },
+        },
+        {
+          name: "--allow-empty",
+          description:
+            "After a patch failure on an input e-mail message lacking a patch, create an empty commit with the contents of the e-mail message as its log message",
+        },
+        {
+          name: "--committer-date-is-author-date",
+          description: "Use the author date as the committer date",
+        },
+        {
+          name: "--ignore-date",
+          description: "Use the committer date as the author date",
+        },
+        {
+          name: ["-S", "--gpg-sign"],
+          description: "GPG-sign commits",
+          args: {
+            name: "keyid",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--whitespace",
+          description: "Passed to git apply",
+          requiresSeparator: true,
+          args: {
+            name: "action",
+            suggestions: ["nowarn", "warn", "fix", "error", "error-all"],
+          },
+        },
+        {
+          name: "--directory",
+          description: "Passed to git apply",
+          requiresSeparator: true,
+          args: {
+            name: "root",
+            template: "folders",
+          },
+        },
+        {
+          name: "-p",
+          description: "Passed to git apply",
+          args: {
+            name: "num",
+          },
+        },
+        {
+          name: "--reject",
+          description: "Passed to git apply",
+        },
+        {
+          name: "--patch-format",
+          description: "Specify the patch format the patch(es) are in",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            suggestions: ["mbox", "mboxrd", "stgit", "stgit-series", "hg"],
+          },
+        },
+      ],
+    },
+    {
+      name: "backfill",
+      description: "Download missing objects in a partial clone",
+      options: [
+        {
+          name: "--min-batch-size",
+          description: "Minimum number of objects to request at a time",
+          requiresSeparator: true,
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: "--sparse",
+          description:
+            "Only download objects if they appear at a path that matches the current sparse-checkout",
+        },
+        {
+          name: "--no-sparse",
+          description:
+            "Download objects regardless of the current sparse-checkout",
+        },
+      ],
+    },
+    {
+      name: "bundle",
+      description: "Move objects and refs by archive",
+      subcommands: [
+        {
+          name: "create",
+          description:
+            "Create a bundle file containing objects and refs selected by rev-list arguments",
+          args: [
+            {
+              name: "file",
+              template: "filepaths",
+            },
+            {
+              name: "git-rev-list-args",
+              isVariadic: true,
+              suggestions: ["--all", "HEAD"],
+              generators: gitGenerators.localBranches,
+            },
+          ],
+          options: [
+            {
+              name: ["-q", "--quiet"],
+              description: "Do not show progress meter",
+            },
+            {
+              name: "--progress",
+              description: "Show progress meter",
+            },
+            {
+              name: "--version",
+              description: "Specify the bundle format version",
+              requiresSeparator: true,
+              args: {
+                name: "version",
+                suggestions: ["2", "3"],
+              },
+            },
+          ],
+        },
+        {
+          name: "verify",
+          description:
+            "Check that a bundle file is valid and will apply cleanly to the current repository",
+          args: {
+            name: "file",
+            template: "filepaths",
+          },
+          options: [
+            {
+              name: ["-q", "--quiet"],
+              description: "Do not show bundle details",
+            },
+          ],
+        },
+        {
+          name: "list-heads",
+          description: "List the references defined in the bundle",
+          args: [
+            {
+              name: "file",
+              template: "filepaths",
+            },
+            {
+              name: "refname",
+              isOptional: true,
+              isVariadic: true,
+            },
+          ],
+        },
+        {
+          name: "unbundle",
+          description:
+            "Pass the objects in the bundle to git index-pack for storage in the repository",
+          args: [
+            {
+              name: "file",
+              template: "filepaths",
+            },
+            {
+              name: "refname",
+              isOptional: true,
+              isVariadic: true,
+            },
+          ],
+          options: [
+            {
+              name: "--progress",
+              description: "Show progress meter",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "describe",
+      description:
+        "Give an object a human readable name based on an available ref",
+      args: {
+        name: "commit-ish",
+        isOptional: true,
+        isVariadic: true,
+        suggestions: headSuggestions,
+        generators: gitGenerators.commits,
+      },
+      options: [
+        {
+          name: "--all",
+          description:
+            "Use any ref found in refs/ namespace instead of only annotated tags",
+        },
+        {
+          name: "--tags",
+          description:
+            "Use any tag found in refs/tags namespace, including lightweight tags",
+        },
+        {
+          name: "--contains",
+          description: "Find the tag that comes after the commit",
+        },
+        {
+          name: "--abbrev",
+          description: "Use <n> digits to display object names",
+          requiresSeparator: true,
+          args: {
+            name: "n",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--candidates",
+          description: "Consider <n> most recent tags (default: 10)",
+          requiresSeparator: true,
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: "--exact-match",
+          description:
+            "Only output exact matches (a tag directly references the supplied commit)",
+        },
+        {
+          name: "--debug",
+          description:
+            "Verbosely display information about the searching strategy",
+        },
+        {
+          name: "--long",
+          description:
+            "Always output the long format (the tag, the number of commits and the abbreviated commit name)",
+        },
+        {
+          name: "--match",
+          description: "Only consider tags matching the given glob pattern",
+          isRepeatable: true,
+          args: {
+            name: "pattern",
+          },
+        },
+        {
+          name: "--exclude",
+          description: "Do not consider tags matching the given glob pattern",
+          isRepeatable: true,
+          args: {
+            name: "pattern",
+          },
+        },
+        {
+          name: "--always",
+          description: "Show uniquely abbreviated commit object as fallback",
+        },
+        {
+          name: "--first-parent",
+          description:
+            "Follow only the first parent commit upon seeing a merge commit",
+        },
+        {
+          name: "--dirty",
+          description:
+            "Describe the state of the working tree; append <mark> (default: -dirty) if it is dirty",
+          requiresSeparator: true,
+          args: {
+            name: "mark",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--broken",
+          description:
+            "Describe the state of the working tree; append <mark> (default: -broken) if the repository is corrupt",
+          requiresSeparator: true,
+          args: {
+            name: "mark",
+            isOptional: true,
+          },
+        },
+      ],
+    },
+    {
+      name: "format-patch",
+      description: "Prepare patches for e-mail submission",
+      args: {
+        name: "since | revision-range",
+        isOptional: true,
+        suggestions: headSuggestions,
+        generators: [gitGenerators.commits, gitGenerators.localBranches],
+      },
+      options: [
+        {
+          name: ["-o", "--output-directory"],
+          description: "Use <dir> to store the resulting files",
+          args: {
+            name: "dir",
+            template: "folders",
+          },
+        },
+        {
+          name: "--stdout",
+          description:
+            "Print all commits to the standard output in mbox format, instead of creating a file for each one",
+        },
+        {
+          name: "--cover-letter",
+          description:
+            "In addition to the patches, generate a cover letter file containing the branch description, shortlog and the overall diffstat",
+        },
+        {
+          name: "--no-cover-letter",
+          description: "Do not generate a cover letter",
+        },
+        {
+          name: "--cover-from-description",
+          description:
+            "Controls which parts of the cover letter will be automatically populated using the branch's description",
+          requiresSeparator: true,
+          args: {
+            name: "mode",
+            suggestions: ["message", "default", "subject", "auto", "none"],
+          },
+        },
+        {
+          name: ["-n", "--numbered"],
+          description:
+            "Name output in [PATCH n/m] format, even with a single patch",
+        },
+        {
+          name: ["-N", "--no-numbered"],
+          description: "Name output in [PATCH] format",
+        },
+        {
+          name: "--start-number",
+          description: "Start numbering the patches at <n> instead of 1",
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: ["-v", "--reroll-count"],
+          description:
+            "Mark the series as the <n>-th iteration of the topic, e.g. [PATCH v2]",
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: "--rfc",
+          description:
+            "Prepend the string <rfc> (defaults to RFC) to the subject prefix",
+          requiresSeparator: true,
+          args: {
+            name: "rfc",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--subject-prefix",
+          description:
+            "Instead of the standard [PATCH] prefix in the subject line, use [<subject-prefix>]",
+          requiresSeparator: true,
+          args: {
+            name: "subject-prefix",
+          },
+        },
+        {
+          name: ["-s", "--signoff"],
+          description: "Add a Signed-off-by trailer to the commit message",
+        },
+        {
+          name: ["-k", "--keep-subject"],
+          description:
+            "Do not strip/add [PATCH] from the first line of the commit log message",
+        },
+        {
+          name: "--numbered-files",
+          description:
+            "Output file names will be a simple number sequence without the default first line of the commit appended",
+        },
+        {
+          name: "--suffix",
+          description:
+            "Use <sfx> as suffix for generated filenames instead of .patch",
+          requiresSeparator: true,
+          args: {
+            name: "sfx",
+          },
+        },
+        {
+          name: "--to",
+          description: "Add a To: header to the email headers",
+          isRepeatable: true,
+          requiresSeparator: true,
+          args: {
+            name: "email",
+          },
+        },
+        {
+          name: "--cc",
+          description: "Add a Cc: header to the email headers",
+          isRepeatable: true,
+          requiresSeparator: true,
+          args: {
+            name: "email",
+          },
+        },
+        {
+          name: "--from",
+          description:
+            "Use <ident> in the From: header of each commit email (or committer ident if absent)",
+          requiresSeparator: true,
+          args: {
+            name: "ident",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--in-reply-to",
+          description:
+            "Make the first mail (or all the mails with --no-thread) appear as a reply to the given Message-ID",
+          requiresSeparator: true,
+          args: {
+            name: "message-id",
+          },
+        },
+        {
+          name: "--thread",
+          description:
+            "Controls addition of In-Reply-To and References headers to make the second and subsequent mails appear as replies to the first",
+          requiresSeparator: true,
+          args: {
+            name: "style",
+            isOptional: true,
+            suggestions: ["shallow", "deep"],
+          },
+        },
+        {
+          name: "--base",
+          description:
+            "Record the base tree information to identify the state the patch series applies to",
+          requiresSeparator: true,
+          args: {
+            name: "base-commit",
+            suggestions: ["auto"],
+            generators: gitGenerators.commits,
+          },
+        },
+        {
+          name: "--interdiff",
+          description:
+            "Insert an interdiff into the cover letter, or as commentary of a lone patch, showing the differences against a previous version",
+          requiresSeparator: true,
+          args: {
+            name: "previous",
+            generators: gitGenerators.commits,
+          },
+        },
+        {
+          name: "--range-diff",
+          description:
+            "Insert a range-diff into the cover letter, or as commentary of a lone patch, showing the differences against a previous version",
+          requiresSeparator: true,
+          args: {
+            name: "previous",
+            generators: gitGenerators.commits,
+          },
+        },
+        {
+          name: "--ignore-if-in-upstream",
+          description:
+            "Do not include a patch that matches a commit in <until>..<since>",
+        },
+        {
+          name: "--zero-commit",
+          description:
+            "Output an all-zero hash in each patch's From header instead of the hash of the commit",
+        },
+        {
+          name: ["-p", "--no-stat"],
+          description: "Generate plain patches without any diffstats",
+        },
+        {
+          name: ["-q", "--quiet"],
+          description:
+            "Do not print the names of the generated files to standard output",
+        },
+      ],
+    },
+    {
+      name: "gc",
+      description:
+        "Cleanup unnecessary files and optimize the local repository",
+      options: [
+        {
+          name: "--aggressive",
+          description:
+            "More aggressively optimize the repository at the expense of taking much more time",
+        },
+        {
+          name: "--auto",
+          description:
+            "Check whether any housekeeping is required; if not, exit without performing any work",
+        },
+        {
+          name: "--detach",
+          description: "Run in the background if the system supports it",
+        },
+        {
+          name: "--no-detach",
+          description: "Do not run in the background",
+        },
+        {
+          name: "--cruft",
+          description:
+            "When expiring unreachable objects, pack them separately into a cruft pack instead of storing them as loose objects",
+        },
+        {
+          name: "--no-cruft",
+          description: "Store unreachable objects as loose objects",
+        },
+        {
+          name: "--max-cruft-size",
+          description:
+            "When packing unreachable objects into a cruft pack, limit the size of new cruft packs",
+          requiresSeparator: true,
+          args: {
+            name: "n",
+          },
+        },
+        {
+          name: "--expire-to",
+          description:
+            "When packing unreachable objects into a cruft pack, write a cruft pack containing pruned objects (if any) to the directory <dir>",
+          requiresSeparator: true,
+          args: {
+            name: "dir",
+            template: "folders",
+          },
+        },
+        {
+          name: "--prune",
+          description:
+            "Prune loose objects older than date (default is 2 weeks ago)",
+          requiresSeparator: true,
+          args: {
+            name: "date",
+            isOptional: true,
+            suggestions: ["now", "never"],
+          },
+        },
+        {
+          name: "--no-prune",
+          description: "Do not prune any loose objects",
+        },
+        {
+          name: ["-q", "--quiet"],
+          description: "Suppress all progress reports",
+        },
+        {
+          name: "--force",
+          description:
+            "Force git gc to run even if there may be another git gc instance running on this repository",
+        },
+        {
+          name: "--keep-largest-pack",
+          description:
+            "All packs except the largest non-cruft pack, any packs marked with a .keep file, and any cruft pack(s) are consolidated into a single pack",
+        },
+      ],
+    },
+    {
+      name: "history",
+      description: "EXPERIMENTAL: Rewrite history",
+      subcommands: [
+        {
+          name: "reword",
+          description:
+            "Rewrite the commit message of the specified commit. All the other details of this commit remain unchanged",
+          args: {
+            name: "commit",
+            generators: gitGenerators.commits,
+          },
+          options: [
+            {
+              name: ["-n", "--dry-run"],
+              description: "Perform a dry-run without updating any refs",
+            },
+            {
+              name: "--update-refs",
+              description: "Control which refs should be updated",
+              requiresSeparator: true,
+              args: {
+                name: "mode",
+                suggestions: ["branches", "head"],
+              },
+            },
+          ],
+        },
+        {
+          name: "split",
+          description:
+            "Interactively split up a commit into two commits by choosing hunks introduced by it",
+          args: [
+            {
+              name: "commit",
+              generators: gitGenerators.commits,
+            },
+            {
+              name: "pathspec",
+              isOptional: true,
+              isVariadic: true,
+              template: "filepaths",
+            },
+          ],
+          options: [
+            {
+              name: ["-n", "--dry-run"],
+              description: "Perform a dry-run without updating any refs",
+            },
+            {
+              name: "--update-refs",
+              description: "Control which refs should be updated",
+              requiresSeparator: true,
+              args: {
+                name: "mode",
+                suggestions: ["branches", "head"],
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "last-modified",
+      description: "EXPERIMENTAL: Show when files were last modified",
+      args: [
+        {
+          name: "revision-range",
+          isOptional: true,
+          generators: gitGenerators.commits,
+        },
+        {
+          name: "pathspec",
+          isOptional: true,
+          isVariadic: true,
+          template: "filepaths",
+        },
+      ],
+      options: [
+        {
+          name: ["-r", "--recursive"],
+          description: "Recursively traverse into all subtrees",
+        },
+        {
+          name: ["-t", "--show-trees"],
+          description: "Show tree entries even when recursing into them",
+        },
+        {
+          name: "--max-depth",
+          description:
+            "For each pathspec given on the command line, traverse at most <depth> levels into subtrees. A negative value means no limit",
+          requiresSeparator: true,
+          args: {
+            name: "depth",
+          },
+        },
+        {
+          name: "-z",
+          description: "Terminate each line with a NUL rather than a newline",
+        },
+      ],
+    },
+    {
+      name: "maintenance",
+      description: "Run tasks to optimize Git repository data",
+      subcommands: [
+        {
+          name: "run",
+          description: "Run one or more maintenance tasks",
+          options: [
+            {
+              name: "--auto",
+              description:
+                "Only run tasks if certain thresholds are met, based on the state of the repository",
+            },
+            {
+              name: "--schedule",
+              description:
+                "Only run tasks whose schedule matches the given frequency",
+              requiresSeparator: true,
+              args: {
+                name: "frequency",
+                suggestions: ["hourly", "daily", "weekly"],
+              },
+            },
+            {
+              name: "--task",
+              description: "Only run the specified task",
+              isRepeatable: true,
+              requiresSeparator: true,
+              args: {
+                name: "task",
+                suggestions: [
+                  "commit-graph",
+                  "prefetch",
+                  "gc",
+                  "geometric-repack",
+                  "loose-objects",
+                  "incremental-repack",
+                  "pack-refs",
+                  "reflog-expire",
+                  "rerere-gc",
+                  "worktree-prune",
+                ],
+              },
+            },
+            {
+              name: "--detach",
+              description: "Perform maintenance in the background",
+            },
+            {
+              name: "--quiet",
+              description:
+                "Do not report progress or other information over stderr",
+            },
+          ],
+        },
+        {
+          name: "start",
+          description:
+            "Register the current repository and start running scheduled maintenance on it",
+          options: [
+            {
+              name: "--scheduler",
+              description:
+                "Specify the scheduler for running the hourly, daily and weekly executions of git maintenance run",
+              requiresSeparator: true,
+              args: {
+                name: "scheduler",
+                suggestions: [
+                  "auto",
+                  "crontab",
+                  "systemd-timer",
+                  "launchctl",
+                  "schtasks",
+                ],
+              },
+            },
+          ],
+        },
+        {
+          name: "stop",
+          description: "Halt the background maintenance schedule",
+        },
+        {
+          name: "register",
+          description:
+            "Initialize Git config values so any scheduled maintenance will start running on this repository",
+          options: [
+            {
+              name: "--config-file",
+              description:
+                "Use the given config file instead of the global one",
+              args: {
+                name: "path",
+                template: "filepaths",
+              },
+            },
+          ],
+        },
+        {
+          name: "unregister",
+          description:
+            "Remove the current repository from background maintenance",
+          options: [
+            {
+              name: "--config-file",
+              description:
+                "Use the given config file instead of the global one",
+              args: {
+                name: "path",
+                template: "filepaths",
+              },
+            },
+            {
+              name: ["-f", "--force"],
+              description:
+                "Return success even if the repository was not registered",
+            },
+          ],
+        },
+        {
+          name: "is-needed",
+          description:
+            "Check whether maintenance needs to be run without actually running it",
+          options: [
+            {
+              name: "--auto",
+              description: "Check tasks based on the state of the repository",
+            },
+            {
+              name: "--task",
+              description: "Check the specified task",
+              isRepeatable: true,
+              requiresSeparator: true,
+              args: {
+                name: "task",
+                suggestions: [
+                  "commit-graph",
+                  "prefetch",
+                  "gc",
+                  "geometric-repack",
+                  "loose-objects",
+                  "incremental-repack",
+                  "pack-refs",
+                  "reflog-expire",
+                  "rerere-gc",
+                  "worktree-prune",
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "notes",
+      description: "Add or inspect object notes",
+      options: [
+        {
+          name: "--ref",
+          description: "Manipulate the notes tree in <ref>",
+          args: {
+            name: "notes-ref",
+          },
+        },
+      ],
+      subcommands: [
+        {
+          name: "list",
+          description:
+            "List the notes object for a given object, or all notes object/annotated object pairs",
+          args: {
+            name: "object",
+            isOptional: true,
+            generators: gitGenerators.commits,
+          },
+        },
+        {
+          name: "add",
+          description: "Add notes for a given object (defaults to HEAD)",
+          args: {
+            name: "object",
+            isOptional: true,
+            generators: gitGenerators.commits,
+          },
+          options: [
+            {
+              name: ["-m", "--message"],
+              description: "Use the given note message",
+              isRepeatable: true,
+              args: {
+                name: "msg",
+              },
+            },
+            {
+              name: ["-F", "--file"],
+              description: "Take the note message from the given file",
+              args: {
+                name: "file",
+                template: "filepaths",
+              },
+            },
+            {
+              name: ["-C", "--reuse-message"],
+              description: "Take the given blob object as the note message",
+              args: {
+                name: "object",
+              },
+            },
+            {
+              name: ["-c", "--reedit-message"],
+              description: "Like -C, but with -c the editor is invoked",
+              args: {
+                name: "object",
+              },
+            },
+            {
+              name: ["-e", "--edit"],
+              description: "Edit the note message in an editor",
+            },
+            {
+              name: "--allow-empty",
+              description: "Allow an empty note object to be stored",
+            },
+            {
+              name: ["-f", "--force"],
+              description: "Overwrite existing notes",
+            },
+            {
+              name: "--separator",
+              description:
+                "Insert <paragraph-break> between paragraphs (default: a blank line)",
+              requiresSeparator: true,
+              args: {
+                name: "paragraph-break",
+                isOptional: true,
+              },
+            },
+            {
+              name: "--no-separator",
+              description: "Do not insert a separator between paragraphs",
+            },
+            {
+              name: "--no-stripspace",
+              description:
+                "Do not strip leading and trailing whitespace from the note message",
+            },
+          ],
+        },
+        {
+          name: "copy",
+          description:
+            "Copy the notes for the first object onto the second object",
+          args: [
+            {
+              name: "from-object",
+              generators: gitGenerators.commits,
+            },
+            {
+              name: "to-object",
+              isOptional: true,
+              generators: gitGenerators.commits,
+            },
+          ],
+          options: [
+            {
+              name: ["-f", "--force"],
+              description: "Overwrite existing notes",
+            },
+            {
+              name: "--stdin",
+              description: "Read object pairs from standard input",
+            },
+          ],
+        },
+        {
+          name: "append",
+          description: "Append new message(s) to an existing note",
+          args: {
+            name: "object",
+            isOptional: true,
+            generators: gitGenerators.commits,
+          },
+          options: [
+            {
+              name: ["-m", "--message"],
+              description: "Use the given note message",
+              isRepeatable: true,
+              args: {
+                name: "msg",
+              },
+            },
+            {
+              name: ["-F", "--file"],
+              description: "Take the note message from the given file",
+              args: {
+                name: "file",
+                template: "filepaths",
+              },
+            },
+            {
+              name: ["-e", "--edit"],
+              description: "Edit the note message in an editor",
+            },
+            {
+              name: "--allow-empty",
+              description: "Allow an empty note object to be stored",
+            },
+            {
+              name: "--separator",
+              description:
+                "Insert <paragraph-break> between paragraphs (default: a blank line)",
+              requiresSeparator: true,
+              args: {
+                name: "paragraph-break",
+                isOptional: true,
+              },
+            },
+            {
+              name: "--no-separator",
+              description: "Do not insert a separator between paragraphs",
+            },
+          ],
+        },
+        {
+          name: "edit",
+          description: "Edit the notes for a given object (defaults to HEAD)",
+          args: {
+            name: "object",
+            isOptional: true,
+            generators: gitGenerators.commits,
+          },
+          options: [
+            {
+              name: "--allow-empty",
+              description: "Allow an empty note object to be stored",
+            },
+          ],
+        },
+        {
+          name: "show",
+          description: "Show the notes for a given object (defaults to HEAD)",
+          args: {
+            name: "object",
+            isOptional: true,
+            generators: gitGenerators.commits,
+          },
+        },
+        {
+          name: "merge",
+          description: "Merge the given notes ref into the current notes ref",
+          args: {
+            name: "notes-ref",
+            isOptional: true,
+          },
+          options: [
+            {
+              name: ["-s", "--strategy"],
+              description: "Resolve notes conflicts using the given strategy",
+              args: {
+                name: "strategy",
+                suggestions: [
+                  "manual",
+                  "ours",
+                  "theirs",
+                  "union",
+                  "cat_sort_uniq",
+                ],
+              },
+            },
+            {
+              name: "--commit",
+              description: "Finalize an in-progress git notes merge",
+            },
+            {
+              name: "--abort",
+              description: "Abort/reset an in-progress git notes merge",
+            },
+            {
+              name: ["-v", "--verbose"],
+              description: "Be more verbose",
+            },
+            {
+              name: ["-q", "--quiet"],
+              description: "Be more quiet",
+            },
+          ],
+        },
+        {
+          name: "remove",
+          description: "Remove the notes for given objects (defaults to HEAD)",
+          args: {
+            name: "object",
+            isOptional: true,
+            isVariadic: true,
+            generators: gitGenerators.commits,
+          },
+          options: [
+            {
+              name: "--ignore-missing",
+              description:
+                "Do not consider it an error to request removing notes from an object that does not have notes attached to it",
+            },
+            {
+              name: "--stdin",
+              description:
+                "Also read the object names to remove notes from standard input",
+            },
+          ],
+        },
+        {
+          name: "prune",
+          description: "Remove all notes for non-existing/unreachable objects",
+          options: [
+            {
+              name: ["-n", "--dry-run"],
+              description:
+                "Do not remove anything; just report the object names whose notes would be removed",
+            },
+            {
+              name: ["-v", "--verbose"],
+              description: "Report pruned notes",
+            },
+          ],
+        },
+        {
+          name: "get-ref",
+          description: "Print the current notes ref",
+        },
+      ],
+    },
+    {
+      name: "range-diff",
+      description: "Compare two commit ranges (e.g. two versions of a branch)",
+      args: [
+        {
+          name: "range1 | base",
+          generators: [gitGenerators.commits, gitGenerators.localBranches],
+        },
+        {
+          name: "range2 | old-tip",
+          isOptional: true,
+          generators: [gitGenerators.commits, gitGenerators.localBranches],
+        },
+        {
+          name: "new-tip",
+          isOptional: true,
+          generators: [gitGenerators.commits, gitGenerators.localBranches],
+        },
+      ],
+      options: [
+        {
+          name: "--creation-factor",
+          description:
+            "Set the creation/deletion cost fudge factor to <percent> (default: 60)",
+          requiresSeparator: true,
+          args: {
+            name: "percent",
+          },
+        },
+        {
+          name: "--no-dual-color",
+          description: "Use simple diff colors",
+        },
+        {
+          name: "--notes",
+          description: "Passed to git log",
+          requiresSeparator: true,
+          args: {
+            name: "ref",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--diff-merges",
+          description:
+            "Generate diffs for merge commits using the corresponding --diff-merges=<format> option of git log",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+            suggestions: [
+              "off",
+              "on",
+              "first-parent",
+              "separate",
+              "combined",
+              "dense-combined",
+              "remerge",
+            ],
+          },
+        },
+        {
+          name: "--remerge-diff",
+          description:
+            "Convenience option, equivalent to --diff-merges=remerge",
+        },
+        {
+          name: "--max-memory",
+          description: "Maximum memory for the cost matrix (default 4G)",
+          requiresSeparator: true,
+          args: {
+            name: "size",
+          },
+        },
+        {
+          name: "--left-only",
+          description:
+            "Suppress commits that are missing from the first specified range",
+        },
+        {
+          name: "--right-only",
+          description:
+            "Suppress commits that are missing from the second specified range",
+        },
+        {
+          name: ["-s", "--no-patch"],
+          description: "Suppress diff output",
+        },
+        {
+          name: "--stat",
+          description: "Generate a diffstat",
+        },
+      ],
+    },
+    {
+      name: "refs",
+      description: "Low-level access to refs",
+      subcommands: [
+        {
+          name: "migrate",
+          description: "Migrate the ref store to a different format",
+          options: [
+            {
+              name: "--ref-format",
+              description: "The ref format to migrate the ref store to",
+              requiresSeparator: true,
+              args: {
+                name: "format",
+                suggestions: ["files", "reftable"],
+              },
+            },
+            {
+              name: "--dry-run",
+              description:
+                "Perform the migration, but do not modify the repository. The migrated refs will be written into a separate directory",
+            },
+            {
+              name: "--no-reflog",
+              description: "Do not migrate reflogs; drop them entirely",
+            },
+          ],
+        },
+        {
+          name: "verify",
+          description: "Verify reference database consistency",
+          options: [
+            {
+              name: "--strict",
+              description: "Enable stricter error checking",
+            },
+            {
+              name: "--verbose",
+              description:
+                "When verifying the reference database consistency, be chatty",
+            },
+          ],
+        },
+        {
+          name: "list",
+          description:
+            "List references in the repository (like git for-each-ref)",
+          args: {
+            name: "pattern",
+            isOptional: true,
+            isVariadic: true,
+          },
+          options: [
+            {
+              name: "--count",
+              description: "Stop after showing <count> refs",
+              requiresSeparator: true,
+              args: {
+                name: "count",
+              },
+            },
+            {
+              name: "--sort",
+              description:
+                "A field name to sort on. Prefix - to sort in descending order of the value",
+              isRepeatable: true,
+              requiresSeparator: true,
+              args: {
+                name: "key",
+              },
+            },
+            {
+              name: "--format",
+              description:
+                "A string that interpolates %(fieldname) from a ref being shown",
+              requiresSeparator: true,
+              args: {
+                name: "format",
+              },
+            },
+            {
+              name: "--include-root-refs",
+              description:
+                "List root refs (HEAD and pseudorefs) apart from regular refs",
+            },
+            {
+              name: "--points-at",
+              description: "Only list refs which point at the given object",
+              requiresSeparator: true,
+              args: {
+                name: "object",
+                generators: gitGenerators.commits,
+              },
+            },
+            {
+              name: "--merged",
+              description:
+                "Only list refs whose tips are reachable from the specified commit",
+              requiresSeparator: true,
+              args: {
+                name: "object",
+                isOptional: true,
+                generators: gitGenerators.commits,
+              },
+            },
+            {
+              name: "--no-merged",
+              description:
+                "Only list refs whose tips are not reachable from the specified commit",
+              requiresSeparator: true,
+              args: {
+                name: "object",
+                isOptional: true,
+                generators: gitGenerators.commits,
+              },
+            },
+            {
+              name: "--contains",
+              description: "Only list refs which contain the specified commit",
+              requiresSeparator: true,
+              args: {
+                name: "object",
+                isOptional: true,
+                generators: gitGenerators.commits,
+              },
+            },
+            {
+              name: "--no-contains",
+              description:
+                "Only list refs which don't contain the specified commit",
+              requiresSeparator: true,
+              args: {
+                name: "object",
+                isOptional: true,
+                generators: gitGenerators.commits,
+              },
+            },
+            {
+              name: "--exclude",
+              description: "Do not list refs which match the given pattern",
+              isRepeatable: true,
+              requiresSeparator: true,
+              args: {
+                name: "pattern",
+              },
+            },
+            {
+              name: "--start-after",
+              description: "Start listing refs after the given marker",
+              requiresSeparator: true,
+              args: {
+                name: "marker",
+              },
+            },
+            {
+              name: "--stdin",
+              description: "Read the list of patterns from standard input",
+            },
+            {
+              name: "--ignore-case",
+              description: "Sorting and filtering refs are case insensitive",
+            },
+            {
+              name: "--omit-empty",
+              description:
+                "Do not print a newline after formatted refs where the format expands to the empty string",
+            },
+            {
+              name: ["-s", "--shell"],
+              description: "Quote placeholders suitably for shells",
+            },
+            {
+              name: ["-p", "--perl"],
+              description: "Quote placeholders suitably for Perl",
+            },
+            {
+              name: "--python",
+              description: "Quote placeholders suitably for Python",
+            },
+            {
+              name: "--tcl",
+              description: "Quote placeholders suitably for Tcl",
+            },
+          ],
+        },
+        {
+          name: "exists",
+          description:
+            "Check whether the given reference exists. Returns exit code 0 if it does, 2 if it is missing",
+          args: {
+            name: "ref",
+            generators: gitGenerators.localBranches,
+          },
+        },
+        {
+          name: "optimize",
+          description:
+            "Optimize references to improve repository performance and reduce disk usage (like git pack-refs)",
+          options: [
+            {
+              name: "--all",
+              description:
+                "Pack all refs, not just tags and already packed refs",
+            },
+            {
+              name: "--no-prune",
+              description: "Do not remove loose refs after packing them",
+            },
+            {
+              name: "--auto",
+              description:
+                "Pack refs as needed depending on the current state of the ref database",
+            },
+            {
+              name: "--include",
+              description: "Pack refs based on a glob pattern",
+              isRepeatable: true,
+              args: {
+                name: "pattern",
+              },
+            },
+            {
+              name: "--exclude",
+              description: "Do not pack refs matching the given glob pattern",
+              isRepeatable: true,
+              args: {
+                name: "pattern",
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "replay",
+      description:
+        "EXPERIMENTAL: Replay commits on a new base, works with bare repos too",
+      args: {
+        name: "revision-range",
+        generators: [gitGenerators.commits, gitGenerators.localBranches],
+      },
+      options: [
+        {
+          name: "--onto",
+          description: "Starting point at which to create the new commits",
+          requiresSeparator: true,
+          args: {
+            name: "newbase",
+            generators: [gitGenerators.commits, gitGenerators.localBranches],
+          },
+        },
+        {
+          name: "--advance",
+          description:
+            "Starting point at which to create the new commits; the branch will be advanced to the last replayed commit",
+          requiresSeparator: true,
+          args: {
+            name: "branch",
+            generators: gitGenerators.localBranches,
+          },
+        },
+        {
+          name: "--revert",
+          description:
+            "Revert the commits in <revision-range> onto the given branch",
+          requiresSeparator: true,
+          args: {
+            name: "branch",
+            generators: gitGenerators.localBranches,
+          },
+        },
+        {
+          name: "--contained",
+          description:
+            "Update all branches that point at commits in <revision-range>. Requires --onto",
+          dependsOn: ["--onto"],
+        },
+        {
+          name: "--ref",
+          description:
+            "Override which reference is updated with the result of the replay. The ref must be fully qualified",
+          requiresSeparator: true,
+          args: {
+            name: "ref",
+            generators: gitGenerators.localBranches,
+          },
+        },
+        {
+          name: "--ref-action",
+          description: "Control how references are updated",
+          requiresSeparator: true,
+          args: {
+            name: "mode",
+            isOptional: true,
+            suggestions: ["update", "print"],
+          },
+        },
+      ],
+    },
+    {
+      name: "repo",
+      description: "Retrieve information about the repository",
+      subcommands: [
+        {
+          name: "info",
+          description:
+            "Retrieve metadata-related information about the current repository",
+          args: {
+            name: "key",
+            isOptional: true,
+            isVariadic: true,
+            suggestions: [
+              "layout.bare",
+              "layout.shallow",
+              "object.format",
+              "references.format",
+            ],
+          },
+          options: [
+            {
+              name: "--format",
+              description: "Output format",
+              requiresSeparator: true,
+              args: {
+                name: "format",
+                suggestions: ["lines", "nul"],
+              },
+            },
+            {
+              name: "-z",
+              description: "Synonym for --format=nul",
+            },
+            {
+              name: "--all",
+              description: "Print all available keys and their values",
+            },
+            {
+              name: "--keys",
+              description: "List all the available keys",
+            },
+          ],
+        },
+        {
+          name: "structure",
+          description:
+            "Retrieve statistics about the current repository structure",
+          options: [
+            {
+              name: "--format",
+              description: "Output format",
+              requiresSeparator: true,
+              args: {
+                name: "format",
+                suggestions: ["table", "lines", "nul"],
+              },
+            },
+            {
+              name: "-z",
+              description: "Synonym for --format=nul",
+            },
+            {
+              name: "--no-progress",
+              description: "Do not show progress",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "shortlog",
+      description: "Summarize 'git log' output",
+      args: [
+        {
+          name: "revision-range",
+          isOptional: true,
+          suggestions: headSuggestions,
+          generators: [gitGenerators.commits, gitGenerators.localBranches],
+        },
+        {
+          name: "path",
+          isOptional: true,
+          isVariadic: true,
+          template: "filepaths",
+        },
+      ],
+      options: [
+        {
+          name: ["-n", "--numbered"],
+          description:
+            "Sort output according to the number of commits per author instead of author alphabetic order",
+        },
+        {
+          name: ["-s", "--summary"],
+          description:
+            "Suppress commit description and provide a commit count summary only",
+        },
+        {
+          name: ["-e", "--email"],
+          description: "Show the email address of each author",
+        },
+        {
+          name: ["-c", "--committer"],
+          description:
+            "Collect and show committer identities instead of authors",
+        },
+        {
+          name: "--group",
+          description: "Group commits based on <type>",
+          isRepeatable: true,
+          requiresSeparator: true,
+          args: {
+            name: "type",
+            suggestions: ["author", "committer", "trailer:"],
+          },
+        },
+        {
+          name: "--format",
+          description:
+            "Instead of the commit subject, use some other information to describe each commit",
+          requiresSeparator: true,
+          args: {
+            name: "format",
+          },
+        },
+        {
+          name: "-w",
+          description: "Linewrap the output",
+          requiresSeparator: true,
+          args: {
+            name: "width[,indent1[,indent2]]",
+            isOptional: true,
+          },
+        },
+      ],
+    },
+    {
+      name: "sparse-checkout",
+      description: "Reduce your working tree to a subset of tracked files",
+      subcommands: [
+        {
+          name: "set",
+          description:
+            "Enable the necessary sparse-checkout config settings and write a set of patterns to the sparse-checkout file",
+          args: {
+            name: "patterns",
+            isOptional: true,
+            isVariadic: true,
+            template: "folders",
+          },
+          options: [
+            {
+              name: "--cone",
+              description: "Use cone mode patterns (the default)",
+            },
+            {
+              name: "--no-cone",
+              description: "Use non-cone mode patterns",
+            },
+            {
+              name: "--sparse-index",
+              description: "Enable the sparse index",
+            },
+            {
+              name: "--no-sparse-index",
+              description: "Disable the sparse index",
+            },
+            {
+              name: "--skip-checks",
+              description:
+                "Skip some sanity checks on the given paths that might give false positives",
+            },
+            {
+              name: "--stdin",
+              description: "Read patterns from standard input",
+            },
+          ],
+        },
+        {
+          name: "add",
+          description:
+            "Update the sparse-checkout file to include additional directories (in cone mode) or patterns (in non-cone mode)",
+          args: {
+            name: "patterns",
+            isVariadic: true,
+            template: "folders",
+          },
+          options: [
+            {
+              name: "--skip-checks",
+              description:
+                "Skip some sanity checks on the given paths that might give false positives",
+            },
+            {
+              name: "--stdin",
+              description: "Read patterns from standard input",
+            },
+          ],
+        },
+        {
+          name: "list",
+          description:
+            "Describe the directories or patterns in the sparse-checkout file",
+        },
+        {
+          name: "reapply",
+          description:
+            "Reapply the sparsity pattern rules to paths in the working tree",
+          options: [
+            {
+              name: "--cone",
+              description: "Use cone mode patterns",
+            },
+            {
+              name: "--no-cone",
+              description: "Use non-cone mode patterns",
+            },
+            {
+              name: "--sparse-index",
+              description: "Enable the sparse index",
+            },
+            {
+              name: "--no-sparse-index",
+              description: "Disable the sparse index",
+            },
+          ],
+        },
+        {
+          name: "disable",
+          description:
+            "Disable the core.sparseCheckout config setting, and restore the working directory to include all files",
+        },
+        {
+          name: "clean",
+          description:
+            "Opportunistically remove files outside of the sparse-checkout definition (requires cone mode)",
+          options: [
+            {
+              name: ["-f", "--force"],
+              description: "Actually delete files",
+            },
+            {
+              name: ["-n", "--dry-run"],
+              description:
+                "List the directories that would be removed without deleting them",
+            },
+            {
+              name: ["-v", "--verbose"],
+              description:
+                "List every file within the directories that are considered for removal",
+            },
+          ],
+        },
+        {
+          name: "check-rules",
+          description:
+            "Check whether sparsity rules match one or more paths read from standard input",
+          options: [
+            {
+              name: "-z",
+              description:
+                "Terminate input and output files by a NUL character",
+            },
+            {
+              name: "--cone",
+              description:
+                "When used with --rules-file, interpret patterns as cone mode patterns",
+            },
+            {
+              name: "--no-cone",
+              description:
+                "When used with --rules-file, interpret patterns as non-cone mode patterns",
+            },
+            {
+              name: "--rules-file",
+              description: "Use patterns in <file> instead of the current ones",
+              args: {
+                name: "file",
+                template: "filepaths",
+              },
+            },
+          ],
+        },
+        {
+          name: "init",
+          description:
+            "Initialize sparse-checkout (deprecated: use git sparse-checkout set instead)",
+          deprecated: true,
+          options: [
+            {
+              name: "--cone",
+              description: "Use cone mode patterns",
+            },
+            {
+              name: "--no-sparse-index",
+              description: "Disable the sparse index",
+            },
+          ],
         },
       ],
     },

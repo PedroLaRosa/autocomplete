@@ -222,10 +222,40 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         },
       },
       {
+        name: "--allow",
+        description:
+          "Allow extra privileged entitlement (e.g., network.host, security.insecure)",
+        args: {
+          name: "stringArray",
+        },
+      },
+      {
+        name: "--annotation",
+        description: "Add annotation to the image",
+        args: {
+          name: "stringArray",
+        },
+      },
+      {
+        name: "--attest",
+        description:
+          "Attestation parameters (format: type=sbom,generator=image)",
+        args: {
+          name: "stringArray",
+        },
+      },
+      {
         name: "--build-arg",
         args: {
           name: "list",
           description: "Set build-time variables",
+        },
+      },
+      {
+        name: "--build-context",
+        description: "Additional build contexts (e.g., name=path)",
+        args: {
+          name: "stringArray",
         },
       },
       {
@@ -236,7 +266,37 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         },
       },
       {
+        name: "--cache-to",
+        description:
+          "Cache export destinations (e.g., user/app:cache, type=local,dest=path/to/dir)",
+        args: {
+          name: "stringArray",
+        },
+      },
+      {
+        name: "--call",
+        description:
+          'Set method for evaluating build ("check", "outline", "targets") (default "build")',
+        args: {
+          name: "string",
+          suggestions: ["build", "check", "outline", "targets"],
+        },
+      },
+      {
+        name: "--cgroup-parent",
+        description:
+          "Set the parent cgroup for the RUN instructions during build",
+        args: {
+          name: "string",
+        },
+      },
+      {
+        name: "--check",
+        description: "Shorthand for --call=check",
+      },
+      {
         name: "--disable-content-trust",
+        deprecated: true,
         description: "Skip image verification (default true)",
       },
       {
@@ -271,6 +331,17 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         },
       },
       {
+        name: "--load",
+        description: "Shorthand for --output=type=docker",
+      },
+      {
+        name: "--metadata-file",
+        description: "Write build result metadata to a file",
+        args: {
+          name: "string",
+        },
+      },
+      {
         name: "--network",
         description:
           'Set the networking mode for the RUN instructions during build (default "default")',
@@ -281,6 +352,13 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
       {
         name: "--no-cache",
         description: "Do not use cache when building the image",
+      },
+      {
+        name: "--no-cache-filter",
+        description: "Do not cache specified stages",
+        args: {
+          name: "stringArray",
+        },
       },
       {
         name: ["-o", "--output"],
@@ -297,12 +375,29 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         },
       },
       {
+        name: "--policy",
+        description:
+          "Policy configuration (format: filename=path[,reset=true|false][,disabled=true|false][,strict=true|false][,log-level=level])",
+        args: {
+          name: "stringArray",
+        },
+      },
+      {
         name: "--progress",
         description:
-          "Set type of progress output (auto, plain, tty). Use plain to show container output",
+          "Set type of progress output (auto, none, plain, quiet, rawjson, tty). Use plain to show container output",
         args: {
           name: "string",
-          suggestions: ["auto", "plain", "tty"].map((i) => ({ name: i })),
+          suggestions: ["auto", "none", "plain", "quiet", "rawjson", "tty"].map(
+            (i) => ({ name: i })
+          ),
+        },
+      },
+      {
+        name: "--provenance",
+        description: "Shorthand for --attest=type=provenance",
+        args: {
+          name: "string",
         },
       },
       {
@@ -310,14 +405,32 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         description: "Always attempt to pull a newer version of the image",
       },
       {
+        name: "--push",
+        description: "Shorthand for --output=type=registry,unpack=false",
+      },
+      {
         name: ["-q", "--quiet"],
         description: "Suppress the build output and print image ID on success",
+      },
+      {
+        name: "--sbom",
+        description: "Shorthand for --attest=type=sbom",
+        args: {
+          name: "string",
+        },
       },
       {
         name: "--secret",
         description: `Secret file to expose to the build (only if BuildKit enabled): id=mysecret,src=/local/secret`,
         args: {
           name: "stringArray",
+        },
+      },
+      {
+        name: "--shm-size",
+        description: "Shared memory size for build containers",
+        args: {
+          name: "bytes",
         },
       },
       {
@@ -379,6 +492,13 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
           },
         },
       },
+      {
+        name: "--ulimit",
+        description: "Ulimit options",
+        args: {
+          name: "ulimit",
+        },
+      },
     ],
   },
   create: {
@@ -401,6 +521,14 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         },
         description: "Add a custom host-to-IP mapping (host:ip)",
         name: "--add-host",
+      },
+      {
+        args: {
+          name: "map",
+        },
+        description:
+          "Add an annotation to the container (passed through to the OCI runtime)",
+        name: "--annotation",
       },
       {
         args: {
@@ -458,6 +586,20 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         },
         description: "Write the container ID to the file",
         name: "--cidfile",
+      },
+      {
+        args: {
+          name: "int64",
+        },
+        description: "CPU count (Windows only)",
+        name: "--cpu-count",
+      },
+      {
+        args: {
+          name: "int64",
+        },
+        description: "CPU percent (Windows only)",
+        name: "--cpu-percent",
       },
       {
         args: {
@@ -564,6 +706,7 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
       {
         description: "Skip image verification (default true)",
         name: "--disable-content-trust",
+        deprecated: true,
       },
       {
         args: {
@@ -662,6 +805,14 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
           name: "duration",
         },
         description:
+          "Time between running the check during the start period (ms|s|m|h) (default 0s)",
+        name: "--health-start-interval",
+      },
+      {
+        args: {
+          name: "duration",
+        },
+        description:
           "Start period for the container to initialize before starting health-retries countdown (ms|s|m|h) (default 0s)",
         name: "--health-start-period",
       },
@@ -692,6 +843,21 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
       {
         description: "Keep STDIN open even if not attached",
         name: ["-i", "--interactive"],
+      },
+      {
+        args: {
+          name: "bytes",
+        },
+        description:
+          "Maximum IO bandwidth limit for the system drive (Windows only)",
+        name: "--io-maxbandwidth",
+      },
+      {
+        args: {
+          name: "uint64",
+        },
+        description: "Maximum IOps limit for the system drive (Windows only)",
+        name: "--io-maxiops",
       },
       {
         args: {
@@ -727,6 +893,7 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         },
         description: "Kernel memory limit",
         name: "--kernel-memory",
+        deprecated: true,
       },
       {
         args: {
@@ -894,6 +1061,10 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         name: "--pull",
       },
       {
+        description: "Suppress the pull output",
+        name: ["-q", "--quiet"],
+      },
+      {
         description: "Mount the container's root filesystem as read only",
         name: "--read-only",
       },
@@ -975,6 +1146,17 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         },
         description: "Ulimit options (default [])",
         name: "--ulimit",
+      },
+      {
+        args: {
+          name: "umask",
+        },
+        description: "Set umask for the container",
+        name: "--umask",
+      },
+      {
+        description: "Bind mount Docker API socket and required auth",
+        name: "--use-api-socket",
       },
       {
         args: {
@@ -1082,8 +1264,13 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         name: ["-m", "--message"],
       },
       {
+        description: "Disable pausing container during commit",
+        name: "--no-pause",
+      },
+      {
         description: "Pause container during commit (default true)",
         name: ["-p", "--pause"],
+        deprecated: true,
       },
     ],
   },
@@ -1102,6 +1289,11 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
       {
         description: "Always follow symbol link in SRC_PATH",
         name: ["-L", "--follow-link"],
+      },
+      {
+        description:
+          "Suppress progress output during copy. Progress output is automatically suppressed if no terminal is attached",
+        name: ["-q", "--quiet"],
       },
     ],
   },
@@ -1276,9 +1468,24 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
     args: containersArg,
     options: [
       {
+        name: ["-s", "--signal"],
+        description: "Signal to send to the container",
+        args: {
+          name: "string",
+        },
+      },
+      {
         description:
           "Seconds to wait for stop before killing the container (default 10)",
-        name: ["-t", "--time"],
+        name: ["-t", "--timeout"],
+        args: {
+          name: "int",
+        },
+      },
+      {
+        name: "--time",
+        deprecated: true,
+        description: "Seconds to wait before killing the container",
         args: {
           name: "int",
         },
@@ -1324,6 +1531,14 @@ const sharedCommands: Record<string, Fig.Subcommand> = {
         args: {
           name: "list",
         },
+      },
+      {
+        args: {
+          name: "map",
+        },
+        description:
+          "Add an annotation to the container (passed through to the OCI runtime)",
+        name: "--annotation",
       },
       {
         name: ["-a", "--attach"],
@@ -1385,6 +1600,20 @@ default-cgroupns-mode option on the daemon (default)`,
         args: {
           name: "string",
         },
+      },
+      {
+        args: {
+          name: "int64",
+        },
+        description: "CPU count (Windows only)",
+        name: "--cpu-count",
+      },
+      {
+        args: {
+          name: "int64",
+        },
+        description: "CPU percent (Windows only)",
+        name: "--cpu-percent",
       },
       {
         name: "--cpu-period",
@@ -1501,6 +1730,7 @@ default-cgroupns-mode option on the daemon (default)`,
       },
       {
         name: "--disable-content-trust",
+        deprecated: true,
         description: "Skip image verification (default true)",
       },
       {
@@ -1596,6 +1826,14 @@ default-cgroupns-mode option on the daemon (default)`,
         },
       },
       {
+        args: {
+          name: "duration",
+        },
+        description:
+          "Time between running the check during the start period (ms|s|m|h) (default 0s)",
+        name: "--health-start-interval",
+      },
+      {
         name: "--health-start-period",
         description:
           "Start period for the container to initialize before starting health-retries countdown (ms|s|m|h) (default 0s)",
@@ -1632,6 +1870,21 @@ default-cgroupns-mode option on the daemon (default)`,
         description: "Keep STDIN open even if not attached",
       },
       {
+        args: {
+          name: "bytes",
+        },
+        description:
+          "Maximum IO bandwidth limit for the system drive (Windows only)",
+        name: "--io-maxbandwidth",
+      },
+      {
+        args: {
+          name: "uint64",
+        },
+        description: "Maximum IOps limit for the system drive (Windows only)",
+        name: "--io-maxiops",
+      },
+      {
         name: "--ip",
         description: "IPv4 address (e.g., 172.30.100.104)",
         args: {
@@ -1661,6 +1914,7 @@ default-cgroupns-mode option on the daemon (default)`,
       },
       {
         name: "--kernel-memory",
+        deprecated: true,
         description: "Kernel memory limit",
         args: {
           name: "bytes",
@@ -1844,6 +2098,10 @@ default-cgroupns-mode option on the daemon (default)`,
         },
       },
       {
+        description: "Suppress the pull output",
+        name: ["-q", "--quiet"],
+      },
+      {
         name: "--read-only",
         description: "Mount the container's root filesystem as read only",
       },
@@ -1929,6 +2187,17 @@ default-cgroupns-mode option on the daemon (default)`,
         args: {
           name: "ulimit",
         },
+      },
+      {
+        args: {
+          name: "umask",
+        },
+        description: "Set umask for the container",
+        name: "--umask",
+      },
+      {
+        description: "Bind mount Docker API socket and required auth",
+        name: "--use-api-socket",
       },
       {
         name: ["-u", "--user"],
@@ -2097,6 +2366,20 @@ default-cgroupns-mode option on the daemon (default)`,
         name: ["-a", "--attach"],
       },
       {
+        description: "Restore from this checkpoint",
+        name: "--checkpoint",
+        args: {
+          name: "string",
+        },
+      },
+      {
+        description: "Use a custom checkpoint storage directory",
+        name: "--checkpoint-dir",
+        args: {
+          name: "string",
+        },
+      },
+      {
         description: "Override the key sequence for detaching a container",
         name: "--detach-keys",
         args: {
@@ -2142,8 +2425,23 @@ default-cgroupns-mode option on the daemon (default)`,
     args: containersArg,
     options: [
       {
-        name: ["-t", "--t"],
+        name: ["-s", "--signal"],
+        description: "Signal to send to the container",
+        args: {
+          name: "string",
+        },
+      },
+      {
+        name: ["-t", "--timeout"],
         description: "Seconds to wait for stop before killing it (default 10)",
+        args: {
+          name: "int",
+        },
+      },
+      {
+        name: "--time",
+        deprecated: true,
+        description: "Seconds to wait before killing the container",
         args: {
           name: "int",
         },
@@ -2241,6 +2539,7 @@ default-cgroupns-mode option on the daemon (default)`,
         },
         description: "Kernel memory limit",
         name: "--kernel-memory",
+        deprecated: true,
       },
       {
         args: {
@@ -2356,6 +2655,14 @@ default-cgroupns-mode option on the daemon (default)`,
         name: "--no-trunc",
       },
       {
+        description:
+          "Show history for the given platform. Formatted as os[/arch[/variant]] (e.g., linux/amd64)",
+        name: "--platform",
+        args: {
+          name: "string",
+        },
+      },
+      {
         description: "Only show image IDs",
         name: ["-q", "--quiet"],
       },
@@ -2429,6 +2736,10 @@ default-cgroupns-mode option on the daemon (default)`,
         name: ["-q", "--quiet"],
         description: "Only show image IDs",
       },
+      {
+        name: "--tree",
+        description: "List multi-platform images as a tree (EXPERIMENTAL)",
+      },
     ],
   },
   load: {
@@ -2436,8 +2747,16 @@ default-cgroupns-mode option on the daemon (default)`,
     description: "Load an image from a tar archive or STDIN",
     options: [
       {
-        name: "-i",
+        name: ["-i", "--input"],
         description: "Read from tar archive file, instead of STDIN",
+        args: {
+          name: "string",
+        },
+      },
+      {
+        name: "--platform",
+        description:
+          "Load only the given platform variant. Formatted as os[/arch[/variant]] (e.g., linux/amd64)",
         args: {
           name: "string",
         },
@@ -2464,6 +2783,7 @@ default-cgroupns-mode option on the daemon (default)`,
       {
         description: "Skip image verification (default true)",
         name: "--disable-content-trust",
+        deprecated: true,
       },
       {
         description: "Set platform if server is multi-platform capable",
@@ -2493,6 +2813,15 @@ default-cgroupns-mode option on the daemon (default)`,
       {
         description: "Skip image signing (default true)",
         name: "--disable-content-trust",
+        deprecated: true,
+      },
+      {
+        description:
+          "Push a platform-specific manifest as a single-platform image to the registry",
+        name: "--platform",
+        args: {
+          name: "string",
+        },
       },
       {
         description: "Suppress verbose output",
@@ -2520,6 +2849,14 @@ default-cgroupns-mode option on the daemon (default)`,
           name: "string",
         },
       },
+      {
+        description:
+          "Save only the given platform variant. Formatted as os[/arch[/variant]] (e.g., linux/amd64)",
+        name: "--platform",
+        args: {
+          name: "string",
+        },
+      },
     ],
   },
   removeImage: {
@@ -2535,6 +2872,14 @@ default-cgroupns-mode option on the daemon (default)`,
         name: "--no-prune",
         description: "Do not delete untagged parents",
       },
+      {
+        name: "--platform",
+        description:
+          "Remove only the given platform variant. Formatted as os[/arch[/variant]] (e.g., linux/amd64)",
+        args: {
+          name: "string",
+        },
+      },
     ],
   },
 };
@@ -2542,6 +2887,74 @@ default-cgroupns-mode option on the daemon (default)`,
 const completionSpec: Fig.Spec = {
   name: "docker",
   description: "A self-sufficient runtime for containers",
+  options: [
+    {
+      name: "--config",
+      description: "Location of client config files",
+      args: {
+        name: "string",
+        template: "folders",
+      },
+    },
+    {
+      name: ["-c", "--context"],
+      description:
+        'Name of the context to use to connect to the daemon (overrides DOCKER_HOST env var and default context set with "docker context use")',
+      args: contextsArg,
+    },
+    {
+      name: ["-D", "--debug"],
+      description: "Enable debug mode",
+    },
+    {
+      name: ["-H", "--host"],
+      description: "Daemon socket to connect to",
+      args: {
+        name: "list",
+      },
+    },
+    {
+      name: ["-l", "--log-level"],
+      description:
+        'Set the logging level ("debug"|"info"|"warn"|"error"|"fatal") (default "info")',
+      args: {
+        name: "string",
+        suggestions: ["debug", "info", "warn", "error", "fatal"],
+      },
+    },
+    {
+      name: "--tls",
+      description: "Use TLS; implied by --tlsverify",
+    },
+    {
+      name: "--tlscacert",
+      description: "Trust certs signed only by this CA",
+      args: {
+        name: "string",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--tlscert",
+      description: "Path to TLS certificate file",
+      args: {
+        name: "string",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--tlskey",
+      description: "Path to TLS key file",
+      args: {
+        name: "string",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--tlsverify",
+      description: "Use TLS and verify the remote",
+    },
+  ],
   subcommands: [
     sharedCommands.attach,
     sharedCommands.build,
@@ -2781,6 +3194,7 @@ const completionSpec: Fig.Spec = {
         {
           description: "Kubernetes config file",
           name: "--kubeconfig",
+          deprecated: true,
           args: {
             name: "string",
           },
@@ -2825,6 +3239,77 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "checkpoint",
+      description: "Manage checkpoints",
+      subcommands: [
+        {
+          name: "create",
+          description: "Create a checkpoint from a running container",
+          args: [
+            containersArg,
+            {
+              name: "CHECKPOINT",
+            },
+          ],
+          options: [
+            {
+              name: "--checkpoint-dir",
+              description: "Use a custom checkpoint storage directory",
+              args: {
+                name: "string",
+                template: "folders",
+              },
+            },
+            {
+              name: "--leave-running",
+              description: "Leave the container running after checkpoint",
+            },
+          ],
+        },
+        {
+          name: "ls",
+          description: "List checkpoints for a container",
+          args: {
+            name: "container",
+            generators: dockerGenerators.allDockerContainers,
+          },
+          options: [
+            {
+              name: "--checkpoint-dir",
+              description: "Use a custom checkpoint storage directory",
+              args: {
+                name: "string",
+                template: "folders",
+              },
+            },
+          ],
+        },
+        {
+          name: "rm",
+          description: "Remove a checkpoint",
+          args: [
+            {
+              name: "container",
+              generators: dockerGenerators.allDockerContainers,
+            },
+            {
+              name: "CHECKPOINT",
+            },
+          ],
+          options: [
+            {
+              name: "--checkpoint-dir",
+              description: "Use a custom checkpoint storage directory",
+              args: {
+                name: "string",
+                template: "folders",
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: "config",
       description: "Manage Docker configs",
       subcommands: [
@@ -2837,7 +3322,7 @@ const completionSpec: Fig.Spec = {
           },
           options: [
             {
-              name: "-l",
+              name: ["-l", "--label"],
               description: "Config labels",
               args: {
                 name: "list",
@@ -2861,7 +3346,7 @@ const completionSpec: Fig.Spec = {
           },
           options: [
             {
-              name: "-f",
+              name: ["-f", "--format"],
               description: "Format the output using the given Go template",
               args: {
                 name: "string",
@@ -2878,7 +3363,7 @@ const completionSpec: Fig.Spec = {
           description: "List configs",
           options: [
             {
-              name: "-f",
+              name: ["-f", "--filter"],
               description: "Filter output based on conditions provided",
               args: {
                 name: "filter",
@@ -2912,6 +3397,7 @@ const completionSpec: Fig.Spec = {
       description: "Manage containers",
       subcommands: [
         sharedCommands.attach,
+        sharedCommands.commit,
         sharedCommands.cp,
         sharedCommands.create,
         sharedCommands.diff,
@@ -2980,6 +3466,7 @@ const completionSpec: Fig.Spec = {
           subcommands: [
             {
               name: "aci",
+              deprecated: true,
               description: "Create a context for Azure Container Instances",
               args: {
                 name: "CONTEXT",
@@ -3021,6 +3508,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "ecs",
+              deprecated: true,
               description: "Create a context for Amazon ECS",
               args: {
                 name: "CONTEXT",
@@ -3067,6 +3555,7 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--default-stack-orchestrator",
+              deprecated: true,
               description:
                 "Default orchestrator for stack operations to use with this context (swarm|kubernetes|all)",
               args: {
@@ -3101,6 +3590,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--kubernetes",
+              deprecated: true,
               description: "Set the kubernetes endpoint (default [])",
               args: {
                 name: "stringToString",
@@ -3125,6 +3615,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--kubeconfig",
+              deprecated: true,
               description: "Export as a kubeconfig file",
             },
           ],
@@ -3154,7 +3645,7 @@ const completionSpec: Fig.Spec = {
           args: { ...contextsArg, isVariadic: true },
           options: [
             {
-              name: "-f",
+              name: ["-f", "--format"],
               description: "Format the output using the given Go template",
               args: {
                 name: "string",
@@ -3221,6 +3712,7 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--default-stack-orchestrator",
+              deprecated: true,
               description:
                 "Default orchestrator for stack operations to use with this context (swarm|kubernetes|all)",
               args: {
@@ -3248,6 +3740,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--kubernetes",
+              deprecated: true,
               description: "Set the kubernetes endpoint (default [])",
               args: {
                 name: "stringToString",
@@ -3287,8 +3780,16 @@ const completionSpec: Fig.Spec = {
           args: { ...imagesArg, isVariadic: true },
           options: [
             {
-              name: "-f",
+              name: ["-f", "--format"],
               description: "Format the output using the given Go template",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--platform",
+              description:
+                "Inspect a specific platform of the multi-platform image",
               args: {
                 name: "string",
               },
@@ -3326,6 +3827,134 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "manifest",
+      description: "Manage Docker image manifests and manifest lists",
+      subcommands: [
+        {
+          name: "annotate",
+          description: "Add additional information to a local image manifest",
+          args: [
+            {
+              name: "MANIFEST_LIST",
+            },
+            {
+              name: "MANIFEST",
+            },
+          ],
+          options: [
+            {
+              name: "--arch",
+              description: "Set architecture",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--os",
+              description: "Set operating system",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--os-features",
+              description: "Set operating system feature",
+              args: {
+                name: "strings",
+              },
+            },
+            {
+              name: "--os-version",
+              description: "Set operating system version",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--variant",
+              description: "Set architecture variant",
+              args: {
+                name: "string",
+              },
+            },
+          ],
+        },
+        {
+          name: "create",
+          description:
+            "Create a local manifest list for annotating and pushing to a registry",
+          args: [
+            {
+              name: "MANIFEST_LIST",
+            },
+            {
+              name: "MANIFEST",
+              isVariadic: true,
+            },
+          ],
+          options: [
+            {
+              name: ["-a", "--amend"],
+              description: "Amend an existing manifest list",
+            },
+            {
+              name: "--insecure",
+              description: "Allow communication with an insecure registry",
+            },
+          ],
+        },
+        {
+          name: "inspect",
+          description: "Display an image manifest, or manifest list",
+          args: [
+            {
+              name: "MANIFEST_LIST",
+              isOptional: true,
+            },
+            {
+              name: "MANIFEST",
+            },
+          ],
+          options: [
+            {
+              name: "--insecure",
+              description: "Allow communication with an insecure registry",
+            },
+            {
+              name: ["-v", "--verbose"],
+              description:
+                "Output additional info including layers and platform",
+            },
+          ],
+        },
+        {
+          name: "push",
+          description: "Push a manifest list to a repository",
+          args: {
+            name: "MANIFEST_LIST",
+          },
+          options: [
+            {
+              name: "--insecure",
+              description: "Allow push to an insecure registry",
+            },
+            {
+              name: ["-p", "--purge"],
+              description: "Remove the local manifest list after push",
+            },
+          ],
+        },
+        {
+          name: "rm",
+          description: "Delete one or more manifest lists from local storage",
+          args: {
+            name: "MANIFEST_LIST",
+            isVariadic: true,
+          },
+        },
+      ],
+    },
+    {
       name: "network",
       description: "Manage networks",
       subcommands: [
@@ -3352,6 +3981,14 @@ const completionSpec: Fig.Spec = {
               description: "Driver options for the network",
               args: {
                 name: "strings",
+              },
+            },
+            {
+              name: "--gw-priority",
+              description:
+                "Highest gw-priority provides the default gateway. Accepts positive and negative values",
+              args: {
+                name: "int",
               },
             },
             {
@@ -3456,6 +4093,11 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "map",
               },
+            },
+            {
+              name: "--ipv4",
+              description:
+                "Enable or disable IPv4 address assignment (default true)",
             },
             {
               name: "--ipv6",
@@ -3584,6 +4226,12 @@ const completionSpec: Fig.Spec = {
             generators: dockerGenerators.listDockerNetworks,
             isVariadic: true,
           },
+          options: [
+            {
+              name: ["-f", "--force"],
+              description: "Do not error if the network does not exist",
+            },
+          ],
         },
       ],
     },
@@ -3763,11 +4411,39 @@ const completionSpec: Fig.Spec = {
           },
           options: [
             {
+              name: "--allow",
+              description: "Allow build to access specified resources",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--call",
+              description:
+                'Set method for evaluating build ("check", "outline", "targets") (default "build")',
+              args: {
+                name: "string",
+                suggestions: ["build", "check", "outline", "targets"],
+              },
+            },
+            {
+              name: "--check",
+              description: "Shorthand for --call=check",
+            },
+            {
               name: ["-f", "--file"],
               description: "Build definition file",
               args: {
                 name: "string",
                 isVariadic: true,
+              },
+            },
+            {
+              name: "--list",
+              description: "List targets or variables",
+              args: {
+                name: "string",
+                suggestions: ["targets", "variables"],
               },
             },
             {
@@ -3792,6 +4468,14 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--policy",
+              description:
+                "Global policy evaluation options (format: [disabled=true|false][,strict=true|false][,log-level=level])",
+              args: {
+                name: "string",
+              },
+            },
+            {
               name: "--print",
               description: "Print the options without building",
               args: {
@@ -3801,11 +4485,25 @@ const completionSpec: Fig.Spec = {
             {
               name: "--progress",
               description:
-                "Set type of progress output (auto, plain, tty). Use plain to show container output",
+                "Set type of progress output (auto, none, plain, quiet, rawjson, tty). Use plain to show container output",
               args: {
                 name: "progress",
                 default: "auto",
-                suggestions: ["auto", "plain", "tty"],
+                suggestions: [
+                  "auto",
+                  "none",
+                  "plain",
+                  "quiet",
+                  "rawjson",
+                  "tty",
+                ],
+              },
+            },
+            {
+              name: "--provenance",
+              description: "Shorthand for --set=*.attest=type=provenance",
+              args: {
+                name: "string",
               },
             },
             {
@@ -3823,9 +4521,23 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--sbom",
+              description: "Shorthand for --set=*.attest=type=sbom",
+              args: {
+                name: "string",
+              },
+            },
+            {
               name: "--set",
               description:
                 "Override target value (e.g., targetpattern.key=value)",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--var",
+              description: "Set a variable value (e.g., name=value)",
               args: {
                 name: "string",
               },
@@ -3852,6 +4564,21 @@ const completionSpec: Fig.Spec = {
               description: "Allow extra privileged entitlement",
               args: {
                 name: "string",
+              },
+            },
+            {
+              name: "--annotation",
+              description: "Add annotation to the image",
+              args: {
+                name: "stringArray",
+              },
+            },
+            {
+              name: "--attest",
+              description:
+                "Attestation parameters (format: type=sbom,generator=image)",
+              args: {
+                name: "stringArray",
               },
             },
             {
@@ -3883,6 +4610,15 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--call",
+              description:
+                'Set method for evaluating build ("check", "outline", "targets") (default "build")',
+              args: {
+                name: "string",
+                suggestions: ["build", "check", "outline", "targets"],
+              },
+            },
+            {
               name: "--cgroup-parent",
               description: "Optional parent cgroup for the container",
               args: {
@@ -3890,7 +4626,12 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--check",
+              description: "Shorthand for --call=check",
+            },
+            {
               name: "--compress",
+              deprecated: true,
               description: "Compress the build context using gzip",
               args: {
                 name: "string",
@@ -3898,6 +4639,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--cpu-period",
+              deprecated: true,
               description:
                 "Limit the CPU CFS (Completely Fair Scheduler) period",
               args: {
@@ -3906,6 +4648,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--cpu-quota",
+              deprecated: true,
               description:
                 "Limit the CPU CFS (Completely Fair Scheduler) quota",
               args: {
@@ -3914,6 +4657,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--cpu-shares", "-c"],
+              deprecated: true,
               description: "CPU shares (relative weight)",
               args: {
                 name: "string",
@@ -3921,6 +4665,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--cpuset-cpus",
+              deprecated: true,
               description: "CPUs in which to allow execution (0-3, 0,1)",
               args: {
                 name: "string",
@@ -3928,6 +4673,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--cpuset-mems",
+              deprecated: true,
               description: "MEMs in which to allow execution (0-3, 0,1)",
               args: {
                 name: "string",
@@ -3942,6 +4688,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--force-rm",
+              deprecated: true,
               description: "Always remove intermediate containers",
               args: {
                 name: "string",
@@ -3956,6 +4703,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--invoke",
+              deprecated: true,
               description: "Invoke a command after the build [experimental]",
               args: {
                 name: "string",
@@ -3963,6 +4711,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--isolation",
+              deprecated: true,
               description: "Container isolation technology",
               args: {
                 name: "string",
@@ -3984,6 +4733,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--memory", "-m"],
+              deprecated: true,
               description: "Memory limit",
               args: {
                 name: "string",
@@ -3991,6 +4741,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--memory-swap",
+              deprecated: true,
               description:
                 "Swap limit equal to memory plus swap: -1 to enable unlimited swap",
               args: {
@@ -4041,7 +4792,16 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--policy",
+              description:
+                "Policy configuration (format: filename=path[,reset=true|false][,disabled=true|false][,strict=true|false][,log-level=level])",
+              args: {
+                name: "stringArray",
+              },
+            },
+            {
               name: "--print",
+              deprecated: true,
               description:
                 "Print result of information request (e.g., outline, targets) [experimental]",
               args: {
@@ -4051,11 +4811,25 @@ const completionSpec: Fig.Spec = {
             {
               name: "--progress",
               description:
-                "Set type of progress output (auto, plain, tty). Use plain to show container output",
+                "Set type of progress output (auto, none, plain, quiet, rawjson, tty). Use plain to show container output",
               args: {
                 name: "progress",
                 default: "auto",
-                suggestions: ["auto", "plain", "tty"],
+                suggestions: [
+                  "auto",
+                  "none",
+                  "plain",
+                  "quiet",
+                  "rawjson",
+                  "tty",
+                ],
+              },
+            },
+            {
+              name: "--provenance",
+              description: "Shorthand for --attest=type=provenance",
+              args: {
+                name: "string",
               },
             },
             {
@@ -4082,11 +4856,19 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--rm",
+              deprecated: true,
               description:
                 "Remove intermediate containers after a successful build",
               args: {
                 name: "container",
                 default: "true",
+              },
+            },
+            {
+              name: "--sbom",
+              description: "Shorthand for --attest=type=sbom",
+              args: {
+                name: "string",
               },
             },
             {
@@ -4099,6 +4881,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--security-opt",
+              deprecated: true,
               description: "Security options",
               args: {
                 name: "string",
@@ -4113,6 +4896,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--squash",
+              deprecated: true,
               description: "Squash newly built layers into a single new layer",
               args: {
                 name: "string",
@@ -4171,6 +4955,14 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--buildkitd-config",
+              description: "BuildKit daemon config file",
+              args: {
+                name: "string",
+                template: "filepaths",
+              },
+            },
+            {
               name: "--buildkitd-flags",
               description: "Flags for buildkitd daemon",
               args: {
@@ -4179,6 +4971,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--config",
+              deprecated: true,
               description: "BuildKit config file",
               args: {
                 name: "string",
@@ -4228,10 +5021,40 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--timeout",
+              description:
+                "Override the default timeout for loading builder status (default 20s)",
+              args: {
+                name: "duration",
+              },
+            },
+            {
               name: "--use",
               description: "Set the current builder instance",
               args: {
                 name: "string",
+              },
+            },
+          ],
+        },
+        {
+          name: "dial-stdio",
+          description: "Proxy current stdio streams to builder instance",
+          options: [
+            {
+              name: "--platform",
+              description: "Target platform: this is used for node selection",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--progress",
+              description:
+                'Set type of progress output ("auto", "plain", "rawjson", "tty"). Use plain to show container output (default "none")',
+              args: {
+                name: "string",
+                suggestions: ["auto", "plain", "rawjson", "tty"],
               },
             },
           ],
@@ -4245,8 +5068,215 @@ const completionSpec: Fig.Spec = {
           options: [
             { name: "--filter", description: "Provide filter values" },
             {
+              name: "--format",
+              description: "Format the output",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--timeout",
+              description:
+                "Override the default timeout for loading builder status (default 20s)",
+              args: {
+                name: "duration",
+              },
+            },
+            {
               name: "--verbose",
               description: "Provide a more verbose output",
+            },
+          ],
+        },
+        {
+          name: "history",
+          description: "Commands to work on build records",
+          subcommands: [
+            {
+              name: "export",
+              description: "Export build records into Docker Desktop bundle",
+              args: {
+                name: "REF",
+                isOptional: true,
+                isVariadic: true,
+              },
+              options: [
+                {
+                  name: "--all",
+                  description: "Export all build records for the builder",
+                },
+                {
+                  name: "--finalize",
+                  description:
+                    "Ensure build records are finalized before exporting",
+                },
+                {
+                  name: ["-o", "--output"],
+                  description: "Output file path",
+                  args: {
+                    name: "string",
+                    template: "filepaths",
+                  },
+                },
+              ],
+            },
+            {
+              name: "import",
+              description: "Import build records into Docker Desktop",
+              options: [
+                {
+                  name: ["-f", "--file"],
+                  description: "Import from a file path",
+                  args: {
+                    name: "stringArray",
+                    template: "filepaths",
+                  },
+                },
+              ],
+            },
+            {
+              name: "inspect",
+              description: "Inspect a build record",
+              args: {
+                name: "REF",
+                isOptional: true,
+              },
+              subcommands: [
+                {
+                  name: "attachment",
+                  description: "Inspect a build record attachment",
+                  args: [
+                    {
+                      name: "REF",
+                      isOptional: true,
+                    },
+                    {
+                      name: "DIGEST",
+                      isOptional: true,
+                    },
+                  ],
+                  options: [
+                    {
+                      name: "--platform",
+                      description: "Platform of attachment",
+                      args: {
+                        name: "string",
+                      },
+                    },
+                    {
+                      name: "--type",
+                      description: "Type of attachment",
+                      args: {
+                        name: "string",
+                      },
+                    },
+                  ],
+                },
+              ],
+              options: [
+                {
+                  name: "--format",
+                  description: 'Format the output (default "pretty")',
+                  args: {
+                    name: "string",
+                  },
+                },
+              ],
+            },
+            {
+              name: "logs",
+              description: "Print the logs of a build record",
+              args: {
+                name: "REF",
+                isOptional: true,
+              },
+              options: [
+                {
+                  name: "--progress",
+                  description:
+                    'Set type of progress output ("plain", "rawjson", "tty") (default "plain")',
+                  args: {
+                    name: "string",
+                    suggestions: ["plain", "rawjson", "tty"],
+                  },
+                },
+              ],
+            },
+            {
+              name: "ls",
+              description: "List build records",
+              options: [
+                {
+                  name: "--filter",
+                  description: "Provide filter values (e.g., status=error)",
+                  args: {
+                    name: "stringArray",
+                  },
+                },
+                {
+                  name: "--format",
+                  description: 'Format the output (default "table")',
+                  args: {
+                    name: "string",
+                  },
+                },
+                {
+                  name: "--local",
+                  description: "List records for current repository only",
+                },
+                {
+                  name: "--no-trunc",
+                  description: "Don't truncate output",
+                },
+              ],
+            },
+            {
+              name: "open",
+              description: "Open a build record in Docker Desktop",
+              args: {
+                name: "REF",
+                isOptional: true,
+              },
+            },
+            {
+              name: "rm",
+              description: "Remove build records",
+              args: {
+                name: "REF",
+                isOptional: true,
+                isVariadic: true,
+              },
+              options: [
+                {
+                  name: "--all",
+                  description: "Remove all build records",
+                },
+              ],
+            },
+            {
+              name: "trace",
+              description: "Show the OpenTelemetry trace of a build record",
+              args: {
+                name: "REF",
+                isOptional: true,
+              },
+              options: [
+                {
+                  name: "--addr",
+                  description:
+                    'Address to bind the UI server (default "127.0.0.1:0")',
+                  args: {
+                    name: "string",
+                  },
+                },
+                {
+                  name: "--compare",
+                  description: "Compare with another build record",
+                  args: {
+                    name: "string",
+                  },
+                },
+              ],
             },
           ],
         },
@@ -4265,6 +5295,13 @@ const completionSpec: Fig.Spec = {
                 name: "string",
               },
               options: [
+                {
+                  name: "--annotation",
+                  description: "Add annotation to the image",
+                  args: {
+                    name: "stringArray",
+                  },
+                },
                 {
                   name: "--append",
                   description: "Append to existing manifest",
@@ -4287,13 +5324,32 @@ const completionSpec: Fig.Spec = {
                   },
                 },
                 {
+                  name: "--metadata-file",
+                  description: "Write create result metadata to a file",
+                  args: {
+                    name: "string",
+                  },
+                },
+                {
+                  name: ["--platform", "-p"],
+                  description: "Filter specified platforms of target image",
+                  args: {
+                    name: "stringArray",
+                  },
+                },
+                {
+                  name: "--prefer-index",
+                  description:
+                    "When only a single source is specified, prefer outputting an image index or manifest list instead of performing a carbon copy (default true)",
+                },
+                {
                   name: "--progress",
                   description:
-                    "Set type of progress output (auto, plain, tty). Use plain to show container output",
+                    "Set type of progress output (auto, none, plain, rawjson, tty). Use plain to show container output",
                   args: {
                     name: "progress",
                     default: "auto",
-                    suggestions: ["auto", "plain", "tty"],
+                    suggestions: ["auto", "none", "plain", "rawjson", "tty"],
                   },
                 },
                 {
@@ -4342,15 +5398,45 @@ const completionSpec: Fig.Spec = {
                 name: "string",
               },
             },
+            {
+              name: "--timeout",
+              description:
+                "Override the default timeout for loading builder status (default 20s)",
+              args: {
+                name: "duration",
+              },
+            },
           ],
         },
         {
           name: "install",
+          deprecated: true,
           description: "Install buildx as a ‘docker builder’ alias",
         },
         {
           name: "ls",
           description: "List builder instances",
+          options: [
+            {
+              name: "--format",
+              description: 'Format the output (default "table")',
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--no-trunc",
+              description: "Don't truncate output",
+            },
+            {
+              name: "--timeout",
+              description:
+                "Override the default timeout for loading builder status (default 20s)",
+              args: {
+                name: "duration",
+              },
+            },
+          ],
         },
         {
           name: "prune",
@@ -4382,9 +5468,41 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--keep-storage",
+              deprecated: true,
               description: "Amount of disk space to keep for cache",
               args: {
                 name: "string",
+              },
+            },
+            {
+              name: "--max-used-space",
+              description:
+                "Maximum amount of disk space allowed to keep for cache",
+              args: {
+                name: "bytes",
+              },
+            },
+            {
+              name: "--min-free-space",
+              description: "Target amount of free disk space after pruning",
+              args: {
+                name: "bytes",
+              },
+            },
+            {
+              name: "--reserved-space",
+              description:
+                "Amount of disk space always allowed to keep for cache",
+              args: {
+                name: "bytes",
+              },
+            },
+            {
+              name: "--timeout",
+              description:
+                "Override the default timeout for loading builder status (default 20s)",
+              args: {
+                name: "duration",
               },
             },
             {
@@ -4431,6 +5549,14 @@ const completionSpec: Fig.Spec = {
                 name: "string",
               },
             },
+            {
+              name: "--timeout",
+              description:
+                "Override the default timeout for loading builder status (default 20s)",
+              args: {
+                name: "duration",
+              },
+            },
           ],
         },
         {
@@ -4442,6 +5568,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "uninstall",
+          deprecated: true,
           description: "Uninstall the ‘docker builder’ alias",
         },
         {
@@ -4569,6 +5696,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--disable-content-trust",
+              deprecated: true,
               description: "Skip image verification (default true)",
             },
             {
@@ -4612,6 +5740,7 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--disable-content-trust",
+              deprecated: true,
               description: "Skip image signing (default true)",
             },
           ],
@@ -4655,6 +5784,7 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--disable-content-trust",
+              deprecated: true,
               description: "Skip image verification (default true)",
             },
             {
@@ -4917,6 +6047,14 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--health-start-interval",
+              description:
+                "Time between running the check during the start period (ms|s|m|h)",
+              args: {
+                name: "duration",
+              },
+            },
+            {
               name: "--health-start-period",
               description:
                 "Start period for the container to initialize before counting retries towards unstable (ms|s|m|h)",
@@ -5010,6 +6148,21 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--memory-swap",
+              description: "Swap Bytes (-1 for unlimited)",
+              args: {
+                name: "bytes",
+              },
+            },
+            {
+              name: "--memory-swappiness",
+              description:
+                "Tune memory swappiness (0-100), -1 to reset to default (default -1)",
+              args: {
+                name: "int64",
+              },
+            },
+            {
               name: "--mode",
               description:
                 'Service mode (replicated, global, replicated-job, or global-job) (default "replicated")',
@@ -5052,6 +6205,13 @@ const completionSpec: Fig.Spec = {
               name: "--no-resolve-image",
               description:
                 "Do not query the registry to resolve image digest and supported platforms",
+            },
+            {
+              name: "--oom-score-adj",
+              description: "Tune host's OOM preferences (-1000 to 1000)",
+              args: {
+                name: "int64",
+              },
             },
             {
               name: "--placement-pref",
@@ -5683,6 +6843,14 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--health-start-interval",
+              description:
+                "Time between running the check during the start period (ms|s|m|h)",
+              args: {
+                name: "duration",
+              },
+            },
+            {
               name: "--health-start-period",
               description:
                 "Start period for the container to initialize before counting retries towards unstable (ms|s|m|h)",
@@ -5796,6 +6964,21 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--memory-swap",
+              description: "Swap Bytes (-1 for unlimited)",
+              args: {
+                name: "bytes",
+              },
+            },
+            {
+              name: "--memory-swappiness",
+              description:
+                "Tune memory swappiness (0-100), -1 to reset to default (default -1)",
+              args: {
+                name: "int64",
+              },
+            },
+            {
               name: "--mount-add",
               description: "Add or update a mount on a service",
               args: {
@@ -5831,6 +7014,13 @@ const completionSpec: Fig.Spec = {
               name: "--no-resolve-image",
               description:
                 "Do not query the registry to resolve image digest and supported platforms",
+            },
+            {
+              name: "--oom-score-adj",
+              description: "Tune host's OOM preferences (-1000 to 1000)",
+              args: {
+                name: "int64",
+              },
             },
             {
               name: "--placement-pref-add",
@@ -6109,6 +7299,25 @@ const completionSpec: Fig.Spec = {
       description: "Manage Docker stacks",
       subcommands: [
         {
+          name: "config",
+          description:
+            "Outputs the final config file, after doing merges and interpolations",
+          options: [
+            {
+              name: ["-c", "--compose-file"],
+              description: 'Path to a Compose file, or "-" to read from stdin',
+              args: {
+                name: "strings",
+                template: "filepaths",
+              },
+            },
+            {
+              name: "--skip-interpolation",
+              description: "Skip interpolation and output only merged config",
+            },
+          ],
+        },
+        {
           name: "deploy",
           description: "Deploy a new stack or update an existing stack",
           args: {
@@ -6124,7 +7333,13 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: ["-d", "--detach"],
+              description:
+                "Exit immediately instead of waiting for the stack services to converge (default true)",
+            },
+            {
               name: "--orchestrator",
+              deprecated: true,
               description: "Orchestrator to use (swarm|kubernetes|all)",
               args: {
                 name: "string",
@@ -6133,6 +7348,10 @@ const completionSpec: Fig.Spec = {
             {
               name: "--prune",
               description: "Prune services that are no longer referenced",
+            },
+            {
+              name: ["-q", "--quiet"],
+              description: "Suppress progress output",
             },
             {
               name: "--resolve-image",
@@ -6162,6 +7381,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--orchestrator",
+              deprecated: true,
               description: "Orchestrator to use (swarm|kubernetes|all)",
               args: {
                 name: "string",
@@ -6201,6 +7421,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--orchestrator",
+              deprecated: true,
               description: "Orchestrator to use (swarm|kubernetes|all)",
               args: {
                 name: "string",
@@ -6222,7 +7443,12 @@ const completionSpec: Fig.Spec = {
           },
           options: [
             {
+              name: ["-d", "--detach"],
+              description: "Do not wait for stack removal (default true)",
+            },
+            {
               name: "--orchestrator",
+              deprecated: true,
               description: "Orchestrator to use (swarm|kubernetes|all)",
               args: {
                 name: "string",
@@ -6254,6 +7480,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--orchestrator",
+              deprecated: true,
               description: "Orchestrator to use (swarm|kubernetes|all)",
               args: {
                 name: "string",
@@ -6709,6 +7936,47 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
+          name: "key",
+          description: "Manage keys for signing Docker images",
+          subcommands: [
+            {
+              name: "generate",
+              description: "Generate and load a signing key-pair",
+              args: {
+                name: "NAME",
+              },
+              options: [
+                {
+                  name: "--dir",
+                  description:
+                    "Directory to generate key in, defaults to current directory",
+                  args: {
+                    name: "string",
+                    template: "folders",
+                  },
+                },
+              ],
+            },
+            {
+              name: "load",
+              description: "Load a private key file for signing",
+              args: {
+                name: "KEYFILE",
+                template: "filepaths",
+              },
+              options: [
+                {
+                  name: "--name",
+                  description: 'Name for the loaded key (default "signer")',
+                  args: {
+                    name: "string",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
           name: "revoke",
           description: "Remove trust for an image",
           args: imagesArg,
@@ -6730,6 +7998,55 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
+        {
+          name: "signer",
+          description: "Manage entities who can sign Docker images",
+          subcommands: [
+            {
+              name: "add",
+              description: "Add a signer",
+              args: [
+                {
+                  name: "NAME",
+                },
+                {
+                  name: "REPOSITORY",
+                  isVariadic: true,
+                },
+              ],
+              options: [
+                {
+                  name: "--key",
+                  description: "Path to the signer's public key file",
+                  args: {
+                    name: "list",
+                    template: "filepaths",
+                  },
+                },
+              ],
+            },
+            {
+              name: "remove",
+              description: "Remove a signer",
+              args: [
+                {
+                  name: "NAME",
+                },
+                {
+                  name: "REPOSITORY",
+                  isVariadic: true,
+                },
+              ],
+              options: [
+                {
+                  name: ["-f", "--force"],
+                  description:
+                    "Do not prompt for confirmation before removing the most recent signer",
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -6744,8 +8061,24 @@ const completionSpec: Fig.Spec = {
           },
           options: [
             {
+              name: "--availability",
+              description:
+                'Cluster Volume availability ("active"|"pause"|"drain") (default "active")',
+              args: {
+                name: "string",
+                suggestions: ["active", "pause", "drain"],
+              },
+            },
+            {
               name: ["-d", "--driver"],
               description: 'Specify volume driver name (default "local")',
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--group",
+              description: "Cluster Volume group (cluster volumes)",
               args: {
                 name: "string",
               },
@@ -6758,10 +8091,74 @@ const completionSpec: Fig.Spec = {
               },
             },
             {
+              name: "--limit-bytes",
+              description: "Minimum size of the Cluster Volume in bytes",
+              args: {
+                name: "bytes",
+              },
+            },
+            {
               name: ["-o", "--opt"],
               description: "Set driver specific options (default map[])",
               args: {
                 name: "map",
+              },
+            },
+            {
+              name: "--required-bytes",
+              description: "Maximum size of the Cluster Volume in bytes",
+              args: {
+                name: "bytes",
+              },
+            },
+            {
+              name: "--scope",
+              description:
+                'Cluster Volume access scope ("single"|"multi") (default "single")',
+              args: {
+                name: "string",
+                suggestions: ["single", "multi"],
+              },
+            },
+            {
+              name: "--secret",
+              description: "Cluster Volume secrets",
+              args: {
+                name: "map",
+              },
+            },
+            {
+              name: "--sharing",
+              description:
+                'Cluster Volume access sharing ("none"|"readonly"|"onewriter"|"all") (default "none")',
+              args: {
+                name: "string",
+                suggestions: ["none", "readonly", "onewriter", "all"],
+              },
+            },
+            {
+              name: "--topology-preferred",
+              description:
+                "A topology that the Cluster Volume would be preferred in",
+              args: {
+                name: "list",
+              },
+            },
+            {
+              name: "--topology-required",
+              description:
+                "A topology that the Cluster Volume must be accessible from",
+              args: {
+                name: "list",
+              },
+            },
+            {
+              name: "--type",
+              description:
+                'Cluster Volume access type ("mount"|"block") (default "block")',
+              args: {
+                name: "string",
+                suggestions: ["mount", "block"],
               },
             },
           ],
@@ -6789,6 +8186,11 @@ const completionSpec: Fig.Spec = {
           description: "List volumes",
           options: [
             {
+              name: "--cluster",
+              description:
+                "Display only cluster volumes, and use cluster volume list formatting",
+            },
+            {
               name: ["-f", "--filter"],
               description: "Provide filter values (e.g. 'dangling=true')",
               args: {
@@ -6812,6 +8214,10 @@ const completionSpec: Fig.Spec = {
           name: "prune",
           description: "Remove all unused local volumes",
           options: [
+            {
+              name: ["-a", "--all"],
+              description: "Remove all unused volumes, not just anonymous ones",
+            },
             {
               name: "--filter",
               description: "Provide filter values (e.g. 'label=<label>')",
@@ -6837,6 +8243,25 @@ const completionSpec: Fig.Spec = {
             {
               name: ["-f", "--force"],
               description: "Force the removal of one or more volumes",
+            },
+          ],
+        },
+        {
+          name: "update",
+          description: "Update a volume (cluster volumes only)",
+          args: {
+            name: "VOLUME",
+            generators: dockerGenerators.listDockerVolumes,
+          },
+          options: [
+            {
+              name: "--availability",
+              description:
+                'Cluster Volume availability ("active"|"pause"|"drain") (default "active")',
+              args: {
+                name: "string",
+                suggestions: ["active", "pause", "drain"],
+              },
             },
           ],
         },

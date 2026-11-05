@@ -329,7 +329,7 @@ const npmUninstallOptions: Fig.Option[] = [
 
 const npmListOptions: Fig.Option[] = [
   {
-    name: ["-a", "-all"],
+    name: ["-a", "--all"],
     description: "Show all outdated or installed packages",
   },
   jsonOption,
@@ -395,6 +395,54 @@ const dryRunOption: Fig.Option = {
     "Indicates that you don't want npm to make any changes and that it should only report what it would have done",
 };
 
+const installStrategyOption: Fig.Option = {
+  name: "--install-strategy",
+  description: "Sets the strategy for installing packages in node_modules",
+  args: {
+    name: "strategy",
+    default: "hoisted",
+    suggestions: ["hoisted", "nested", "shallow", "linked"],
+  },
+};
+
+const installLinksOption: Fig.Option = {
+  name: "--install-links",
+  description:
+    "Install file: protocol dependencies outside the project root as regular dependencies instead of creating a symlink",
+};
+
+const foregroundScriptsOption: Fig.Option = {
+  name: "--foreground-scripts",
+  description:
+    "Run all build scripts for installed packages in the foreground process, sharing standard input, output, and error with the main npm process",
+};
+
+const allowGitOption: Fig.Option = {
+  name: "--allow-git",
+  description: "Limits the ability for npm to install git dependencies",
+  args: { name: "allow-git", suggestions: ["all", "none", "root"] },
+};
+
+const allowRemoteOption: Fig.Option = {
+  name: "--allow-remote",
+  description:
+    "Limits the ability for npm to install user-supplied tarball URL dependencies",
+  args: { name: "allow-remote", suggestions: ["all", "none", "root"] },
+};
+
+const trustPermissionOptions: Fig.Option[] = [
+  {
+    name: "--allow-publish",
+    description:
+      "Allows the trusted publisher to run npm publish for the package",
+  },
+  {
+    name: ["--allow-stage-publish", "--allow-staged-publish"],
+    description:
+      "Allows the trusted publisher to run npm stage for the package",
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "npm",
   parserDirectives: {
@@ -441,15 +489,18 @@ const completionSpec: Fig.Spec = {
             "Saved dependencies will also be added to your bundleDependencies list",
         },
         globalOption,
+        installStrategyOption,
         {
           name: "--global-style",
           description:
             "Causes npm to install the package into your local node_modules folder with the same layout it uses with the global node_modules folder",
+          deprecated: true,
         },
         {
           name: "--legacy-bundling",
           description:
             "Causes npm to install the package such that versions of npm prior to 1.4, such as the one included with node 0.8, can install the package",
+          deprecated: true,
         },
         {
           name: "--legacy-peer-deps",
@@ -469,10 +520,14 @@ const completionSpec: Fig.Spec = {
         verboseOption,
         omitOption,
         ignoreScriptsOption,
+        foregroundScriptsOption,
+        allowGitOption,
+        allowRemoteOption,
+        installLinksOption,
         {
           name: "--no-audit",
           description:
-            "Submit audit reports alongside the current npm command to the default registry and all registries configured for scopes",
+            "Do not submit audit reports alongside the current npm command",
         },
         {
           name: "--no-bin-links",
@@ -535,12 +590,98 @@ const completionSpec: Fig.Spec = {
             "Create the folders and boilerplate expected while also adding a reference to your project workspaces property",
           args: { name: "dir" },
         },
+        {
+          name: "--init-private",
+          description: "Set the private field to true in package.json",
+        },
+        {
+          name: "--scope",
+          description: "Create a scoped package",
+          args: {
+            name: "scope",
+            description: "Scope name",
+          },
+        },
       ],
     },
-    { name: "access", description: "Set access controls on private packages" },
     {
-      name: ["adduser", "login"],
+      name: "access",
+      description: "Set access level on published packages",
+      subcommands: [
+        {
+          name: "list",
+          description: "List packages or collaborators",
+          subcommands: [
+            {
+              name: "packages",
+              description:
+                "List all packages accessible by a user, scope or team",
+              args: [
+                { name: "user|scope|scope:team", isOptional: true },
+                { name: "package", isOptional: true },
+              ],
+            },
+            {
+              name: "collaborators",
+              description: "List all users with access to a package",
+              args: [
+                { name: "package", isOptional: true },
+                { name: "user", isOptional: true },
+              ],
+            },
+          ],
+        },
+        {
+          name: "get",
+          description: "Get the access status of a package",
+          subcommands: [
+            {
+              name: "status",
+              description: "Get the visibility status of a package",
+              args: { name: "package", isOptional: true },
+            },
+          ],
+        },
+        {
+          name: "set",
+          description:
+            "Set the visibility status or publishing MFA requirement of a package",
+          args: [
+            {
+              name: "status|mfa",
+              suggestions: [
+                "status=public",
+                "status=private",
+                "mfa=none",
+                "mfa=publish",
+                "mfa=automation",
+              ],
+            },
+            { name: "package", isOptional: true },
+          ],
+        },
+        {
+          name: "grant",
+          description:
+            "Grant a team read-only or read-write access to a package",
+          args: [
+            { name: "permissions", suggestions: ["read-only", "read-write"] },
+            { name: "scope:team" },
+            { name: "package", isOptional: true },
+          ],
+        },
+        {
+          name: "revoke",
+          description: "Revoke a team's access to a package",
+          args: [{ name: "scope:team" }, { name: "package", isOptional: true }],
+        },
+      ],
+      options: [jsonOption, otpOption, registryOption],
+    },
+    {
+      name: "adduser",
       description: "Add a registry user account",
+      deprecated: true,
       options: [
         registryOption,
         {
@@ -555,9 +696,47 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "login",
+      description: "Login to a registry user account",
+      options: [
+        registryOption,
+        {
+          name: "--scope",
+          description:
+            "Associate an operation with a scope for a scoped registry",
+          args: {
+            name: "scope",
+            description: "Scope name",
+          },
+        },
+        {
+          name: "--auth-type",
+          description: "What authentication strategy to use with login",
+          args: {
+            name: "auth-type",
+            default: "web",
+            suggestions: ["legacy", "web"],
+          },
+        },
+      ],
+    },
+    {
       name: "audit",
       description: "Run a security audit",
       subcommands: [
+        {
+          name: "signatures",
+          description:
+            "Verify registry signatures and provenance attestations of downloaded packages",
+          options: [
+            jsonOption,
+            {
+              name: "--include-attestations",
+              description:
+                "Include full sigstore attestation bundles in the JSON output",
+            },
+          ],
+        },
         {
           name: "fix",
           description:
@@ -604,6 +783,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "bin",
       description: "Print the folder where npm will install executables",
+      deprecated: true,
       options: [globalOption],
     },
     {
@@ -634,7 +814,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "cache",
-      description: "Manipulates packages cache",
+      description: "Manipulates packages and npx cache",
       subcommands: [
         {
           name: "add",
@@ -642,12 +822,41 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "clean",
-          description: "Delete all data out of the cache folder",
+          description:
+            "Delete a single entry or all entries out of the cache folder",
+          args: { name: "key", isOptional: true },
+        },
+        {
+          name: "ls",
+          description: "List given entries or all entries in the local cache",
+          args: { name: "name@version", isOptional: true, isVariadic: true },
         },
         {
           name: "verify",
           description:
             "Verify the contents of the cache folder, garbage collecting any unneeded data, and verifying the integrity of the cache index and all cached data",
+        },
+        {
+          name: "npx",
+          description: "Manipulates the npx cache",
+          subcommands: [
+            {
+              name: "ls",
+              description: "List all entries in the npx cache",
+            },
+            {
+              name: "rm",
+              description:
+                "Remove given entries or all entries from the npx cache",
+              args: { name: "key", isOptional: true, isVariadic: true },
+            },
+            {
+              name: "info",
+              description:
+                "Get detailed information about given entries in the npx cache",
+              args: { name: "key", isVariadic: true },
+            },
+          ],
         },
       ],
       options: [
@@ -682,6 +891,11 @@ const completionSpec: Fig.Spec = {
         scriptShellOption,
         verboseOption,
         registryOption,
+        installStrategyOption,
+        omitOption,
+        foregroundScriptsOption,
+        allowGitOption,
+        allowRemoteOption,
       ],
     },
     {
@@ -731,6 +945,11 @@ const completionSpec: Fig.Spec = {
             { name: "--global", description: "Edits the global config" },
           ],
         },
+        {
+          name: "fix",
+          description:
+            "Attempts to repair invalid configuration items, such as attaching authentication configuration to the configured registry",
+        },
       ],
     },
     { name: "create", description: "Create a package.json file" },
@@ -742,6 +961,64 @@ const completionSpec: Fig.Spec = {
       name: "deprecate",
       description: "Deprecate a version of a package",
       options: [registryOption],
+    },
+    {
+      name: "diff",
+      description: "The registry diff command",
+      args: {
+        name: "paths",
+        isOptional: true,
+        isVariadic: true,
+        template: "filepaths",
+      },
+      options: [
+        {
+          name: "--diff",
+          description: "Define arguments to compare in npm diff",
+          isRepeatable: 2,
+          args: { name: "package-spec" },
+        },
+        {
+          name: "--diff-name-only",
+          description: "Prints only filenames when using npm diff",
+        },
+        {
+          name: "--diff-unified",
+          description: "The number of lines of context to print in npm diff",
+          args: { name: "number", default: "3" },
+        },
+        {
+          name: "--diff-ignore-all-space",
+          description: "Ignore whitespace when comparing lines in npm diff",
+        },
+        {
+          name: "--diff-no-prefix",
+          description:
+            "Do not show any source or destination prefix in npm diff output",
+        },
+        {
+          name: "--diff-src-prefix",
+          description: "Source prefix to be used in npm diff output",
+          args: { name: "path", default: "a/" },
+        },
+        {
+          name: "--diff-dst-prefix",
+          description: "Destination prefix to be used in npm diff output",
+          args: { name: "path", default: "b/" },
+        },
+        {
+          name: "--diff-text",
+          description: "Treat all files as text in npm diff",
+        },
+        globalOption,
+        {
+          name: "--tag",
+          description:
+            "The tag used to fetch the tarball that will be compared with the local files",
+          args: { name: "tag", default: "latest" },
+        },
+        ...workSpaceOptions,
+      ],
     },
     { name: "dist-tag", description: "Modify package distribution tags" },
     {
@@ -787,6 +1064,57 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: ["exec", "x"],
+      description: "Run a command from a local or remote npm package",
+      args: {
+        name: "command",
+        isOptional: true,
+        isVariadic: true,
+      },
+      options: [
+        {
+          name: "--package",
+          description: "The package or packages to install for npm exec",
+          isRepeatable: true,
+          args: {
+            name: "package-spec",
+            generators: npmSearchGenerator,
+            debounce: true,
+          },
+        },
+        {
+          name: ["-c", "--call"],
+          description:
+            "Custom command to be run along with the installed packages",
+          args: { name: "call" },
+        },
+        {
+          name: ["-y", "--yes"],
+          description:
+            "Automatically answer 'yes' to the prompt to install missing packages",
+          exclusiveOn: ["--no"],
+        },
+        {
+          name: "--no",
+          description:
+            "Automatically answer 'no' to the prompt to install missing packages",
+          exclusiveOn: ["-y", "--yes"],
+        },
+        ...workSpaceOptions,
+      ],
+    },
+    {
+      name: ["explain", "why"],
+      description: "Explain installed packages",
+      args: {
+        name: "package-spec",
+        filterStrategy: "fuzzy",
+        generators: dependenciesGenerator,
+        isVariadic: true,
+      },
+      options: [jsonOption, ...workSpaceOptions],
+    },
+    {
       name: "explore",
       description: "Browse an installed package",
       args: {
@@ -794,6 +1122,16 @@ const completionSpec: Fig.Spec = {
         filterStrategy: "fuzzy",
         generators: dependenciesGenerator,
       },
+    },
+    {
+      name: "find-dupes",
+      description: "Find duplication in the package tree",
+      options: [
+        installStrategyOption,
+        omitOption,
+        ignoreScriptsOption,
+        ...workSpaceOptions,
+      ],
     },
     { name: "fund", description: "Retrieve funding information" },
     { name: "get", description: "Echo the config value to stdout" },
@@ -824,10 +1162,59 @@ const completionSpec: Fig.Spec = {
       },
       options: [longOption],
     },
-    { name: "hook", description: "Manage registry hooks" },
+    { name: "hook", description: "Manage registry hooks", deprecated: true },
     {
       name: "install-ci-test",
       description: "Install a project with a clean slate and run tests",
+    },
+    {
+      name: "install-scripts",
+      description:
+        "Manage which dependencies are allowed to run install scripts",
+      subcommands: [
+        {
+          name: "approve",
+          description:
+            "Approve install scripts for packages, pinned to their installed version",
+          args: {
+            name: "pkg",
+            isOptional: true,
+            isVariadic: true,
+            generators: dependenciesGenerator,
+          },
+          options: [
+            {
+              name: "--all",
+              description: "Approve all currently-installed install scripts",
+            },
+          ],
+        },
+        {
+          name: "deny",
+          description: "Deny install scripts for packages so they stay blocked",
+          args: {
+            name: "pkg",
+            isOptional: true,
+            isVariadic: true,
+            generators: dependenciesGenerator,
+          },
+          options: [
+            {
+              name: "--all",
+              description: "Deny all currently-installed install scripts",
+            },
+          ],
+        },
+        {
+          name: "ls",
+          description: "List packages whose install scripts still need review",
+        },
+        {
+          name: "prune",
+          description: "Remove stale allowScripts entries",
+          options: [dryRunOption],
+        },
+      ],
     },
     { name: "install-test", description: "Install package(s) and run tests" },
     { name: "it", description: "Install package(s) and run tests" },
@@ -927,7 +1314,7 @@ const completionSpec: Fig.Spec = {
       },
       options: [
         {
-          name: ["-a", "-all"],
+          name: ["-a", "--all"],
           description: "Show all outdated or installed packages",
         },
         jsonOption,
@@ -1048,6 +1435,11 @@ const completionSpec: Fig.Spec = {
               isDangerous: true,
             },
           ],
+        },
+        {
+          name: "fix",
+          description: "Auto corrects common errors in your package.json",
+          options: workSpaceOptions,
         },
       ],
     },
@@ -1182,6 +1574,53 @@ const completionSpec: Fig.Spec = {
         },
         dryRunOption,
         otpOption,
+        {
+          name: "--provenance",
+          description:
+            "When publishing from a supported cloud CI/CD system, the package will be publicly linked to where it was built and published from",
+          exclusiveOn: ["--provenance-file"],
+        },
+        {
+          name: "--provenance-file",
+          description:
+            "When publishing, the provenance bundle at the given path will be used",
+          args: { name: "file", template: "filepaths" },
+          exclusiveOn: ["--provenance"],
+        },
+      ],
+    },
+    {
+      name: "query",
+      description: "Retrieve a filtered list of packages",
+      args: {
+        name: "selector",
+        description: "Dependency selector, e.g. ':root > .prod'",
+      },
+      options: [
+        globalOption,
+        ...workSpaceOptions,
+        {
+          name: "--package-lock-only",
+          description:
+            "Current operation will only use the package-lock.json, ignoring node_modules",
+        },
+        {
+          name: "--expect-results",
+          description: "Exit with an error code if the query has no results",
+          exclusiveOn: ["--no-expect-results", "--expect-result-count"],
+        },
+        {
+          name: "--no-expect-results",
+          description: "Exit with an error code if the query has any results",
+          exclusiveOn: ["--expect-results", "--expect-result-count"],
+        },
+        {
+          name: "--expect-result-count",
+          description:
+            "Exit with an error code if the query does not return exactly this many results",
+          args: { name: "count" },
+          exclusiveOn: ["--expect-results", "--no-expect-results"],
+        },
       ],
     },
     {
@@ -1251,6 +1690,24 @@ const completionSpec: Fig.Spec = {
           description:
             "Print the effective global node_modules folder to standard out",
         },
+      ],
+    },
+    {
+      name: "sbom",
+      description: "Generate a Software Bill of Materials (SBOM)",
+      options: [
+        omitOption,
+        {
+          name: "--package-lock-only",
+          description:
+            "Current operation will only use the package-lock.json, ignoring node_modules",
+        },
+        {
+          name: "--sbom-format",
+          description: "SBOM format to use when generating SBOMs",
+          args: { name: "format", suggestions: ["cyclonedx", "spdx"] },
+        },
+        ...workSpaceOptions,
       ],
     },
     {
@@ -1324,6 +1781,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "set-script",
       description: "Set tasks in the scripts section of package.json",
+      deprecated: true,
       args: [
         {
           name: "script",
@@ -1340,10 +1798,61 @@ const completionSpec: Fig.Spec = {
     {
       name: "shrinkwrap",
       description: "Lock down dependency versions for publication",
+      deprecated: true,
+    },
+    {
+      name: "stage",
+      description:
+        "Stage a package for publishing, deferring 2FA to a later approval",
+      subcommands: [
+        {
+          name: "publish",
+          description: "Stage a package for publishing",
+          args: {
+            name: "package-spec",
+            isOptional: true,
+            template: ["folders"],
+          },
+          options: [
+            {
+              name: "--tag",
+              description: "Registers the staged package with the given tag",
+              args: { name: "tag" },
+            },
+          ],
+        },
+        {
+          name: "list",
+          description: "List all staged package versions",
+          args: { name: "package-spec", isOptional: true },
+        },
+        {
+          name: "view",
+          description: "View details of a specific staged package",
+          args: { name: "stage-id" },
+        },
+        {
+          name: "approve",
+          description: "Approve a staged package for publishing",
+          args: { name: "stage-id" },
+        },
+        {
+          name: "reject",
+          description: "Reject a staged package",
+          args: { name: "stage-id" },
+        },
+        {
+          name: "download",
+          description:
+            "Download the tarball of a staged package for inspection",
+          args: { name: "stage-id" },
+        },
+      ],
     },
     {
       name: "star",
       description: "Mark your favorite packages",
+      deprecated: true,
       args: {
         name: "pkg",
         description: "Package to mark as favorite",
@@ -1359,6 +1868,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "stars",
       description: "View packages marked as favorites",
+      deprecated: true,
       args: {
         name: "user",
         isOptional: true,
@@ -1470,6 +1980,128 @@ const completionSpec: Fig.Spec = {
       ],
       options: [registryOption, otpOption],
     },
+    {
+      name: "trust",
+      description:
+        "Create a trusted relationship between a package and an OIDC provider",
+      subcommands: [
+        {
+          name: "github",
+          description:
+            "Create a trusted relationship between a package and GitHub Actions",
+          args: { name: "package", isOptional: true },
+          options: [
+            ...trustPermissionOptions,
+            {
+              name: "--file",
+              description:
+                "Name of the workflow file within the repository's .github folder (must end in yaml or yml)",
+              isRequired: true,
+              args: { name: "file" },
+            },
+            {
+              name: ["--repository", "--repo"],
+              description: "Name of the repository in the format owner/repo",
+              args: { name: "repository" },
+            },
+            {
+              name: ["--environment", "--env"],
+              description: "CI environment name",
+              args: { name: "environment" },
+            },
+          ],
+        },
+        {
+          name: "gitlab",
+          description:
+            "Create a trusted relationship between a package and GitLab CI/CD",
+          args: { name: "package", isOptional: true },
+          options: [
+            ...trustPermissionOptions,
+            {
+              name: "--file",
+              description: "Name of the pipeline file (e.g. .gitlab-ci.yml)",
+              isRequired: true,
+              args: { name: "file" },
+            },
+            {
+              name: "--project",
+              description:
+                "Name of the project in the format group/project or group/subgroup/project",
+              args: { name: "project" },
+            },
+            {
+              name: ["--environment", "--env"],
+              description: "CI environment name",
+              args: { name: "environment" },
+            },
+          ],
+        },
+        {
+          name: "circleci",
+          description:
+            "Create a trusted relationship between a package and CircleCI",
+          args: { name: "package", isOptional: true },
+          options: [
+            ...trustPermissionOptions,
+            {
+              name: "--org-id",
+              description: "CircleCI organization UUID",
+              isRequired: true,
+              args: { name: "org-id" },
+            },
+            {
+              name: "--project-id",
+              description: "CircleCI project UUID",
+              isRequired: true,
+              args: { name: "project-id" },
+            },
+            {
+              name: "--pipeline-definition-id",
+              description: "CircleCI pipeline definition UUID",
+              isRequired: true,
+              args: { name: "pipeline-definition-id" },
+            },
+            {
+              name: "--vcs-origin",
+              description:
+                "CircleCI repository origin in the format provider/owner/repo",
+              isRequired: true,
+              args: { name: "vcs-origin" },
+            },
+            {
+              name: "--context-id",
+              description: "CircleCI context UUID to match",
+              isRepeatable: true,
+              args: { name: "context-id" },
+            },
+          ],
+        },
+        {
+          name: "list",
+          description: "List trusted relationships for a package",
+          args: { name: "package", isOptional: true },
+        },
+        {
+          name: "revoke",
+          description: "Revoke a trusted relationship for a package",
+          args: { name: "package", isOptional: true },
+          options: [
+            {
+              name: "--id",
+              description: "ID of the trusted relationship to revoke",
+              args: { name: "trust-id" },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "undeprecate",
+      description: "Undeprecate a version of a package",
+      args: { name: "package-spec" },
+      options: [registryOption, otpOption, dryRunOption],
+    },
     uninstallSubcommand("uninstall"),
     uninstallSubcommand(["r", "rm"]),
     uninstallSubcommand("un"),
@@ -1495,6 +2127,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "unstar",
       description: "Remove an item from your favorite packages",
+      deprecated: true,
       args: {
         name: "pkg",
         description: "Package to unmark as favorite",
@@ -1509,19 +2142,22 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: ["update", "upgrade", "up"],
+      name: ["update", "upgrade", "up", "u"],
       description: "Update a package",
       options: [
         { name: "-g", description: "Update global package" },
+        installStrategyOption,
         {
           name: "--global-style",
           description:
             "Causes npm to install the package into your local node_modules folder with the same layout it uses with the global node_modules folder",
+          deprecated: true,
         },
         {
           name: "--legacy-bundling",
           description:
             "Causes npm to install the package such that versions of npm prior to 1.4, such as the one included with node 0.8, can install the package",
+          deprecated: true,
         },
         {
           name: "--strict-peer-deps",
@@ -1534,10 +2170,12 @@ const completionSpec: Fig.Spec = {
         },
         omitOption,
         ignoreScriptsOption,
+        foregroundScriptsOption,
+        installLinksOption,
         {
           name: "--no-audit",
           description:
-            "Submit audit reports alongside the current npm command to the default registry and all registries configured for scopes",
+            "Do not submit audit reports alongside the current npm command",
         },
         {
           name: "--no-bin-links",
