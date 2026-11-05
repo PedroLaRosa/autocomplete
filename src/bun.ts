@@ -175,7 +175,8 @@ const sharedPublicParams: Fig.Option[] = [
     },
   },
   {
-    name: ["-u", "--origin"],
+    name: "--origin",
+    deprecated: true,
     args: {
       name: "args",
       description: 'Rewrite import URLs to start with --origin. Default: ""',
@@ -246,7 +247,14 @@ const sharedPublicParams: Fig.Option[] = [
   },
   {
     name: "--if-present",
-    description: "Exit if the entrypoint does not exist",
+    description: "Exit without an error if the entrypoint does not exist",
+  },
+  {
+    name: "--conditions",
+    description: "Pass custom conditions to resolve",
+    args: {
+      name: "conditions",
+    },
   },
 ];
 
@@ -262,6 +270,20 @@ const notBunDevFlags: Fig.Option[] = [
     name: "--watch",
     description: "Automatically restart the process on file change",
     priority: 50,
+  },
+  {
+    name: "--no-clear-screen",
+    description:
+      "Disable clearing the terminal screen on reload when --hot or --watch is enabled",
+  },
+  {
+    name: "--env-file",
+    description: "Load environment variables from the specified file(s)",
+    isRepeatable: true,
+    args: {
+      name: "path",
+      template: "filepaths",
+    },
   },
   {
     name: "--no-install",
@@ -298,18 +320,101 @@ const notBunDevFlags: Fig.Option[] = [
 
 const buildOnlyParams: Fig.Option[] = [
   {
-    name: "compile",
+    name: "--production",
+    description: "Set NODE_ENV=production and enable minification",
+    priority: 50,
+  },
+  {
+    name: "--compile",
     description:
       "Generate a standalone Bun executable containing your bundled code",
     priority: 50,
   },
   {
-    name: "--format",
-    description:
-      "Specifies the module format to build to. Only esm is supported currently",
+    name: "--compile-exec-argv",
+    description: "Prepend arguments to the standalone executable's execArgv",
     args: {
       name: "args",
-      suggestions: ["esm"],
+    },
+  },
+  {
+    name: "--bytecode",
+    description: "Use a bytecode cache when compiling",
+  },
+  {
+    name: "--format",
+    description:
+      'Specifies the module format to build to. Defaults to "esm", or "cjs" with --bytecode',
+    args: {
+      name: "args",
+      suggestions: ["esm", "cjs", "iife"],
+    },
+  },
+  {
+    name: "--packages",
+    description: "Add dependencies to bundle or keep them external",
+    args: {
+      name: "mode",
+      suggestions: ["external", "bundle"],
+    },
+  },
+  {
+    name: "--env",
+    description:
+      "Inline environment variables into the bundle as process.env.${name}. Use a glob like 'FOO_PUBLIC_*' to inline a prefix. Default: 'disable'",
+    args: {
+      name: "mode",
+      suggestions: ["disable"],
+    },
+  },
+  {
+    name: "--metafile",
+    description: "Write a JSON file with metadata about the build",
+    args: {
+      name: "path",
+    },
+  },
+  {
+    name: "--banner",
+    description:
+      'Add a banner to the bundled output such as "use client" for React Server Components',
+    args: {
+      name: "string",
+    },
+  },
+  {
+    name: "--footer",
+    description:
+      "Add a footer to the bundled output such as // built with bun!",
+    args: {
+      name: "string",
+    },
+  },
+  {
+    name: "--keep-names",
+    description: "Preserve original function and class names when minifying",
+  },
+  {
+    name: "--css-chunking",
+    description:
+      "Chunk CSS files together to reduce duplicated CSS loaded in a browser",
+  },
+  {
+    name: "--app",
+    description: "Build a web app for production using Bun Bake (experimental)",
+  },
+  {
+    name: "--windows-hide-console",
+    description:
+      "When using --compile targeting Windows, prevent a console window from opening",
+  },
+  {
+    name: "--windows-icon",
+    description:
+      "When using --compile targeting Windows, set an executable icon",
+    args: {
+      name: "path",
+      template: "filepaths",
     },
   },
   {
@@ -349,13 +454,14 @@ const buildOnlyParams: Fig.Option[] = [
   },
   {
     name: "--sourcemap",
-    description: "Build with sourcemaps - 'inline', 'external', or 'none'",
+    description:
+      "Build with sourcemaps - 'linked', 'inline', 'external', or 'none'",
     requiresSeparator: "-",
     priority: 50,
     args: {
       name: "args",
       isOptional: true,
-      suggestions: ["inline", "external", "none"],
+      suggestions: ["linked", "inline", "external", "none"],
     },
   },
   {
@@ -399,8 +505,47 @@ const testOnlyParams: Fig.Option[] = [
     },
   },
   {
-    name: "--update-snapshots",
+    name: ["-u", "--update-snapshots"],
     description: "Update snapshot files",
+  },
+  {
+    name: "--retry",
+    description:
+      "Default retry count for all tests, overridden by per-test { retry: N }",
+    args: {
+      name: "number",
+    },
+  },
+  {
+    name: "--concurrent",
+    description: "Treat all tests as `test.concurrent()` tests",
+  },
+  {
+    name: "--max-concurrency",
+    description:
+      "Maximum number of concurrent tests to execute at once. Default is 20",
+    args: {
+      name: "number",
+    },
+  },
+  {
+    name: "--randomize",
+    description: "Run tests in random order",
+  },
+  {
+    name: "--seed",
+    description: "Set the random seed for test randomization",
+    args: {
+      name: "number",
+    },
+  },
+  {
+    name: "--path-ignore-patterns",
+    description: "Glob patterns for test file paths to ignore",
+    isRepeatable: true,
+    args: {
+      name: "pattern",
+    },
   },
   {
     name: "--rerun-each",
@@ -421,6 +566,43 @@ const testOnlyParams: Fig.Option[] = [
   {
     name: "--coverage",
     description: "Generate a coverage profile",
+  },
+  {
+    name: "--coverage-reporter",
+    description: "Report coverage in 'text' and/or 'lcov'. Defaults to 'text'",
+    isRepeatable: true,
+    args: {
+      name: "reporter",
+      suggestions: ["text", "lcov"],
+    },
+  },
+  {
+    name: "--coverage-dir",
+    description: "Directory for coverage files. Defaults to 'coverage'",
+    args: {
+      name: "path",
+      template: "folders",
+    },
+  },
+  {
+    name: "--reporter",
+    description:
+      "Test output reporter format. 'junit' requires --reporter-outfile. Default: console output",
+    args: {
+      name: "format",
+      suggestions: ["junit", "dots"],
+    },
+  },
+  {
+    name: "--reporter-outfile",
+    description: "Output file path for the reporter format",
+    args: {
+      name: "path",
+    },
+  },
+  {
+    name: "--dots",
+    description: "Enable dots reporter. Shorthand for --reporter=dots",
   },
   {
     name: "--bail",
@@ -525,12 +707,79 @@ const dependencyOptions: Fig.Option[] = [
   },
   {
     name: "--backend",
-    args: { name: "syscall", suggestions: ["clonefile", "copyfile"] },
+    args: {
+      name: "syscall",
+      suggestions: ["clonefile", "hardlink", "copyfile"],
+    },
     description:
-      "Platform-specific optimizations for installing dependencies. For macOS, 'clonefile' (default), 'copyfile'",
+      "Platform-specific optimizations for installing dependencies. 'clonefile' (macOS default), 'hardlink' (Linux and Windows default), 'copyfile'",
+  },
+  {
+    name: "--filter",
+    isRepeatable: true,
+    args: { name: "pattern" },
+    description: "Install dependencies for the matching workspaces",
+  },
+  {
+    name: "--linker",
+    args: { name: "strategy", suggestions: ["isolated", "hoisted"] },
+    description: "Linker strategy",
+  },
+  {
+    name: "--omit",
+    isRepeatable: true,
+    args: { name: "type", suggestions: ["dev", "optional", "peer"] },
+    description:
+      "Exclude 'dev', 'optional', or 'peer' dependencies from install",
+  },
+  {
+    name: "--lockfile-only",
+    description: "Generate a lockfile without installing dependencies",
+  },
+  {
+    name: "--registry",
+    args: { name: "url" },
+    description:
+      "Use a specific registry by default, overriding .npmrc, bunfig.toml and environment variables",
+  },
+  {
+    name: "--ca",
+    args: { name: "cert" },
+    description: "Provide a Certificate Authority signing certificate",
+  },
+  {
+    name: "--cafile",
+    args: { name: "path", template: "filepaths" },
+    description: "The same as `--ca`, but is a file path to the certificate",
+  },
+  {
+    name: "--concurrent-scripts",
+    args: { name: "number" },
+    description: "Maximum number of concurrent jobs for lifecycle scripts",
+  },
+  {
+    name: "--network-concurrency",
+    args: { name: "number" },
+    description: "Maximum number of concurrent network requests (default 48)",
+  },
+  {
+    name: "--minimum-release-age",
+    args: { name: "seconds" },
+    description: "Only install packages published at least N seconds ago",
+  },
+  {
+    name: "--cpu",
+    args: { name: "arch", suggestions: ["x64", "arm64", "*"] },
+    description: "Override CPU architecture for optional dependencies",
+  },
+  {
+    name: "--os",
+    args: { name: "os", suggestions: ["linux", "darwin", "*"] },
+    description: "Override operating system for optional dependencies",
   },
   {
     name: "--link-native-bins",
+    deprecated: true,
     args: {
       name: "str",
       isVariadic: true,
@@ -617,12 +866,25 @@ const spec: Fig.Spec = {
     },
   ],
   // These flags are used before the subcommand or file
-  options: publicParams.filter(
-    (param) =>
-      param.name.includes("--inspect") ||
-      param.name.includes("--hot") ||
-      param.name.includes("--watch")
-  ),
+  options: [
+    ...publicParams.filter(
+      (param) =>
+        param.name.includes("--inspect") ||
+        param.name.includes("--hot") ||
+        param.name.includes("--watch") ||
+        param.name.includes("--env-file")
+    ),
+    {
+      name: ["-e", "--eval"],
+      description: "Evaluate argument as a script",
+      args: { name: "script" },
+    },
+    {
+      name: ["-p", "--print"],
+      description: "Evaluate argument as a script and print the result",
+      args: { name: "script" },
+    },
+  ],
   subcommands: [
     {
       name: ["c", "create"],
@@ -713,6 +975,55 @@ const spec: Fig.Spec = {
           npmScriptsGenerator,
         ],
       },
+      options: [
+        {
+          name: ["-F", "--filter"],
+          description:
+            "Run a script in all workspace packages matching the pattern",
+          isRepeatable: true,
+          args: { name: "pattern" },
+        },
+        {
+          name: "--workspaces",
+          description:
+            'Run a script in all workspace packages (from the "workspaces" field in package.json)',
+        },
+        {
+          name: "--elide-lines",
+          description:
+            "Truncate each script's output to its last N lines when using --filter. Default 0 shows all lines",
+          args: { name: "number" },
+        },
+        {
+          name: "--parallel",
+          description:
+            "Run multiple scripts or workspace scripts concurrently with prefixed output",
+        },
+        {
+          name: "--sequential",
+          description:
+            "Run multiple scripts or workspace scripts one after another with prefixed output",
+        },
+        {
+          name: "--no-exit-on-error",
+          description:
+            "Continue running other scripts when one fails (with --parallel/--sequential)",
+        },
+        {
+          name: "--shell",
+          description: "Control the shell used for package.json scripts",
+          args: { name: "shell", suggestions: ["bun", "system"] },
+        },
+      ],
+    },
+    {
+      name: "exec",
+      icon,
+      description: "Run a shell script directly with Bun",
+      args: {
+        name: "script",
+        description: "Shell script to run with Bun Shell",
+      },
     },
     {
       name: ["i", "install"],
@@ -761,10 +1072,21 @@ const spec: Fig.Spec = {
       options: buildParams,
     },
     {
-      name: "update",
+      name: ["up", "update"],
       icon,
       description: "Update outdated dependencies",
-      options: dependencyOptions,
+      options: [
+        ...dependencyOptions,
+        {
+          name: ["-L", "--latest"],
+          description: "Update packages to their latest versions",
+        },
+        {
+          name: ["-i", "--interactive"],
+          description:
+            "Show an interactive list of outdated packages to select for update",
+        },
+      ],
       args: {
         name: "package",
         filterStrategy: "fuzzy",
@@ -772,6 +1094,235 @@ const spec: Fig.Spec = {
         generators: dependenciesGenerator,
         isVariadic: true,
       },
+    },
+    {
+      name: "outdated",
+      icon: "📦",
+      description: "Display latest versions of outdated dependencies",
+      args: {
+        name: "filter",
+        isOptional: true,
+        isVariadic: true,
+        generators: dependenciesGenerator,
+      },
+      options: [
+        {
+          name: ["-F", "--filter"],
+          description:
+            "Display outdated dependencies for each matching workspace",
+          isRepeatable: true,
+          args: { name: "pattern" },
+        },
+        {
+          name: ["-r", "--recursive"],
+          description: "Check outdated packages in all workspaces",
+        },
+      ],
+    },
+    {
+      name: "audit",
+      icon: "📦",
+      description: "Check installed packages for vulnerabilities",
+      options: [
+        {
+          name: "--json",
+          description: "Output in JSON format",
+        },
+        {
+          name: "--audit-level",
+          description: "Only report vulnerabilities at this severity or higher",
+          args: {
+            name: "level",
+            suggestions: ["low", "moderate", "high", "critical"],
+          },
+        },
+        {
+          name: ["-p", "-P", "--prod", "--production"],
+          description:
+            "Only audit packages reachable through dependencies, optionalDependencies, or peerDependencies",
+        },
+        {
+          name: "--omit",
+          description: "Skip packages only reachable through the given type",
+          isRepeatable: true,
+          args: { name: "type", suggestions: ["dev", "optional", "peer"] },
+        },
+        {
+          name: "--ignore",
+          description: "Ignore an advisory by GHSA ID or numeric ID",
+          isRepeatable: true,
+          args: { name: "id" },
+        },
+      ],
+      subcommands: [
+        {
+          name: "fix",
+          description:
+            "Upgrade vulnerable packages to the lowest non-vulnerable version",
+          options: [
+            {
+              name: "--latest",
+              description:
+                "Rewrite ranges in your own package.json and catalogs when they block a fix",
+            },
+            {
+              name: "--dry-run",
+              description: "Print the plan without installing",
+            },
+            {
+              name: "--json",
+              description: "Output the plan and result in JSON format",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "why",
+      icon: "📦",
+      description: "Explain why a package is installed",
+      args: {
+        name: "package",
+        filterStrategy: "fuzzy",
+        generators: dependenciesGenerator,
+      },
+      options: [
+        {
+          name: "--top",
+          description: "Show only the top-level dependencies",
+        },
+        {
+          name: "--depth",
+          description: "Maximum depth of the dependency tree to display",
+          args: { name: "number" },
+        },
+      ],
+    },
+    {
+      name: "info",
+      icon: "📦",
+      description: "Display package metadata from the registry",
+      args: {
+        name: "package",
+        debounce: true,
+        generators: npmSearchGenerator,
+        filterStrategy: "fuzzy",
+      },
+      options: [
+        {
+          name: "--json",
+          description: "Output in JSON format",
+        },
+      ],
+    },
+    {
+      name: "publish",
+      icon: "📦",
+      description: "Publish a package to the npm registry",
+      args: {
+        name: "tarball",
+        isOptional: true,
+        generators: filepaths({ extensions: ["tgz"] }),
+      },
+      options: [
+        {
+          name: "--access",
+          description: "Set access level for scoped packages",
+          args: { name: "level", suggestions: ["public", "restricted"] },
+        },
+        {
+          name: "--tag",
+          description: 'Tag the release. Default is "latest"',
+          args: { name: "tag" },
+        },
+        {
+          name: "--otp",
+          description: "Provide a one-time password for authentication",
+          args: { name: "code" },
+        },
+        {
+          name: "--auth-type",
+          description:
+            "Specify the type of one-time password authentication (default is 'web')",
+          args: { name: "type", suggestions: ["web", "legacy"] },
+        },
+        {
+          name: "--gzip-level",
+          description: "Specify a custom compression level for gzip (0-9)",
+          args: { name: "level" },
+        },
+        {
+          name: "--dry-run",
+          description: "Perform a dry run without publishing",
+        },
+      ],
+    },
+    {
+      name: "patch",
+      icon: "📦",
+      description: "Prepare a package for patching",
+      args: {
+        name: "package",
+        filterStrategy: "fuzzy",
+        generators: dependenciesGenerator,
+      },
+      options: [
+        {
+          name: "--commit",
+          description: "Install a package containing modifications in `dir`",
+        },
+        {
+          name: "--patches-dir",
+          description:
+            "The directory to put the patch file in (only if --commit is used)",
+          args: { name: "path", template: "folders" },
+        },
+      ],
+    },
+    {
+      name: "patch-commit",
+      icon: "📦",
+      description: "Generate a patch file for a patched package (pnpm compat)",
+      args: {
+        name: "package",
+        filterStrategy: "fuzzy",
+        generators: dependenciesGenerator,
+      },
+      options: [
+        {
+          name: "--patches-dir",
+          description: "The directory to put the patch file in",
+          args: { name: "path", template: "folders" },
+        },
+      ],
+    },
+    {
+      name: "prune",
+      icon: "📦",
+      description:
+        "Remove packages from node_modules that are not defined in bun.lock",
+      options: [
+        {
+          name: "--dry-run",
+          description: "List what would be removed without deleting anything",
+        },
+        {
+          name: "--production",
+          description: "Also remove devDependencies",
+        },
+        {
+          name: "--filter",
+          description: "Prune only the matching workspaces",
+          isRepeatable: true,
+          args: { name: "pattern" },
+        },
+        {
+          name: "--omit",
+          description: "Also remove 'dev', 'optional', or 'peer' dependencies",
+          isRepeatable: true,
+          args: { name: "type", suggestions: ["dev", "optional", "peer"] },
+        },
+      ],
     },
     {
       name: "link",
@@ -850,7 +1401,7 @@ const spec: Fig.Spec = {
       name: "pm",
       icon,
       description: "Set of utilities for working with Bun's package manager",
-      options: [
+      subcommands: [
         {
           name: "bin",
           description: "Print the path to bin folder",
@@ -858,6 +1409,12 @@ const spec: Fig.Spec = {
         {
           name: "cache",
           description: "Print the path to the cache folder",
+          subcommands: [
+            {
+              name: "rm",
+              description: "Clear the cache",
+            },
+          ],
         },
         {
           name: "hash",
@@ -875,6 +1432,159 @@ const spec: Fig.Spec = {
           name: "ls",
           description:
             "List the dependency tree according to the current lockfile",
+          options: [
+            {
+              name: ["-a", "--all"],
+              description: "List the entire dependency tree",
+            },
+          ],
+        },
+        {
+          name: "pack",
+          description: "Create a tarball of the current workspace",
+          options: [
+            {
+              name: "--dry-run",
+              description: "Do everything except writing the tarball to disk",
+            },
+            {
+              name: "--destination",
+              description: "The directory the tarball will be saved in",
+              args: { name: "dir", template: "folders" },
+            },
+            {
+              name: "--filename",
+              description: "The name of the tarball",
+              args: { name: "name" },
+            },
+            {
+              name: "--ignore-scripts",
+              description: "Don't run pre/postpack and prepare scripts",
+            },
+            {
+              name: "--gzip-level",
+              description: "Set the gzip compression level (0-9, default 9)",
+              args: { name: "level" },
+            },
+            {
+              name: "--quiet",
+              description: "Only output the tarball filename",
+            },
+          ],
+        },
+        {
+          name: "whoami",
+          description: "Print the current npm username",
+        },
+        {
+          name: "view",
+          description: "View package metadata from the registry (bun info)",
+          args: {
+            name: "package",
+            debounce: true,
+            generators: npmSearchGenerator,
+            filterStrategy: "fuzzy",
+          },
+        },
+        {
+          name: "version",
+          description:
+            "Bump the version in package.json and create a git commit and tag",
+          args: {
+            name: "increment",
+            isOptional: true,
+            suggestions: [
+              "patch",
+              "minor",
+              "major",
+              "prepatch",
+              "preminor",
+              "premajor",
+              "prerelease",
+              "from-git",
+            ],
+          },
+          options: [
+            {
+              name: "--no-git-tag-version",
+              description: "Skip creating a git commit and tag",
+            },
+            {
+              name: "--dry-run",
+              description: "Print the new version without writing package.json",
+            },
+          ],
+        },
+        {
+          name: "pkg",
+          description: "Manage data in package.json",
+          subcommands: [
+            {
+              name: "get",
+              description: "Get properties from package.json",
+              args: { name: "key", isOptional: true, isVariadic: true },
+            },
+            {
+              name: "set",
+              description: "Set properties in package.json",
+              args: { name: "key=value", isVariadic: true },
+              options: [
+                {
+                  name: "--json",
+                  description: "Parse values as JSON",
+                },
+              ],
+            },
+            {
+              name: "delete",
+              description: "Delete properties from package.json",
+              args: { name: "key", isVariadic: true },
+            },
+            {
+              name: "fix",
+              description: "Auto-correct common package.json errors",
+            },
+          ],
+        },
+        {
+          name: "diff",
+          description:
+            "Compare package versions across registry specs, local folders, or tarballs",
+          args: {
+            name: "spec",
+            isOptional: true,
+            isVariadic: true,
+            generators: dependenciesGenerator,
+          },
+        },
+        {
+          name: "licenses",
+          description: "List every installed package grouped by license",
+        },
+        {
+          name: "migrate",
+          description:
+            "Migrate another package manager's lockfile without installing anything",
+        },
+        {
+          name: "untrusted",
+          description: "Print current untrusted dependencies with scripts",
+        },
+        {
+          name: "trust",
+          description:
+            "Run scripts for untrusted dependencies and add to `trustedDependencies`",
+          args: { name: "names", isOptional: true, isVariadic: true },
+          options: [
+            {
+              name: "--all",
+              description: "Trust all untrusted dependencies",
+            },
+          ],
+        },
+        {
+          name: "default-trusted",
+          description: "Print the default trusted dependencies list",
         },
       ],
     },
@@ -896,14 +1606,27 @@ const spec: Fig.Spec = {
     {
       name: "x",
       icon,
-      description: "Run an npx command",
+      description:
+        "Execute a package binary (CLI), installing if needed (bunx)",
       loadSpec: "bunx",
     },
     {
       name: "repl",
       icon,
-      description:
-        "Run a REPL (read eval print loop) with the Bun runtime.(experimental)",
+      description: "Start a REPL (read eval print loop) session with Bun",
+      options: [
+        {
+          name: ["-e", "--eval"],
+          description: "Evaluate a script with REPL semantics and exit",
+          args: { name: "script" },
+        },
+        {
+          name: ["-p", "--print"],
+          description:
+            "Evaluate a script with REPL semantics and print the result",
+          args: { name: "script" },
+        },
+      ],
     },
     {
       name: "init",
@@ -913,6 +1636,16 @@ const spec: Fig.Spec = {
         {
           name: ["-y", "--yes"],
           description: "Answer yes to all prompts",
+        },
+        {
+          name: "--react",
+          description: "Scaffold a React project",
+          requiresSeparator: true,
+          args: {
+            name: "preset",
+            isOptional: true,
+            suggestions: ["tailwind", "shadcn"],
+          },
         },
       ],
     },
