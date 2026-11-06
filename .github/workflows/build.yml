@@ -8,8 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write # npm provenance; auth is NPM_TOKEN (trusted publishing OIDC gave 403)
-  contents: read
+  contents: read # no id-token: with it npm tries OIDC (403) instead of NPM_TOKEN
 
 jobs:
   publish:
