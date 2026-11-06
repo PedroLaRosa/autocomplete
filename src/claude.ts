@@ -1,4 +1,4 @@
-// Claude Code v2.1.317 (npm "latest", 2026-11-02). Source: `claude --help` on
+// Claude Code v2.1.319 (npm "latest", 2026-11-06). Source: `claude --help` on
 // every subcommand, plus flags/commands documented at
 // https://code.claude.com/docs/en/cli-reference that `--help` doesn't list.
 
