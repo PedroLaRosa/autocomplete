@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read # no id-token: with it npm tries OIDC (403) instead of NPM_TOKEN
+  id-token: write # npm trusted publishing (OIDC), no NPM_TOKEN needed
+  contents: read
 
 jobs:
   publish:
@@ -18,12 +19,10 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
-          registry-url: https://registry.npmjs.org
       - uses: pnpm/action-setup@v6
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       # ponytail: version = 1.0.<run number>; bump the 1.0 in package.json for breaking changes
       - run: npm pkg set version=1.0.${{ github.run_number }}
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # stages the version; approve it with `npm stage approve <id>` (needs 2FA)
+      - run: npm stage publish
