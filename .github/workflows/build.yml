@@ -6,6 +6,11 @@ on:
       - "src/**/*.ts"
     branches: [main]
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish directly to npm (skips staging and its 2FA approval)
+        type: boolean
+        default: false
 
 permissions:
   id-token: write # npm trusted publishing (OIDC), no NPM_TOKEN needed
@@ -24,5 +29,6 @@ jobs:
       - run: pnpm build
       # ponytail: version = 1.0.<run number>; bump the 1.0 in package.json for breaking changes
       - run: npm pkg set version=1.0.${{ github.run_number }}
-      # stages the version; approve it with `npm stage approve <id>` (needs 2FA)
-      - run: npm stage publish
+      # push / unchecked: stages the version; approve it with `npm stage approve <id>` (needs 2FA)
+      # manual run with "publish" checked: publishes directly; needs "Allow npm publish" on the npm trusted publisher
+      - run: npm ${{ inputs.publish && 'publish' || 'stage publish' }}
