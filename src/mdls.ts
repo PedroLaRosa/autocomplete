@@ -1,3 +1,6 @@
+// mdls macOS man page (mdls(1) dated June 3, 2004; text taken from the Xcode 27.3 beta 2 export, 2026-11-19).
+// Source: mdls.1 HTML in the keith/xcode-man-pages mirror, read statically (no live run on macOS). -plist and the
+// -- spellings are not in the man page; they are kept as they were (only third-party references seen, unverified)
 const completionSpec: Fig.Spec = {
   name: "mdls",
   description: "Lists the metadata attributes for the specified file",
@@ -62,8 +65,12 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--nullMarker", "-nullMarker"],
       description:
-        "Sets a marker string to be used when a requested attribute is null. Only used in -raw mode.  Default is '(null)'",
+        "Sets a marker string to be used when a requested attribute is null. Only used in -raw mode. Default is '(null)'",
       insertValue: `--nullMarker "{cursor}"`,
+      args: {
+        name: "markerString",
+        description: "Marker for null attributes",
+      },
       dependsOn: ["--raw", "-raw"],
       exclusiveOn: ["--plist", "-plist"],
     },
