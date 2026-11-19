@@ -1,23 +1,38 @@
+// Dust v1.2.7 (latest tag of bootandy/dust, matches Homebrew formula, 2026-11-19).
+// Source: src/cli.rs (clap definition) and the generated completions/dust.fish at tag v1.2.7; binary not run.
+const sizeFormatSuggestions: Fig.Suggestion[] = [
+  { name: "si", description: "SI prefix (powers of 1000)" },
+  { name: "b", description: "Byte (B)" },
+  { name: "k", description: "Kibibyte (KiB)" },
+  { name: "m", description: "Mebibyte (MiB)" },
+  { name: "g", description: "Gibibyte (GiB)" },
+  { name: "t", description: "Tebibyte (TiB)" },
+  { name: "kb", description: "Kilobyte (kB)" },
+  { name: "mb", description: "Megabyte (MB)" },
+  { name: "gb", description: "Gigabyte (GB)" },
+  { name: "tb", description: "Terabyte (TB)" },
+];
+
+const fileTimeSuggestions: Fig.Suggestion[] = [
+  { name: "a", description: "Last accessed time" },
+  { name: "c", description: "Last changed time" },
+  { name: "m", description: "Last modified time" },
+];
+
+const timeFilterDescription =
+  "+n matches files more than n days old, -n matches files less than n days old, n matches files exactly n days old (days are rounded down)";
+
 const completionSpec: Fig.Spec = {
   name: "dust",
   description: "Like du but more intuitive",
   options: [
     {
       name: ["--help", "-h"],
-      description: "Show help for dust",
+      description: "Print help (see more with '--help')",
     },
     {
       name: ["--version", "-V"],
-      description: "Print version information",
-    },
-    {
-      name: ["--no-percent-bars", "-b"],
-      description: "No percent bars or percentages will be displayed",
-    },
-    {
-      name: ["--no-colors", "-c"],
-      description:
-        "No colors will be printed (Useful for commands like: watch)",
+      description: "Print version",
     },
     {
       name: ["--depth", "-d"],
@@ -27,32 +42,26 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: ["--filter", "-e"],
-      description:
-        'Only include filepaths matching this regex. For png files type: -e "\\.png$"',
+      name: ["--threads", "-T"],
+      description: "Number of threads to use",
       args: {
-        name: "filter",
+        name: "threads",
       },
     },
     {
-      name: ["--filecount", "-f"],
-      description:
-        "Directory 'size' is number of child files/dirs not disk size",
-    },
-    {
-      name: ["--si", "-H"],
-      description: "Print sizes in powers of 1000 (e.g., 1.1G)",
-    },
-    {
-      name: ["--ignore_hidden", "-i"],
-      description: "Do not display hidden files",
+      name: "--config",
+      description: "Specify a config file to use",
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
     },
     {
       name: ["--number-of-lines", "-n"],
       description:
-        "Number of lines of output to show. (Default is terminal_height - 10)",
+        "Display the 'n' largest entries (default is terminal height)",
       args: {
-        name: "number_of_lines",
+        name: "number",
       },
     },
     {
@@ -60,36 +69,27 @@ const completionSpec: Fig.Spec = {
       description: "Subdirectories will not have their path shortened",
     },
     {
-      name: ["--reverse", "-r"],
-      description: "Print tree upside down (biggest highest)",
-    },
-    {
-      name: ["--apparent-size", "-s"],
-      description: "Use file length instead of blocks",
-    },
-    {
-      name: "--skip-total",
-      description: "No total row will be displayed",
-    },
-    {
-      name: ["--file_types", "-t"],
-      description: "Show only these file types",
-    },
-    {
-      name: ["--invert-filter", "-v"],
-      description:
-        'Exclude filepaths matching this regex. To ignore png files type: -v "\\.png$"',
+      name: ["--ignore-directory", "-X"],
+      description: "Exclude any file or directory with this path",
+      isRepeatable: true,
       args: {
-        name: "invert_filter",
+        name: "path",
+        template: ["filepaths", "folders"],
       },
     },
     {
-      name: ["--terminal_width", "-w"],
+      name: ["--ignore-all-in-file", "-I"],
       description:
-        "Specify width of output overriding the auto detection of terminal width",
+        "Exclude any file or directory with a regex matching that listed in this file, the file entries will be added to the ignore regexs provided by --invert-filter",
       args: {
-        name: "width",
+        name: "file",
+        template: "filepaths",
       },
+    },
+    {
+      name: ["--dereference-links", "-L"],
+      description:
+        "Dereference sym links - treat sym links as directories and go into them",
     },
     {
       name: ["--limit-filesystem", "-x"],
@@ -97,12 +97,34 @@ const completionSpec: Fig.Spec = {
         "Only count the files and directories on the same filesystem as the supplied directory",
     },
     {
-      name: ["--ignore-directory", "-X"],
-      description: "Exclude any file or directory with this name",
-      args: {
-        name: "ignore_directory",
-        template: "folders",
-      },
+      name: ["--apparent-size", "-s"],
+      description: "Use file length instead of blocks",
+    },
+    {
+      name: ["--reverse", "-r"],
+      description: "Print tree upside down (biggest highest)",
+    },
+    {
+      name: ["--no-colors", "-c"],
+      description:
+        "No colors will be printed (useful for commands like: watch)",
+    },
+    {
+      name: ["--force-colors", "-C"],
+      description: "Force colors print",
+    },
+    {
+      name: "--dim",
+      description:
+        "Dim the percent bars (grey) to reduce brightness on dark terminals",
+    },
+    {
+      name: ["--no-percent-bars", "-b"],
+      description: "No percent bars or percentages will be displayed",
+    },
+    {
+      name: ["--bars-on-right", "-B"],
+      description: "Percent bars moved to right side of screen",
     },
     {
       name: ["--min-size", "-z"],
@@ -111,9 +133,152 @@ const completionSpec: Fig.Spec = {
         name: "min_size",
       },
     },
+    {
+      name: ["--screen-reader", "-R"],
+      description:
+        "For screen readers. Removes bars. Adds new column: depth level (may want to use -p too for full path)",
+    },
+    {
+      name: "--skip-total",
+      description: "No total row will be displayed",
+    },
+    {
+      name: ["--filecount", "-f"],
+      description:
+        "Directory 'size' is number of child files instead of disk size",
+    },
+    {
+      name: ["--ignore-hidden", "-i"],
+      description: "Do not display hidden files",
+    },
+    {
+      name: ["--invert-filter", "-v"],
+      description:
+        'Exclude filepaths matching this regex. To ignore png files type: -v "\\.png$"',
+      isRepeatable: true,
+      args: {
+        name: "regex",
+      },
+    },
+    {
+      name: ["--filter", "-e"],
+      description:
+        'Only include filepaths matching this regex. For png files type: -e "\\.png$"',
+      isRepeatable: true,
+      args: {
+        name: "regex",
+      },
+    },
+    {
+      name: ["--file-types", "-t"],
+      description: "Show only these file types",
+    },
+    {
+      name: ["--terminal-width", "-w"],
+      description:
+        "Specify width of output overriding the auto detection of terminal width",
+      args: {
+        name: "width",
+      },
+    },
+    {
+      name: ["--no-progress", "-P"],
+      description: "Disable the progress indication",
+    },
+    {
+      name: "--print-errors",
+      description: "Print path with errors",
+    },
+    {
+      name: ["--only-dir", "-D"],
+      description: "Only directories will be displayed",
+    },
+    {
+      name: ["--only-file", "-F"],
+      description: "Only files will be displayed (finds your largest files)",
+    },
+    {
+      name: ["--output-format", "-o"],
+      description:
+        "Changes output display size. si will print sizes in powers of 1000. b k m g t kb mb gb tb will print the whole tree in that size",
+      args: {
+        name: "format",
+        suggestions: sizeFormatSuggestions,
+      },
+    },
+    {
+      name: ["--stack-size", "-S"],
+      description:
+        "The walker no longer recurses so a custom stack size is unnecessary, the value is ignored",
+      deprecated: true,
+      args: {
+        name: "stack_size",
+      },
+    },
+    {
+      name: ["--output-json", "-j"],
+      description: "Output the directory tree as json to the current directory",
+    },
+    {
+      name: ["--mtime", "-M"],
+      description: `Filter by modification time: ${timeFilterDescription}`,
+      args: {
+        name: "days",
+      },
+    },
+    {
+      name: ["--atime", "-A"],
+      description: `Filter by access time: ${timeFilterDescription}`,
+      args: {
+        name: "days",
+      },
+    },
+    {
+      name: ["--ctime", "-y"],
+      description: `Filter by change time: ${timeFilterDescription}`,
+      args: {
+        name: "days",
+      },
+    },
+    {
+      name: "--files0-from",
+      description: "Read NUL-terminated paths from FILE (use - for stdin)",
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--files-from",
+      description: "Read newline-terminated paths from FILE (use - for stdin)",
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--collapse",
+      description: "Keep these directories collapsed",
+      isRepeatable: true,
+      args: {
+        name: "path",
+        template: ["filepaths", "folders"],
+      },
+    },
+    {
+      name: ["--filetime", "-m"],
+      description:
+        "Directory 'size' is max filetime of child files instead of disk size, while a/c/m for last accessed/changed/modified time",
+      args: {
+        name: "time",
+        suggestions: fileTimeSuggestions,
+      },
+    },
   ],
   args: {
-    name: "inputs",
+    name: "path",
+    description: "Input files or directories",
+    isVariadic: true,
     template: ["filepaths", "folders"],
   },
 };
