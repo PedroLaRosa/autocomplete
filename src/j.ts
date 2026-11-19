@@ -1,29 +1,37 @@
+// j (autojump shell function) v22.5.3 (latest tag release-v22.5.3 of wting/autojump; master still reports VERSION 22.5.3; 2026-11-19).
+// Source: bin/autojump (argparse definitions, set_defaults data path) and the j() function in bin/autojump.bash from a shallow checkout; nothing was run.
+// Changes vs the previous spec: name is "j" again (it was overridden by the autojump spread), the directory argument is optional like autojump's nargs='*',
+// the generator reads the database from the per-OS location autojump uses (~/Library on macOS, $XDG_DATA_HOME or ~/.local/share elsewhere) and ignores blank lines.
 import autojump from "./autojump";
 
 const completionSpec: Fig.Spec = {
-  name: "j",
   ...autojump,
+  name: "j",
   args: {
     name: "directory",
     description: "Directory to jump to",
     isVariadic: true,
+    isOptional: true,
     generators: {
-      custom: async (tokens, executeCommand, context) => {
+      custom: async (tokens, executeCommand) => {
         const { stdout } = await executeCommand({
-          command: "cat",
-          // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
+          command: "sh",
           args: [
-            `${context.environmentVariables["HOME"]}/Library/autojump/autojump.txt`,
+            "-c",
+            'f="${XDG_DATA_HOME:-$HOME/.local/share}/autojump/autojump.txt"; [ "$(uname)" = Darwin ] && f="$HOME/Library/autojump/autojump.txt"; cat "$f" 2>/dev/null',
           ],
         });
-        const lines = stdout.split("\n").map((line) => {
-          const [weight, dir] = line.split("\t");
+        const lines = stdout
+          .split("\n")
+          .filter((line) => line.trim() !== "")
+          .map((line) => {
+            const [weight, dir] = line.split("\t");
 
-          return {
-            weight: Number(weight),
-            dir,
-          };
-        });
+            return {
+              weight: Number(weight),
+              dir,
+            };
+          });
 
         const args = tokens.slice(1, tokens.length - 1);
 
