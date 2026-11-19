@@ -1,3 +1,7 @@
+// open (Xcode 27.2 man pages, 2026-11-19). Source: open(1) from keith/xcode-man-pages, the HTML export of the man pages bundled with Xcode 27.2 (27B52); identical in 27.3 beta 2.
+// Read statically from the man page (revision April 14, 2017; the last change upstream added --arch in Xcode 15), not a live run on macOS.
+// Long aliases (--fresh, --reveal, --wait-apps, --new, --hide, --background, --header) match an older `open` usage dump (weareinteractive/node-mac-open README).
+// -D, --url, -i, -o and the /dev/null defaults are not in the man page; they remain from the previous spec and are unverified.
 export const generateApps = (unquotedPath: string): Fig.Generator => ({
   cache: { strategy: "stale-while-revalidate" },
   script: [
@@ -78,11 +82,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-e",
-      description: "Opens the file with /Applications/TextEdit",
+      description: "Opens the file with the TextEdit application",
     },
     {
       name: "-t",
-      description: "Open the file with the default text editor",
+      description:
+        "Open the file with the default text editor, as determined via LaunchServices",
     },
     {
       name: "-f",
@@ -91,11 +96,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-F", "--fresh"],
-      description: "Opens the application without restoring windows",
+      description:
+        "Opens the application without restoring windows. Saved persistent state is lost, except for Untitled documents",
     },
     {
       name: ["-W", "--wait-apps"],
-      description: "Waits until the applications exit",
+      description:
+        "Waits until the applications it opens (or that were already open) have exited. Use with -n to function as an editor for $EDITOR",
     },
     {
       name: ["-R", "--reveal"],
@@ -117,19 +124,20 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-h", "--header"],
       description:
-        "Searches header locations for a header whose name matches the given string and then opens it",
+        "Searches header locations for a header whose name matches the given string and then opens it. Pass a full header name (such as NSView.h) for increased performance",
     },
     {
       name: "-s",
       description:
-        "For -h, the SDK to use; if supplied, only SDKs whose names contain the argument value are searched",
+        "For -h, partial or full SDK name to use; if supplied, only SDKs whose names contain the argument value are searched. Otherwise the highest versioned SDK in each platform is used",
       args: {
         name: "partial SDK name",
       },
     },
     {
       name: ["-u", "--url"],
-      description: "Open this URL, even if it matches exactly a filepath",
+      description:
+        "Opens URL with whatever application claims the URL scheme, even if it also matches a file path",
       args: {
         name: "URL",
       },
@@ -165,9 +173,27 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--arch",
+      description:
+        "Launch with the given CPU architecture type and subtype. Two integers matching cpu_type_t and cpu_subtype_t can be given separated by a '/', like 12/13",
+      args: {
+        name: "ARCH",
+        suggestions: [
+          "any",
+          "arm",
+          "arm64",
+          "arm64e",
+          "arm64_32",
+          "x86_64",
+          "x86_64h",
+          "i386",
+        ],
+      },
+    },
+    {
       name: "--env",
       description:
-        "Add an enviroment variable to the launched process, where VAR is formatted AAA=foo",
+        "Add an environment variable to the launched process, where VAR is formatted NAME=VALUE or NAME",
       isRepeatable: true,
       args: {
         name: "VAR",
