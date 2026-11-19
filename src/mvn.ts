@@ -1,52 +1,59 @@
+// Maven v3.10.1 (latest stable on Maven Central 2026-11, 2026-11-19). Source: CLIManager.java at tag maven-3.10.1
+// (apache/maven, maven-embedder), the commons-cli option definitions behind `mvn --help`; the binary was not run.
+// Maven 4.0.0-rc-7 is still a release candidate and its options are not included.
 const completionSpec: Fig.Spec = {
   name: "mvn",
   description: "Maven - a Java based project management and comprehension tool",
   options: [
     {
       name: ["--also-make", "-am"],
-      description: "Also build projects required by project list",
+      description:
+        "If project list is specified, also build projects required by the list",
     },
     {
       name: ["--also-make-dependents", "-amd"],
       description:
-        "Also build projects that depend on projects in the project list",
+        "If project list is specified, also build projects that depend on projects on the list",
     },
     {
       name: ["--batch-mode", "-B"],
-      description: "Run in non-interactive (batch)",
+      description:
+        "Run in non-interactive (batch) mode (disables output color)",
     },
     {
       name: ["--builder", "-b"],
-      description: "Specify the build strategy to use",
+      description: "The id of the build strategy to use",
       args: {
         name: "id of build strategy",
       },
     },
     {
       name: ["--strict-checksums", "-C"],
-      description: "Fail if checksums do not match",
+      description: "Fail the build if checksums don't match",
     },
     {
       name: ["--lax-checksums", "-c"],
-      description: "Warn if checksums do not match",
+      description: "Warn if checksums don't match",
     },
     {
       name: "--color",
-      description: "Specify the color mode of the output",
+      description: "Defines the color mode of the output",
       args: {
         name: "color mode",
-        suggestions: ["always", "never", "auto"],
+        isOptional: true,
+        suggestions: ["auto", "always", "never"],
       },
     },
     {
       name: ["--check-plugin-updates", "-cpu"],
-      description: "Ineffective. Only kept for backward compatibility",
+      description: "Ineffective, only kept for backward compatibility",
+      deprecated: true,
     },
     {
       name: ["--define", "-D"],
-      description: "Define a system property",
+      description: "Define a user property",
       args: {
-        name: "system property",
+        name: "user property",
       },
     },
     {
@@ -55,16 +62,18 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--encrypt-master-password", "-emp"],
-      description: "Encrypt the master security password",
+      description: "Encrypt master security password",
       args: {
         name: "master password",
+        isOptional: true,
       },
     },
     {
       name: ["--encrypt-password", "-ep"],
-      description: "Encrypt the server password",
+      description: "Encrypt server password",
       args: {
         name: "server password",
+        isOptional: true,
       },
     },
     {
@@ -91,7 +100,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--global-settings", "-gs"],
-      description: "Specify the global settings file to use",
+      description: "Alternate path for the global settings file",
       args: {
         name: "path",
         template: ["filepaths"],
@@ -99,7 +108,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--global-toolchains", "-gt"],
-      description: "Specify the global toolchains file to use",
+      description: "Alternate path for the global toolchains file",
       args: {
         name: "path",
         template: ["filepaths"],
@@ -111,7 +120,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--log-file", "-l"],
-      description: "Specify the file to log to",
+      description:
+        "Log file where all build output will go (disables output color)",
       args: {
         name: "path",
         template: ["filepaths"],
@@ -119,7 +129,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--legacy-local-repository", "-llr"],
-      description: "Use the Maven2 legacy local repository behaviour",
+      description:
+        "UNSUPPORTED: Use of this option will make Maven invocation fail",
+      deprecated: true,
     },
     {
       name: ["--non-recursive", "-N"],
@@ -127,11 +139,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--no-plugin-registry", "-npr"],
-      description: "Ineffective. Only kept for backward compatibility",
+      description: "Ineffective, only kept for backward compatibility",
+      deprecated: true,
     },
     {
       name: ["--no-plugin-updates", "-npu"],
-      description: "Ineffective. Only kept for backward compatibility",
+      description: "Ineffective, only kept for backward compatibility",
+      deprecated: true,
     },
     {
       name: ["--no-snapshot-updates", "-nsu"],
@@ -148,32 +162,33 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--activate-profiles", "-P"],
-      description: "Activate the specified profiles (comma delimited)",
+      description: "Comma-delimited list of profiles to activate",
       args: {
         name: "profiles",
       },
     },
     {
       name: ["--projects", "-pl"],
-      description: "Specify the projects to build",
+      description:
+        "Comma-delimited list of specified reactor projects to build instead of all projects. A project can be specified by [groupId]:artifactId or by its relative path",
       args: {
         name: "project list",
       },
     },
     {
       name: ["--quiet", "-q"],
-      description: "Quiet output - only shows errors",
+      description: "Quiet output - only show errors",
     },
     {
       name: ["--resume-from", "-rf"],
-      description: "Resume from the specified project",
+      description: "Resume reactor from specified project",
       args: {
         name: "project",
       },
     },
     {
       name: ["--settings", "-s"],
-      description: "Specify the user settings file to use",
+      description: "Alternate path for the user settings file",
       args: {
         name: "path",
         template: ["filepaths"],
@@ -181,7 +196,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--toolchains", "-t"],
-      description: "Specify the toolchains file to use",
+      description: "Alternate path for the user toolchains file",
       args: {
         name: "path",
         template: ["filepaths"],
@@ -189,7 +204,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--threads", "-T"],
-      description: "Specify the number of threads to use",
+      description:
+        "Thread count, for instance 4 (int) or 2C/2.5C (int/float) where C is core multiplied",
       args: {
         name: "threads",
       },
@@ -200,8 +216,19 @@ const completionSpec: Fig.Spec = {
         "Forces a check for missing releases and updated snapshots on remote repositories",
     },
     {
+      name: ["--update-metadata", "-UM"],
+      description:
+        "Forces updates of remote repository metadata (updates plugin prefixes, version ranges and snapshots)",
+    },
+    {
+      name: ["--update-artifacts", "-UA"],
+      description:
+        "Forces checks for missing artifacts (retries cached retrieval errors)",
+    },
+    {
       name: ["--update-plugins", "-up"],
-      description: "Ineffective. Only kept for backward compatibility",
+      description: "Ineffective, only kept for backward compatibility",
+      deprecated: true,
     },
     {
       name: ["--version", "-v"],
@@ -209,11 +236,38 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--show-version", "-V"],
-      description: "Display version information",
+      description: "Display version information WITHOUT stopping build",
     },
     {
       name: ["--debug", "-X"],
       description: "Produce execution debug output",
+    },
+    {
+      name: ["--ignore-transitive-repositories", "-itr"],
+      description:
+        "Ignore remote repositories introduced by transitive dependencies",
+    },
+    {
+      name: "--artifacts-update-policy",
+      description:
+        "The update policy to apply onto artifacts. The -UA option overrides this option with 'always'",
+      args: {
+        name: "policy",
+        suggestions: ["always", "daily", "never"],
+      },
+    },
+    {
+      name: "--metadata-update-policy",
+      description:
+        "The update policy to apply onto metadata. The -UM option overrides this option with 'always'",
+      args: {
+        name: "policy",
+        suggestions: ["always", "daily", "never"],
+      },
+    },
+    {
+      name: "--raw-streams",
+      description: "Ignored (Maven 4 option)",
     },
   ],
   args: {
