@@ -1,3 +1,8 @@
+// Paper: NOT verified against any release (2026-11-19). No standalone `paper` CLI with this command
+// tree exists on npm, PyPI, crates.io or Homebrew, and web search finds none. Source checked: git history
+// of this repo; the tree below is a name-substituted copy of the early-2022 Open Policy Agent `opa` spec
+// (bench, build, eval, run, ...), so it lacks newer OPA flags. Left as-is apart from removing a
+// user-specific history path default. The maintained OPA spec is src/opa.ts; consider deleting this one.
 const completionSpec: Fig.Spec = {
   name: "paper",
   description: "The Paper CLI",
@@ -934,7 +939,7 @@ const completionSpec: Fig.Spec = {
           displayName: "history",
           args: {
             name: "history",
-            default: "/Users/batuhan.apaydin/.Paper_history",
+            template: "filepaths",
           },
         },
         {
