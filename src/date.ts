@@ -1,37 +1,36 @@
+// date (macOS 15.5 BSD, `man date` dated 2024-09-10, 2026-11-19). Source: apple-oss-distributions shell_cmds-326 date.1 + date.c getopt string, matches the Xcode 16.4 man page; not run on macOS
 const completionSpec: Fig.Spec = {
   name: "date",
   description: "Display or set date and time",
   options: [
     {
-      name: "-d",
-      description: "Set the kernel's value for daylight saving time",
+      name: "-f",
+      description:
+        "Use input_fmt (parsed with strptime) as the format of new_date instead of the default [[[mm]dd]HH]MM[[cc]yy][.ss] format",
       args: {
-        name: "dst",
+        name: "input_fmt",
+        description: "The format with which to parse the new date value",
       },
     },
     {
-      name: "-f",
+      name: "-I",
       description:
-        "Use specified format for input instead of the default [[[mm]dd]HH]MM[[cc]yy][.ss] format",
-      args: [
-        {
-          name: "input_fmt",
-          description: "The format with which to parse the new date value",
-        },
-        {
-          name: "new_date",
-          description: "The new date to set",
-        },
-      ],
+        "Use ISO 8601 output format with the given precision (default is date)",
+      args: {
+        name: "FMT",
+        isOptional: true,
+        suggestions: ["date", "hours", "minutes", "seconds", "ns"],
+      },
     },
     {
       name: "-j",
-      description: "Don't try to set the date",
+      description:
+        "Do not try to set the date (allows -f together with + to convert one date format to another)",
     },
     {
       name: "-n",
-      description:
-        "Only set time on the current machine, instead of all machines in the local group",
+      description: "Obsolete flag, accepted and ignored for compatibility",
+      deprecated: true,
     },
     {
       name: "-R",
@@ -40,18 +39,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "-r",
       description:
-        "Print the date and time represented by the specified number of seconds since the Epoch",
+        "Print the date and time represented by the specified number of seconds since the Epoch, or the last modification time of a file",
       args: {
-        name: "seconds",
+        name: "seconds or filename",
         description:
-          "Number of seconds since the Epoch (00:00:00 UTC, January 1, 1970)",
-      },
-    },
-    {
-      name: "-t",
-      description: "Set the system's value for minutes west of GMT",
-      args: {
-        name: "minutes_west",
+          "Seconds since the Epoch (00:00:00 UTC, January 1, 1970; decimal, octal or hex) or a file name",
+        template: "filepaths",
       },
     },
     {
@@ -63,16 +56,25 @@ const completionSpec: Fig.Spec = {
       name: "-v",
       description:
         "Adjust and print (but don't set) the second, minute, hour, month day, week day, month, or year according to val",
+      isRepeatable: true,
       args: {
         name: "val",
         description: "[+|-]val[ymwdHMS]",
+      },
+    },
+    {
+      name: "-z",
+      description:
+        "Change to the specified timezone just before printing the time",
+      args: {
+        name: "output_zone",
       },
     },
   ],
   args: {
     name: "new_time OR output_fmt",
     description:
-      "New_time: [[[mm]dd]HH]MM[[cc]yy][.ss], output_fmt: '+' followed by user-defined format string",
+      "New_time: [[[mm]dd]HH]MM[[cc]yy][.ss] (or new_date when -f is used), output_fmt: '+' followed by user-defined format string",
     isOptional: true,
     isDangerous: true,
   },
