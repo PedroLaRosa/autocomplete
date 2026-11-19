@@ -1,7 +1,16 @@
+// pkill (macOS 15.5 BSD pkill/pgrep, adv_cmds-235 from the Apple OSS mirror, man page dated 2020-10-05, 2026-11-19).
+// Source: pkill.1 and pkill.c read from github.com/apple-oss-distributions/adv_cmds (not run on macOS; no option
+// changes in adv_cmds-237). The procps-ng (Linux) flags the spec already listed were re-checked against
+// `pkill --help` of procps-ng 4.0.4 (run locally) and kept; no new Linux-only flags were added.
+const listArg = (name: string, description: string): Fig.Arg => ({
+  name,
+  description: `Comma-separated list of ${description}`,
+});
+
 const completionSpec: Fig.Spec = {
   name: "pkill",
   description:
-    "Send  the  specified  signal  (by default SIGTERM) to each specified process",
+    "Send the specified signal (by default SIGTERM) to each specified process",
   options: [
     {
       name: "--signal",
@@ -68,19 +77,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-g", "--pgroup"],
-      description: "Match listed process group IDs",
-      args: {
-        name: "PGID",
-        isVariadic: true,
-      },
+      description:
+        "Match listed process group IDs (zero means the group of pkill itself)",
+      args: listArg("PGID", "process group IDs"),
     },
     {
       name: ["-G", "--group"],
       description: "Match real group IDs",
-      args: {
-        name: "GID",
-        isVariadic: true,
-      },
+      args: listArg("GID", "real group IDs or names"),
     },
     {
       name: ["-i", "--ignore-case"],
@@ -104,42 +108,48 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-P", "--parent"],
       description: "Match only child processes of the given parent",
-      args: {
-        name: "PPID",
-        isVariadic: true,
-      },
+      args: listArg("PPID", "parent process IDs"),
     },
     {
       name: ["-s", "--session"],
-      description: "Match session IDs",
-      args: {
-        name: "SID",
-        isVariadic: true,
-      },
+      description: "Match session IDs (Linux)",
+      args: listArg("SID", "session IDs"),
     },
     {
       name: ["-t", "--terminal"],
-      description: "Match by controlling terminal",
-      args: {
-        name: "tty",
-        isVariadic: true,
-      },
+      description:
+        "Match by controlling terminal (a single dash matches processes without one)",
+      args: listArg("tty", "terminal names"),
     },
     {
       name: ["-u", "--euid"],
       description: "Match by effective IDs",
-      args: {
-        name: "ID",
-        isVariadic: true,
-      },
+      args: listArg("ID", "effective user IDs or names"),
     },
     {
       name: ["-U", "--uid"],
       description: "Match by real IDs",
-      args: {
-        name: "ID",
-        isVariadic: true,
-      },
+      args: listArg("ID", "real user IDs or names"),
+    },
+    {
+      name: "-I",
+      description:
+        "Request confirmation before attempting to signal each process (macOS)",
+    },
+    {
+      name: "-a",
+      description:
+        "Include process ancestors in the match list; by default pkill and its ancestors are excluded (macOS)",
+    },
+    {
+      name: "-l",
+      description:
+        "Long output; display the kill command used for each process killed (macOS)",
+    },
+    {
+      name: "-v",
+      description:
+        "Reverse the sense of the matching; select processes that do not match",
     },
     {
       name: ["-x", "--exact"],
@@ -154,8 +164,9 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: ["-L", "logpidfile"],
-      description: "Fail if PID file is not locked",
+      name: ["-L", "--logpidfile"],
+      description:
+        "Fail if PID file is not locked (macOS: it must be locked with flock(2) or created with pidfile(3))",
     },
     {
       name: ["-r", "--runstates"],
@@ -195,6 +206,8 @@ const completionSpec: Fig.Spec = {
     name: "pattern",
     description:
       "Specifies an Extended Regular Expression for matching against the process names or command lines",
+    isOptional: true,
+    isVariadic: true,
   },
 };
 export default completionSpec;
