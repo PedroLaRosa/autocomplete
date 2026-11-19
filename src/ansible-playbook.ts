@@ -1,3 +1,4 @@
+// ansible-playbook v2.22.0 (ansible-core latest on PyPI, 2026-11-19). Source: `ansible-playbook --help` of ansible-core 2.22.0 run from a venv, plus ansible/cli/arguments/option_helpers.py for the deprecated --inventory-file alias (removed in 2.23)
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const completionSpec: Fig.Spec = {
@@ -12,12 +13,13 @@ const completionSpec: Fig.Spec = {
   },
   options: [
     {
-      name: "--ask-vault-pass",
+      name: ["--ask-vault-password", "--ask-vault-pass", "-J"],
       description: "Ask for vault password",
+      exclusiveOn: ["--vault-password-file", "--vault-pass-file"],
     },
     {
       name: "--flush-cache",
-      description: "Clears the fact cache for every host in inventory",
+      description: "Clear the fact cache for every host in inventory",
     },
     {
       name: "--force-handlers",
@@ -39,21 +41,21 @@ const completionSpec: Fig.Spec = {
       name: "--skip-tags",
       description:
         "Only run plays and tasks whose tags do not match these values",
+      isRepeatable: true,
       args: {
         name: "tags",
       },
     },
     {
       name: "--start-at-task",
-      description:
-        "Start the playbook at the task matching this name one-step-at-a-time",
+      description: "Start the playbook at the task matching this name",
       args: {
         name: "task name",
       },
     },
     {
       name: "--step",
-      description: "Execute one-step-at-a-time",
+      description: "One-step-at-a-time: confirm each task before running",
     },
     {
       name: "--syntax-check",
@@ -62,14 +64,17 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--vault-id",
-      description: "Specify the vault identity to use",
+      description: "The vault identity to use",
+      isRepeatable: true,
       args: {
         name: "vault ID",
       },
     },
     {
-      name: "--vault-password-file",
-      description: "Specify a vault password file",
+      name: ["--vault-password-file", "--vault-pass-file"],
+      description: "Vault password file",
+      isRepeatable: true,
+      exclusiveOn: ["--ask-vault-password", "--ask-vault-pass", "-J"],
       args: {
         name: "vault password file",
         template: ["filepaths"],
@@ -78,7 +83,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--version",
       description:
-        "Show program's version number, config file location, configured module search path, module location and executable location",
+        "Show program's version number, config file location, configured module search path, module location, executable location",
     },
     {
       name: ["--check", "-C"],
@@ -88,11 +93,12 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--diff", "-D"],
       description:
-        "When changing (small) files and templates, show the differences in those files",
+        "When changing (small) files and templates, show the differences in those files; works great with --check",
     },
     {
       name: ["--module-path", "-M"],
       description: "Prepend colon-separated path(s) to module library",
+      isRepeatable: true,
       args: {
         name: "module path",
         template: ["folders"],
@@ -102,6 +108,7 @@ const completionSpec: Fig.Spec = {
       name: ["--extra-vars", "-e"],
       description:
         "Set additional variables as key=value or YAML/JSON, if filename prepend with @",
+      isRepeatable: true,
       args: {
         name: "extra vars",
       },
@@ -115,11 +122,22 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--help", "-h"],
-      description: "Show help for ansible",
+      description: "Show help for ansible-playbook",
     },
     {
       name: ["--inventory", "-i"],
       description: "Specify inventory host path or comma separated host list",
+      isRepeatable: true,
+      args: {
+        name: "inventory",
+      },
+    },
+    {
+      name: "--inventory-file",
+      description:
+        "Deprecated alias of --inventory, removed in 2.23; use -i or --inventory",
+      deprecated: true,
+      isRepeatable: true,
       args: {
         name: "inventory",
       },
@@ -134,25 +152,20 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--tags", "-t"],
       description: "Only run plays and tasks tagged with these values",
+      isRepeatable: true,
       args: {
         name: "tags",
       },
     },
     {
       name: ["--verbose", "-v"],
-      description: "Enable verbose mode",
-    },
-    {
-      name: "-vvv",
-      description: "Enable very verbose mode",
-    },
-    {
-      name: "-vvvv",
-      description: "Enable connection debug mode",
+      description:
+        "Print more debug messages; -vvv is a reasonable level to start, connection debugging might require -vvvv",
+      isRepeatable: 6,
     },
     {
       name: "--become-method",
-      description: "Privilege escalation method to use",
+      description: "Privilege escalation method to use (default: sudo)",
       args: {
         name: "become method",
         suggestions: [
@@ -170,22 +183,33 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--become-user",
-      description: "Privilege escalation user to use",
+      description: "Run operations as this user (default: root)",
       args: {
         name: "become user",
       },
     },
     {
       name: ["--ask-become-pass", "-K"],
-      description: "Prompt for privilege escalation password",
+      description: "Ask for privilege escalation password",
+      exclusiveOn: ["--become-password-file", "--become-pass-file"],
+    },
+    {
+      name: ["--become-password-file", "--become-pass-file"],
+      description: "Become password file",
+      exclusiveOn: ["--ask-become-pass", "-K"],
+      args: {
+        name: "become password file",
+        template: ["filepaths"],
+      },
     },
     {
       name: ["--become", "-b"],
-      description: "Run operations with become",
+      description:
+        "Run operations with become (does not imply password prompting)",
     },
     {
       name: ["--private-key", "--key-file"],
-      description: "Use this fole to authenticate the connection",
+      description: "Use this file to authenticate the connection",
       args: {
         name: "private key",
         template: ["filepaths"],
@@ -206,7 +230,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "-ssh-extra-args",
+      name: "--ssh-extra-args",
       description: "Extra arguments to pass to (only) ssh",
       args: {
         name: "SSH extra args",
@@ -228,7 +252,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--connection", "-c"],
-      description: "Connection type to use",
+      description: "Connection type to use (default: ssh)",
       args: {
         name: "connection type",
       },
@@ -236,12 +260,22 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--ask-pass", "-k"],
       description: "Ask for connection password",
+      exclusiveOn: ["--connection-password-file", "--conn-pass-file"],
+    },
+    {
+      name: ["--connection-password-file", "--conn-pass-file"],
+      description: "Connection password file",
+      exclusiveOn: ["--ask-pass", "-k"],
+      args: {
+        name: "connection password file",
+        template: ["filepaths"],
+      },
     },
     {
       name: ["--user", "-u"],
       description: "Connect as this user",
       args: {
-        name: "user",
+        name: "remote user",
       },
     },
   ],
