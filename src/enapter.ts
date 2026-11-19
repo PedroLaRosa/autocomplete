@@ -1,3 +1,49 @@
+// Enapter CLI v0.2.0 (the `enapter` binary: last release of the v1 line, tag v0.2.0, still what Homebrew's `enapter` formula installs, 2026-11-19).
+// Source: urfave/cli command definitions in internal/app/enaptercli/cmd_*.go at tag v0.2.0 of Enapter/enapter-cli, not a live run.
+// The newest upstream release, v3.1.0 (tag commit 2026-05-15), is a rewrite (site/device/blueprint/rule-engine/connection commands) that ships as the
+// separate `enapter3` binary (Homebrew `enapter@3`), so it is NOT described here and needs its own src/enapter3.ts.
+// Hidden per-command flags (--token, --api-host, --gql-api-url, --ws-api-url) are intentionally left out.
+const hardwareIdOption: Fig.Option = {
+  name: "--hardware-id",
+  description:
+    "Hardware ID of the device; can be obtained in cloud.enapter.com",
+  isRequired: true,
+  args: {
+    name: "ID",
+  },
+};
+
+const ruleIdOption: Fig.Option = {
+  name: "--rule-id",
+  description: "Rule ID; can be obtained in cloud.enapter.com",
+  isRequired: true,
+  args: {
+    name: "ID",
+  },
+};
+
+const helpOption: Fig.Option = {
+  name: ["--help", "-h"],
+  description: "Show help",
+};
+
+const uploadTimeoutOption: Fig.Option = {
+  name: "--timeout",
+  description: "Time to wait for blueprint uploading (default: 30s)",
+  args: {
+    name: "timeout",
+  },
+};
+
+const helpSubcommand: Fig.Subcommand = {
+  name: ["help", "h"],
+  description: "Shows a list of commands or help for one command",
+  args: {
+    name: "command",
+    isOptional: true,
+  },
+};
+
 const completionSpec: Fig.Spec = {
   name: "enapter",
   description:
@@ -11,87 +57,50 @@ const completionSpec: Fig.Spec = {
           name: "upload",
           description: "Upload blueprint to a device",
           options: [
-            {
-              name: "--hardware-id",
-              description:
-                "Hardware ID (UCM ID) of the device; can be obtained in cloud.enapter.com",
-              args: {
-                name: "ID",
-              },
-            },
+            hardwareIdOption,
             {
               name: "--blueprint-dir",
               description: "Directory which contains blueprint file",
+              isRequired: true,
               args: {
-                template: "filepaths",
+                name: "dir",
+                template: "folders",
               },
             },
-            {
-              name: "--timeout",
-              description:
-                "Time to wait for blueprint uploading (default: 30s)",
-              args: {
-                name: "timeout",
-                isOptional: true,
-              },
-            },
-            {
-              name: ["--help", "-h"],
-              description: "Show help",
-            },
+            uploadTimeoutOption,
+            helpOption,
           ],
         },
         {
           name: "logs",
           description: "Stream logs from a device",
-          options: [
-            {
-              name: "--hardware-id",
-              description:
-                "Hardware ID (UCM ID) of the device; can be obtained in cloud.enapter.com",
-              args: {
-                name: "ID",
-              },
-            },
-            {
-              name: ["--help", "-h"],
-              description: "Show help",
-            },
-          ],
+          options: [hardwareIdOption, helpOption],
         },
         {
           name: "upload-logs",
           description: "Show blueprint uploading logs",
           options: [
+            hardwareIdOption,
             {
-              name: "--hardware-id",
-              description:
-                "Hardware ID (UCM ID) of the device; can be obtained in cloud.enapter.com",
+              name: "--operation-id",
+              description: "Uploading operation ID (optional)",
               args: {
                 name: "ID",
               },
             },
-            {
-              name: ["--help", "-h"],
-              description: "Show help",
-            },
+            uploadTimeoutOption,
+            helpOption,
           ],
         },
         {
           name: "execute",
           description: "Execute command on device",
           options: [
-            {
-              name: "--hardware-id",
-              description:
-                "Hardware ID (UCM ID) of the device; can be obtained in cloud.enapter.com",
-              args: {
-                name: "ID",
-              },
-            },
+            hardwareIdOption,
             {
               name: "--command",
               description: "Command name",
+              isRequired: true,
               args: {
                 name: "command",
               },
@@ -105,19 +114,12 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--show-progress",
-              description:
-                "Enable in-progress responses streaming (default: false)",
+              description: "Enable in-progress responses streaming",
             },
-            {
-              name: ["--help", "-h"],
-              description: "Show help",
-            },
+            helpOption,
           ],
         },
-        {
-          name: "help",
-          description: "Help",
-        },
+        helpSubcommand,
       ],
     },
     {
@@ -128,17 +130,12 @@ const completionSpec: Fig.Spec = {
           name: "update",
           description: "Update rule",
           options: [
-            {
-              name: "--rule-id",
-              description: "Rule ID; can be obtained in cloud.enapter.com",
-              args: {
-                name: "ID",
-              },
-            },
+            ruleIdOption,
             {
               name: "--rule-path",
               description: "Path to file with rule Lua code",
               args: {
+                name: "path",
                 template: "filepaths",
               },
             },
@@ -148,7 +145,6 @@ const completionSpec: Fig.Spec = {
                 "Rule execution interval in milliseconds (default: chosen by the server)",
               args: {
                 name: "interval",
-                isOptional: true,
               },
             },
             {
@@ -157,7 +153,6 @@ const completionSpec: Fig.Spec = {
                 "Version of standard library used by the rule (default: chosen by the server)",
               args: {
                 name: "version",
-                isOptional: true,
               },
             },
             {
@@ -165,53 +160,27 @@ const completionSpec: Fig.Spec = {
               description: "Time to wait for rule update (default: 30s)",
               args: {
                 name: "timeout",
-                isOptional: true,
               },
             },
-            {
-              name: ["--help", "-h"],
-              description: "Show help",
-            },
+            helpOption,
           ],
         },
         {
           name: "logs",
           description: "Stream logs from a rule",
-          options: [
-            {
-              name: "--rule-id",
-              description: "Rule ID; can be obtained in cloud.enapter.com",
-              args: {
-                name: "ID",
-              },
-            },
-            {
-              name: ["--help", "-h"],
-              description: "Show help",
-            },
-          ],
+          options: [ruleIdOption, helpOption],
         },
+        helpSubcommand,
       ],
     },
-    {
-      name: "help",
-      description: "Shows a list of commands or help for one command",
-      args: {
-        name: "command",
-      },
-    },
+    helpSubcommand,
   ],
   options: [
-    {
-      name: ["--help", "-h"],
-      description: "Show help",
-    },
+    helpOption,
     {
       name: ["--version", "-v"],
       description: "Show version",
     },
   ],
-  // Only uncomment if enapter takes an argument
-  // args: {}
 };
 export default completionSpec;
