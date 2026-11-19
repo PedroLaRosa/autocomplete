@@ -1,6 +1,11 @@
+// Fisher v4.4.8 (GitHub tag jorgebucaran/fisher 4.4.8, the latest release tag; 2026-11-19).
+// Source: static read of functions/fisher.fish (usage text and command dispatch), completions/fisher.fish and README.md at upstream HEAD 791da64 (version string 4.4.8, same as the latest tag), not a live run.
+// The `fisher list` generator no longer cuts the first 19 characters of the output: v4 prints one plugin per line. Added the uninstall and ls aliases.
+// The plugin suggestions are a hand-picked list; their pinned versions were checked against the plugins' latest release tags and READMEs (tide v6, gitnow 2.13.0).
+
 const pluginList = [
   {
-    name: "IlanCosman/tide@v5",
+    name: "IlanCosman/tide@v6",
     displayName: "Tide",
     description: "[Prompt] - 🌊 The ultimate Fish prompt",
     icon: "fig://icon?type=box",
@@ -19,7 +24,7 @@ const pluginList = [
     displayName: "Hydro",
     description: "[Prompt] - Minimal, lag-free prompt with async Git status",
     icon: "fig://icon?type=box",
-    prority: 97,
+    priority: 97,
   },
   {
     name: "jethrokuan/z",
@@ -61,7 +66,7 @@ const pluginList = [
     icon: "fig://icon?type=package",
   },
   {
-    name: "joseluisq/gitnow@2.10.0",
+    name: "joseluisq/gitnow@2.13.0",
     displayName: "GitNow",
     description: "[Plugin] - Speed up your Git workflow. 🐠",
     icon: "fig://icon?type=package",
@@ -75,12 +80,14 @@ const installedPlugins: Fig.Generator = {
     if (!output) {
       return [];
     }
+    // `fisher list` prints one installed plugin per line
     return output
-      .substring(19)
       .split("\n")
+      .map((p: string) => p.trim())
+      .filter((p: string) => p !== "")
       .map((p: string) => {
         return {
-          name: p.trim(),
+          name: p,
           icon: "fig://icon?type=package",
           description: "Plugin",
         };
@@ -94,12 +101,19 @@ const completionSpec: Fig.Spec = {
   subcommands: [
     {
       name: "install",
-      description: "Install plugin",
+      description: "Install plugins",
       subcommands: pluginList,
+      args: {
+        name: "plugins",
+        description:
+          "Plugins to install: GitHub path (owner/repo[@ref]), gitlab.com/ path or local directory",
+        isVariadic: true,
+        template: "folders",
+      },
     },
     {
-      name: "remove",
-      description: "Remove plugins",
+      name: ["remove", "uninstall"],
+      description: "Remove installed plugins",
       args: {
         name: "installed plugins",
         description: "The plugin you want to remove",
@@ -110,17 +124,18 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "update",
-      description: "Update plugins",
+      description: "Update installed plugins (all of them if none is given)",
       args: {
         name: "installed plugins",
         description: "The plugin you want to update",
+        isOptional: true,
         isVariadic: true,
         generators: installedPlugins,
       },
     },
     {
-      name: "list",
-      description: "List plugins",
+      name: ["list", "ls"],
+      description: "List installed plugins matching regex",
       args: {
         name: "RegEx",
         description: "Search in list with regular expression",
@@ -131,11 +146,11 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["--help", "-h"],
-      description: "Show help for fisher",
+      description: "Print help",
     },
     {
       name: ["--version", "-v"],
-      description: "Show fisher version",
+      description: "Print version",
     },
   ],
 };
