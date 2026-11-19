@@ -1,43 +1,161 @@
-const commonOptions: Fig.Option[] = [
+// VTEX IO CLI (vtex) v4.4.3 (npm latest, 2026-11-19). Source: oclif.manifest.json and command sources read statically from the npm tarballs
+// of vtex@4.4.3 and of its bundled plugins (@vtex/cli-plugin-abtest 0.1.1, autoupdate 0.0.2, deploy 0.3.1, deps 0.1.1, edition 0.1.1, plugins 1.13.2,
+// whoami 0.2.2, workspace 1.2.0), plus @oclif/command and @oclif/plugin-help for `help`/`--version`; nothing was executed.
+// Since v3.0.0 (2021-01) add, config, debug dotnet, infra, lighthouse, logs, redirects, settings, submit, support, test and url are no longer bundled;
+// they are optional plugins (`vtex plugins install <name>`) and are kept here, checked against their latest npm releases (add 0.1.2, config 0.1.2,
+// debug 0.0.1, infra 1.0.0, lighthouse 1.0.0, logs 0.1.1, redirects 1.0.2, settings 0.1.2, submit 1.1.6, support 0.1.3, test 1.0.4, url 0.1.2).
+// Removed upstream in v3 and therefore not in this spec: `vtex local account|welcome|workspace`, `vtex workspace create|info`.
+// Not verified: the list of plugins `vtex plugins install` accepts (it is a remote feature flag); only the packages above are suggested.
+
+const helpOption: Fig.Option = {
+  name: ["--help", "-h"],
+  description: "Shows this help message",
+  priority: 1,
+};
+
+const verboseOption: Fig.Option = {
+  name: ["--verbose", "-v"],
+  description: "Shows debug level logs",
+  priority: 1,
+};
+
+const traceOption: Fig.Option = {
+  name: "--trace",
+  description: "Ensures all requests to VTEX IO are traced",
+  priority: 1,
+};
+
+// Flags accepted by every command of the CLI (`vtex plugins ...` only takes --help and --verbose)
+const commonOptions: Fig.Option[] = [helpOption, verboseOption, traceOption];
+const pluginsCommonOptions: Fig.Option[] = [helpOption, verboseOption];
+
+const yesOption: Fig.Option = {
+  name: ["--yes", "-y"],
+  description: "Answers yes to all prompts",
+};
+
+const forceOption = (description: string): Fig.Option => ({
+  name: ["--force", "-f"],
+  isDangerous: true,
+  description,
+});
+
+const appIdDescription = (action: string): string =>
+  `Name and version of the app ({vendor}.{appname}@{x.x.x}) to ${action}`;
+
+const optionalAppsArg = (action: string): Fig.Arg => ({
+  name: "APPID",
+  description: appIdDescription(action),
+  isOptional: true,
+  isVariadic: true,
+});
+
+const csvPathArg = (description: string): Fig.Arg => ({
+  name: "CSVPATH",
+  description,
+  template: "filepaths",
+});
+
+const promoteSubcommand: Fig.Subcommand = {
+  name: "promote",
+  description:
+    "Promotes the current workspace to master. Only works for production workspaces",
+  options: [
+    ...commonOptions,
+    {
+      name: "--conflict",
+      description:
+        "Defines how to handle data conflict between workspaces. 'master' discards the workspace's conflicting data, 'mine' overrides the master with the workspace, 'abort' aborts the promotion",
+      args: {
+        name: "STRATEGY",
+        default: "master",
+        suggestions: ["master", "mine", "abort"],
+      },
+    },
+  ],
+};
+
+const useSubcommand: Fig.Subcommand = {
+  name: "use",
+  description:
+    "Creates and switches to a new workspace or simply switches to an existing one",
+  args: {
+    name: "WORKSPACE",
+    description: "Name of the workspace to use",
+  },
+  options: [
+    ...commonOptions,
+    {
+      name: ["--production", "-p"],
+      description: "Creates and/or switches to a production workspace",
+    },
+    {
+      name: ["--reset", "-r"],
+      description: "Resets the workspace before switching to it",
+    },
+  ],
+};
+
+const lighthouseSubcommands: Fig.Subcommand[] = [
   {
-    name: ["--help", "-h"],
-    description: "Show help for command",
-    priority: 1,
+    name: "audit",
+    description: "Runs a Lighthouse audit over the specified URL",
+    args: {
+      name: "URL",
+      description: "URL to audit",
+    },
+    options: [
+      ...commonOptions,
+      {
+        name: ["--json", "-j"],
+        description: "Returns the report as a json on stdout",
+      },
+    ],
+  },
+  {
+    name: "show",
+    description: "Shows a previous audit report, filtering by app and/or URL",
+    options: [
+      ...commonOptions,
+      {
+        name: ["--app", "-a"],
+        description: "Filters by app name",
+        args: { name: "APP" },
+      },
+      {
+        name: ["--url", "-u"],
+        description: "Filters by URL",
+        args: { name: "URL" },
+      },
+    ],
   },
 ];
 
 const completion: Fig.Spec = {
   name: "vtex",
   description:
-    "Fig autocomplete for VTEX IO's CLI - VTEX IO's CLI allows you to perform any action necessary to your development process, such as linking local files to the VTEX platform, managing workspaces, and releasing new app versions",
+    "VTEX IO's CLI - perform any action necessary to your development process, such as linking local files to the VTEX platform, managing workspaces, and releasing new app versions",
   subcommands: [
     {
       name: "add",
       description: "Adds the specified app(s) to the manifest's dependencies",
-      args: [
-        {
-          name: "APPID",
-          description:
-            "Name and version ({vendor}.{appname}@{x.x.x}) of the dependency to include in the manifest.json file",
-        },
-        {
-          name: "ITHAPPID",
-          description:
-            "Names and versions ({vendor}.{appname}@{x.x.x}) of the multiple dependencies to include in the manifest.json file",
-          isOptional: true,
-        },
-      ],
-      options: [...commonOptions],
+      args: {
+        name: "APPID",
+        description:
+          "Name and version ({vendor}.{appname}@{x.x.x}) of the dependency to include in the manifest.json file",
+        isVariadic: true,
+      },
+      options: commonOptions,
     },
     {
       name: "autoupdate",
-      description: "Automatically updates VTEX IO's CLI",
+      description: "Updates the VTEX IO's CLI",
       args: {
         name: "CHANNEL",
-        description: "Channel to automatically updates",
+        description: "Release channel to update to (defaults to stable)",
         isOptional: true,
       },
-      options: [...commonOptions],
+      options: [{ name: "--help", description: "Shows this help message" }],
     },
     {
       name: "browse",
@@ -54,14 +172,12 @@ const completion: Fig.Spec = {
         {
           name: ["--qr", "-q"],
           description: "Prints a QR Code on the terminal",
-          priority: 1,
         },
       ],
     },
     {
       name: "config",
-      description: "Env Configuration",
-      options: [...commonOptions],
+      description: "Prints, sets, or resets a configuration value",
       subcommands: [
         {
           name: "get",
@@ -69,8 +185,9 @@ const completion: Fig.Spec = {
           args: {
             name: "CONFIGNAME",
             description: "Configuration to retrieve the value from",
+            suggestions: ["env", "cluster"],
           },
-          options: [...commonOptions],
+          options: commonOptions,
         },
         {
           name: "reset",
@@ -79,8 +196,9 @@ const completion: Fig.Spec = {
           args: {
             name: "CONFIGNAME",
             description: "Name of the configuration to reset",
+            suggestions: ["env", "cluster"],
           },
-          options: [...commonOptions],
+          options: commonOptions,
         },
         {
           name: "set",
@@ -88,25 +206,32 @@ const completion: Fig.Spec = {
           args: [
             {
               name: "CONFIGNAME",
-              description: "Name of the configuration to reset",
+              description: "Name of the configuration",
+              suggestions: ["env", "cluster"],
             },
             {
               name: "VALUE",
               description: "New value of the specified configuration",
             },
           ],
-          options: [...commonOptions],
+          options: commonOptions,
         },
       ],
     },
     {
-      name: "debug dotnet",
-      description: "Debug .NET applications (IDEs only)",
-      args: {
-        name: "DEBUGINST",
-        description: "Name of the .NET application to debug",
-      },
-      options: [...commonOptions],
+      name: "debug",
+      description: "Debug commands",
+      subcommands: [
+        {
+          name: "dotnet",
+          description: "Debug .NET applications (IDEs only)",
+          args: {
+            name: "DEBUGINST",
+            description: "Name of the .NET application to debug",
+          },
+          options: commonOptions,
+        },
+      ],
     },
     {
       name: "deploy",
@@ -114,56 +239,28 @@ const completion: Fig.Spec = {
         "Publishes an app as a stable version. Only works for apps previously published as a release candidate version [see vtex publish --help]",
       args: {
         name: "APPID",
-        description: "Name and version of the app you want to deploy",
+        description:
+          "Name and version of the app ({vendor}.{appname}@{x.x.x}) you want to deploy",
         isOptional: true,
       },
       options: [
         ...commonOptions,
-        {
-          name: ["--yes", "-y"],
-          description: "Answers yes to all prompts",
-          priority: 1,
-        },
-        {
-          name: ["--force", "-f"],
-          isDangerous: true,
-          description:
-            "(Use with caution.) Ignores the testing period of 7 minutes after publishing an app",
-          priority: 2,
-        },
+        yesOption,
+        forceOption(
+          "Ignores the testing period of 7 minutes after publishing an app (use with caution)"
+        ),
       ],
     },
     {
       name: "deprecate",
       description:
         "Deprecates the specified app, uninstalling and downgrading it to the latest stable version in every VTEX account",
-      args: [
-        {
-          name: "APPID",
-          description:
-            "Name and version of the app ({vendor}.{appname}@{x.x.x}) to deprecate",
-          isOptional: true,
-        },
-        {
-          name: "ITHAPPID",
-          description:
-            "Names and versions of the multiple apps ({vendor}.{appname}@{x.x.x}) to deprecate",
-          isOptional: true,
-        },
-      ],
-      options: [
-        ...commonOptions,
-        {
-          name: ["--yes", "-y"],
-          description: "Answers yes to all prompts",
-          priority: 1,
-        },
-      ],
+      args: optionalAppsArg("deprecate"),
+      options: [...commonOptions, yesOption],
     },
     {
       name: "deps",
-      description:
-        "Displays the differences between the dependencies of two distinct workspaces. If a single parameter is passed, the specified workspace's dependencies are compared with the master's. If no parameter is passed, the diff is made between the current workspace and master",
+      description: "Lists, compares, or updates dependencies",
       subcommands: [
         {
           name: "diff",
@@ -177,14 +274,15 @@ const completion: Fig.Spec = {
             },
             {
               name: "WORKSPACE2",
-              description: "[default: master] Second workspace for comparison",
+              description: "Second workspace for comparison",
               isOptional: true,
+              default: "master",
             },
           ],
-          options: [...commonOptions],
+          options: commonOptions,
         },
         {
-          name: "list",
+          name: ["list", "ls"],
           description:
             "Displays the complete dependency tree of the current workspace",
           options: [
@@ -192,12 +290,10 @@ const completion: Fig.Spec = {
             {
               name: ["--keys", "-k"],
               description: "Shows only key dependencies",
-              priority: 1,
             },
             {
               name: ["--npm", "-n"],
               description: "Includes dependencies from the npm registry",
-              priority: 2,
             },
           ],
         },
@@ -205,46 +301,31 @@ const completion: Fig.Spec = {
           name: "update",
           description:
             "Updates a dependency of the current workspace. If not specified which dependency, it updates all of them",
-          args: [
-            {
-              name: "APPID",
-              description:
-                "Name and version of the app ({vendor}.{appname}@{x.x.x}) to update",
-              isOptional: true,
-            },
-            {
-              name: "ITHAPPID",
-              description:
-                "Names and versions of the multiple apps ({vendor}.{appname}@{x.x.x}) to update",
-              isOptional: true,
-            },
-          ],
-          options: [...commonOptions],
+          args: optionalAppsArg("update"),
+          options: commonOptions,
         },
       ],
     },
     {
       name: "edition",
-      description:
-        "Displays the Edition App version installed on the current account",
+      description: "Prints or updates the Edition App of the current account",
       subcommands: [
         {
           name: "get",
           description:
             "Displays the Edition App version installed on the current account",
-          options: [...commonOptions],
+          options: commonOptions,
         },
         {
           name: "set",
           description: "Sets the Edition App version for the current account",
           args: {
             name: "EDITION",
-            description: "Name of the Edition App to install",
+            description: "Name and version of the Edition App to install",
           },
-          options: [...commonOptions],
+          options: commonOptions,
         },
       ],
-      options: [...commonOptions],
     },
     {
       name: "help",
@@ -255,17 +336,15 @@ const completion: Fig.Spec = {
         isOptional: true,
       },
       options: [
-        ...commonOptions,
         {
           name: "--all",
           description: "Displays all commands available in the CLI",
-          priority: 1,
         },
       ],
     },
     {
       name: "infra",
-      description: "Infra service",
+      description: "Installs, updates, or lists infra services",
       subcommands: [
         {
           name: "install",
@@ -275,10 +354,10 @@ const completion: Fig.Spec = {
             description:
               "Name and version of the service ({vendor}.{servicename}@{x.x.x}) to install",
           },
-          options: [...commonOptions],
+          options: commonOptions,
         },
         {
-          name: "list",
+          name: ["list", "ls"],
           description: "Lists installed infra services",
           args: {
             name: "NAME",
@@ -290,139 +369,48 @@ const completion: Fig.Spec = {
             {
               name: ["--available", "-a"],
               description: "Lists services that are available to install",
-              priority: 1,
             },
             {
-              name: ["--filter=filter", "-f"],
+              name: ["--filter", "-f"],
               description: "Lists services that contain the specified word",
-              priority: 2,
+              args: { name: "FILTER" },
             },
           ],
         },
         {
           name: "update",
           description: "Updates all installed infra services",
-          options: [...commonOptions],
+          options: commonOptions,
         },
       ],
-      options: [...commonOptions],
     },
     {
       name: "init",
       description:
         "Copies starting files and folders from VTEX boilerplates into your local directories",
-      options: [...commonOptions],
+      args: {
+        name: "PROJECTNAME",
+        description: "Name of the folder to create the project in",
+        isOptional: true,
+      },
+      options: commonOptions,
     },
     {
       name: "install",
       description:
         "Installs an app on the current workspace. If not specified which one, it defaults to the app in the current directory",
-      args: [
-        {
-          name: "APPID",
-          description:
-            "Name and version of the app ({vendor}.{appname}@{x.x.x}) to install",
-          isOptional: true,
-        },
-        {
-          name: "ITHAPPID",
-          description:
-            "Names and versions of the multiple apps ({vendor}.{appname}@{x.x.x}) to install",
-          isOptional: true,
-        },
-      ],
+      args: optionalAppsArg("install"),
       options: [
         ...commonOptions,
-        {
-          name: ["--force", "-f"],
-          isDangerous: true,
-          description:
-            "Installs the specified app without checking for route conflicts",
-          priority: 1,
-        },
+        forceOption(
+          "Installs the specified app without checking for route conflicts"
+        ),
       ],
     },
     {
-      name: "lighthouse",
-      description: "Runs a Lighthouse audit over the specified URL",
-      subcommands: [
-        {
-          name: "audit",
-          description: "Runs a Lighthouse audit over the specified URL",
-          args: {
-            name: "URL",
-            description: "URL to audit",
-          },
-          options: [
-            ...commonOptions,
-            {
-              name: ["--json", "-j"],
-              description: "Returns the report as a json on stdout",
-              priority: 1,
-            },
-          ],
-        },
-        {
-          name: "show",
-          description:
-            "Shows a previous audit report, filtering by app and/or URL",
-          options: [
-            ...commonOptions,
-            {
-              name: ["--app=app", "-a"],
-              description: "Filters by app name",
-              priority: 1,
-            },
-            {
-              name: ["--url=url", "-u"],
-              description: "Filters by URL",
-              priority: 2,
-            },
-          ],
-        },
-      ],
-      options: [...commonOptions],
-    },
-    {
-      name: "lh",
-      description: "Runs a Lighthouse audit over the specified URL",
-      subcommands: [
-        {
-          name: "audit",
-          description: "Runs a Lighthouse audit over the specified URL",
-          args: {
-            name: "URL",
-            description: "URL to audit",
-          },
-          options: [
-            ...commonOptions,
-            {
-              name: ["--json", "-j"],
-              description: "Returns the report as a json on stdout",
-              priority: 1,
-            },
-          ],
-        },
-        {
-          name: "show",
-          description:
-            "Shows a previous audit report, filtering by app and/or URL",
-          options: [
-            ...commonOptions,
-            {
-              name: ["--app=app", "-a"],
-              description: "Filters by app name",
-              priority: 1,
-            },
-            {
-              name: ["--url=url", "-u"],
-              description: "Filters by URL",
-              priority: 2,
-            },
-          ],
-        },
-      ],
-      options: [...commonOptions],
+      name: ["lighthouse", "lh"],
+      description: "Runs or displays a Lighthouse audit",
+      subcommands: lighthouseSubcommands,
     },
     {
       name: "link",
@@ -431,55 +419,57 @@ const completion: Fig.Spec = {
       options: [
         ...commonOptions,
         {
-          name: ["--account=account", "-a"],
+          name: ["--account", "-a"],
           description:
             "Starts a development session in the specified account. Must be paired with the '--workspace' flag",
-          priority: 1,
+          args: { name: "ACCOUNT" },
         },
         {
           name: ["--clean", "-c"],
           description: "Cleans builder cache",
-          priority: 2,
         },
         {
           name: ["--setup", "-s"],
           description:
             "Sets up typing definitions before linking the app [see vtex setup --help]",
-          priority: 3,
         },
         {
           name: ["--unsafe", "-u"],
           description: "Allows linking the app despite Typescript errors",
-          priority: 4,
         },
         {
-          name: ["--workspace=workspace", "-w"],
+          name: ["--workspace", "-w"],
           description:
             "Starts a development session in the specified workspace. Can be paired with the '--account' flag to switch from the current account and workspace",
-          priority: 5,
+          args: { name: "WORKSPACE" },
         },
         {
           name: "--no-watch",
           description: "Doesn't watch for file changes after the initial link",
-          priority: 6,
         },
       ],
     },
     {
-      name: "list",
+      name: ["list", "ls"],
       description:
         "Lists the apps installed on the current workspace and account",
-      options: [...commonOptions],
+      options: commonOptions,
     },
     {
-      name: "local token",
-      description:
-        "Prints the user's auth token and copies it to the clipboard",
-      options: [...commonOptions],
+      name: "local",
+      description: "Local commands",
+      subcommands: [
+        {
+          name: "token",
+          description:
+            "Prints the user's auth token and copies it to the clipboard",
+          options: commonOptions,
+        },
+      ],
     },
     {
       name: "login",
-      description: "Login to a VTEX account",
+      description: "Logs in to a VTEX account",
       args: {
         name: "ACCOUNT",
         description: "Account name to log in",
@@ -488,16 +478,16 @@ const completion: Fig.Spec = {
       options: [
         ...commonOptions,
         {
-          name: ["--workspace=workspace", "-w"],
+          name: ["--workspace", "-w"],
           description: "Logs in the specified workspace",
-          priority: 1,
+          args: { name: "WORKSPACE" },
         },
       ],
     },
     {
       name: "logout",
       description: "Logs out of the current VTEX account",
-      options: [...commonOptions],
+      options: commonOptions,
     },
     {
       name: "logs",
@@ -513,83 +503,163 @@ const completion: Fig.Spec = {
           name: ["--all", "-a"],
           description:
             "Shows logs of every app installed on the current account",
-          priority: 1,
         },
         {
           name: ["--past", "-p"],
           description: "Shows previous logs of the specified app",
-          priority: 2,
         },
       ],
     },
+    {
+      name: "plugins",
+      description: "Manages the CLI plugins",
+      subcommands: [
+        {
+          name: ["install", "add"],
+          description: "Installs a plugin into the CLI",
+          args: {
+            name: "PLUGIN",
+            description:
+              "Plugin to install: a name (e.g. lighthouse), an npm package (@vtex/cli-plugin-name) or a git repository URL",
+            isVariadic: true,
+            suggestions: [
+              "add",
+              "config",
+              "debug",
+              "infra",
+              "lighthouse",
+              "logs",
+              "redirects",
+              "settings",
+              "submit",
+              "support",
+              "test",
+              "url",
+            ],
+          },
+          options: [
+            ...pluginsCommonOptions,
+            {
+              name: ["--force", "-f"],
+              description:
+                "Refetches all packages, even the ones that were previously installed",
+            },
+          ],
+        },
+        {
+          name: "link",
+          description: "Links a plugin into the CLI for development",
+          args: {
+            name: "PATH",
+            description: "Plugin path",
+            template: "folders",
+          },
+          options: pluginsCommonOptions,
+        },
+        {
+          name: "list",
+          description: "Lists all plugins installed on your machine",
+          options: [
+            {
+              name: "--core",
+              description: "Shows core plugins",
+            },
+          ],
+        },
+        {
+          name: "source",
+          description: "Lists all plugins supported by VTEX",
+          options: pluginsCommonOptions,
+        },
+        {
+          name: ["uninstall", "unlink", "remove"],
+          description: "Removes a plugin from the CLI",
+          args: {
+            name: "PLUGIN",
+            description: "Plugin to uninstall",
+            isOptional: true,
+            isVariadic: true,
+          },
+          options: pluginsCommonOptions,
+        },
+        {
+          name: "update",
+          description: "Updates all plugins installed on your machine",
+          options: pluginsCommonOptions,
+        },
+      ],
+    },
+    promoteSubcommand,
     {
       name: "publish",
       description:
         "Publishes the app in the current directory as a release candidate version",
       options: [
         ...commonOptions,
+        forceOption("Publishes the app independently of SemVer rules"),
         {
-          name: ["--force", "-f"],
-          isDangerous: true,
-          description: "Publishes the app independently of SemVer rules",
-          priority: 1,
-        },
-        {
-          name: ["--tag=tag", "-t"],
+          name: ["--tag", "-t"],
           description: "Adds the specified tag to the release",
-          priority: 2,
+          args: { name: "TAG" },
         },
         {
-          name: ["--workspace=workspace", "-w"],
+          name: ["--workspace", "-w"],
           description: "Uses the specified workspace in the app registry",
-          priority: 3,
+          args: { name: "WORKSPACE" },
         },
-        {
-          name: ["--yes", "-y"],
-          description: "Answers yes to all prompts",
-          priority: 4,
-        },
+        yesOption,
       ],
     },
     {
       name: "redirects",
-      description: "Redirects from the current account and workspace",
+      description:
+        "Imports, exports, or removes redirects from the current account and workspace",
       subcommands: [
         {
           name: "delete",
           description:
             "Deletes redirects from the current account and workspace",
-          args: {
-            name: "CSVPATH",
-            description: "CSV file containing the URL paths to be deleted",
-          },
-          options: [...commonOptions],
+          args: csvPathArg("CSV file containing the URL paths to delete"),
+          options: commonOptions,
         },
         {
           name: "export",
           description:
             "Exports all redirects defined in the current account and workspace to a CSV file",
-          args: {
-            name: "CSVPATH",
-            description: "Name of the CSV file",
-          },
-          options: [...commonOptions],
+          args: csvPathArg("Name of the CSV file"),
+          options: [
+            ...commonOptions,
+            {
+              name: ["--concurrency", "-c"],
+              description: "Maximum number of concurrent requests",
+              args: { name: "CONCURRENCY", default: "5" },
+            },
+            {
+              name: ["--batchSize", "-b"],
+              description: "Batch size for writing to file",
+              args: { name: "BATCHSIZE", default: "100" },
+            },
+            {
+              name: ["--maxRetries", "-r"],
+              description: "Maximum number of retries for failed requests",
+              args: { name: "MAXRETRIES", default: "5" },
+            },
+          ],
         },
         {
           name: "import",
           description:
             "Imports redirects from a CSV file to the current account and workspace",
+          args: csvPathArg("Name of the CSV file"),
           options: [
             ...commonOptions,
             {
               name: ["--reset", "-r"],
               description: "Removes all redirects previously defined",
-              priority: 1,
             },
           ],
         },
       ],
-      options: [...commonOptions],
     },
     {
       name: "release",
@@ -598,27 +668,31 @@ const completion: Fig.Spec = {
       args: [
         {
           name: "RELEASETYPE",
-          description: "Release type (major, minor, or patch)",
+          description: "Release type",
           isOptional: true,
+          default: "patch",
+          suggestions: ["pre", "major", "minor", "patch", "prerelease"],
         },
         {
           name: "TAGNAME",
-          description: "Tag name (e.g., stable, beta)",
+          description: "Tag name",
           isOptional: true,
+          default: "beta",
+          suggestions: ["stable", "beta", "hkignore"],
         },
       ],
-      options: [...commonOptions],
+      options: commonOptions,
     },
     {
       name: "settings",
-      description: "VTEX CLI Settings",
+      description: "Prints, enables, or disables an app setting",
       subcommands: [
         {
           name: "get",
-          description: "",
+          description: "Prints the settings of an app",
           args: [
             {
-              name: "APNAME",
+              name: "APPNAME",
               description: "Name of the app to check the available settings",
             },
             {
@@ -627,7 +701,7 @@ const completion: Fig.Spec = {
               isOptional: true,
             },
           ],
-          options: [...commonOptions],
+          options: commonOptions,
         },
         {
           name: "set",
@@ -646,7 +720,7 @@ const completion: Fig.Spec = {
               description: "Value of the setting",
             },
           ],
-          options: [...commonOptions],
+          options: commonOptions,
         },
         {
           name: "unset",
@@ -661,10 +735,9 @@ const completion: Fig.Spec = {
               description: "Name of the setting",
             },
           ],
-          options: [...commonOptions],
+          options: commonOptions,
         },
       ],
-      options: [...commonOptions],
     },
     {
       name: "setup",
@@ -675,28 +748,23 @@ const completion: Fig.Spec = {
         {
           name: ["--ignore-linked", "-i"],
           description:
-            "Sets up types from published apps, and ignores types from linked apps",
-          priority: 1,
+            "Sets up types from published apps while ignoring types from linked apps",
         },
         {
           name: "--all",
           description: "Sets up all available typings, configs, and tools",
-          priority: 2,
         },
         {
           name: "--tooling",
           description: "Sets up Prettier, Husky, and ESLint",
-          priority: 3,
         },
         {
           name: "--tsconfig",
           description: "Sets up React and Node TSconfig, if applicable",
-          priority: 4,
         },
         {
           name: "--typings",
           description: "Sets up GraphQL and React typings",
-          priority: 5,
         },
       ],
     },
@@ -706,10 +774,10 @@ const completion: Fig.Spec = {
         "Submits the current app, or an specified one, to validation from VTEX App Store team",
       args: {
         name: "APPID",
-        description: "Name of the app to be validated",
+        description: appIdDescription("submit"),
         isOptional: true,
       },
-      options: [...commonOptions],
+      options: commonOptions,
     },
     {
       name: "support",
@@ -718,7 +786,7 @@ const completion: Fig.Spec = {
         name: "ACCOUNT",
         description: "Name of the account to give support",
       },
-      options: [...commonOptions],
+      options: commonOptions,
     },
     {
       name: "switch",
@@ -730,15 +798,15 @@ const completion: Fig.Spec = {
       options: [
         ...commonOptions,
         {
-          name: ["--workspace=workspace", "-w"],
+          name: ["--workspace", "-w"],
           description: "Moves to the specified workspace",
-          priority: 1,
+          args: { name: "WORKSPACE" },
         },
       ],
     },
     {
       name: "test",
-      description: "Runs unit tests for the app in the current directory",
+      description: "Runs unit or end-to-end tests of the app",
       subcommands: [
         {
           name: "e2e",
@@ -747,22 +815,19 @@ const completion: Fig.Spec = {
           options: [
             ...commonOptions,
             {
-              name: ["--report=report", "-r"],
+              name: ["--report", "-r"],
               description:
                 "Displays the results and state of the specified test ID",
-              priority: 1,
+              args: { name: "TESTID" },
             },
             {
               name: ["--token", "-t"],
               description:
                 "(Not recommended.) Sends your personal authorization token to your testing session, making it available during the tests. It can be dangerous since it exposes your token via the 'authToken' environment variable",
-              priority: 2,
             },
             {
               name: ["--workspace", "-w"],
-              description:
-                "Runs tests for the apps installed on the specified workspace",
-              priority: 3,
+              description: "Runs tests for the apps installed on the workspace",
             },
           ],
         },
@@ -773,92 +838,46 @@ const completion: Fig.Spec = {
             ...commonOptions,
             {
               name: ["--unsafe", "-u"],
-              description: "Ignores Typescript errors",
-              priority: 1,
+              description: "Allows tests with Typescript errors",
             },
           ],
         },
       ],
-      options: [...commonOptions],
     },
     {
       name: "undeprecate",
       description:
         "Reestablishes a deprecated version of an app as a stable version",
-      args: [
-        {
-          name: "APPID",
-          description:
-            "Name and version of the app ({vendor}.{appname}@{x.x.x}) to undeprecate",
-          isOptional: true,
-        },
-        {
-          name: "ITHAPPID",
-          description:
-            "Names and versions of the multiple apps ({vendor}.{appname}@{x.x.x}) to undeprecate",
-          isOptional: true,
-        },
-      ],
-      options: [
-        ...commonOptions,
-        {
-          name: ["--yes", "-y"],
-          description: "Answers yes to all prompts",
-          priority: 1,
-        },
-      ],
+      args: optionalAppsArg("undeprecate"),
+      options: [...commonOptions, yesOption],
     },
     {
       name: "uninstall",
       description:
         "Uninstalls an app from the current workspace. If not specified which app to uninstall, it defaults to the app in the current directory",
-      args: [
-        {
-          name: "APPNAME",
-          description:
-            "Name and version of the app ({vendor}.{appname}@{x.x.x}) to uninstall",
-          isOptional: true,
-        },
-        {
-          name: "ITHAPPNAME",
-          description:
-            "Names and versions of the multiple apps ({vendor}.{appname}@{x.x.x}) to uninstall",
-          isOptional: true,
-        },
-      ],
-      options: [
-        ...commonOptions,
-        {
-          name: ["--yes", "-y"],
-          description: "Answers yes to all prompts",
-          priority: 1,
-        },
-      ],
+      args: {
+        name: "APPNAME",
+        description: "Name of the app to uninstall",
+        isOptional: true,
+        isVariadic: true,
+      },
+      options: [...commonOptions, yesOption],
     },
     {
       name: "unlink",
       description:
         "Unlinks an app from the current workspace. If not specified which app to unlink, it defaults to the app in the current directory",
-      args: [
-        {
-          name: "APPID",
-          description:
-            "Name and version of the app ({vendor}.{appname}@{x.x.x}) to unlink",
-          isOptional: true,
-        },
-        {
-          name: "ITHAPPID",
-          description:
-            "Names and versions of the multiple apps ({vendor}.{appname}@{x.x.x}) to unlink",
-          isOptional: true,
-        },
-      ],
+      args: {
+        name: "APPID",
+        description: "Name of the app to unlink",
+        isOptional: true,
+        isVariadic: true,
+      },
       options: [
         ...commonOptions,
         {
           name: ["--all", "-a"],
           description: "Unlinks all apps",
-          priority: 1,
         },
       ],
     },
@@ -866,92 +885,75 @@ const completion: Fig.Spec = {
       name: "update",
       description:
         "Updates all installed apps to the latest (minor or patch) version. Does not upgrade to another major version",
-      options: [...commonOptions],
+      options: commonOptions,
     },
+    useSubcommand,
     {
       name: "url",
-      description: "Prints base URL for the current account and workspace",
-      options: [...commonOptions],
+      description:
+        "Prints the base URL for the current account, workspace and environment",
+      options: commonOptions,
     },
     {
       name: "whoami",
       description:
         "Prints the current account, workspace, environment, and login details",
-      options: [...commonOptions],
+      options: commonOptions,
     },
     {
       name: "workspace",
-      description: "Workspace from the current account",
+      description: "Manages workspaces",
       subcommands: [
         {
           name: "abtest",
-          description: "A/B tests from running on the current account",
+          description:
+            "Creates, finishes, or displays the status of an A/B test",
           subcommands: [
             {
               name: "finish",
               description:
                 "Stops all A/B tests from running on the current account",
-              options: [...commonOptions],
+              options: commonOptions,
             },
             {
               name: "start",
               description: "Starts a new A/B test on the current workspace",
-              options: [...commonOptions],
+              options: commonOptions,
             },
             {
               name: "status",
               description: "Displays the results of the active A/B tests",
-              options: [...commonOptions],
+              options: commonOptions,
             },
           ],
-          options: [...commonOptions],
         },
         {
           name: "delete",
           description:
             "Deletes one or many workspaces from the current account",
-          args: [
-            {
-              name: "WORKSPACE1",
-              description: "Name of the workspace to delete",
-            },
-            {
-              name: "ITHWORKSPACE",
-              description: "Name of the multiple workspaces to delete",
-              isOptional: true,
-            },
-          ],
+          args: {
+            name: "WORKSPACE",
+            description: "Name of the workspace to delete",
+            isVariadic: true,
+          },
           options: [
             ...commonOptions,
-            {
-              name: ["--force", "-f"],
-              isDangerous: true,
-              description:
-                "Deletes the specified workspace even if it is currently in use",
-              priority: 1,
-            },
-            {
-              name: ["--yes", "-y"],
-              description: "Answers yes to all prompts",
-              priority: 2,
-            },
+            forceOption(
+              "Deletes the specified workspace even if it is currently in use"
+            ),
+            yesOption,
           ],
         },
         {
-          name: "list",
+          name: ["list", "ls"],
           description: "Lists all workspaces of the current account",
-          options: [...commonOptions],
+          options: commonOptions,
         },
-        {
-          name: "promote",
-          description:
-            "Promotes the current workspace to master. Only works for production workspaces",
-          options: [...commonOptions],
-        },
+        promoteSubcommand,
         {
           name: "reset",
           description:
-            "Cleans all configurations of the specified workspace and recreates it with the configurations from master",
+            "Cleans all configurations of a workspace and recreates it with the configurations from master. If not specified which workspace, it defaults to the current one",
           args: {
             name: "WORKSPACENAME",
             description: "Name of the workspace to reset",
@@ -962,13 +964,8 @@ const completion: Fig.Spec = {
             {
               name: ["--production", "-p"],
               description: "Recreates the workspace as a production one",
-              priority: 1,
             },
-            {
-              name: ["--yes", "-y"],
-              description: "Answers yes to all prompts",
-              priority: 2,
-            },
+            yesOption,
           ],
         },
         {
@@ -979,35 +976,22 @@ const completion: Fig.Spec = {
             description: "Name of the workspace",
             isOptional: true,
           },
-          options: [...commonOptions],
+          options: commonOptions,
         },
-        {
-          name: "use",
-          description:
-            "Creates and switches to a new workspace or simply switches to an existing one",
-          args: {
-            name: "WORKSPACE",
-            description: "Name of the workspace to use",
-          },
-          options: [
-            ...commonOptions,
-            {
-              name: ["--production", "-p"],
-              description: "Creates and/or switches to a production workspace",
-              priority: 1,
-            },
-            {
-              name: ["--reset", "-r"],
-              description: "Resets the workspace before switching to it",
-              priority: 2,
-            },
-          ],
-        },
+        useSubcommand,
       ],
-      options: [...commonOptions],
     },
   ],
-  options: [...commonOptions],
+  options: [
+    {
+      name: "--help",
+      description: "Shows help for the CLI or a command",
+    },
+    {
+      name: ["--version", "-v"],
+      description: "Shows the CLI version",
+    },
+  ],
 };
 
 export default completion;
