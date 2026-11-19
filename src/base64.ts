@@ -1,4 +1,4 @@
-// base64 (macOS 15.5 BSD, `man base64` = bintrans(1) dated 2024-01-23, 2026-11-19). Source: apple-oss-distributions/text_cmds tag text_cmds-195 (bintrans/bintrans.1 and bintrans.c option table); not a live run on macOS
+// base64 (macOS 15 BSD, `man base64` = bintrans(1) dated 2024-01-23, 2026-11-19). Source: apple-oss-distributions/text_cmds tag text_cmds-195 (2025-04-30 drop; bintrans/bintrans.1 and bintrans.c option table); not a live run on macOS
 const completionSpec: Fig.Spec = {
   name: "base64",
   description: "Encode and decode using Base64 representation",
