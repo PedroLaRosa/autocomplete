@@ -190,7 +190,8 @@ const commonOptions: Fig.Option[] = [
 
 const brewDebugOption: Fig.Option = {
   name: ["-d", "--debug"],
-  description: "If brewing fails, open an interactive debugging session with access to IRB or a shell inside the temporary build directory",
+  description:
+    "If brewing fails, open an interactive debugging session with access to IRB or a shell inside the temporary build directory",
 };
 
 const postInstallVerboseOption: Fig.Option = {
@@ -200,7 +201,8 @@ const postInstallVerboseOption: Fig.Option = {
 
 const displayTimesOption: Fig.Option = {
   name: "--display-times",
-  description: "Print install times for each package at the end of the run. Enabled by default if $HOMEBREW_DISPLAY_INSTALL_TIMES is set",
+  description:
+    "Print install times for each package at the end of the run. Enabled by default if $HOMEBREW_DISPLAY_INSTALL_TIMES is set",
 };
 
 const keepTmpOption: Fig.Option = {
@@ -211,26 +213,30 @@ const keepTmpOption: Fig.Option = {
 
 const debugSymbolsOption: Fig.Option = {
   name: "--debug-symbols",
-  description: "Generate debug symbols on build. Source will be retained in a cache directory",
+  description:
+    "Generate debug symbols on build. Source will be retained in a cache directory",
   exclusiveOn: ["--cask"],
   dependsOn: ["--build-from-source"],
 };
 
 const interactiveOption: Fig.Option = {
   name: ["-i", "--interactive"],
-  description: "Download and patch formula, then open a shell. This allows the user to run ./configure --help and otherwise determine how to turn the software package into a Homebrew package. If formula has a fetch block, first open a shell with network access after it runs",
+  description:
+    "Download and patch formula, then open a shell. This allows the user to run ./configure --help and otherwise determine how to turn the software package into a Homebrew package. If formula has a fetch block, first open a shell with network access after it runs",
   exclusiveOn: ["--cask"],
 };
 
 const binariesOption: Fig.Option = {
   name: "--binaries",
-  description: "Disable/enable linking of helper executables (default: enabled)",
+  description:
+    "Disable/enable linking of helper executables (default: enabled)",
   exclusiveOn: ["--formula"],
 };
 
 const noBinariesOption: Fig.Option = {
   name: "--no-binaries",
-  description: "Disable/enable linking of helper executables (default: enabled)",
+  description:
+    "Disable/enable linking of helper executables (default: enabled)",
 };
 
 const requireShaOption: Fig.Option = {
@@ -267,7 +273,8 @@ const appimagedirOption: Fig.Option = {
 
 const keyboardLayoutdirOption: Fig.Option = {
   name: "--keyboard-layoutdir",
-  description: "Target location for Keyboard Layouts (default: /Library/Keyboard Layouts)",
+  description:
+    "Target location for Keyboard Layouts (default: /Library/Keyboard Layouts)",
   args: {
     name: "location",
     template: "folders",
@@ -277,7 +284,8 @@ const keyboardLayoutdirOption: Fig.Option = {
 
 const colorpickerdirOption: Fig.Option = {
   name: "--colorpickerdir",
-  description: "Target location for Color Pickers (default: ~/Library/ColorPickers)",
+  description:
+    "Target location for Color Pickers (default: ~/Library/ColorPickers)",
   args: {
     name: "location",
     template: "folders",
@@ -287,7 +295,8 @@ const colorpickerdirOption: Fig.Option = {
 
 const prefpanedirOption: Fig.Option = {
   name: "--prefpanedir",
-  description: "Target location for Preference Panes (default: ~/Library/PreferencePanes)",
+  description:
+    "Target location for Preference Panes (default: ~/Library/PreferencePanes)",
   args: {
     name: "location",
     template: "folders",
@@ -297,7 +306,8 @@ const prefpanedirOption: Fig.Option = {
 
 const qlplugindirOption: Fig.Option = {
   name: "--qlplugindir",
-  description: "Target location for Quick Look Plugins (default: ~/Library/QuickLook)",
+  description:
+    "Target location for Quick Look Plugins (default: ~/Library/QuickLook)",
   args: {
     name: "location",
     template: "folders",
@@ -307,7 +317,8 @@ const qlplugindirOption: Fig.Option = {
 
 const mdimporterdirOption: Fig.Option = {
   name: "--mdimporterdir",
-  description: "Target location for Spotlight Plugins (default: ~/Library/Spotlight)",
+  description:
+    "Target location for Spotlight Plugins (default: ~/Library/Spotlight)",
   args: {
     name: "location",
     template: "folders",
@@ -317,7 +328,8 @@ const mdimporterdirOption: Fig.Option = {
 
 const dictionarydirOption: Fig.Option = {
   name: "--dictionarydir",
-  description: "Target location for Dictionaries (default: ~/Library/Dictionaries)",
+  description:
+    "Target location for Dictionaries (default: ~/Library/Dictionaries)",
   args: {
     name: "location",
     template: "folders",
@@ -347,7 +359,8 @@ const servicedirOption: Fig.Option = {
 
 const inputMethoddirOption: Fig.Option = {
   name: "--input-methoddir",
-  description: "Target location for Input Methods (default: ~/Library/Input Methods)",
+  description:
+    "Target location for Input Methods (default: ~/Library/Input Methods)",
   args: {
     name: "location",
     template: "folders",
@@ -357,7 +370,8 @@ const inputMethoddirOption: Fig.Option = {
 
 const internetPlugindirOption: Fig.Option = {
   name: "--internet-plugindir",
-  description: "Target location for Internet Plugins (default: ~/Library/Internet Plug-Ins)",
+  description:
+    "Target location for Internet Plugins (default: ~/Library/Internet Plug-Ins)",
   args: {
     name: "location",
     template: "folders",
@@ -367,7 +381,8 @@ const internetPlugindirOption: Fig.Option = {
 
 const audioUnitPlugindirOption: Fig.Option = {
   name: "--audio-unit-plugindir",
-  description: "Target location for Audio Unit Plugins (default: ~/Library/Audio/Plug-Ins/Components)",
+  description:
+    "Target location for Audio Unit Plugins (default: ~/Library/Audio/Plug-Ins/Components)",
   args: {
     name: "location",
     template: "folders",
@@ -377,7 +392,8 @@ const audioUnitPlugindirOption: Fig.Option = {
 
 const vstPlugindirOption: Fig.Option = {
   name: "--vst-plugindir",
-  description: "Target location for VST Plugins (default: ~/Library/Audio/Plug-Ins/VST)",
+  description:
+    "Target location for VST Plugins (default: ~/Library/Audio/Plug-Ins/VST)",
   args: {
     name: "location",
     template: "folders",
@@ -387,7 +403,8 @@ const vstPlugindirOption: Fig.Option = {
 
 const vst3PlugindirOption: Fig.Option = {
   name: "--vst3-plugindir",
-  description: "Target location for VST3 Plugins (default: ~/Library/Audio/Plug-Ins/VST3)",
+  description:
+    "Target location for VST3 Plugins (default: ~/Library/Audio/Plug-Ins/VST3)",
   args: {
     name: "location",
     template: "folders",
@@ -397,7 +414,8 @@ const vst3PlugindirOption: Fig.Option = {
 
 const screenSaverdirOption: Fig.Option = {
   name: "--screen-saverdir",
-  description: "Target location for Screen Savers (default: ~/Library/Screen Savers)",
+  description:
+    "Target location for Screen Savers (default: ~/Library/Screen Savers)",
   args: {
     name: "location",
     template: "folders",
@@ -407,7 +425,8 @@ const screenSaverdirOption: Fig.Option = {
 
 const languageOption: Fig.Option = {
   name: "--language",
-  description: "Comma-separated list of language codes to prefer for cask installation. The first matching language is used, otherwise it reverts to the cask's default language. The default value is the language of your system",
+  description:
+    "Comma-separated list of language codes to prefer for cask installation. The first matching language is used, otherwise it reverts to the cask's default language. The default value is the language of your system",
   args: {
     name: "language",
   },
@@ -418,10 +437,7 @@ const formulaOrCaskVariadicArg: Fig.Arg = {
   name: "formula|cask",
   description: "Formula or cask",
   isVariadic: true,
-  generators: [
-    generateAllFormulae,
-    generateAllCasks,
-  ],
+  generators: [generateAllFormulae, generateAllCasks],
 };
 
 const caskOption: Fig.Option = {
@@ -434,10 +450,7 @@ const installedFormulaOrCaskVariadicArg: Fig.Arg = {
   name: "formula|cask",
   description: "Installed formula or cask",
   isVariadic: true,
-  generators: [
-    installedFormulaeGenerator,
-    installedCasksGenerator,
-  ],
+  generators: [installedFormulaeGenerator, installedCasksGenerator],
 };
 
 const formulaOption: Fig.Option = {
@@ -451,10 +464,7 @@ const formulaOrCaskOptionalVariadicArg: Fig.Arg = {
   description: "Formula or cask",
   isOptional: true,
   isVariadic: true,
-  generators: [
-    generateAllFormulae,
-    generateAllCasks,
-  ],
+  generators: [generateAllFormulae, generateAllCasks],
 };
 
 const formulaVariadicArg: Fig.Arg = {
@@ -490,7 +500,8 @@ const tapOptionalVariadicArg: Fig.Arg = {
 
 const rootUrlOption: Fig.Option = {
   name: "--root-url",
-  description: "Use the specified URL as the root of the bottle's URL instead of Homebrew's default",
+  description:
+    "Use the specified URL as the root of the bottle's URL instead of Homebrew's default",
   args: {
     name: "url",
   },
@@ -498,7 +509,8 @@ const rootUrlOption: Fig.Option = {
 
 const rootUrlUsingOption: Fig.Option = {
   name: "--root-url-using",
-  description: "Use the specified download strategy class for downloading the bottle's URL instead of Homebrew's default",
+  description:
+    "Use the specified download strategy class for downloading the bottle's URL instead of Homebrew's default",
   args: {
     name: "root-url-using",
   },
@@ -522,7 +534,8 @@ const dryRunOption2: Fig.Option = {
 
 const writeOnlyOption: Fig.Option = {
   name: "--write-only",
-  description: "Make the expected file modifications without taking any Git actions",
+  description:
+    "Make the expected file modifications without taking any Git actions",
   exclusiveOn: ["--dry-run"],
 };
 
@@ -562,20 +575,24 @@ const completionSpec: Fig.Spec = {
         displayTimesOption,
         {
           name: ["-f", "--force"],
-          description: "Install formulae without checking for previously installed keg-only or non-migrated versions. When installing casks, overwrite existing files (binaries and symlinks are excluded, unless originally from the same cask)",
+          description:
+            "Install formulae without checking for previously installed keg-only or non-migrated versions. When installing casks, overwrite existing files (binaries and symlinks are excluded, unless originally from the same cask)",
           exclusiveOn: ["--adopt"],
         },
         {
           name: ["-n", "--dry-run"],
-          description: "Show what would be installed, but do not actually install anything",
+          description:
+            "Show what would be installed, but do not actually install anything",
         },
         {
           name: "--as-dependency",
-          description: "Install formula or cask as a dependency without marking it as installed on request. Previously requested packages retain their status",
+          description:
+            "Install formula or cask as a dependency without marking it as installed on request. Previously requested packages retain their status",
         },
         {
           name: ["-y", "--no-ask", "--yes"],
-          description: "Do not ask for confirmation before downloading and installing. Ask mode is the default. Enabled by default if $HOMEBREW_NO_ASK is set",
+          description:
+            "Do not ask for confirmation before downloading and installing. Ask mode is the default. Enabled by default if $HOMEBREW_NO_ASK is set",
         },
         {
           name: ["--formula", "--formulae"],
@@ -608,17 +625,20 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--ignore-dependencies",
-          description: "An unsupported Homebrew development option to skip installing any dependencies of any kind. If the dependencies are not already present, the formula will have issues. If you're not developing Homebrew, consider adjusting your PATH rather than using this option",
+          description:
+            "An unsupported Homebrew development option to skip installing any dependencies of any kind. If the dependencies are not already present, the formula will have issues. If you're not developing Homebrew, consider adjusting your PATH rather than using this option",
           exclusiveOn: ["--cask", "--only-dependencies"],
         },
         {
           name: "--only-dependencies",
-          description: "Install the dependencies with specified options but do not install the formula itself",
+          description:
+            "Install the dependencies with specified options but do not install the formula itself",
           exclusiveOn: ["--cask", "--ignore-dependencies"],
         },
         {
           name: "--cc",
-          description: "Attempt to compile using the specified compiler, which should be the name of the compiler's executable, e.g. gcc-9 for GCC 9. In order to use LLVM's clang, specify llvm_clang. To use the Apple-provided clang, specify clang. This option will only accept compilers that are provided by Homebrew or bundled with macOS. Please do not file issues if you encounter errors while using this option",
+          description:
+            "Attempt to compile using the specified compiler, which should be the name of the compiler's executable, e.g. gcc-9 for GCC 9. In order to use LLVM's clang, specify llvm_clang. To use the Apple-provided clang, specify clang. This option will only accept compilers that are provided by Homebrew or bundled with macOS. Please do not file issues if you encounter errors while using this option",
           args: {
             name: "compiler",
             suggestions: ["clang", "llvm_clang", "gcc-9"],
@@ -627,34 +647,40 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-s", "--build-from-source"],
-          description: "Compile formula from source even if a bottle is provided. Dependencies will still be installed from bottles if they are available",
+          description:
+            "Compile formula from source even if a bottle is provided. Dependencies will still be installed from bottles if they are available",
           exclusiveOn: ["--cask", "--build-bottle", "--force-bottle"],
         },
         {
           name: "--force-bottle",
-          description: "Install from a bottle if it exists for the current or newest version of macOS, even if it would not normally be used for installation",
+          description:
+            "Install from a bottle if it exists for the current or newest version of macOS, even if it would not normally be used for installation",
           exclusiveOn: ["--cask", "--build-from-source", "--build-bottle"],
         },
         {
           name: "--include-test",
-          description: "Install testing dependencies required to run brew test formula",
+          description:
+            "Install testing dependencies required to run brew test formula",
           exclusiveOn: ["--cask"],
         },
         {
           name: "--HEAD",
-          description: "If formula defines it, install the HEAD version, aka. main, trunk, unstable, master",
+          description:
+            "If formula defines it, install the HEAD version, aka. main, trunk, unstable, master",
           exclusiveOn: ["--cask"],
         },
         {
           name: "--fetch-HEAD",
-          description: "Fetch the upstream repository to detect if the HEAD installation of the formula is outdated. Otherwise, the repository's HEAD will only be checked for updates when a new stable or development version has been released",
+          description:
+            "Fetch the upstream repository to detect if the HEAD installation of the formula is outdated. Otherwise, the repository's HEAD will only be checked for updates when a new stable or development version has been released",
           exclusiveOn: ["--cask"],
         },
         keepTmpOption,
         debugSymbolsOption,
         {
           name: "--build-bottle",
-          description: "Prepare the formula for eventual bottling during installation, skipping any post-install steps",
+          description:
+            "Prepare the formula for eventual bottling during installation, skipping any post-install steps",
           exclusiveOn: ["--cask", "--build-from-source", "--force-bottle"],
         },
         {
@@ -669,7 +695,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--bottle-arch",
-          description: "Optimise bottles for the specified architecture rather than the oldest architecture supported by the version of macOS the bottles are built on",
+          description:
+            "Optimise bottles for the specified architecture rather than the oldest architecture supported by the version of macOS the bottles are built on",
           args: {
             name: "bottle-arch",
           },
@@ -679,12 +706,14 @@ const completionSpec: Fig.Spec = {
         interactiveOption,
         {
           name: ["-g", "--git"],
-          description: "Create a Git repository, useful for creating patches to the software",
+          description:
+            "Create a Git repository, useful for creating patches to the software",
           exclusiveOn: ["--cask"],
         },
         {
           name: "--overwrite",
-          description: "Delete files that already exist in the prefix while linking",
+          description:
+            "Delete files that already exist in the prefix while linking",
           exclusiveOn: ["--cask"],
         },
         {
@@ -716,13 +745,15 @@ const completionSpec: Fig.Spec = {
         requireShaOption,
         {
           name: "--adopt",
-          description: "Adopt existing artifacts in the destination that are identical to those being installed. Cannot be combined with --force",
+          description:
+            "Adopt existing artifacts in the destination that are identical to those being installed. Cannot be combined with --force",
           exclusiveOn: ["--formula", "--force"],
         },
         skipCaskDepsOption,
         {
           name: "--zap",
-          description: "For use with brew reinstall --cask. Remove all files associated with a cask. May remove files which are shared between applications",
+          description:
+            "For use with brew reinstall --cask. Remove all files associated with a cask. May remove files which are shared between applications",
           exclusiveOn: ["--formula"],
         },
         appdirOption,
@@ -752,20 +783,24 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: ["-f", "--force"],
-          description: "Delete all installed versions of formula. Uninstall even if cask is not installed, overwrite existing files and ignore errors when removing files",
+          description:
+            "Delete all installed versions of formula. Uninstall even if cask is not installed, overwrite existing files and ignore errors when removing files",
         },
         {
           name: ["-n", "--dry-run"],
-          description: "Show what would be uninstalled and autoremoved, but do not actually remove anything",
+          description:
+            "Show what would be uninstalled and autoremoved, but do not actually remove anything",
         },
         {
           name: "--zap",
-          description: "Remove all files associated with a cask. May remove files which are shared between applications",
+          description:
+            "Remove all files associated with a cask. May remove files which are shared between applications",
           exclusiveOn: ["--formula"],
         },
         {
           name: "--ignore-dependencies",
-          description: "Don't fail uninstall, even if formula is a dependency of any installed formulae",
+          description:
+            "Don't fail uninstall, even if formula is a dependency of any installed formulae",
         },
         {
           name: ["--formula", "--formulae"],
@@ -777,7 +812,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "upgrade",
-      description: "Upgrade outdated, unpinned packages using the same options they were originally installed with, plus any appended brew formula options",
+      description:
+        "Upgrade outdated, unpinned packages using the same options they were originally installed with, plus any appended brew formula options",
       args: {
         name: "formula|cask",
         description: "Outdated formula or cask",
@@ -793,27 +829,32 @@ const completionSpec: Fig.Spec = {
         displayTimesOption,
         {
           name: ["-f", "--force"],
-          description: "Install formulae without checking for previously installed keg-only or non-migrated versions. When installing casks, overwrite existing files (binaries and symlinks are excluded, unless originally from the same cask)",
+          description:
+            "Install formulae without checking for previously installed keg-only or non-migrated versions. When installing casks, overwrite existing files (binaries and symlinks are excluded, unless originally from the same cask)",
         },
         {
           name: ["-n", "--dry-run"],
-          description: "Show what would be upgraded, but do not actually upgrade anything",
+          description:
+            "Show what would be upgraded, but do not actually upgrade anything",
         },
         {
           name: ["--minimum-version", "--min-version"],
-          description: "Only upgrade a named formula or cask with an installed version below the given minimum version",
+          description:
+            "Only upgrade a named formula or cask with an installed version below the given minimum version",
           args: {
             name: "version",
           },
         },
         {
           name: "--vulnerable",
-          description: "Only select outdated formulae with open vulnerabilities from OSV.dev. Stop if any candidate cannot be reliably scanned. Implies --formula; dependencies and dependants may also be upgraded. The available version is not guaranteed to fix every finding",
+          description:
+            "Only select outdated formulae with open vulnerabilities from OSV.dev. Stop if any candidate cannot be reliably scanned. Implies --formula; dependencies and dependants may also be upgraded. The available version is not guaranteed to fix every finding",
           exclusiveOn: ["--cask"],
         },
         {
           name: "--severity",
-          description: "Only select findings at or above low, medium, high or critical",
+          description:
+            "Only select findings at or above low, medium, high or critical",
           args: {
             name: "severity",
             suggestions: ["low", "medium", "high", "critical"],
@@ -822,11 +863,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-y", "--no-ask", "--yes"],
-          description: "Do not ask for confirmation before downloading and upgrading. Ask mode is the default. Enabled by default if $HOMEBREW_NO_ASK is set",
+          description:
+            "Do not ask for confirmation before downloading and upgrading. Ask mode is the default. Enabled by default if $HOMEBREW_NO_ASK is set",
         },
         {
           name: ["--formula", "--formulae"],
-          description: "Treat all named arguments as formulae. If no named arguments are specified, upgrade only outdated formulae",
+          description:
+            "Treat all named arguments as formulae. If no named arguments are specified, upgrade only outdated formulae",
           exclusiveOn: [
             "--cask",
             "--skip-cask-deps",
@@ -857,30 +900,35 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-s", "--build-from-source"],
-          description: "Compile formula from source even if a bottle is available",
+          description:
+            "Compile formula from source even if a bottle is available",
           exclusiveOn: ["--cask", "--force-bottle"],
         },
         interactiveOption,
         {
           name: "--force-bottle",
-          description: "Install from a bottle if it exists for the current or newest version of macOS, even if it would not normally be used for installation",
+          description:
+            "Install from a bottle if it exists for the current or newest version of macOS, even if it would not normally be used for installation",
           exclusiveOn: ["--cask", "--build-from-source"],
         },
         {
           name: "--fetch-HEAD",
-          description: "Fetch the upstream repository to detect if the HEAD installation of the formula is outdated. Otherwise, the repository's HEAD will only be checked for updates when a new stable or development version has been released",
+          description:
+            "Fetch the upstream repository to detect if the HEAD installation of the formula is outdated. Otherwise, the repository's HEAD will only be checked for updates when a new stable or development version has been released",
           exclusiveOn: ["--cask"],
         },
         keepTmpOption,
         debugSymbolsOption,
         {
           name: "--overwrite",
-          description: "Delete files that already exist in the prefix while linking",
+          description:
+            "Delete files that already exist in the prefix while linking",
           exclusiveOn: ["--cask"],
         },
         {
           name: ["--cask", "--casks"],
-          description: "Treat all named arguments as casks. If no named arguments are specified, upgrade only outdated casks",
+          description:
+            "Treat all named arguments as casks. If no named arguments are specified, upgrade only outdated casks",
           exclusiveOn: [
             "--formula",
             "--build-from-source",
@@ -896,12 +944,14 @@ const completionSpec: Fig.Spec = {
         skipCaskDepsOption,
         {
           name: "--no-quit",
-          description: "Prevent running cask applications from being quit during upgrade. Enabled by default if $HOMEBREW_NO_UPGRADE_QUIT_CASKS is set",
+          description:
+            "Prevent running cask applications from being quit during upgrade. Enabled by default if $HOMEBREW_NO_UPGRADE_QUIT_CASKS is set",
           exclusiveOn: ["--formula"],
         },
         {
           name: ["-g", "--greedy"],
-          description: "Also include casks with version :latest and auto_updates true casks that would otherwise be skipped. Enabled by default if $HOMEBREW_UPGRADE_GREEDY is set",
+          description:
+            "Also include casks with version :latest and auto_updates true casks that would otherwise be skipped. Enabled by default if $HOMEBREW_UPGRADE_GREEDY is set",
           exclusiveOn: ["--formula"],
         },
         {
@@ -911,7 +961,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--greedy-auto-updates",
-          description: "Also include auto_updates true casks that would otherwise be skipped",
+          description:
+            "Also include auto_updates true casks that would otherwise be skipped",
           exclusiveOn: ["--formula"],
         },
         binariesOption,
@@ -938,25 +989,30 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["update", "up"],
-      description: "Fetch the newest version of Homebrew and all formulae from GitHub using git(1) and perform any necessary migrations",
+      description:
+        "Fetch the newest version of Homebrew and all formulae from GitHub using git(1) and perform any necessary migrations",
       options: [
         {
           name: ["-d", "--debug"],
-          description: "Display a trace of all shell commands as they are executed",
+          description:
+            "Display a trace of all shell commands as they are executed",
         },
         quietOption,
         {
           name: ["-v", "--verbose"],
-          description: "Print the directories checked and git operations performed",
+          description:
+            "Print the directories checked and git operations performed",
         },
         helpOption,
         {
           name: "--auto-update",
-          description: "Run on auto-updates (e.g. before brew install). Skips some slower steps",
+          description:
+            "Run on auto-updates (e.g. before brew install). Skips some slower steps",
         },
         {
           name: ["-f", "--force"],
-          description: "Always do a slower, full update check (even if unnecessary)",
+          description:
+            "Always do a slower, full update check (even if unnecessary)",
         },
       ],
     },
@@ -968,16 +1024,14 @@ const completionSpec: Fig.Spec = {
         description: "Installed formula or cask",
         isOptional: true,
         isVariadic: true,
-        generators: [
-          installedFormulaeGenerator,
-          installedCasksGenerator,
-        ],
+        generators: [installedFormulaeGenerator, installedCasksGenerator],
       },
       options: [
         ...commonOptions,
         {
           name: ["--formula", "--formulae"],
-          description: "List only formulae, or treat all named arguments as formulae",
+          description:
+            "List only formulae, or treat all named arguments as formulae",
           exclusiveOn: ["--cask"],
         },
         {
@@ -994,12 +1048,21 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--full-name",
-          description: "Print formulae with fully-qualified names. Unless --full-name, --versions or --pinned are passed, other options (i.e. -1, -l, -r and -t) are passed to ls(1) which produces the actual output",
-          exclusiveOn: ["--versions", "--multiple", "--pinned", "-l", "-r", "-t"],
+          description:
+            "Print formulae with fully-qualified names. Unless --full-name, --versions or --pinned are passed, other options (i.e. -1, -l, -r and -t) are passed to ls(1) which produces the actual output",
+          exclusiveOn: [
+            "--versions",
+            "--multiple",
+            "--pinned",
+            "-l",
+            "-r",
+            "-t",
+          ],
         },
         {
           name: "--versions",
-          description: "Show the version number for installed formulae, or only the specified formulae if formula are provided",
+          description:
+            "Show the version number for installed formulae, or only the specified formulae if formula are provided",
           exclusiveOn: [
             "--installed-on-request",
             "--no-installed-on-request",
@@ -1014,11 +1077,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--json",
-          description: "Output installed formulae and casks with versions, linked and opt-linked formula versions and pinned versions as JSON using the fast Bash command path. Requires --versions, no named arguments and jq",
+          description:
+            "Output installed formulae and casks with versions, linked and opt-linked formula versions and pinned versions as JSON using the fast Bash command path. Requires --versions, no named arguments and jq",
         },
         {
           name: "--multiple",
-          description: "Only show formulae with multiple versions installed. Implies --versions",
+          description:
+            "Only show formulae with multiple versions installed. Implies --versions",
           exclusiveOn: [
             "--cask",
             "--pinned",
@@ -1035,7 +1100,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--pinned",
-          description: "List only pinned packages, or only the specified (pinned) packages if formula or cask are provided. See also pin, unpin",
+          description:
+            "List only pinned packages, or only the specified (pinned) packages if formula or cask are provided. See also pin, unpin",
           exclusiveOn: [
             "--multiple",
             "--installed-on-request",
@@ -1056,7 +1122,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--no-installed-on-request",
-          description: "List the formulae not installed on request (i.e. installed as dependencies)",
+          description:
+            "List the formulae not installed on request (i.e. installed as dependencies)",
           exclusiveOn: ["--cask", "--versions", "--multiple", "--pinned", "-l"],
         },
         {
@@ -1071,12 +1138,14 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "-1",
-          description: "Force output to be one entry per line. This is the default when output is not to a terminal",
+          description:
+            "Force output to be one entry per line. This is the default when output is not to a terminal",
           exclusiveOn: ["--versions", "--multiple", "--pinned"],
         },
         {
           name: "-l",
-          description: "List formulae and/or casks in long format. Has no effect when a formula or cask name is passed as an argument",
+          description:
+            "List formulae and/or casks in long format. Has no effect when a formula or cask name is passed as an argument",
           exclusiveOn: [
             "--installed-on-request",
             "--no-installed-on-request",
@@ -1090,19 +1159,22 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "-r",
-          description: "Reverse the order of formula and/or cask sorting to list the oldest entries first. Has no effect when a formula or cask name is passed as an argument",
+          description:
+            "Reverse the order of formula and/or cask sorting to list the oldest entries first. Has no effect when a formula or cask name is passed as an argument",
           exclusiveOn: ["--versions", "--multiple", "--pinned", "--full-name"],
         },
         {
           name: "-t",
-          description: "Sort formulae and/or casks by time modified, listing most recently modified first. Has no effect when a formula or cask name is passed as an argument",
+          description:
+            "Sort formulae and/or casks by time modified, listing most recently modified first. Has no effect when a formula or cask name is passed as an argument",
           exclusiveOn: ["--versions", "--multiple", "--pinned", "--full-name"],
         },
       ],
     },
     {
       name: ["search", "-S"],
-      description: "Perform a substring search of cask tokens and formula names for text",
+      description:
+        "Perform a substring search of cask tokens and formula names for text",
       args: {
         name: "text",
         description: "Text or /regex/ to search for",
@@ -1120,7 +1192,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--desc",
-          description: "Search for formulae with a description matching text and casks with a name or description matching text",
+          description:
+            "Search for formulae with a description matching text and casks with a name or description matching text",
           exclusiveOn: ["--pull-request"],
         },
         {
@@ -1277,16 +1350,19 @@ const completionSpec: Fig.Spec = {
         quietOption,
         {
           name: ["-v", "--verbose"],
-          description: "Show more verbose data for formula, or full information with --installed",
+          description:
+            "Show more verbose data for formula, or full information with --installed",
         },
         helpOption,
         {
           name: "--analytics",
-          description: "List global Homebrew analytics data or, if specified, installation and build error data for formula (provided neither $HOMEBREW_NO_ANALYTICS nor $HOMEBREW_NO_GITHUB_API are set)",
+          description:
+            "List global Homebrew analytics data or, if specified, installation and build error data for formula (provided neither $HOMEBREW_NO_ANALYTICS nor $HOMEBREW_NO_GITHUB_API are set)",
         },
         {
           name: "--days",
-          description: "How many days of analytics data to retrieve. The value for days must be 30, 90 or 365. The default is 30",
+          description:
+            "How many days of analytics data to retrieve. The value for days must be 30, 90 or 365. The default is 30",
           args: {
             name: "days",
             suggestions: ["30", "90", "365"],
@@ -1295,7 +1371,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--category",
-          description: "Which type of analytics data to retrieve. The value for category must be install, install-on-request or build-error; cask-install or os-version may be specified if formula is not. The default is install",
+          description:
+            "Which type of analytics data to retrieve. The value for category must be install, install-on-request or build-error; cask-install or os-version may be specified if formula is not. The default is install",
           args: {
             name: "category",
             generators: infoCategoryGenerator,
@@ -1304,11 +1381,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--github",
-          description: "Open the GitHub source page for formula and cask in a browser. To view the history locally: brew log -p formula or cask",
+          description:
+            "Open the GitHub source page for formula and cask in a browser. To view the history locally: brew log -p formula or cask",
         },
         {
           name: "--json",
-          description: "Print a JSON representation. Currently the default value for version is v1. v1 is valid for formula only. v2 is valid for both formula and cask. See the docs for examples of using the JSON output: https://docs.brew.sh/Querying-Brew",
+          description:
+            "Print a JSON representation. Currently the default value for version is v1. v1 is valid for formula only. v2 is valid for both formula and cask. See the docs for examples of using the JSON output: https://docs.brew.sh/Querying-Brew",
           args: {
             name: "version",
             isOptional: true,
@@ -1318,11 +1397,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--installed",
-          description: "Output a human-readable inventory of installed formulae and casks. If --json is passed, print JSON for installed formulae and, with --json=v2, installed casks",
+          description:
+            "Output a human-readable inventory of installed formulae and casks. If --json is passed, print JSON for installed formulae and, with --json=v2, installed casks",
         },
         {
           name: "--variations",
-          description: "Include the variations hash in each formula's JSON output",
+          description:
+            "Include the variations hash in each formula's JSON output",
           dependsOn: ["--json"],
         },
         formulaOption,
@@ -1335,13 +1416,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "outdated",
-      description: "List installed casks and formulae that have an updated version available",
+      description:
+        "List installed casks and formulae that have an updated version available",
       args: formulaOrCaskOptionalVariadicArg,
       options: [
         debugOption,
         {
           name: ["-q", "--quiet"],
-          description: "List only the names of outdated kegs (takes precedence over --verbose)",
+          description:
+            "List only the names of outdated kegs (takes precedence over --verbose)",
           exclusiveOn: ["--verbose", "--json"],
         },
         {
@@ -1362,7 +1445,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--json",
-          description: "Print outdated formulae and casks in JSON format. The default and only supported version is v2",
+          description:
+            "Print outdated formulae and casks in JSON format. The default and only supported version is v2",
           args: {
             name: "version",
             isOptional: true,
@@ -1373,19 +1457,22 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["--minimum-version", "--min-version"],
-          description: "Only list a named formula or cask with an installed version below the given minimum version",
+          description:
+            "Only list a named formula or cask with an installed version below the given minimum version",
           args: {
             name: "version",
           },
         },
         {
           name: "--vulnerable",
-          description: "Only list outdated formulae with open vulnerabilities from OSV.dev. Stop if any candidate cannot be reliably scanned. Implies --formula",
+          description:
+            "Only list outdated formulae with open vulnerabilities from OSV.dev. Stop if any candidate cannot be reliably scanned. Implies --formula",
           exclusiveOn: ["--cask"],
         },
         {
           name: "--severity",
-          description: "Only select findings at or above low, medium, high or critical",
+          description:
+            "Only select findings at or above low, medium, high or critical",
           args: {
             name: "severity",
             suggestions: ["low", "medium", "high", "critical"],
@@ -1394,30 +1481,36 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--fetch-HEAD",
-          description: "Fetch the upstream repository to detect if the HEAD installation of the formula is outdated. Otherwise, the repository's HEAD will only be checked for updates when a new stable or development version has been released",
+          description:
+            "Fetch the upstream repository to detect if the HEAD installation of the formula is outdated. Otherwise, the repository's HEAD will only be checked for updates when a new stable or development version has been released",
         },
         {
           name: ["-g", "--greedy"],
-          description: "Also include outdated casks with version :latest and auto_updates true casks that would otherwise be skipped. Enabled by default if $HOMEBREW_UPGRADE_GREEDY is set",
+          description:
+            "Also include outdated casks with version :latest and auto_updates true casks that would otherwise be skipped. Enabled by default if $HOMEBREW_UPGRADE_GREEDY is set",
         },
         {
           name: "--greedy-latest",
-          description: "Also include outdated casks including those with version :latest",
+          description:
+            "Also include outdated casks including those with version :latest",
         },
         {
           name: "--greedy-auto-updates",
-          description: "Also include outdated auto_updates true casks that would otherwise be skipped",
+          description:
+            "Also include outdated auto_updates true casks that would otherwise be skipped",
         },
       ],
     },
     {
       name: "services",
-      description: "Manage background services with macOS' launchctl(1) daemon manager or Linux's systemctl(1) service manager",
+      description:
+        "Manage background services with macOS' launchctl(1) daemon manager or Linux's systemctl(1) service manager",
       options: [
         ...commonOptions,
         {
           name: "--sudo-service-user",
-          description: "When run as root on macOS, run the service(s) as this user",
+          description:
+            "When run as root on macOS, run the service(s) as this user",
           args: {
             name: "user",
           },
@@ -1427,7 +1520,8 @@ const completionSpec: Fig.Spec = {
       subcommands: [
         {
           name: ["list", "ls"],
-          description: "List information about all managed services for the current user (or root)",
+          description:
+            "List information about all managed services for the current user (or root)",
           options: [
             ...commonOptions,
             {
@@ -1438,7 +1532,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["start", "launch", "load", "s", "l"],
-          description: "Start the service formula immediately and register it to launch at login (or boot)",
+          description:
+            "Start the service formula immediately and register it to launch at login (or boot)",
           args: {
             name: "formula",
             isOptional: true,
@@ -1449,7 +1544,8 @@ const completionSpec: Fig.Spec = {
             ...commonOptions,
             {
               name: "--file",
-              description: "Use the service file from this location to start the service",
+              description:
+                "Use the service file from this location to start the service",
               args: {
                 name: "file",
                 template: "filepaths",
@@ -1458,14 +1554,16 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--all",
-              description: "Start all services and register them to launch at login (or boot)",
+              description:
+                "Start all services and register them to launch at login (or boot)",
               exclusiveOn: ["--file"],
             },
           ],
         },
         {
           name: ["stop", "unload", "terminate", "term", "t", "u"],
-          description: "Stop the service formula immediately and unregister it from launching at login (or boot), unless --keep is specified",
+          description:
+            "Stop the service formula immediately and unregister it from launching at login (or boot), unless --keep is specified",
           args: {
             name: "formula",
             isOptional: true,
@@ -1476,7 +1574,8 @@ const completionSpec: Fig.Spec = {
             ...commonOptions,
             {
               name: "--max-wait",
-              description: "Wait at most this many seconds for stop to finish stopping a service. Defaults to 60. Set this to zero (0) seconds to wait indefinitely",
+              description:
+                "Wait at most this many seconds for stop to finish stopping a service. Defaults to 60. Set this to zero (0) seconds to wait indefinitely",
               args: {
                 name: "seconds",
               },
@@ -1489,17 +1588,20 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--keep",
-              description: "When stopped, don't unregister the service from launching at login (or boot)",
+              description:
+                "When stopped, don't unregister the service from launching at login (or boot)",
             },
             {
               name: "--all",
-              description: "Stop all services and unregister them from launching at login (or boot), unless --keep is specified",
+              description:
+                "Stop all services and unregister them from launching at login (or boot), unless --keep is specified",
             },
           ],
         },
         {
           name: ["restart", "relaunch", "reload", "r"],
-          description: "Stop (if necessary) and start the service formula immediately and register it to launch at login (or boot)",
+          description:
+            "Stop (if necessary) and start the service formula immediately and register it to launch at login (or boot)",
           args: {
             name: "formula",
             isOptional: true,
@@ -1510,7 +1612,8 @@ const completionSpec: Fig.Spec = {
             ...commonOptions,
             {
               name: "--file",
-              description: "Use the service file from this location to start the service",
+              description:
+                "Use the service file from this location to start the service",
               args: {
                 name: "file",
                 template: "filepaths",
@@ -1526,7 +1629,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "run",
-          description: "Run the service formula without registering to launch at login (or boot)",
+          description:
+            "Run the service formula without registering to launch at login (or boot)",
           args: {
             name: "formula",
             isOptional: true,
@@ -1537,7 +1641,8 @@ const completionSpec: Fig.Spec = {
             ...commonOptions,
             {
               name: "--file",
-              description: "Use the service file from this location to run the service",
+              description:
+                "Use the service file from this location to run the service",
               args: {
                 name: "file",
                 template: "filepaths",
@@ -1546,14 +1651,16 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--all",
-              description: "Run all services without registering them to launch at login (or boot)",
+              description:
+                "Run all services without registering them to launch at login (or boot)",
               exclusiveOn: ["--file"],
             },
           ],
         },
         {
           name: ["info", "i"],
-          description: "List all managed services for the current user (or root)",
+          description:
+            "List all managed services for the current user (or root)",
           args: {
             name: "formula",
             isOptional: true,
@@ -1574,7 +1681,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["kill", "k"],
-          description: "Stop the service formula immediately but keep it registered to launch at login (or boot)",
+          description:
+            "Stop the service formula immediately but keep it registered to launch at login (or boot)",
           args: {
             name: "formula",
             isOptional: true,
@@ -1585,28 +1693,29 @@ const completionSpec: Fig.Spec = {
             ...commonOptions,
             {
               name: "--all",
-              description: "Stop all services immediately but keep them registered to launch at login (or boot)",
+              description:
+                "Stop all services immediately but keep them registered to launch at login (or boot)",
             },
           ],
         },
         {
           name: ["cleanup", "clean", "cl", "rm"],
           description: "Remove all unused services",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
       ],
     },
     {
       name: "cleanup",
-      description: "Remove stale lock files and outdated downloads for all formulae and casks, and remove old versions of installed formulae",
+      description:
+        "Remove stale lock files and outdated downloads for all formulae and casks, and remove old versions of installed formulae",
       args: formulaOrCaskOptionalVariadicArg,
       options: [
         ...commonOptions,
         {
           name: "--prune",
-          description: "Remove all cache files older than specified days. If you want to remove everything, use --prune=all",
+          description:
+            "Remove all cache files older than specified days. If you want to remove everything, use --prune=all",
           args: {
             name: "days",
             suggestions: ["all"],
@@ -1614,15 +1723,18 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-n", "--dry-run"],
-          description: "Show what would be removed, but do not actually remove anything",
+          description:
+            "Show what would be removed, but do not actually remove anything",
         },
         {
           name: ["-s", "--scrub"],
-          description: "Scrub the cache, including downloads for even the latest versions. Note that downloads for any installed formulae or casks will still not be deleted. If you want to delete those too: rm -rf \"$(brew --cache)\"",
+          description:
+            'Scrub the cache, including downloads for even the latest versions. Note that downloads for any installed formulae or casks will still not be deleted. If you want to delete those too: rm -rf "$(brew --cache)"',
         },
         {
           name: "--prune-prefix",
-          description: "Only prune the symlinks and directories from the prefix and remove no other files",
+          description:
+            "Only prune the symlinks and directories from the prefix and remove no other files",
         },
       ],
     },
@@ -1639,7 +1751,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--list-checks",
-          description: "List all audit methods, which can be run individually if provided as arguments",
+          description:
+            "List all audit methods, which can be run individually if provided as arguments",
         },
         {
           name: ["-D", "--audit-debug"],
@@ -1649,7 +1762,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "tap",
-      description: "Tap a repository containing formulae, casks, or external commands",
+      description:
+        "Tap a repository containing formulae, casks, or external commands",
       args: [
         {
           name: "user/repo",
@@ -1665,11 +1779,13 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--custom-remote",
-          description: "Install or change a tap with a custom remote. Useful for mirrors",
+          description:
+            "Install or change a tap with a custom remote. Useful for mirrors",
         },
         {
           name: "--repair",
-          description: "Add missing symlinks to tap manpages and shell completions. Correct git remote refs for any taps where upstream HEAD branch has been renamed",
+          description:
+            "Add missing symlinks to tap manpages and shell completions. Correct git remote refs for any taps where upstream HEAD branch has been renamed",
         },
         {
           name: ["-f", "--force"],
@@ -1689,51 +1805,51 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: ["-f", "--force"],
-          description: "Uninstall all formulae and casks from this tap with --force before untapping",
+          description:
+            "Uninstall all formulae and casks from this tap with --force before untapping",
         },
       ],
     },
     {
       name: "pin",
-      description: "Pin the specified package, preventing it from being upgraded when issuing the brew upgrade formula or cask command",
+      description:
+        "Pin the specified package, preventing it from being upgraded when issuing the brew upgrade formula or cask command",
       args: installedFormulaOrCaskVariadicArg,
-      options: [
-        ...commonOptions,
-        formulaOption,
-        caskOption,
-      ],
+      options: [...commonOptions, formulaOption, caskOption],
     },
     {
       name: "unpin",
-      description: "Unpin the specified package, allowing it to be upgraded by brew upgrade formula or cask",
+      description:
+        "Unpin the specified package, allowing it to be upgraded by brew upgrade formula or cask",
       args: installedFormulaOrCaskVariadicArg,
-      options: [
-        ...commonOptions,
-        formulaOption,
-        caskOption,
-      ],
+      options: [...commonOptions, formulaOption, caskOption],
     },
     {
       name: ["link", "ln"],
-      description: "Symlink all of formula's installed files or cask's binaries, manpages and shell completions into Homebrew's prefix",
+      description:
+        "Symlink all of formula's installed files or cask's binaries, manpages and shell completions into Homebrew's prefix",
       args: installedFormulaOrCaskVariadicArg,
       options: [
         ...commonOptions,
         {
           name: "--overwrite",
-          description: "Delete files that already exist in the prefix while linking",
+          description:
+            "Delete files that already exist in the prefix while linking",
         },
         {
           name: ["-n", "--dry-run"],
-          description: "List files which would be linked or deleted by brew link --overwrite without actually linking or deleting any files",
+          description:
+            "List files which would be linked or deleted by brew link --overwrite without actually linking or deleting any files",
         },
         {
           name: ["-f", "--force"],
-          description: "Allow keg-only formulae to be linked. When linking casks, overwrite existing symlinks originally from the same cask",
+          description:
+            "Allow keg-only formulae to be linked. When linking casks, overwrite existing symlinks originally from the same cask",
         },
         {
           name: "--HEAD",
-          description: "Link the HEAD version of the formula if it is installed",
+          description:
+            "Link the HEAD version of the formula if it is installed",
           exclusiveOn: ["--cask"],
         },
         formulaOption,
@@ -1752,7 +1868,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: ["-n", "--dry-run"],
-          description: "List files which would be unlinked without actually unlinking or deleting any files",
+          description:
+            "List files which would be unlinked without actually unlinking or deleting any files",
         },
         formulaOption,
         caskOption,
@@ -1760,12 +1877,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "bundle",
-      description: "Bundler for non-Ruby dependencies from Homebrew formulae, Homebrew casks, Mac App Store dependencies, VSCode (and forks/variants) extensions, Go packages, Cargo packages, uv tools, Flatpak packages, WinGet packages, Krew plugins and npm packages",
+      description:
+        "Bundler for non-Ruby dependencies from Homebrew formulae, Homebrew casks, Mac App Store dependencies, VSCode (and forks/variants) extensions, Go packages, Cargo packages, uv tools, Flatpak packages, WinGet packages, Krew plugins and npm packages",
       options: [
         ...commonOptions,
         {
           name: "--file",
-          description: "Read from or write to the Brewfile from this location. Use --file=- to pipe to stdin/stdout",
+          description:
+            "Read from or write to the Brewfile from this location. Use --file=- to pipe to stdin/stdout",
           args: {
             name: "file",
             template: "filepaths",
@@ -1775,7 +1894,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-g", "--global"],
-          description: "Read from or write to the Brewfile from $HOMEBREW_BUNDLE_FILE_GLOBAL (if set), ${XDG_CONFIG_HOME}/homebrew/Brewfile (if $XDG_CONFIG_HOME is set), ~/.homebrew/Brewfile or ~/.Brewfile otherwise",
+          description:
+            "Read from or write to the Brewfile from $HOMEBREW_BUNDLE_FILE_GLOBAL (if set), ${XDG_CONFIG_HOME}/homebrew/Brewfile (if $XDG_CONFIG_HOME is set), ~/.homebrew/Brewfile or ~/.Brewfile otherwise",
           isPersistent: true,
           exclusiveOn: ["--file"],
         },
@@ -1783,7 +1903,8 @@ const completionSpec: Fig.Spec = {
       subcommands: [
         {
           name: ["install", "upgrade"],
-          description: "Install and upgrade (by default) all dependencies from the Brewfile (upgrade is shorthand for install --upgrade)",
+          description:
+            "Install and upgrade (by default) all dependencies from the Brewfile (upgrade is shorthand for install --upgrade)",
           options: [
             debugOption,
             quietOption,
@@ -1794,15 +1915,18 @@ const completionSpec: Fig.Spec = {
             helpOption,
             {
               name: "--no-upgrade",
-              description: "Do not run brew upgrade on outdated dependencies. Note they may still be upgraded by brew install if needed. Enabled by default if $HOMEBREW_BUNDLE_NO_UPGRADE is set",
+              description:
+                "Do not run brew upgrade on outdated dependencies. Note they may still be upgraded by brew install if needed. Enabled by default if $HOMEBREW_BUNDLE_NO_UPGRADE is set",
             },
             {
               name: "--upgrade",
-              description: "Run brew upgrade on outdated dependencies, even if $HOMEBREW_BUNDLE_NO_UPGRADE is set",
+              description:
+                "Run brew upgrade on outdated dependencies, even if $HOMEBREW_BUNDLE_NO_UPGRADE is set",
             },
             {
               name: ["--upgrade-formulae", "--upgrade-formula"],
-              description: "Run brew upgrade on any of these comma-separated formulae, even if $HOMEBREW_BUNDLE_NO_UPGRADE is set",
+              description:
+                "Run brew upgrade on any of these comma-separated formulae, even if $HOMEBREW_BUNDLE_NO_UPGRADE is set",
               args: {
                 name: "formulae",
               },
@@ -1813,11 +1937,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--force-cleanup",
-              description: "Perform cleanup after installing dependencies without asking",
+              description:
+                "Perform cleanup after installing dependencies without asking",
             },
             {
               name: "--zap",
-              description: "Use zap instead of uninstall when cleaning up casks after installing dependencies",
+              description:
+                "Use zap instead of uninstall when cleaning up casks after installing dependencies",
             },
           ],
         },
@@ -1848,7 +1974,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--no-describe",
-              description: "Do not add description comments above each line. Description comments are the default. Enabled by default if $HOMEBREW_BUNDLE_NO_DESCRIBE is set",
+              description:
+                "Do not add description comments above each line. Description comments are the default. Enabled by default if $HOMEBREW_BUNDLE_NO_DESCRIBE is set",
             },
             {
               name: "--cargo",
@@ -1876,7 +2003,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--vscode",
-              description: "Add entries for VSCode (and forks/variants) extensions",
+              description:
+                "Add entries for VSCode (and forks/variants) extensions",
             },
           ],
         },
@@ -1895,7 +2023,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--formula", "--formulae", "--brews"],
-              description: "Remove Homebrew formula entries, including matches against formula aliases and old names",
+              description:
+                "Remove Homebrew formula entries, including matches against formula aliases and old names",
             },
             {
               name: ["--cask", "--casks"],
@@ -1911,7 +2040,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--flatpak",
-              description: "Remove entries for Flatpak packages. Note: Linux only",
+              description:
+                "Remove entries for Flatpak packages. Note: Linux only",
             },
             {
               name: "--go",
@@ -1935,7 +2065,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--vscode",
-              description: "Remove entries for VSCode (and forks/variants) extensions",
+              description:
+                "Remove entries for VSCode (and forks/variants) extensions",
             },
             {
               name: "--winget",
@@ -2008,7 +2139,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "check",
-          description: "Check if all dependencies present in the Brewfile are installed",
+          description:
+            "Check if all dependencies present in the Brewfile are installed",
           options: [
             debugOption,
             quietOption,
@@ -2019,7 +2151,8 @@ const completionSpec: Fig.Spec = {
             helpOption,
             {
               name: "--no-upgrade",
-              description: "Do not check for outdated dependencies. Note they may still be upgraded by brew install if needed. Enabled by default if $HOMEBREW_BUNDLE_NO_UPGRADE is set",
+              description:
+                "Do not check for outdated dependencies. Note they may still be upgraded by brew install if needed. Enabled by default if $HOMEBREW_BUNDLE_NO_UPGRADE is set",
             },
             {
               name: "--install",
@@ -2038,7 +2171,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-f", "--force"],
-              description: "Actually perform cleanup operations and reset Homebrew's global trust store to the Brewfile values",
+              description:
+                "Actually perform cleanup operations and reset Homebrew's global trust store to the Brewfile values",
             },
             {
               name: "--all",
@@ -2051,12 +2185,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--no-formula", "--no-formulae", "--no-brews"],
-              description: "Clean up without Homebrew formula dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_BREW is set",
+              description:
+                "Clean up without Homebrew formula dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_BREW is set",
               exclusiveOn: ["--formula"],
             },
             {
               name: "--no-cleanup-brew",
-              description: "Clean up without Homebrew formula dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_BREW is set",
+              description:
+                "Clean up without Homebrew formula dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_BREW is set",
               exclusiveOn: ["--formula"],
             },
             {
@@ -2066,12 +2202,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--no-cask", "--no-casks"],
-              description: "Clean up without Homebrew cask dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_CASK is set",
+              description:
+                "Clean up without Homebrew cask dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_CASK is set",
               exclusiveOn: ["--cask"],
             },
             {
               name: "--no-cleanup-cask",
-              description: "Clean up without Homebrew cask dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_CASK is set",
+              description:
+                "Clean up without Homebrew cask dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_CASK is set",
               exclusiveOn: ["--cask"],
             },
             {
@@ -2081,17 +2219,20 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--no-tap", "--no-taps"],
-              description: "Clean up without Homebrew tap dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_TAP is set",
+              description:
+                "Clean up without Homebrew tap dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_TAP is set",
               exclusiveOn: ["--tap"],
             },
             {
               name: "--no-cleanup-tap",
-              description: "Clean up without Homebrew tap dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_TAP is set",
+              description:
+                "Clean up without Homebrew tap dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_TAP is set",
               exclusiveOn: ["--tap"],
             },
             {
               name: "--zap",
-              description: "Clean up casks using the zap command instead of uninstall",
+              description:
+                "Clean up casks using the zap command instead of uninstall",
             },
             {
               name: "--cargo",
@@ -2120,92 +2261,110 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--no-cargo",
-              description: "Cleanup without Cargo packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_CARGO is set",
+              description:
+                "Cleanup without Cargo packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_CARGO is set",
               exclusiveOn: ["--cargo"],
             },
             {
               name: "--no-cleanup-cargo",
-              description: "Cleanup without Cargo packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_CARGO is set",
+              description:
+                "Cleanup without Cargo packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_CARGO is set",
               exclusiveOn: ["--cargo"],
             },
             {
               name: "--no-cleanup-flatpak",
-              description: "Cleanup without Flatpak packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_FLATPAK is set",
+              description:
+                "Cleanup without Flatpak packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_FLATPAK is set",
               exclusiveOn: ["--flatpak"],
             },
             {
               name: "--no-cleanup-go",
-              description: "Cleanup without Go packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_GO is set",
+              description:
+                "Cleanup without Go packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_GO is set",
               exclusiveOn: ["--go"],
             },
             {
               name: "--no-cleanup-krew",
-              description: "Cleanup without Krew plugins. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_KREW is set",
+              description:
+                "Cleanup without Krew plugins. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_KREW is set",
               exclusiveOn: ["--krew"],
             },
             {
               name: "--no-cleanup-mas",
-              description: "Cleanup without Mac App Store dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_MAS is set",
+              description:
+                "Cleanup without Mac App Store dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_MAS is set",
               exclusiveOn: ["--mas"],
             },
             {
               name: "--no-cleanup-npm",
-              description: "Cleanup without npm packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_NPM is set",
+              description:
+                "Cleanup without npm packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_NPM is set",
               exclusiveOn: ["--npm"],
             },
             {
               name: "--no-cleanup-uv",
-              description: "Cleanup without uv tools. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_UV is set",
+              description:
+                "Cleanup without uv tools. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_UV is set",
               exclusiveOn: ["--uv"],
             },
             {
               name: "--no-cleanup-vscode",
-              description: "Cleanup without VSCode (and forks/variants) extensions. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_VSCODE is set",
+              description:
+                "Cleanup without VSCode (and forks/variants) extensions. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_VSCODE is set",
               exclusiveOn: ["--vscode"],
             },
             {
               name: "--no-cleanup-winget",
-              description: "Cleanup without WinGet packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_WINGET is set",
+              description:
+                "Cleanup without WinGet packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_WINGET is set",
               exclusiveOn: ["--winget"],
             },
             {
               name: "--no-flatpak",
-              description: "Cleanup without Flatpak packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_FLATPAK is set",
+              description:
+                "Cleanup without Flatpak packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_FLATPAK is set",
               exclusiveOn: ["--flatpak"],
             },
             {
               name: "--no-go",
-              description: "Cleanup without Go packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_GO is set",
+              description:
+                "Cleanup without Go packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_GO is set",
               exclusiveOn: ["--go"],
             },
             {
               name: "--no-krew",
-              description: "Cleanup without Krew plugins. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_KREW is set",
+              description:
+                "Cleanup without Krew plugins. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_KREW is set",
               exclusiveOn: ["--krew"],
             },
             {
               name: "--no-mas",
-              description: "Cleanup without Mac App Store dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_MAS is set",
+              description:
+                "Cleanup without Mac App Store dependencies. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_MAS is set",
               exclusiveOn: ["--mas"],
             },
             {
               name: "--no-npm",
-              description: "Cleanup without npm packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_NPM is set",
+              description:
+                "Cleanup without npm packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_NPM is set",
               exclusiveOn: ["--npm"],
             },
             {
               name: "--no-uv",
-              description: "Cleanup without uv tools. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_UV is set",
+              description:
+                "Cleanup without uv tools. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_UV is set",
               exclusiveOn: ["--uv"],
             },
             {
               name: "--no-vscode",
-              description: "Cleanup without VSCode (and forks/variants) extensions. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_VSCODE is set",
+              description:
+                "Cleanup without VSCode (and forks/variants) extensions. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_VSCODE is set",
               exclusiveOn: ["--vscode"],
             },
             {
               name: "--no-winget",
-              description: "Cleanup without WinGet packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_WINGET is set",
+              description:
+                "Cleanup without WinGet packages. Enabled by default if $HOMEBREW_BUNDLE_CLEANUP_NO_WINGET is set",
               exclusiveOn: ["--winget"],
             },
             {
@@ -2232,7 +2391,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "dump",
-          description: "Write all installed casks/formulae/images/taps into a Brewfile in the current directory or to a custom file specified with the --file option",
+          description:
+            "Write all installed casks/formulae/images/taps into a Brewfile in the current directory or to a custom file specified with the --file option",
           options: [
             ...commonOptions,
             {
@@ -2250,12 +2410,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--no-formula", "--no-formulae", "--no-brews"],
-              description: "Dump without Homebrew formula dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_BREW is set",
+              description:
+                "Dump without Homebrew formula dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_BREW is set",
               exclusiveOn: ["--formula"],
             },
             {
               name: "--no-dump-brew",
-              description: "Dump without Homebrew formula dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_BREW is set",
+              description:
+                "Dump without Homebrew formula dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_BREW is set",
               exclusiveOn: ["--formula"],
             },
             {
@@ -2265,12 +2427,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--no-cask", "--no-casks"],
-              description: "Dump without Homebrew cask dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_CASK is set",
+              description:
+                "Dump without Homebrew cask dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_CASK is set",
               exclusiveOn: ["--cask"],
             },
             {
               name: "--no-dump-cask",
-              description: "Dump without Homebrew cask dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_CASK is set",
+              description:
+                "Dump without Homebrew cask dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_CASK is set",
               exclusiveOn: ["--cask"],
             },
             {
@@ -2280,17 +2444,20 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--no-tap", "--no-taps"],
-              description: "Dump without Homebrew tap dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_TAP is set",
+              description:
+                "Dump without Homebrew tap dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_TAP is set",
               exclusiveOn: ["--tap"],
             },
             {
               name: "--no-dump-tap",
-              description: "Dump without Homebrew tap dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_TAP is set",
+              description:
+                "Dump without Homebrew tap dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_TAP is set",
               exclusiveOn: ["--tap"],
             },
             {
               name: "--no-describe",
-              description: "Do not add description comments above each line. Description comments are the default. Enabled by default if $HOMEBREW_BUNDLE_NO_DESCRIBE is set",
+              description:
+                "Do not add description comments above each line. Description comments are the default. Enabled by default if $HOMEBREW_BUNDLE_NO_DESCRIBE is set",
             },
             {
               name: "--no-restart",
@@ -2323,92 +2490,110 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--no-cargo",
-              description: "Dump without Cargo packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_CARGO is set",
+              description:
+                "Dump without Cargo packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_CARGO is set",
               exclusiveOn: ["--cargo"],
             },
             {
               name: "--no-dump-cargo",
-              description: "Dump without Cargo packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_CARGO is set",
+              description:
+                "Dump without Cargo packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_CARGO is set",
               exclusiveOn: ["--cargo"],
             },
             {
               name: "--no-dump-flatpak",
-              description: "Dump without Flatpak packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_FLATPAK is set",
+              description:
+                "Dump without Flatpak packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_FLATPAK is set",
               exclusiveOn: ["--flatpak"],
             },
             {
               name: "--no-dump-go",
-              description: "Dump without Go packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_GO is set",
+              description:
+                "Dump without Go packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_GO is set",
               exclusiveOn: ["--go"],
             },
             {
               name: "--no-dump-krew",
-              description: "Dump without Krew plugins. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_KREW is set",
+              description:
+                "Dump without Krew plugins. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_KREW is set",
               exclusiveOn: ["--krew"],
             },
             {
               name: "--no-dump-mas",
-              description: "Dump without Mac App Store dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_MAS is set",
+              description:
+                "Dump without Mac App Store dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_MAS is set",
               exclusiveOn: ["--mas"],
             },
             {
               name: "--no-dump-npm",
-              description: "Dump without npm packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_NPM is set",
+              description:
+                "Dump without npm packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_NPM is set",
               exclusiveOn: ["--npm"],
             },
             {
               name: "--no-dump-uv",
-              description: "Dump without uv tools. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_UV is set",
+              description:
+                "Dump without uv tools. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_UV is set",
               exclusiveOn: ["--uv"],
             },
             {
               name: "--no-dump-vscode",
-              description: "Dump without VSCode (and forks/variants) extensions. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_VSCODE is set",
+              description:
+                "Dump without VSCode (and forks/variants) extensions. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_VSCODE is set",
               exclusiveOn: ["--vscode"],
             },
             {
               name: "--no-dump-winget",
-              description: "Dump without WinGet packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_WINGET is set",
+              description:
+                "Dump without WinGet packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_WINGET is set",
               exclusiveOn: ["--winget"],
             },
             {
               name: "--no-flatpak",
-              description: "Dump without Flatpak packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_FLATPAK is set",
+              description:
+                "Dump without Flatpak packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_FLATPAK is set",
               exclusiveOn: ["--flatpak"],
             },
             {
               name: "--no-go",
-              description: "Dump without Go packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_GO is set",
+              description:
+                "Dump without Go packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_GO is set",
               exclusiveOn: ["--go"],
             },
             {
               name: "--no-krew",
-              description: "Dump without Krew plugins. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_KREW is set",
+              description:
+                "Dump without Krew plugins. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_KREW is set",
               exclusiveOn: ["--krew"],
             },
             {
               name: "--no-mas",
-              description: "Dump without Mac App Store dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_MAS is set",
+              description:
+                "Dump without Mac App Store dependencies. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_MAS is set",
               exclusiveOn: ["--mas"],
             },
             {
               name: "--no-npm",
-              description: "Dump without npm packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_NPM is set",
+              description:
+                "Dump without npm packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_NPM is set",
               exclusiveOn: ["--npm"],
             },
             {
               name: "--no-uv",
-              description: "Dump without uv tools. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_UV is set",
+              description:
+                "Dump without uv tools. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_UV is set",
               exclusiveOn: ["--uv"],
             },
             {
               name: "--no-vscode",
-              description: "Dump without VSCode (and forks/variants) extensions. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_VSCODE is set",
+              description:
+                "Dump without VSCode (and forks/variants) extensions. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_VSCODE is set",
               exclusiveOn: ["--vscode"],
             },
             {
               name: "--no-winget",
-              description: "Dump without WinGet packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_WINGET is set",
+              description:
+                "Dump without WinGet packages. Enabled by default if $HOMEBREW_BUNDLE_DUMP_NO_WINGET is set",
               exclusiveOn: ["--winget"],
             },
             {
@@ -2446,7 +2631,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "env",
-          description: "Print the environment variables that would be set in a brew bundle exec environment",
+          description:
+            "Print the environment variables that would be set in a brew bundle exec environment",
           options: [
             ...commonOptions,
             {
@@ -2455,17 +2641,20 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--check",
-              description: "Check that all dependencies in the Brewfile are installed before printing the environment. Enabled by default if $HOMEBREW_BUNDLE_CHECK is set",
+              description:
+                "Check that all dependencies in the Brewfile are installed before printing the environment. Enabled by default if $HOMEBREW_BUNDLE_CHECK is set",
             },
             {
               name: "--no-secrets",
-              description: "Attempt to remove secrets from the environment before printing it",
+              description:
+                "Attempt to remove secrets from the environment before printing it",
             },
           ],
         },
         {
           name: "exec",
-          description: "Run an external command in an isolated build environment based on the Brewfile dependencies",
+          description:
+            "Run an external command in an isolated build environment based on the Brewfile dependencies",
           args: {
             name: "command",
             isCommand: true,
@@ -2478,19 +2667,23 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--services",
-              description: "Temporarily start services while executing the command. Enabled by default if $HOMEBREW_BUNDLE_SERVICES is set",
+              description:
+                "Temporarily start services while executing the command. Enabled by default if $HOMEBREW_BUNDLE_SERVICES is set",
             },
             {
               name: "--check",
-              description: "Check that all dependencies in the Brewfile are installed before executing the command. Enabled by default if $HOMEBREW_BUNDLE_CHECK is set",
+              description:
+                "Check that all dependencies in the Brewfile are installed before executing the command. Enabled by default if $HOMEBREW_BUNDLE_CHECK is set",
             },
             {
               name: "--no-secrets",
-              description: "Attempt to remove secrets from the environment before executing the command",
+              description:
+                "Attempt to remove secrets from the environment before executing the command",
             },
             {
               name: "--sandbox",
-              description: "Run command in Homebrew's sandbox, allowing writes to path and Homebrew's temporary and cache directories",
+              description:
+                "Run command in Homebrew's sandbox, allowing writes to path and Homebrew's temporary and cache directories",
               args: {
                 name: "path",
                 template: "filepaths",
@@ -2514,15 +2707,18 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--services",
-              description: "Temporarily start services while running the shell. Enabled by default if $HOMEBREW_BUNDLE_SERVICES is set",
+              description:
+                "Temporarily start services while running the shell. Enabled by default if $HOMEBREW_BUNDLE_SERVICES is set",
             },
             {
               name: "--check",
-              description: "Check that all dependencies in the Brewfile are installed before starting the shell. Enabled by default if $HOMEBREW_BUNDLE_CHECK is set",
+              description:
+                "Check that all dependencies in the Brewfile are installed before starting the shell. Enabled by default if $HOMEBREW_BUNDLE_CHECK is set",
             },
             {
               name: "--no-secrets",
-              description: "Attempt to remove secrets from the environment before starting the shell",
+              description:
+                "Attempt to remove secrets from the environment before starting the shell",
             },
           ],
         },
@@ -2530,12 +2726,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "autoremove",
-      description: "Uninstall formulae that were only installed as a dependency of another formula and are now no longer needed",
+      description:
+        "Uninstall formulae that were only installed as a dependency of another formula and are now no longer needed",
       options: [
         ...commonOptions,
         {
           name: ["-n", "--dry-run"],
-          description: "List what would be uninstalled, but do not actually uninstall anything",
+          description:
+            "List what would be uninstalled, but do not actually uninstall anything",
         },
       ],
     },
@@ -2551,11 +2749,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-1", "--direct", "--declared", "--1"],
-          description: "Show only the direct dependencies declared in the formula",
+          description:
+            "Show only the direct dependencies declared in the formula",
         },
         {
           name: "--union",
-          description: "Show the union of dependencies for multiple formula, instead of the intersection",
+          description:
+            "Show the union of dependencies for multiple formula, instead of the intersection",
         },
         {
           name: "--full-name",
@@ -2563,7 +2763,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--include-implicit",
-          description: "Include implicit dependencies used to download and unpack source files",
+          description:
+            "Include implicit dependencies used to download and unpack source files",
         },
         {
           name: "--include-build",
@@ -2575,7 +2776,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--include-test",
-          description: "Include :test dependencies for formula (non-recursive unless --graph or --tree)",
+          description:
+            "Include :test dependencies for formula (non-recursive unless --graph or --tree)",
         },
         {
           name: "--skip-recommended",
@@ -2583,11 +2785,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--include-requirements",
-          description: "Include requirements in addition to dependencies for formula",
+          description:
+            "Include requirements in addition to dependencies for formula",
         },
         {
           name: "--tree",
-          description: "Show dependencies as a tree. When given multiple formula arguments, show individual trees for each formula",
+          description:
+            "Show dependencies as a tree. When given multiple formula arguments, show individual trees for each formula",
           exclusiveOn: ["--graph"],
         },
         {
@@ -2607,16 +2811,19 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--annotate",
-          description: "Mark any build, test, implicit, optional, or recommended dependencies as such in the output",
+          description:
+            "Mark any build, test, implicit, optional, or recommended dependencies as such in the output",
         },
         {
           name: "--installed",
-          description: "List dependencies for formulae that are currently installed. If formula is specified, list only its dependencies that are currently installed",
+          description:
+            "List dependencies for formulae that are currently installed. If formula is specified, list only its dependencies that are currently installed",
           exclusiveOn: ["--missing"],
         },
         {
           name: "--brewfile",
-          description: "Use formulae and casks listed in a Brewfile as inputs. Defaults to ./Brewfile; use --brewfile=path to specify another",
+          description:
+            "Use formulae and casks listed in a Brewfile as inputs. Defaults to ./Brewfile; use --brewfile=path to specify another",
           args: {
             name: "file",
             isOptional: true,
@@ -2631,11 +2838,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--for-each",
-          description: "Switch into the mode used when evaluating all formulae and casks, but only list dependencies for each provided formula, one formula per line",
+          description:
+            "Switch into the mode used when evaluating all formulae and casks, but only list dependencies for each provided formula, one formula per line",
         },
         {
           name: "--HEAD",
-          description: "Show dependencies for HEAD version instead of stable version",
+          description:
+            "Show dependencies for HEAD version instead of stable version",
         },
         {
           name: "--os",
@@ -2659,7 +2868,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "uses",
-      description: "Show formulae and casks that specify formula as a dependency; that is, show dependents of formula",
+      description:
+        "Show formulae and casks that specify formula as a dependency; that is, show dependents of formula",
       args: formulaVariadicArg,
       options: [
         ...commonOptions,
@@ -2669,33 +2879,40 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--installed",
-          description: "Only list formulae and casks that are currently installed",
+          description:
+            "Only list formulae and casks that are currently installed",
           exclusiveOn: ["--missing"],
         },
         {
           name: "--missing",
-          description: "Only list formulae and casks that are not currently installed",
+          description:
+            "Only list formulae and casks that are not currently installed",
           exclusiveOn: ["--installed"],
         },
         {
           name: "--include-implicit",
-          description: "Include formulae that have formula as an implicit dependency for downloading and unpacking source files",
+          description:
+            "Include formulae that have formula as an implicit dependency for downloading and unpacking source files",
         },
         {
           name: "--include-build",
-          description: "Include formulae that specify formula as a :build dependency",
+          description:
+            "Include formulae that specify formula as a :build dependency",
         },
         {
           name: "--include-test",
-          description: "Include formulae that specify formula as a :test dependency",
+          description:
+            "Include formulae that specify formula as a :test dependency",
         },
         {
           name: "--include-optional",
-          description: "Include formulae that specify formula as an :optional dependency",
+          description:
+            "Include formulae that specify formula as an :optional dependency",
         },
         {
           name: "--skip-recommended",
-          description: "Skip all formulae that specify formula as a :recommended dependency",
+          description:
+            "Skip all formulae that specify formula as a :recommended dependency",
         },
         {
           name: ["--formula", "--formulae"],
@@ -2711,7 +2928,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "leaves",
-      description: "List installed formulae that are not dependencies of another installed formula or cask",
+      description:
+        "List installed formulae that are not dependencies of another installed formula or cask",
       options: [
         ...commonOptions,
         {
@@ -2728,19 +2946,22 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "fetch",
-      description: "Download a bottle (if available) or source packages for formulae and binaries for casks",
+      description:
+        "Download a bottle (if available) or source packages for formulae and binaries for casks",
       args: formulaOrCaskVariadicArg,
       options: [
         debugOption,
         quietOption,
         {
           name: ["-v", "--verbose"],
-          description: "Do a verbose VCS checkout, if the URL represents a VCS. This is useful for seeing if an existing VCS cache has been updated",
+          description:
+            "Do a verbose VCS checkout, if the URL represents a VCS. This is useful for seeing if an existing VCS cache has been updated",
         },
         helpOption,
         {
           name: "--os",
-          description: "Download for the given operating system. (Pass all to download for all operating systems.)",
+          description:
+            "Download for the given operating system. (Pass all to download for all operating systems.)",
           args: {
             name: "os",
             suggestions: ["all"],
@@ -2749,7 +2970,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--arch",
-          description: "Download for the given CPU architecture. (Pass all to download for all architectures.)",
+          description:
+            "Download for the given CPU architecture. (Pass all to download for all architectures.)",
           args: {
             name: "arch",
             suggestions: ["all", "arm", "intel"],
@@ -2758,7 +2980,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--all-platforms",
-          description: "Download for every supported operating system and architecture, plus each language for casks, fetching each distinct URL once",
+          description:
+            "Download for every supported operating system and architecture, plus each language for casks, fetching each distinct URL once",
           exclusiveOn: ["--os", "--arch", "--bottle-tag"],
         },
         {
@@ -2788,7 +3011,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--retry",
-          description: "Retry if downloading fails or re-download if the checksum of a previously cached version no longer matches. Tries at most 5 times with exponential backoff",
+          description:
+            "Retry if downloading fails or re-download if the checksum of a previously cached version no longer matches. Tries at most 5 times with exponential backoff",
         },
         {
           name: "--deps",
@@ -2797,7 +3021,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--test",
-          description: "Also download test resources and their patches for each formula",
+          description:
+            "Also download test resources and their patches for each formula",
           exclusiveOn: ["--cask"],
         },
         {
@@ -2807,13 +3032,25 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--build-bottle",
-          description: "Download source packages (for eventual bottling) rather than a bottle",
-          exclusiveOn: ["--build-from-source", "--force-bottle", "--bottle-tag", "--cask"],
+          description:
+            "Download source packages (for eventual bottling) rather than a bottle",
+          exclusiveOn: [
+            "--build-from-source",
+            "--force-bottle",
+            "--bottle-tag",
+            "--cask",
+          ],
         },
         {
           name: "--force-bottle",
-          description: "Download a bottle if it exists for the current or newest version of macOS, even if it would not be used during installation",
-          exclusiveOn: ["--build-from-source", "--build-bottle", "--bottle-tag", "--cask"],
+          description:
+            "Download a bottle if it exists for the current or newest version of macOS, even if it would not be used during installation",
+          exclusiveOn: [
+            "--build-from-source",
+            "--build-bottle",
+            "--bottle-tag",
+            "--cask",
+          ],
         },
         formulaOption,
         {
@@ -2834,7 +3071,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "reinstall",
-      description: "Uninstall and then reinstall a formula or cask using the same options it was originally installed with, plus any appended options specific to a formula",
+      description:
+        "Uninstall and then reinstall a formula or cask using the same options it was originally installed with, plus any appended options specific to a formula",
       args: formulaOrCaskVariadicArg,
       options: [
         brewDebugOption,
@@ -2844,12 +3082,14 @@ const completionSpec: Fig.Spec = {
         displayTimesOption,
         {
           name: ["-f", "--force"],
-          description: "Install without checking for previously installed keg-only or non-migrated versions",
+          description:
+            "Install without checking for previously installed keg-only or non-migrated versions",
           exclusiveOn: ["--adopt"],
         },
         {
           name: ["-y", "--no-ask", "--yes"],
-          description: "Do not ask for confirmation before downloading and reinstalling. Ask mode is the default. Enabled by default if $HOMEBREW_NO_ASK is set",
+          description:
+            "Do not ask for confirmation before downloading and reinstalling. Ask mode is the default. Enabled by default if $HOMEBREW_NO_ASK is set",
         },
         {
           name: ["--formula", "--formulae"],
@@ -2882,20 +3122,23 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-s", "--build-from-source"],
-          description: "Compile formula from source even if a bottle is available",
+          description:
+            "Compile formula from source even if a bottle is available",
           exclusiveOn: ["--cask", "--force-bottle"],
         },
         interactiveOption,
         {
           name: "--force-bottle",
-          description: "Install from a bottle if it exists for the current or newest version of macOS, even if it would not normally be used for installation",
+          description:
+            "Install from a bottle if it exists for the current or newest version of macOS, even if it would not normally be used for installation",
           exclusiveOn: ["--cask", "--build-from-source"],
         },
         keepTmpOption,
         debugSymbolsOption,
         {
           name: ["-g", "--git"],
-          description: "Create a Git repository, useful for creating patches to the software",
+          description:
+            "Create a Git repository, useful for creating patches to the software",
           exclusiveOn: ["--cask"],
         },
         {
@@ -2916,13 +3159,15 @@ const completionSpec: Fig.Spec = {
         requireShaOption,
         {
           name: "--adopt",
-          description: "Adopt existing artifacts in the destination that are identical to those being installed. Cannot be combined with --force",
+          description:
+            "Adopt existing artifacts in the destination that are identical to those being installed. Cannot be combined with --force",
           exclusiveOn: ["--formula", "--force"],
         },
         skipCaskDepsOption,
         {
           name: "--zap",
-          description: "For use with brew reinstall --cask. Remove all files associated with a cask. May remove files which are shared between applications",
+          description:
+            "For use with brew reinstall --cask. Remove all files associated with a cask. May remove files which are shared between applications",
           exclusiveOn: ["--formula"],
         },
         appdirOption,
@@ -2946,20 +3191,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["config", "--config"],
-      description: "Show Homebrew and system configuration info useful for debugging",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "Show Homebrew and system configuration info useful for debugging",
+      options: [...commonOptions],
     },
     {
       name: ["home", "homepage"],
-      description: "Open a formula or cask's homepage in a browser, or open Homebrew's own homepage if no argument is provided",
+      description:
+        "Open a formula or cask's homepage in a browser, or open Homebrew's own homepage if no argument is provided",
       args: formulaOrCaskOptionalVariadicArg,
-      options: [
-        ...commonOptions,
-        formulaOption,
-        caskOption,
-      ],
+      options: [...commonOptions, formulaOption, caskOption],
     },
     {
       name: "desc",
@@ -2968,10 +3209,7 @@ const completionSpec: Fig.Spec = {
         name: "formula|cask|text",
         description: "Formula, cask, text or /regex/",
         isVariadic: true,
-        generators: [
-          generateAllFormulae,
-          generateAllCasks,
-        ],
+        generators: [generateAllFormulae, generateAllCasks],
       },
       options: [
         {
@@ -2983,17 +3221,20 @@ const completionSpec: Fig.Spec = {
         helpOption,
         {
           name: ["-s", "--search"],
-          description: "Search both names and descriptions for text. If text is flanked by slashes, it is interpreted as a regular expression",
+          description:
+            "Search both names and descriptions for text. If text is flanked by slashes, it is interpreted as a regular expression",
           exclusiveOn: ["--name", "--description"],
         },
         {
           name: ["-n", "--name"],
-          description: "Search just names for text. If text is flanked by slashes, it is interpreted as a regular expression",
+          description:
+            "Search just names for text. If text is flanked by slashes, it is interpreted as a regular expression",
           exclusiveOn: ["--search", "--description"],
         },
         {
           name: ["-d", "--description"],
-          description: "Search just descriptions for text. If text is flanked by slashes, it is interpreted as a regular expression",
+          description:
+            "Search just descriptions for text. If text is flanked by slashes, it is interpreted as a regular expression",
           exclusiveOn: ["--search", "--name"],
         },
         {
@@ -3008,91 +3249,69 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "analytics",
-      description: "Control Homebrew's anonymous aggregate user behaviour analytics",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "Control Homebrew's anonymous aggregate user behaviour analytics",
+      options: [...commonOptions],
       subcommands: [
         {
           name: "state",
           description: "Display the current state of Homebrew's analytics",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
         {
           name: "on",
           description: "Turn Homebrew's analytics on",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
         {
           name: "off",
           description: "Turn Homebrew's analytics off",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
       ],
     },
     {
       name: "completions",
-      description: "Control whether Homebrew automatically links external tap shell completion files",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "Control whether Homebrew automatically links external tap shell completion files",
+      options: [...commonOptions],
       subcommands: [
         {
           name: "state",
           description: "Display the current state of Homebrew's completions",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
         {
           name: "link",
           description: "Link Homebrew's completions",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
         {
           name: "unlink",
           description: "Unlink Homebrew's completions",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
       ],
     },
     {
       name: "developer",
       description: "Control Homebrew's developer mode",
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
       subcommands: [
         {
           name: "state",
           description: "Display the current state of Homebrew's developer mode",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
         {
           name: "on",
           description: "Turn Homebrew's developer mode on",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
         {
           name: "off",
           description: "Turn Homebrew's developer mode off",
-          options: [
-            ...commonOptions,
-          ],
+          options: [...commonOptions],
         },
       ],
     },
@@ -3108,7 +3327,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--edit",
-          description: "Edit aliases in a text editor. Either one or all aliases may be opened at once. If the given alias doesn't exist it'll be pre-populated with a template",
+          description:
+            "Edit aliases in a text editor. Either one or all aliases may be opened at once. If the given alias doesn't exist it'll be pre-populated with a template",
         },
       ],
     },
@@ -3120,13 +3340,12 @@ const completionSpec: Fig.Spec = {
         isVariadic: true,
         generators: generateAliases,
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "as-brew-user",
-      description: "Run a Homebrew command as the owner of HOMEBREW_PREFIX on macOS or Linux",
+      description:
+        "Run a Homebrew command as the owner of HOMEBREW_PREFIX on macOS or Linux",
       args: [
         {
           name: "command",
@@ -3138,13 +3357,12 @@ const completionSpec: Fig.Spec = {
           isVariadic: true,
         },
       ],
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "as-console-user",
-      description: "Run a Homebrew command as the user logged in to the macOS desktop",
+      description:
+        "Run a Homebrew command as the user logged in to the macOS desktop",
       args: [
         {
           name: "command",
@@ -3156,31 +3374,25 @@ const completionSpec: Fig.Spec = {
           isVariadic: true,
         },
       ],
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "casks",
       description: "List all locally installable casks including short names",
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "command",
-      description: "Display the path to the file being used when invoking brew cmd",
+      description:
+        "Display the path to the file being used when invoking brew cmd",
       args: commandVariadicArg,
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "command-not-found-init",
-      description: "Print instructions for setting up the command-not-found hook for your shell",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "Print instructions for setting up the command-not-found hook for your shell",
+      options: [...commonOptions],
     },
     {
       name: "commands",
@@ -3189,7 +3401,8 @@ const completionSpec: Fig.Spec = {
         debugOption,
         {
           name: ["-q", "--quiet"],
-          description: "List only the names of commands without category headers",
+          description:
+            "List only the names of commands without category headers",
         },
         verboseOption,
         helpOption,
@@ -3202,14 +3415,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "docs",
-      description: "Open Homebrew's online documentation at https://docs.brew.sh in a browser",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "Open Homebrew's online documentation at https://docs.brew.sh in a browser",
+      options: [...commonOptions],
     },
     {
       name: ["exec", "x"],
-      description: "Run command in an environment populated by Homebrew formulae",
+      description:
+        "Run command in an environment populated by Homebrew formulae",
       args: {
         name: "command",
         isCommand: true,
@@ -3218,14 +3431,16 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--formulae",
-          description: "Comma-separated formulae to install and add to PATH before running command",
+          description:
+            "Comma-separated formulae to install and add to PATH before running command",
           args: {
             name: "formulae",
           },
         },
         {
           name: "--sandbox",
-          description: "Run command in Homebrew's sandbox, allowing writes to path and Homebrew's temporary and cache directories",
+          description:
+            "Run command in Homebrew's sandbox, allowing writes to path and Homebrew's temporary and cache directories",
           args: {
             name: "path",
             template: "filepaths",
@@ -3240,10 +3455,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "formulae",
-      description: "List all locally installable formulae including short names",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "List all locally installable formulae including short names",
+      options: [...commonOptions],
     },
     {
       name: "gist-logs",
@@ -3253,11 +3467,13 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: ["-n", "--new-issue"],
-          description: "Automatically create a new issue in the appropriate GitHub repository after creating the Gist",
+          description:
+            "Automatically create a new issue in the appropriate GitHub repository after creating the Gist",
         },
         {
           name: ["-p", "--private"],
-          description: "The Gist will be marked private and will not appear in listings but will be accessible with its link",
+          description:
+            "The Gist will be marked private and will not appear in listings but will be accessible with its link",
         },
       ],
     },
@@ -3270,21 +3486,17 @@ const completionSpec: Fig.Spec = {
         isVariadic: true,
         generators: commandsGenerator,
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "log",
-      description: "Show the git log for formula or cask, or show the log for the Homebrew repository if no formula or cask is provided",
+      description:
+        "Show the git log for formula or cask, or show the log for the Homebrew repository if no formula or cask is provided",
       args: {
         name: "formula|cask",
         description: "Formula or cask",
         isOptional: true,
-        generators: [
-          generateAllFormulae,
-          generateAllCasks,
-        ],
+        generators: [generateAllFormulae, generateAllCasks],
       },
       options: [
         ...commonOptions,
@@ -3332,17 +3544,20 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "migrate",
-      description: "Migrate renamed packages to new names, where formula are old names of packages",
+      description:
+        "Migrate renamed packages to new names, where formula are old names of packages",
       args: installedFormulaOrCaskVariadicArg,
       options: [
         ...commonOptions,
         {
           name: ["-f", "--force"],
-          description: "Treat installed formula and provided formula as if they are from the same taps and migrate them anyway",
+          description:
+            "Treat installed formula and provided formula as if they are from the same taps and migrate them anyway",
         },
         {
           name: ["-n", "--dry-run"],
-          description: "Show what would be migrated, but do not actually migrate anything",
+          description:
+            "Show what would be migrated, but do not actually migrate anything",
         },
         {
           name: ["--formula", "--formulae"],
@@ -3358,13 +3573,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "missing",
-      description: "Check the given formula kegs and cask installations for missing dependencies",
+      description:
+        "Check the given formula kegs and cask installations for missing dependencies",
       args: formulaOrCaskOptionalVariadicArg,
       options: [
         ...commonOptions,
         {
           name: "--hide",
-          description: "Act as if none of the specified hidden are installed. hidden should be a comma-separated list of formulae or casks",
+          description:
+            "Act as if none of the specified hidden are installed. hidden should be a comma-separated list of formulae or casks",
           args: {
             name: "hide",
           },
@@ -3373,10 +3590,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "nodenv-sync",
-      description: "Create symlinks for Homebrew's installed NodeJS versions in ~/.nodenv/versions",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "Create symlinks for Homebrew's installed NodeJS versions in ~/.nodenv/versions",
+      options: [...commonOptions],
     },
     {
       name: "options",
@@ -3403,33 +3619,31 @@ const completionSpec: Fig.Spec = {
         isVariadic: true,
         generators: installedFormulaeGenerator,
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "pyenv-sync",
-      description: "Create symlinks for Homebrew's installed Python versions in ~/.pyenv/versions",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "Create symlinks for Homebrew's installed Python versions in ~/.pyenv/versions",
+      options: [...commonOptions],
     },
     {
       name: "rbenv-sync",
-      description: "Create symlinks for Homebrew's installed Ruby versions in ~/.rbenv/versions",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "Create symlinks for Homebrew's installed Ruby versions in ~/.rbenv/versions",
+      options: [...commonOptions],
     },
     {
       name: "readall",
-      description: "Import all items from the specified tap, or from all installed taps if none is provided",
+      description:
+        "Import all items from the specified tap, or from all installed taps if none is provided",
       args: tapOptionalVariadicArg,
       options: [
         ...commonOptions,
         {
           name: "--os",
-          description: "Read using the given operating system. (Pass all to simulate all operating systems.)",
+          description:
+            "Read using the given operating system. (Pass all to simulate all operating systems.)",
           args: {
             name: "os",
             suggestions: ["all"],
@@ -3437,7 +3651,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--arch",
-          description: "Read using the given CPU architecture. (Pass all to simulate all architectures.)",
+          description:
+            "Read using the given CPU architecture. (Pass all to simulate all architectures.)",
           args: {
             name: "arch",
             suggestions: ["all", "arm", "intel"],
@@ -3449,17 +3664,20 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--syntax",
-          description: "Syntax-check all of Homebrew's Ruby files (if no tap is passed)",
+          description:
+            "Syntax-check all of Homebrew's Ruby files (if no tap is passed)",
         },
         {
           name: "--no-simulate",
-          description: "Don't simulate other system configurations when checking formulae and casks",
+          description:
+            "Don't simulate other system configurations when checking formulae and casks",
         },
       ],
     },
     {
       name: "sandbox-exec",
-      description: "Run command in Homebrew's sandbox, allowing writes to writable-path and Homebrew's temporary and cache directories",
+      description:
+        "Run command in Homebrew's sandbox, allowing writes to writable-path and Homebrew's temporary and cache directories",
       args: [
         {
           name: "writable-path",
@@ -3486,29 +3704,25 @@ const completionSpec: Fig.Spec = {
         isOptional: true,
         isVariadic: true,
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "shellenv",
-      description: "Print export statements to add Homebrew to your PATH, MANPATH and INFOPATH",
+      description:
+        "Print export statements to add Homebrew to your PATH, MANPATH and INFOPATH",
       args: {
         name: "shell",
         isOptional: true,
         suggestions: ["bash", "csh", "fish", "pwsh", "sh", "tcsh", "zsh"],
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "source",
-      description: "Open a formula's source repository in a browser, or open Homebrew's own repository if no argument is provided",
+      description:
+        "Open a formula's source repository in a browser, or open Homebrew's own repository if no argument is provided",
       args: formulaOptionalVariadicArg,
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "tab",
@@ -3518,12 +3732,14 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--installed-on-request",
-          description: "Mark installed_formula or installed_cask as installed on request",
+          description:
+            "Mark installed_formula or installed_cask as installed on request",
           exclusiveOn: ["--no-installed-on-request"],
         },
         {
           name: "--no-installed-on-request",
-          description: "Mark installed_formula or installed_cask as not installed on request",
+          description:
+            "Mark installed_formula or installed_cask as not installed on request",
           exclusiveOn: ["--installed-on-request"],
         },
         {
@@ -3550,7 +3766,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--json",
-          description: "Print a JSON representation of tap. Currently the default and only accepted value for version is v1. See the docs for examples of using the JSON output: https://docs.brew.sh/Querying-Brew",
+          description:
+            "Print a JSON representation of tap. Currently the default and only accepted value for version is v1. See the docs for examples of using the JSON output: https://docs.brew.sh/Querying-Brew",
           args: {
             name: "version",
             isOptional: true,
@@ -3562,7 +3779,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "trust",
-      description: "Trust non-official tap formulae, casks or commands so Homebrew may load them",
+      description:
+        "Trust non-official tap formulae, casks or commands so Homebrew may load them",
       args: {
         name: "target",
         isOptional: true,
@@ -3592,7 +3810,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--json",
-          description: "Print trusted entries as JSON. A version number is required. The only accepted value for version is v1",
+          description:
+            "Print trusted entries as JSON. A version number is required. The only accepted value for version is v1",
           args: {
             name: "version",
             suggestions: ["v1"],
@@ -3635,26 +3854,24 @@ const completionSpec: Fig.Spec = {
     {
       name: "update-if-needed",
       description: "Runs brew update --auto-update only if needed",
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "update-reset",
-      description: "Fetch and reset Homebrew and all tap repositories (or any specified repository) using git(1) to their latest origin/HEAD",
+      description:
+        "Fetch and reset Homebrew and all tap repositories (or any specified repository) using git(1) to their latest origin/HEAD",
       args: {
         name: "repository",
         isOptional: true,
         isVariadic: true,
         template: "folders",
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "version-install",
-      description: "Extract a specific version of formula into a personal tap and install it",
+      description:
+        "Extract a specific version of formula into a personal tap and install it",
       args: [
         {
           name: "formula[@version]",
@@ -3665,13 +3882,12 @@ const completionSpec: Fig.Spec = {
           isOptional: true,
         },
       ],
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "vulns",
-      description: "Check formula for known security vulnerabilities using the OSV.dev database",
+      description:
+        "Check formula for known security vulnerabilities using the OSV.dev database",
       args: formulaOptionalVariadicArg,
       options: [
         {
@@ -3687,11 +3903,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--no-ignore-patches",
-          description: "Report vulnerabilities even when a formula patch resolves them",
+          description:
+            "Report vulnerabilities even when a formula patch resolves them",
         },
         {
           name: "--brewfile",
-          description: "Check formulae listed in a Brewfile. Defaults to ./Brewfile; use --brewfile=path to specify another",
+          description:
+            "Check formulae listed in a Brewfile. Defaults to ./Brewfile; use --brewfile=path to specify another",
           args: {
             name: "file",
             isOptional: true,
@@ -3701,17 +3919,20 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--fix-available",
-          description: "Only report vulnerabilities that have a released version fix available. Shortcut for --fix-type=released",
+          description:
+            "Only report vulnerabilities that have a released version fix available. Shortcut for --fix-type=released",
           exclusiveOn: ["--no-fix-available", "--fix-type"],
         },
         {
           name: "--no-fix-available",
-          description: "Only report vulnerabilities that do not have a released version fix available (includes unreleased commit SHA patches). Shortcut for --fix-type=unreleased",
+          description:
+            "Only report vulnerabilities that do not have a released version fix available (includes unreleased commit SHA patches). Shortcut for --fix-type=unreleased",
           exclusiveOn: ["--fix-available", "--fix-type"],
         },
         {
           name: "--fix-type",
-          description: "Filter findings by fix type: released (official version release), patch (unreleased commit SHA), any (either), none (neither), unreleased (no released version fix)",
+          description:
+            "Filter findings by fix type: released (official version release), patch (unreleased commit SHA), any (either), none (neither), unreleased (no released version fix)",
           args: {
             name: "type",
             suggestions: ["released", "patch", "any", "none", "unreleased"],
@@ -3720,11 +3941,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--list-skipped",
-          description: "List packages skipped due to missing or unsupported source URL",
+          description:
+            "List packages skipped due to missing or unsupported source URL",
         },
         {
           name: ["-s", "--severity"],
-          description: "Only report findings at or above: low, medium, high, critical",
+          description:
+            "Only report findings at or above: low, medium, high, critical",
           args: {
             name: "severity",
             suggestions: ["low", "medium", "high", "critical"],
@@ -3732,14 +3955,16 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-m", "--max-summary"],
-          description: "Truncate summaries to n characters (default 60, 0 for no limit)",
+          description:
+            "Truncate summaries to n characters (default 60, 0 for no limit)",
           args: {
             name: "max-summary",
           },
         },
         {
           name: ["-j", "--json"],
-          description: "Output findings and scan coverage as JSON. A complete scan does not guarantee the absence of vulnerabilities",
+          description:
+            "Output findings and scan coverage as JSON. A complete scan does not guarantee the absence of vulnerabilities",
         },
       ],
     },
@@ -3754,7 +3979,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--explain",
-          description: "Output explanation of how to get command by installing one of the providing formulae",
+          description:
+            "Output explanation of how to get command by installing one of the providing formulae",
         },
       ],
     },
@@ -3766,7 +3992,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--os",
-          description: "Audit the given operating system. (Pass all to audit all operating systems.)",
+          description:
+            "Audit the given operating system. (Pass all to audit all operating systems.)",
           args: {
             name: "os",
             suggestions: ["all"],
@@ -3774,7 +4001,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--arch",
-          description: "Audit the given CPU architecture. (Pass all to audit all architectures.)",
+          description:
+            "Audit the given CPU architecture. (Pass all to audit all architectures.)",
           args: {
             name: "arch",
             suggestions: ["all", "arm", "intel"],
@@ -3787,20 +4015,24 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--git",
-          description: "Run additional, slower style checks that navigate the Git repository",
+          description:
+            "Run additional, slower style checks that navigate the Git repository",
         },
         {
           name: "--online",
-          description: "Run additional, slower style checks that require a network connection",
+          description:
+            "Run additional, slower style checks that require a network connection",
         },
         {
           name: "--installed",
-          description: "Only check formulae and casks that are currently installed",
+          description:
+            "Only check formulae and casks that are currently installed",
           exclusiveOn: ["--changed", "--tap"],
         },
         {
           name: "--new",
-          description: "Run various additional style checks to determine if a new formula or cask is eligible for Homebrew. This should be used when creating new formulae or casks and implies --strict and --online",
+          description:
+            "Run various additional style checks to determine if a new formula or cask is eligible for Homebrew. This should be used when creating new formulae or casks and implies --strict and --online",
         },
         {
           name: "--changed",
@@ -3809,7 +4041,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--tap",
-          description: "Check formulae and casks within the given tap, specified as user/repo",
+          description:
+            "Check formulae and casks within the given tap, specified as user/repo",
           args: {
             name: "tap",
             generators: repositoriesGenerator(),
@@ -3818,15 +4051,18 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--fix",
-          description: "Fix style violations automatically using RuboCop's auto-correct feature. When passed with --online for casks, also correct the depends_on macos: stanza and the case of artifact stanzas",
+          description:
+            "Fix style violations automatically using RuboCop's auto-correct feature. When passed with --online for casks, also correct the depends_on macos: stanza and the case of artifact stanzas",
         },
         {
           name: "--display-filename",
-          description: "Prefix every line of output with the file or formula name being audited, to make output easy to grep",
+          description:
+            "Prefix every line of output with the file or formula name being audited, to make output easy to grep",
         },
         {
           name: "--skip-style",
-          description: "Skip running non-RuboCop style checks. Useful if you plan on running brew style separately. Enabled by default unless a formula is specified by name",
+          description:
+            "Skip running non-RuboCop style checks. Useful if you plan on running brew style separately. Enabled by default unless a formula is specified by name",
         },
         {
           name: ["-D", "--audit-debug"],
@@ -3834,7 +4070,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--only",
-          description: "Specify a comma-separated method list to only run the methods named audit_method",
+          description:
+            "Specify a comma-separated method list to only run the methods named audit_method",
           args: {
             name: "only",
           },
@@ -3842,7 +4079,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--except",
-          description: "Specify a comma-separated method list to skip running the methods named audit_method",
+          description:
+            "Specify a comma-separated method list to skip running the methods named audit_method",
           args: {
             name: "except",
           },
@@ -3850,7 +4088,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--only-cops",
-          description: "Specify a comma-separated cops list to check for violations of only the listed RuboCop cops",
+          description:
+            "Specify a comma-separated cops list to check for violations of only the listed RuboCop cops",
           args: {
             name: "only-cops",
           },
@@ -3858,7 +4097,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--except-cops",
-          description: "Specify a comma-separated cops list to skip checking for violations of the listed RuboCop cops",
+          description:
+            "Specify a comma-separated cops list to skip checking for violations of the listed RuboCop cops",
           args: {
             name: "except-cops",
           },
@@ -3870,13 +4110,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "benchmark",
-      description: "Benchmark this brew with hyperfine, installing hyperfine first if it is missing",
+      description:
+        "Benchmark this brew with hyperfine, installing hyperfine first if it is missing",
       args: formulaVariadicArg,
       options: [
         ...commonOptions,
         {
           name: "--exec",
-          description: "Run hyperfine with the arguments given after -- instead of Homebrew's own workloads, e.g. brew benchmark --exec -- 'brew --version'",
+          description:
+            "Run hyperfine with the arguments given after -- instead of Homebrew's own workloads, e.g. brew benchmark --exec -- 'brew --version'",
           exclusiveOn: ["--runs"],
         },
         {
@@ -3891,7 +4133,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "bottle",
-      description: "Generate a bottle (binary package) from a formula that was installed with --build-bottle",
+      description:
+        "Generate a bottle (binary package) from a formula that was installed with --build-bottle",
       args: {
         name: "formula|file",
         isVariadic: true,
@@ -3902,48 +4145,58 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--skip-relocation",
-          description: "Do not check if the bottle can be marked as relocatable",
+          description:
+            "Do not check if the bottle can be marked as relocatable",
         },
         {
           name: "--force-core-tap",
-          description: "Build a bottle even if formula is not in homebrew/core or any installed taps",
+          description:
+            "Build a bottle even if formula is not in homebrew/core or any installed taps",
         },
         {
           name: "--no-rebuild",
-          description: "If the formula specifies a rebuild version, remove it from the generated DSL",
+          description:
+            "If the formula specifies a rebuild version, remove it from the generated DSL",
           exclusiveOn: ["--keep-old"],
         },
         {
           name: "--keep-old",
-          description: "If the formula specifies a rebuild version, attempt to preserve its value in the generated DSL",
+          description:
+            "If the formula specifies a rebuild version, attempt to preserve its value in the generated DSL",
           exclusiveOn: ["--no-rebuild"],
         },
         {
           name: "--json",
-          description: "Write bottle information to a JSON file, which can be used as the value for --merge",
+          description:
+            "Write bottle information to a JSON file, which can be used as the value for --merge",
         },
         {
           name: "--merge",
-          description: "Generate an updated bottle block for a formula and optionally merge it into the formula file. Instead of a formula name, requires the path to a JSON file generated with brew bottle --json formula",
+          description:
+            "Generate an updated bottle block for a formula and optionally merge it into the formula file. Instead of a formula name, requires the path to a JSON file generated with brew bottle --json formula",
         },
         {
           name: "--write",
-          description: "Write changes to the formula file. A new commit will be generated unless --no-commit is passed",
+          description:
+            "Write changes to the formula file. A new commit will be generated unless --no-commit is passed",
           dependsOn: ["--merge"],
         },
         {
           name: "--no-commit",
-          description: "When passed with --write, a new commit will not generated after writing changes to the formula file",
+          description:
+            "When passed with --write, a new commit will not generated after writing changes to the formula file",
           dependsOn: ["--write"],
         },
         {
           name: "--only-json-tab",
-          description: "When passed with --json, the tab will be written to the JSON file but not the bottle",
+          description:
+            "When passed with --json, the tab will be written to the JSON file but not the bottle",
           dependsOn: ["--json"],
         },
         {
           name: "--no-all-checks",
-          description: "Don't try to create an all bottle or stop a no-change upload",
+          description:
+            "Don't try to create an all bottle or stop a no-change upload",
           dependsOn: ["--merge"],
         },
         rootUrlOption,
@@ -3952,7 +4205,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "bump",
-      description: "Displays out-of-date packages and the latest version available",
+      description:
+        "Displays out-of-date packages and the latest version available",
       args: formulaOrCaskOptionalVariadicArg,
       options: [
         ...commonOptions,
@@ -3967,7 +4221,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--no-autobump",
-          description: "Ignore formulae/casks in autobump list (official repositories only)",
+          description:
+            "Ignore formulae/casks in autobump list (official repositories only)",
           exclusiveOn: ["--tap"],
         },
         {
@@ -3986,7 +4241,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--tap",
-          description: "Check formulae and casks within the given tap, specified as user/repo",
+          description:
+            "Check formulae and casks within the given tap, specified as user/repo",
           args: {
             name: "tap",
             generators: repositoriesGenerator(),
@@ -4001,19 +4257,22 @@ const completionSpec: Fig.Spec = {
         noForkOption,
         {
           name: "--open-pr",
-          description: "Open a pull request for the new version if none have been opened yet",
+          description:
+            "Open a pull request for the new version if none have been opened yet",
           exclusiveOn: ["--no-pull-requests"],
         },
         {
           name: "--start-with",
-          description: "Letter or word that the list of package results should alphabetically follow",
+          description:
+            "Letter or word that the list of package results should alphabetically follow",
           args: {
             name: "start-with",
           },
         },
         {
           name: "--bump-synced",
-          description: "Bump additional formulae marked as synced with the given formulae",
+          description:
+            "Bump additional formulae marked as synced with the given formulae",
         },
       ],
     },
@@ -4029,11 +4288,13 @@ const completionSpec: Fig.Spec = {
         dryRunOption,
         {
           name: "--write-only",
-          description: "Make the expected file modifications without taking any Git actions",
+          description:
+            "Make the expected file modifications without taking any Git actions",
         },
         {
           name: "--commit",
-          description: "When passed with --write-only, generate a new commit after writing changes to the cask file",
+          description:
+            "When passed with --write-only, generate a new commit after writing changes to the cask file",
           dependsOn: ["--write-only"],
         },
         {
@@ -4046,7 +4307,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--no-browse",
-          description: "Print the pull request URL instead of opening in a browser",
+          description:
+            "Print the pull request URL instead of opening in a browser",
         },
         noForkOption,
         {
@@ -4126,7 +4388,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "bump-compatibility-version",
-      description: "Create a commit to increment the compatibility_version of formula",
+      description:
+        "Create a commit to increment the compatibility_version of formula",
       args: formulaVariadicArg,
       options: [
         ...commonOptions,
@@ -4143,7 +4406,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "bump-formula-pr",
-      description: "Create a pull request to update formula with a new URL or a new tag",
+      description:
+        "Create a pull request to update formula with a new URL or a new tag",
       args: {
         name: "formula",
         isOptional: true,
@@ -4155,7 +4419,8 @@ const completionSpec: Fig.Spec = {
         writeOnlyOption,
         {
           name: "--commit",
-          description: "When passed with --write-only, generate a new commit after writing changes to the formula file",
+          description:
+            "When passed with --write-only, generate a new commit after writing changes to the formula file",
           dependsOn: ["--write-only"],
         },
         {
@@ -4175,12 +4440,14 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--no-browse",
-          description: "Print the pull request URL instead of opening in a browser",
+          description:
+            "Print the pull request URL instead of opening in a browser",
         },
         noForkOption,
         {
           name: "--mirror",
-          description: "Use the specified URL as a mirror URL. If URL is a comma-separated list of URLs, multiple mirrors will be added",
+          description:
+            "Use the specified URL as a mirror URL. If URL is a comma-separated list of URLs, multiple mirrors will be added",
           args: {
             name: "mirror",
           },
@@ -4194,7 +4461,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--version",
-          description: "Use the specified version to override the value parsed from the URL or tag. Note that --version=0 can be used to delete an existing version override from a formula if it has become redundant",
+          description:
+            "Use the specified version to override the value parsed from the URL or tag. Note that --version=0 can be used to delete an existing version override from a formula if it has become redundant",
           args: {
             name: "version",
           },
@@ -4208,7 +4476,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--url",
-          description: "Specify the URL for the new download. If a URL is specified, the SHA-256 checksum of the new download should also be specified",
+          description:
+            "Specify the URL for the new download. If a URL is specified, the SHA-256 checksum of the new download should also be specified",
           args: {
             name: "url",
           },
@@ -4232,7 +4501,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--revision",
-          description: "Specify the new commit revision corresponding to the specified git tag or specified version",
+          description:
+            "Specify the new commit revision corresponding to the specified git tag or specified version",
           args: {
             name: "revision",
           },
@@ -4244,14 +4514,16 @@ const completionSpec: Fig.Spec = {
         installDependenciesOption,
         {
           name: "--python-package-name",
-          description: "Use the specified package-name when finding Python resources for formula. If no package name is specified, it will be inferred from the formula's stable URL",
+          description:
+            "Use the specified package-name when finding Python resources for formula. If no package name is specified, it will be inferred from the formula's stable URL",
           args: {
             name: "python-package-name",
           },
         },
         {
           name: "--python-extra-packages",
-          description: "Include these additional Python packages when finding resources",
+          description:
+            "Include these additional Python packages when finding resources",
           args: {
             name: "python-extra-packages",
           },
@@ -4274,7 +4546,8 @@ const completionSpec: Fig.Spec = {
         dryRunOption2,
         {
           name: "--remove-bottle-block",
-          description: "Remove the bottle block in addition to bumping the revision",
+          description:
+            "Remove the bottle block in addition to bumping the revision",
         },
         writeOnlyOption,
         {
@@ -4288,20 +4561,19 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "bump-unversioned-casks",
-      description: "Check all casks with unversioned URLs in a given tap for updates",
+      description:
+        "Check all casks with unversioned URLs in a given tap for updates",
       args: {
         name: "cask|tap",
         isVariadic: true,
-        generators: [
-          generateAllCasks,
-          repositoriesGenerator(),
-        ],
+        generators: [generateAllCasks, repositoriesGenerator()],
       },
       options: [
         ...commonOptions,
         {
           name: ["-n", "--dry-run"],
-          description: "Do everything except caching state and opening pull requests",
+          description:
+            "Do everything except caching state and opening pull requests",
         },
         {
           name: "--limit",
@@ -4324,11 +4596,7 @@ const completionSpec: Fig.Spec = {
       name: "cat",
       description: "Display the source of a formula or cask",
       args: formulaOrCaskVariadicArg,
-      options: [
-        ...commonOptions,
-        formulaOption,
-        caskOption,
-      ],
+      options: [...commonOptions, formulaOption, caskOption],
     },
     {
       name: "contributions",
@@ -4337,7 +4605,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--user",
-          description: "Specify a comma-separated list of GitHub usernames or email addresses to find contributions from. Omitting this flag searches Homebrew maintainers and requires access to the Homebrew/maintainers team. With --maintainer-report-csv, only matching period-end Maintainers are included",
+          description:
+            "Specify a comma-separated list of GitHub usernames or email addresses to find contributions from. Omitting this flag searches Homebrew maintainers and requires access to the Homebrew/maintainers team. With --maintainer-report-csv, only matching period-end Maintainers are included",
           args: {
             name: "user",
           },
@@ -4345,7 +4614,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--repositories",
-          description: "Specify a comma-separated list of repositories to search. All repositories must be under the same user or organisation. Omitting this flag, or specifying --repositories=primary, searches only the main repositories: Homebrew/brew, Homebrew/homebrew-core, Homebrew/homebrew-cask",
+          description:
+            "Specify a comma-separated list of repositories to search. All repositories must be under the same user or organisation. Omitting this flag, or specifying --repositories=primary, searches only the main repositories: Homebrew/brew, Homebrew/homebrew-core, Homebrew/homebrew-cask",
           args: {
             name: "repositories",
             suggestions: ["primary"],
@@ -4354,7 +4624,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["--organisation", "--organization", "--org"],
-          description: "Specify the organisation to populate sources repositories from. Omitting this flag searches the Homebrew primary repositories",
+          description:
+            "Specify the organisation to populate sources repositories from. Omitting this flag searches the Homebrew primary repositories",
           args: {
             name: "organisation",
           },
@@ -4362,7 +4633,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--team",
-          description: "Specify the team to populate users from. The first part of the team name will be used as the organisation",
+          description:
+            "Specify the team to populate users from. The first part of the team name will be used as the organisation",
           args: {
             name: "team",
           },
@@ -4370,7 +4642,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--quarter",
-          description: "Homebrew contributions quarter to search (1-4). Omitting this flag searches the past year. If --from or --to are set, they take precedence",
+          description:
+            "Homebrew contributions quarter to search (1-4). Omitting this flag searches the past year. If --from or --to are set, they take precedence",
           args: {
             name: "quarter",
           },
@@ -4378,7 +4651,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--from",
-          description: "Date (ISO 8601 format) to start searching contributions. Omitting this flag searches the past year",
+          description:
+            "Date (ISO 8601 format) to start searching contributions. Omitting this flag searches the past year",
           args: {
             name: "from",
           },
@@ -4392,21 +4666,29 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--csv",
-          description: "Print a CSV of contributions across repositories over the time period",
+          description:
+            "Print a CSV of contributions across repositories over the time period",
         },
         {
           name: "--maintainer-report-csv",
-          description: "Print a CSV of Maintainer and Lead Maintainer activity criteria using fetched Git histories, verified GitHub approvals and issue closures for the Homebrew governance quarter, for example --maintainer-report-csv=2026-2. Alternatively, omit the value and set --from and --to for any reporting period. Also write it in the current directory as brew-contributions-FROM-to-TO.csv, or brew-contributions-FROM-to-TO-USER.csv when filtered with --user, beside a matching .md summary of activity in the latest completed and current quarters with each Maintainer's numerical gap. Only Maintainers listed at the end of that period are included. Activity checks use the latest completed governance quarter; role recommendations use up to four full quarters of reports. Counts are capped at 500 per repository and contribution type. Merge and approval checks stop once the activity thresholds are met. Historical reports using older criteria must be regenerated. Completed-period GitHub searches are cached in Homebrew's cache and removed by normal cache pruning. YEAR-1 is December of the previous year through February, YEAR-2 is March through May, YEAR-3 is June through August and YEAR-4 is September through November",
+          description:
+            "Print a CSV of Maintainer and Lead Maintainer activity criteria using fetched Git histories, verified GitHub approvals and issue closures for the Homebrew governance quarter, for example --maintainer-report-csv=2026-2. Alternatively, omit the value and set --from and --to for any reporting period. Also write it in the current directory as brew-contributions-FROM-to-TO.csv, or brew-contributions-FROM-to-TO-USER.csv when filtered with --user, beside a matching .md summary of activity in the latest completed and current quarters with each Maintainer's numerical gap. Only Maintainers listed at the end of that period are included. Activity checks use the latest completed governance quarter; role recommendations use up to four full quarters of reports. Counts are capped at 500 per repository and contribution type. Merge and approval checks stop once the activity thresholds are met. Historical reports using older criteria must be regenerated. Completed-period GitHub searches are cached in Homebrew's cache and removed by normal cache pruning. YEAR-1 is December of the previous year through February, YEAR-2 is March through May, YEAR-3 is June through August and YEAR-4 is September through November",
           args: {
             name: "maintainer-report-csv",
             isOptional: true,
           },
           requiresSeparator: true,
-          exclusiveOn: ["--repositories", "--organisation", "--team", "--quarter"],
+          exclusiveOn: [
+            "--repositories",
+            "--organisation",
+            "--team",
+            "--quarter",
+          ],
         },
         {
           name: "--maintainer-exempt",
-          description: "GitHub usernames exempt from Maintainer inactivity removal, such as Security Team members. Lead Maintainer activity requirements still apply",
+          description:
+            "GitHub usernames exempt from Maintainer inactivity removal, such as Security Team members. Lead Maintainer activity requirements still apply",
           args: {
             name: "maintainer-exempt",
           },
@@ -4415,7 +4697,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "create",
-      description: "Generate a formula or, with --cask, a cask for the downloadable file at URL and open it in the editor",
+      description:
+        "Generate a formula or, with --cask, a cask for the downloadable file at URL and open it in the editor",
       args: {
         name: "URL",
       },
@@ -4659,11 +4942,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--no-fetch",
-          description: "Homebrew will not download URL to the cache and will thus not add its SHA-256 to the formula for you, nor will it check the GitHub API for GitHub projects (to fill out its description and homepage)",
+          description:
+            "Homebrew will not download URL to the cache and will thus not add its SHA-256 to the formula for you, nor will it check the GitHub API for GitHub projects (to fill out its description and homepage)",
         },
         {
           name: "--HEAD",
-          description: "Indicate that URL points to the package's repository rather than a file",
+          description:
+            "Indicate that URL points to the package's repository rather than a file",
           exclusiveOn: ["--cask"],
         },
         {
@@ -4690,7 +4975,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--tap",
-          description: "Generate the new formula within the given tap, specified as user/repo",
+          description:
+            "Generate the new formula within the given tap, specified as user/repo",
           args: {
             name: "tap",
             generators: repositoriesGenerator(),
@@ -4698,7 +4984,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-f", "--force"],
-          description: "Ignore errors for disallowed formula names and names that shadow aliases",
+          description:
+            "Ignore errors for disallowed formula names and names that shadow aliases",
         },
       ],
     },
@@ -4716,7 +5003,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "edit",
-      description: "Open a formula, cask or tap in the editor set by $EDITOR or $HOMEBREW_EDITOR, or open the Homebrew repository for editing if no argument is provided",
+      description:
+        "Open a formula, cask or tap in the editor set by $EDITOR or $HOMEBREW_EDITOR, or open the Homebrew repository for editing if no argument is provided",
       args: {
         name: "formula|cask|tap",
         isOptional: true,
@@ -4733,13 +5021,15 @@ const completionSpec: Fig.Spec = {
         caskOption,
         {
           name: "--print-path",
-          description: "Print the file path to be edited, without opening an editor",
+          description:
+            "Print the file path to be edited, without opening an editor",
         },
       ],
     },
     {
       name: "extract",
-      description: "Look through repository history to find the most recent version of formula and create a copy in tap",
+      description:
+        "Look through repository history to find the most recent version of formula and create a copy in tap",
       args: [
         {
           name: "formula",
@@ -4754,14 +5044,16 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--git-revision",
-          description: "Search for the specified version of formula starting at revision instead of HEAD",
+          description:
+            "Search for the specified version of formula starting at revision instead of HEAD",
           args: {
             name: "git-revision",
           },
         },
         {
           name: "--version",
-          description: "Extract the specified version of formula instead of the most recent",
+          description:
+            "Extract the specified version of formula instead of the most recent",
           args: {
             name: "version",
           },
@@ -4774,33 +5066,29 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "find-appcast",
-      description: "Find the appcast of the app bundle at app_path, for use in a cask livecheck block",
+      description:
+        "Find the appcast of the app bundle at app_path, for use in a cask livecheck block",
       args: {
         name: "app_path",
         template: "filepaths",
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "formula",
       description: "Display the path where formula is located",
       args: formulaVariadicArg,
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "generate-cask-token",
-      description: "Generate a cask token, filename and header line for an application, following the token conventions described in the Cask Cookbook",
+      description:
+        "Generate a cask token, filename and header line for an application, following the token conventions described in the Cask Cookbook",
       args: {
         name: "app_or_name",
         description: "Application bundle path or name",
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "generate-man-completions",
@@ -4815,7 +5103,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-zap",
-      description: "Generate a zap stanza for a cask by scanning the system for associated files and directories",
+      description:
+        "Generate a zap stanza for a cask by scanning the system for associated files and directories",
       args: {
         name: "cask_or_name",
         description: "Cask or application name",
@@ -4824,7 +5113,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--name",
-          description: "Treat the argument as a raw application name instead of a cask token. Also matches the app's bundle identifier if it is installed in /Applications",
+          description:
+            "Treat the argument as a raw application name instead of a cask token. Also matches the app's bundle identifier if it is installed in /Applications",
         },
       ],
     },
@@ -4835,7 +5125,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--groups",
-          description: "Installs the specified comma-separated list of gem groups (default: last used). Replaces any previously installed groups",
+          description:
+            "Installs the specified comma-separated list of gem groups (default: last used). Replaces any previously installed groups",
           args: {
             name: "groups",
           },
@@ -4843,7 +5134,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--add-groups",
-          description: "Installs the specified comma-separated list of gem groups, in addition to those already installed",
+          description:
+            "Installs the specified comma-separated list of gem groups, in addition to those already installed",
           args: {
             name: "add-groups",
           },
@@ -4864,12 +5156,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "lgtm",
-      description: "Run brew typecheck, brew style --changed and the relevant brew tests, brew audit and brew test checks in one go",
+      description:
+        "Run brew typecheck, brew style --changed and the relevant brew tests, brew audit and brew test checks in one go",
       options: [
         ...commonOptions,
         {
           name: "--online",
-          description: "Run additional, slower checks that require a network connection",
+          description:
+            "Run additional, slower checks that require a network connection",
         },
       ],
     },
@@ -4887,32 +5181,38 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--test",
-          description: "Show only missing libraries and exit with a non-zero status if any missing libraries are found",
+          description:
+            "Show only missing libraries and exit with a non-zero status if any missing libraries are found",
         },
         {
           name: "--strict",
-          description: "Exit with a non-zero status if any undeclared dependencies with linkage are found",
+          description:
+            "Exit with a non-zero status if any undeclared dependencies with linkage are found",
           dependsOn: ["--test"],
         },
         {
           name: "--reverse",
-          description: "For every library that a keg references, print its dylib path followed by the binaries that link to it",
+          description:
+            "For every library that a keg references, print its dylib path followed by the binaries that link to it",
         },
         {
           name: "--cached",
-          description: "Print the cached linkage values stored in $HOMEBREW_CACHE, set by a previous brew linkage run",
+          description:
+            "Print the cached linkage values stored in $HOMEBREW_CACHE, set by a previous brew linkage run",
         },
       ],
     },
     {
       name: ["livecheck", "lc"],
-      description: "Check for newer versions of formulae and/or casks from upstream",
+      description:
+        "Check for newer versions of formulae and/or casks from upstream",
       args: formulaOrCaskOptionalVariadicArg,
       options: [
         debugOption,
         {
           name: ["-q", "--quiet"],
-          description: "Suppress warnings, don't print a progress bar for JSON output",
+          description:
+            "Suppress warnings, don't print a progress bar for JSON output",
         },
         verboseOption,
         helpOption,
@@ -4922,7 +5222,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--tap",
-          description: "Check formulae and casks within the given tap, specified as user/repo",
+          description:
+            "Check formulae and casks within the given tap, specified as user/repo",
           args: {
             name: "tap",
             generators: repositoriesGenerator(),
@@ -4936,7 +5237,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--newer-only",
-          description: "Show the latest version only if it's newer than the current formula or cask version",
+          description:
+            "Show the latest version only if it's newer than the current formula or cask version",
         },
         {
           name: "--json",
@@ -4959,12 +5261,14 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--extract-plist",
-          description: "Enable checking multiple casks with ExtractPlist strategy",
+          description:
+            "Enable checking multiple casks with ExtractPlist strategy",
           exclusiveOn: ["--formula"],
         },
         {
           name: "--autobump",
-          description: "Include packages that are autobumped by BrewTestBot. By default these are skipped",
+          description:
+            "Include packages that are autobumped by BrewTestBot. By default these are skipped",
         },
       ],
     },
@@ -4986,7 +5290,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--timings",
-          description: "Record machine-readable timings for Homebrew command phases",
+          description:
+            "Record machine-readable timings for Homebrew command phases",
           exclusiveOn: ["--stackprof", "--vernier"],
         },
       ],
@@ -4994,9 +5299,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "rubocop",
       description: "Installs, configures and runs Homebrew's rubocop",
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "ruby",
@@ -5041,7 +5344,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "sh",
-      description: "Enter an interactive shell for Homebrew's build environment",
+      description:
+        "Enter an interactive shell for Homebrew's build environment",
       args: {
         name: "file",
         isOptional: true,
@@ -5056,7 +5360,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--env",
-          description: "Use the standard $PATH instead of superenv's when std is passed",
+          description:
+            "Use the standard $PATH instead of superenv's when std is passed",
           args: {
             name: "env",
             suggestions: ["std"],
@@ -5074,7 +5379,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "style",
-      description: "Check formulae or files for conformance to Homebrew style guidelines",
+      description:
+        "Check formulae or files for conformance to Homebrew style guidelines",
       args: {
         name: "file|tap|formula|cask",
         isOptional: true,
@@ -5090,11 +5396,13 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--fix",
-          description: "Fix style violations automatically using RuboCop's auto-correct feature",
+          description:
+            "Fix style violations automatically using RuboCop's auto-correct feature",
         },
         {
           name: "--todo",
-          description: "Add rubocop:todo comments for RuboCop violations that remain after auto-correction. Requires --fix",
+          description:
+            "Add rubocop:todo comments for RuboCop violations that remain after auto-correction. Requires --fix",
           dependsOn: ["--fix"],
         },
         {
@@ -5109,7 +5417,8 @@ const completionSpec: Fig.Spec = {
         caskOption,
         {
           name: "--only-cops",
-          description: "Specify a comma-separated cops list to check for violations of only the listed RuboCop cops",
+          description:
+            "Specify a comma-separated cops list to check for violations of only the listed RuboCop cops",
           args: {
             name: "only-cops",
           },
@@ -5117,7 +5426,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--except-cops",
-          description: "Specify a comma-separated cops list to skip checking for violations of the listed RuboCop cops",
+          description:
+            "Specify a comma-separated cops list to skip checking for violations of the listed RuboCop cops",
           args: {
             name: "except-cops",
           },
@@ -5140,7 +5450,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--branch",
-          description: "Initialise a Git repository and set up GitHub Actions workflows with the specified branch name (default: main)",
+          description:
+            "Initialise a Git repository and set up GitHub Actions workflows with the specified branch name (default: main)",
           args: {
             name: "branch",
           },
@@ -5182,7 +5493,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "test-bot",
-      description: "Tests the full lifecycle of a Homebrew change to a tap (Git repository)",
+      description:
+        "Tests the full lifecycle of a Homebrew change to a tap (Git repository)",
       args: {
         name: "formula",
         isOptional: true,
@@ -5193,7 +5505,8 @@ const completionSpec: Fig.Spec = {
         quietOption,
         {
           name: ["-v", "--verbose"],
-          description: "Print test step output in real time. Has the side effect of passing output as raw bytes instead of re-encoding in UTF-8",
+          description:
+            "Print test step output in real time. Has the side effect of passing output as raw bytes instead of re-encoding in UTF-8",
         },
         helpOption,
         {
@@ -5202,7 +5515,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--cleanup",
-          description: "Clean all state from the Homebrew directory. Use with care!",
+          description:
+            "Clean all state from the Homebrew directory. Use with care!",
         },
         {
           name: "--skip-setup",
@@ -5223,7 +5537,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--build-dependents-from-source",
-          description: "Build a limited set of dependents from source in addition to testing bottles. Up to 10 per formula per shard, prioritising popular dependents in a sharded group",
+          description:
+            "Build a limited set of dependents from source in addition to testing bottles. Up to 10 per formula per shard, prioritising popular dependents in a sharded group",
         },
         {
           name: "--junit",
@@ -5231,23 +5546,28 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--keep-old",
-          description: "Run brew bottle --keep-old to build new bottles for a single platform",
+          description:
+            "Run brew bottle --keep-old to build new bottles for a single platform",
         },
         {
           name: "--skip-relocation",
-          description: "Run brew bottle --skip-relocation to build new bottles that don't require relocation",
+          description:
+            "Run brew bottle --skip-relocation to build new bottles that don't require relocation",
         },
         {
           name: "--only-json-tab",
-          description: "Run brew bottle --only-json-tab to build new bottles that do not contain a tab",
+          description:
+            "Run brew bottle --only-json-tab to build new bottles that do not contain a tab",
         },
         {
           name: "--local",
-          description: "Ask Homebrew to write verbose logs under ./logs/ and set $HOME to ./home/",
+          description:
+            "Ask Homebrew to write verbose logs under ./logs/ and set $HOME to ./home/",
         },
         {
           name: "--tap",
-          description: "Use the Git repository of the given tap. Defaults to the core tap for syntax checking",
+          description:
+            "Use the Git repository of the given tap. Defaults to the core tap for syntax checking",
           args: {
             name: "tap",
             generators: repositoriesGenerator(),
@@ -5259,7 +5579,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--test-default-formula",
-          description: "Use a default testing formula when not building a tap and no other formulae are specified",
+          description:
+            "Use a default testing formula when not building a tap and no other formulae are specified",
         },
         rootUrlOption,
         {
@@ -5282,7 +5603,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--skip-online-checks",
-          description: "Don't pass --online to brew audit and skip brew livecheck",
+          description:
+            "Don't pass --online to brew audit and skip brew livecheck",
         },
         {
           name: "--skip-new",
@@ -5316,7 +5638,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--only-cleanup-before",
-          description: "Only run the pre-cleanup step. Needs --cleanup, except in GitHub Actions",
+          description:
+            "Only run the pre-cleanup step. Needs --cleanup, except in GitHub Actions",
           exclusiveOn: [
             "--only-setup",
             "--only-tap-syntax",
@@ -5403,11 +5726,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--only-bottles-fetch",
-          description: "Only run the bottles fetch steps. This optional post-upload test checks that all the bottles were uploaded correctly. It is not run unless requested and only needs to be run on a single machine. The bottle commit to be tested must be on the tested branch",
+          description:
+            "Only run the bottles fetch steps. This optional post-upload test checks that all the bottles were uploaded correctly. It is not run unless requested and only needs to be run on a single machine. The bottle commit to be tested must be on the tested branch",
         },
         {
           name: "--only-cleanup-after",
-          description: "Only run the post-cleanup step. Needs --cleanup, except in GitHub Actions",
+          description:
+            "Only run the post-cleanup step. Needs --cleanup, except in GitHub Actions",
           exclusiveOn: [
             "--only-cleanup-before",
             "--only-setup",
@@ -5420,7 +5745,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--testing-formulae",
-          description: "Use these testing formulae rather than running the formulae detection steps",
+          description:
+            "Use these testing formulae rather than running the formulae detection steps",
           args: {
             name: "testing-formulae",
           },
@@ -5428,7 +5754,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--added-formulae",
-          description: "Use these added formulae rather than running the formulae detection steps",
+          description:
+            "Use these added formulae rather than running the formulae detection steps",
           args: {
             name: "added-formulae",
           },
@@ -5436,7 +5763,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--deleted-formulae",
-          description: "Use these deleted formulae rather than running the formulae detection steps",
+          description:
+            "Use these deleted formulae rather than running the formulae detection steps",
           args: {
             name: "deleted-formulae",
           },
@@ -5444,14 +5772,16 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--skipped-or-failed-formulae",
-          description: "Use these skipped or failed formulae from formulae steps for a formulae dependents step",
+          description:
+            "Use these skipped or failed formulae from formulae steps for a formulae dependents step",
           args: {
             name: "skipped-or-failed-formulae",
           },
         },
         {
           name: "--tested-formulae",
-          description: "Use these tested formulae from formulae steps for a formulae dependents step",
+          description:
+            "Use these tested formulae from formulae steps for a formulae dependents step",
           args: {
             name: "tested-formulae",
           },
@@ -5464,7 +5794,8 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: "--debug",
-          description: "Enable debugging using ruby/debug, or surface the standard odebug output",
+          description:
+            "Enable debugging using ruby/debug, or surface the standard odebug output",
         },
         quietOption,
         verboseOption,
@@ -5479,11 +5810,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--online",
-          description: "Include tests that use the GitHub API and tests that use any of the taps for official external commands",
+          description:
+            "Include tests that use the GitHub API and tests that use any of the taps for official external commands",
         },
         {
           name: "--changed",
-          description: "Only runs tests on files that were changed from the main branch",
+          description:
+            "Only runs tests on files that were changed from the main branch",
           exclusiveOn: ["--only", "--shard"],
         },
         {
@@ -5492,7 +5825,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--load-only",
-          description: "Load each test file independently without running its examples",
+          description:
+            "Load each test file independently without running its examples",
         },
         {
           name: "--no-parallel",
@@ -5515,7 +5849,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--only",
-          description: "Run only test_script_spec.rb. Appending :line_number will start at a specific line",
+          description:
+            "Run only test_script_spec.rb. Appending :line_number will start at a specific line",
           args: {
             name: "only",
           },
@@ -5531,14 +5866,16 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--profile",
-          description: "Output the n slowest tests. When run without --no-parallel this will output the slowest tests for each parallel test process",
+          description:
+            "Output the n slowest tests. When run without --no-parallel this will output the slowest tests for each parallel test process",
           args: {
             name: "profile",
           },
         },
         {
           name: "--seed",
-          description: "Randomise tests with the specified value instead of a random seed",
+          description:
+            "Randomise tests with the specified value instead of a random seed",
           args: {
             name: "seed",
           },
@@ -5602,7 +5939,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--ignore",
-          description: "Ignores input files that contain the given string in their paths (relative to the input path passed to Sorbet)",
+          description:
+            "Ignores input files that contain the given string in their paths (relative to the input path passed to Sorbet)",
           args: {
             name: "ignore",
           },
@@ -5617,14 +5955,16 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--tag",
-          description: "Use the specified bottle tag (e.g. big_sur) instead of the current OS",
+          description:
+            "Use the specified bottle tag (e.g. big_sur) instead of the current OS",
           args: {
             name: "tag",
           },
         },
         {
           name: "--dependents",
-          description: "Skip getting analytics data and sort by number of dependents instead",
+          description:
+            "Skip getting analytics data and sort by number of dependents instead",
           exclusiveOn: ["--total", "--lost"],
         },
         {
@@ -5634,20 +5974,23 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--lost",
-          description: "Print the homebrew/core commits where bottles were lost in the last week",
+          description:
+            "Print the homebrew/core commits where bottles were lost in the last week",
           exclusiveOn: ["--dependents", "--total"],
         },
       ],
     },
     {
       name: "unpack",
-      description: "Unpack the files for the formula or cask into subdirectories of the current working directory",
+      description:
+        "Unpack the files for the formula or cask into subdirectories of the current working directory",
       args: formulaOrCaskVariadicArg,
       options: [
         ...commonOptions,
         {
           name: "--destdir",
-          description: "Create subdirectories in the directory named by path instead",
+          description:
+            "Create subdirectories in the directory named by path instead",
           args: {
             name: "path",
             template: "folders",
@@ -5655,17 +5998,20 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--patch",
-          description: "Patches for formula will be applied to the unpacked source",
+          description:
+            "Patches for formula will be applied to the unpacked source",
           exclusiveOn: ["--git", "--cask"],
         },
         {
           name: ["-g", "--git"],
-          description: "Initialise a Git repository in the unpacked source. This is useful for creating patches for the software",
+          description:
+            "Initialise a Git repository in the unpacked source. This is useful for creating patches for the software",
           exclusiveOn: ["--patch", "--cask"],
         },
         {
           name: ["-f", "--force"],
-          description: "Overwrite the destination directory if it already exists",
+          description:
+            "Overwrite the destination directory if it already exists",
         },
         formulaOption,
         {
@@ -5683,11 +6029,13 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: ["-p", "--print-only"],
-          description: "Print the updated resource blocks instead of changing formula",
+          description:
+            "Print the updated resource blocks instead of changing formula",
         },
         {
           name: "--ignore-errors",
-          description: "Continue processing even if some resources can't be resolved",
+          description:
+            "Continue processing even if some resources can't be resolved",
         },
       ],
     },
@@ -5699,11 +6047,13 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: ["-p", "--print-only"],
-          description: "Print the updated resource blocks instead of changing formula",
+          description:
+            "Print the updated resource blocks instead of changing formula",
         },
         {
           name: "--ignore-errors",
-          description: "Record all discovered resources, even those that can't be resolved successfully. This option is ignored for homebrew/core formulae",
+          description:
+            "Record all discovered resources, even those that can't be resolved successfully. This option is ignored for homebrew/core formulae",
         },
         {
           name: "--ignore-non-pypi-packages",
@@ -5711,26 +6061,30 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--ignore-main-package-cooldown",
-          description: "Bypass the release cooldown for formula's own package when resolving resources. Its dependencies still respect the cooldown. This option is ignored for official taps",
+          description:
+            "Bypass the release cooldown for formula's own package when resolving resources. Its dependencies still respect the cooldown. This option is ignored for official taps",
         },
         installDependenciesOption,
         {
           name: "--version",
-          description: "Use the specified version when finding resources for formula. If no version is specified, the current version for formula will be used",
+          description:
+            "Use the specified version when finding resources for formula. If no version is specified, the current version for formula will be used",
           args: {
             name: "version",
           },
         },
         {
           name: "--package-name",
-          description: "Use the specified package-name when finding resources for formula. If no package name is specified, it will be inferred from the formula's stable URL",
+          description:
+            "Use the specified package-name when finding resources for formula. If no package name is specified, it will be inferred from the formula's stable URL",
           args: {
             name: "package-name",
           },
         },
         {
           name: "--extra-packages",
-          description: "Include these additional packages when finding resources",
+          description:
+            "Include these additional packages when finding resources",
           args: {
             name: "extra-packages",
           },
@@ -5751,11 +6105,13 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--to-tag",
-          description: "Set $HOMEBREW_UPDATE_TO_TAG to test updating between tags",
+          description:
+            "Set $HOMEBREW_UPDATE_TO_TAG to test updating between tags",
         },
         {
           name: "--keep-tmp",
-          description: "Retain the temporary directory containing the new repository clone",
+          description:
+            "Retain the temporary directory containing the new repository clone",
         },
         {
           name: "--commit",
@@ -5766,7 +6122,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--before",
-          description: "Use the commit at the specified date as the start commit",
+          description:
+            "Use the commit at the specified date as the start commit",
           args: {
             name: "before",
           },
@@ -5780,7 +6137,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--update",
-          description: "Update the specified list of vendored gems to the latest version",
+          description:
+            "Update the specified list of vendored gems to the latest version",
           args: {
             name: "update",
           },
@@ -5793,13 +6151,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "verify",
-      description: "Verify the build provenance of bottles using GitHub's attestation tools",
+      description:
+        "Verify the build provenance of bottles using GitHub's attestation tools",
       args: formulaVariadicArg,
       options: [
         ...commonOptions,
         {
           name: "--os",
-          description: "Download for the given operating system. (Pass all to download for all operating systems.)",
+          description:
+            "Download for the given operating system. (Pass all to download for all operating systems.)",
           args: {
             name: "os",
             suggestions: ["all"],
@@ -5808,7 +6168,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--arch",
-          description: "Download for the given CPU architecture. (Pass all to download for all architectures.)",
+          description:
+            "Download for the given CPU architecture. (Pass all to download for all architectures.)",
           args: {
             name: "arch",
             suggestions: ["all", "arm", "intel"],
@@ -5847,7 +6208,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--bottle-json-dir",
-          description: "Use generated bottle JSON files in the given directory to update formula entries",
+          description:
+            "Use generated bottle JSON files in the given directory to update formula entries",
           args: {
             name: "directory",
             template: "folders",
@@ -5855,7 +6217,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--removed-formulae-file",
-          description: "Remove database entries for formulae listed in the given file",
+          description:
+            "Remove database entries for formulae listed in the given file",
           args: {
             name: "file",
             template: "filepaths",
@@ -5863,14 +6226,16 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--pull-request",
-          description: "Update entries for formula changes in the given pull request number",
+          description:
+            "Update entries for formula changes in the given pull request number",
           args: {
             name: "pull-request",
           },
         },
         {
           name: "--repository",
-          description: "GitHub repository for --pull-request (default: $GITHUB_REPOSITORY)",
+          description:
+            "GitHub repository for --pull-request (default: $GITHUB_REPOSITORY)",
           args: {
             name: "repository",
           },
@@ -5888,7 +6253,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "advisory-match",
-      description: "Match formula against OSV.dev (GIT, language-registry and distro ecosystems) and CPANSA to produce candidate BREW-* advisory records for https://github.com/Homebrew/advisory-database",
+      description:
+        "Match formula against OSV.dev (GIT, language-registry and distro ecosystems) and CPANSA to produce candidate BREW-* advisory records for https://github.com/Homebrew/advisory-database",
       hidden: true,
       args: formulaOptionalVariadicArg,
       options: [
@@ -5910,7 +6276,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--output",
-          description: "Write each record to directory as BREW-formula-id.json, preserving existing published/ranges fields",
+          description:
+            "Write each record to directory as BREW-formula-id.json, preserving existing published/ranges fields",
           args: {
             name: "directory",
             template: "folders",
@@ -5919,7 +6286,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--repology",
-          description: "Load the formula to distro-package index from file instead of the published data/repology.json",
+          description:
+            "Load the formula to distro-package index from file instead of the published data/repology.json",
           args: {
             name: "file",
             template: "filepaths",
@@ -5927,7 +6295,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--overrides",
-          description: "Load reviewed formula and advisory matching overrides from file",
+          description:
+            "Load reviewed formula and advisory matching overrides from file",
           args: {
             name: "file",
             template: "filepaths",
@@ -5935,7 +6304,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--rejected-candidates",
-          description: "Skip new comparable candidates whose record IDs are listed in file, before history",
+          description:
+            "Skip new comparable candidates whose record IDs are listed in file, before history",
           args: {
             name: "file",
             template: "filepaths",
@@ -5944,24 +6314,28 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--no-history",
-          description: "Skip FormulaVersions walks for new ranges; use zero/current pkg_version as unverified boundaries",
+          description:
+            "Skip FormulaVersions walks for new ranges; use zero/current pkg_version as unverified boundaries",
           exclusiveOn: ["--reconcile-history", "--new-history"],
         },
         {
           name: "--new-history",
-          description: "Skip FormulaVersions for existing terminal ranges unless their matching provenance changes",
+          description:
+            "Skip FormulaVersions for existing terminal ranges unless their matching provenance changes",
           exclusiveOn: ["--reconcile-history", "--no-history"],
           dependsOn: ["--output"],
         },
         {
           name: "--reconcile-history",
-          description: "Reconcile existing matched terminal ranges against complete history; requires --overrides",
+          description:
+            "Reconcile existing matched terminal ranges against complete history; requires --overrides",
           exclusiveOn: ["--new-history", "--no-history", "--json", "--index"],
           dependsOn: ["--output"],
         },
         {
           name: "--formula-list",
-          description: "Match only the core formula names in a newline-separated file with --new-history or --reconcile-history, using bulk queries",
+          description:
+            "Match only the core formula names in a newline-separated file with --new-history or --reconcile-history, using bulk queries",
           args: {
             name: "file",
             template: "filepaths",
@@ -5972,20 +6346,23 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "bump-python-resources-pr",
-      description: "Update vulnerable PyPI resources in formula, bump its revision, and create a pull request",
+      description:
+        "Update vulnerable PyPI resources in formula, bump its revision, and create a pull request",
       hidden: true,
       args: formulaArg,
       options: [
         ...commonOptions,
         {
           name: ["-n", "--dry-run"],
-          description: "Print what would be done rather than creating a pull request",
+          description:
+            "Print what would be done rather than creating a pull request",
         },
         noForkOption,
         installDependenciesOption,
         {
           name: "--packages",
-          description: "Names of vulnerable Python packages that must be updated",
+          description:
+            "Names of vulnerable Python packages that must be updated",
           args: {
             name: "packages",
           },
@@ -6006,7 +6383,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--output",
-          description: "Write the JSON result to this file instead of standard output. Use this when parsing the result, as progress is also printed to standard output",
+          description:
+            "Write the JSON result to this file instead of standard output. Use this when parsing the result, as progress is also printed to standard output",
           args: {
             name: "file",
             template: "filepaths",
@@ -6029,13 +6407,12 @@ const completionSpec: Fig.Spec = {
           generators: generateAllCasks,
         },
       ],
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "determine-test-runners",
-      description: "Determines the runners used to test formulae or their dependents",
+      description:
+        "Determines the runners used to test formulae or their dependents",
       hidden: true,
       args: [
         {
@@ -6051,7 +6428,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--all-supported",
-          description: "Instead of selecting runners based on the chosen formula, return all supported runners",
+          description:
+            "Instead of selecting runners based on the chosen formula, return all supported runners",
           exclusiveOn: ["--dependents"],
         },
         {
@@ -6078,21 +6456,24 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--issue",
-          description: "If specified, post a comment to this issue number if the job fails",
+          description:
+            "If specified, post a comment to this issue number if the job fails",
           args: {
             name: "issue",
           },
         },
         {
           name: "--macos",
-          description: "MacOS version (or comma-separated list of versions) the bottle should be built for",
+          description:
+            "MacOS version (or comma-separated list of versions) the bottle should be built for",
           args: {
             name: "macos",
           },
         },
         {
           name: "--workflow",
-          description: "Dispatch specified workflow (default: dispatch-build-bottle.yml)",
+          description:
+            "Dispatch specified workflow (default: dispatch-build-bottle.yml)",
           args: {
             name: "workflow",
           },
@@ -6103,7 +6484,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--linux",
-          description: "Dispatch bottle for Linux x86_64 (using GitHub runners)",
+          description:
+            "Dispatch bottle for Linux x86_64 (using GitHub runners)",
           exclusiveOn: ["--linux-self-hosted"],
         },
         {
@@ -6112,7 +6494,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--linux-self-hosted",
-          description: "Dispatch bottle for Linux x86_64 (using self-hosted runner)",
+          description:
+            "Dispatch bottle for Linux x86_64 (using self-hosted runner)",
           exclusiveOn: ["--linux"],
         },
       ],
@@ -6125,14 +6508,16 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--days-ago",
-          description: "Query from the specified days ago until the present. The default is 30 days",
+          description:
+            "Query from the specified days ago until the present. The default is 30 days",
           args: {
             name: "days-ago",
           },
         },
         {
           name: "--install",
-          description: "Output the number of specifically requested installations or installation as dependencies of formulae. This is the default",
+          description:
+            "Output the number of specifically requested installations or installation as dependencies of formulae. This is the default",
           exclusiveOn: [
             "--cask-install",
             "--install-on-request",
@@ -6150,7 +6535,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--install-on-request",
-          description: "Output the number of specifically requested installations of formulae",
+          description:
+            "Output the number of specifically requested installations of formulae",
           exclusiveOn: [
             "--install",
             "--cask-install",
@@ -6222,7 +6608,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--homebrew-devcmdrun-developer",
-          description: "Output the number of devcmdrun/HOMEBREW_DEVELOPER events",
+          description:
+            "Output the number of devcmdrun/HOMEBREW_DEVELOPER events",
           exclusiveOn: [
             "--install",
             "--cask-install",
@@ -6240,7 +6627,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--homebrew-env-config",
-          description: "Output rates of non-default Homebrew environment configuration variables",
+          description:
+            "Output rates of non-default Homebrew environment configuration variables",
           exclusiveOn: [
             "--install",
             "--cask-install",
@@ -6366,17 +6754,20 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--json",
-          description: "Output JSON. This is required: plain text support has been removed",
+          description:
+            "Output JSON. This is required: plain text support has been removed",
           exclusiveOn: ["--all-core-formulae-json", "--setup"],
         },
         {
           name: "--all-core-formulae-json",
-          description: "Output a different JSON format containing the JSON data for all Homebrew/homebrew-core formulae",
+          description:
+            "Output a different JSON format containing the JSON data for all Homebrew/homebrew-core formulae",
           exclusiveOn: ["--json", "--setup"],
         },
         {
           name: "--setup",
-          description: "Install the necessary Python dependencies and exit without running a query",
+          description:
+            "Install the necessary Python dependencies and exit without running a query",
           exclusiveOn: ["--json", "--all-core-formulae-json"],
         },
       ],
@@ -6394,7 +6785,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--tap",
-          description: "Only include formulae from the named tap. Requires --all",
+          description:
+            "Only include formulae from the named tap. Requires --all",
           args: {
             name: "tap",
             generators: repositoriesGenerator(),
@@ -6404,45 +6796,70 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-advisories-api",
-      description: "Generate advisory API data for https://formulae.brew.sh from a checkout of https://github.com/Homebrew/advisory-database",
+      description:
+        "Generate advisory API data for https://formulae.brew.sh from a checkout of https://github.com/Homebrew/advisory-database",
       hidden: true,
       args: {
         name: "directory",
         template: "folders",
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "generate-analytics-api",
-      description: "Generates analytics API data files for https://formulae.brew.sh",
+      description:
+        "Generates analytics API data files for https://formulae.brew.sh",
       hidden: true,
       options: [
         ...commonOptions,
         {
           name: "--influx",
-          description: "Generate only InfluxDB analytics, without local Git histories or GitHub queries",
-          exclusiveOn: ["--repositories", "--formula-history", "--releases", "--github-packages"],
+          description:
+            "Generate only InfluxDB analytics, without local Git histories or GitHub queries",
+          exclusiveOn: [
+            "--repositories",
+            "--formula-history",
+            "--releases",
+            "--github-packages",
+          ],
         },
         {
           name: "--repositories",
-          description: "Generate only repository and catalogue analytics from local Git history and GitHub",
-          exclusiveOn: ["--influx", "--formula-history", "--releases", "--github-packages"],
+          description:
+            "Generate only repository and catalogue analytics from local Git history and GitHub",
+          exclusiveOn: [
+            "--influx",
+            "--formula-history",
+            "--releases",
+            "--github-packages",
+          ],
         },
         {
           name: "--formula-history",
-          description: "Generate only formula version history, resuming its persistent Git checkpoint",
-          exclusiveOn: ["--influx", "--repositories", "--releases", "--github-packages"],
+          description:
+            "Generate only formula version history, resuming its persistent Git checkpoint",
+          exclusiveOn: [
+            "--influx",
+            "--repositories",
+            "--releases",
+            "--github-packages",
+          ],
         },
         {
           name: "--releases",
-          description: "Generate only brew release analytics from local Git history and tags",
-          exclusiveOn: ["--influx", "--repositories", "--formula-history", "--github-packages"],
+          description:
+            "Generate only brew release analytics from local Git history and tags",
+          exclusiveOn: [
+            "--influx",
+            "--repositories",
+            "--formula-history",
+            "--github-packages",
+          ],
         },
         {
           name: "--legacy-homebrew",
-          description: "Include the legacy Homebrew repository at this path in repository analytics",
+          description:
+            "Include the legacy Homebrew repository at this path in repository analytics",
           args: {
             name: "directory",
             template: "folders",
@@ -6450,7 +6867,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--homebrew-site",
-          description: "Read brew.sh release announcements and security disclosures from this Git checkout",
+          description:
+            "Read brew.sh release announcements and security disclosures from this Git checkout",
           args: {
             name: "directory",
             template: "folders",
@@ -6466,12 +6884,19 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--github-packages",
-          description: "Generate only package downloads, using existing 30-day install analytics",
-          exclusiveOn: ["--influx", "--repositories", "--formula-history", "--releases"],
+          description:
+            "Generate only package downloads, using existing 30-day install analytics",
+          exclusiveOn: [
+            "--influx",
+            "--repositories",
+            "--formula-history",
+            "--releases",
+          ],
         },
         {
           name: "--github-packages-limit",
-          description: "Fetch downloads for the top number of formulae by install analytics (1-1000; default: 1000)",
+          description:
+            "Fetch downloads for the top number of formulae by install analytics (1-1000; default: 1000)",
           args: {
             name: "github-packages-limit",
           },
@@ -6480,7 +6905,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-bottle-ci-matrix",
-      description: "Generate a GitHub Actions runner matrix for a dispatched bottle build",
+      description:
+        "Generate a GitHub Actions runner matrix for a dispatched bottle build",
       hidden: true,
       args: formulaArg,
       options: [
@@ -6496,7 +6922,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-cask-api",
-      description: "Generate homebrew/cask API data files for https://formulae.brew.sh",
+      description:
+        "Generate homebrew/cask API data files for https://formulae.brew.sh",
       hidden: true,
       options: [
         ...commonOptions,
@@ -6508,7 +6935,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-cask-ci-matrix",
-      description: "Generate a GitHub Actions matrix for a given pull request URL or list of cask names",
+      description:
+        "Generate a GitHub Actions matrix for a given pull request URL or list of cask names",
       hidden: true,
       args: {
         name: "cask|url",
@@ -6547,13 +6975,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-cask-feeds",
-      description: "Generate recent cask additions and updates for https://formulae.brew.sh feeds",
+      description:
+        "Generate recent cask additions and updates for https://formulae.brew.sh feeds",
       hidden: true,
       options: [
         ...commonOptions,
         {
           name: "--output",
-          description: "Write JSON to this path instead of _data/cask_feeds.json",
+          description:
+            "Write JSON to this path instead of _data/cask_feeds.json",
           args: {
             name: "file",
             template: "filepaths",
@@ -6563,7 +6993,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-formula-api",
-      description: "Generate homebrew/core API data files for https://formulae.brew.sh",
+      description:
+        "Generate homebrew/core API data files for https://formulae.brew.sh",
       hidden: true,
       options: [
         ...commonOptions,
@@ -6575,13 +7006,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-formula-feeds",
-      description: "Generate recent formula additions and updates for https://formulae.brew.sh feeds",
+      description:
+        "Generate recent formula additions and updates for https://formulae.brew.sh feeds",
       hidden: true,
       options: [
         ...commonOptions,
         {
           name: "--output",
-          description: "Write JSON to this path instead of _data/formula_feeds.json",
+          description:
+            "Write JSON to this path instead of _data/formula_feeds.json",
           args: {
             name: "file",
             template: "filepaths",
@@ -6591,7 +7024,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-internal-api",
-      description: "Generate internal API data files for https://formulae.brew.sh",
+      description:
+        "Generate internal API data files for https://formulae.brew.sh",
       hidden: true,
       options: [
         ...commonOptions,
@@ -6603,7 +7037,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate-vulns-advisories",
-      description: "Generate OSV-schema advisory records for the Homebrew ecosystem from homebrew/core formula patch resolves annotations, for https://github.com/Homebrew/advisory-database",
+      description:
+        "Generate OSV-schema advisory records for the Homebrew ecosystem from homebrew/core formula patch resolves annotations, for https://github.com/Homebrew/advisory-database",
       hidden: true,
       args: {
         name: "directory",
@@ -6613,13 +7048,15 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: ["-n", "--dry-run"],
-          description: "List the records that would be generated without writing files or querying OSV.dev",
+          description:
+            "List the records that would be generated without writing files or querying OSV.dev",
         },
       ],
     },
     {
       name: "pr-automerge",
-      description: "Find pull requests that can be automatically merged using brew pr-publish",
+      description:
+        "Find pull requests that can be automatically merged using brew pr-publish",
       hidden: true,
       options: [
         ...commonOptions,
@@ -6640,7 +7077,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--without-labels",
-          description: "Pull requests must not have these labels (default: do not merge, new formula, automerge-skip, pre-release, CI-published-bottle-commits)",
+          description:
+            "Pull requests must not have these labels (default: do not merge, new formula, automerge-skip, pre-release, CI-published-bottle-commits)",
           args: {
             name: "without-labels",
           },
@@ -6655,7 +7093,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--autosquash",
-          description: "Instruct brew pr-publish to automatically reformat and reword commits in the pull request to the preferred format",
+          description:
+            "Instruct brew pr-publish to automatically reformat and reword commits in the pull request to the preferred format",
         },
         {
           name: "--ignore-failures",
@@ -6676,7 +7115,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--autosquash",
-          description: "If supported on the target tap, automatically reformat and reword commits to our preferred format",
+          description:
+            "If supported on the target tap, automatically reformat and reword commits to our preferred format",
         },
         {
           name: "--branch",
@@ -6687,7 +7127,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--message",
-          description: "Message to include when autosquashing revision bumps, deletions and rebuilds",
+          description:
+            "Message to include when autosquashing revision bumps, deletions and rebuilds",
           args: {
             name: "message",
           },
@@ -6696,7 +7137,8 @@ const completionSpec: Fig.Spec = {
         tapOption,
         {
           name: "--workflow",
-          description: "Target workflow filename (default: publish-commit-bottles.yml)",
+          description:
+            "Target workflow filename (default: publish-commit-bottles.yml)",
           args: {
             name: "workflow",
           },
@@ -6705,7 +7147,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "pr-pull",
-      description: "Download and publish bottles and apply the bottle commit from a pull request with artifacts generated by GitHub Actions",
+      description:
+        "Download and publish bottles and apply the bottle commit from a pull request with artifacts generated by GitHub Actions",
       hidden: true,
       args: {
         name: "pull_request",
@@ -6724,7 +7167,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--no-cherry-pick",
-          description: "Do not cherry-pick commits from the pull request branch",
+          description:
+            "Do not cherry-pick commits from the pull request branch",
         },
         dryRunOption,
         {
@@ -6734,32 +7178,39 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--keep-old",
-          description: "If the formula specifies a rebuild version, attempt to preserve its value in the generated DSL",
+          description:
+            "If the formula specifies a rebuild version, attempt to preserve its value in the generated DSL",
         },
         {
           name: "--autosquash",
-          description: "Automatically reformat and reword commits in the pull request to our preferred format",
+          description:
+            "Automatically reformat and reword commits in the pull request to our preferred format",
           exclusiveOn: ["--clean"],
         },
         {
           name: "--branch-okay",
-          description: "Do not warn if pulling to a branch besides the repository default (useful for testing)",
+          description:
+            "Do not warn if pulling to a branch besides the repository default (useful for testing)",
         },
         {
           name: "--resolve",
-          description: "When a patch fails to apply, leave in progress and allow user to resolve, instead of aborting",
+          description:
+            "When a patch fails to apply, leave in progress and allow user to resolve, instead of aborting",
         },
         {
           name: "--warn-on-upload-failure",
-          description: "Warn instead of raising an error if the bottle upload fails. Useful for repairing bottle uploads that previously failed",
+          description:
+            "Warn instead of raising an error if the bottle upload fails. Useful for repairing bottle uploads that previously failed",
         },
         {
           name: "--retain-bottle-dir",
-          description: "Does not clean up the tmp directory for the bottle so it can be used later",
+          description:
+            "Does not clean up the tmp directory for the bottle so it can be used later",
         },
         {
           name: "--message",
-          description: "Message to include when autosquashing revision bumps, deletions and rebuilds",
+          description:
+            "Message to include when autosquashing revision bumps, deletions and rebuilds",
           args: {
             name: "message",
           },
@@ -6767,7 +7218,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["--artifact-pattern", "--artifact"],
-          description: "Download artifacts with the specified pattern (default: bottles{,_*})",
+          description:
+            "Download artifacts with the specified pattern (default: bottles{,_*})",
           args: {
             name: "artifact-pattern",
           },
@@ -6784,14 +7236,16 @@ const completionSpec: Fig.Spec = {
         rootUrlUsingOption,
         {
           name: "--workflows",
-          description: "Retrieve artifacts from the specified workflow (default: tests.yml). Can be a comma-separated list to include multiple workflows",
+          description:
+            "Retrieve artifacts from the specified workflow (default: tests.yml). Can be a comma-separated list to include multiple workflows",
           args: {
             name: "workflows",
           },
         },
         {
           name: "--ignore-missing-artifacts",
-          description: "Comma-separated list of workflows which can be ignored if they have not been run",
+          description:
+            "Comma-separated list of workflows which can be ignored if they have not been run",
           args: {
             name: "ignore-missing-artifacts",
           },
@@ -6806,7 +7260,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--keep-old",
-          description: "If the formula specifies a rebuild version, attempt to preserve its value in the generated DSL. When using GitHub Packages, this also appends the manifest to the existing list",
+          description:
+            "If the formula specifies a rebuild version, attempt to preserve its value in the generated DSL. When using GitHub Packages, this also appends the manifest to the existing list",
         },
         dryRunOption,
         {
@@ -6816,7 +7271,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--warn-on-upload-failure",
-          description: "Warn instead of raising an error if the bottle upload fails. Useful for repairing bottle uploads that previously failed",
+          description:
+            "Warn instead of raising an error if the bottle upload fails. Useful for repairing bottle uploads that previously failed",
         },
         {
           name: "--upload-only",
@@ -6829,7 +7285,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "release",
-      description: "Create a new draft Homebrew/brew release with the appropriate version number and release notes",
+      description:
+        "Create a new draft Homebrew/brew release with the appropriate version number and release notes",
       hidden: true,
       options: [
         ...commonOptions,
@@ -6845,7 +7302,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--force",
-          description: "Actually create the release and trigger the workflow. Without this, just show what would be done",
+          description:
+            "Actually create the release and trigger the workflow. Without this, just show what would be done",
         },
       ],
     },
@@ -6853,27 +7311,25 @@ const completionSpec: Fig.Spec = {
       name: "update-license-data",
       description: "Update SPDX license data in the Homebrew repository",
       hidden: true,
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "update-maintainers",
       description: "Update the list of maintainers in the Homebrew/brew README",
       hidden: true,
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "update-portable-ruby",
-      description: "Update the vendored portable-ruby from the current portable-ruby formula: write the version files and bottle checksums, run brew vendor-install ruby, then sync utils/ruby.sh, vendored gems and RBI files to the bundler shipped by the new ruby",
+      description:
+        "Update the vendored portable-ruby from the current portable-ruby formula: write the version files and bottle checksums, run brew vendor-install ruby, then sync utils/ruby.sh, vendored gems and RBI files to the bundler shipped by the new ruby",
       hidden: true,
       options: [
         ...commonOptions,
         {
           name: "--print-target-version",
-          description: "Print the target portable Ruby package version without updating it",
+          description:
+            "Print the target portable Ruby package version without updating it",
         },
       ],
     },
@@ -6889,7 +7345,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-f", "--force"],
-          description: "Treat installed and updated formulae as if they are from the same taps and migrate them anyway",
+          description:
+            "Treat installed and updated formulae as if they are from the same taps and migrate them anyway",
         },
       ],
     },
@@ -6897,9 +7354,7 @@ const completionSpec: Fig.Spec = {
       name: "update-sponsors",
       description: "Update the list of sponsors in the Homebrew/brew README",
       hidden: true,
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "vendor-install",
@@ -6909,9 +7364,7 @@ const completionSpec: Fig.Spec = {
         name: "target",
         isOptional: true,
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "--cache",
@@ -6921,7 +7374,8 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--os",
-          description: "Show cache file for the given operating system. (Pass all to show cache files for all operating systems.)",
+          description:
+            "Show cache file for the given operating system. (Pass all to show cache files for all operating systems.)",
           args: {
             name: "os",
             suggestions: ["all"],
@@ -6930,7 +7384,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--arch",
-          description: "Show cache file for the given CPU architecture. (Pass all to show cache files for all architectures.)",
+          description:
+            "Show cache file for the given CPU architecture. (Pass all to show cache files for all architectures.)",
           args: {
             name: "arch",
             suggestions: ["all", "arm", "intel"],
@@ -6945,20 +7400,38 @@ const completionSpec: Fig.Spec = {
         {
           name: "--force-bottle",
           description: "Show the cache file used when pouring a bottle",
-          exclusiveOn: ["--build-from-source", "--bottle-tag", "--HEAD", "--cask"],
+          exclusiveOn: [
+            "--build-from-source",
+            "--bottle-tag",
+            "--HEAD",
+            "--cask",
+          ],
         },
         {
           name: "--bottle-tag",
-          description: "Show the cache file used when pouring a bottle for the given tag",
+          description:
+            "Show the cache file used when pouring a bottle for the given tag",
           args: {
             name: "tag",
           },
-          exclusiveOn: ["--build-from-source", "--force-bottle", "--HEAD", "--cask", "--os", "--arch"],
+          exclusiveOn: [
+            "--build-from-source",
+            "--force-bottle",
+            "--HEAD",
+            "--cask",
+            "--os",
+            "--arch",
+          ],
         },
         {
           name: "--HEAD",
           description: "Show the cache file used when building from HEAD",
-          exclusiveOn: ["--build-from-source", "--force-bottle", "--bottle-tag", "--cask"],
+          exclusiveOn: [
+            "--build-from-source",
+            "--force-bottle",
+            "--bottle-tag",
+            "--cask",
+          ],
         },
         {
           name: ["--formula", "--formulae"],
@@ -6987,17 +7460,13 @@ const completionSpec: Fig.Spec = {
         isVariadic: true,
         generators: generateAllCasks,
       },
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "--cellar",
       description: "Display Homebrew's Cellar path",
       args: formulaOptionalVariadicArg,
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: ["--env", "environment"],
@@ -7007,10 +7476,20 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--shell",
-          description: "Generate a list of environment variables for the specified shell, or --shell=auto to detect the current shell",
+          description:
+            "Generate a list of environment variables for the specified shell, or --shell=auto to detect the current shell",
           args: {
             name: "shell",
-            suggestions: ["auto", "bash", "csh", "fish", "pwsh", "sh", "tcsh", "zsh"],
+            suggestions: [
+              "auto",
+              "bash",
+              "csh",
+              "fish",
+              "pwsh",
+              "sh",
+              "tcsh",
+              "zsh",
+            ],
           },
         },
         {
@@ -7027,12 +7506,14 @@ const completionSpec: Fig.Spec = {
         ...commonOptions,
         {
           name: "--unbrewed",
-          description: "List files in Homebrew's prefix not installed by Homebrew",
+          description:
+            "List files in Homebrew's prefix not installed by Homebrew",
           exclusiveOn: ["--installed"],
         },
         {
           name: "--installed",
-          description: "Outputs nothing and returns a failing status code if formula is not installed",
+          description:
+            "Outputs nothing and returns a failing status code if formula is not installed",
           exclusiveOn: ["--unbrewed"],
         },
       ],
@@ -7041,23 +7522,18 @@ const completionSpec: Fig.Spec = {
       name: ["--repository", "--repo"],
       description: "Display where Homebrew's Git repository is located",
       args: tapOptionalVariadicArg,
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: "--taps",
       description: "Display the path to Homebrew's Taps directory",
-      options: [
-        ...commonOptions,
-      ],
+      options: [...commonOptions],
     },
     {
       name: ["--version", "-v"],
-      description: "Print the version numbers of Homebrew, Homebrew/homebrew-core and Homebrew/homebrew-cask (if tapped) to standard output",
-      options: [
-        ...commonOptions,
-      ],
+      description:
+        "Print the version numbers of Homebrew, Homebrew/homebrew-core and Homebrew/homebrew-cask (if tapped) to standard output",
+      options: [...commonOptions],
     },
   ],
 };
