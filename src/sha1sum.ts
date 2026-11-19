@@ -1,3 +1,6 @@
+// sha1sum v9.12 (GNU coreutils, latest tag v9.12 from the coreutils/coreutils git mirror and Homebrew coreutils 9.12, 2026-11-19).
+// Source: src/cksum.c usage() and long_options (sha1sum is a thin wrapper that runs cksum in legacy mode with algorithm sha1; legacy_long_options) at v9.12, checked against `sha1sum --help` of the local 9.4 build.
+// No option changes between 9.4 and 9.12. sha1sum is not part of macOS (use shasum / `sha1`); this spec describes the GNU tool.
 const completionSpec: Fig.Spec = {
   name: "sha1sum",
   description: "Print or check SHA1 (160-bit) checksums",
@@ -8,7 +11,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-c", "--check"],
-      description: "Read SHA1 sums from the FILEs and check them",
+      description: "Read checksums from the FILEs and check them",
     },
     {
       name: "--tag",
@@ -58,6 +61,7 @@ const completionSpec: Fig.Spec = {
     template: "filepaths",
     suggestions: ["-"],
     isOptional: true,
+    isVariadic: true,
   },
 };
 export default completionSpec;
