@@ -1,3 +1,7 @@
+// Django v6.1.3 (latest stable on PyPI, 2026-11-19). Source: the Django 6.1.3 wheel from PyPI, read statically (not executed):
+// argparse definitions in django/core/management/{base,templates,__init__}.py, django/core/management/commands/*,
+// django/contrib/{auth,contenttypes,gis,sessions,staticfiles}/management/commands/* and DiscoverRunner.add_arguments in django/test/runner.py.
+// The docs site was not reachable, so descriptions are the commands' own help strings.
 const DJANGO_ICON_URL = "https://github.com/django.png";
 
 const ALWAYS_AVAILABLE_OPTIONS: Fig.Option[] = [
@@ -37,7 +41,7 @@ const ALWAYS_AVAILABLE_OPTIONS: Fig.Option[] = [
   },
   {
     name: "--traceback",
-    description: "Raise on CommandError exceptions",
+    description: "Display a full stack trace on CommandError exceptions",
   },
   {
     name: "--no-color",
@@ -49,18 +53,92 @@ const ALWAYS_AVAILABLE_OPTIONS: Fig.Option[] = [
   },
 ];
 
+// Added by BaseCommand to every command whose requires_system_checks is not empty
+const SKIP_CHECKS_OPTION: Fig.Option = {
+  name: "--skip-checks",
+  description: "Skip system checks",
+};
+
+const NO_INPUT_OPTION: Fig.Option = {
+  name: ["--noinput", "--no-input"],
+  description: "Tells Django to NOT prompt the user for input of any kind",
+};
+
+const databaseOption = (description: string): Fig.Option => ({
+  name: "--database",
+  description,
+  args: {
+    name: "DATABASE",
+  },
+});
+
+// Serializer formats built into Django (the "python" serializer is only an intermediate format)
+const SERIALIZATION_FORMATS: Fig.Suggestion[] = [
+  { name: "json", description: "JSON" },
+  { name: "jsonl", description: "JSON Lines" },
+  { name: "xml", description: "XML" },
+  { name: "yaml", description: "YAML (requires PyYAML)" },
+];
+
+// Options shared by startapp and startproject (django/core/management/templates.py)
+const TEMPLATE_COMMAND_OPTIONS: Fig.Option[] = [
+  {
+    name: "--template",
+    description: "The path or URL to load the template from",
+    args: {
+      name: "TEMPLATE",
+    },
+  },
+  {
+    name: ["--extension", "-e"],
+    description:
+      'The file extension(s) to render (default: "py"). Separate multiple extensions with commas, or use -e multiple times',
+    isRepeatable: true,
+    args: {
+      name: "EXTENSIONS",
+    },
+  },
+  {
+    name: ["--name", "-n"],
+    description:
+      "The file name(s) to render. Separate multiple file names with commas, or use -n multiple times",
+    isRepeatable: true,
+    args: {
+      name: "FILES",
+    },
+  },
+  {
+    name: ["--exclude", "-x"],
+    description:
+      "The directory name(s) to exclude, in addition to .git and __pycache__. Can be used multiple times",
+    isRepeatable: true,
+    args: {
+      name: "DIRECTORY",
+      isOptional: true,
+    },
+  },
+];
+
+const TEMPLATE_COMMAND_ARGS: Fig.Arg[] = [
+  {
+    name: "name",
+    description: "Name of the application or project",
+  },
+  {
+    name: "directory",
+    description:
+      "Optional destination directory, this will be created if needed",
+    isOptional: true,
+    template: "folders",
+  },
+];
+
 const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
   {
     name: "changepassword",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: "--database",
-        description: 'Specifies the database to use. Default is "default"',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      databaseOption('Specifies the database to use. Default is "default"'),
     ],
     description: "Change a user's password for django.contrib.auth",
     args: {
@@ -84,15 +162,9 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       {
         name: ["--noinput", "--no-input"],
         description:
-          "Tells Django to NOT prompt the user for input of any kind",
+          "Tells Django to NOT prompt the user for input of any kind. You must use --username with --noinput, along with an option for any other required field. Superusers created with --noinput will not be able to log in until they're given a valid password",
       },
-      {
-        name: "--database",
-        description: 'Specifies the database to use. Default is "default"',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      databaseOption('Specifies the database to use. Default is "default"'),
       {
         name: "--email",
         description: "Specifies the email for the superuser",
@@ -100,10 +172,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
           name: "EMAIL",
         },
       },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      SKIP_CHECKS_OPTION,
     ],
     description: "Used to create a superuser",
   },
@@ -111,29 +180,18 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "remove_stale_contenttypes",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: ["--noinput", "--no-input"],
-        description:
-          "Tells Django to NOT prompt the user for input of any kind",
-      },
-      {
-        name: "--database",
-        description:
-          'Nominates the database to use. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      NO_INPUT_OPTION,
+      databaseOption(
+        'Nominates the database to use. Defaults to the "default" database'
+      ),
       {
         name: "--include-stale-apps",
         description:
           "Deletes stale content types including ones from previously installed apps that have been removed from INSTALLED_APPS",
       },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      SKIP_CHECKS_OPTION,
     ],
+    description: "Deletes stale content types in the database",
   },
   {
     name: "check",
@@ -142,13 +200,15 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       {
         name: ["--tag", "-t"],
         description: "Run only checks labeled with given tag",
+        isRepeatable: true,
         args: {
           name: "TAGS",
         },
       },
       {
         name: "--list-tags",
-        description: "List available tags",
+        description:
+          "List available tags. Specify --deploy to include available deployment tags",
       },
       {
         name: "--deploy",
@@ -166,6 +226,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       {
         name: "--database",
         description: "Run database related checks against these aliases",
+        isRepeatable: true,
         args: {
           name: "DATABASES",
         },
@@ -186,6 +247,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: ["--locale", "-l"],
         description:
           "Locale(s) to process (e.g. de_AT). Default is to process all. Can be used multiple times",
+        isRepeatable: true,
         args: {
           name: "LOCALE",
         },
@@ -194,6 +256,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: ["--exclude", "-x"],
         description:
           "Locales to exclude. Default is none. Can be used multiple times",
+        isRepeatable: true,
         args: {
           name: "EXCLUDE",
         },
@@ -206,6 +269,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: ["--ignore", "-i"],
         description:
           "Ignore directories matching this glob-style pattern. Use multiple times to ignore more",
+        isRepeatable: true,
         args: {
           name: "PATTERN",
         },
@@ -218,14 +282,9 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "createcachetable",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: "--database",
-        description:
-          'Nominates a database onto which the cache tables will be installed. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      databaseOption(
+        'Nominates a database onto which the cache tables will be installed. Defaults to the "default" database'
+      ),
       {
         name: "--dry-run",
         description:
@@ -245,16 +304,19 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "dbshell",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: "--database",
-        description: "Nominates a database onto which to open a shell",
-        args: {
-          name: "DATABASE",
-        },
-      },
+      databaseOption(
+        'Nominates a database onto which to open a shell. Defaults to the "default" database'
+      ),
     ],
     description:
-      "Runs the command-line client for specified database, or the default database",
+      "Runs the command-line client for specified database, or the default database if none is provided",
+    args: {
+      name: "parameters",
+      description:
+        "Extra arguments for the database client (put them after --)",
+      isOptional: true,
+      isVariadic: true,
+    },
   },
   {
     name: "diffsettings",
@@ -295,6 +357,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         description: "Specifies the output serialization format for fixtures",
         args: {
           name: "FORMAT",
+          suggestions: SERIALIZATION_FORMATS,
         },
       },
       {
@@ -305,18 +368,14 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
           name: "INDENT",
         },
       },
-      {
-        name: "--database",
-        description:
-          'Nominates a specific database to dump fixtures from. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      databaseOption(
+        'Nominates a specific database to dump fixtures from. Defaults to the "default" database'
+      ),
       {
         name: ["-e", "--exclude"],
         description:
           "An app_label or app_label.ModelName to exclude (use multiple --exclude to exclude multiple apps/models)",
+        isRepeatable: true,
         args: {
           name: "EXCLUDE",
         },
@@ -347,17 +406,15 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         description: "Specifies file to which the output is written",
         args: {
           name: "OUTPUT",
+          template: "filepaths",
         },
       },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      SKIP_CHECKS_OPTION,
     ],
     description:
       "Output the contents of the database as a fixture of the given format (using each model's default manager unless --all is specified)",
     args: {
-      name: "app_label",
+      name: "app_label[.ModelName]",
       description:
         "Restricts dumped data to the specified app_label or app_label.ModelName",
       isOptional: true,
@@ -368,39 +425,22 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "flush",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: ["--noinput", "--no-input"],
-        description:
-          "Tells Django to NOT prompt the user for input of any kind",
-      },
-      {
-        name: "--database",
-        description:
-          'Nominates a database to flush. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      NO_INPUT_OPTION,
+      databaseOption(
+        'Nominates a database to flush. Defaults to the "default" database'
+      ),
+      SKIP_CHECKS_OPTION,
     ],
     description:
-      "Removes ALL DATA from the database, including data added during migrations",
+      'Removes ALL DATA from the database, including data added during migrations. Does not achieve a "fresh install" state',
   },
   {
     name: "inspectdb",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: "--database",
-        description:
-          'Nominates a database to introspect. Defaults to using the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      databaseOption(
+        'Nominates a database to introspect. Defaults to using the "default" database'
+      ),
       {
         name: "--include-partitions",
         description: "Also output models for partition tables",
@@ -411,7 +451,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       },
     ],
     description:
-      "Introspects the database tables in the given database and outputs a Django",
+      "Introspects the database tables in the given database and outputs a Django model module",
     args: {
       name: "table",
       description: "Selects what tables or views should be introspected",
@@ -423,14 +463,9 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "loaddata",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: "--database",
-        description:
-          'Nominates a specific database to load fixtures into. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      databaseOption(
+        'Nominates a specific database to load fixtures into. Defaults to the "default" database'
+      ),
       {
         name: "--app",
         description: "Only look for fixtures in the specified app",
@@ -447,6 +482,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: ["-e", "--exclude"],
         description:
           "An app_label or app_label.ModelName to exclude. Can be used multiple times",
+        isRepeatable: true,
         args: {
           name: "EXCLUDE",
         },
@@ -456,12 +492,10 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         description: "Format of serialized data when reading from stdin",
         args: {
           name: "FORMAT",
+          suggestions: SERIALIZATION_FORMATS,
         },
       },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      SKIP_CHECKS_OPTION,
     ],
     description: "Installs the named fixture(s) in the database",
     args: {
@@ -478,6 +512,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: ["--locale", "-l"],
         description:
           "Creates or updates the message files for the given locale(s) (e.g. pt_BR). Can be used multiple times",
+        isRepeatable: true,
         args: {
           name: "LOCALE",
         },
@@ -486,6 +521,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: ["--exclude", "-x"],
         description:
           "Locales to exclude. Default is none. Can be used multiple times",
+        isRepeatable: true,
         args: {
           name: "EXCLUDE",
         },
@@ -495,6 +531,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         description: 'The domain of the message files (default: "django")',
         args: {
           name: "DOMAIN",
+          suggestions: ["django", "djangojs"],
         },
       },
       {
@@ -505,6 +542,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: ["--extension", "-e"],
         description:
           'The file extension(s) to examine (default: "html,txt,py", or "js" if the domain is "djangojs"). Separate multiple extensions with commas, or use -e multiple times',
+        isRepeatable: true,
         args: {
           name: "EXTENSIONS",
         },
@@ -518,6 +556,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: ["--ignore", "-i"],
         description:
           "Ignore files or directories matching this glob-style pattern. Use multiple times to ignore more",
+        isRepeatable: true,
         args: {
           name: "PATTERN",
         },
@@ -538,7 +577,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       {
         name: "--add-location",
         description:
-          "[{full,file,never}] Controls '#: filename:line' lines. If the option is 'full' (the default if not given), the lines include both file name and line number. If it's 'file', the line number is omitted. If it's 'never', the lines are suppressed (same as --no-location). --add-location requires gettext 0.19 or newer",
+          "Controls '#: filename:line' lines. If the option is 'full' (the default if not given), the lines include both file name and line number. If it's 'file', the line number is omitted. If it's 'never', the lines are suppressed (same as --no-location). --add-location requires gettext 0.19 or newer",
         args: {
           name: "location",
           isOptional: true,
@@ -586,11 +625,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: "--empty",
         description: "Create an empty migration",
       },
-      {
-        name: ["--noinput", "--no-input"],
-        description:
-          "Tells Django to NOT prompt the user for input of any kind",
-      },
+      NO_INPUT_OPTION,
       {
         name: ["-n", "--name"],
         description: "Use this name for migration file(s)",
@@ -605,12 +640,19 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       {
         name: "--check",
         description:
-          "Exit with a non-zero status if model changes are missing migrations",
+          "Exit with a non-zero status if model changes are missing migrations and don't actually write them. Implies --dry-run",
       },
       {
-        name: "--skip-checks",
-        description: "Skip system checks",
+        name: "--scriptable",
+        description:
+          "Divert log output and input prompts to stderr, writing only paths of generated migration files to stdout",
       },
+      {
+        name: "--update",
+        description:
+          "Merge model changes into the latest migration and optimize the resulting operations",
+      },
+      SKIP_CHECKS_OPTION,
     ],
     description: "Creates new migration(s) for apps",
     args: {
@@ -624,19 +666,10 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "migrate",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: ["--noinput", "--no-input"],
-        description:
-          "Tells Django to NOT prompt the user for input of any kind",
-      },
-      {
-        name: "--database",
-        description:
-          'Nominates a database to synchronize. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      NO_INPUT_OPTION,
+      databaseOption(
+        'Nominates a database to synchronize. Defaults to the "default" database'
+      ),
       {
         name: "--fake",
         description: "Mark migrations as run without actually running them",
@@ -658,12 +691,14 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       {
         name: "--check",
         description:
-          "Exits with a non-zero status if unapplied migrations exist",
+          "Exits with a non-zero status if unapplied migrations exist and does not actually apply migrations",
       },
       {
-        name: "--skip-checks",
-        description: "Skip system checks",
+        name: "--prune",
+        description:
+          "Delete nonexistent migrations from the django_migrations table",
       },
+      SKIP_CHECKS_OPTION,
     ],
     description:
       "Updates database schema. Manages both apps with migrations and those without",
@@ -682,6 +717,122 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     ],
   },
   {
+    // Only available when django.contrib.gis is in INSTALLED_APPS
+    name: "ogrinspect",
+    icon: DJANGO_ICON_URL,
+    options: [
+      {
+        name: "--blank",
+        description:
+          "Use a comma separated list of OGR field names to add the `blank=True` option to the field definition. Set to `true` to apply to all applicable fields",
+        args: {
+          name: "FIELDS",
+        },
+      },
+      {
+        name: "--decimal",
+        description:
+          "Use a comma separated list of OGR float fields to generate `DecimalField` instead of the default `FloatField`. Set to `true` to apply to all OGR float fields",
+        args: {
+          name: "FIELDS",
+        },
+      },
+      {
+        name: "--geom-name",
+        description:
+          "Specifies the model name for the Geometry Field (defaults to `geom`)",
+        args: {
+          name: "NAME",
+          default: "geom",
+        },
+      },
+      {
+        name: "--layer",
+        description:
+          "The key for specifying which layer in the OGR data source to use. Defaults to 0 (the first layer). May be an integer or a string identifier for the layer",
+        args: {
+          name: "LAYER",
+          default: "0",
+        },
+      },
+      {
+        name: "--multi-geom",
+        description:
+          "Treat the geometry in the data source as a geometry collection",
+      },
+      {
+        name: "--name-field",
+        description:
+          "Specifies a field name to return for the __str__() method",
+        args: {
+          name: "FIELD",
+        },
+      },
+      {
+        name: "--no-imports",
+        description:
+          "Do not include `from django.contrib.gis.db import models` statement",
+      },
+      {
+        name: "--null",
+        description:
+          "Use a comma separated list of OGR field names to add the `null=True` option to the field definition. Set to `true` to apply to all applicable fields",
+        args: {
+          name: "FIELDS",
+        },
+      },
+      {
+        name: "--srid",
+        description:
+          "The SRID to use for the Geometry Field. If it can be determined, the SRID of the data source is used",
+        args: {
+          name: "SRID",
+        },
+      },
+      {
+        name: "--mapping",
+        description: "Generate mapping dictionary for use with `LayerMapping`",
+      },
+    ],
+    description:
+      "Inspects the given OGR-compatible data source (e.g., a shapefile) and outputs a GeoDjango model with the given model name",
+    args: [
+      {
+        name: "data_source",
+        description: "Path to the data source",
+        template: "filepaths" as const,
+      },
+      {
+        name: "model_name",
+        description: "Name of the model to create",
+      },
+    ],
+  },
+  {
+    name: "optimizemigration",
+    icon: DJANGO_ICON_URL,
+    options: [
+      {
+        name: "--check",
+        description:
+          "Exit with a non-zero status if the migration can be optimized",
+      },
+      SKIP_CHECKS_OPTION,
+    ],
+    description: "Optimizes the operations for the named migration",
+    args: [
+      {
+        name: "app_label",
+        description:
+          "App label of the application to optimize the migration for",
+      },
+      {
+        name: "migration_name",
+        description: "Migration name to optimize the operations for",
+      },
+    ],
+  },
+  {
     name: "sendtestemail",
     icon: DJANGO_ICON_URL,
     options: [
@@ -696,9 +847,14 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
           "Send a test email to the addresses specified in settings.ADMINS",
       },
       {
-        name: "--skip-checks",
-        description: "Skip system checks",
+        name: "--using",
+        description:
+          "Specify the MAILERS alias to use for sending the test email. Defaults to 'default'",
+        args: {
+          name: "USING",
+        },
       },
+      SKIP_CHECKS_OPTION,
     ],
     description:
       "Sends a test email to the email addresses specified as arguments",
@@ -720,6 +876,10 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: "--no-startup",
         description:
           "When using plain Python, ignore the PYTHONSTARTUP environment variable and ~/.pythonrc.py script",
+      },
+      {
+        name: "--no-imports",
+        description: "Disable automatic imports of models",
       },
       {
         name: ["-i", "--interface"],
@@ -746,14 +906,9 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "showmigrations",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: "--database",
-        description:
-          'Nominates a database to synchronize. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      databaseOption(
+        'Nominates a database to show migrations for. Defaults to the "default" database'
+      ),
       {
         name: ["--list", "-l"],
         description:
@@ -764,10 +919,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         description:
           "Shows all migrations in the order they will be applied. With a verbosity level of 2 or above all direct migration dependencies and reverse dependencies (run_before) will be included",
       },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      SKIP_CHECKS_OPTION,
     ],
     description: "Shows all available migrations for the current project",
     args: {
@@ -781,18 +933,10 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "sqlflush",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: "--database",
-        description:
-          'Nominates a database to print the SQL for. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      databaseOption(
+        'Nominates a database to print the SQL for. Defaults to the "default" database'
+      ),
+      SKIP_CHECKS_OPTION,
     ],
     description:
       "Returns a list of the SQL statements required to return all tables in the database to the state they were in just after they were installed",
@@ -801,23 +945,15 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "sqlmigrate",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: "--database",
-        description:
-          'Nominates a database to create SQL for. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
+      databaseOption(
+        'Nominates a database to create SQL for. Defaults to the "default" database'
+      ),
       {
         name: "--backwards",
         description:
           "Creates SQL to unapply the migration, rather than to apply it",
       },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      SKIP_CHECKS_OPTION,
     ],
     description: "Prints the SQL statements for the named migration",
     args: [
@@ -835,18 +971,10 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
     name: "sqlsequencereset",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: "--database",
-        description:
-          'Nominates a database to print the SQL for. Defaults to the "default" database',
-        args: {
-          name: "DATABASE",
-        },
-      },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      databaseOption(
+        'Nominates a database to print the SQL for. Defaults to the "default" database'
+      ),
+      SKIP_CHECKS_OPTION,
     ],
     description:
       "Prints the SQL statements for resetting sequences for the given app name(s)",
@@ -864,11 +992,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: "--no-optimize",
         description: "Do not try to optimize the squashed operations",
       },
-      {
-        name: ["--noinput", "--no-input"],
-        description:
-          "Tells Django to NOT prompt the user for input of any kind",
-      },
+      NO_INPUT_OPTION,
       {
         name: "--squashed-name",
         description: "Sets the name of the new squashed migration",
@@ -881,10 +1005,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         description:
           "Do not add a header comment to the new squashed migration",
       },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      SKIP_CHECKS_OPTION,
     ],
     description:
       "Squashes an existing set of migrations (from first until specified) into a single new one",
@@ -909,100 +1030,27 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
   {
     name: "startapp",
     icon: DJANGO_ICON_URL,
-    options: [
-      {
-        name: "--template",
-        description: "The path or URL to load the template from",
-        args: {
-          name: "TEMPLATE",
-        },
-      },
-      {
-        name: ["--extension", "-e"],
-        description:
-          'The file extension(s) to render (default: "py"). Separate multiple extensions with commas, or use -e multiple times',
-        args: {
-          name: "EXTENSIONS",
-        },
-      },
-      {
-        name: ["--name", "-n"],
-        description:
-          "The file name(s) to render. Separate multiple file names with commas, or use -n multiple times",
-        args: {
-          name: "FILES",
-        },
-      },
-    ],
+    options: TEMPLATE_COMMAND_OPTIONS,
     description:
       "Creates a Django app directory structure for the given app name in the current directory or optionally in the given directory",
-    args: [
-      {
-        name: "name",
-        description: "Name of the application or project",
-      },
-      {
-        name: "directory",
-        description: "Optional destination directory",
-        isOptional: true,
-      },
-    ],
+    args: TEMPLATE_COMMAND_ARGS,
   },
   {
     name: "startproject",
     icon: DJANGO_ICON_URL,
-    options: [
-      {
-        name: "--template",
-        description: "The path or URL to load the template from",
-        args: {
-          name: "TEMPLATE",
-        },
-      },
-      {
-        name: ["--extension", "-e"],
-        description:
-          'The file extension(s) to render (default: "py"). Separate multiple extensions with commas, or use -e multiple times',
-        args: {
-          name: "EXTENSIONS",
-        },
-      },
-      {
-        name: ["--name", "-n"],
-        description:
-          "The file name(s) to render. Separate multiple file names with commas, or use -n multiple times",
-        args: {
-          name: "FILES",
-        },
-      },
-    ],
+    options: TEMPLATE_COMMAND_OPTIONS,
     description:
       "Creates a Django project directory structure for the given project name in the current directory or optionally in the given directory",
-    args: [
-      {
-        name: "name",
-        description: "Name of the application or project",
-      },
-      {
-        name: "directory",
-        description: "Optional destination directory",
-        isOptional: true,
-      },
-    ],
+    args: TEMPLATE_COMMAND_ARGS,
   },
   {
     name: "test",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: ["--noinput", "--no-input"],
-        description:
-          "Tells Django to NOT prompt the user for input of any kind",
-      },
+      NO_INPUT_OPTION,
       {
         name: "--failfast",
-        description:
-          "Tells Django to stop running the test suite after first failed test",
+        description: "Stops the test suite after the first failure",
       },
       {
         name: "--testrunner",
@@ -1032,8 +1080,16 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         description: "Preserves the test DB between runs",
       },
       {
+        name: "--shuffle",
+        description: "Shuffles test case order",
+        args: {
+          name: "SEED",
+          isOptional: true,
+        },
+      },
+      {
         name: ["-r", "--reverse"],
-        description: "Reverses test cases order",
+        description: "Reverses test case order",
       },
       {
         name: "--debug-mode",
@@ -1045,15 +1101,19 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       },
       {
         name: "--parallel",
-        description: "Run tests using up to N parallel processes",
+        description:
+          'Run tests using up to N parallel processes. Use the value "auto" to run one test process for each processor core',
         args: {
-          name: "[N]",
+          name: "N",
+          isOptional: true,
+          suggestions: ["auto"],
         },
       },
       {
         name: "--tag",
         description:
           "Run only tests with the specified tag. Can be used multiple times",
+        isRepeatable: true,
         args: {
           name: "TAGS",
         },
@@ -1062,6 +1122,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: "--exclude-tag",
         description:
           "Do not run tests with the specified tag. Can be used multiple times",
+        isRepeatable: true,
         args: {
           name: "EXCLUDE_TAGS",
         },
@@ -1076,11 +1137,28 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         description: "Discard output from passing tests",
       },
       {
+        name: "--no-faulthandler",
+        description: "Disables the Python faulthandler module during tests",
+      },
+      {
+        name: "--timing",
+        description:
+          "Output timings, including database set up and total run time",
+      },
+      {
         name: "-k",
         description:
           "Only run test methods and classes that match the pattern or substring. Can be used multiple times. Same as unittest -k option",
+        isRepeatable: true,
         args: {
           name: "TEST_NAME_PATTERNS",
+        },
+      },
+      {
+        name: "--durations",
+        description: "Show the N slowest test cases (N=0 for all)",
+        args: {
+          name: "N",
         },
       },
     ],
@@ -1091,17 +1169,14 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       description:
         "Module paths to test; can be modulename, modulename.TestCase or modulename.TestCase.test_method",
       isOptional: true,
+      isVariadic: true,
     },
   },
   {
     name: "testserver",
     icon: DJANGO_ICON_URL,
     options: [
-      {
-        name: ["--noinput", "--no-input"],
-        description:
-          "Tells Django to NOT prompt the user for input of any kind",
-      },
+      NO_INPUT_OPTION,
       {
         name: "--addrport",
         description: "Port number or ipaddr:port to run the server on",
@@ -1120,29 +1195,15 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
       name: "fixture",
       description: "Path(s) to fixtures to load before running the server",
       isOptional: true,
+      isVariadic: true,
     },
-  },
-  {
-    name: "test_mail",
-    icon: DJANGO_ICON_URL,
-    options: [
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
-    ],
   },
   {
     name: "clearsessions",
     icon: DJANGO_ICON_URL,
-    options: [
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
-    ],
+    options: [SKIP_CHECKS_OPTION],
     description:
-      "Can be run as a cronjob or directly to clean out expired sessions (only with the database backend at the moment)",
+      "Can be run as a cronjob or directly to clean out expired sessions when the backend supports it",
   },
   {
     name: "collectstatic",
@@ -1160,6 +1221,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: ["-i", "--ignore"],
         description:
           "Ignore files or directories matching this glob-style pattern. Use multiple times to ignore more",
+        isRepeatable: true,
         args: {
           name: "PATTERN",
         },
@@ -1182,10 +1244,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         description:
           "Don't ignore the common private glob-style patterns (defaults to 'CVS', '.*' and '*~')",
       },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      SKIP_CHECKS_OPTION,
     ],
     description: "Collect static files in a single location",
   },
@@ -1197,10 +1256,7 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: "--first",
         description: "Only return the first match for each static file",
       },
-      {
-        name: "--skip-checks",
-        description: "Skip system checks",
-      },
+      SKIP_CHECKS_OPTION,
     ],
     description: "Finds the absolute paths for the given static file(s)",
     args: {
@@ -1233,9 +1289,10 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         name: "--insecure",
         description: "Allows serving static files even if DEBUG is False",
       },
+      SKIP_CHECKS_OPTION,
     ],
     description:
-      "Starts a lightweight Web server for development and also serves static files",
+      "Starts a lightweight web server for development and also serves static files",
     args: {
       name: "addrport",
       description: "Optional port number, or ipaddr:port",
@@ -1250,7 +1307,14 @@ const DJANGO_NATIVE_COMMANDS: Fig.Subcommand[] = [
         priority: 51,
         ...option,
       })),
-      ...ALWAYS_AVAILABLE_OPTIONS,
+      ...ALWAYS_AVAILABLE_OPTIONS.map((option) =>
+        // runserver accepts --verbosity and --traceback but never uses them,
+        // so Django hides them from its help (suppressed_base_arguments)
+        subcommand.name === "runserver" &&
+        (option.name === "--traceback" || option.name.includes("--verbosity"))
+          ? { ...option, hidden: true }
+          : option
+      ),
     ],
   };
 });
@@ -1259,13 +1323,30 @@ const completionSpec: Fig.Spec = {
   name: "django-admin",
   description: "Utility script for the Django Web framework",
   icon: DJANGO_ICON_URL,
+  options: [
+    {
+      name: ["-h", "--help"],
+      description: "Show the list of available subcommands",
+    },
+    {
+      name: "--version",
+      description: "Show Django's version number and exit",
+    },
+  ],
   subcommands: [
     {
       name: "help",
       description: "Usage and help information for django-admin",
       icon: DJANGO_ICON_URL,
+      options: [
+        {
+          name: "--commands",
+          description: "List only the names of the available subcommands",
+        },
+      ],
       args: {
         name: "subcommand",
+        isOptional: true,
         suggestions: DJANGO_NATIVE_COMMANDS.filter(
           (command) => command.name != "help"
         ).map((command) => ({
@@ -1274,6 +1355,11 @@ const completionSpec: Fig.Spec = {
           icon: command.icon,
         })),
       },
+    },
+    {
+      name: "version",
+      description: "Print the Django version",
+      icon: DJANGO_ICON_URL,
     },
     ...DJANGO_NATIVE_COMMANDS,
   ],
