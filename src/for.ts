@@ -1,15 +1,23 @@
+// for shell reserved word (bash 5.3 bash(1) "Compound Commands" man page from Ubuntu bash 5.3-2ubuntu1, zsh 5.9.2 Doc/Zsh/grammar.yo at tag zsh-5.9.2, 2026-11-19).
+// Source: bash 5.3 man page text and zsh 5.9.2 source docs read, not run (bash 5.2.21 `help for`/`help if` run locally; 5.3 binary not executed, zsh and macOS not run).
 const completionSpec: Fig.Spec = {
   name: "for",
-  description: "Perform a set of commands multiple times",
+  description:
+    "Execute commands once for each item in a list, or with the arithmetic form for ((init; condition; step))",
   args: [
     {
       name: "var",
+      description: "Loop variable that is set to each item in turn",
     },
     {
+      description:
+        "Introduces the list of words, omit to loop over the positional parameters",
+      isOptional: true,
       suggestions: ["in"],
     },
     {
       name: "values",
+      isOptional: true,
       isVariadic: true,
     },
   ],
