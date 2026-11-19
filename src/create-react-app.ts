@@ -1,10 +1,10 @@
+// create-react-app v5.1.0 (npm latest, published 2025-02-15, 2026-11-19). Source: createReactApp.js shipped in the npm tarball (commander definition and --help text), read statically; the binary was not run.
+// Upstream deprecated the project (see https://react.dev/link/cra); 5.1.0 is still the latest release. Removed --use-npm (absent from 5.1.0), added --info, --use-pnp is a plain flag.
+
 const ICONS = {
   help: "https://raw.githubusercontent.com/expo/expo-cli/master/assets/fig/help.png",
   version:
     "https://raw.githubusercontent.com/expo/expo-cli/master/assets/fig/info.png",
-  true: "https://raw.githubusercontent.com/expo/expo-cli/master/assets/fig/true.png",
-  false:
-    "https://raw.githubusercontent.com/expo/expo-cli/master/assets/fig/false.png",
   skip: "https://raw.githubusercontent.com/expo/expo-cli/master/assets/fig/skip.png",
   path: "https://raw.githubusercontent.com/expo/expo-cli/master/assets/fig/path.png",
   string:
@@ -15,61 +15,43 @@ const ICONS = {
   yarn: "fig://icon?type=yarn",
 };
 
-const boolArg: Fig.Arg = {
-  name: "boolean",
-  isOptional: true,
-  suggestions: [
-    {
-      name: "true",
-      icon: ICONS.true,
-    },
-    {
-      name: "false",
-      icon: ICONS.false,
-    },
-  ],
-};
-
 const completionSpec: Fig.Spec = {
   name: "create-react-app",
   description: "Creates a new React project",
   args: {
+    name: "project-directory",
     template: "folders",
-    name: "name",
   },
   options: [
     // template
     {
       name: "--template",
       description:
-        'Specify a template for the created project (a custom template on npm (search for "cra-template-*"), a relative path, or an archive (.tgz or .tar.gz))',
+        'Specify a template for the created project (a custom template on npm (search for "cra-template-*"), a local path (file:../my-custom-template), or an archive (.tgz or .tar.gz))',
       args: {
-        name: "name or url",
+        name: "path-to-template",
+        suggestions: [
+          {
+            name: "typescript",
+            description: "The cra-template-typescript template",
+          },
+        ],
       },
       icon: ICONS.path,
       priority: 76,
     },
     {
-      name: "--use-npm",
-      description:
-        "Use npm to install dependencies (default when Yarn is not installed)",
-      args: boolArg,
-      icon: ICONS.npm,
-      priority: 75,
-    },
-    {
       name: "--use-pnp",
       description: "Use Yarn Plug'n'Play to create the app",
-      args: boolArg,
       icon: ICONS.yarn,
       priority: 75,
     },
     {
       name: "--scripts-version",
       description:
-        "Use a non-standard version of react-scripts (a specific npm version or npm tag, a custom fork published on npm, a relative path, or an archive (.tgz or .tar.gz))",
+        "Use a non-standard version of react-scripts (a specific npm version or npm tag, a custom fork published on npm, a local path (file:../my-react-scripts), or an archive (.tgz or .tar.gz))",
       args: {
-        name: "alternative package",
+        name: "alternative-package",
       },
       priority: 74,
     },
@@ -77,6 +59,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "--verbose",
       description: "Print additional logs",
+      priority: 1,
+      icon: ICONS.string,
+    },
+    {
+      name: "--info",
+      description: "Print environment debug info",
       priority: 1,
       icon: ICONS.string,
     },
