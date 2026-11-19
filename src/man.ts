@@ -1,4 +1,4 @@
-// man (macOS 26 FreeBSD-derived man.sh, apple-oss-distributions/man tag man-62 which is the latest tag, 2026-11-19). Source: man/man.1 and the getopts string in man/man.sh; not run on macOS.
+// man (macOS 26 FreeBSD-derived man.sh, apple-oss-distributions/man tag man-62 which is the latest tag, 2026-11-19). Source: man/man.1, man/man.sh (getopts string and incompatible option checks) and man/man.conf (default MANSECT); not run on macOS.
 // Removed options that the old BSD man had but the current macOS man (man.sh) rejects: -B, -H, -D, -F/--preformat, -c.
 // Kept -K, -W and --path (accepted by GNU man-db 2.13.3, which was checked via its src/man.c option table). The page-name generator (`man -k .`) is unchanged and was not run on macOS.
 import { valueList } from "@tabsmith/autocomplete-generators";
