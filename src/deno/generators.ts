@@ -7,19 +7,27 @@ import type { DenoConfigurationFileSchema } from "./config_schema";
 import type {
   ClassMethodDef,
   ClassPropertyDef,
-  DocNode,
+  Declaration,
+  Document,
   InterfaceMethodDef,
   InterfacePropertyDef,
+  Symbol as DocSymbol,
 } from "./deno_doc";
 
 // --- Generate documentation symbols
 
 type Node =
-  | DocNode
+  | DocSymbol
   | InterfaceMethodDef
   | InterfacePropertyDef
   | ClassMethodDef
   | ClassPropertyDef;
+
+/** The shape of the output of `deno doc --json` (JSON schema version 2) */
+type DocJson = {
+  version: number;
+  nodes: Record<string, Document>;
+};
 
 /** Get unique values */
 function getUniqueNamed<T extends { name: string }>(input: readonly T[]): T[] {
@@ -33,24 +41,39 @@ function getUniqueNamed<T extends { name: string }>(input: readonly T[]): T[] {
   return out;
 }
 
+/** Whether the node is a symbol (as opposed to a class/interface member) */
+function isSymbol(node: Node): node is DocSymbol {
+  return "declarations" in node;
+}
+
+/**
+ * Get the children of the given declaration, if it has children. If it cannot
+ * have children, return an empty array.
+ */
+function getDeclarationChildren(declaration: Declaration): Node[] {
+  if (declaration.kind === "namespace") {
+    return declaration.def.elements;
+  }
+  if (declaration.kind === "interface" || declaration.kind === "class") {
+    return [
+      ...(declaration.def.methods ?? []),
+      ...(declaration.def.properties ?? []),
+    ];
+  }
+  return [];
+}
+
 /**
  * Get the children of the given node, if it has children. If it cannot have
  * children, return an empty array.
  */
 function getNodeChildren(node: Node): Node[] {
-  if (!("kind" in node)) {
+  if (!isSymbol(node)) {
     return [];
   }
-  if (node.kind === "namespace") {
-    return node.namespaceDef.elements;
-  }
-  if (node.kind === "interface") {
-    return [...node.interfaceDef.methods, ...node.interfaceDef.properties];
-  }
-  if (node.kind === "class") {
-    return [...node.classDef.methods, ...node.classDef.properties];
-  }
-  return [];
+  return node.declarations.flatMap((declaration) =>
+    getDeclarationChildren(declaration)
+  );
 }
 
 /**
@@ -95,14 +118,18 @@ function getPriorityByNodeName(name: string): number {
  * Get a human-readable short name for the kind of node
  */
 function getNodeTypeName(node: Node): string {
-  if ("kind" in node) {
-    if (node.kind === "typeAlias") {
-      return "Type";
-    }
-    const kind = node.kind;
-    return `${kind.charAt(0).toUpperCase()}${kind.slice(1)}`;
+  const kind = isSymbol(node)
+    ? (node.declarations[0]?.kind ?? "reference")
+    : "kind" in node
+      ? node.kind
+      : undefined;
+  if (kind === undefined) {
+    return "Property";
   }
-  return "Property";
+  if (kind === "typeAlias") {
+    return "Type";
+  }
+  return `${kind.charAt(0).toUpperCase()}${kind.slice(1)}`;
 }
 
 /**
@@ -116,17 +143,12 @@ function filterNodes(
 ): Node[] {
   const { showPrivateNodes } = init;
   return nodes.filter((node) => {
-    // 1. Check if it's a node that can't be shown
-    if ("kind" in node) {
-      if (node.kind === "moduleDoc" || node.kind === "import") {
-        return false;
-      }
-    }
-    // 2. Check if the visibility preference filters out the node
-    if ("declarationKind" in node) {
-      if (!showPrivateNodes && node.declarationKind === "private") {
-        return false;
-      }
+    // Check if the visibility preference filters out the symbol. A symbol is
+    // private if all of its declarations are un-exported.
+    if (isSymbol(node) && !showPrivateNodes) {
+      return node.declarations.some(
+        (declaration) => declaration.declarationKind !== "private"
+      );
     }
     // All else failing, allow the node
     return true;
@@ -168,7 +190,10 @@ export const generateDocs: Fig.Generator = {
     return command;
   },
   postProcess: (out, tokens) => {
-    const docNodes = JSON.parse(out) as DocNode[];
+    const docJson = JSON.parse(out) as DocJson;
+    const docNodes: Node[] = Object.values(docJson.nodes).flatMap(
+      (document) => document.symbols
+    );
 
     // The final segment is being typed, ignore it
     const finalToken = tokens[tokens.length - 1];
@@ -237,6 +262,9 @@ export const generateRunnableFiles = filepaths({
 
 // --- Generate lint rules
 
+// The rules `deno lint` ships with (cli/schemas/lint-rules.v1.json in Deno v2.9.8),
+// described with the first sentence of their documentation at docs.deno.com/lint/rules/
+
 export const generateLintRules = valueList({
   insertDelimiter: true,
   values: [
@@ -252,7 +280,7 @@ export const generateLintRules = valueList({
     {
       name: "ban-types",
       description:
-        "Bans the use of primitive wrapper objects (e.g. `String` the object is a wrapper\nof `string` the primitive) in addition to the non-explicit `Function` type and\nthe misunderstood `Object` type",
+        "Bans the use of primitive wrapper objects (e.g. `String` the object is a wrapper of `string` the primitive) in addition to the non-explicit `Function` type and the misunderstood `Object` type",
     },
     {
       name: "ban-unknown-rule-code",
@@ -264,8 +292,17 @@ export const generateLintRules = valueList({
         "Requires `deno-lint-ignore` to be annotated with one or more rule names",
     },
     {
+      name: "ban-untagged-todo",
+      description:
+        "Requires TODOs to be annotated with either a user tag (`@user`) or an issue reference (`#issue`)",
+    },
+    {
       name: "ban-unused-ignore",
       description: "Warns unused ignore directives",
+    },
+    {
+      name: "camelcase",
+      description: "Enforces the use of camelCase in variable names",
     },
     {
       name: "constructor-super",
@@ -273,13 +310,95 @@ export const generateLintRules = valueList({
         "Verifies the correct usage of constructors and calls to `super()`",
     },
     {
+      name: "default-param-last",
+      description:
+        "Enforces default parameter(s) to be last in the function signature",
+    },
+    {
+      name: "eqeqeq",
+      description:
+        "Enforces the use of type-safe equality operators `===` and `!==` instead of the more error prone `==` and `!=` operators",
+    },
+    {
+      name: "explicit-function-return-type",
+      description: "Requires all functions to have explicit return types",
+    },
+    {
+      name: "explicit-module-boundary-types",
+      description:
+        "Requires all module exports to have fully typed declarations",
+    },
+    {
       name: "for-direction",
       description:
         "Requires `for` loop control variables to increment in the correct direction",
     },
     {
+      name: "fresh-handler-export",
+      description: "Checks correct naming for named fresh middleware export",
+    },
+    {
+      name: "fresh-server-event-handlers",
+      description: "Disallows event handlers in fresh server components",
+    },
+    {
       name: "getter-return",
       description: "Requires all property getter functions to return a value",
+    },
+    {
+      name: "guard-for-in",
+      description: "Require `for-in` loops to include an `if` statement",
+    },
+    {
+      name: "jsx-boolean-value",
+      description: "Enforce a consistent JSX boolean value style",
+    },
+    {
+      name: "jsx-button-has-type",
+      description: "Enforce `<button>` elements to have a `type` attribute",
+    },
+    {
+      name: "jsx-curly-braces",
+      description:
+        "Ensure consistent use of curly braces around JSX expressions",
+    },
+    {
+      name: "jsx-key",
+      description:
+        "Ensure the `key` attribute is present when passing iterables into JSX",
+    },
+    {
+      name: "jsx-no-children-prop",
+      description: "Pass children as JSX children instead of as an attribute",
+    },
+    {
+      name: "jsx-no-comment-text-nodes",
+      description:
+        "JavaScript comments inside text nodes are rendered as plain text in JSX",
+    },
+    {
+      name: "jsx-no-duplicate-props",
+      description: "Disallow duplicated JSX props",
+    },
+    {
+      name: "jsx-no-unescaped-entities",
+      description:
+        "Leaving the `>` or `}` character in JSX is often undesired and difficult to spot",
+    },
+    {
+      name: "jsx-no-useless-fragment",
+      description:
+        'Fragments are only necessary at the top of a JSX "block" and only when there are multiple children',
+    },
+    {
+      name: "jsx-props-no-spread-multi",
+      description:
+        "Spreading the same expression twice is typically a mistake and causes unnecessary computations",
+    },
+    {
+      name: "jsx-void-dom-elements-no-children",
+      description:
+        "Ensure that void elements in HTML don't have any children as that is not valid HTML",
     },
     {
       name: "no-array-constructor",
@@ -291,9 +410,22 @@ export const generateLintRules = valueList({
         "Requires that async promise executor functions are not used",
     },
     {
+      name: "no-await-in-loop",
+      description: "Requires `await` is not used in a for loop body",
+    },
+    {
+      name: "no-await-in-sync-fn",
+      description: "Disallow `await` keyword inside a non-async function",
+    },
+    {
+      name: "no-boolean-literal-for-arguments",
+      description:
+        "Requires all functions called with any amount of `boolean` literals as parameters to use a self-documenting constant instead",
+    },
+    {
       name: "no-case-declarations",
       description:
-        "Requires lexical declarations (`let`, `const`, `function` and `class`) in switch\n`case` or `default` clauses to be scoped with brackets",
+        "Requires lexical declarations (`let`, `const`, `function` and `class`) in switch `case` or `default` clauses to be scoped with brackets",
     },
     {
       name: "no-class-assign",
@@ -309,6 +441,14 @@ export const generateLintRules = valueList({
         "Disallows the use of the assignment operator, `=`, in conditional statements",
     },
     {
+      name: "no-console",
+      description: "Disallows the use of the `console` global",
+    },
+    {
+      name: "no-const-assign",
+      description: "Disallows modifying a variable declared as `const`",
+    },
+    {
       name: "no-constant-condition",
       description:
         "Disallows the use of a constant expression in conditional test",
@@ -316,7 +456,7 @@ export const generateLintRules = valueList({
     {
       name: "no-control-regex",
       description:
-        "Disallows the use ascii control characters in regular expressions",
+        "Disallows the use ASCII control characters in regular expressions",
     },
     {
       name: "no-debugger",
@@ -328,7 +468,7 @@ export const generateLintRules = valueList({
     },
     {
       name: "no-deprecated-deno-api",
-      description: "Warns the usage of the deprecated Deno APIs",
+      description: "Warns the usage of the deprecated - Deno APIs",
     },
     {
       name: "no-dupe-args",
@@ -375,13 +515,15 @@ export const generateLintRules = valueList({
       name: "no-empty-pattern",
       description: "Disallows the use of empty patterns in destructuring",
     },
+    { name: "no-eval", description: "Disallows the use of `eval`" },
     {
       name: "no-ex-assign",
       description: "Disallows the reassignment of exception parameters",
     },
+    { name: "no-explicit-any", description: "Disallows use of the `any` type" },
     {
-      name: "no-explicit-any",
-      description: "Disallows use of the `any` type",
+      name: "no-external-import",
+      description: "Disallows the use of external imports",
     },
     {
       name: "no-extra-boolean-cast",
@@ -390,10 +532,6 @@ export const generateLintRules = valueList({
     {
       name: "no-extra-non-null-assertion",
       description: "Disallows unnecessary non-null assertions",
-    },
-    {
-      name: "no-extra-semi",
-      description: "<!-- deno-fmt-ignore-file -->",
     },
     {
       name: "no-fallthrough",
@@ -409,8 +547,22 @@ export const generateLintRules = valueList({
       description: "Disallows assignment to native Javascript objects",
     },
     {
+      name: "no-implicit-declare-namespace-export",
+      description:
+        'Disallows the use of implicit exports in "ambient" namespaces',
+    },
+    {
+      name: "no-import-assertions",
+      description: "Disallows the `assert` keyword for import attributes",
+    },
+    {
       name: "no-import-assign",
       description: "Disallows reassignment of imported module bindings",
+    },
+    {
+      name: "no-import-prefix",
+      description:
+        "Ensure that all dependencies are declared in either `deno.json` or `package.json`",
     },
     {
       name: "no-inferrable-types",
@@ -451,6 +603,20 @@ export const generateLintRules = valueList({
         "Disallows the use of `new` operators with built-in `Symbol`s",
     },
     {
+      name: "no-node-globals",
+      description: "Disallows the use of NodeJS global objects",
+    },
+    {
+      name: "no-non-null-asserted-optional-chain",
+      description:
+        "Disallow non-null assertions after an optional chain expression",
+    },
+    {
+      name: "no-non-null-assertion",
+      description:
+        "Disallow non-null assertions using the `!` postfix operator",
+    },
+    {
       name: "no-obj-calls",
       description: "Disallows calling built-in global objects like functions",
     },
@@ -458,6 +624,10 @@ export const generateLintRules = valueList({
       name: "no-octal",
       description:
         "Disallows expressing octal numbers via numeric literals beginning with `0`",
+    },
+    {
+      name: "no-process-global",
+      description: "Disallows the use of NodeJS `process` global",
     },
     {
       name: "no-prototype-builtins",
@@ -472,9 +642,11 @@ export const generateLintRules = valueList({
       name: "no-regex-spaces",
       description: "Disallows multiple spaces in regular expression literals",
     },
+    { name: "no-self-assign", description: "Disallows self assignments" },
     {
-      name: "no-self-assign",
-      description: "Disallows self assignments",
+      name: "no-self-compare",
+      description:
+        "Disallows comparisons where both sides are exactly the same",
     },
     {
       name: "no-setter-return",
@@ -485,6 +657,21 @@ export const generateLintRules = valueList({
       description: "Disallows shadowing of restricted names",
     },
     {
+      name: "no-sloppy-imports",
+      description:
+        "Enforces specifying explicit references to paths in module specifiers",
+    },
+    {
+      name: "no-slow-types",
+      description:
+        "Enforces using types that are explicit or can be simply inferred",
+    },
+    { name: "no-sparse-arrays", description: "Disallows sparse arrays" },
+    {
+      name: "no-sync-fn-in-async-fn",
+      description: "Disallow sync function inside async function",
+    },
+    {
       name: "no-this-alias",
       description: "Disallows assigning variables to `this`",
     },
@@ -492,6 +679,18 @@ export const generateLintRules = valueList({
       name: "no-this-before-super",
       description:
         "Disallows use of `this` or `super` before calling `super()` in constructors",
+    },
+    {
+      name: "no-throw-literal",
+      description: "Disallow throwing literals as exceptions",
+    },
+    {
+      name: "no-top-level-await",
+      description: "Disallows the use of top level await expressions",
+    },
+    {
+      name: "no-undef",
+      description: "Disallow the use of undeclared variables",
     },
     {
       name: "no-unreachable",
@@ -506,20 +705,31 @@ export const generateLintRules = valueList({
     {
       name: "no-unsafe-negation",
       description:
-        "Disallows the usage of negation operator `!` as the left operand of relational\noperators",
+        "Disallows the usage of negation operator `!` as the left operand of relational operators",
     },
-    {
-      name: "no-unused-labels",
-      description: "Disallows unused labels",
-    },
+    { name: "no-unused-labels", description: "Disallows unused labels" },
     {
       name: "no-unused-vars",
-      description: "Enforces all variables used at least once",
+      description: "Enforces all variables are used at least once",
+    },
+    {
+      name: "no-unversioned-import",
+      description:
+        "Ensure that inline dependency imports have a version specifier",
+    },
+    {
+      name: "no-useless-rename",
+      description:
+        "Disallow useless rename operations where both the original and new name are exactly the same",
     },
     {
       name: "no-var",
       description:
-        "Enforces the use of block scoped variables over more error prone function scoped\nvariables. Block scoped variables are defined using `const` and `let` keywords",
+        "Enforces the use of block scoped variables over more error prone function scoped variables",
+    },
+    {
+      name: "no-window",
+      description: "Disallows the use of the `window` object",
     },
     {
       name: "no-window-prefix",
@@ -532,35 +742,71 @@ export const generateLintRules = valueList({
     {
       name: "prefer-as-const",
       description:
-        "Recommends using const assertion (`as const`) over explicitly specifying literal\ntypes or using type assertion",
+        "Recommends using const assertion (`as const`) over explicitly specifying literal types or using type assertion",
+    },
+    {
+      name: "prefer-ascii",
+      description: "Ensures that the code is fully written in ASCII characters",
     },
     {
       name: "prefer-const",
-      description: "Recommends declaring variables with [`const`] over [`let`]",
+      description: "Recommends declaring variables with `const` over `let`",
     },
     {
       name: "prefer-namespace-keyword",
       description:
-        "Recommends the use of `namespace` keyword over `module` keyword when declaring\nTypeScript module",
+        "Recommends the use of `namespace` keyword over `module` keyword when declaring TypeScript module",
+    },
+    {
+      name: "prefer-primordials",
+      description:
+        "Suggests using frozen intrinsics from `primordials` rather than the default globals",
+    },
+    {
+      name: "react-no-danger",
+      description:
+        "Prevent the use of `dangerouslySetInnerHTML` which can lead to XSS vulnerabilities if used incorrectly",
+    },
+    {
+      name: "react-no-danger-with-children",
+      description:
+        "Using JSX children together with `dangerouslySetInnerHTML` is invalid as they will be ignored",
+    },
+    {
+      name: "react-rules-of-hooks",
+      description:
+        "Ensure that hooks are called correctly in React/Preact components",
     },
     {
       name: "require-await",
-      description: "Disallows async functions that have no await expression",
+      description:
+        "Disallows async functions that have no await expression or await using declaration",
     },
     {
       name: "require-yield",
       description: "Disallows generator functions that have no `yield`",
     },
     {
-      name: "use-isnan",
-      description: "Disallows comparisons to `NaN`",
+      name: "single-var-declarator",
+      description:
+        "Disallows multiple variable definitions in the same declaration statement",
     },
+    {
+      name: "triple-slash-reference",
+      description:
+        "Disallow certain triple slash directives in favor of ES6-style import declarations",
+    },
+    { name: "use-isnan", description: "Disallows comparisons to `NaN`" },
     {
       name: "valid-typeof",
       description:
         "Restricts the use of the `typeof` operator to a specific set of string literals",
     },
-  ].map((suggestion) => ({ ...suggestion, icon: "fig://icon?type=string" })),
+    {
+      name: "verbatim-module-syntax",
+      description: "Enforces type imports to be declared as type imports",
+    },
+  ],
 });
 
 // --- Generate tasks
