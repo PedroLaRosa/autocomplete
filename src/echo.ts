@@ -1,3 +1,4 @@
+// echo (macOS BSD /bin/echo from Apple OSS shell_cmds-329, man page dated 2003-04-12, 2026-11-19). Source: apple-oss-distributions/shell_cmds echo/echo.1 + echo.c; -e/-E kept from the existing spec (bash 5.2 `help echo`, GNU coreutils echo), they are not understood by macOS /bin/echo. Not run on macOS.
 const environmentVariableGenerator: Fig.Generator = {
   custom: async (tokens, _, context) => {
     if (tokens.length < 3 || tokens[tokens.length - 1].startsWith("$")) {
@@ -30,11 +31,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-e",
-      description: "Interpret escape sequences",
+      description:
+        "Interpret backslash escape sequences (shell builtin and GNU echo only)",
     },
     {
       name: "-E",
-      description: "Disable escape sequences",
+      description:
+        "Disable interpretation of backslash escape sequences (shell builtin and GNU echo only)",
     },
   ],
 };
