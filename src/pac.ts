@@ -7927,8 +7927,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--template-name",
-              description:
-                "Website template name",
+              description: "Website template name",
               isRequired: true,
               args: {
                 name: "template-name",
