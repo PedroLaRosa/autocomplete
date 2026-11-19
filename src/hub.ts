@@ -115,7 +115,7 @@ const gitSubcommands: Fig.Subcommand[] = (gitSpec.subcommands ?? []).map(
     return extra
       ? { ...subcommand, options: [...(subcommand.options ?? []), ...extra] }
       : subcommand;
-  },
+  }
 );
 
 const hubSubcommands: Fig.Subcommand[] = [
@@ -150,7 +150,8 @@ const hubSubcommands: Fig.Subcommand[] = [
       },
       {
         name: ["-F", "--field"],
-        description: "Data to serialize with the request (value has magic handling)",
+        description:
+          "Data to serialize with the request (value has magic handling)",
         isRepeatable: true,
         args: { name: "KEY=VALUE" },
       },
@@ -162,7 +163,8 @@ const hubSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--input",
-        description: "File to read the raw request body from (use - for standard input)",
+        description:
+          "File to read the raw request body from (use - for standard input)",
         args: { name: "file", template: "filepaths" },
       },
       {
@@ -228,10 +230,11 @@ const hubSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: ["-v", "--verbose"],
-        description: "Print detailed report of all status checks and their URLs",
+        description:
+          "Print detailed report of all status checks and their URLs",
       },
       formatOption(
-        "Pretty print all status checks using FORMAT (implies --verbose)",
+        "Pretty print all status checks using FORMAT (implies --verbose)"
       ),
       colorOption,
     ],
@@ -269,7 +272,8 @@ const hubSubcommands: Fig.Subcommand[] = [
   },
   {
     name: "create",
-    description: "Create a new repository on GitHub and add a git remote for it",
+    description:
+      "Create a new repository on GitHub and add a git remote for it",
     options: [
       {
         name: ["-p", "--private"],
@@ -317,7 +321,8 @@ const hubSubcommands: Fig.Subcommand[] = [
   },
   {
     name: "fork",
-    description: "Fork the current repository on GitHub and add a git remote for it",
+    description:
+      "Fork the current repository on GitHub and add a git remote for it",
     options: [
       {
         name: "--no-remote",
@@ -365,7 +370,8 @@ const hubSubcommands: Fig.Subcommand[] = [
           { name: "id", description: "Gist ID" },
           {
             name: "filename",
-            description: "File within the gist (required for gists with multiple files)",
+            description:
+              "File within the gist (required for gists with multiple files)",
             isOptional: true,
           },
         ],
@@ -390,14 +396,16 @@ const hubSubcommands: Fig.Subcommand[] = [
       editOption("pull request"),
       {
         name: ["-i", "--issue"],
-        description: "Convert an issue (referenced by its number) to a pull request",
+        description:
+          "Convert an issue (referenced by its number) to a pull request",
         args: { name: "issue" },
       },
       browseOption("pull request"),
       copyOption("pull request"),
       {
         name: ["-p", "--push"],
-        description: "Push the current branch to HEAD before creating the pull request",
+        description:
+          "Push the current branch to HEAD before creating the pull request",
       },
       {
         name: ["-b", "--base"],
@@ -411,7 +419,8 @@ const hubSubcommands: Fig.Subcommand[] = [
       },
       {
         name: ["-r", "--reviewer"],
-        description: "Comma-separated list of GitHub handles to request a review from",
+        description:
+          "Comma-separated list of GitHub handles to request a review from",
         args: { name: "users" },
       },
       {
@@ -421,7 +430,7 @@ const hubSubcommands: Fig.Subcommand[] = [
       },
       milestoneOption("The milestone name to add to this pull request"),
       labelsOption(
-        "Comma-separated list of labels to add (created if they do not exist)",
+        "Comma-separated list of labels to add (created if they do not exist)"
       ),
       {
         name: ["-d", "--draft"],
@@ -496,7 +505,7 @@ const hubSubcommands: Fig.Subcommand[] = [
           urlOption,
           copyUrlOption,
           formatOption(
-            "Print information about the pull request using FORMAT instead of opening it",
+            "Print information about the pull request using FORMAT instead of opening it"
           ),
           colorOption,
         ],
@@ -572,7 +581,9 @@ const hubSubcommands: Fig.Subcommand[] = [
         args: { name: "state", suggestions: stateSuggestions },
       },
       formatOption("Pretty print the contents of the issues using FORMAT"),
-      milestoneOption("Display only issues for a GitHub milestone with this name"),
+      milestoneOption(
+        "Display only issues for a GitHub milestone with this name"
+      ),
       labelsOption("Display only issues with certain labels"),
       {
         name: ["-d", "--since"],
@@ -620,7 +631,9 @@ const hubSubcommands: Fig.Subcommand[] = [
             description: "Comma-separated list of GitHub handles to assign",
             args: { name: "users" },
           },
-          milestoneOption("Add the issue to the GitHub milestone with this name"),
+          milestoneOption(
+            "Add the issue to the GitHub milestone with this name"
+          ),
           labelsOption("Comma-separated list of labels to add to the issue"),
         ],
       },
@@ -636,7 +649,9 @@ const hubSubcommands: Fig.Subcommand[] = [
             description: "Comma-separated list of GitHub handles to assign",
             args: { name: "users" },
           },
-          milestoneOption("Add the issue to the GitHub milestone with this name"),
+          milestoneOption(
+            "Add the issue to the GitHub milestone with this name"
+          ),
           labelsOption("Comma-separated list of labels to set on the issue"),
           {
             name: ["-s", "--state"],
@@ -661,7 +676,10 @@ const hubSubcommands: Fig.Subcommand[] = [
         description: "Transfer an issue to another repository",
         args: [
           { name: "number", description: "Issue number" },
-          { name: "repo", description: "[OWNER/]REPOSITORY to transfer the issue to" },
+          {
+            name: "repo",
+            description: "[OWNER/]REPOSITORY to transfer the issue to",
+          },
         ],
       },
     ],
@@ -744,7 +762,8 @@ const hubSubcommands: Fig.Subcommand[] = [
     ],
     args: {
       name: "command",
-      description: "A command, or hub-COMMAND for hub extensions to a git command",
+      description:
+        "A command, or hub-COMMAND for hub extensions to a git command",
       isOptional: true,
     },
   },
@@ -792,7 +811,8 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: "--noop",
-      description: "Print the commands that would be run instead of running them",
+      description:
+        "Print the commands that would be run instead of running them",
     },
     ...(gitSpec.options ?? []),
   ],
