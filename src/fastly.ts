@@ -1,7 +1,7 @@
-// Fastly CLI v17.2.0 (git tag v17.2.0 of github.com/fastly/cli, released 2026-11-17, checked 2026-11-19). Source: statically read the kingpin command/flag definitions
-// in pkg/commands/** and pkg/app/run.go of the v17.2.0 tag (plus go-fastly v19.3.1 enum constants) with a script; the release binary was NOT executed in this
-// session, so `fastly help` output was not compared. Previous spec was v3.1.0. Deprecated top-level aliases (acl, backend, logging, ...) are kept as hidden
-// commands that mirror their `service ...` replacements.
+// Fastly CLI v17.2.0 (git tag v17.2.0 of github.com/fastly/cli, 2026-11-19). Source: kingpin command and flag definitions in pkg/commands/** and pkg/app/run.go
+// at tag v17.2.0 (released 2026-11-17 per CHANGELOG.md), plus go-fastly v19.3.1 enum constants, read statically with a script.
+// The release binary was NOT run (execution was denied in this session), so the tree was not compared against `fastly help --format json` output.
+// Previous spec was v3.1.0. Deprecated top-level aliases (acl, backend, logging, ...) are hidden commands that mirror their `service ...` replacements.
 
 const jsonOption: Fig.Option = {
   name: ["-j", "--json"],
