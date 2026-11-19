@@ -4348,6 +4348,7 @@ const completionSpec: Fig.Spec = {
           description: "Specify a comma-separated list of repositories to search. All repositories must be under the same user or organisation. Omitting this flag, or specifying --repositories=primary, searches only the main repositories: Homebrew/brew, Homebrew/homebrew-core, Homebrew/homebrew-cask",
           args: {
             name: "repositories",
+            suggestions: ["primary"],
           },
           exclusiveOn: ["--organisation", "--maintainer-report-csv"],
         },

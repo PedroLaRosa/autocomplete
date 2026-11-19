@@ -1,99 +1,159 @@
+// Projj v3.2.0 (crates.io latest = GitHub tag v3.2.0, 2026-11-19). Source: src/main.rs (clap derive), src/config.rs, src/task.rs and README.md at popomore/projj tag v3.2.0, read statically (binary not run)
+// v3 is a Rust rewrite: the Node-era completion/import/sync commands and ~/.projj/cache.json are gone; the npm package "projj" is stuck at 2.1.0 (2021)
+
+const projjDir = (context: Fig.GeneratorContext) =>
+  `${context.environmentVariables["PROJJ_HOME"] ?? context.environmentVariables["HOME"]}/.projj`;
+
+// Repository directory names, taken from `projj list --raw` (one path per line)
 const repoGenerator: Fig.Generator = {
-  custom: async (_, executeCommand, context) => {
-    const { stdout } = await executeCommand({
-      command: "cat",
-      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
-      args: [`${context.environmentVariables["HOME"]}/.projj/cache.json`],
-    });
-    const cache = JSON.parse(stdout);
-    return Object.keys(cache).map((key) => ({
-      name: key.split("/").pop(),
-      description: cache[key].repo,
-    }));
+  script: ["projj", "list", "--raw"],
+  postProcess: (output) => {
+    const seen = new Set<string>();
+    const suggestions: Fig.Suggestion[] = [];
+    for (const path of output.split("\n")) {
+      const name = path.trim().split("/").pop();
+      if (!name || seen.has(name)) continue;
+      seen.add(name);
+      suggestions.push({ name, description: path.trim() });
+    }
+    return suggestions;
   },
 };
 
-const hookGenerator: Fig.Generator = {
+// Named tasks: the `[tasks]` table of config.toml plus executables in ~/.projj/tasks/
+const taskGenerator: Fig.Generator = {
   custom: async (_, executeCommand, context) => {
-    const { stdout } = await executeCommand({
-      command: "cat",
-      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
-      args: [`${context.environmentVariables["HOME"]}/.projj/config.json`],
-    });
-    const cache = JSON.parse(stdout);
-    const hooks = cache.hooks;
-    return Object.keys(hooks).map((key) => ({
-      name: key,
-      description: hooks[key],
-    }));
+    const dir = projjDir(context);
+    const tasks = new Map<string, Fig.Suggestion>();
+
+    try {
+      const config = await executeCommand({
+        command: "cat",
+        // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
+        args: [`${dir}/config.toml`],
+      });
+      let inTasksTable = false;
+      for (const line of config.stdout.split("\n")) {
+        const table = line.match(/^\s*\[+[^\]]+\]+/);
+        if (table) {
+          inTasksTable = table[0].trim() === "[tasks]";
+          continue;
+        }
+        const entry = line.match(/^\s*([\w-]+)\s*=\s*(.*?)\s*$/);
+        if (inTasksTable && entry) {
+          tasks.set(entry[1], {
+            name: entry[1],
+            description: entry[2].replace(/^["']|["']$/g, ""),
+          });
+        }
+      }
+    } catch {
+      // No readable config.toml: `projj init` has not been run yet
+    }
+
+    try {
+      const scripts = await executeCommand({
+        command: "ls",
+        args: ["-1", `${dir}/tasks`],
+      });
+      for (const name of scripts.stdout.split("\n")) {
+        if (name && !tasks.has(name)) {
+          tasks.set(name, { name, description: "Task script" });
+        }
+      }
+    } catch {
+      // No ~/.projj/tasks directory
+    }
+
+    return [...tasks.values()];
   },
 };
 
 const completionSpec: Fig.Spec = {
   name: "projj",
-  description: "Manage repository easily",
+  description: "Manage git repositories with directory conventions",
   subcommands: [
     {
-      name: "completion",
-      description: "Generate completion script",
+      name: "init",
+      description: "Initialize configuration",
     },
     {
       name: "add",
       description: "Add repository",
       args: {
-        name: "repository url",
+        name: "repo",
+        description: "Repository URL, short form (owner/repo), or local path",
+        template: "folders",
       },
     },
     {
       name: "find",
       description: "Find repository",
       args: {
-        name: "repository name",
+        name: "keyword",
+        description: "Keyword to search (opens fzf if omitted)",
+        isOptional: true,
         generators: repoGenerator,
       },
-    },
-    {
-      name: "import",
-      description: "Import repositories from existing directory",
-      args: {
-        name: "directory",
-        template: "folders",
-      },
-    },
-    {
-      name: "init",
-      description: "Initialize configuration",
     },
     {
       name: "remove",
       description: "Remove repository",
       args: {
-        name: "repository name",
+        name: "keyword",
+        description: "Keyword to match repository",
         generators: repoGenerator,
       },
     },
     {
       name: "run",
-      description: "Run hook in current directory",
-      args: {
-        name: "hook name",
-        generators: hookGenerator,
-      },
+      description: "Run script in repository",
+      options: [
+        {
+          name: "--all",
+          description: "Run in all repositories",
+        },
+        {
+          name: "--match",
+          description: "Regex to filter repositories (with --all)",
+          dependsOn: ["--all"],
+          args: {
+            name: "pattern",
+          },
+        },
+      ],
+      args: [
+        {
+          name: "script",
+          description: "Script name or shell command",
+          generators: taskGenerator,
+        },
+        {
+          name: "args",
+          description: "Extra arguments passed to the script (after --)",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
     },
     {
-      name: "runall",
-      description: "Run hook in every repository",
-      args: {
-        name: "hook name",
-        generators: hookGenerator,
-      },
+      name: "list",
+      description: "List all repositories",
+      options: [
+        {
+          name: "--raw",
+          description: "Output raw paths only (for piping)",
+        },
+      ],
     },
     {
-      name: "sync",
-      description: "Sync data from directory",
+      name: "shell-setup",
+      description: "Output shell setup (completions + `p()` function)",
+      hidden: true,
       args: {
-        name: "directory",
-        template: "folders",
+        name: "shell",
+        description: "Shell type",
+        suggestions: ["bash", "elvish", "fish", "powershell", "zsh"],
       },
     },
   ],
@@ -101,9 +161,10 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--help", "-h"],
       description: "Show help for projj",
+      isPersistent: true,
     },
     {
-      name: ["--version", "-v"],
+      name: ["--version", "-V"],
       description: "Show version number",
     },
   ],
