@@ -1,4 +1,5 @@
 // man (macOS 26 FreeBSD-derived man.sh, apple-oss-distributions/man tag man-62 which is the latest tag, 2026-11-19). Source: man/man.1, man/man.sh (getopts string and incompatible option checks) and man/man.conf (default MANSECT); not run on macOS.
+// Verified against man_usage() and getopts 'C:M:P:S:adfhkm:op:tw' in man.sh.
 // Section suggestions for -S are the nine sections named in man.1.
 // Removed options that the old BSD man had but the current macOS man (man.sh) rejects: -B, -H, -D, -F/--preformat, -c.
 // Kept -K, -W and --path (accepted by GNU man-db 2.13.3, which was checked via its src/man.c option table). The page-name generator (`man -k .`) is unchanged and was not run on macOS.
