@@ -1,4 +1,5 @@
 // od (macOS BSD, od.1 dated 2011-12-22, apple-oss-distributions/shell_cmds-329 hexdump/od.1 + odsyntax.c, 2026-11-19). Source: man page + source from Apple's OSS mirror (not run on macOS)
+// -A defaults to octal addresses; -t is repeatable and its suggestions are literal type specifiers
 const integerSizes = ["", "C", "S", "I", "L"];
 const integerTypes = ["d", "o", "u", "x"].flatMap((kind) =>
   integerSizes.map((size) => kind + size)
