@@ -1,4 +1,4 @@
-// command shell builtin (bash 5.3 `help command`, zsh 5.9.2 zshbuiltins(1), 2026-11-19). Source: bash 5.3 builtins/command.def (bash_5.3.orig.tar.xz) and zsh 5.9.2 Doc/Zsh/builtins.yo + Src/exec.c; not run on macOS. fish's `command` was not checked
+// command shell builtin (bash 5.3 and zsh 5.9.2, the current stable releases per Homebrew formulae, 2026-11-19). Source: bash 5.3 builtins/command.def (bash_5.3.orig.tar.xz) and zsh 5.9.2 Doc/Zsh/builtins.yo + Src/exec.c; not run on macOS. fish's `command` was not checked
 const completionSpec: Fig.Spec = {
   name: "command",
   description: "Run an external command",
