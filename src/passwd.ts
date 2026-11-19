@@ -1,3 +1,5 @@
+// passwd (macOS 15 man page dated 2008-08-18, 2026-11-19). Source: apple-oss-distributions/system_cmds passwd/passwd.1 and passwd.c getopt string "i:l:u:"; read only, not run on macOS.
+// Added the optional user argument; the options themselves were already correct. Linux passwd (shadow) has a different option set and is not described here.
 const generateUsers: Fig.Generator = {
   script: ["bash", "-c", "dscl . -list /Users | grep -E -v '^_'"],
   postProcess: (out) =>
@@ -17,7 +19,15 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "infosystem",
         description: "The directory system",
-        suggestions: ["PAM", "opendirectory", "file", "nis"],
+        suggestions: [
+          { name: "PAM", description: "Pluggable Authentication Modules" },
+          {
+            name: "opendirectory",
+            description: "A system conforming to Open Directory APIs",
+          },
+          { name: "file", description: "The local flat-files" },
+          { name: "nis", description: "A remote NIS server" },
+        ],
       },
     },
     {
@@ -26,7 +36,8 @@ const completionSpec: Fig.Spec = {
         "Causes the password to be updated in the given location of the chosen directory system",
       args: {
         name: "location",
-        description: "The location of the chosen directory system",
+        description:
+          "A file name for file, a NIS domain name for nis, a directory node name for opendirectory",
         template: ["filepaths", "folders"],
       },
     },
@@ -41,6 +52,12 @@ const completionSpec: Fig.Spec = {
       },
     },
   ],
+  args: {
+    name: "user",
+    description: "The user account whose password will be changed",
+    isOptional: true,
+    generators: generateUsers,
+  },
 };
 
 export default completionSpec;
