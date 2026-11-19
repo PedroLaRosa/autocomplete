@@ -32,6 +32,7 @@ const completionSpec: Fig.Spec = {
       description: "Shred this many bytes (suffixes like K, M, G accepted)",
       args: {
         name: "N",
+        description: "Byte count with an optional size suffix, e.g. 10K or 1M",
         suggestions: ["1K", "1M", "1G"],
       },
     },
