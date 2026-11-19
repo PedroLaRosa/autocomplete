@@ -1,3 +1,6 @@
+// Exercism CLI v3.5.9 (latest upstream tag exercism/cli, 2026-11-19).
+// Source: cloned exercism/cli at v3.5.9 and read cmd/*.go (cobra v1.10.0 command and flag definitions, incl. the
+// default `completion` command from cobra's completions.go) plus shell/ completions. The built binary was not run.
 const completionSpec: Fig.Spec = {
   name: "exercism",
   description: "Solve coding exercises in your chosen programming languages",
@@ -50,13 +53,6 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: ["-T", "--team"],
-          description: "The team slug",
-          args: {
-            name: "team",
-          },
-        },
-        {
           name: ["-t", "--track"],
           description: "The track ID",
           args: {
@@ -70,7 +66,25 @@ const completionSpec: Fig.Spec = {
             name: "uuid",
           },
         },
+        {
+          name: ["-F", "--force"],
+          description: "Overwrite existing exercise directory",
+        },
       ],
+    },
+    {
+      name: "completion",
+      description: "Generate the autocompletion script for the specified shell",
+      subcommands: ["bash", "zsh", "fish", "powershell"].map((shell) => ({
+        name: shell,
+        description: `Generate the autocompletion script for ${shell}`,
+        options: [
+          {
+            name: "--no-descriptions",
+            description: "Disable completion descriptions",
+          },
+        ],
+      })),
     },
     {
       name: "help",
@@ -81,7 +95,10 @@ const completionSpec: Fig.Spec = {
       description: "Open an exercise on the website",
       args: {
         name: "path",
+        description:
+          "Path to the exercise directory (defaults to the current one)",
         template: "folders",
+        isOptional: true,
       },
     },
     {
@@ -93,18 +110,29 @@ const completionSpec: Fig.Spec = {
       description: "Submit your solution to an exercise",
       args: {
         name: "file",
-        description: "The files you want to submit",
+        description:
+          "The files you want to submit (defaults to the exercise's solution files)",
         template: "filepaths",
         isVariadic: true,
       },
     },
     {
-      name: ["troubleshoot", "t", "debug"],
+      name: ["test", "t"],
+      description: "Run the exercise's tests",
+      args: {
+        name: "args",
+        description: "Arguments passed through to the track's test command",
+        isOptional: true,
+        isVariadic: true,
+      },
+    },
+    {
+      name: ["troubleshoot", "debug"],
       description: "Troubleshoot does a diagnostic self-check",
       options: [
         {
           name: ["-f", "--full-api-key"],
-          description: "Display the user's full API key",
+          description: "Display the user's full API key, censored by default",
         },
       ],
     },
@@ -115,6 +143,12 @@ const completionSpec: Fig.Spec = {
     {
       name: ["version", "v"],
       description: "Version outputs the version of CLI",
+      options: [
+        {
+          name: ["-l", "--latest"],
+          description: "Check latest available version",
+        },
+      ],
     },
     {
       name: ["workspace", "w"],
@@ -129,10 +163,10 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--timeout",
-      description: "Override the default HTTP timeout",
+      description: "Override the default HTTP timeout (seconds)",
       isPersistent: true,
       args: {
-        name: "value",
+        name: "seconds",
       },
     },
     {
