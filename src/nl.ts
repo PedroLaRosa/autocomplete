@@ -1,4 +1,5 @@
 // nl (macOS BSD, nl.1 dated 2020-06-18, apple-oss-distributions/text_cmds-199, 2026-11-19). Source: nl.1 + nl.c from Apple's OSS mirror (not run on macOS)
+// -n defaults to rn; -b/-f/-h all accept a, t, n and pexpr
 const numberingTypes: Fig.Suggestion[] = [
   {
     name: "a",
