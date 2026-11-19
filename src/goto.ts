@@ -1,18 +1,26 @@
+// goto v2.1.0 (iridakos/goto master, 2020-11-15; no git tag for 2.1.0, latest tag is v2.0.0; checked 2026-11-19). Source: read
+// statically goto.sh (usage text, option parsing, bash/zsh completion functions), CHANGELOG.md and README.md.
+// goto is a shell function: the alias DB is $GOTO_DB, else $XDG_CONFIG_HOME/goto, else ~/.config/goto (one "alias directory" per line).
 const listTargets: Fig.Generator = {
   custom: async (tokens, executeShellCommand, context) => {
+    const env = context.environmentVariables;
+    const db =
+      env["GOTO_DB"] ||
+      `${env["XDG_CONFIG_HOME"] || `${env["HOME"]}/.config`}/goto`;
     const { stdout } = await executeShellCommand({
       command: "cat",
       // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
-      args: [`${context.environmentVariables["HOME"]}/.config/goto`],
+      args: [db],
     });
 
     const targetSuggestions = new Map<string, Fig.Suggestion>();
 
     for (const target of stdout.split("\n")) {
-      const splits = target.split(" ");
+      if (!target) continue;
+      const [alias, ...directory] = target.split(" ");
       targetSuggestions.set(target, {
-        name: splits[0],
-        description: "Goto " + splits[1],
+        name: alias,
+        description: "Goto " + directory.join(" "),
         icon: "🔖",
         priority: 80,
       });
@@ -28,12 +36,11 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["--help", "-h"],
-      description: "Show help for goto",
+      description: "Prints help for goto",
     },
     {
       name: ["--register", "-r"],
       description: "Registers an alias",
-      isPersistent: true,
       args: [
         {
           name: "alias",
@@ -47,7 +54,6 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--unregister", "-u"],
       description: "Unregister an alias",
-      isPersistent: true,
       args: {
         name: "alias",
         isDangerous: true,
@@ -59,6 +65,10 @@ const completionSpec: Fig.Spec = {
       name: ["--push", "-p"],
       description:
         "Pushes the current directory onto the stack, then performs goto",
+      args: {
+        name: "alias",
+        generators: listTargets,
+      },
     },
     {
       name: ["--pop", "-o"],
@@ -67,8 +77,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--list", "-l"],
-      description:
-        "Pops the top directory from the stack, then changes to that directory",
+      description: "Lists aliases",
     },
     {
       name: ["--expand", "-x"],
@@ -89,6 +98,8 @@ const completionSpec: Fig.Spec = {
   ],
   args: {
     name: "alias",
+    description:
+      "Registered alias, or a special directory such as ~ that cannot be registered",
     generators: listTargets,
   },
 };
