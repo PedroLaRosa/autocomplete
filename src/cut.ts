@@ -1,4 +1,4 @@
-// cut (macOS 15.5 BSD, `man cut` dated 2017-08-03, 2026-11-19). Source: apple-oss-distributions/text_cmds tag text_cmds-195 (cut/cut.1 and cut/cut.c getopt "b:c:d:f:snw"); not a live run on macOS
+// cut (macOS 15 BSD, `man cut` dated 2017-08-03, 2026-11-19). Source: apple-oss-distributions/text_cmds tag text_cmds-195 (2025-04-30 drop; cut/cut.1 and cut/cut.c getopt "b:c:d:f:snw"); not a live run on macOS
 const listArg = (description: string): Fig.Arg => ({
   name: "list",
   description: `${description}, as a comma or whitespace separated set of numbers and ranges (e.g. 1,3-5)`,
