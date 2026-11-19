@@ -1,10 +1,12 @@
+// diff (macOS 15.5 Apple diff, FreeBSD-based, `man diff` dated 2024-03-07; GNU diffutils 3.12, 2026-11-19). Source: Xcode 16.4 diff(1) man page (keith/xcode-man-pages) + FreeBSD usr.bin/diff option table for macOS flags, diffutils-3.12 diff.c and --help for GNU flags
+// Flags only found in GNU diff (-E, -v, --left-column, --from-file, --to-file, --horizon-lines, --line-format, --old/new/unchanged-*-format) were kept from the previous spec and are not documented in the macOS man page. Not run on macOS (Apple does not publish the diff source)
 // https://www.gnu.org/software/diffutils
 const groupFormatOptions = (names: string[]) =>
   names.map<Fig.Option>((name) => ({
     name: `--${name}-group-format`,
-    description: `Similar, but format ${name} input groups with GFTM`,
+    description: `Format ${name} input groups with GFMT`,
     args: {
-      name: "GFTM",
+      name: "GFMT",
       description: `%<  lines from FILE1
 %>  lines from FILE2
 %=  lines common to FILE1 and FILE2
@@ -24,9 +26,9 @@ M  L+1
 const lineFormatOptions = (names: string[]) =>
   names.map<Fig.Option>((name) => ({
     name: `--${name}-line-format`,
-    description: `Format ${name} input lines with LFTM`,
+    description: `Format ${name} input lines with LFMT`,
     args: {
-      name: "LFTM",
+      name: "LFMT",
       description: `%L  contents of line
 %l  contents of line, excluding any trailing newline
 %[-][WIDTH][.[PREC]]{doxX}n  printf-style spec for input line number
@@ -78,6 +80,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-I", "--ignore-matching-lines"],
       description: "Ignore changes whose lines all match RE",
+      isRepeatable: true,
       args: {
         name: "RE",
       },
@@ -87,19 +90,34 @@ const completionSpec: Fig.Spec = {
       description: "Strip trailing carriage return on input",
     },
     { name: ["-a", "--text"], description: "Treat all files as text" },
+    { name: "-c", description: "Output 3 lines of copied context" },
     {
-      name: ["-c", "-C", "--context"],
+      name: "-C",
       description: "Output NUM lines of copied context",
-      args: { name: "NUM", default: "3" },
+      args: { name: "NUM" },
     },
     {
-      name: ["-u", "-U", "--unified"],
+      name: "--context",
+      description: "Output NUM (default 3) lines of copied context",
+      requiresSeparator: true,
+      args: { name: "NUM", isOptional: true, default: "3" },
+    },
+    { name: "-u", description: "Output 3 lines of unified context" },
+    {
+      name: "-U",
       description: "Output NUM lines of unified context",
-      args: { name: "NUM", default: "3" },
+      args: { name: "NUM" },
     },
     {
-      name: "--label",
-      description: "Use LABEL instead of file name",
+      name: "--unified",
+      description: "Output NUM (default 3) lines of unified context",
+      requiresSeparator: true,
+      args: { name: "NUM", isOptional: true, default: "3" },
+    },
+    {
+      name: ["-L", "--label"],
+      description: "Use LABEL instead of file name and timestamp",
+      isRepeatable: true,
       args: { name: "LABEL" },
     },
     {
@@ -116,6 +134,11 @@ const completionSpec: Fig.Spec = {
       description: "Output only whether files differ",
     },
     { name: ["-e", "--ed"], description: "Output an ed script" },
+    {
+      name: ["-f", "--forward-ed"],
+      description:
+        "Output an ed-like script with changes in the order they appear in the file",
+    },
     { name: "--normal", description: "Output a normal diff" },
     { name: ["-n", "--rcs"], description: "Output an RCS format diff" },
     { name: ["-y", "--side-by-side"], description: "Output in two columns" },
@@ -150,12 +173,17 @@ const completionSpec: Fig.Spec = {
       description: "Make tabs line up by prepending a tab",
     },
     {
+      name: "--tabsize",
+      description: "Tab stops every NUM (default 8) print columns",
+      args: { name: "NUM" },
+    },
+    {
       name: ["-r", "--recursive"],
       description: "Recursively compare any subdirectories found",
     },
     { name: ["-N", "--new-file"], description: "Treat absent files as empty" },
     {
-      name: "--unidirectional-new-file",
+      name: ["-P", "--unidirectional-new-file"],
       description: "Treat absent first files as empty",
     },
     {
@@ -165,11 +193,13 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-x", "--exclude"],
       description: "Exclude files that match PAT",
+      isRepeatable: true,
       args: { name: "PAT" },
     },
     {
       name: ["-X", "--exclude-from"],
       description: "Exclude files that match any pattern in FILE",
+      isRepeatable: true,
       args: { name: "FILE", template: "filepaths" },
     },
     {
@@ -200,6 +230,41 @@ const completionSpec: Fig.Spec = {
       name: "--speed-large-files",
       description: "Assume large files and many scattered small changes",
     },
+    {
+      name: ["-A", "--algorithm"],
+      description: "Choose the algorithm used when comparing files",
+      args: {
+        name: "algo",
+        suggestions: [
+          {
+            name: "myers",
+            description:
+              "Find the shortest edit script (default, falls back to stone for unsupported options)",
+          },
+          {
+            name: "patience",
+            description:
+              "Variant of Myers that groups lines for a more readable diff",
+          },
+          {
+            name: "stone",
+            description:
+              "Hunt-McIlroy longest common subsequence, kept for compatibility (default with POSIXLY_CORRECT)",
+          },
+        ],
+      },
+    },
+    {
+      name: "--color",
+      description:
+        "Color additions green and removals red (or as set in DIFFCOLORS); plain --color means auto",
+      requiresSeparator: true,
+      args: {
+        name: "when",
+        isOptional: true,
+        suggestions: ["never", "always", "auto"],
+      },
+    },
     { name: ["-v", "--version"], description: "Output version info" },
     { name: "--help", description: "Show help" },
 
@@ -207,7 +272,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--line-format",
       description: "Format all input lines with LFMT",
-      args: { name: "LFTM" },
+      args: { name: "LFMT" },
     },
     ...lineFormatOptions(["old", "new", "unchanged"]),
   ],
