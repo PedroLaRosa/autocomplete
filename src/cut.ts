@@ -34,8 +34,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-n",
-      description:
-        "Do not split multi-byte characters (only valid with -b)",
+      description: "Do not split multi-byte characters (only valid with -b)",
       exclusiveOn: ["-f"],
     },
     {
