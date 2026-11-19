@@ -1,3 +1,8 @@
+// sed (macOS 15.5 BSD sed, text_cmds-195 from the Apple OSS mirror, man page dated 2020-06-10, 2026-11-19).
+// Source: sed.1, main.c and compile.c read from github.com/apple-oss-distributions/text_cmds (not run on macOS;
+// text_cmds-199 only changes documentation wording). Functions marked "GNU sed only" were already in the spec,
+// are not implemented by BSD sed and were re-checked against GNU sed 4.9 (run locally); no other GNU flags were added.
+// The `=` function (print line number) is not listed because the linter forbids `=` in a name.
 const labelArg: Fig.Arg = {
   name: "label",
   isOptional: true,
@@ -43,7 +48,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "e",
       description:
-        "Executes the command that is found in pattern space and replaces the pattern space with the output; a trailing newline is suppressed",
+        "Executes the command that is found in pattern space and replaces the pattern space with the output; a trailing newline is suppressed (GNU sed only)",
       args: {
         name: "command",
         isCommand: true,
@@ -52,7 +57,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "F",
-      description: "Prints the file name of the current input file",
+      description:
+        "Prints the file name of the current input file (GNU sed only)",
     },
     {
       name: "g",
@@ -112,7 +118,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "Q",
       description:
-        "This command is the same as q, but will not print the contents of pattern space",
+        "This command is the same as q, but will not print the contents of pattern space (GNU sed only)",
       args: {
         name: "Exit Code",
         isOptional: true,
@@ -126,7 +132,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "R",
       description:
-        "Queue a line of filename to be read and inserted into the output stream at the end of the current cycle, or when the next input line is read",
+        "Queue a line of filename to be read and inserted into the output stream at the end of the current cycle, or when the next input line is read (GNU sed only)",
       args: filenameArg,
     },
     {
@@ -143,13 +149,13 @@ const completionSpec: Fig.Spec = {
     {
       name: "T",
       description:
-        "(test) Branch to label only if there have been no successful substitutions since the last input line was read or conditional branch was taken. The label may be omitted, in which case the next cycle is started",
+        "(test) Branch to label only if there have been no successful substitutions since the last input line was read or conditional branch was taken. The label may be omitted, in which case the next cycle is started (GNU sed only)",
       args: labelArg,
     },
     {
       name: "v",
       description:
-        "Makes sed fail if GNU sed extensions are not supported, or if the requested version is not available",
+        "Makes sed fail if GNU sed extensions are not supported, or if the requested version is not available (GNU sed only)",
       args: {
         name: "version",
         isOptional: true,
@@ -163,7 +169,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "W",
       description:
-        "Writes to the given filename the portion of the pattern space up to the first newline",
+        "Writes to the given filename the portion of the pattern space up to the first newline (GNU sed only)",
       args: filenameArg,
     },
     {
@@ -177,7 +183,28 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "z",
-      description: "(zap) Empties the content of pattern space",
+      description: "(zap) Empties the content of pattern space (GNU sed only)",
+    },
+    {
+      name: ":",
+      description: "Define a label to which the b and t functions may branch",
+      args: {
+        name: "label",
+      },
+    },
+    {
+      name: "!",
+      description:
+        "Apply the following function or function-list only to the lines that are not selected by the address",
+    },
+    {
+      name: "{",
+      description:
+        "Start a function-list, executed only when the pattern space is selected",
+    },
+    {
+      name: "}",
+      description: "End a function-list",
     },
     {
       name: "#",
@@ -189,6 +216,11 @@ const completionSpec: Fig.Spec = {
       name: "-E",
       description:
         "Interprets regular expressions as extended (modern) regular expressions rather than basic regular expressions",
+    },
+    {
+      name: "-H",
+      description:
+        "Enables enhanced features in the regular expression syntax (macOS); independent of the `-E` option",
     },
     {
       name: "-a",
@@ -206,7 +238,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-f",
       description:
-        "Appends the editing commands found in the file command_file to the list of commands. The editing commands should each be listed on a separate line",
+        "Appends the editing commands found in the file command_file to the list of commands. The editing commands should each be listed on a separate line; commands are read from standard input if command_file is `-`",
       args: {
         name: "command_file",
         template: "filepaths",
