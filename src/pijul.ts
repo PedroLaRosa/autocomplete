@@ -76,11 +76,14 @@ const pathsOption = (description: string): Fig.Option => ({
   },
 });
 
-const forceSubRootOption: Fig.Option = {
+const forceSubRootOption = (
+  subject: string,
+  exclusiveOn?: string[],
+): Fig.Option => ({
   name: "--force",
-  description:
-    "Allow the new change to span more than one sub-root (imported project) instead of erroring. The change will not commute across projects",
-};
+  description: `Allow ${subject} to span more than one sub-root (imported project) instead of erroring. The change will not commute across projects`,
+  exclusiveOn,
+});
 
 // Options shared by the commands that write a new change (record, squash)
 const headerOptions: Fig.Option[] = [
@@ -773,7 +776,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "FILTERS",
         description:
-          "Filter log output, showing only log entries that touched the specified files. Accepted as a list of paths relative to your current directory, after --. Currently, filters can only be applied when logging the channel that’s in use",
+          "Filter log output, showing only log entries that touched the specified files. Accepted as a list of paths relative to your current directory, after --. Currently, filters can only be applied when logging the channel that's in use",
         isVariadic: true,
         isOptional: true,
         template: "filepaths",
@@ -951,7 +954,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--to-channel",
           description:
-            "Push to this remote channel instead of the remote’s default channel",
+            "Push to this remote channel instead of the remote's default channel",
           args: {
             name: "TO_CHANNEL",
           },
@@ -991,12 +994,7 @@ const completionSpec: Fig.Spec = {
           },
         },
         channelOption,
-        {
-          ...forceSubRootOption,
-          description:
-            "Allow a single change to span more than one sub-root (imported project) instead of erroring. The change will not commute across projects",
-          exclusiveOn: ["--split-per-root"],
-        },
+        forceSubRootOption("a single change", ["--split-per-root"]),
         {
           name: "--from-change",
           description:
@@ -1038,7 +1036,7 @@ const completionSpec: Fig.Spec = {
             {
               name: ["-1", "--exact"],
               description:
-                "Delete only the specified datum, i.e. database ID or remote name. If this isn’t specified and there is at most one of each kind of data linked to a remote, the entire remote is deleted",
+                "Delete only the specified datum, i.e. database ID or remote name. If this isn't specified and there is at most one of each kind of data linked to a remote, the entire remote is deleted",
               exclusiveOn: ["--flood"],
             },
             {
@@ -1118,7 +1116,7 @@ const completionSpec: Fig.Spec = {
             generators: channelGenerator,
           },
         },
-        forceSubRootOption,
+        forceSubRootOption("the new change"),
         ...headerOptions,
         {
           name: "-k",

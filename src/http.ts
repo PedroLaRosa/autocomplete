@@ -1,3 +1,15 @@
+// HTTPie v3.2.4 (latest release on PyPI/GitHub, 2026-11-19). Source: static read of httpie/cli/definition.py, httpie/cli/constants.py, httpie/ssl_.py, httpie/plugins/builtin.py and the shipped man page extras/man/http.1 at tag 3.2.4 (binary not run).
+// --style suggestions: styles bundled with HTTPie (auto, pie, pie-dark, pie-light, solarized) plus the built-in styles of Pygments 2.21.0; the styles actually available depend on the installed Pygments version.
+// --auth-type: built-in plugins only (basic, digest, bearer); auth plugins installed via `httpie cli plugins` add more types.
+
+const printParts: Fig.Suggestion[] = [
+  { name: "H", description: "Request headers" },
+  { name: "B", description: "Request body" },
+  { name: "h", description: "Response headers" },
+  { name: "b", description: "Response body" },
+  { name: "m", description: "Response metadata" },
+];
+
 const completionSpec: Fig.Spec = {
   name: "http",
   description: "HTTPie: command-line HTTP client for the API era",
@@ -5,22 +17,21 @@ const completionSpec: Fig.Spec = {
     {
       name: "METHOD",
       isOptional: true,
-      suggestions: ["GET", "POST", "PUT", "DELETE", "HEAD"],
-      default: "GET",
+      suggestions: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
       description:
-        "The HTTP method to be used for the request (GET, POST, PUT, DELETE, ...)",
+        "The HTTP method to be used for the request. If omitted, HTTPie uses POST if there is some data to be sent, otherwise GET",
     },
     {
       name: "URL",
       description:
-        "The scheme defaults to 'http://' if the URL does not include one",
+        "The request URL. Scheme defaults to 'http://' if the URL does not include one (override with --default-scheme). Shorthand for localhost: ':3000' or ':/foo'",
     },
     {
       name: "REQUEST_ITEM",
       isOptional: true,
       isVariadic: true,
       description:
-        "Optional key-value pairs to be included in the request. The separator used determines the type",
+        "Optional key-value pairs to be included in the request. The separator used determines the type: Name:Value (HTTP header), name==value (URL parameter), field=value (data field), field:=json (raw JSON field), field@file (form file upload), field=@file (data field from file), field:=@file (raw JSON field from file)",
     },
   ],
   options: [
@@ -28,32 +39,46 @@ const completionSpec: Fig.Spec = {
       name: ["--json", "-j"],
       exclusiveOn: ["--form", "-f", "--multipart", "--boundary"],
       description:
-        "Data items from the command line are serialized as a JSON object. The Content-Type and Accept headers are set to application/json",
+        "(default) Data items from the command line are serialized as a JSON object. The Content-Type and Accept headers are set to application/json (if not specified)",
     },
     {
       name: ["--form", "-f"],
-      exclusiveOn: ["--json", "-j", "--multipart", "--boundary"],
-      description: `FData items from the command line are serialized as form fields.
+      exclusiveOn: ["--json", "-j", "--multipart"],
+      description: `Data items from the command line are serialized as form fields.
 The Content-Type is set to application/x-www-form-urlencoded (if not
 specified). The presence of any file fields results in a
 multipart/form-data request`,
     },
     {
       name: "--multipart",
-      exclusiveOn: ["--json", "-j", "--form", "-f", "--boundary"],
+      exclusiveOn: ["--json", "-j", "--form", "-f"],
       description:
         "Similar to --form, but always sends a multipart/form-data request (i.e., even without files)",
     },
     {
       name: "--boundary",
-      exclusiveOn: ["--json", "-j", "--multipart"],
+      args: {
+        name: "BOUNDARY",
+      },
+      exclusiveOn: ["--json", "-j"],
       description:
-        "Specify a custom boundary string for multipart/form-data requests. Has effect only together with --form",
+        "Specify a custom boundary string for multipart/form-data requests. Only has effect together with --form or --multipart",
+    },
+    {
+      name: "--raw",
+      args: {
+        name: "RAW",
+      },
+      description:
+        "Pass raw request data without extra processing (as opposed to the structured request items syntax)",
     },
     {
       name: ["--compress", "-x"],
-      description:
-        "Content compressed (encoded) with Deflate algorithm. The Content-Encoding header is set to deflate",
+      isRepeatable: true,
+      description: `Content compressed (encoded) with Deflate algorithm. The Content-Encoding
+header is set to deflate. Compression is skipped if it appears that
+compression ratio is negative. Compression can be forced by repeating
+the argument`,
     },
     {
       name: "--pretty",
@@ -77,29 +102,45 @@ and formatting (default for terminal output), "colors", or "format"`,
           "autumn",
           "borland",
           "bw",
+          "coffee",
           "colorful",
           "default",
+          "dracula",
           "emacs",
           "friendly",
+          "friendly_grayscale",
           "fruity",
+          "github-dark",
+          "gruvbox-dark",
+          "gruvbox-light",
           "igor",
           "inkpot",
+          "lightbulb",
+          "lilypond",
           "lovelace",
           "manni",
+          "material",
           "monokai",
           "murphy",
           "native",
+          "night-owl",
+          "nord",
+          "nord-darker",
+          "one-dark",
           "paraiso-dark",
           "paraiso-light",
           "pastie",
           "perldoc",
+          "pie",
+          "pie-dark",
+          "pie-light",
           "rainbow_dash",
           "rrt",
           "sas",
           "solarized",
           "solarized-dark",
           "solarized-light",
-          "stata",
+          "staroffice",
           "stata-dark",
           "stata-light",
           "tango",
@@ -107,9 +148,12 @@ and formatting (default for terminal output), "colors", or "format"`,
           "vim",
           "vs",
           "xcode",
+          "zenburn",
         ],
         default: "auto",
       },
+      description: `Output coloring style (default is "auto"). The "auto" style follows
+your terminal's ANSI color styles`,
     },
     {
       name: "--unsorted",
@@ -122,29 +166,46 @@ and formatting (default for terminal output), "colors", or "format"`,
       exclusiveOn: ["--unsorted"],
     },
     {
+      name: "--response-charset",
+      args: {
+        name: "ENCODING",
+      },
+      description:
+        "Override the response encoding for terminal display purposes (e.g. utf8, big5)",
+    },
+    {
+      name: "--response-mime",
+      args: {
+        name: "MIME_TYPE",
+      },
+      description:
+        "Override the response mime type for coloring and formatting for the terminal (e.g. application/json, text/xml)",
+    },
+    {
       name: "--format-options",
       args: {
         name: "FORMAT_OPTIONS",
         suggestions: [
           "headers.sort:true",
+          "headers.sort:false",
           "json.format:true",
           "json.indent:4",
           "json.sort_keys:true",
+          "json.sort_keys:false",
+          "xml.format:true",
+          "xml.indent:2",
         ],
       },
       isRepeatable: true,
-      description: "Controls output formatting",
+      description: `Controls output formatting. Only relevant when formatting is enabled
+through (explicit or implied) --pretty=all or --pretty=format. Multiple
+comma-separated options can be given at once`,
     },
     {
       name: ["--print", "-p"],
       args: {
         name: "WHAT",
-        suggestions: [
-          { name: "H", description: "Request headers" },
-          { name: "B", description: "Request body" },
-          { name: "h", description: "Response headers" },
-          { name: "b", description: "Response body" },
-        ],
+        suggestions: printParts,
         default: "hb",
       },
       description: "String specifying what the output should contain",
@@ -154,38 +215,40 @@ and formatting (default for terminal output), "colors", or "format"`,
       description: "Print only the response headers. Shortcut for --print=h",
     },
     {
+      name: ["--meta", "-m"],
+      description: "Print only the response metadata. Shortcut for --print=m",
+    },
+    {
       name: ["--body", "-b"],
       description: "Print only the response body. Shortcut for --print=b",
     },
     {
       name: ["--verbose", "-v"],
-      description: `Verbose output. Print the whole request as well as the response. Also print
-any intermediary requests/responses (such as redirects).
-It's a shortcut for: --all --print=BHbh`,
+      isRepeatable: true,
+      description: `Verbose output. For the level one (with single -v/--verbose), print
+the whole request as well as the response. Also print any intermediary
+requests/responses (such as redirects). For the second level and higher,
+print these as well as the response metadata.
+Level one is a shortcut for: --all --print=BHbh
+Level two is a shortcut for: --all --print=BHbhm`,
     },
     {
       name: "--all",
       description: `By default, only the final request/response is shown. Use this flag to show
 any intermediary requests/responses as well. Intermediary requests include
 followed redirects (with --follow), the first unauthorized request when
-Digest auth is used (--auth=digest), etc`,
+Digest auth is used (--auth-type=digest), etc`,
     },
     {
       name: ["--history-print", "-P"],
       args: {
         name: "WHAT",
-        suggestions: [
-          { name: "H", description: "Request headers" },
-          { name: "B", description: "Request body" },
-          { name: "h", description: "Response headers" },
-          { name: "b", description: "Response body" },
-        ],
-        default: "hb",
+        suggestions: printParts,
       },
-      description: `The same as --print, -p but applies only to intermediary requests/responses
-(such as redirects) when their inclusion is enabled with --all. If this
-options is not specified, then they are formatted the same way as the final
-response`,
+      deprecated: true,
+      description: `Soft deprecated and hidden from --help. The same as --print, -p but applies
+only to intermediary requests/responses (such as redirects) when their
+inclusion is enabled with --all`,
     },
     {
       name: ["--stream", "-S"],
@@ -215,7 +278,9 @@ in a file. The filename is guessed unless specified with --output
     },
     {
       name: ["--quiet", "-q"],
-      description: `Do not print to stdout or stderr.
+      isRepeatable: 2,
+      description: `Do not print to stdout or stderr, except for errors and warnings when
+provided once. Provide twice to suppress warnings as well.
 stdout is still redirected if --output is specified.
 Flag doesn't affect behaviour of download beyond not printing to terminal`,
     },
@@ -225,6 +290,7 @@ Flag doesn't affect behaviour of download beyond not printing to terminal`,
         name: "SESSION_NAME_OR_PATH",
         template: "filepaths",
       },
+      exclusiveOn: ["--session-read-only"],
       description: `Create, or reuse and update a session. Within a session, custom headers,
 auth credential, as well as any cookies sent by the server persist between
 requests`,
@@ -235,16 +301,17 @@ requests`,
         name: "SESSION_NAME_OR_PATH",
         template: "filepaths",
       },
+      exclusiveOn: ["--session"],
       description:
-        "Create or read a session without updating it form the request/response exchange",
+        "Create or read a session without updating it from the request/response exchange",
     },
     {
       name: ["--auth", "-a"],
       args: {
-        name: "USER[:PASS]",
+        name: "USER[:PASS] | TOKEN",
       },
       description:
-        "If only the username is provided (-a username), HTTPie will prompt for the password",
+        "Credentials for the selected (-A) authentication method. For username/password based mechanisms, if only the username is provided (-a username), HTTPie will prompt for the password",
     },
     {
       name: ["--auth-type", "-A"],
@@ -252,6 +319,7 @@ requests`,
         suggestions: [
           { name: "basic", description: "Basic HTTP auth" },
           { name: "digest", description: "Digest HTTP auth" },
+          { name: "bearer", description: "Bearer HTTP auth" },
         ],
       },
       description:
@@ -270,6 +338,7 @@ requests`,
       args: {
         name: "PROTOCOL:PROXY_URL",
       },
+      isRepeatable: true,
       description: `String mapping protocol to the URL of the proxy
 (e.g. http:http://foo.bar:3128). You can specify multiple proxies with
 different protocols. The environment variables $ALL_PROXY, $HTTP_PROXY,
@@ -283,14 +352,16 @@ and $HTTPS_proxy are supported as well`,
       name: "--max-redirects",
       args: {
         name: "MAX_REDIRECTS",
+        default: "30",
       },
       description:
-        "By default, requests have a limit of 30 redirects (works with --follow)",
+        "The maximum number of redirects that should be followed (works with --follow)",
     },
     {
       name: "--max-headers",
       args: {
         name: "MAX_HEADERS",
+        default: "0",
       },
       description:
         "The maximum number of response headers to be read before giving up (default 0, i.e., no limit)",
@@ -299,15 +370,19 @@ and $HTTPS_proxy are supported as well`,
       name: "--timeout",
       args: {
         name: "SECONDS",
+        default: "0",
       },
       description: `The connection timeout of the request in seconds.
-The default value is 0, i.e., there is no timeout limit`,
+The default value is 0, i.e., there is no timeout limit.
+This is not a time limit on the entire response download; rather, an error
+is reported if the server has not issued a response for timeout seconds`,
     },
     {
       name: "--check-status",
       description: `By default, HTTPie exits with 0 when no network or other fatal errors
 occur. This flag instructs HTTPie to also check the HTTP status code and
-exit with an error if the status indicates one`,
+exit with an error if the status indicates one (exit status 3 for 3xx
+without --follow, 4 for 4xx, 5 for 5xx)`,
     },
     {
       name: "--path-as-is",
@@ -315,7 +390,8 @@ exit with an error if the status indicates one`,
     },
     {
       name: "--chunked",
-      description: "Enable streaming via chunked transfer encoding",
+      description:
+        "Enable streaming via chunked transfer encoding. The Transfer-Encoding header is set to chunked",
     },
     {
       name: "--verify",
@@ -326,24 +402,26 @@ exit with an error if the status indicates one`,
       },
       description: `Set to "no" (or "false") to skip checking the host's SSL certificate.
 Defaults to "yes" ("true"). You can also pass the path to a CA_BUNDLE file
-for private certs`,
+for private certs. (Or you can set the REQUESTS_CA_BUNDLE environment
+variable instead.)`,
     },
     {
       name: "--ssl",
       args: {
-        suggestions: ["ssl2.3", "tls1", "tls1.1", "tls1.2"],
+        suggestions: ["ssl2.3", "ssl3", "tls1", "tls1.1", "tls1.2", "tls1.3"],
       },
       description: `The desired protocol version to use. This will default to
 SSL v2.3 which will negotiate the highest protocol that both
-the server and your installation of OpenSSL support`,
+the server and your installation of OpenSSL support. Available protocols
+may vary depending on OpenSSL installation`,
     },
     {
       name: "--ciphers",
       args: {
-        default:
-          "ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20:ECDH+AESGCM:DH+AESGCM:ECDH+AES:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!eNULL:!MD5:!DSS",
+        name: "CIPHERS",
       },
-      description: "A string in the OpenSSL cipher list format",
+      description:
+        "A string in the OpenSSL cipher list format. By default, the ciphers configured by the system are used",
     },
     {
       name: "--cert",
@@ -363,12 +441,24 @@ specify --cert-key separately`,
         "The private key to use with SSL. Only needed if --cert is given and the certificate file does not contain the private key",
     },
     {
+      name: "--cert-key-pass",
+      args: {
+        name: "PASSPHRASE",
+      },
+      description:
+        "The passphrase to be used with the given private key. Only needed if --cert-key is given and the key file requires a passphrase. If not provided, you’ll be prompted interactively",
+    },
+    {
       name: ["--ignore-stdin", "-I"],
       description: "Do not attempt to read stdin",
     },
     {
       name: "--help",
       description: "Show the help message and exit",
+    },
+    {
+      name: "--manual",
+      description: "Show the full manual",
     },
     {
       name: "--version",
@@ -382,6 +472,8 @@ specify --cert-key separately`,
       name: "--default-scheme",
       args: {
         name: "DEFAULT_SCHEME",
+        suggestions: ["http", "https"],
+        default: "http",
       },
       description: "The default scheme to use if not specified in the URL",
     },
