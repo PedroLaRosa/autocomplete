@@ -1,54 +1,74 @@
+// wrk v4.2.0 (latest upstream tag, identical to wg/wrk master HEAD a211dd5 of 2021-02-06; matches Homebrew; 2026-11-19).
+// Source: wg/wrk 4.2.0 checkout read statically (src/wrk.c usage(), longopts and getopt string; SCRIPTING); the binary was not run.
+// Upstream has not changed since 4.2.0; the -T and -L short forms are accepted by the getopt string but not listed in usage().
 const completionSpec: Fig.Spec = {
   name: "wrk",
-  description: "Wrk - a HTTP benchmarking tool",
-  args: {
-    name: "Url",
-  },
+  description: "HTTP benchmarking tool",
+  args: [
+    {
+      name: "url",
+      description: "URL to benchmark",
+    },
+    {
+      name: "script args",
+      description:
+        "Arguments passed to the Lua script (separate them from wrk's arguments with --)",
+      isOptional: true,
+      isVariadic: true,
+    },
+  ],
   options: [
     {
-      name: ["-c", "--c"],
-      description: "Connections to keep open",
+      name: ["-c", "--connections"],
+      description: "Connections to keep open (default: 10)",
       args: {
-        name: "Number",
+        name: "N",
+        description: "Number, may include a SI unit (1k, 1M, 1G)",
       },
     },
     {
       name: ["-d", "--duration"],
-      description: "Duration of test",
+      description: "Duration of test (default: 10s)",
       args: {
-        name: "Time",
+        name: "T",
+        description: "Time, may include a unit (2s, 2m, 2h)",
       },
     },
     {
       name: ["-t", "--threads"],
-      description: "Number of threads",
+      description: "Number of threads to use (default: 2)",
       args: {
-        name: "Number",
+        name: "N",
+        description: "Number, may include a SI unit (1k, 1M, 1G)",
       },
     },
     {
       name: ["-s", "--script"],
       description: "Load Lua script file",
       args: {
-        name: "Script",
+        name: "S",
+        template: "filepaths",
       },
     },
     {
       name: ["-H", "--header"],
       description: "Add header to request",
+      isRepeatable: true,
       args: {
-        name: "Header",
+        name: "H",
+        description: "Header, e.g. 'Name: value'",
       },
     },
     {
-      name: "--latency",
+      name: ["-L", "--latency"],
       description: "Print latency statistics",
     },
     {
-      name: "--timeout",
-      description: "Socket/request timeout",
+      name: ["-T", "--timeout"],
+      description: "Socket/request timeout (default: 2s)",
       args: {
-        name: "Time",
+        name: "T",
+        description: "Time, may include a unit (2s, 2m, 2h)",
       },
     },
     {
@@ -57,7 +77,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-h", "--help"],
-      description: "Output usage information",
+      description: "Show usage",
     },
   ],
 };
