@@ -1,3 +1,5 @@
+// googler v4.3.2 (GitHub tag v4.3.2 = main HEAD, 2021-11-13; upstream is unmaintained, checked 2026-11-19). Source: read
+// statically (not executed) the argparse definitions in the `googler` script, its man page and shipped completions at v4.3.2.
 const completionSpec: Fig.Spec = {
   name: "googler",
   description: "Google from the command-line",
@@ -11,6 +13,7 @@ const completionSpec: Fig.Spec = {
       description: "Start at the Nth result",
       args: {
         name: "N",
+        default: "0",
       },
     },
     {
@@ -34,14 +37,14 @@ const completionSpec: Fig.Spec = {
       description:
         "Country-specific search with top-level domain .TLD, e.g., 'in' for India",
       args: {
-        name: "top-level domain",
+        name: "TLD",
       },
     },
     {
       name: ["-l", "--lang"],
-      description: "Display in language",
+      description: "Display in language LANG",
       args: {
-        name: "language",
+        name: "LANG",
       },
     },
     {
@@ -60,10 +63,11 @@ const completionSpec: Fig.Spec = {
     {
       name: "--colorize",
       description:
-        "Whether to colorize output which enables color when stdout is a tty device",
+        "Whether to colorize output; 'auto' enables color when stdout is a tty device, without an argument it is 'always'",
       args: {
         name: "mode",
         default: "auto",
+        isOptional: true,
         suggestions: ["auto", "always", "never"],
       },
     },
@@ -73,10 +77,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--colors",
-      description: "Set output colors",
+      description:
+        "Set output colors as a six-letter string (see the man page for details; default from $GOOGLER_COLORS or GKlgxy)",
       args: {
-        name: "colors",
-        isVariadic: true,
+        name: "COLORS",
+        default: "GKlgxy",
       },
     },
     {
@@ -86,9 +91,9 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-t", "--time"],
       description:
-        "Time limit search [h5 (5 hrs), d5 (5 days), w5 (5 weeks), m5 (5 months), y5 (5 years)",
+        "Time limit search [h5 (5 hrs), d5 (5 days), w5 (5 weeks), m5 (5 months), y5 (5 years)]",
       args: {
-        name: "time limit",
+        name: "dN",
       },
     },
     {
@@ -103,7 +108,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--to",
-      description: "Ending date/month/year of date range",
+      description: "Ending date/month/year of date range; see --from",
       args: {
         name: "date",
         description:
@@ -113,13 +118,18 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-w", "--site"],
       description: "Search a site using Google",
+      isRepeatable: true,
       args: {
-        name: "site",
+        name: "SITE",
       },
     },
     {
       name: ["-e", "--exclude"],
       description: "Exclude site from results",
+      isRepeatable: true,
+      args: {
+        name: "SITE",
+      },
     },
     {
       name: "--unfilter",
@@ -134,19 +144,24 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--noua",
+      description: "Deprecated, has no effect",
+      deprecated: true,
+      hidden: true,
+    },
+    {
       name: "--notweak",
       description: "Disable TCP optimizations and forced TLS 1.2",
     },
     {
       name: "--json",
       description: "Output in JSON format; implies --noprompt",
-      dependsOn: ["--noprompt"],
     },
     {
       name: "--url-handler",
       description: "Custom script or cli utility to open results",
       args: {
-        name: "util",
+        name: "UTIL",
       },
     },
     {
@@ -182,9 +197,31 @@ const completionSpec: Fig.Spec = {
       name: ["-d", "--debug"],
       description: "Enable debugging",
     },
+    {
+      name: ["-D", "--debugger"],
+      description: "Interact with the DOM in an IPython/pdb shell",
+      hidden: true,
+    },
+    {
+      name: "--parse",
+      description: "Parse a dumped HTML file",
+      hidden: true,
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--complete",
+      description: "Print query completions for a prefix",
+      hidden: true,
+      args: {
+        name: "prefix",
+      },
+    },
   ],
   args: {
-    name: "keyword",
+    name: "KEYWORD",
     description: "Search keywords",
     isVariadic: true,
     isOptional: true,
