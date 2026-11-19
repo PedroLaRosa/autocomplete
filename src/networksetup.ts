@@ -1,3 +1,8 @@
+// networksetup (macOS man page NETWORKSETUP(8) dated July 29, 2020, unchanged in the newest Xcode man pages; 2026-11-19).
+// Source: static read of the man page from the keith/xcode-man-pages mirror (Xcode 27.3 beta 2 (27C5035i), commit 6ddd0b2, 2026-11-16);
+// the tool is macOS-only and was NOT run on macOS. All 92 flags of the man page are covered.
+// Not added: -setftpproxy/-setgopherproxy/-setstreamingproxy and -setautoproxystate are reported by third-party sources
+// but are absent from the shipped man page, so they could not be verified against an authoritative source.
 const hardwareports: Fig.Generator = {
   script: ["networksetup", "-listallhardwareports"],
   postProcess: (out) => {
@@ -114,6 +119,47 @@ const locations: Fig.Generator = {
   },
 };
 
+const networkserviceArg: Fig.Arg = {
+  name: "networkservice",
+  generators: networkservices,
+};
+
+const onOffArg: Fig.Arg = { name: "on | off", suggestions: ["on", "off"] };
+
+// Any flag that takes a password accepts "-" to read it from stdin
+const passwordSuggestions: Fig.Suggestion[] = [
+  { name: "-", description: "Read the password from stdin" },
+];
+
+const proxyArgs: Fig.Arg[] = [
+  networkserviceArg,
+  {
+    name: "domain",
+    description: "The domain name or IP address of the proxy server",
+  },
+  { name: "portnumber", description: "The port number for the proxy server" },
+  {
+    name: "authenticated",
+    description: "Whether proxy authentication is required",
+    isOptional: true,
+    suggestions: [
+      { name: "on", description: "Enable authenticated proxy support" },
+      { name: "off", description: "Disable authenticated proxy support" },
+    ],
+  },
+  {
+    name: "username",
+    description: "The username for proxy authentication",
+    isOptional: true,
+  },
+  {
+    name: "password",
+    description: "The password for proxy authentication",
+    isOptional: true,
+    suggestions: passwordSuggestions,
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "networksetup",
   description: "Configuration tool for network settings in System Preferences",
@@ -121,12 +167,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "-listnetworkserviceorder",
       description:
-        "Displays a list of network services in the order they are contacted for a connection, along with the corresponding port and device for each",
+        "Displays a list of network services in the order they are contacted for a connection, along with the corresponding port and device for each. An asterisk (*) next to a service means the service is inactive",
     },
     {
       name: "-listallnetworkservices",
       description:
-        "Displays a list of all the network services on the server's hardware ports",
+        "Displays a list of all the network services on the server's hardware ports. An asterisk (*) denotes that a network service is disabled",
     },
     {
       name: "-listallhardwareports",
@@ -234,7 +280,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "dest mask gate",
           description:
-            "One or more tuples of (destination address, subnet mask, gateway address). Specify 'Empty' to clear routes",
+            "The list of routes, each specified as a tuple of destination address, subnet mask, and gateway address. Omit this to clear all routes",
           isOptional: true,
           isVariadic: true,
         },
@@ -281,6 +327,7 @@ const completionSpec: Fig.Spec = {
       description:
         "Use this command to set IPv6 to get its addresses manually for <networkservice>. Specify the ip address, the prefix length and the router",
       args: [
+        networkserviceArg,
         { name: "ip", description: "The IPv6 address to assign" },
         {
           name: "prefixlength",
@@ -368,21 +415,14 @@ const completionSpec: Fig.Spec = {
       name: "-set6to4automatic",
       description:
         "Use this command to set the 6 to 4 service such that it will get the relay address automatically",
-      args: {
-        name: "newnetworkservicename",
-        description:
-          "The name of the 6 to 4 service to be configured for automatic relay address retrieval",
-      },
+      args: networkserviceArg,
     },
     {
       name: "-set6to4manual",
       description:
         "Use this command to set the 6 to 4 service such that it will get the relay address manually. Specify the <relayaddress> that you would like to set",
       args: [
-        {
-          name: "newnetworkservicename",
-          description: "The name of the 6 to 4 service to be configured",
-        },
+        networkserviceArg,
         {
           name: "relayaddress",
           description:
@@ -403,50 +443,12 @@ const completionSpec: Fig.Spec = {
       name: "-setwebproxy",
       description:
         "Set Web proxy for <networkservice> with <domain> and <port number>. Turns proxy on. Optionally, specify <on> or <off> for <authenticated> to enable and disable authenticated proxy support. Specify <username> and <password> if you turn authenticated proxy support on",
-      args: [
-        { name: "networkservice", generators: networkservices },
-        {
-          name: "domain",
-          description: "The domain name or IP address of the proxy server",
-        },
-        {
-          name: "portnumber",
-          description: "The port number for the proxy server",
-        },
-        {
-          name: "authenticated",
-          description: "Specify whether proxy authentication is required",
-          isOptional: true,
-          suggestions: [
-            {
-              name: "on",
-              description:
-                "Specify <on> for <authenticated> to enable authenticated proxy support",
-            },
-            {
-              name: "off",
-              description:
-                "Specify <off> for <authenticated> to disable authenticated proxy support",
-            },
-          ],
-        },
-        {
-          name: "username",
-          description: "The username for proxy authentication",
-        },
-        {
-          name: "password",
-          description: "The password for proxy authentication",
-        },
-      ],
+      args: proxyArgs,
     },
     {
       name: "-setwebproxystate",
       description: "Set Web proxy on <networkservice> to either <on> or <off>",
-      args: [
-        { name: "networkservice", generators: networkservices },
-        { name: "on | off", suggestions: ["on", "off"] },
-      ],
+      args: [networkserviceArg, onOffArg],
     },
     {
       name: "-getsecurewebproxy",
@@ -461,51 +463,13 @@ const completionSpec: Fig.Spec = {
       name: "-setsecurewebproxy",
       description:
         "Set Secure Web proxy for <networkservice> with <domain> and <port number>. Turns proxy on. Optionally, specify <on> or <off> for <authenticated> to enable and disable authenticated proxy support. Specify <username> and <password> if you turn authenticated proxy support on",
-      args: [
-        { name: "networkservice", generators: networkservices },
-        {
-          name: "domain",
-          description: "The proxy server's domain or IP address",
-        },
-        {
-          name: "portnumber",
-          description: "The port number for the proxy server",
-        },
-        {
-          name: "authenticated",
-          description: "Specify whether proxy authentication is required",
-          isOptional: true,
-          suggestions: [
-            {
-              name: "on",
-              description:
-                "Specify <on> for <authenticated> to enable authenticated proxy support",
-            },
-            {
-              name: "off",
-              description:
-                "Specify <off> for <authenticated> to disable authenticated proxy support",
-            },
-          ],
-        },
-        {
-          name: "username",
-          description: "The username for proxy authentication",
-        },
-        {
-          name: "password",
-          description: "The password for proxy authentication",
-        },
-      ],
+      args: proxyArgs,
     },
     {
       name: "-setsecurewebproxystate",
       description:
         "Set Secure Web proxy on <networkservice> to either <on> or <off>",
-      args: [
-        { name: "networkservice", generators: networkservices },
-        { name: "on | off", suggestions: ["on", "off"] },
-      ],
+      args: [networkserviceArg, onOffArg],
     },
     {
       name: "-getsocksfirewallproxy",
@@ -519,51 +483,13 @@ const completionSpec: Fig.Spec = {
     {
       name: "-setsocksfirewallproxy",
       description:
-        "Set SOCKS Firewall proxy for <networkservice> with <domain> and <port number>. Turns proxy on.  Optionally, specify <on> or <off> for <authenticated> to enable and disable authenticated proxy support. Specify <username> and <password> if you turn authenticated proxy support on",
-      args: [
-        { name: "networkservice", generators: networkservices },
-        {
-          name: "domain",
-          description: "The proxy server's domain or IP address",
-        },
-        {
-          name: "portnumber",
-          description: "The port number for the proxy server",
-        },
-        {
-          name: "authenticated",
-          description: "Specify whether proxy authentication is required",
-          isOptional: true,
-          suggestions: [
-            {
-              name: "on",
-              description:
-                "Specify <on> for <authenticated> to enable authenticated proxy support",
-            },
-            {
-              name: "off",
-              description:
-                "Specify <off> for <authenticated> to disable authenticated proxy support",
-            },
-          ],
-        },
-        {
-          name: "username",
-          description: "The username for proxy authentication",
-        },
-        {
-          name: "password",
-          description: "The password for proxy authentication",
-        },
-      ],
+        "Set SOCKS Firewall proxy for <networkservice> with <domain> and <port number>. Turns proxy on. Optionally, specify <on> or <off> for <authenticated> to enable and disable authenticated proxy support. Specify <username> and <password> if you turn authenticated proxy support on",
+      args: proxyArgs,
     },
     {
       name: "-setsocksfirewallproxystate",
-      description: "Set SOCKS Firewall proxy to  either <on> or <off>",
-      args: [
-        { name: "networkservice", generators: networkservices },
-        { name: "on | off", suggestions: ["on", "off"] },
-      ],
+      description: "Set SOCKS Firewall proxy to either <on> or <off>",
+      args: [networkserviceArg, onOffArg],
     },
     {
       name: "-getproxybypassdomains",
@@ -598,10 +524,7 @@ const completionSpec: Fig.Spec = {
       name: "-setproxyautodiscovery",
       description:
         "Set Proxy Auto Discover for <networkservice> to either <on> or <off>",
-      args: [
-        { name: "networkservice", generators: networkservices },
-        { name: "on | off", suggestions: ["on", "off"] },
-      ],
+      args: [networkserviceArg, onOffArg],
     },
     {
       name: "-setautoproxyurl",
@@ -628,7 +551,7 @@ const completionSpec: Fig.Spec = {
       name: "-getairportnetwork",
       description: "Displays current Wi-Fi Network",
       args: {
-        name: "hardwareport",
+        name: "device",
         generators: wirelessInterfaces,
       },
     },
@@ -637,15 +560,17 @@ const completionSpec: Fig.Spec = {
       description:
         "Set Wi-Fi Network to <network> using optional [password] if specified",
       args: [
-        { name: "hardwareport", generators: wirelessInterfaces },
+        { name: "device", generators: wirelessInterfaces },
         {
           name: "network",
           description: "The name of the Wi-Fi network to connect to",
         },
         {
           name: "password",
-          description: "Optional password for the Wi-Fi network",
+          description:
+            "Optional password for the Wi-Fi network. Use '-' to read it from stdin",
           isOptional: true,
+          suggestions: passwordSuggestions,
         },
       ],
     },
@@ -653,17 +578,14 @@ const completionSpec: Fig.Spec = {
       name: "-getairportpower",
       description: "Displays whether Wi-Fi power is on or off",
       args: {
-        name: "hardwareport",
+        name: "device",
         generators: wirelessInterfaces,
       },
     },
     {
       name: "-setairportpower",
       description: "Set Wi-Fi power to either <on> or <off>",
-      args: [
-        { name: "hardwareport", generators: wirelessInterfaces },
-        { name: "on | off", suggestions: ["on", "off"] },
-      ],
+      args: [{ name: "device", generators: wirelessInterfaces }, onOffArg],
     },
     {
       name: "-listpreferredwirelessnetworks",
@@ -704,8 +626,10 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "password",
-          description: "Optional password for the network",
+          description:
+            "Optional password for the network, stored in the keychain. Use '-' to read it from stdin",
           isOptional: true,
+          suggestions: passwordSuggestions,
         },
       ],
     },
@@ -743,10 +667,7 @@ const completionSpec: Fig.Spec = {
       name: "-setnetworkserviceenabled",
       description:
         "Use this command to turn the specified network service on or off (enable or disable)",
-      args: [
-        { name: "networkservice", generators: networkservices },
-        { name: "on | off", suggestions: ["on", "off"] },
-      ],
+      args: [networkserviceArg, onOffArg],
     },
     {
       name: "-createnetworkservice",
@@ -1000,7 +921,12 @@ const completionSpec: Fig.Spec = {
         },
         { name: "name", description: "The name for the new PPPoE service" },
         { name: "account", description: "The PPPoE account name" },
-        { name: "password", description: "The PPPoE account password" },
+        {
+          name: "password",
+          description:
+            "The PPPoE account password. Use '-' to read it from stdin",
+          suggestions: passwordSuggestions,
+        },
         {
           name: "pppoeName",
           description: "Optional name for the PPPoE service",
@@ -1029,7 +955,12 @@ const completionSpec: Fig.Spec = {
       description: "Set the password for the service",
       args: [
         { name: "service", generators: pppoeServices },
-        { name: "password", description: "The PPPoE account password" },
+        {
+          name: "password",
+          description:
+            "The PPPoE account password. Use '-' to read it from stdin",
+          suggestions: passwordSuggestions,
+        },
       ],
     },
     {
@@ -1065,8 +996,9 @@ const completionSpec: Fig.Spec = {
         {
           name: "populate",
           description:
-            "Specify 'true' to populate with default services or 'false' to create an empty location",
+            "Specify 'populate' to populate the location with the default services",
           isOptional: true,
+          suggestions: ["populate"],
         },
       ],
     },
