@@ -1,9 +1,12 @@
+// traceroute (macOS 15.5 BSD traceroute, network_cmds-705.100.5, man page dated 2008-05-29, 2026-11-19). Source: Apple OSS mirror
+// apple-oss-distributions/network_cmds traceroute.tproj/traceroute.8 and traceroute.c (getopt). Not run on macOS.
+// --help is kept from the previous spec (Linux traceroute 2.x only); macOS traceroute has no -h or --help.
 const completionSpec: Fig.Spec = {
   name: "traceroute",
   description: "Print the route packets take to network host",
   options: [
     {
-      name: ["--help", "-h"],
+      name: "--help",
       description: "Show help for traceroute",
     },
     {
@@ -31,6 +34,11 @@ const completionSpec: Fig.Spec = {
         "Firewall evasion mode. Use fixed destination ports for UDP and TCP probes. The destination port does NOT increment with each packet sent",
     },
     {
+      name: "-E",
+      description:
+        "Detect ECN bleaching. Set the IPTOS_ECN_ECT1 bit and report if that value has been bleached or mangled",
+    },
+    {
       name: "-f",
       args: { name: "first_ttl" },
       description:
@@ -44,12 +52,13 @@ const completionSpec: Fig.Spec = {
       name: "-g",
       args: { name: "gateway" },
       description: "Specify a loose source route gateway (8 maximum)",
+      isRepeatable: 8,
     },
     {
       name: "-i",
       args: { name: "iface" },
       description:
-        "Specify a network interface to obtain the source IP address for outgoing probe packets. This is normally only useful on a multihomed host. (See the -s flag for another way to do this.)",
+        "Specify a network interface to obtain the source IP address for outgoing probe packets. This is normally only useful on a multi-homed host. (See the -s flag for another way to do this.)",
     },
     {
       name: "-I",
@@ -75,9 +84,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-P",
-      args: { name: "proto" },
+      args: {
+        name: "proto",
+        suggestions: ["udp", "tcp", "gre", "icmp"],
+      },
       description:
-        "Send packets of specified IP protocol. The currently supported protocols are: UDP, TCP, GRE and ICMP Other protocols may also be specified (either by name or by number), though traceroute does not implement any special knowledge of their packet formats. This option is useful for determining which router along a path may be blocking packets based on IP protocol number. But see BUGS below",
+        "Send packets of specified IP protocol. The currently supported protocols are: UDP, TCP, GRE and ICMP. Other protocols may also be specified (either by name or by number), though traceroute does not implement any special knowledge of their packet formats. This option is useful for determining which router along a path may be blocking packets based on IP protocol number",
     },
     {
       name: "-p",
@@ -89,12 +101,12 @@ const completionSpec: Fig.Spec = {
       name: "-q",
       args: { name: "nqueries" },
       description:
-        "Set the number of probes per ``ttl'' to nqueries (default is three probes)",
+        "Set the number of probes per `ttl` to nqueries (default is three probes)",
     },
     {
       name: "-r",
       description:
-        "Bypass the normal routing tables and send directly to a host on an attached network. If the host is not on a directly-attached network, an error is returned. This option can be used to ping a local host through an interface that has no route through it (e.g., after the interface was dropped by routed(8))",
+        "Bypass the normal routing tables and send directly to a host on an attached network. If the host is not on a directly-attached network, an error is returned. This option can be used to ping a local host through an interface that has no route through it",
     },
     {
       name: "-s",
@@ -111,32 +123,42 @@ const completionSpec: Fig.Spec = {
       name: "-t",
       args: { name: "tos" },
       description:
-        "Set the type-of-service in probe packets to the following value (default zero). The value must be a decimal integer in the range 0 to 255. This option can be used to see if different types-of- service result in different paths. (If you are not running a 4.4BSD or later system, this may be academic since the normal network services like telnet and ftp don't let you control the TOS). Not all values of TOS are legal or meaningful - see the IP spec for definitions. Useful values are probably `-t 16' (low delay) and `-t 8' (high throughput)",
+        "Set the type-of-service in probe packets to the following value (default zero). The value must be a decimal integer in the range 0 to 255. This option can be used to see if different types-of-service result in different paths. Not all values of TOS are legal or meaningful - see the IP spec for definitions. Useful values are probably `-t 16` (low delay) and `-t 8` (high throughput)",
     },
     {
       name: "-v",
       description:
         "Verbose output. Received ICMP packets other than TIME_EXCEEDED and UNREACHABLEs are listed",
+      isRepeatable: true,
     },
     {
       name: "-w",
+      args: { name: "waittime", default: "5" },
       description:
         "Set the time (in seconds) to wait for a response to a probe (default 5 sec.)",
     },
     {
       name: "-x",
       description:
-        "Toggle IP checksums. Normally, this prevents traceroute from calculating IP checksums. In some cases, the operating system can overwrite parts of the outgoing packet but not recalculate the checksum (so in some cases the default is to not calculate checksums and using -x causes them to be calculated). Note that checksums are usually required for the last hop when using ICMP ECHO probes ( -I ). So they are always calculated when using ICMP",
+        "Toggle IP checksums. Normally, this prevents traceroute from calculating IP checksums. In some cases, the operating system can overwrite parts of the outgoing packet but not recalculate the checksum (so in some cases the default is to not calculate checksums and using -x causes them to be calculated). Note that checksums are usually required for the last hop when using ICMP ECHO probes (-I). So they are always calculated when using ICMP",
     },
     {
       name: "-z",
-      args: { name: "pausemsecs" },
+      args: { name: "pausemsecs", default: "0" },
       description:
-        "Set the time (in milliseconds) to pause between probes (default 0). Some systems such as Solaris and routers such as Ciscos rate limit ICMP messages. A good value to use with this this is 500 (e.g. 1/2 second)",
+        "Set the time (in milliseconds) to pause between probes (default 0). Some systems such as Solaris and routers such as Ciscos rate limit ICMP messages. A good value to use with this is 500 (e.g. 1/2 second)",
     },
   ],
-  args: {
-    name: "host",
-  },
+  args: [
+    {
+      name: "host",
+    },
+    {
+      name: "packetsize",
+      description:
+        "Probe packet length in bytes (default 40). Ignored for TCP probes",
+      isOptional: true,
+    },
+  ],
 };
 export default completionSpec;
