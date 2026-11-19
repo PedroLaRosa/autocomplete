@@ -1,3 +1,6 @@
+// Drush v13.8.1 (git tag 13.8.1 of drush-ops/drush and Packagist "drush/drush" latest, 2026-11-19).
+// Source: src/Commands/help/ListCommands.php and src/Application.php (global options) read statically, plus Symfony Console 7.3
+// Descriptor/JsonDescriptor.php for the `drush list --format=json` shape that generateSpec parses; drush was not run (needs PHP and a Drupal project).
 interface DrushArgument {
   name: string;
   is_required: boolean;
@@ -23,15 +26,23 @@ interface DrushCommandDefinition {
 
 interface DrushCommand {
   name: string;
-  usage: string[];
+  usage: string[]; // synopsis, usage examples, then the command aliases
   description: string;
   help: string;
+  hidden: boolean;
   definition: DrushCommandDefinition;
 }
 
 interface DrushListOutput {
   commands: DrushCommand[];
 }
+
+// Descriptions can contain Symfony console style tags such as <info>...</info>
+const stripTags = (text: string) =>
+  text.replace(
+    /<\/?(?:info|comment|error|question|(?:fg|bg|options|href)=[^>]*)?>/gi,
+    ""
+  );
 
 const completionSpec: Fig.Spec = {
   name: "drush",
@@ -40,17 +51,26 @@ const completionSpec: Fig.Spec = {
   generateSpec: async (tokens, executeShellCommand) => {
     const { stdout: jsonList } = await executeShellCommand({
       command: "drush",
-      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
-      args: ["--format=json"],
+      args: ["list", "--format=json"],
     });
     const subcommands: Fig.Subcommand[] = [];
 
     try {
       const data: DrushListOutput = JSON.parse(jsonList);
       for (const command of data.commands) {
+        // Aliases are listed after the synopsis and the usage examples (which
+        // contain whitespace). Drush hides the "foo-bar" alias of "foo:bar".
+        const aliases = command.usage.filter(
+          (usage) =>
+            !/\s/.test(usage) &&
+            usage !== command.name &&
+            usage !== command.name.replace(/:/g, "-")
+        );
+
         subcommands.push({
-          name: command.name,
-          description: command.description,
+          name: [command.name, ...aliases],
+          description: stripTags(command.description),
+          hidden: command.hidden || undefined,
 
           args: Object.keys(command.definition.arguments).map((argKey) => {
             const arg = command.definition.arguments[argKey];
@@ -62,7 +82,7 @@ const completionSpec: Fig.Spec = {
 
             return {
               name: arg.name,
-              description: arg.description,
+              description: stripTags(arg.description),
               isOptional: !arg.is_required,
               default: argDefault,
               isVariadic: arg.is_array,
@@ -73,16 +93,22 @@ const completionSpec: Fig.Spec = {
             const option = command.definition.options[optionKey];
             const names = [option.name];
 
-            const shortCut = option.shortcut;
-            if (shortCut.trim().length > 0) {
-              names.push(shortCut);
+            // Shortcuts are joined by "|", e.g. "-v|-vv|-vvv"
+            for (const shortCut of option.shortcut.split("|")) {
+              if (shortCut.trim().length > 0) {
+                names.push(shortCut.trim());
+              }
             }
 
             return {
               name: names,
-              description: option.description,
-              isRequired: option.is_value_required,
-              args: option.accept_value ? {} : undefined,
+              description: stripTags(option.description),
+              args: option.accept_value
+                ? {
+                    name: option.name.replace(/^--/, ""),
+                    isOptional: !option.is_value_required,
+                  }
+                : undefined,
               isRepeatable: option.is_multiple,
             };
           }),
