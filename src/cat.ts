@@ -1,4 +1,4 @@
-// cat (macOS 15.5 BSD, `man cat` dated 2013-01-29, 2026-11-19). Source: apple-oss-distributions/text_cmds tag text_cmds-195 (cat/cat.1 and cat/cat.c flags "belnstuv"); not a live run on macOS. Spec already matched upstream
+// cat (macOS 15 BSD, `man cat` dated 2013-01-29, 2026-11-19). Source: apple-oss-distributions/text_cmds tag text_cmds-195 (2025-04-30 drop; cat/cat.1 and cat/cat.c flags "belnstuv"); not a live run on macOS. Spec already matched upstream
 const completionSpec: Fig.Spec = {
   name: "cat",
   description: "Concatenate and print files",
