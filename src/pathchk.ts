@@ -1,4 +1,5 @@
 // pathchk (macOS BSD, pathchk.1 dated 2010-05-01, apple-oss-distributions/file_cmds-479, 2026-11-19). Source: pathchk.1 + pathchk.c from Apple's OSS mirror (not run on macOS)
+// Options: -p (portability checks, also rejects components starting with a hyphen) and -P
 const completionSpec: Fig.Spec = {
   name: "pathchk",
   description: "Check whether pathnames are valid or portable",
