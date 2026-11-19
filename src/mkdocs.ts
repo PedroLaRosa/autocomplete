@@ -1,27 +1,37 @@
-const help = (name: string): Fig.Option => ({
+// MkDocs v1.6.1 (latest PyPI release, 2026-11-19). Source: `mkdocs --help` and `mkdocs <command> --help` of an installed 1.6.1 plus mkdocs/__main__.py (click definitions, hidden options).
+const helpOption: Fig.Option = {
   name: ["-h", "--help"],
-  description: `help for ${name}`,
-});
+  description: "Show this message and exit",
+};
+
+const configFileOption: Fig.Option = {
+  name: ["-f", "--config-file"],
+  description:
+    "Provide a specific MkDocs config. This can be a file name, or '-' to read from stdin",
+  args: {
+    name: "filename",
+    template: "filepaths",
+  },
+};
 
 // options common to 'mkdocs build' 'mkdocs gh-deploy' and 'mkdocs serve'
 const commonOptions: Fig.Option[] = [
-  {
-    name: ["-f", "--config-file"],
-    description: "Provide a specific MkDocs config",
-    args: {
-      template: "filepaths",
-    },
-  },
+  configFileOption,
   {
     name: ["-s", "--strict"],
     description:
       "Enable strict mode. This will cause MkDocs to abort the build on any warnings",
   },
   {
+    name: "--no-strict",
+    description: "Disable strict mode",
+  },
+  {
     name: ["-t", "--theme"],
     description: "The theme to use when building your documentation",
     args: {
       name: "theme",
+      suggestions: ["mkdocs", "readthedocs"],
     },
   },
   {
@@ -34,16 +44,37 @@ const commonOptions: Fig.Option[] = [
   },
 ];
 
-const globalOptions: Fig.Option[] = [
-  {
-    name: ["-q", "--quiet"],
-    description: "Silence warnings",
+const quietOption: Fig.Option = {
+  name: ["-q", "--quiet"],
+  description: "Silence warnings",
+};
+
+const verboseOption: Fig.Option = {
+  name: ["-v", "--verbose"],
+  description: "Enable verbose output",
+};
+
+const globalOptions: Fig.Option[] = [quietOption, verboseOption];
+
+const cleanOption: Fig.Option = {
+  name: ["-c", "--clean"],
+  description:
+    "Remove old files from the site_dir before building (the default)",
+};
+
+const dirtyOption: Fig.Option = {
+  name: "--dirty",
+  description: "Only rebuild pages that have been modified since last build",
+};
+
+const siteDirOption: Fig.Option = {
+  name: ["-d", "--site-dir"],
+  description: "The directory to output the result of the documentation build",
+  args: {
+    name: "path",
+    template: "folders",
   },
-  {
-    name: ["-v", "--verbose"],
-    description: "Enable verbose output",
-  },
-];
+};
 
 const completionSpec: Fig.Spec = {
   name: "mkdocs",
@@ -53,25 +84,29 @@ const completionSpec: Fig.Spec = {
       name: "build",
       description: "Build the MkDocs documentation",
       options: [
-        help("build"),
+        helpOption,
         ...globalOptions,
         ...commonOptions,
+        cleanOption,
+        dirtyOption,
+        siteDirOption,
+      ],
+    },
+    {
+      name: "get-deps",
+      description:
+        "Show required PyPI packages inferred from plugins in mkdocs.yml",
+      options: [
+        helpOption,
+        verboseOption,
+        configFileOption,
         {
-          name: ["-c", "--clean"],
+          name: ["-p", "--projects-file"],
           description:
-            "Remove old files from the site directory before building (the default)",
-        },
-        {
-          name: "--dirty",
-          description:
-            "Only rebuild pages that have been modified since last build",
-        },
-        {
-          name: ["-d", "--site-dir"],
-          description:
-            "The directory to output the result of the documentation build",
+            "URL or local path of the registry file that declares all known MkDocs-related projects",
           args: {
-            template: "folders",
+            name: "projects file",
+            template: "filepaths",
           },
         },
       ],
@@ -80,19 +115,12 @@ const completionSpec: Fig.Spec = {
       name: "gh-deploy",
       description: "Deploy your documentation to GitHub Pages",
       options: [
-        help("gh-deploy"),
+        helpOption,
         ...globalOptions,
         ...commonOptions,
-        {
-          name: ["-c", "--clean"],
-          description:
-            "Remove old files from the site directory before building (the default)",
-        },
-        {
-          name: "--dirty",
-          description:
-            "Only rebuild pages that have been modified since last build",
-        },
+        cleanOption,
+        dirtyOption,
+        siteDirOption,
         {
           name: ["-m", "--message"],
           description:
@@ -141,8 +169,9 @@ const completionSpec: Fig.Spec = {
     {
       name: "new",
       description: "Create a new MkDocs project",
-      options: [help("new"), ...globalOptions],
+      options: [helpOption, ...globalOptions],
       args: {
+        name: "project directory",
         template: "folders",
       },
     },
@@ -150,7 +179,7 @@ const completionSpec: Fig.Spec = {
       name: "serve",
       description: "Run the builtin development server",
       options: [
-        help("serve"),
+        helpOption,
         ...globalOptions,
         ...commonOptions,
         {
@@ -162,18 +191,34 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--live-reload",
+          name: ["-o", "--open"],
           description:
-            "Enable the live reloading in the development server (this is the default)",
+            "Open the website in a Web browser after the initial build finishes",
         },
         {
-          name: "--no-reload",
+          name: "--no-livereload",
           description: "Disable the live reloading in the development server",
         },
         {
-          name: "--dirtyreload",
+          name: "--livereload",
           description:
-            "Enable the live reloading in the development server, but only re-build files that have changed",
+            "Enable the live reloading in the development server (the default)",
+          hidden: true,
+        },
+        {
+          name: "--dirtyreload",
+          description: "Deprecated alias of --dirty",
+          deprecated: true,
+          hidden: true,
+        },
+        {
+          name: "--dirty",
+          description: "Only re-build files that have changed",
+        },
+        {
+          name: ["-c", "--clean"],
+          description:
+            "Build the site without any effects of `mkdocs serve` - pure `mkdocs build`, then serve",
         },
         {
           name: "--watch-theme",
@@ -184,7 +229,9 @@ const completionSpec: Fig.Spec = {
           name: ["-w", "--watch"],
           description:
             "A directory or file to watch for live reloading. Can be supplied multiple times",
+          isRepeatable: true,
           args: {
+            name: "path",
             template: ["folders", "filepaths"],
           },
         },
@@ -192,13 +239,21 @@ const completionSpec: Fig.Spec = {
     },
   ],
   options: [
-    {
-      name: ["-h", "--help"],
-      description: "Show help message and exit",
-    },
+    helpOption,
     {
       name: ["-V", "--version"],
       description: "Show the version and exit",
+    },
+    ...globalOptions,
+    {
+      name: "--color",
+      description:
+        "Force enable color and wrapping for the output (default: auto-detect)",
+    },
+    {
+      name: "--no-color",
+      description:
+        "Force disable color and wrapping for the output (default: auto-detect)",
     },
   ],
 };
