@@ -1,3 +1,6 @@
+// wasm-bindgen CLI v0.2.130 (crates.io wasm-bindgen-cli latest, Homebrew formula 0.2.130, 2026-11-19). Source: clap definitions in src/wasm_bindgen.rs of the wasm-bindgen-cli-0.2.130 crate and wasm-bindgen-cli-support-0.2.130 (read, binary not run).
+// Changes: version flag is -V (clap), --target gained experimental-nodejs-module and module, added --keep-lld-exports, --split-debug-info, --debug-info-url, --split-linked-modules, --js-string-builtins, --ts-typed-array-buffers, --experimental-reset-state-function and --force-enable-abort-handler; --typescript, --weak-refs and --reference-types are hidden deprecated no-ops.
+
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const completionSpec: Fig.Spec = {
@@ -9,7 +12,7 @@ const completionSpec: Fig.Spec = {
       description: "Show help for wasm-bindgen",
     },
     {
-      name: ["--version", "-v"],
+      name: ["--version", "-V"],
       description: "Show version for wasm-bindgen",
     },
     {
@@ -45,7 +48,8 @@ const completionSpec: Fig.Spec = {
           },
           {
             name: "bundler",
-            description: "Suitable for loading in bundlers like Webpack",
+            description:
+              "Suitable for loading in bundlers like Webpack (default)",
           },
           {
             name: "nodejs",
@@ -59,12 +63,20 @@ const completionSpec: Fig.Spec = {
             name: "deno",
             description: "Loadable using imports from Deno modules",
           },
+          {
+            name: "experimental-nodejs-module",
+            description: "Node.js output as an ES module (experimental)",
+          },
+          {
+            name: "module",
+            description: "ES module output using Wasm source phase imports",
+          },
         ],
       },
     },
     {
       name: "--no-modules-global",
-      description: "Name of global to assign generated bindings to",
+      description: "Name of the global variable to initialize",
       args: {
         name: "name",
       },
@@ -75,7 +87,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--typescript",
-      description: "Output a TypeScript definition file (on by default)",
+      description: "Deprecated, TypeScript definitions are on by default",
+      deprecated: true,
     },
     {
       name: "--no-typescript",
@@ -94,8 +107,26 @@ const completionSpec: Fig.Spec = {
       description: "Don't demangle Rust symbol names",
     },
     {
+      name: "--keep-lld-exports",
+      description: "Keep exports synthesized by LLD",
+    },
+    {
       name: "--keep-debug",
-      description: "Keep debug sections in wasm files",
+      description: "Keep debug sections in Wasm files",
+    },
+    {
+      name: "--split-debug-info",
+      description:
+        "Write DWARF debug info to a separate `*_bg.debug.wasm` file (implies `--keep-debug`)",
+    },
+    {
+      name: "--debug-info-url",
+      description:
+        "URL of the split debug info file, recorded in the main Wasm file (defaults to the file name of the debug info file)",
+      dependsOn: ["--split-debug-info"],
+      args: {
+        name: "url",
+      },
     },
     {
       name: "--remove-name-section",
@@ -112,7 +143,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--encode-into",
-      description: "Whether or not to use TextEncoder#encodeInto()",
+      description: "Whether or not to use TextEncoder#encodeInto",
       args: {
         name: "option",
         suggestions: [
@@ -153,17 +184,43 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--weak-refs",
-      description: "Enable usage of the JS weak references proposal",
+      description: "Deprecated, runtime-detected",
+      deprecated: true,
     },
     {
       name: "--reference-types",
-      description: "Enable usage of WebAssembly reference types",
+      description: "Deprecated, automatically inferred from the Wasm features",
+      deprecated: true,
+    },
+    {
+      name: "--split-linked-modules",
+      description:
+        "Split linked modules out into their own files (recommended if possible, a bundler needs to be set up accordingly)",
+    },
+    {
+      name: "--js-string-builtins",
+      description:
+        "Import `static_string` constants as JS String Builtins string constants from `wasm:js/string-constants`",
+    },
+    {
+      name: "--ts-typed-array-buffers",
+      description:
+        "Emit `Uint8Array<ArrayBuffer>`-style generic typed array return types in generated TypeScript (requires TypeScript 5.7 or later)",
+    },
+    {
+      name: "--experimental-reset-state-function",
+      description:
+        "Generate __wbg_reset_state function for Wasm reinitialization (experimental)",
+    },
+    {
+      name: "--force-enable-abort-handler",
+      description:
+        "Enable abort handler even if building with panic=abort (does nothing when panic=unwind)",
     },
   ],
   args: {
     name: "input",
-    description: "File name to output the compiled binary bindings",
-    isScript: true,
+    description: "Input Wasm file",
     generators: filepaths({
       extensions: ["wasm"],
     }),
