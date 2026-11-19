@@ -1,13 +1,14 @@
+// example/ holds spec-authoring samples, not a real CLI (git_push.ts mirrors the `git push` synopsis, checked against git v2.56.1 = latest tag of git/git, 2026-11-19). Source: Documentation/git-push.adoc and builtin/push.c at tag v2.56.1; trigger.ts is a generic generator demo with no upstream and is unchanged
 // WORK IN PROGRESS
 
 // This is taken straight from the top of `git push --help`
 
 // SYNOPSIS
-// git push [--all | --mirror | --tags] [--follow-tags] [--atomic] [-n | --dry-run] [--receive-pack=<git-receive-pack>]
-//            [--repo=<repository>] [-f | --force] [-d | --delete] [--prune] [-v | --verbose]
+// git push [--all | --branches | --mirror | --tags] [--follow-tags] [--atomic] [-n | --dry-run] [--receive-pack=<git-receive-pack>]
+//            [--repo=<repository>] [-f | --force] [-d | --delete] [--prune] [-q | --quiet] [-v | --verbose]
 //            [-u | --set-upstream] [-o <string> | --push-option=<string>]
-//            [--[no-]signed|--signed=(true|false|if-asked)]
-//            [--force-with-lease[=<refname>[:<expect>]]]
+//            [--[no-]signed | --signed=(true|false|if-asked)]
+//            [--force-with-lease[=<refname>[:<expect>]] [--force-if-includes]]
 //            [--no-verify] [<repository> [<refspec>...]]
 
 // In your head think:
@@ -40,15 +41,22 @@ const completionSpec: Fig.Spec = {
     // Despite the square brackets, Fig does not currently have a syntax to support optional options
     { name: "--all" },
 
-    // [--all | --mirror | --tags]
+    // [--all | --branches | --mirror | --tags]
 
     // The | symbol means mutually exclusive. Fig currently doesn't support mutually exclusive options.
     // so you should list each option on their own.
+    { name: "--branches" },
     { name: "--mirror" },
     { name: "--tags" },
 
     // [-n | --dry-run]
     { name: ["-n", "--dry-run"] },
+
+    // [-q | --quiet]
+    { name: ["-q", "--quiet"] },
+
+    // [--force-with-lease[=<refname>[:<expect>]] [--force-if-includes]]
+    { name: "--force-if-includes" },
     { name: "--receive-pack", args: { name: "git-receive-pack" } }, // No `=` sign, arg is mandatory
     // ...
     { name: ["-u", "--set-upstream"] },
