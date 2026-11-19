@@ -1,3 +1,4 @@
+// z: rupa/z v1.12 (GitHub tag, last commit 2023-12-09; repo inactive) and zoxide v0.10.0 (GitHub tag, 2026-07-04), 2026-11-19. Source: rupa/z z.sh + z.1 (options -c -e -h -l -r -t -x unchanged) and zoxide src/cmd/query.rs + src/cmd/cmd.rs (`zoxide query --list --score` output and flags unchanged) read statically; header-only update, binaries not run.
 interface ZSuggestion {
   name: string;
   path: string;
