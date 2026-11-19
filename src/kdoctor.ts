@@ -1,3 +1,6 @@
+// KDoctor v1.1.0 (latest GitHub release tag, checked via git ls-remote and the Homebrew formula, 2026-11-19).
+// Source: static read of the clikt option definitions in kdoctor/src/commonMain/.../Main.kt at tag v1.1.0 and the
+// README `kdoctor -h` output; macOS-only tool, not run here.
 const completionSpec: Fig.Spec = {
   name: "kdoctor",
   description:
@@ -13,7 +16,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--all", "-a"],
-      description: "Run extra diagnostics",
+      description:
+        "Run extra diagnostics such as a build of a synthetic project and an analysis of a project in the current directory",
     },
     {
       name: "--team-ids",
@@ -21,7 +25,29 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--help", "-h"],
-      description: "Usage info",
+      description: "Show this message and exit",
+    },
+    {
+      name: "--debug",
+      description: "Enable debug logging",
+      hidden: true,
+    },
+    {
+      name: "--compatibilityJson",
+      description: "Use a local compatibility JSON file",
+      hidden: true,
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--templateProject",
+      description: "Tag of the template project to build",
+      hidden: true,
+      args: {
+        name: "tag",
+      },
     },
   ],
 };
