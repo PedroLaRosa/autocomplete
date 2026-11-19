@@ -1,167 +1,139 @@
-const bodyTempalates: Fig.Generator = {
+// quickmail (quick-mail) v1.0.4 (PyPI latest, released 2021-03-25; upstream avikumar15/quick-mail-cli has had no release since, 2026-11-19).
+// Source: argparse definitions in quickmail/cli.py and quickmail/commands/*.py from the upstream repo, read not run.
+const bodyTemplates: Fig.Generator = {
   script: ["quickmail", "template", "listall"],
   postProcess: (output) => {
-    const items = output.split("\n");
-    return items.map((item) => {
-      return {
-        name: item,
+    return output
+      .split("\n")
+      .filter((item) => item.trim().length > 0)
+      .map((item) => ({
+        name: item.trim(),
         icon: "fig://icon?type=box",
-        description: item,
-      };
-    });
+        description: "Mail body template",
+      }));
   },
 };
 
 const completionSpec: Fig.Spec = {
   name: "quickmail",
-  description: "Quickmail is a terminal-based solution to send mails",
+  description: "A command line interface to send mail without any hassle",
   parserDirectives: {
     flagsArePosixNoncompliant: true,
   },
   options: [
     {
-      name: ["-v", "--version"],
-      description: "Output cli version",
+      name: ["-h", "--help"],
+      description: "Show this help message and exit",
+      isPersistent: true,
     },
     {
-      name: ["-h", "--help"],
-      description: "Output cli help",
+      name: ["-v", "--version"],
+      description: "Print current cli version",
     },
   ],
   subcommands: [
     {
-      name: "init",
-      description: "Initialise cli",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Get help regarding init command",
-        },
-      ],
-      args: {
-        isOptional: true,
-        template: ["filepaths"],
-      },
-    },
-    {
       name: "clear",
-      description: "Clear the files stored locally",
+      description:
+        "Clear the saved mail bodies, or the credentials and token as well with --justdoit",
       options: [
-        {
-          name: ["-h", "--help"],
-          description: "Get help regarding clear command",
-        },
         {
           name: ["-j", "--justdoit"],
-          description: "Clear entire cli storage including token",
+          description: "Clear storage including the credentials and token",
         },
       ],
+    },
+    {
+      name: "init",
+      description: "Initialise the token and set up your Gmail account",
+      args: {
+        name: "filepath",
+        description: "Path to credentials.json",
+        template: "filepaths",
+      },
     },
     {
       name: "send",
       description: "Send mail",
       options: [
         {
-          name: ["-h", "--help"],
-          description: "Get help regarding send command",
-        },
-        {
           name: ["-r", "--receiver"],
           description: "Receiver's email address",
+          isRequired: true,
           args: {
             name: "receiver",
           },
         },
         {
           name: ["-sub", "--subject"],
-          description: "Subject of mail",
+          description: "Email's subject",
+          isRequired: true,
           args: {
-            name: "Subject",
+            name: "subject",
           },
         },
         {
           name: ["-t", "--template"],
-          description: "Templates for mail body",
+          description: "Template of the email body",
           args: {
-            name: "Template",
-            isOptional: true,
-            generators: bodyTempalates,
+            name: "template",
+            generators: bodyTemplates,
           },
         },
         {
           name: ["-b", "--body"],
-          description: "Body of the mail",
+          description: "Email's body",
           args: {
-            name: "Body",
-            isOptional: true,
+            name: "body",
           },
         },
         {
           name: ["-a", "--attachment"],
-          description: "Path to attachment file",
+          description: "Email's attachment path",
           args: {
-            name: "Attachment file",
-            isOptional: true,
-            template: ["filepaths"],
+            name: "attachment",
+            template: "filepaths",
           },
         },
         {
           name: ["-l", "--lessgo"],
-          description: "Skip confirmation, and send mail",
+          description: "Skip confirmation before sending mail",
         },
       ],
     },
     {
       name: "template",
-      description: "Manage templates",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Get help regarding template command",
-        },
-      ],
+      description: "Manage templates of mail body",
       subcommands: [
         {
           name: "add",
           description: "Add a new template",
           options: [
             {
-              name: ["-h", "--help"],
-              description: "Get help regarding template add subcommand",
-            },
-            {
-              name: "-n",
-              description: "Set template id",
+              name: ["-n", "--templatename"],
+              description: "Name of the new template",
+              isRequired: true,
               args: {
-                name: "Template id",
+                name: "template name",
               },
             },
           ],
         },
         {
           name: "listall",
-          description: "List all templates stored",
-          options: [
-            {
-              name: ["-h", "--help"],
-              description: "Get help regarding template listall subcommand",
-            },
-          ],
+          description: "List all templates",
         },
         {
           name: "edit",
-          description: "Edit any particular template",
+          description: "Edit a particular template",
           options: [
             {
-              name: ["-h", "--help"],
-              description: "Get help regarding template edit subcommand",
-            },
-            {
-              name: "-n",
-              description: "Edit template by id",
+              name: ["-n", "--templatename"],
+              description: "Name of the template to edit",
+              isRequired: true,
               args: {
-                name: "Template id",
-                generators: bodyTempalates,
+                name: "template name",
+                generators: bodyTemplates,
               },
             },
           ],
