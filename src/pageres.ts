@@ -1,3 +1,5 @@
+// Pageres CLI (pageres-cli) v9.0.0 (npm latest, 2026-11-19). Source: pageres-cli 9.0.0 cli.js (meow flag definitions and help text) and readme, pageres 9.0.0 library dist/index.js.
+// Device keywords (e.g. iphone5s) were removed in 9.0; resolutions must be explicit WxH sizes.
 const completionSpec: Fig.Spec = {
   name: "pageres",
   description: "Capture website screenshots",
@@ -15,7 +17,8 @@ const completionSpec: Fig.Spec = {
       name: ["--delay", "-d"],
       description: "Delay screenshot capture",
       args: {
-        name: "time",
+        name: "seconds",
+        default: "0",
       },
     },
     {
@@ -92,6 +95,7 @@ const completionSpec: Fig.Spec = {
       description: "Scale webpage n of times",
       args: {
         name: "number",
+        default: "1",
       },
     },
     {
@@ -119,6 +123,21 @@ const completionSpec: Fig.Spec = {
       name: "--darkMode",
       description: "Emulate preference of dark color scheme",
     },
+    {
+      name: "--clickElement",
+      description: "Click DOM element before screenshot",
+      args: {
+        name: "element",
+      },
+    },
+    {
+      name: "--timeout",
+      description: "Request timeout in seconds",
+      args: {
+        name: "seconds",
+        default: "60",
+      },
+    },
   ],
   args: [
     {
@@ -128,6 +147,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "resolution",
+      description: "Screen resolution as WxH (defaults to 1366x768)",
       isVariadic: true,
     },
   ],
