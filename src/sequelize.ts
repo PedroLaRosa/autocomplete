@@ -1,8 +1,10 @@
+// Sequelize CLI (sequelize-cli) v6.6.5 (npm latest, 2026-11-19). Source: installed sequelize-cli@6.6.5 + sequelize@6.37.8 from npm,
+// walked `sequelize --help` and `sequelize <command> --help` for all 22 commands and read lib/commands/*.js and lib/core/yargs.js.
 const commonOptions: Fig.Option[] = [
   {
     name: "--env",
     description: "The environment to run the command in",
-    args: { name: "environment" },
+    args: { name: "environment", default: "development" },
   },
   {
     name: "--config",
@@ -17,21 +19,22 @@ const commonOptions: Fig.Option[] = [
   {
     name: "--migrations-path",
     description: "The path to the migrations folder",
-    args: { name: "folder path", template: "folders" },
+    args: { name: "folder path", template: "folders", default: "migrations" },
   },
   {
     name: "--seeders-path",
     description: "The path to the seeders folder",
-    args: { name: "folder path", template: "folders" },
+    args: { name: "folder path", template: "folders", default: "seeders" },
   },
   {
     name: "--models-path",
     description: "The path to the models folder",
-    args: { name: "folder path", template: "folders" },
+    args: { name: "folder path", template: "folders", default: "models" },
   },
   {
     name: "--url",
-    description: "The database connection string to use",
+    description:
+      "The database connection string to use. Alternative to using --config files",
     args: { name: "connection string" },
   },
   {
@@ -76,6 +79,11 @@ const databaseOptions: Fig.Option[] = [
   },
 ];
 
+const underscoredOption: Fig.Option = {
+  name: "--underscored",
+  description: "Use snake case for the timestamp's attribute names",
+};
+
 const initOptions: Fig.Option[] = [
   {
     name: "--force",
@@ -94,6 +102,13 @@ const migrateOptions: Fig.Option[] = [
     name: "--from",
     description: "Migration name to start migrations from (excluding)",
     args: { name: "migration name" },
+  },
+  {
+    name: "--name",
+    description:
+      "Migration name. When specified, only this migration will be run",
+    args: { name: "migration name" },
+    exclusiveOn: ["--to", "--from"],
   },
 ];
 
@@ -139,7 +154,7 @@ const subCommands: Fig.Subcommand[] = [
       {
         name: "--to",
         description: "Revert to the provided migration",
-        args: { name: "migration name" },
+        args: { name: "migration name", default: "0" },
       },
     ],
   },
@@ -194,7 +209,9 @@ const subCommands: Fig.Subcommand[] = [
         name: "--name",
         description: "Defines the name of the migration",
         args: { name: "migration name" },
+        isRequired: true,
       },
+      underscoredOption,
     ],
   },
   {
@@ -205,20 +222,19 @@ const subCommands: Fig.Subcommand[] = [
         name: "--name",
         description: "Defines the name of the new model",
         args: { name: "model name" },
+        isRequired: true,
       },
       {
         name: "--attributes",
         description: "A list of attributes",
         args: { name: "attributes string" },
+        isRequired: true,
       },
       {
         name: "--force",
         description: "Forcefully re-creates model with the same name",
       },
-      {
-        name: "--underscored",
-        description: "Use snake case for the timestamp's attribute names",
-      },
+      underscoredOption,
     ],
   },
   {
@@ -229,6 +245,7 @@ const subCommands: Fig.Subcommand[] = [
         name: "--name",
         description: "Defines the name of the seed",
         args: { name: "seed name" },
+        isRequired: true,
       },
     ],
   },
