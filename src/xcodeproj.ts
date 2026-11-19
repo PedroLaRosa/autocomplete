@@ -1,3 +1,6 @@
+// Xcodeproj v1.28.1 (rubygems.org latest, released 2026-07-06, 2026-11-19). Source: gem files lib/xcodeproj/command/*.rb and CLAide 1.1.0 default options, read statically (gem not run).
+// Commands and options are unchanged upstream; only descriptions were aligned with the gem.
+// `target-diff --project` is kept as the help documents it (`--project PATH`); its CLAide parsing was not verified at runtime.
 const projectsAndFoldersGenerator: Fig.Generator = {
   template: "folders",
   filterTemplateSuggestions: (paths) => {
@@ -13,7 +16,7 @@ const projectsAndFoldersGenerator: Fig.Generator = {
 
 const completionSpec: Fig.Spec = {
   name: "xcodeproj",
-  description: "Xcodeproj lets you create and modify Xcode projects",
+  description: "Xcodeproj lets you create and modify Xcode projects from Ruby",
   subcommands: [
     {
       description:
@@ -86,7 +89,7 @@ const completionSpec: Fig.Spec = {
           name: "--group-option",
           requiresSeparator: true,
           description:
-            "The position of the groups when sorting. If no option is specified sorting will interleave groups and files",
+            "The position of the groups when sorting. If no option is specified, sorting will interleave groups and files",
           args: {
             name: "POSITION",
             suggestions: ["above", "below"],
