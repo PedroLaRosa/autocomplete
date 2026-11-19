@@ -1,3 +1,6 @@
+// pass (password-store) v1.7.4 (latest release tag, 2021-06-11; matches Homebrew's formula, 2026-11-19).
+// Source: zx2c4/password-store at tag 1.7.4: cmd_usage() and the getopt tables in src/password-store.sh, man/pass.1, src/completion/pass.zsh-completion.
+// Upstream master has unreleased commits (to 2026-10, Wayland clipboard / emacs / tests) but no CLI option changes, so they do not affect this spec.
 const listPasswords: Fig.Generator = {
   custom: async (_tokens, executeCommand, context) => {
     const { stdout } = await executeCommand({
@@ -17,6 +20,20 @@ const listPasswords: Fig.Generator = {
   },
 };
 
+const listGpgIds: Fig.Generator = {
+  script: ["gpg", "--list-secret-keys", "--with-colons"],
+  postProcess: (output) =>
+    [
+      ...new Set(
+        output
+          .split("\n")
+          .filter((line) => line.startsWith("uid:"))
+          .map((line) => line.split(":")[9])
+          .filter(Boolean)
+      ),
+    ].map((name) => ({ name, icon: "🔑" })),
+};
+
 const listDirectories: Fig.Generator = {
   custom: async (_tokens, executeCommand, context) => {
     const { stdout } = await executeCommand({
@@ -33,6 +50,46 @@ const listDirectories: Fig.Generator = {
   },
 };
 
+// "--clip[=line-number]" / "-c[line-number]" and "--qrcode[=line-number]" / "-q[line-number]"
+const lineNumberArg: Fig.Arg = {
+  name: "line-number",
+  description: "The line of the password file to use (default 1)",
+  isOptional: true,
+};
+
+const showOptions: Fig.Option[] = [
+  {
+    name: "--clip",
+    description:
+      "Copy a line of the password to the clipboard instead of printing it",
+    requiresSeparator: true,
+    args: lineNumberArg,
+    exclusiveOn: ["--qrcode", "-q"],
+  },
+  {
+    name: "-c",
+    description:
+      "Copy a line of the password to the clipboard instead of printing it, e.g. -c2 for line 2",
+    exclusiveOn: ["--qrcode", "-q"],
+  },
+  {
+    name: "--qrcode",
+    description:
+      "Display a QR code of a line of the password instead of printing it",
+    requiresSeparator: true,
+    args: lineNumberArg,
+    exclusiveOn: ["--clip", "-c"],
+  },
+  {
+    name: "-q",
+    description:
+      "Display a QR code of a line of the password instead of printing it, e.g. -q2 for line 2",
+    exclusiveOn: ["--clip", "-c"],
+  },
+];
+
+const forceDescription = "Silently overwrite new-path if it exists";
+
 const completionSpec: Fig.Spec = {
   name: "pass",
   description:
@@ -43,13 +100,10 @@ const completionSpec: Fig.Spec = {
     generators: listPasswords,
   },
   options: [
+    ...showOptions,
     {
-      name: ["--clip", "-c"],
-      description: "Copy the password to the clipboard",
-    },
-    {
-      name: ["--qrcode", "-q"],
-      description: "Display a QRcode of the password",
+      name: "--version",
+      description: "Show version information",
     },
     {
       name: "--help",
@@ -65,6 +119,8 @@ const completionSpec: Fig.Spec = {
         name: "gpg-id",
         description:
           "The gpg-id you want to use to encrypt your password store",
+        isVariadic: true,
+        generators: listGpgIds,
       },
       options: [
         {
@@ -79,7 +135,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "insert",
+      name: ["insert", "add"],
       description:
         "Insert a new password into the password store called pass-name",
       args: {
@@ -90,12 +146,14 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--echo", "-e"],
           description:
-            "Disable keyboard echo when the password is entered and confirm the password by asking for it twice",
+            "Echo the password back to the console during entry. Otherwise, keyboard echo is disabled and the password is confirmed by asking for it twice",
+          exclusiveOn: ["--multiline", "-m"],
         },
         {
-          name: ["--multi-line", "-m"],
+          name: ["--multiline", "-m"],
           description:
             "Lines will be read until EOF or Ctrl+D is reached. Otherwise, only a single line from standard in is read",
+          exclusiveOn: ["--echo", "-e"],
         },
         {
           name: ["--force", "-f"],
@@ -117,7 +175,7 @@ const completionSpec: Fig.Spec = {
       description: "Show usage message",
     },
     {
-      name: "cp",
+      name: ["cp", "copy"],
       description:
         "Copies the password or directory named old-path to new-path",
       args: [
@@ -134,12 +192,12 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: ["--force", "-f"],
-          description: "Do not interactively prompt before moving",
+          description: forceDescription,
         },
       ],
     },
     {
-      name: "mv",
+      name: ["mv", "rename"],
       description:
         "Renames the password or directory named old-path to new-path",
       args: [
@@ -156,12 +214,12 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: ["--force", "-f"],
-          description: "Do not interactively prompt before moving",
+          description: forceDescription,
         },
       ],
     },
     {
-      name: "rm",
+      name: ["rm", "remove", "delete"],
       description:
         "Remove the password named pass-name from the password store",
       args: {
@@ -191,7 +249,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "pass-length",
-          description: "The length of the password",
+          description:
+            "The length of the password (PASSWORD_STORE_GENERATED_LENGTH if unspecified)",
           isOptional: true,
         },
       ],
@@ -205,15 +264,24 @@ const completionSpec: Fig.Spec = {
           name: ["--clip", "-c"],
           description:
             "Do not print the password but instead copy it to the clipboard",
+          exclusiveOn: ["--qrcode", "-q"],
+        },
+        {
+          name: ["--qrcode", "-q"],
+          description:
+            "Do not print the password but instead display a QR code of it",
+          exclusiveOn: ["--clip", "-c"],
         },
         {
           name: ["--in-place", "-i"],
           description:
             "Do not interactively prompt, and only replace the first line of the password file with the new generated password, keeping the remainder of the file intact",
+          exclusiveOn: ["--force", "-f"],
         },
         {
           name: ["--force", "-f"],
-          description: "Overwrite the existing password",
+          description: "Overwrite the existing password without prompting",
+          exclusiveOn: ["--in-place", "-i"],
         },
       ],
     },
@@ -229,12 +297,13 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "find",
+      name: ["find", "search"],
       description:
         "List names of passwords inside the tree that match pass-names",
       args: {
-        name: "pass-name",
-        description: "The password name you want to search for",
+        name: "pass-names",
+        description: "The password names you want to search for",
+        isVariadic: true,
       },
     },
     {
@@ -243,18 +312,10 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "pass-name",
         description: "The password you want to show",
+        isOptional: true,
         generators: listPasswords,
       },
-      options: [
-        {
-          name: ["--clip", "-c"],
-          description: "Copy the password to the clipboard",
-        },
-        {
-          name: ["--qrcode", "-q"],
-          description: "Display a QRcode of the password",
-        },
-      ],
+      options: showOptions,
     },
     {
       name: "edit",
@@ -272,8 +333,8 @@ const completionSpec: Fig.Spec = {
         "Searches inside each decrypted password file for search-string. Grep options can be used",
       loadSpec: "grep",
       args: {
-        name: "pass-name",
-        description: "The password name you want to grep for",
+        name: "search-string",
+        description: "The string to search for in decrypted password files",
       },
     },
   ],
