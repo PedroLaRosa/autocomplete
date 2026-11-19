@@ -118,15 +118,7 @@ const completionSpec: Fig.Spec = {
       isRepeatable: true,
       args: {
         name: "type",
-        suggestions: [
-          "a",
-          "c",
-          ...integerTypes,
-          "f",
-          "fF",
-          "fD",
-          "fL",
-        ],
+        suggestions: ["a", "c", ...integerTypes, "f", "fF", "fD", "fL"],
       },
     },
     {
