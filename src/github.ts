@@ -1,3 +1,5 @@
+// GitHub Desktop CLI (`github`) v3.6.11 (GitHub release tag release-3.6.11, matches Homebrew cask, 2026-11-19).
+// Source: desktop/desktop app/src/cli/main.ts at that tag (read statically, not run; macOS/Windows only).
 const completionSpec: Fig.Spec = {
   name: "github",
   description: "Open a git repository in GitHub Desktop",
@@ -8,13 +10,9 @@ const completionSpec: Fig.Spec = {
   },
   options: [
     {
-      name: "--help",
-      description: "Show the help page for a command",
-      args: {
-        name: "command",
-        isOptional: true,
-        suggestions: ["clone", "open", "help"],
-      },
+      name: ["-h", "--help"],
+      description: "Show the usage of the GitHub Desktop CLI",
+      isPersistent: true,
     },
   ],
   subcommands: [
@@ -57,12 +55,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "help",
-      description: "Show the help page for a command",
-      args: {
-        name: "command",
-        isOptional: true,
-        suggestions: ["clone", "open", "help"],
-      },
+      description: "Show the usage of the GitHub Desktop CLI",
     },
   ],
 };
