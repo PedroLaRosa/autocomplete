@@ -1,42 +1,151 @@
 // sips (macOS built-in tool, no standalone version; man page bundled with Xcode 27.3 beta 2, 2026-11-19).
 // Source: sips(1) from the keith/xcode-man-pages mirror (commit 6ddd0b2) plus the existing spec; NOT a live run on macOS.
 // Added -1/--oneLine, --cropOffset, --optimizeColorForSharing, -o/--out, -j/--js; renamed -padColor to --padColor; -i/--addIcon takes no argument.
-const propertySuggestions: (string | Fig.Suggestion)[] = [
-  "all",
-  "allxml",
-  "dpiHeight",
-  "dpiWidth",
-  "pixelHeight",
-  "pixelWidth",
-  "typeIdentifier",
-  "format",
-  "formatOptions",
-  "space",
-  "samplesPerPixel",
-  "bitsPerSample",
-  "creation",
-  "make",
-  "model",
-  "software",
-  "description",
-  "copyright",
-  "artist",
-  "profile",
-  "hasAlpha",
-  "size",
-  "cmm",
-  "version",
-  "class",
-  "pcs",
-  "platform",
-  "quality",
-  "deviceManufacturer",
-  "deviceModel",
-  "deviceAttributes0",
-  "deviceAttributes1",
-  "renderingIntent",
-  "creator",
-  "md5",
+// Property key suggestions now carry the value types from the man page's OPTIONS section.
+const propertySuggestions: Fig.Suggestion[] = [
+  {
+    name: "all",
+    description: "Binary data (special key)",
+  },
+  {
+    name: "allxml",
+    description: "Binary data (special key)",
+  },
+  {
+    name: "dpiHeight",
+    description: "Float (image)",
+  },
+  {
+    name: "dpiWidth",
+    description: "Float (image)",
+  },
+  {
+    name: "pixelHeight",
+    description: "Integer, read-only (image)",
+  },
+  {
+    name: "pixelWidth",
+    description: "Integer, read-only (image)",
+  },
+  {
+    name: "typeIdentifier",
+    description: "String, read-only (image)",
+  },
+  {
+    name: "format",
+    description:
+      "String: jpeg | tiff | png | gif | jp2 | pict | bmp | qtif | psd | sgi | tga (image)",
+  },
+  {
+    name: "formatOptions",
+    description:
+      "String: default | low | normal | high | best | <percent> | lzw | packbits (image)",
+  },
+  {
+    name: "space",
+    description: "String, read-only (image and profile)",
+  },
+  {
+    name: "samplesPerPixel",
+    description: "Integer, read-only (image)",
+  },
+  {
+    name: "bitsPerSample",
+    description: "Integer, read-only (image)",
+  },
+  {
+    name: "creation",
+    description: "String, read-only for images (image and profile)",
+  },
+  {
+    name: "make",
+    description: "String (image)",
+  },
+  {
+    name: "model",
+    description: "String (image)",
+  },
+  {
+    name: "software",
+    description: "String, read-only (image)",
+  },
+  {
+    name: "description",
+    description: "String (image and profile)",
+  },
+  {
+    name: "copyright",
+    description: "String (image and profile)",
+  },
+  {
+    name: "artist",
+    description: "String (image)",
+  },
+  {
+    name: "profile",
+    description: "Binary data (image)",
+  },
+  {
+    name: "hasAlpha",
+    description: "Boolean, read-only (image)",
+  },
+  {
+    name: "size",
+    description: "Integer, read-only (profile)",
+  },
+  {
+    name: "cmm",
+    description: "String (profile)",
+  },
+  {
+    name: "version",
+    description: "String (profile)",
+  },
+  {
+    name: "class",
+    description: "String, read-only (profile)",
+  },
+  {
+    name: "pcs",
+    description: "String, read-only (profile)",
+  },
+  {
+    name: "platform",
+    description: "String (profile)",
+  },
+  {
+    name: "quality",
+    description: "String: normal | draft | best (profile)",
+  },
+  {
+    name: "deviceManufacturer",
+    description: "String (profile)",
+  },
+  {
+    name: "deviceModel",
+    description: "Integer (profile)",
+  },
+  {
+    name: "deviceAttributes0",
+    description: "Integer (profile)",
+  },
+  {
+    name: "deviceAttributes1",
+    description: "Integer (profile)",
+  },
+  {
+    name: "renderingIntent",
+    description:
+      "String: perceptual | relative | saturation | absolute (profile)",
+  },
+  {
+    name: "creator",
+    description: "String (profile)",
+  },
+  {
+    name: "md5",
+    description: "String, read-only (profile)",
+  },
 ];
 
 const completionSpec: Fig.Spec = {
