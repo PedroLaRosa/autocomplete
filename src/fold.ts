@@ -1,3 +1,4 @@
+// fold (macOS BSD fold from Apple OSS text_cmds-199, man page dated 2020-10-29, 2026-11-19). Source: apple-oss-distributions/text_cmds fold/fold.1 + fold.c (usage: fold [-bs] [-w width] [file ...]); spec already matched. Not run on macOS.
 const completionSpec: Fig.Spec = {
   name: "fold",
   description: "Fold long lines for finite width output device",
