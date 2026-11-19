@@ -64,7 +64,7 @@ const completionSpec: Fig.Spec = {
       name: ["init", "i"],
       priority: 80,
       description: "Creates a config file on an existing Sapphire project",
-      displayName: "Initalize CLI on an existing project ⚙️",
+      displayName: "Initialize CLI on an existing project ⚙️",
     },
     {
       name: "help",
