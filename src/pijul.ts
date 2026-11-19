@@ -78,7 +78,7 @@ const pathsOption = (description: string): Fig.Option => ({
 
 const forceSubRootOption = (
   subject: string,
-  exclusiveOn?: string[],
+  exclusiveOn?: string[]
 ): Fig.Option => ({
   name: "--force",
   description: `Allow ${subject} to span more than one sub-root (imported project) instead of erroring. The change will not commute across projects`,
@@ -447,7 +447,7 @@ const completionSpec: Fig.Spec = {
       options: [
         channelOption,
         outputFormatOption(
-          "Output format; json emits the annotations as structured JSON instead of the default per-line change attribution",
+          "Output format; json emits the annotations as structured JSON instead of the default per-line change attribution"
         ),
         repositoryOption,
       ],
@@ -504,7 +504,7 @@ const completionSpec: Fig.Spec = {
           deprecated: true,
         },
         outputFormatOption(
-          "Output format; json emits a structured diff instead of the default human-readable change text",
+          "Output format; json emits a structured diff instead of the default human-readable change text"
         ),
         repositoryOption,
         {
@@ -1158,7 +1158,7 @@ const completionSpec: Fig.Spec = {
       options: [
         channelOption,
         outputFormatOption(
-          "Output format; json emits a structured status instead of the default human-readable summary",
+          "Output format; json emits a structured status instead of the default human-readable summary"
         ),
         repositoryOption,
       ],
@@ -1202,8 +1202,7 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: "--config",
-      description:
-        "Override a configuration value, in the form key=value",
+      description: "Override a configuration value, in the form key=value",
       isPersistent: true,
       isRepeatable: true,
       args: {
