@@ -1,4 +1,4 @@
-// bc 6.7.6 (macOS 15.5 /usr/bin/bc = Gavin Howard's bc, Apple OSS tag bc-33; its help text is identical in 7.0.3, 2026-11-19). Source: bc/gen/bc_help.txt, bc/src/data.c option table, bc/manuals/bc/A.1.md and bc.xcodeproj build flags (extra math and history enabled); not a live run on macOS
+// bc 6.7.6 (Gavin Howard's bc as shipped in macOS 15, Apple OSS tag bc-33 of 2025-04-30; its help text is identical in 7.0.3, 2026-11-19). Source: bc/gen/bc_help.txt, bc/src/data.c option table, bc/manuals/bc/A.1.md and bc.xcodeproj build flags (extra math and history enabled); not a live run on macOS
 const completionSpec: Fig.Spec = {
   name: "bc",
   description: "An arbitrary precision calculator language",
@@ -51,7 +51,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--ibase", "-I"],
-      description: "Set the builtin variable ibase to the given value (base 10)",
+      description:
+        "Set the builtin variable ibase to the given value (base 10)",
       args: {
         name: "ibase",
       },
@@ -71,7 +72,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--obase", "-O"],
-      description: "Set the builtin variable obase to the given value (base 10)",
+      description:
+        "Set the builtin variable obase to the given value (base 10)",
       args: {
         name: "obase",
       },
@@ -120,7 +122,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--scale", "-S"],
-      description: "Set the builtin variable scale to the given value (base 10)",
+      description:
+        "Set the builtin variable scale to the given value (base 10)",
       args: {
         name: "scale",
       },
