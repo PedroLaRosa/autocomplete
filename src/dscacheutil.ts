@@ -1,3 +1,5 @@
+// dscacheutil (macOS, Xcode 27.2 (27B52) man page dated 2007-01-14, 2026-11-19). Source: dscacheutil(1) from the keith/xcode-man-pages mirror (commit 03c4382); man page only, not run on macOS.
+// Flags, categories and their keys (group, host, mount, protocol, rpc, service, user) match the man page; descriptions and the optional -entries category were corrected.
 const categoryKeysMapping = {
   group: ["name", "gid"],
   host: ["name", "ip_address"],
@@ -74,11 +76,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-q",
-      description: "Query the Directory Service cache",
+      description:
+        "Initiate a query using standard calls, returning cached results or live data (all results of the category by default)",
       options: [
         {
           name: "-a",
-          description: "Attribute to query",
+          description: "Query a specific key with a value",
           args: [
             {
               name: "attributeKey",
@@ -99,17 +102,20 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-cachedump",
-      description: "Get an overview of the cache by default",
+      description: "Dump an overview of the cache by default",
       options: [
         {
           name: "-buckets",
-          description: "Get an overview of the cache by default",
+          description: "Also print hash bucket usage of the current cache",
         },
         {
           name: "-entries",
-          description: "Dump detailed information about cache entries",
+          description:
+            "Dump detailed information about cache entries (dumping host entries requires an administrative user)",
           args: {
-            name: "entry",
+            name: "category",
+            description: "Only dump entries of this category",
+            isOptional: true,
             suggestions: categories,
           },
         },
@@ -118,16 +124,17 @@ const completionSpec: Fig.Spec = {
     {
       name: "-configuration",
       description:
-        "Get the current configuration information, such as the search policy and cache parameters",
+        "Print current configuration information, such as the search policy from Directory Service and cache parameters",
     },
     {
       name: "-flushcache",
-      description: "Flush the entire cache",
+      description:
+        "Flush the entire cache (should only be used in extreme cases)",
     },
     {
       name: "-statistics",
       description:
-        "Get statistics from the cache, including an overview an detailed call statistics",
+        "Print statistics from the cache, including an overview and detailed call statistics",
     },
   ],
 };
