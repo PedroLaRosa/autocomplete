@@ -1,3 +1,4 @@
+// ls (macOS BSD, Apple OSS file_cmds-457.140.3 and file_cmds-479 man page dated 2020-08-31, 2026-11-19). Source: apple-oss-distributions/file_cmds ls/ls.1 + ls/ls.c (getopt "+@1ABCD:FGHILOPRSTUWXabcdefghiklmnopqrstuvwxy%," plus --color); man pages and source only, not run on macOS. Changes: added -D -I -X -y, --color argument is optional (default always) and accepts tty/if-tty, several descriptions refreshed. GNU-only -Z is not on macOS and is not listed.
 const completionSpec: Fig.Spec = {
   name: "ls",
   description: "List directory contents",
@@ -15,12 +16,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "-1",
       description:
-        "(The numeric digit ``one''.)  Force output to be one entry per line.  This is the default when output is not to a terminal",
+        "Force output to be one entry per line. This is the default when output is not to a terminal",
     },
     {
       name: "-A",
       description:
-        "List all entries except for . and ...  Always set for the super-user",
+        "Include directory entries whose names begin with a dot (.) except for . and ... Automatically set for the super-user unless -I is specified",
     },
     {
       name: "-a",
@@ -29,7 +30,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-B",
       description:
-        "Force printing of non-printable characters (as defined by ctype(3) and current locale settings) in file names as xxx, where xxx is the numeric value of the character in octal",
+        "Force printing of non-printable characters (as defined by ctype(3) and current locale settings) in file names as \\xxx, where xxx is the numeric value of the character in octal",
     },
     {
       name: "-b",
@@ -44,6 +45,14 @@ const completionSpec: Fig.Spec = {
       name: "-c",
       description:
         "Use time when file status was last changed for sorting (-t) or long printing (-l)",
+    },
+    {
+      name: "-D",
+      description:
+        "When printing in the long (-l) format, use format (a strftime(3) string) to format the date and time output. Overrides -T",
+      args: {
+        name: "format",
+      },
     },
     {
       name: "-d",
@@ -62,27 +71,32 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-f",
-      description: "Output is not sorted.  This option turns on the -a option",
+      description:
+        "Output is not sorted. This option turns on the -a option and negates the effect of the -r, -S and -t options",
     },
     {
       name: "-G",
       description:
-        "Enable colorized output.  This option is equivalent to defining CLICOLOR in the environment.  (See below.)",
+        "Enable colorized output. This option is equivalent to defining CLICOLOR or COLORTERM in the environment and setting --color=auto",
     },
     {
       name: "-g",
       description:
-        "This option is only available for compatibility with POSIX; it is used to display the group name in the long (-l) format output (the owner name is suppressed)",
+        "Display the group name instead of the owner name in long (-l) output (compatibility option; the man page documents it as having no effect)",
     },
     {
       name: "-H",
       description:
-        "Symbolic links on the command line are followed.  This option is assumed if none of the -F, -d, or -l options are specified",
+        "Symbolic links on the command line are followed. This option is assumed if none of the -F, -d, or -l options are specified",
     },
     {
       name: "-h",
       description:
-        "When used with the -l option, use unit suffixes: Byte, Kilobyte, Megabyte, Gigabyte, Terabyte and Petabyte in order to reduce the number of digits to three or less using base 2 for sizes",
+        "When used with the -l option, use unit suffixes: Byte, Kilobyte, Megabyte, Gigabyte, Terabyte and Petabyte in order to reduce the number of digits to four or fewer using base 2 for sizes",
+    },
+    {
+      name: "-I",
+      description: "Prevent -A from being automatically set for the super-user",
     },
     {
       name: "-i",
@@ -92,17 +106,16 @@ const completionSpec: Fig.Spec = {
     {
       name: "-k",
       description:
-        "If the -s option is specified, print the file size allocation in kilobytes, not blocks.  This option overrides the environment variable BLOCKSIZE",
+        "Same as setting the environment variable BLOCKSIZE to 1024, except that it also nullifies any -h options to its left",
     },
     {
       name: "-L",
       description:
-        "Follow all symbolic links to final target and list the file or directory the link references rather than the link itself.  This option cancels the -P option",
+        "Follow all symbolic links to final target and list the file or directory the link references rather than the link itself. This option cancels the -P option",
     },
     {
       name: "-l",
-      description:
-        "(The lowercase letter ``ell''.)  List in long format.  (See below.)  A total sum for all the file sizes is output on a line before the long listing",
+      description: "List files in the long format",
     },
     {
       name: "-m",
@@ -112,49 +125,52 @@ const completionSpec: Fig.Spec = {
     {
       name: "-n",
       description:
-        "Display user and group IDs numerically, rather than converting to a user or group name in a long (-l) output.  This option turns on the -l option",
+        "Display user and group IDs numerically rather than converting to a user or group name in long (-l) output. This option turns on the -l option",
     },
     {
       name: "-O",
-      description: "Include the file flags in a long (-l) output",
+      description: "Include the file flags in long (-l) output",
     },
     { name: "-o", description: "List in long format, but omit the group id" },
     {
       name: "-P",
       description:
-        "If argument is a symbolic link, list the link itself rather than the object the link references.  This option cancels the -H and -L options",
+        "If argument is a symbolic link, list the link itself rather than the object the link references. This option cancels the -H and -L options",
     },
     {
       name: "-p",
       description:
-        "Write a slash (`/') after each filename if that file is a directory",
+        "Write a slash (/) after each filename if that file is a directory",
     },
     {
       name: "-q",
       description:
-        "Force printing of non-graphic characters in file names as the character `?'; this is the default when output is to a terminal",
+        "Force printing of non-graphic characters in file names as the character ?; this is the default when output is to a terminal",
     },
     { name: "-R", description: "Recursively list subdirectories encountered" },
     {
       name: "-r",
-      description:
-        "Reverse the order of the sort to get reverse lexicographical order or the oldest entries first (or largest files last, if combined with sort by size",
+      description: "Reverse the order of the sort",
     },
-    { name: "-S", description: "Sort files by size" },
+    {
+      name: "-S",
+      description:
+        "Sort by size (largest file first) before sorting the operands in lexicographical order",
+    },
     {
       name: "-s",
       description:
-        "Display the number of file system blocks actually used by each file, in units of 512 bytes, where partial units are rounded up to the next integer value.  If the output is to a terminal, a total sum for all the file sizes is output on a line before the listing.  The environment variable BLOCKSIZE overrides the unit size of 512 bytes",
+        "Display the number of blocks used in the file system by each file",
     },
     {
       name: "-T",
       description:
-        "When used with the -l (lowercase letter ``ell'') option, display complete time information for the file, including month, day, hour, minute, second, and year",
+        "When printing in the long (-l) format, display complete time information for the file, including month, day, hour, minute, second, and year",
     },
     {
       name: "-t",
       description:
-        "Sort by time modified (most recently modified first) before sorting the operands by lexicographical order",
+        "Sort by descending time modified (most recently modified first). If two files have the same modification timestamp, sort their names in ascending lexicographical order",
     },
     {
       name: "-u",
@@ -163,8 +179,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-U",
-      description:
-        "Use time of file creation, instead of last modification for sorting (-t) or long output (-l)",
+      description: "Use time when file was created for sorting or printing",
     },
     {
       name: "-v",
@@ -173,17 +188,27 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-W",
-      description: "Display whiteouts when scanning directories.  (-S) flag)",
+      description: "Display whiteouts when scanning directories",
     },
     {
       name: "-w",
       description:
-        "Force raw printing of non-printable characters.  This is the default when output is not to a terminal",
+        "Force raw printing of non-printable characters. This is the default when output is not to a terminal",
+    },
+    {
+      name: "-X",
+      description:
+        "When listing recursively, do not descend into directories that have a different device number (would cross file system boundaries)",
     },
     {
       name: "-x",
       description:
         "The same as -C, except that the multi-column output is produced with entries sorted across, rather than down, the columns",
+    },
+    {
+      name: "-y",
+      description:
+        "When the -t option is set, sort the alphabetical output in the same order as the time output (same as setting LS_SAMESORT)",
     },
     {
       name: "-%",
@@ -192,24 +217,25 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-,",
-      description: `When the -l option is set, print file sizes grouped and separated by thousands using the non-monetary separator returned
-by localeconv(3), typically a comma or period.  If no locale is set, or the locale does not have a non-monetary separator, this
-option has no effect.  This option is not defined in IEEE Std 1003.1-2001 (“POSIX.1”)`,
+      description:
+        "Print file sizes grouped and separated by thousands using the non-monetary separator returned by localeconv(3), typically a comma or period",
       dependsOn: ["-l"],
     },
     {
       name: "--color",
-      description: `Output colored escape sequences based on when, which may be set to either always, auto, or never`,
+      description:
+        "Output colored escape sequences based on when (always if no argument is given)",
       requiresSeparator: true,
       args: {
         name: "when",
+        isOptional: true,
         suggestions: [
           {
             name: ["always", "yes", "force"],
             description: "Will make ls always output color",
           },
           {
-            name: "auto",
+            name: ["auto", "tty", "if-tty"],
             description:
               "Will make ls output escape sequences based on termcap(5), but only if stdout is a tty and either the -G flag is specified or the COLORTERM environment variable is set and not empty",
           },
