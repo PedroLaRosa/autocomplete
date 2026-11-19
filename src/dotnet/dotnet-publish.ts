@@ -1,138 +1,74 @@
-import { filepaths } from "@tabsmith/autocomplete-generators";
+import {
+  artifactsPathOption,
+  configurationOption,
+  disableBuildServersOption,
+  frameworkOption,
+  implicitRestoreOptions,
+  interactiveOption,
+  msbuildOptions,
+  noDependenciesOption,
+  noLogoOption,
+  noRestoreOption,
+  outputOption,
+  projectSolutionOrFileGenerator,
+  selfContainedOptions,
+  targetPlatformOptions,
+  useCurrentRuntimeOption,
+  verbosityOption,
+  versionSuffixOption,
+} from "./shared";
 
 const completionSpec: Fig.Spec = {
   name: "publish",
-  description:
-    "Dotnet publish compiles the application, reads through its dependencies specified in the project file, and publishes the resulting set of files to a directory",
+  description: "Publisher for the .NET Platform",
   args: {
-    name: "project",
-    description: "The project or solution to publish",
+    name: "project | solution | file",
+    description:
+      "The project or solution or C# (file-based program) file to operate on. If a file is not specified, the command will search the current directory for a project or solution",
     isOptional: true,
-    generators: filepaths({ extensions: ["csproj", "sln"] }),
+    isVariadic: true,
+    generators: projectSolutionOrFileGenerator,
   },
   options: [
-    {
-      name: ["-a", "--arch"],
-      description:
-        "Specifies the target architecture. This is a shorthand syntax for setting the Runtime Identifier (RID), where the provided value is combined with the default RID. For example, on a win-x64 machine, specifying --arch x86 sets the RID to win-x86. If you use this option, don't use the -r|--runtime option. Available since .NET 6 Preview 7",
-      args: {
-        name: "arch",
-        suggestions: ["x86", "x64", "arm", "arm64"],
-      },
-    },
-    {
-      name: ["-c", "--configuration"],
-      description:
-        "Defines the build configuration. The default for most projects is Debug, but you can override the build configuration settings in your project",
-      args: {
-        name: "configuration",
-        suggestions: ["Debug", "Release"],
-      },
-    },
-    {
-      name: ["-f", "--framework"],
-      description:
-        "Publishes the application for the specified target framework. You must specify the target framework in the project file",
-      args: {
-        name: "framework",
-      },
-    },
-    {
-      name: "--force",
-      description:
-        "Forces all dependencies to be resolved even if the last restore was successful. Specifying this flag is the same as deleting the project.assets.json file",
-    },
-    {
-      name: "--interactive",
-      description:
-        "Allows the command to stop and wait for user input or action. For example, to complete authentication. Available since .NET Core 3.0 SDK",
-    },
+    ...implicitRestoreOptions(),
+    useCurrentRuntimeOption("Use current runtime as the target runtime"),
+    noDependenciesOption(
+      "Do not restore project-to-project references and only restore the specified project",
+    ),
+    outputOption("The output directory to place the published artifacts in"),
+    artifactsPathOption,
     {
       name: "--manifest",
       description:
-        "Specifies one or several target manifests to use to trim the set of packages published with the app. The manifest file is part of the output of the dotnet store command. To specify multiple manifests, add a --manifest option for each manifest",
+        "The path to a target manifest file that contains the list of packages to be excluded from the publish step",
+      isRepeatable: true,
       args: {
-        name: "path",
+        name: "manifest",
         template: "filepaths",
       },
     },
     {
       name: "--no-build",
       description:
-        "Doesn't build the project before publishing. It also implicitly sets the --no-restore flag",
+        "Do not build the project before publishing. Implies --no-restore",
     },
-    {
-      name: "--no-dependencies",
-      description:
-        "Ignores project-to-project references and only restores the root project",
-    },
-    {
-      name: "--nologo",
-      description:
-        "Doesn't display the startup banner or the copyright message. Available since .NET Core 3.0 SDK",
-    },
-    {
-      name: "--no-restore",
-      description:
-        "Doesn't execute an implicit restore when running the command",
-    },
-    {
-      name: ["-o", "--output"],
-      description: "Specifies the path for the output directory",
-      args: {
-        name: "path",
-        template: "folders",
-      },
-    },
-    {
-      name: "--os",
-      description:
-        "Specifies the target operating system (OS). This is a shorthand syntax for setting the Runtime Identifier (RID), where the provided value is combined with the default RID. For example, on a win-x64 machine, specifying --os os sets the RID to os-x64. If you use this option, don't use the -r|--runtime option. Available since .NET 6 Preview 7",
-      args: {
-        name: "os",
-      },
-    },
-    {
-      name: "--self-contained",
-      description:
-        "Publishes the .NET runtime with your application so the runtime doesn't need to be installed on the target machine. Default is true if a runtime identifier is specified and the project is an executable project (not a library project)",
-      args: {
-        name: "self-contained",
-        default: "true",
-        isOptional: true,
-        suggestions: ["true", "false"],
-      },
-    },
-    {
-      name: "--no-self-contained",
-      description:
-        "Equivalent to --self-contained false. Available since .NET Core 3.0 SDK",
-    },
-    {
-      name: ["-r", "--runtime"],
-      description:
-        "Publishes the application for a given runtime. For a list of Runtime Identifiers (RIDs), see the RID catalog",
-      args: {
-        name: "runtime",
-      },
-    },
-    {
-      name: ["-v", "--verbosity"],
-      description:
-        "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. The default is minimal. For more information, see LoggerVerbosity",
-      args: {
-        name: "verbosity",
-        suggestions: ["quiet", "minimal", "normal", "detailed", "diagnostic"],
-      },
-    },
-    {
-      name: "--version-suffix",
-      description:
-        "Defines the version suffix to replace the asterisk (*) in the version field of the project file",
-      args: {
-        name: "suffix",
-      },
-    },
+    ...selfContainedOptions,
+    noLogoOption,
+    frameworkOption(
+      "The target framework to publish for. The target framework has to be specified in the project file",
+    ),
+    configurationOption(
+      "The configuration to publish for. The default is 'Release' for NET 8.0 projects and above, but 'Debug' for older projects",
+    ),
+    versionSuffixOption,
+    interactiveOption,
+    noRestoreOption,
+    verbosityOption(),
+    ...targetPlatformOptions(
+      "The target runtime to publish for. This is used when creating a self-contained deployment. The default is to publish a framework-dependent application",
+    ),
+    disableBuildServersOption,
+    ...msbuildOptions(),
   ],
 };
 
