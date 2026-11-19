@@ -1,3 +1,5 @@
+// tldr v1.6.1 (tldr-pages/tldr-c-client GitHub release, latest tag as of 2026-11-19). Source: src/tldr.c (getopt table, usage text), man/tldr.1, CHANGELOG.md at tag v1.6.1.
+// This spec follows the C client, whose page cache is ~/.tldrc/tldr/pages; the npm (3.5.0), Python (3.4.4) and Rust tlrc (1.13.1) clients ship different flags.
 const tldrRc = `~/.tldrc/tldr`;
 const android = `${tldrRc}/pages/android/`;
 const common = `${tldrRc}/pages/common/`;
@@ -33,106 +35,56 @@ const wholeTldrPages: Fig.Generator = {
   },
 };
 
-const linuxTldrPages: Fig.Generator = {
-  script: ["bash", "-c", `command ls -Al ${linux} 2>/dev/null`],
-  postProcess: (out) => {
-    return out
-      .split("\n")
-      .filter((line) => isMarkDownRegex.test(line))
-      .map((line) => {
-        return {
-          name: line.split(" ").at(-1).slice(0, -3),
-          description: "Tldr page",
-          icon: "fig://icon?type=string",
-        };
-      });
-  },
-};
-
-const osxTldrPages: Fig.Generator = {
-  script: ["bash", "-c", `command ls -l ${osx} 2>/dev/null`],
-  postProcess: (out) => {
-    return out
-      .split("\n")
-      .filter((line) => isMarkDownRegex.test(line))
-      .map((line) => {
-        return {
-          name: line.split(" ").at(-1).slice(0, -3),
-          description: "Tldr page",
-          icon: "fig://icon?type=string",
-        };
-      });
-  },
-};
-
-const sunosTldrPages: Fig.Generator = {
-  script: ["bash", "-c", `command ls -l ${sunos} 2>/dev/null`],
-  postProcess: (out) => {
-    return out
-      .split("\n")
-      .filter((line) => isMarkDownRegex.test(line))
-      .map((line) => {
-        return {
-          name: line.split(" ").at(-1).slice(0, -3),
-          description: "Tldr page",
-          icon: "fig://icon?type=string",
-        };
-      });
-  },
-};
-
 const platformSuggestions = ["linux", "osx", "sunos", "windows", "common"];
 
 const completionSpec: Fig.Spec = {
   name: "tldr",
   description: "A simpler man page than the existing man page",
-  args: { generators: wholeTldrPages },
+  args: { name: "page", generators: wholeTldrPages },
   options: [
     {
       name: ["-h", "--help"],
-      description: "Display help for command",
+      description: "Print this help and exit",
     },
     {
-      name: ["-s", "--search"],
-      description: "Search all pages for the query",
-      args: {
-        name: "query",
-      },
+      name: ["-C", "--color"],
+      description: "Force color display",
     },
     {
-      name: "--linux",
-      description: "Show command page for Linux",
-      args: { generators: linuxTldrPages },
-    },
-    {
-      name: "--osx",
-      description: "Show command page for OSX",
-      args: { generators: osxTldrPages },
-    },
-    {
-      name: "--sunos",
-      description: "Show command page for SunOS",
-      args: { generators: sunosTldrPages },
-    },
-    {
-      name: ["-l", "--list"],
-      description: "Show all pages for current platform",
-    },
-    {
-      name: ["-u", "--update"],
-      description: "Download the latest pages and generate search index",
-    },
-    {
-      name: ["-c", "--clear-cache"],
-      description: "Delete the entire local cache",
-    },
-    {
-      name: ["--platform", "-p"],
+      name: ["-p", "--platform"],
       description: "Select platform",
       args: {
         name: "platform",
         suggestions: platformSuggestions,
       },
+    },
+    {
+      name: ["-r", "--render"],
+      description: "Render a local page for testing purposes",
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: ["-u", "--update"],
+      description: "Update local database",
+    },
+    {
+      name: ["-v", "--version"],
+      description: "Print version and exit",
+    },
+    {
+      name: ["-c", "--clear-cache"],
+      description: "Clear local database",
+    },
+    {
+      name: ["-V", "--verbose"],
+      description: "Display verbose output (when used with -c or -u)",
+    },
+    {
+      name: ["-l", "--list"],
+      description: "List all entries in the local database",
     },
   ],
 };
