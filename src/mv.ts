@@ -1,4 +1,5 @@
 // mv (macOS BSD, mv.1 dated 2013-03-15, apple-oss-distributions/file_cmds-479, 2026-11-19). Source: mv.1 + mv.c from Apple's OSS mirror (not run on macOS)
+// BSD flags only (-f -h -i -n -v); GNU-only flags are not listed
 const completionSpec: Fig.Spec = {
   name: "mv",
   description: "Move & rename files and folders",
