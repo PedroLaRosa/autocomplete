@@ -1,6 +1,7 @@
 // palera1n v2.4 (latest stable upstream tag, released 2026-07-27; v3.0.0-beta.x are pre-releases and not covered, 2026-11-19).
 // Source: getopt_long table and usage() text in src/optparse.c at tag v2.4 (palera1n/palera1n).
 // Flags only built into some variants (rootful -B/-c/-C/-f/-l, TUI -t/--cli, macOS-only --override-libcheckra1nhelper) are kept.
+// DEV_BUILD-only flags (-1/--test1, -2/--test2) are intentionally omitted.
 // The usage text lists --jbinit-log-to-file for -L but v2.4 does not register that long name in getopt_long, so only -L works.
 const completionSpec: Fig.Spec = {
   name: "palera1n",
