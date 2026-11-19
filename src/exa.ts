@@ -1,3 +1,6 @@
+// exa v0.10.1 (latest upstream release tag, 2021-04; ogham/exa is archived, succeeded by eza; 2026-11-19).
+// Source: cloned ogham/exa at v0.10.1 and read src/options/{flags,help,filter,view}.rs, man/exa.1.md and
+// completions/completions.zsh. Not run (Rust build skipped); no flags were invented beyond those sources.
 const completionSpec: Fig.Spec = {
   name: "exa",
   description: "A modern replacement for ls",
@@ -46,8 +49,6 @@ const completionSpec: Fig.Spec = {
     {
       description: "When to use terminal colours (always, auto, never)",
       name: ["--colour", "--color"],
-
-      requiresSeparator: true,
       args: {
         name: "when",
         suggestions: [
@@ -68,8 +69,10 @@ const completionSpec: Fig.Spec = {
       name: ["--colour-scale", "--color-scale"],
     },
     {
-      description: "Show hidden and 'dot' files",
+      description:
+        "Show hidden and 'dot' files (use twice to also show . and ..)",
       name: ["-a", "--all"],
+      isRepeatable: 2,
     },
     {
       description: "List directories like regular files",
@@ -87,7 +90,8 @@ const completionSpec: Fig.Spec = {
       name: ["-r", "--reverse"],
     },
     {
-      description: "Which field to sort by",
+      description:
+        "Which field to sort by (date, time, old and new all refer to modified)",
       name: ["-s", "--sort"],
       args: {
         name: "sort field",
@@ -114,6 +118,9 @@ const completionSpec: Fig.Spec = {
             name: "modified",
           },
           {
+            name: "changed",
+          },
+          {
             name: "accessed",
           },
           {
@@ -127,15 +134,31 @@ const completionSpec: Fig.Spec = {
           },
           {
             name: "date",
+            description: "Alias for modified",
           },
           {
             name: "time",
+            description: "Alias for modified",
           },
           {
-            name: "old",
+            name: "newest",
+            description: "Alias for modified",
           },
           {
             name: "new",
+            description: "Alias for modified",
+          },
+          {
+            name: "age",
+            description: "Reverse of modified (oldest first)",
+          },
+          {
+            name: "oldest",
+            description: "Reverse of modified (oldest first)",
+          },
+          {
+            name: "old",
+            description: "Reverse of modified (oldest first)",
           },
         ],
       },
@@ -188,26 +211,20 @@ const completionSpec: Fig.Spec = {
       name: ["-m", "--modified"],
     },
     {
+      description: "List numeric user and group IDs",
+      name: ["-n", "--numeric"],
+    },
+    {
       description: "Show number of file system blocks",
       name: ["-S", "--blocks"],
     },
     {
       description:
-        "Which timestamp field to list (modified, accessed, created)",
+        "Which timestamp field to list (modified, changed, accessed, created)",
       name: ["-t", "--time"],
       args: {
         name: "FIELD",
-        suggestions: [
-          {
-            name: "modified",
-          },
-          {
-            name: "accessed",
-          },
-          {
-            name: "created",
-          },
-        ],
+        suggestions: ["modified", "changed", "accessed", "created"],
       },
     },
     {
@@ -217,6 +234,10 @@ const completionSpec: Fig.Spec = {
     {
       description: "Use the created timestamp field",
       name: ["-U", "--created"],
+    },
+    {
+      description: "Use the changed timestamp field",
+      name: "--changed",
     },
     {
       description:
@@ -241,6 +262,26 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      description: "Suppress the permissions field",
+      name: "--no-permissions",
+    },
+    {
+      description: "List each file's permission in octal format",
+      name: "--octal-permissions",
+    },
+    {
+      description: "Suppress the filesize field",
+      name: "--no-filesize",
+    },
+    {
+      description: "Suppress the user field",
+      name: "--no-user",
+    },
+    {
+      description: "Suppress the time field",
+      name: "--no-time",
+    },
+    {
       description: "List each file's Git status, if tracked or ignored",
       name: "--git",
     },
@@ -254,14 +295,9 @@ const completionSpec: Fig.Spec = {
       exclusiveOn: ["--no-icons"],
     },
     {
-      description: "Does not display icons",
+      description: "Does not display icons (always overrides --icons)",
       exclusiveOn: ["--icons"],
       name: "--no-icons",
-    },
-    {
-      description:
-        "Displays when a file or folder got changed instead of modified in the header",
-      name: "--changed",
     },
   ],
 };
