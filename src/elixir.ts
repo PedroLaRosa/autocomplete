@@ -1,3 +1,7 @@
+// Elixir v1.20.5 (latest stable tag elixir-lang/elixir, cross-checked with Homebrew formula, 2026-11-19).
+// Source: usage text of bin/elixir and bin/elixir.bat plus the option parser lib/elixir/lib/kernel/cli.ex at tag v1.20.5, not a live run.
+// Changes vs the previous spec: added --color/--no-color and --short-version, removed --werl and --app (neither is in the 1.20 usage text or Kernel.CLI),
+// refreshed the -h/--help and -v/--version descriptions.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const completionSpec: Fig.Subcommand = {
@@ -28,7 +32,7 @@ const completionSpec: Fig.Subcommand = {
     },
     {
       name: ["-h", "--help"],
-      description: "Prints this message and exits",
+      description: "Prints this message (standalone)",
     },
     {
       name: "-r",
@@ -74,15 +78,15 @@ const completionSpec: Fig.Subcommand = {
     },
     {
       name: ["-v", "--version"],
-      description: "Prints Elixir version and exits",
+      description: "Prints Erlang/OTP and Elixir versions (standalone)",
     },
     {
-      name: "--app",
-      description: "Starts the given app and its dependencies",
-      isRepeatable: true,
-      args: {
-        name: "APP",
-      },
+      name: "--color",
+      description: "Enables ANSI coloring",
+    },
+    {
+      name: "--no-color",
+      description: "Disables ANSI coloring",
     },
     {
       name: "--erl",
@@ -97,6 +101,7 @@ const completionSpec: Fig.Subcommand = {
       description: "Enables or disables OTP reporting",
       args: {
         name: "BOOL",
+        suggestions: ["true", "false"],
       },
     },
     {
@@ -104,6 +109,7 @@ const completionSpec: Fig.Subcommand = {
       description: "Enables or disables SASL reporting",
       args: {
         name: "BOOL",
+        suggestions: ["true", "false"],
       },
     },
     {
@@ -111,8 +117,8 @@ const completionSpec: Fig.Subcommand = {
       description: "Does not halt the Erlang VM after execution",
     },
     {
-      name: "--werl",
-      description: "Uses Erlang's Windows shell GUI (Windows only)",
+      name: "--short-version",
+      description: "Prints Elixir version (standalone)",
     },
     {
       name: "--cookie",
