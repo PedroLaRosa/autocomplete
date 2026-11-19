@@ -1,3 +1,5 @@
+// fmt (macOS BSD fmt from Apple OSS text_cmds-199, man page dated 2020-10-29, 2026-11-19). Source: apple-oss-distributions/text_cmds fmt/fmt.1 + fmt.c (getopt string "0123456789cd:hl:mnpst:w:"). Not run on macOS.
+// The positional `goal [maximum]` and `-width` forms are not modelled (ambiguous with file names); use -w.
 const completionSpec: Fig.Spec = {
   name: "fmt",
   description: "Simple text formatter",
@@ -41,7 +43,7 @@ your shell`,
       args: {
         name: "chars",
         suggestions: [".", "?", "!"],
-        default: ".",
+        default: ".?!",
       },
     },
     {
@@ -64,6 +66,16 @@ stop.  The default is 8`,
         name: "number",
         suggestions: ["8"],
         default: "8",
+      },
+    },
+    {
+      name: "-w",
+      description: `Set the line width (goal and maximum) to width.  The goal
+length otherwise defaults to 65 and the maximum to 10 more
+than the goal.  Also written as -width`,
+      args: {
+        name: "width",
+        suggestions: ["72", "80"],
       },
     },
   ],
