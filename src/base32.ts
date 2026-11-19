@@ -35,7 +35,8 @@ const completionSpec: Fig.Spec = {
   ],
   args: {
     name: "FILE",
-    description: "File to base32 encode/decode",
+    description:
+      "File to base32 encode/decode (standard input when absent or -)",
     template: "filepaths",
   },
 };
