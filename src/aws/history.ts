@@ -40,6 +40,7 @@ const completionSpec: Fig.Spec = {
         name: "command_id",
         description:
           "The ID of the CLI command to show. If this positional argument is omitted, it will show the last the CLI command ran",
+        isOptional: true,
       },
     },
     {
@@ -49,4 +50,5 @@ const completionSpec: Fig.Spec = {
     },
   ],
 };
+
 export default completionSpec;

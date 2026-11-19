@@ -340,11 +340,10 @@ const generators: Record<string, Fig.Generator> = {
     },
   },
 };
-
 const completionSpec: Fig.Spec = {
   name: "s3",
   description:
-    'This section explains prominent concepts and notations in the set of high-level S3 commands provided.\n\nPath Argument Type\n++++++++++++++++++\n\nWhenever using a command, at least one path argument must be specified.  There\nare two types of path arguments: ``LocalPath`` and ``S3Uri``.\n\n``LocalPath``: represents the path of a local file or directory.  It can be\nwritten as an absolute path or relative path.\n\n``S3Uri``: represents the location of a S3 object, prefix, or bucket.  This\nmust be written in the form ``s3://mybucket/mykey`` where ``mybucket`` is\nthe specified S3 bucket, ``mykey`` is the specified S3 key.  The path argument\nmust begin with ``s3://`` in order to denote that the path argument refers to\na S3 object. Note that prefixes are separated by forward slashes. For\nexample, if the S3 object ``myobject`` had the prefix ``myprefix``, the\nS3 key would be ``myprefix/myobject``, and if the object was in the bucket\n``mybucket``, the ``S3Uri`` would be ``s3://mybucket/myprefix/myobject``.\n\n``S3Uri`` also supports S3 access points. To specify an access point, this\nvalue must be of the form ``s3://<access-point-arn>/<key>``. For example if\nthe access point ``myaccesspoint`` to be used has the ARN:\n``arn:aws:s3:us-west-2:123456789012:accesspoint/myaccesspoint`` and the object\nbeing accessed has the key ``mykey``, then the ``S3URI`` used must be:\n``s3://arn:aws:s3:us-west-2:123456789012:accesspoint/myaccesspoint/mykey``.\nSimilar to bucket names, you can also use prefixes with access point ARNs for\nthe ``S3Uri``. For example:\n``s3://arn:aws:s3:us-west-2:123456789012:accesspoint/myaccesspoint/myprefix/``\n\nThe higher level ``s3`` commands do **not** support access point object ARNs.\nFor example, if the following was specified:\n``s3://arn:aws:s3:us-west-2:123456789012:accesspoint/myaccesspoint/object/mykey``\nthe ``S3URI`` will resolve to the object key ``object/mykey``\n\n\n\nOrder of Path Arguments\n+++++++++++++++++++++++\n\nEvery command takes one or two positional path arguments.  The first path\nargument represents the source, which is the local file/directory or S3\nobject/prefix/bucket that is being referenced.  If there is a second path\nargument, it represents the destination, which is the local file/directory\nor S3 object/prefix/bucket that is being operated on.  Commands with only\none path argument do not have a destination because the operation is being\nperformed only on the source.\n\n\nSingle Local File and S3 Object Operations\n++++++++++++++++++++++++++++++++++++++++++\n\nSome commands perform operations only on single files and S3 objects.  The\nfollowing commands are single file/object operations if no ``--recursive``\nflag is provided.\n\n    * ``cp``\n    * ``mv``\n    * ``rm``\n\nFor this type of operation, the first path argument, the source, must exist\nand be a local file or S3 object.  The second path argument, the destination,\ncan be the name of a local file, local directory, S3 object, S3 prefix,\nor S3 bucket.\n\nThe destination is indicated as a local directory, S3 prefix, or S3 bucket\nif it ends with a forward slash or back slash.  The use of slash depends\non the path argument type.  If the path argument is a ``LocalPath``,\nthe type of slash is the separator used by the operating system.  If the\npath is a ``S3Uri``, the forward slash must always be used.  If a slash\nis at the end of the destination, the destination file or object will\nadopt the name of the source file or object.  Otherwise, if there is no\nslash at the end, the file or object will be saved under the name provided.\nSee examples in ``cp`` and ``mv`` to illustrate this description.\n\n\nDirectory and S3 Prefix Operations\n++++++++++++++++++++++++++++++++++\n\nSome commands only perform operations on the contents of a local directory\nor S3 prefix/bucket.  Adding or omitting a forward slash or back slash to\nthe end of any path argument, depending on its type, does not affect the\nresults of the operation.  The following commands will always result in\na directory or S3 prefix/bucket operation:\n\n* ``sync``\n* ``mb``\n* ``rb``\n* ``ls``\n\n\nUse of Exclude and Include Filters\n++++++++++++++++++++++++++++++++++\n\nCurrently, there is no support for the use of UNIX style wildcards in\na command\'s path arguments.  However, most commands have ``--exclude "<value>"``\nand ``--include "<value>"`` parameters that can achieve the desired result.\nThese parameters perform pattern matching to either exclude or include\na particular file or object.  The following pattern symbols are supported.\n\n    * ``*``: Matches everything\n    * ``?``: Matches any single character\n    * ``[sequence]``: Matches any character in ``sequence``\n    * ``[!sequence]``: Matches any character not in ``sequence``\n\nAny number of these parameters can be passed to a command.  You can do this by\nproviding an ``--exclude`` or ``--include`` argument multiple times, e.g.\n``--include "*.txt" --include "*.png"``.\nWhen there are multiple filters, the rule is the filters that appear later in\nthe command take precedence over filters that appear earlier in the command.\nFor example, if the filter parameters passed to the command were\n\n::\n\n    --exclude "*" --include "*.txt"\n\nAll files will be excluded from the command except for files ending with\n``.txt``  However, if the order of the filter parameters was changed to\n\n::\n\n    --include "*.txt" --exclude "*"\n\nAll files will be excluded from the command.\n\nEach filter is evaluated against the **source directory**.  If the source\nlocation is a file instead of a directory, the directory containing the file is\nused as the source directory.  For example, suppose you had the following\ndirectory structure::\n\n    /tmp/foo/\n      .git/\n      |---config\n      |---description\n      foo.txt\n      bar.txt\n      baz.jpg\n\nIn the command ``aws s3 sync /tmp/foo s3://bucket/`` the source directory is\n``/tmp/foo``.  Any include/exclude filters will be evaluated with the source\ndirectory prepended.  Below are several examples to demonstrate this.\n\nGiven the directory structure above and the command\n``aws s3 cp /tmp/foo s3://bucket/ --recursive --exclude ".git/*"``, the\nfiles ``.git/config`` and ``.git/description`` will be excluded from the\nfiles to upload because the exclude filter ``.git/*`` will have the source\nprepended to the filter.  This means that::\n\n    /tmp/foo/.git/* -> /tmp/foo/.git/config       (matches, should exclude)\n    /tmp/foo/.git/* -> /tmp/foo/.git/description  (matches, should exclude)\n    /tmp/foo/.git/* -> /tmp/foo/foo.txt  (does not match, should include)\n    /tmp/foo/.git/* -> /tmp/foo/bar.txt  (does not match, should include)\n    /tmp/foo/.git/* -> /tmp/foo/baz.jpg  (does not match, should include)\n\nThe command ``aws s3 cp /tmp/foo/ s3://bucket/ --recursive --exclude "ba*"``\nwill exclude ``/tmp/foo/bar.txt`` and ``/tmp/foo/baz.jpg``::\n\n    /tmp/foo/ba* -> /tmp/foo/.git/config      (does not match, should include)\n    /tmp/foo/ba* -> /tmp/foo/.git/description (does not match, should include)\n    /tmp/foo/ba* -> /tmp/foo/foo.txt          (does not match, should include)\n    /tmp/foo/ba* -> /tmp/foo/bar.txt  (matches, should exclude)\n    /tmp/foo/ba* -> /tmp/foo/baz.jpg  (matches, should exclude)\n\n\nNote that, by default, *all files are included*.  This means that\nproviding **only** an ``--include`` filter will not change what\nfiles are transferred.  ``--include`` will only re-include files that\nhave been excluded from an ``--exclude`` filter.  If you only want\nto upload files with a particular extension, you need to first exclude\nall files, then re-include the files with the particular extension.\nThis command will upload **only** files ending with ``.jpg``::\n\n    aws s3 cp /tmp/foo/ s3://bucket/ --recursive --exclude "*" --include "*.jpg"\n\nIf you wanted to include both ``.jpg`` files as well as ``.txt`` files you\ncan run::\n\n    aws s3 cp /tmp/foo/ s3://bucket/ --recursive \\\n        --exclude "*" --include "*.jpg" --include "*.txt"\n',
+    'This section explains prominent concepts and notations in the set of high-level S3 commands provided.\n\nIf you are looking for the low level S3 commands for the CLI, please see the\n``s3api`` command `reference page\n`_.\n\nPath Argument Type\n++++++++++++++++++\n\nWhenever using a command, at least one path argument must be specified.  There\nare two types of path arguments: ``LocalPath`` and ``S3Uri``.\n\n``LocalPath``: represents the path of a local file or directory.  It can be\nwritten as an absolute path or relative path.\n\n``S3Uri``: represents the location of an S3 object, prefix, or bucket.  This\nmust be written in the form ``s3://amzn-s3-demo-bucket/mykey`` where ``amzn-s3-demo-bucket`` is\nthe specified S3 bucket, ``mykey`` is the specified S3 key.  The path argument\nmust begin with ``s3://`` in order to denote that the path argument refers to\nan S3 object. Note that prefixes are separated by forward slashes. For\nexample, if the S3 object ``myobject`` had the prefix ``myprefix``, the\nS3 key would be ``myprefix/myobject``, and if the object was in the bucket\n``amzn-s3-demo-bucket``, the ``S3Uri`` would be ``s3://amzn-s3-demo-bucket/myprefix/myobject``.\n\n``S3Uri`` also supports S3 access points. To specify an access point, this\nvalue must be of the form ``s3:///``. For example if\nthe access point ``myaccesspoint`` to be used has the ARN:\n``arn:aws:s3:us-west-2:123456789012:accesspoint/myaccesspoint`` and the object\nbeing accessed has the key ``mykey``, then the ``S3URI`` used must be:\n``s3://arn:aws:s3:us-west-2:123456789012:accesspoint/myaccesspoint/mykey``.\nSimilar to bucket names, you can also use prefixes with access point ARNs for\nthe ``S3Uri``. For example:\n``s3://arn:aws:s3:us-west-2:123456789012:accesspoint/myaccesspoint/myprefix/``\n\n\n\nOrder of Path Arguments\n+++++++++++++++++++++++\n\nEvery command takes one or two positional path arguments.  The first path\nargument represents the source, which is the local file/directory or S3\nobject/prefix/bucket that is being referenced.  If there is a second path\nargument, it represents the destination, which is the local file/directory\nor S3 object/prefix/bucket that is being operated on.  Commands with only\none path argument do not have a destination because the operation is being\nperformed only on the source.\n\n\nSingle Local File and S3 Object Operations\n++++++++++++++++++++++++++++++++++++++++++\n\nSome commands perform operations only on single files and S3 objects.  The\nfollowing commands are single file/object operations if no ``--recursive``\nflag is provided.\n\n    * ``cp``\n    * ``mv``\n    * ``rm``\n\nFor this type of operation, the first path argument, the source, must exist\nand be a local file or S3 object.  The second path argument, the destination,\ncan be the name of a local file, local directory, S3 object, S3 prefix,\nor S3 bucket.\n\nThe destination is indicated as a local directory, S3 prefix, or S3 bucket\nif it ends with a forward slash or back slash.  The use of slash depends\non the path argument type.  If the path argument is a ``LocalPath``,\nthe type of slash is the separator used by the operating system.  If the\npath is a ``S3Uri``, the forward slash must always be used.  If a slash\nis at the end of the destination, the destination file or object will\nadopt the name of the source file or object.  Otherwise, if there is no\nslash at the end, the file or object will be saved under the name provided.\nSee examples in ``cp`` and ``mv`` to illustrate this description.\n\n\nDirectory and S3 Prefix Operations\n++++++++++++++++++++++++++++++++++\n\nSome commands only perform operations on the contents of a local directory\nor S3 prefix/bucket.  Adding or omitting a forward slash or back slash to\nthe end of any path argument, depending on its type, does not affect the\nresults of the operation.  The following commands will always result in\na directory or S3 prefix/bucket operation:\n\n* ``sync``\n* ``mb``\n* ``rb``\n* ``ls``\n\n\nUse of Exclude and Include Filters\n++++++++++++++++++++++++++++++++++\n\nCurrently, there is no support for the use of UNIX style wildcards in\na command\'s path arguments.  However, most commands have ``--exclude ""``\nand ``--include ""`` parameters that can achieve the desired result.\nThese parameters perform pattern matching to either exclude or include\na particular file or object.  The following pattern symbols are supported.\n\n    * ``*``: Matches everything\n    * ``?``: Matches any single character\n    * ``[sequence]``: Matches any character in ``sequence``\n    * ``[!sequence]``: Matches any character not in ``sequence``\n\nAny number of these parameters can be passed to a command.  You can do this by\nproviding an ``--exclude`` or ``--include`` argument multiple times, e.g.\n``--include "*.txt" --include "*.png"``.\nWhen there are multiple filters, the rule is the filters that appear later in\nthe command take precedence over filters that appear earlier in the command.\nFor example, if the filter parameters passed to the command were\n\n::\n\n    --exclude "*" --include "*.txt"\n\nAll files will be excluded from the command except for files ending with\n``.txt``  However, if the order of the filter parameters was changed to\n\n::\n\n    --include "*.txt" --exclude "*"\n\nAll files will be excluded from the command.\n\nEach filter is evaluated against the **source directory**.  If the source\nlocation is a file instead of a directory, the directory containing the file is\nused as the source directory.  For example, suppose you had the following\ndirectory structure::\n\n    /tmp/foo/\n      .git/\n      |---config\n      |---description\n      foo.txt\n      bar.txt\n      baz.jpg\n\nIn the command ``aws s3 sync /tmp/foo s3://bucket/`` the source directory is\n``/tmp/foo``.  Any include/exclude filters will be evaluated with the source\ndirectory prepended.  Below are several examples to demonstrate this.\n\nGiven the directory structure above and the command\n``aws s3 cp /tmp/foo s3://bucket/ --recursive --exclude ".git/*"``, the\nfiles ``.git/config`` and ``.git/description`` will be excluded from the\nfiles to upload because the exclude filter ``.git/*`` will have the source\nprepended to the filter.  This means that::\n\n    /tmp/foo/.git/* -> /tmp/foo/.git/config       (matches, should exclude)\n    /tmp/foo/.git/* -> /tmp/foo/.git/description  (matches, should exclude)\n    /tmp/foo/.git/* -> /tmp/foo/foo.txt  (does not match, should include)\n    /tmp/foo/.git/* -> /tmp/foo/bar.txt  (does not match, should include)\n    /tmp/foo/.git/* -> /tmp/foo/baz.jpg  (does not match, should include)\n\nThe command ``aws s3 cp /tmp/foo/ s3://bucket/ --recursive --exclude "ba*"``\nwill exclude ``/tmp/foo/bar.txt`` and ``/tmp/foo/baz.jpg``::\n\n    /tmp/foo/ba* -> /tmp/foo/.git/config      (does not match, should include)\n    /tmp/foo/ba* -> /tmp/foo/.git/description (does not match, should include)\n    /tmp/foo/ba* -> /tmp/foo/foo.txt          (does not match, should include)\n    /tmp/foo/ba* -> /tmp/foo/bar.txt  (matches, should exclude)\n    /tmp/foo/ba* -> /tmp/foo/baz.jpg  (matches, should exclude)\n\n\nNote that, by default, *all files are included*.  This means that\nproviding **only** an ``--include`` filter will not change what\nfiles are transferred.  ``--include`` will only re-include files that\nhave been excluded from an ``--exclude`` filter.  If you only want\nto upload files with a particular extension, you need to first exclude\nall files, then re-include the files with the particular extension.\nThis command will upload **only** files ending with ``.jpg``::\n\n    aws s3 cp /tmp/foo/ s3://bucket/ --recursive --exclude "*" --include "*.jpg"\n\nIf you wanted to include both ``.jpg`` files as well as ``.txt`` files you\ncan run::\n\n    aws s3 cp /tmp/foo/ s3://bucket/ --recursive \\\n        --exclude "*" --include "*.jpg" --include "*.txt"',
   subcommands: [
     {
       name: "ls",
@@ -381,6 +380,23 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: requester,
+            isOptional: true,
+          },
+        },
+        {
+          name: "--bucket-name-prefix",
+          description:
+            "Limits the response to bucket names that begin with the specified bucket name prefix",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--bucket-region",
+          description:
+            "Limits the response to buckets that are located in the specified Amazon Web Services Region. The Amazon Web Services Region must be expressed according to the Amazon Web Services Region code, such as us-west-2 for the US West (Oregon) Region. For a list of the valid values for all of the Amazon Web Services Regions, see https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region",
+          args: {
+            name: "string",
           },
         },
       ],
@@ -461,7 +477,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--follow-symlinks",
           description:
-            "Symbolic links are followed only when uploading to S3 from the local filesystem. Note that S3 does not support symbolic links, so the contents of the link target are uploaded under the name of the link. When neither ``--follow-symlinks`` nor ``--no-follow-symlinks`` is specified, the default is to follow symlinks",
+            "Symbolic links are followed when uploading to S3 from the local filesystem. Note that S3 does not support symbolic links, so the contents of the link target are uploaded under the name of the link. When downloading from S3, ``--no-follow-symlinks`` skips any object whose destination is a symbolic link, or is located under one, starting at the destination you specified. Symbolic links in the path leading up to that destination are still followed. When neither ``--follow-symlinks`` nor ``--no-follow-symlinks`` is specified, the default is to follow symlinks",
         },
         {
           name: "--no-follow-symlinks",
@@ -478,6 +494,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: sse,
+            isOptional: true,
           },
         },
         {
@@ -487,6 +504,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: sseC,
+            isOptional: true,
           },
         },
         {
@@ -514,6 +532,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: sseC,
+            isOptional: true,
           },
         },
         {
@@ -528,10 +547,18 @@ const completionSpec: Fig.Spec = {
         {
           name: "--storage-class",
           description:
-            "The type of storage to use for the object. Valid choices are: STANDARD | REDUCED_REDUNDANCY | STANDARD_IA | ONEZONE_IA | INTELLIGENT_TIERING | GLACIER | DEEP_ARCHIVE. Defaults to 'STANDARD'",
+            "The type of storage to use for the object. Valid choices are: STANDARD | REDUCED_REDUNDANCY | STANDARD_IA | ONEZONE_IA | INTELLIGENT_TIERING | GLACIER | DEEP_ARCHIVE | GLACIER_IR. Defaults to 'STANDARD'",
           args: {
             name: "string",
             suggestions: storageClasses,
+          },
+        },
+        {
+          name: "--tags",
+          description:
+            "Tags to set on objects, in the format of ``--tags key value``. You can specify this flag multiple times, once for each tag. This parameter is only supported when transferring from a local path to S3. For a ``sync``, tags are only set on objects that are transferred",
+          args: {
+            name: "string",
           },
         },
         {
@@ -617,6 +644,18 @@ const completionSpec: Fig.Spec = {
             "File transfer progress is not displayed. This flag is only applied when the quiet and only-show-errors flags are not provided",
         },
         {
+          name: "--progress-frequency",
+          description:
+            "Number of seconds to wait before updating file transfer progress. This flag is only applied when the quiet and only-show-errors flags are not provided",
+          args: {
+            name: "integer",
+          },
+        },
+        {
+          name: "--progress-multiline",
+          description: "Show progress on multiple lines",
+        },
+        {
           name: "--page-size",
           description:
             "The number of results to return in each response to a list operation. The default value is 1000 (the maximum allowed). Using a lower value may help if an operation times out",
@@ -642,21 +681,59 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: requester,
+            isOptional: true,
+          },
+        },
+        {
+          name: "--checksum-mode",
+          description:
+            "To retrieve the checksum, this mode must be enabled. If the object has a checksum, it will be verified",
+          args: {
+            name: "string",
+            suggestions: ["ENABLED"],
+          },
+        },
+        {
+          name: "--checksum-algorithm",
+          description:
+            "Indicates the algorithm used to create the checksum for the object",
+          args: {
+            name: "string",
+            suggestions: [
+              "CRC64NVME",
+              "CRC32",
+              "SHA256",
+              "SHA1",
+              "CRC32C",
+              "SHA512",
+              "XXHASH64",
+              "XXHASH3",
+              "XXHASH128",
+            ],
           },
         },
         {
           name: "--metadata",
           description:
-            "A map of metadata to store with the objects in S3. This will be applied to every object which is part of this request. In a sync, this means that files which haven't changed won't receive the new metadata. When copying between two s3 locations, the metadata-directive argument will default to 'REPLACE' unless otherwise specified",
+            "A map of metadata to store with the objects in S3. This will be applied to every object which is part of this request. In a sync, this means that files which haven't changed won't receive the new metadata",
           args: {
             name: "map",
             description: "KeyName1=string,KeyName2=string",
           },
         },
         {
+          name: "--copy-props",
+          description:
+            "Determines which properties are copied from the source S3 object. This parameter only applies for S3 to S3 copies. Valid values are: ``none`` - Do not copy any of the properties from the source S3 object.``metadata-directive`` - Copies the following properties from the source S3 object: ``content-type``, ``content-language``, ``content-encoding``, ``content-disposition``, ``cache-control``, ``--expires``, and ``metadata````default`` - The default value. Copies tags and properties covered under the ``metadata-directive`` value from the source S3 object.``all`` - Copies annotations in addition to the tags and properties covered under the ``default`` value from the source S3 object.In order to copy the appropriate properties for multipart copies, some of the options may require additional API calls if a multipart copy is involved. Specifically:``metadata-directive`` may require additional ``HeadObject`` API calls.``default`` may require additional ``HeadObject``, ``GetObjectTagging``, and ``PutObjectTagging`` API calls.``all`` may require the additional API calls covered under the ``default`` value, as well as ``ListObjectAnnotations``, ``GetObjectAnnotation``, and ``PutObjectAnnotation`` API calls. Note this list of API calls may grow in the future in order to ensure multipart copies preserve the exact properties a ``CopyObject`` API call would preserve.If you want to guarantee no additional API calls are made other than than the ones needed to perform the actual copy, set this option to ``none``",
+          args: {
+            name: "string",
+            suggestions: ["none", "metadata-directive", "default", "all"],
+          },
+        },
+        {
           name: "--metadata-directive",
           description:
-            "Specifies whether the metadata is copied from the source object or replaced with metadata provided when copying S3 objects. Note that if the object is copied over in parts, the source object's metadata will not be copied over, no matter the value for ``--metadata-directive``, and instead the desired metadata values must be specified as parameters on the command line. Valid values are ``COPY`` and ``REPLACE``. If this parameter is not specified, ``COPY`` will be used by default. If ``REPLACE`` is used, the copied object will only have the metadata values that were specified by the CLI command. Note that if you are using any of the following parameters: ``--content-type``, ``content-language``, ``--content-encoding``, ``--content-disposition``, ``--cache-control``, or ``--expires``, you will need to specify ``--metadata-directive REPLACE`` for non-multipart copies if you want the copied objects to have the specified metadata values",
+            "Sets the ``x-amz-metadata-directive`` header for CopyObject operations. It is recommended to use the ``--copy-props`` parameter instead to control copying of metadata properties. If ``--metadata-directive`` is set, the ``--copy-props`` parameter will be disabled and will have no affect on the transfer",
           args: {
             name: "string",
             suggestions: metadataDirective,
@@ -674,6 +751,20 @@ const completionSpec: Fig.Spec = {
           name: "--recursive",
           description:
             "Command is performed on all files or objects under the specified directory or prefix",
+        },
+        {
+          name: "--case-conflict",
+          description:
+            "Configures behavior when attempting to download multiple objects whose keys differ only by case, which can cause undefined behavior on case-insensitive filesystems. This parameter only applies for commands that perform multiple S3 to local downloads. See Handling case conflicts for details. Valid values are: ``error`` - Raise an error and abort downloads.``warn`` - Emit a warning and download the object.``skip`` - Skip downloading the object.``ignore`` - The default value. Ignore the conflict and download the object",
+          args: {
+            name: "string",
+            suggestions: ["ignore", "skip", "warn", "error"],
+          },
+        },
+        {
+          name: "--no-overwrite",
+          description:
+            "This flag prevents overwriting of files at the destination. With this flag, only files not present at the destination will be transferred",
         },
       ],
       args: [
@@ -696,7 +787,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "mv",
       description:
-        "Moves a local file or S3 object to another location locally or in S3",
+        "Moves a local file or S3 object to another location locally or in S3. \nThe ``mv`` command copies the source object or file to the specified \ndestination and then deletes the source object or file.\n\n.. WARNING::\n    If you are using any type of access point ARNs or access point aliases \n    in your S3 URIs, you must take extra care to make sure that your source \n    and destination S3 URIs resolve to different underlying buckets. If the \n    source and destination buckets are the same, the source file or object \n    can be moved onto itself, which can result in accidental deletion of \n    your source file or object.\n\n    To verify that the source and destination buckets are not the same, \n    use the ``--validate-same-s3-paths`` parameter, or set the environment\n    variable ``AWS_CLI_S3_MV_VALIDATE_SAME_S3_PATHS`` to ``true``",
       options: [
         {
           name: "--dryrun",
@@ -736,7 +827,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--follow-symlinks",
           description:
-            "Symbolic links are followed only when uploading to S3 from the local filesystem. Note that S3 does not support symbolic links, so the contents of the link target are uploaded under the name of the link. When neither ``--follow-symlinks`` nor ``--no-follow-symlinks`` is specified, the default is to follow symlinks",
+            "Symbolic links are followed when uploading to S3 from the local filesystem. Note that S3 does not support symbolic links, so the contents of the link target are uploaded under the name of the link. When downloading from S3, ``--no-follow-symlinks`` skips any object whose destination is a symbolic link, or is located under one, starting at the destination you specified. Symbolic links in the path leading up to that destination are still followed. When neither ``--follow-symlinks`` nor ``--no-follow-symlinks`` is specified, the default is to follow symlinks",
         },
         {
           name: "--no-follow-symlinks",
@@ -753,6 +844,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: sse,
+            isOptional: true,
           },
         },
         {
@@ -762,6 +854,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: sseC,
+            isOptional: true,
           },
         },
         {
@@ -789,6 +882,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: sseC,
+            isOptional: true,
           },
         },
         {
@@ -803,10 +897,18 @@ const completionSpec: Fig.Spec = {
         {
           name: "--storage-class",
           description:
-            "The type of storage to use for the object. Valid choices are: STANDARD | REDUCED_REDUNDANCY | STANDARD_IA | ONEZONE_IA | INTELLIGENT_TIERING | GLACIER | DEEP_ARCHIVE. Defaults to 'STANDARD'",
+            "The type of storage to use for the object. Valid choices are: STANDARD | REDUCED_REDUNDANCY | STANDARD_IA | ONEZONE_IA | INTELLIGENT_TIERING | GLACIER | DEEP_ARCHIVE | GLACIER_IR. Defaults to 'STANDARD'",
           args: {
             name: "string",
             suggestions: storageClasses,
+          },
+        },
+        {
+          name: "--tags",
+          description:
+            "Tags to set on objects, in the format of ``--tags key value``. You can specify this flag multiple times, once for each tag. This parameter is only supported when transferring from a local path to S3. For a ``sync``, tags are only set on objects that are transferred",
+          args: {
+            name: "string",
           },
         },
         {
@@ -892,6 +994,18 @@ const completionSpec: Fig.Spec = {
             "File transfer progress is not displayed. This flag is only applied when the quiet and only-show-errors flags are not provided",
         },
         {
+          name: "--progress-frequency",
+          description:
+            "Number of seconds to wait before updating file transfer progress. This flag is only applied when the quiet and only-show-errors flags are not provided",
+          args: {
+            name: "integer",
+          },
+        },
+        {
+          name: "--progress-multiline",
+          description: "Show progress on multiple lines",
+        },
+        {
           name: "--page-size",
           description:
             "The number of results to return in each response to a list operation. The default value is 1000 (the maximum allowed). Using a lower value may help if an operation times out",
@@ -917,21 +1031,59 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: requester,
+            isOptional: true,
+          },
+        },
+        {
+          name: "--checksum-mode",
+          description:
+            "To retrieve the checksum, this mode must be enabled. If the object has a checksum, it will be verified",
+          args: {
+            name: "string",
+            suggestions: ["ENABLED"],
+          },
+        },
+        {
+          name: "--checksum-algorithm",
+          description:
+            "Indicates the algorithm used to create the checksum for the object",
+          args: {
+            name: "string",
+            suggestions: [
+              "CRC64NVME",
+              "CRC32",
+              "SHA256",
+              "SHA1",
+              "CRC32C",
+              "SHA512",
+              "XXHASH64",
+              "XXHASH3",
+              "XXHASH128",
+            ],
           },
         },
         {
           name: "--metadata",
           description:
-            "A map of metadata to store with the objects in S3. This will be applied to every object which is part of this request. In a sync, this means that files which haven't changed won't receive the new metadata. When copying between two s3 locations, the metadata-directive argument will default to 'REPLACE' unless otherwise specified",
+            "A map of metadata to store with the objects in S3. This will be applied to every object which is part of this request. In a sync, this means that files which haven't changed won't receive the new metadata",
           args: {
             name: "map",
             description: "KeyName1=string,KeyName2=string",
           },
         },
         {
+          name: "--copy-props",
+          description:
+            "Determines which properties are copied from the source S3 object. This parameter only applies for S3 to S3 copies. Valid values are: ``none`` - Do not copy any of the properties from the source S3 object.``metadata-directive`` - Copies the following properties from the source S3 object: ``content-type``, ``content-language``, ``content-encoding``, ``content-disposition``, ``cache-control``, ``--expires``, and ``metadata````default`` - The default value. Copies tags and properties covered under the ``metadata-directive`` value from the source S3 object.``all`` - Copies annotations in addition to the tags and properties covered under the ``default`` value from the source S3 object.In order to copy the appropriate properties for multipart copies, some of the options may require additional API calls if a multipart copy is involved. Specifically:``metadata-directive`` may require additional ``HeadObject`` API calls.``default`` may require additional ``HeadObject``, ``GetObjectTagging``, and ``PutObjectTagging`` API calls.``all`` may require the additional API calls covered under the ``default`` value, as well as ``ListObjectAnnotations``, ``GetObjectAnnotation``, and ``PutObjectAnnotation`` API calls. Note this list of API calls may grow in the future in order to ensure multipart copies preserve the exact properties a ``CopyObject`` API call would preserve.If you want to guarantee no additional API calls are made other than than the ones needed to perform the actual copy, set this option to ``none``",
+          args: {
+            name: "string",
+            suggestions: ["none", "metadata-directive", "default", "all"],
+          },
+        },
+        {
           name: "--metadata-directive",
           description:
-            "Specifies whether the metadata is copied from the source object or replaced with metadata provided when copying S3 objects. Note that if the object is copied over in parts, the source object's metadata will not be copied over, no matter the value for ``--metadata-directive``, and instead the desired metadata values must be specified as parameters on the command line. Valid values are ``COPY`` and ``REPLACE``. If this parameter is not specified, ``COPY`` will be used by default. If ``REPLACE`` is used, the copied object will only have the metadata values that were specified by the CLI command. Note that if you are using any of the following parameters: ``--content-type``, ``content-language``, ``--content-encoding``, ``--content-disposition``, ``--cache-control``, or ``--expires``, you will need to specify ``--metadata-directive REPLACE`` for non-multipart copies if you want the copied objects to have the specified metadata values",
+            "Sets the ``x-amz-metadata-directive`` header for CopyObject operations. It is recommended to use the ``--copy-props`` parameter instead to control copying of metadata properties. If ``--metadata-directive`` is set, the ``--copy-props`` parameter will be disabled and will have no affect on the transfer",
           args: {
             name: "string",
             suggestions: metadataDirective,
@@ -941,6 +1093,25 @@ const completionSpec: Fig.Spec = {
           name: "--recursive",
           description:
             "Command is performed on all files or objects under the specified directory or prefix",
+        },
+        {
+          name: "--validate-same-s3-paths",
+          description:
+            "Resolves the source and destination S3 URIs to their underlying buckets and verifies that the file or object is not being moved onto itself. If you are using any type of access point ARNs or access point aliases in your S3 URIs, we strongly recommended using this parameter to help prevent accidental deletions of the source file or object. This parameter resolves the underlying buckets of S3 access point ARNs and aliases, S3 on Outposts access point ARNs, and Multi-Region Access Point ARNs. S3 on Outposts access point aliases are not supported. Instead of using this parameter, you can set the environment variable ``AWS_CLI_S3_MV_VALIDATE_SAME_S3_PATHS`` to ``true``. NOTE: Path validation requires making additional API calls. Future updates to this path-validation mechanism might change which API calls are made",
+        },
+        {
+          name: "--case-conflict",
+          description:
+            "Configures behavior when attempting to download multiple objects whose keys differ only by case, which can cause undefined behavior on case-insensitive filesystems. This parameter only applies for commands that perform multiple S3 to local downloads. See Handling case conflicts for details. Valid values are: ``error`` - Raise an error and abort downloads.``warn`` - Emit a warning and download the object.``skip`` - Skip downloading the object.``ignore`` - The default value. Ignore the conflict and download the object",
+          args: {
+            name: "string",
+            suggestions: ["ignore", "skip", "warn", "error"],
+          },
+        },
+        {
+          name: "--no-overwrite",
+          description:
+            "This flag prevents overwriting of files at the destination. With this flag, only files not present at the destination will be transferred",
         },
       ],
       args: [
@@ -986,6 +1157,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: requester,
+            isOptional: true,
           },
         },
         {
@@ -1067,7 +1239,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--follow-symlinks",
           description:
-            "Symbolic links are followed only when uploading to S3 from the local filesystem. Note that S3 does not support symbolic links, so the contents of the link target are uploaded under the name of the link. When neither ``--follow-symlinks`` nor ``--no-follow-symlinks`` is specified, the default is to follow symlinks",
+            "Symbolic links are followed when uploading to S3 from the local filesystem. Note that S3 does not support symbolic links, so the contents of the link target are uploaded under the name of the link. When downloading from S3, ``--no-follow-symlinks`` skips any object whose destination is a symbolic link, or is located under one, starting at the destination you specified. Symbolic links in the path leading up to that destination are still followed. When neither ``--follow-symlinks`` nor ``--no-follow-symlinks`` is specified, the default is to follow symlinks",
         },
         {
           name: "--no-follow-symlinks",
@@ -1084,6 +1256,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: sse,
+            isOptional: true,
           },
         },
         {
@@ -1093,6 +1266,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: sseC,
+            isOptional: true,
           },
         },
         {
@@ -1120,6 +1294,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: sseC,
+            isOptional: true,
           },
         },
         {
@@ -1134,10 +1309,18 @@ const completionSpec: Fig.Spec = {
         {
           name: "--storage-class",
           description:
-            "The type of storage to use for the object. Valid choices are: STANDARD | REDUCED_REDUNDANCY | STANDARD_IA | ONEZONE_IA | INTELLIGENT_TIERING | GLACIER | DEEP_ARCHIVE. Defaults to 'STANDARD'",
+            "The type of storage to use for the object. Valid choices are: STANDARD | REDUCED_REDUNDANCY | STANDARD_IA | ONEZONE_IA | INTELLIGENT_TIERING | GLACIER | DEEP_ARCHIVE | GLACIER_IR. Defaults to 'STANDARD'",
           args: {
             name: "string",
             suggestions: storageClasses,
+          },
+        },
+        {
+          name: "--tags",
+          description:
+            "Tags to set on objects, in the format of ``--tags key value``. You can specify this flag multiple times, once for each tag. This parameter is only supported when transferring from a local path to S3. For a ``sync``, tags are only set on objects that are transferred",
+          args: {
+            name: "string",
           },
         },
         {
@@ -1223,6 +1406,18 @@ const completionSpec: Fig.Spec = {
             "File transfer progress is not displayed. This flag is only applied when the quiet and only-show-errors flags are not provided",
         },
         {
+          name: "--progress-frequency",
+          description:
+            "Number of seconds to wait before updating file transfer progress. This flag is only applied when the quiet and only-show-errors flags are not provided",
+          args: {
+            name: "integer",
+          },
+        },
+        {
+          name: "--progress-multiline",
+          description: "Show progress on multiple lines",
+        },
+        {
           name: "--page-size",
           description:
             "The number of results to return in each response to a list operation. The default value is 1000 (the maximum allowed). Using a lower value may help if an operation times out",
@@ -1248,25 +1443,77 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "string",
             suggestions: requester,
+            isOptional: true,
+          },
+        },
+        {
+          name: "--checksum-mode",
+          description:
+            "To retrieve the checksum, this mode must be enabled. If the object has a checksum, it will be verified",
+          args: {
+            name: "string",
+            suggestions: ["ENABLED"],
+          },
+        },
+        {
+          name: "--checksum-algorithm",
+          description:
+            "Indicates the algorithm used to create the checksum for the object",
+          args: {
+            name: "string",
+            suggestions: [
+              "CRC64NVME",
+              "CRC32",
+              "SHA256",
+              "SHA1",
+              "CRC32C",
+              "SHA512",
+              "XXHASH64",
+              "XXHASH3",
+              "XXHASH128",
+            ],
           },
         },
         {
           name: "--metadata",
           description:
-            "A map of metadata to store with the objects in S3. This will be applied to every object which is part of this request. In a sync, this means that files which haven't changed won't receive the new metadata. When copying between two s3 locations, the metadata-directive argument will default to 'REPLACE' unless otherwise specified",
+            "A map of metadata to store with the objects in S3. This will be applied to every object which is part of this request. In a sync, this means that files which haven't changed won't receive the new metadata",
           args: {
             name: "map",
             description: "KeyName1=string,KeyName2=string",
           },
         },
         {
+          name: "--copy-props",
+          description:
+            "Determines which properties are copied from the source S3 object. This parameter only applies for S3 to S3 copies. Valid values are: ``none`` - Do not copy any of the properties from the source S3 object.``metadata-directive`` - Copies the following properties from the source S3 object: ``content-type``, ``content-language``, ``content-encoding``, ``content-disposition``, ``cache-control``, ``--expires``, and ``metadata````default`` - The default value. Copies tags and properties covered under the ``metadata-directive`` value from the source S3 object.``all`` - Copies annotations in addition to the tags and properties covered under the ``default`` value from the source S3 object.In order to copy the appropriate properties for multipart copies, some of the options may require additional API calls if a multipart copy is involved. Specifically:``metadata-directive`` may require additional ``HeadObject`` API calls.``default`` may require additional ``HeadObject``, ``GetObjectTagging``, and ``PutObjectTagging`` API calls.``all`` may require the additional API calls covered under the ``default`` value, as well as ``ListObjectAnnotations``, ``GetObjectAnnotation``, and ``PutObjectAnnotation`` API calls. Note this list of API calls may grow in the future in order to ensure multipart copies preserve the exact properties a ``CopyObject`` API call would preserve.If you want to guarantee no additional API calls are made other than than the ones needed to perform the actual copy, set this option to ``none``",
+          args: {
+            name: "string",
+            suggestions: ["none", "metadata-directive", "default", "all"],
+          },
+        },
+        {
           name: "--metadata-directive",
           description:
-            "Specifies whether the metadata is copied from the source object or replaced with metadata provided when copying S3 objects. Note that if the object is copied over in parts, the source object's metadata will not be copied over, no matter the value for ``--metadata-directive``, and instead the desired metadata values must be specified as parameters on the command line. Valid values are ``COPY`` and ``REPLACE``. If this parameter is not specified, ``COPY`` will be used by default. If ``REPLACE`` is used, the copied object will only have the metadata values that were specified by the CLI command. Note that if you are using any of the following parameters: ``--content-type``, ``content-language``, ``--content-encoding``, ``--content-disposition``, ``--cache-control``, or ``--expires``, you will need to specify ``--metadata-directive REPLACE`` for non-multipart copies if you want the copied objects to have the specified metadata values",
+            "Sets the ``x-amz-metadata-directive`` header for CopyObject operations. It is recommended to use the ``--copy-props`` parameter instead to control copying of metadata properties. If ``--metadata-directive`` is set, the ``--copy-props`` parameter will be disabled and will have no affect on the transfer",
           args: {
             name: "string",
             suggestions: metadataDirective,
           },
+        },
+        {
+          name: "--case-conflict",
+          description:
+            "Configures behavior when attempting to download multiple objects whose keys differ only by case, which can cause undefined behavior on case-insensitive filesystems. This parameter only applies for commands that perform multiple S3 to local downloads. See Handling case conflicts for details. Valid values are: ``error`` - Raise an error and abort downloads.``warn`` - Emit a warning and download the object.``skip`` - Skip downloading the object.``ignore`` - The default value. Ignore the conflict and download the object",
+          args: {
+            name: "string",
+            suggestions: ["ignore", "skip", "warn", "error"],
+          },
+        },
+        {
+          name: "--no-overwrite",
+          description:
+            "This flag prevents overwriting of files at the destination. With this flag, only files not present at the destination will be transferred",
         },
       ],
       args: [
@@ -1291,11 +1538,11 @@ const completionSpec: Fig.Spec = {
       description: "Creates an S3 bucket",
       options: [
         {
-          name: "--region",
-          description: "AWS region where the bucket is created",
+          name: "--tags",
+          description:
+            "This flag specifies tags to be added to the bucket in the format of ``--tags key value``. You can specify this flag multiple times, once for each tag",
           args: {
-            name: "region",
-            suggestions: awsRegions,
+            name: "string",
           },
         },
       ],
@@ -1323,12 +1570,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "presign",
       description:
-        "Generate a pre-signed URL for an Amazon S3 object. This allows anyone who receives the pre-signed URL to retrieve the S3 object with an HTTP GET request. For sigv4 requests the region needs to be configured explicitly",
+        "Generate a pre-signed URL for an Amazon S3 object. This allows anyone who receives the pre-signed URL to retrieve the S3 object with an HTTP GET request. All presigned URL's now use sigv4 so the region needs to be configured explicitly",
       options: [
         {
           name: "--expires-in",
           description:
-            "Number of seconds until the pre-signed URL expires.  Default is 3600 seconds",
+            "Number of seconds until the pre-signed URL expires.  Default is 3600 seconds. Maximum is 604800 seconds",
           args: {
             name: "integer",
           },
