@@ -1,9 +1,18 @@
+// Firefox v160.0.1 (mozilla-firefox/firefox tag FIREFOX_160_0_1_RELEASE, cross-checked with the Homebrew cask firefox 160.0.1; 2026-11-19).
+// Source: static read of the command line handlers at that tag, not a live run of the binary:
+// toolkit/xre/nsAppRunner.cpp (DumpHelp), browser/components/BrowserContentHandler.sys.mjs,
+// browser/components/shell/HeadlessShell.sys.mjs, devtools/startup/DevToolsStartup.sys.mjs,
+// remote/components/RemoteAgent.sys.mjs and remote/components/Marionette.sys.mjs.
+// Platform-specific flags that only exist on Windows (--console) are omitted; --dbus-service is Linux (GTK) only.
+
 const completionSpec: Fig.Spec = {
   name: "firefox",
-  description: "Free open-source web browser developer by Mozilla",
+  description: "Free open-source web browser developed by Mozilla",
   args: {
     name: "URL",
     description: "URL to open",
+    isOptional: true,
+    isVariadic: true,
   },
   options: [
     {
@@ -32,11 +41,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--full-version",
-      description: "Print full version information and exit",
+      description: "Print full version, build and platform build ids and exit",
     },
     {
       name: "-P",
-      description: "Specify profile to use",
+      description: "Start with the given profile",
       args: {
         name: "profile",
         description: "Profile to use",
@@ -44,9 +53,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--profile",
-      description: "Specify profile to use by folder",
+      description: "Start with the profile at the given path",
       args: {
-        name: "profile",
+        name: "path",
         description: "Profile folder to use",
         template: "folders",
       },
@@ -60,10 +69,16 @@ const completionSpec: Fig.Spec = {
       description: "Start with ProfileManager",
     },
     {
+      name: "--origin-to-force-quic-on",
+      description: "Force to use QUIC for the specified origin",
+      args: {
+        name: "origin",
+      },
+    },
+    {
       name: "--no-remote",
-      description:
-        "Do not accept or send remote commands; implies --new-instance",
-      exclusiveOn: ["--new-instance"],
+      description: "Ignored, no longer supported (use --new-instance instead)",
+      deprecated: true,
     },
     {
       name: "--new-instance",
@@ -83,7 +98,6 @@ const completionSpec: Fig.Spec = {
         "Treated as MOZ_LOG=<modules> environment variable, overrides it",
       args: {
         name: "modules",
-        // not sure how to describe this, don't know how it works
       },
     },
     {
@@ -93,7 +107,6 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "file",
         template: "filepaths",
-        // see comment on line 86
       },
     },
     {
@@ -101,13 +114,21 @@ const completionSpec: Fig.Spec = {
       description: "Run without a GUI",
     },
     {
+      name: "--dbus-service",
+      description:
+        "Run as DBus service for org.freedesktop.Application and set a launcher (usually /usr/bin/appname script) for it",
+      args: {
+        name: "launcher",
+        template: "filepaths",
+      },
+    },
+    {
       name: "--jsdebugger",
       description:
         "Open the Browser Toolbox. Defaults to the local build but can be overridden by a firefox path",
       args: {
-        name: "folder",
-        // see comment on line 86
-        template: "folders",
+        name: "path",
+        template: "filepaths",
         isOptional: true,
       },
     },
@@ -120,9 +141,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "--start-debugger-server",
       description:
-        "Start the devtools server on a TCP port or Unix domain socket path",
+        "Start the devtools server on a TCP port (default: 6000) or Unix domain socket path, use the ws: prefix for the WebSocket protocol",
       args: {
-        name: "port or path",
+        name: "[ws:][port | path]",
+        isOptional: true,
         template: "filepaths",
         generators: {
           // Needs to trigger on every keystroke
@@ -163,12 +185,31 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--url-background",
+      description: "Open a URL in a background tab",
+      isRepeatable: true,
+      args: {
+        name: "URL",
+        description: "URL to open",
+      },
+    },
+    {
+      name: "--data",
+      description: "Open a data: URL",
+      isRepeatable: true,
+      args: {
+        name: "data-URL",
+        description: "Data URL to open",
+      },
+    },
+    {
       name: "--private-window",
       description: "Open a URL in a new private window",
       isRepeatable: true,
       args: {
         name: "URL",
         description: "URL to open",
+        isOptional: true,
       },
     },
     {
@@ -177,29 +218,24 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--screenshot",
-      description: "Take a screenshot",
+      description:
+        "Save a screenshot of the given URL to the path or in the working directory",
       args: {
         isOptional: true,
-        name: "folder",
-        description: "Folder to save screenshot to",
-        template: "folders",
+        name: "path",
+        description:
+          "File to save the screenshot to (default: screenshot.png in the working directory)",
+        template: "filepaths",
       },
     },
     {
       name: "--window-size",
-      description: "Size of your screenshot",
+      description: "Width and optionally height of the screenshot",
       dependsOn: ["--screenshot"],
-      args: [
-        {
-          name: "width",
-          description: "Width of your screenshot",
-        },
-        {
-          name: "height",
-          description: "Height of your screenshot",
-          isOptional: true,
-        },
-      ],
+      args: {
+        name: "width[,height]",
+        description: "Width and optionally height of your screenshot",
+      },
     },
     {
       name: "--search",
@@ -222,6 +258,14 @@ const completionSpec: Fig.Spec = {
       description: "Start the browser in kiosk mode",
     },
     {
+      name: "--kiosk-monitor",
+      description: "Place kiosk browser window on given monitor",
+      args: {
+        name: "num",
+        description: "Monitor number",
+      },
+    },
+    {
       name: "--disable-pinch",
       description: "Disable touch-screen and touch-pad pinch gestures",
     },
@@ -235,12 +279,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--marionette",
-      description: "Enable remote debugging server",
+      description: "Enable remote control server",
     },
     {
       name: "--remote-debugging-port",
       description:
-        "Start the Firefox Remote Agent, which is a low-level remote debugging interface used for WebDriver",
+        "Start the Firefox Remote Agent, which is a low-level remote debugging interface used for WebDriver BiDi",
       args: {
         name: "port",
         description: "Defaults to port 9222",
@@ -249,19 +293,19 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--allow-remote-hosts",
+      name: "--remote-allow-hosts",
       description: "Values of the Host header to allow for incoming requests",
       args: {
         name: "hosts",
-        // see comment on line 86
+        description: "Comma-separated list of hosts",
       },
     },
     {
-      name: "--allow-remote-origins",
+      name: "--remote-allow-origins",
       description: "Values of the Origin header to allow for incoming requests",
       args: {
         name: "origins",
-        // see comment on line 86
+        description: "Comma-separated list of origins",
       },
     },
   ],
