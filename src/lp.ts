@@ -1,5 +1,6 @@
 // lp (macOS 26 CUPS lp, apple-oss-distributions/cups tag cups-522.4 (Apple fork based on CUPS 2.3.x), 2026-11-19). Source: man/lp.1 and systemv/lp.c usage text and option parser; not run on macOS.
 // Cross-checked against upstream OpenPrinting CUPS v2.4.20 man/lp.1 (only difference: -o print-as-raster, not in Apple's CUPS). Legacy options that lp parses but ignores with a warning (-f, -S, -T, -y) and the undocumented aliases -w (= -m) and -p (= -q) are omitted.
+// Fixed from the previous spec: -H (hold/immediate/restart/resume/HH:MM) and -P (page-list) had swapped argument names and suggestions.
 const prioritySuggestions: (string | Fig.Suggestion)[] = Array.from(
   { length: 100 },
   (_, i) => i + 1
