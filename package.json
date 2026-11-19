@@ -29,7 +29,8 @@
     "lint": "eslint '**/*.ts' && prettier --check '**/*.ts' --parser typescript",
     "lint:fix": "eslint '**/*.ts' --fix && prettier --write '**/*.ts' --parser typescript",
     "test": "tsc --noEmit && echo 'All specs passed validation. You are ready to push!'",
-    "prepare": "husky"
+    "prepare": "husky",
+    "cli-list": "pnpm build && node scripts/generate-cli-list.js"
   },
   "fig": {
     "dev": {
@@ -54,6 +55,9 @@
     },
     "prepare": {
       "description": "Install husky"
+    },
+    "cli-list": {
+      "description": "Regenerate SUPPORTED_CLIS.md"
     }
   },
   "prettier": {
