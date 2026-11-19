@@ -1,3 +1,4 @@
+// tr (macOS 15 BSD, `man tr` dated 2006-10-13, 2026-11-19). Source: apple-oss-distributions/text_cmds tags text_cmds-195 (macOS 15-era) and text_cmds-199 (latest published), tr/tr.1 and tr/tr.c getopt "Ccdsu" (identical in both); not a live run on macOS
 const stringSuggestions: Fig.Suggestion[] = [
   {
     name: "a",
@@ -40,9 +41,15 @@ const stringSuggestions: Fig.Suggestion[] = [
     priority: 39,
   },
   {
+    name: "\\octal",
+    description:
+      "Character with the given octal encoded value (1 to 3 octal digits)",
+    priority: 39,
+  },
+  {
     name: "c-c",
     description:
-      "For non-octal range endpoints represents the range of characters between the range endpoints, inclusive, in ascending order, as defined by the collation sequence",
+      "For non-octal range endpoints represents the range of characters between the range endpoints, inclusive, in ascending order, as defined by the collation sequence. If either endpoint is an octal sequence, the range of coded values between them",
     priority: 38,
   },
   {
@@ -134,7 +141,7 @@ const stringSuggestions: Fig.Suggestion[] = [
   {
     name: "[#*n]",
     description:
-      "Represents 'n' repeated occurrences of the character represented by '#'",
+      "Represents 'n' repeated occurrences of the character represented by '#' (only valid in string2)",
     priority: 35,
   },
 ];
@@ -172,12 +179,12 @@ const completionSpec: Fig.Spec = {
   args: [
     {
       name: "string1",
-      description: "Candidate string",
+      description: "Set of characters to translate, delete or squeeze",
       suggestions: stringSuggestions,
     },
     {
       name: "string2",
-      description: "Replacment string",
+      description: "Replacement set of characters",
       isOptional: true,
       suggestions: stringSuggestions,
     },
