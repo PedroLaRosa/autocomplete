@@ -1,3 +1,9 @@
+// youtube-dl v2026.11.06 (latest ytdl-org/ytdl-nightly release, built from master bc069d2, 2026-11-19).
+// The latest stable release (PyPI, GitHub tag) is v2021.12.17; options that exist only in the nightly/master line
+// (--no-list-formats, --mtime, --no-check-extensions, --youtube-player-js-variant, --youtube-player-js-version,
+// the aria2p external downloader) are not accepted by v2021.12.17.
+// Source: youtube_dl/options.py of the nightly tag and of tag 2021.12.17 read statically (AST-parsed, nothing executed),
+// plus youtube_dl/downloader/external.py for the external downloader names.
 const youtubeDlGenerators: Record<string, Fig.Generator> = {
   listVideos: {
     script: (context) => [
@@ -59,7 +65,7 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["--help", "-h"],
-      description: "Print the help text and exit",
+      description: "Print this help text and exit",
     },
     {
       name: "--version",
@@ -68,7 +74,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-U", "--update"],
       description:
-        "Update this program to latest version. Make sure you have sufficient permissions (run with sudo if needed)",
+        "Update this program to latest version. Make sure that you have sufficient permissions (run with sudo if needed)",
     },
     {
       name: ["--ignore-errors", "-i"],
@@ -98,6 +104,25 @@ const completionSpec: Fig.Spec = {
         'Use this prefix for unqualified URLs. For example "gvsearch2:" downloads two videos from google videos for youtube-dl "large apple"',
       args: {
         name: "PREFIX",
+        suggestions: [
+          {
+            name: "auto",
+            description: "Let youtube-dl guess",
+          },
+          {
+            name: "auto_warning",
+            description: "Guess, and emit a warning when guessing",
+          },
+          {
+            name: "error",
+            description: "Throw an error",
+          },
+          {
+            name: "fixup_error",
+            description:
+              "Repair broken URLs, but emit an error if this is not possible instead of searching (default)",
+          },
+        ],
       },
     },
     {
@@ -115,7 +140,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--ignore-config",
-      description: "Do not read configuration files",
+      description:
+        "Do not read configuration files. When given in the global configuration file /etc/youtube-dl.conf: Do not read the user configuration in ~/.config/youtube-dl/config (%APPDATA%/youtube-dl/config.txt on Windows)",
     },
     {
       name: "--flat-playlist",
@@ -130,13 +156,13 @@ const completionSpec: Fig.Spec = {
       description: "Do not mark videos watched (YouTube only)",
     },
     {
-      name: "--no-color",
+      name: ["--no-color", "--no-colors"],
       description: "Do not emit color codes in output",
     },
     {
       name: "--proxy",
       description:
-        "Use the specified HTTP/HTTPS/SOCKS proxy. Pass in an empty string for direct connection",
+        'Use the specified HTTP/HTTPS/SOCKS proxy. To enable SOCKS proxy, specify a proper scheme. For example socks5://127.0.0.1:1080/. Pass in an empty string (--proxy "") for direct connection',
       insertValue: '--proxy "{cursor}"',
       args: {
         name: "URL",
@@ -167,7 +193,17 @@ const completionSpec: Fig.Spec = {
     {
       name: "--geo-verification-proxy",
       description:
-        "Use this proxy to verify the IP address for some geo-restricted sites",
+        "Use this proxy to verify the IP address for some geo-restricted sites. The default proxy specified by --proxy (or none, if the option is not present) is used for the actual downloading",
+      args: {
+        name: "URL",
+      },
+    },
+    {
+      name: "--cn-verification-proxy",
+      description:
+        "Use this proxy to verify the IP address for some geo-restricted sites (replaced by --geo-verification-proxy)",
+      hidden: true,
+      deprecated: true,
       args: {
         name: "URL",
       },
@@ -185,7 +221,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--geo-bypass-country",
       description:
-        "Force bypass geographic restriction with explicitly provided two-letter ISO 3166-2 county code",
+        "Force bypass geographic restriction with explicitly provided two-letter ISO 3166-2 country code",
       args: {
         name: "CODE",
       },
@@ -203,6 +239,7 @@ const completionSpec: Fig.Spec = {
       description: "Playlist video to start at (default is 1)",
       args: {
         name: "NUMBER",
+        default: "1",
         generators: youtubeDlGenerators.listVideos,
       },
     },
@@ -216,7 +253,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--playlist-items",
-      description: "Playlist video to end at (default is last)",
+      description:
+        'Playlist video items to download. Specify indices of the videos in the playlist separated by commas like: "--playlist-items 1,2,5,8" or a range like "--playlist-items 1-3,7,10-13"',
       args: {
         name: "ITEM_SPEC",
         generators: youtubeDlGenerators.listVideos,
@@ -225,7 +263,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--match-title",
       description:
-        "Download only matching titles (regex or caseless sub-string)",
+        "Download only matching titles (case-insensitive regex or alphanumeric sub-string)",
       args: {
         name: "REGEX",
       },
@@ -233,7 +271,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--reject-title",
       description:
-        "Skip download for matching titles (regex or caseless sub-string)",
+        "Skip download for matching titles (case-insensitive regex or alphanumeric sub-string)",
       args: {
         name: "REGEX",
       },
@@ -248,7 +286,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--min-filesize",
       description:
-        "Do not download any videos smaller than SIZE (e.g. 50k or 44.6)",
+        "Do not download any videos smaller than SIZE (e.g. 50k or 44.6m)",
       args: {
         name: "SIZE",
       },
@@ -256,7 +294,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--max-filesize",
       description:
-        "Do not download any videos larger than SIZE (e.g. 50k or 44.6)",
+        "Do not download any videos larger than SIZE (e.g. 50k or 44.6m)",
       args: {
         name: "SIZE",
       },
@@ -300,7 +338,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--match-filter",
-      description: "Generic video filter",
+      description:
+        'Generic video filter. Specify any key (see the "OUTPUT TEMPLATE" for a list of available keys) to match if the key is present, !key to check if the key is not present, key > NUMBER (like "comment_count > 12", also works with >=, <, <=, !=, =) to compare against a number, key = \'LITERAL\' (like "uploader = \'Mike Smith\'", also works with !=) to match against a string literal and & to require multiple matches. Values which are not known are excluded unless you put a question mark (?) after the operator',
       args: {
         name: "FILTER",
       },
@@ -335,7 +374,7 @@ const completionSpec: Fig.Spec = {
       description: "Download advertisements as well (experimental)",
     },
     {
-      name: ["-r", "--limit-rate"],
+      name: ["-r", "--limit-rate", "--rate-limit"],
       description:
         "Maximum download rate in bytes per second (e.g. 50K or 4.2M)",
       args: {
@@ -344,7 +383,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-R", "--retries"],
-      description: 'Number of retries or "infinite"',
+      description: 'Number of retries (default is 10), or "infinite"',
       args: {
         name: "RETRIES",
         default: "10",
@@ -352,7 +391,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--fragment-retries",
-      description: 'Number of retries for a fragment or "infinite"',
+      description:
+        'Number of retries for a fragment (default is 10), or "infinite" (DASH, hlsnative and ISM)',
       args: {
         name: "RETRIES",
         default: "10",
@@ -360,10 +400,10 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--skip-unavailable-fragments",
-      description: "Skip unavailable fragments",
+      description: "Skip unavailable fragments (DASH, hlsnative and ISM)",
     },
     {
-      name: "--abort-on-unavailable-fragments",
+      name: "--abort-on-unavailable-fragment",
       description: "Abort downloading when some fragment is not available",
     },
     {
@@ -381,15 +421,22 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--no-resize-buffer",
-      description: "Do not automatically adjust the buffer size",
+      description:
+        "Do not automatically adjust the buffer size. By default, the buffer size is automatically resized from an initial value of SIZE",
     },
     {
       name: "--http-chunk-size",
       description:
-        "Size of a chunk for chunk-based HTTP downloading (e.g. 10385760 or 10M)",
+        "Size of a chunk for chunk-based HTTP downloading (e.g. 10485760 or 10M) (default is disabled). May be useful for bypassing bandwidth throttling imposed by a webserver (experimental)",
       args: {
         name: "SIZE",
       },
+    },
+    {
+      name: "--test",
+      description:
+        "Download only a small part of each video (for extractor tests)",
+      hidden: true,
     },
     {
       name: "--playlist-reverse",
@@ -412,9 +459,9 @@ const completionSpec: Fig.Spec = {
       description: "Use ffmpeg instead of the native HLS downloader",
     },
     {
-      name: "--hls-prefer-mpegts",
+      name: "--hls-use-mpegts",
       description:
-        "Use the mpegts container for HLS videos, allowing to play the video while downloading",
+        "Use the mpegts container for HLS videos, allowing to play the video while downloading (some players may not be able to play it)",
     },
     {
       name: "--external-downloader",
@@ -423,6 +470,7 @@ const completionSpec: Fig.Spec = {
         name: "COMMAND",
         suggestions: [
           "aria2c",
+          "aria2p",
           "avconv",
           "axel",
           "curl",
@@ -479,9 +527,40 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--autonumber-size",
+      description:
+        "Specify the number of digits in %(autonumber)s (use an output template with %(autonumber)0Nd instead)",
+      hidden: true,
+      deprecated: true,
+      args: {
+        name: "NUMBER",
+      },
+    },
+    {
       name: "--restrict-filenames",
       description:
         'Restrict filenames to only ASCII characters, and avoid "&" and spaces in filenames',
+    },
+    {
+      name: ["-A", "--auto-number"],
+      description:
+        'Number downloaded files starting from 00000 (use -o "%(autonumber)s-%(title)s.%(ext)s" instead)',
+      hidden: true,
+      deprecated: true,
+    },
+    {
+      name: ["-t", "--title"],
+      description:
+        "Use title in file name (the default output template already does this)",
+      hidden: true,
+      deprecated: true,
+    },
+    {
+      name: ["-l", "--literal"],
+      description:
+        "Alias of --title, use title in file name (the default output template already does this)",
+      hidden: true,
+      deprecated: true,
     },
     {
       name: ["-w", "--no-overwrites"],
@@ -490,11 +569,21 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-c", "--continue"],
       description:
+        "Force resume of partially downloaded files. By default, youtube-dl will resume downloads if possible",
+    },
+    {
+      name: "--no-continue",
+      description:
         "Do not resume partially downloaded files (restart from beginning)",
     },
     {
       name: "--no-part",
       description: "Do not use .part files - write directly into output file",
+    },
+    {
+      name: "--mtime",
+      description:
+        "Use the Last-modified header to set the file modification time (default). Nightly builds only, not in v2021.12.17",
     },
     {
       name: "--no-mtime",
@@ -503,7 +592,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--write-description",
-      description: "Write video descriptions to a .description file",
+      description: "Write video description to a .description file",
     },
     {
       name: "--write-info-json",
@@ -514,9 +603,9 @@ const completionSpec: Fig.Spec = {
       description: "Write video annotations to a .annotations.xml file",
     },
     {
-      name: "--load-info-json",
+      name: ["--load-info-json", "--load-info"],
       description:
-        'JSON file containing the video information (created with the "--write-info-json" option',
+        'JSON file containing the video information (created with the "--write-info-json" option)',
       args: {
         name: "FILE",
         template: "filepaths",
@@ -533,7 +622,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--cache-dir",
       description:
-        "Location in the filesystem where youtube-dl can store some downloaded information permanently",
+        "Location in the filesystem where youtube-dl can store some downloaded information permanently. At the moment, only YouTube player files (for videos with obfuscated signatures) are cached, but that may change",
       args: {
         name: "DIR",
         template: "folders",
@@ -553,7 +642,7 @@ const completionSpec: Fig.Spec = {
       description: "Write thumbnail image to disk",
     },
     {
-      name: "--write-all-thumbnail",
+      name: "--write-all-thumbnails",
       description: "Write all thumbnail image formats to disk",
     },
     {
@@ -562,7 +651,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-q", "--quiet"],
-      description: "Activate quite mode",
+      description: "Activate quiet mode",
     },
     {
       name: "--no-warnings",
@@ -571,7 +660,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-s", "--simulate"],
       description:
-        "Do not download the video and do note write anything to disk",
+        "Do not download the video and do not write anything to disk",
     },
     {
       name: "--skip-download",
@@ -611,12 +700,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-j", "--dump-json"],
-      description: "Simulate, quiet but JSON information",
+      description: "Simulate, quiet but print JSON information",
     },
     {
       name: ["-J", "--dump-single-json"],
       description:
-        "Simulate, quiet but JSON information for each command-line argument",
+        "Simulate, quiet but print JSON information for each command-line argument. If the URL refers to a playlist, dump the whole playlist information in a single line",
     },
     {
       name: "--print-json",
@@ -625,11 +714,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--newline",
-      description: "Output the progress bar as new lines",
+      description: "Output progress bar as new lines",
     },
     {
       name: "--no-progress",
-      description: "Do not print the progress bar",
+      description: "Do not print progress bar",
     },
     {
       name: "--console-title",
@@ -640,7 +729,7 @@ const completionSpec: Fig.Spec = {
       description: "Print various debugging information",
     },
     {
-      name: "--dump-pages",
+      name: ["--dump-pages", "--dump-intermediate-pages"],
       description:
         "Print downloaded pages encoded using base64 to debug problems (very verbose)",
     },
@@ -650,7 +739,12 @@ const completionSpec: Fig.Spec = {
         "Write downloaded intermediary pages to files in the current directory to debug problems",
     },
     {
-      name: "--print-traffic",
+      name: "--youtube-print-sig-code",
+      description: "Print the YouTube signature deciphering code (debugging)",
+      hidden: true,
+    },
+    {
+      name: ["--print-traffic", "--dump-headers"],
       description: "Display sent and read HTTP traffic",
     },
     {
@@ -673,7 +767,12 @@ const completionSpec: Fig.Spec = {
       description: "Suppress HTTPS certificate validation",
     },
     {
-      name: "--prefer-insecure",
+      name: "--no-check-extensions",
+      description:
+        "Suppress file extension validation (nightly builds only, not in v2021.12.17)",
+    },
+    {
+      name: ["--prefer-insecure", "--prefer-unsecure"],
       description:
         "Use an unencrypted connection to retrieve information about the video. (Currently supported only for YouTube)",
     },
@@ -687,7 +786,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--referer",
       description:
-        "Specify a custom referer, use if the video access is restricted to one domain",
+        "Specify a custom Referer: use if the video access is restricted to one domain",
       args: {
         name: "URL",
       },
@@ -695,7 +794,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--add-header",
       description:
-        "Specify a custom HTTP header and its value, separated by a colon ':'",
+        "Specify a custom HTTP header and its value, separated by a colon ':'. You can use this option multiple times. NB Use --cookies rather than adding a Cookie header if its contents may be sensitive; data from a Cookie header will be sent to all domains, not just the one intended",
       isRepeatable: true,
       args: {
         name: "FIELD:VALUE",
@@ -707,9 +806,9 @@ const completionSpec: Fig.Spec = {
         "Work around terminals that lack bidirectional text support. Requires bidiv or fribidi executable in PATH",
     },
     {
-      name: "--sleep-interval",
+      name: ["--sleep-interval", "--min-sleep-interval"],
       description:
-        "Number of seconds to sleep before each download when used alone or a lower bound of a range for randomized sleep before each download when used along with --max-sleep-interval",
+        "Number of seconds to sleep before each download when used alone or a lower bound of a range for randomized sleep before each download (minimum possible number of seconds to sleep) when used along with --max-sleep-interval",
       args: {
         name: "SECONDS",
       },
@@ -718,14 +817,15 @@ const completionSpec: Fig.Spec = {
       name: "--max-sleep-interval",
       dependsOn: ["--sleep-interval"],
       description:
-        "Upper bound of a range for randomized sleep before each download. Must only be used along with --min- sleep-interval",
+        "Upper bound of a range for randomized sleep before each download (maximum possible number of seconds to sleep). Must only be used along with --min-sleep-interval",
       args: {
         name: "SECONDS",
       },
     },
     {
       name: ["-f", "--format"],
-      description: "Video format code",
+      description:
+        'Video format code, see the "FORMAT SELECTION" for all the info',
       args: {
         name: "FORMAT",
       },
@@ -744,25 +844,66 @@ const completionSpec: Fig.Spec = {
       description: "List all available formats of requested videos",
     },
     {
+      name: "--no-list-formats",
+      description:
+        "Do not list available formats of requested videos (default). Nightly builds only, not in v2021.12.17",
+    },
+    {
       name: "--youtube-skip-dash-manifest",
       description:
         "Do not download the DASH manifests and related data on YouTube videos",
     },
     {
+      name: "--youtube-include-dash-manifest",
+      description:
+        "Download the DASH manifests and related data on YouTube videos (default)",
+      hidden: true,
+    },
+    {
+      name: "--youtube-player-js-variant",
+      description:
+        "For YouTube, the player javascript variant to use for n/sig deciphering; `actual` to follow the site (nightly builds only, not in v2021.12.17)",
+      args: {
+        name: "VARIANT",
+        default: "actual",
+        suggestions: [
+          "actual",
+          "main",
+          "tcc",
+          "tce",
+          "es5",
+          "es6",
+          "tv",
+          "tv_es6",
+          "phone",
+          "tablet",
+        ],
+      },
+    },
+    {
+      name: "--youtube-player-js-version",
+      description:
+        "For YouTube, the player javascript version to use for n/sig deciphering, specified as `signature_timestamp@hash`, or `actual` to follow the site (nightly builds only, not in v2021.12.17)",
+      args: {
+        name: "STS@HASH",
+        default: "actual",
+      },
+    },
+    {
       name: "--merge-output-format",
       description:
-        "If a merge is required (e.g. bestvideo+bestaudio), output to given container format",
+        "If a merge is required (e.g. bestvideo+bestaudio), output to given container format. Ignored if no merge is required",
       args: {
         name: "FORMAT",
         suggestions: ["mkv", "mp4", "ogg", "webm", "flv"],
       },
     },
     {
-      name: "--write-sub",
+      name: ["--write-sub", "--write-srt"],
       description: "Write subtitle file",
     },
     {
-      name: "--write-auto-sub",
+      name: ["--write-auto-sub", "--write-automatic-sub"],
       description: "Write automatically generated subtitle file (YouTube only)",
     },
     {
@@ -779,12 +920,13 @@ const completionSpec: Fig.Spec = {
         'Subtitle format, accepts formats preference, for example: "srt" or "ass/srt/best"',
       args: {
         name: "FORMAT",
+        default: "best",
       },
     },
     {
-      name: "--sub-lang",
+      name: ["--sub-lang", "--sub-langs", "--srt-lang"],
       description:
-        "Languages of the subtitles to download (optional) separated by commas",
+        "Languages of the subtitles to download (optional) separated by commas, use --list-subs for available language tags",
       args: {
         name: "LANGS",
         generators: {
@@ -939,7 +1081,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--ap-mso",
       description:
-        "Adobe Pass multiple-system operator (TV provider) identifier",
+        "Adobe Pass multiple-system operator (TV provider) identifier, use --ap-list-mso for a list of available MSOs",
       args: {
         name: "MSO",
         generators: {
@@ -989,7 +1131,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-x", "--extract-audio"],
       description:
-        "Convert audio files to audio-only files (requires ffmpeg/avconv and ffprobe/avprobe)",
+        "Convert video files to audio-only files (requires ffmpeg/avconv and ffprobe/avprobe)",
     },
     {
       name: "--audio-format",
@@ -1029,7 +1171,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--postprocessor-args",
-      description: "Give these arguments to the postprocessor",
+      description:
+        "Give these arguments to the postprocessor (if postprocessing is required)",
       args: {
         name: "ARGS",
       },
@@ -1054,13 +1197,13 @@ const completionSpec: Fig.Spec = {
       description: "Embed thumbnail in the audio as cover art",
     },
     {
-      name: "--embed-metadata",
+      name: "--add-metadata",
       description: "Write metadata to the video file",
     },
     {
       name: "--metadata-from-title",
       description:
-        "Parse additional metadata like song title / artist from the video title. The format syntax is the same as --output. Regular expressions with named capture groups may also be used. The parsed parameters replace existing values",
+        "Parse additional metadata like song title / artist from the video title. The format syntax is the same as --output. Regular expression with named capture groups may also be used. The parsed parameters replace existing values",
       args: {
         name: "FORMAT",
       },
@@ -1102,7 +1245,7 @@ const completionSpec: Fig.Spec = {
         "Prefer ffmpeg over avconv for running the postprocessors (default)",
     },
     {
-      name: "--ffmpeg-location",
+      name: ["--ffmpeg-location", "--avconv-location"],
       description:
         "Location of the ffmpeg/avconv binary; either the path to the binary or its containing directory",
       args: {
@@ -1113,13 +1256,13 @@ const completionSpec: Fig.Spec = {
     {
       name: "--exec",
       description:
-        "Execute a command on the file after downloading and post-processing, similar to find's -exec syntax",
+        "Execute a command on the file after downloading and post-processing, similar to find's -exec syntax. Example: --exec 'adb push {} /sdcard/Music/ && rm {}'",
       args: {
         name: "CMD",
       },
     },
     {
-      name: "--convert-subs",
+      name: ["--convert-subs", "--convert-subtitles"],
       description: "Convert the subtitles to other format",
       args: {
         name: "FORMAT",
