@@ -1,7 +1,9 @@
+// dateseq (dateutils) v0.4.12 (latest tag of hroptatyr/dateutils and Homebrew formula, 2026-11-19). Source: src/dseq.yuck
+// (the option parser/--help definition) and test/dseq.*.ctst usage examples from the v0.4.12 sources; binary not run.
 const completionSpec: Fig.Spec = {
   name: "dateseq",
   description:
-    "Nifty command line date and time utilities; fast date calculations and conversion in the shell",
+    "Generate a sequence of date/times from FIRST to LAST, optionally in steps of INCREMENT (dateutils)",
   options: [
     {
       name: ["--help", "-h"],
@@ -14,22 +16,33 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--quiet", "-q"],
       description:
-        "Suppress message about date/time and duration parse errors and fix-ups",
+        "Suppress message about date/time and duration parser errors and fix-ups. The default is to print a warning or the fixed up value and return error code 2",
     },
     {
       name: ["-f", "--format"],
       description:
         "Output format. This can either be a specifier string (similar to strftime()'s FMT) or the name of a calendar",
-      requiresSeparator: true,
       args: {
         name: "string",
+        suggestions: [
+          { name: "ymd", description: "Calendar designator, %Y-%m-%d" },
+          { name: "ymcw", description: "Calendar designator, %Y-%m-%c-%w" },
+          { name: "ywd", description: "Calendar designator, %rY-W%V-%u" },
+          { name: "bizda", description: "Calendar designator, %Y-%m-%db" },
+          { name: "lilian", description: "Lilian day number" },
+          { name: "ldn", description: "Lilian day number" },
+          { name: "julian", description: "Julian day number" },
+          { name: "jdn", description: "Julian day number" },
+          { name: "matlab", description: "Matlab date number" },
+          { name: "mdn", description: "Matlab date number" },
+        ],
       },
     },
     {
       name: ["-i", "--input-format"],
+      isRepeatable: true,
       description:
         "Input format, can be used multiple times. Each date/time will be passed to the input format parsers in the order they are given, if a date/time can be read successfully with a given input format specifier string, that value will be used",
-      requiresSeparator: true,
       args: {
         name: "input format",
       },
@@ -38,7 +51,6 @@ const completionSpec: Fig.Spec = {
       name: ["-b", "--base"],
       description:
         "For underspecified input use DT as a fallback to fill in missing fields. Also used for ambiguous format specifiers to position their range on the absolute time line. Must be a date/time in ISO8601 format. If omitted defaults to the current date/time",
-      requiresSeparator: true,
       args: {
         name: "base",
       },
@@ -57,12 +69,20 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--from-locale",
+      description:
+        "Interpret dates on stdin or the command line as coming from the locale LOCALE, this would only affect month and weekday names as input formats have to be specified explicitly",
+      args: {
+        name: "locale",
+      },
+    },
+    {
       name: ["-s", "--skip"],
+      isRepeatable: true,
       description:
         "Skip weekdays specified by WEEKDAY. WEEKDAY can be a single weekday (Mon, Tue, etc.), and to skip several days the --skip option can be used multiple times. WEEKDAY can also be a comma-separated list of weekday names, or `ss' to skip weekends (sat+sun) altogether. WEEKDAY can also contain date ranges like `mo-we' for Monday to Wednesday",
       args: {
         name: "weekday",
-        isVariadic: true,
       },
     },
     {
@@ -82,15 +102,19 @@ const completionSpec: Fig.Spec = {
   args: [
     {
       name: "FIRST",
-      description: "Date/time",
+      description: "First date/time of the sequence (inclusive)",
     },
     {
       name: "INCREMENT",
+      description:
+        "Step between date/times, defaults to 1d, must be negative if FIRST is newer than LAST",
       isOptional: true,
     },
     {
       name: "LAST",
-      description: "Date/time",
+      description:
+        "Last date/time of the sequence (inclusive), defaults to now, today or the current time depending on FIRST",
+      isOptional: true,
     },
   ],
 };

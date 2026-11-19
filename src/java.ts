@@ -748,11 +748,11 @@ const completionSpec: Fig.Spec = {
     ),
     xxFlag(
       "+PrintClassHistogram",
-      "Print a class instance histogram on SIGQUIT (Ctrl+\\) or Ctrl+C on Windows"
+      "Print a class instance histogram on SIGQUIT (non-Windows) or Ctrl+C (Windows)"
     ),
     xxFlag(
       "+PrintConcurrentLocks",
-      "Print java.util.concurrent locks on SIGQUIT (Ctrl+\\) or Ctrl+C on Windows"
+      "Print java.util.concurrent locks on SIGQUIT (non-Windows) or Ctrl+C (Windows)"
     ),
     xxFlag("+PrintFlagsRanges", "Print the allowed ranges of the JVM flags"),
     xxFlag(
