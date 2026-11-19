@@ -26,7 +26,8 @@ const serviceIdOption: Fig.Option = {
 
 const versionOption: Fig.Option = {
   name: "--version",
-  description: "'latest', 'active', 'staged', or the number of a specific Fastly service version",
+  description:
+    "'latest', 'active', 'staged', or the number of a specific Fastly service version",
   isRequired: true,
   args: {
     name: "version",
@@ -35,12 +36,14 @@ const versionOption: Fig.Option = {
 
 const autocloneOption: Fig.Option = {
   name: "--autoclone",
-  description: "If the selected service version is not editable, clone it and use the clone",
+  description:
+    "If the selected service version is not editable, clone it and use the clone",
 };
 
 const formatOption: Fig.Option = {
   name: "--format",
-  description: "Apache style log formatting. Your log must produce valid JSON. Can be a string or a file path to a file containing formatting",
+  description:
+    "Apache style log formatting. Your log must produce valid JSON. Can be a string or a file path to a file containing formatting",
   args: {
     name: "format",
   },
@@ -48,7 +51,8 @@ const formatOption: Fig.Option = {
 
 const formatVersionOption: Fig.Option = {
   name: "--format-version",
-  description: "The version of the custom logging format used for the configured endpoint. Can be either 2 (the default, version 2 log format) or 1 (the version 1 log format). The logging call gets placed by default in vcl_log if format_version is set to 2 and in vcl_deliver if format_version is set to 1",
+  description:
+    "The version of the custom logging format used for the configured endpoint. Can be either 2 (the default, version 2 log format) or 1 (the version 1 log format). The logging call gets placed by default in vcl_log if format_version is set to 2 and in vcl_deliver if format_version is set to 1",
   args: {
     name: "format-version",
   },
@@ -56,7 +60,8 @@ const formatVersionOption: Fig.Option = {
 
 const placementOption: Fig.Option = {
   name: "--placement",
-  description: "Where in the generated VCL the logging call should be placed, overriding any format_version default. Can be none, which suppresses the logging call (the only valid value for Compute services). This field is not required and has no default value. When updating a Delivery service, pass an empty string to reset the endpoint back to automatic placement",
+  description:
+    "Where in the generated VCL the logging call should be placed, overriding any format_version default. Can be none, which suppresses the logging call (the only valid value for Compute services). This field is not required and has no default value. When updating a Delivery service, pass an empty string to reset the endpoint back to automatic placement",
   args: {
     name: "placement",
   },
@@ -64,7 +69,8 @@ const placementOption: Fig.Option = {
 
 const responseConditionOption: Fig.Option = {
   name: "--response-condition",
-  description: "The name of an existing condition in the configured endpoint, or leave blank to always execute",
+  description:
+    "The name of an existing condition in the configured endpoint, or leave blank to always execute",
   args: {
     name: "response-condition",
   },
@@ -72,7 +78,8 @@ const responseConditionOption: Fig.Option = {
 
 const workspaceIdOption: Fig.Option = {
   name: "--workspace-id",
-  description: "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
+  description:
+    "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
   args: {
     name: "workspace-id",
   },
@@ -80,7 +87,8 @@ const workspaceIdOption: Fig.Option = {
 
 const messageTypeOption: Fig.Option = {
   name: "--message-type",
-  description: "How the message should be formatted. One of: classic (default), loggly, logplex or blank",
+  description:
+    "How the message should be formatted. One of: classic (default), loggly, logplex or blank",
   args: {
     name: "message-type",
   },
@@ -88,7 +96,8 @@ const messageTypeOption: Fig.Option = {
 
 const periodOption: Fig.Option = {
   name: "--period",
-  description: "How frequently log files are finalized so they can be available for reading (in seconds, default 3600)",
+  description:
+    "How frequently log files are finalized so they can be available for reading (in seconds, default 3600)",
   args: {
     name: "period",
   },
@@ -96,7 +105,8 @@ const periodOption: Fig.Option = {
 
 const compressionCodecOption: Fig.Option = {
   name: "--compression-codec",
-  description: "The codec used for compression of your logs. Valid values are zstd, snappy, and gzip. If the specified codec is \"gzip\", gzip_level will default to 3. To specify a different level, leave compression_codec blank and explicitly set the level using gzip_level. Specifying both compression_codec and gzip_level in the same API request will result in an error",
+  description:
+    'The codec used for compression of your logs. Valid values are zstd, snappy, and gzip. If the specified codec is "gzip", gzip_level will default to 3. To specify a different level, leave compression_codec blank and explicitly set the level using gzip_level. Specifying both compression_codec and gzip_level in the same API request will result in an error',
   args: {
     name: "compression-codec",
   },
@@ -104,7 +114,8 @@ const compressionCodecOption: Fig.Option = {
 
 const gzipLevelOption: Fig.Option = {
   name: "--gzip-level",
-  description: "What level of GZIP encoding to have when dumping logs (default 0, no compression)",
+  description:
+    "What level of GZIP encoding to have when dumping logs (default 0, no compression)",
   args: {
     name: "gzip-level",
   },
@@ -112,7 +123,8 @@ const gzipLevelOption: Fig.Option = {
 
 const timestampFormatOption: Fig.Option = {
   name: "--timestamp-format",
-  description: "Strftime specified timestamp formatting (default \"%Y-%m-%dT%H:%M:%S.000\")",
+  description:
+    'Strftime specified timestamp formatting (default "%Y-%m-%dT%H:%M:%S.000")',
   args: {
     name: "timestamp-format",
   },
@@ -120,7 +132,8 @@ const timestampFormatOption: Fig.Option = {
 
 const publicKeyOption: Fig.Option = {
   name: "--public-key",
-  description: "A PGP public key that Fastly will use to encrypt your log files before writing them to disk",
+  description:
+    "A PGP public key that Fastly will use to encrypt your log files before writing them to disk",
   args: {
     name: "public-key",
   },
@@ -171,7 +184,8 @@ const descriptionOption: Fig.Option = {
 
 const tlsCaCertOption: Fig.Option = {
   name: "--tls-ca-cert",
-  description: "A secure certificate to authenticate the server with. Must be in PEM format",
+  description:
+    "A secure certificate to authenticate the server with. Must be in PEM format",
   args: {
     name: "tls-ca-cert",
   },
@@ -179,7 +193,8 @@ const tlsCaCertOption: Fig.Option = {
 
 const tlsClientCertOption: Fig.Option = {
   name: "--tls-client-cert",
-  description: "The client certificate used to make authenticated requests. Must be in PEM format",
+  description:
+    "The client certificate used to make authenticated requests. Must be in PEM format",
   args: {
     name: "tls-client-cert",
   },
@@ -187,7 +202,8 @@ const tlsClientCertOption: Fig.Option = {
 
 const tlsClientKeyOption: Fig.Option = {
   name: "--tls-client-key",
-  description: "The client private key used to make authenticated requests. Must be in PEM format",
+  description:
+    "The client private key used to make authenticated requests. Must be in PEM format",
   args: {
     name: "tls-client-key",
   },
@@ -236,7 +252,8 @@ const perPageOption: Fig.Option = {
 
 const accountNameOption: Fig.Option = {
   name: "--account-name",
-  description: "The google account name used to obtain temporary credentials (default none)",
+  description:
+    "The google account name used to obtain temporary credentials (default none)",
   args: {
     name: "account-name",
   },
@@ -287,7 +304,8 @@ const fileMaxBytesOption: Fig.Option = {
 
 const entriesOption: Fig.Option = {
   name: "--entries",
-  description: "Entries for the list. Can either be a comma separated list or a path to a file",
+  description:
+    "Entries for the list. Can either be a comma separated list or a path to a file",
   isRequired: true,
   args: {
     name: "entries",
@@ -296,7 +314,8 @@ const entriesOption: Fig.Option = {
 
 const secretKeyOption: Fig.Option = {
   name: "--secret-key",
-  description: "Your Google Cloud Platform account secret key. The private_key field in your service account authentication JSON",
+  description:
+    "Your Google Cloud Platform account secret key. The private_key field in your service account authentication JSON",
   args: {
     name: "secret-key",
   },
@@ -304,7 +323,8 @@ const secretKeyOption: Fig.Option = {
 
 const userOption: Fig.Option = {
   name: "--user",
-  description: "Your Google Cloud Platform service account email address. The client_email field in your service account authentication JSON",
+  description:
+    "Your Google Cloud Platform service account email address. The client_email field in your service account authentication JSON",
   args: {
     name: "user",
   },
@@ -320,7 +340,8 @@ const requestMaxBytesOption: Fig.Option = {
 
 const requestMaxEntriesOption: Fig.Option = {
   name: "--request-max-entries",
-  description: "Maximum number of logs to append to a batch, if non-zero. Defaults to 10k",
+  description:
+    "Maximum number of logs to append to a batch, if non-zero. Defaults to 10k",
   args: {
     name: "request-max-entries",
   },
@@ -328,7 +349,8 @@ const requestMaxEntriesOption: Fig.Option = {
 
 const useTlsOption: Fig.Option = {
   name: "--use-tls",
-  description: "Whether to use TLS for secure logging. Can be either true or false",
+  description:
+    "Whether to use TLS for secure logging. Can be either true or false",
 };
 
 const iamRoleOption: Fig.Option = {
@@ -341,7 +363,8 @@ const iamRoleOption: Fig.Option = {
 
 const keyOption: Fig.Option = {
   name: "--key",
-  description: "The Insert API key from the Account page of your New Relic account",
+  description:
+    "The Insert API key from the Account page of your New Relic account",
   args: {
     name: "key",
   },
@@ -349,7 +372,8 @@ const keyOption: Fig.Option = {
 
 const processingRegionOption: Fig.Option = {
   name: "--processing-region",
-  description: "The region where logs will be processed before streaming to New Relic. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+  description:
+    "The region where logs will be processed before streaming to New Relic. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
   args: {
     name: "processing-region",
   },
@@ -388,7 +412,8 @@ const serviceAclSubcommands: Fig.Subcommand[] = [
       autocloneOption,
       {
         name: "--name",
-        description: "Name for the ACL. Must start with an alphanumeric character and contain only alphanumeric characters, underscores, and whitespace",
+        description:
+          "Name for the ACL. Must start with an alphanumeric character and contain only alphanumeric characters, underscores, and whitespace",
         args: {
           name: "name",
         },
@@ -437,12 +462,7 @@ const serviceAclSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List ACLs",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -500,7 +520,8 @@ const serviceAclEntrySubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--subnet",
-        description: "Number of bits for the subnet mask applied to the IP address",
+        description:
+          "Number of bits for the subnet mask applied to the IP address",
         args: {
           name: "subnet",
         },
@@ -584,7 +605,8 @@ const serviceAclEntrySubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--file",
-        description: "Batch update json passed as file path or content, e.g. $(< batch.json)",
+        description:
+          "Batch update json passed as file path or content, e.g. $(< batch.json)",
         args: {
           name: "file",
           template: "filepaths",
@@ -612,7 +634,8 @@ const serviceAclEntrySubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--subnet",
-        description: "Number of bits for the subnet mask applied to the IP address",
+        description:
+          "Number of bits for the subnet mask applied to the IP address",
         args: {
           name: "subnet",
         },
@@ -628,7 +651,8 @@ const serviceAlertSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--description",
-        description: "Additional text that is included in the alert notification",
+        description:
+          "Additional text that is included in the alert notification",
         isRequired: true,
         args: {
           name: "description",
@@ -644,14 +668,16 @@ const serviceAlertSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--ignoreBelow",
-        description: "IgnoreBelow is the threshold for the denominator value used in evaluations that calculate a rate or ratio. Usually used to filter out noise",
+        description:
+          "IgnoreBelow is the threshold for the denominator value used in evaluations that calculate a rate or ratio. Usually used to filter out noise",
         args: {
           name: "ignoreBelow",
         },
       },
       {
         name: "--integrations",
-        description: "Integrations are a list of integrations used to notify when alert fires",
+        description:
+          "Integrations are a list of integrations used to notify when alert fires",
         isRepeatable: true,
         args: {
           name: "integrations",
@@ -676,7 +702,8 @@ const serviceAlertSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--period",
-        description: "Period of time to evaluate whether the conditions have been met. The data is polled every minute",
+        description:
+          "Period of time to evaluate whether the conditions have been met. The data is polled every minute",
         isRequired: true,
         args: {
           name: "period",
@@ -760,21 +787,24 @@ const serviceAlertSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--after",
-        description: "After filter history record that either started or ended after a specific date",
+        description:
+          "After filter history record that either started or ended after a specific date",
         args: {
           name: "after",
         },
       },
       {
         name: "--before",
-        description: "Before filter history record that either started or ended before a specific date",
+        description:
+          "Before filter history record that either started or ended before a specific date",
         args: {
           name: "before",
         },
       },
       {
         name: "--cursor",
-        description: "Pagination cursor (Use 'next_cursor' value from list output)",
+        description:
+          "Pagination cursor (Use 'next_cursor' value from list output)",
         args: {
           name: "cursor",
         },
@@ -830,7 +860,8 @@ const serviceAlertSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--cursor",
-        description: "Pagination cursor (Use 'next_cursor' value from list output)",
+        description:
+          "Pagination cursor (Use 'next_cursor' value from list output)",
         args: {
           name: "cursor",
         },
@@ -866,7 +897,8 @@ const serviceAlertSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--sort",
-        description: "Sort by one of the following [name, created_at, updated_at]",
+        description:
+          "Sort by one of the following [name, created_at, updated_at]",
         args: {
           name: "sort",
         },
@@ -879,7 +911,8 @@ const serviceAlertSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--description",
-        description: "Additional text that is included in the alert notification",
+        description:
+          "Additional text that is included in the alert notification",
         isRequired: true,
         args: {
           name: "description",
@@ -903,14 +936,16 @@ const serviceAlertSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--ignoreBelow",
-        description: "IgnoreBelow is the threshold for the denominator value used in evaluations that calculate a rate or ratio. Usually used to filter out noise",
+        description:
+          "IgnoreBelow is the threshold for the denominator value used in evaluations that calculate a rate or ratio. Usually used to filter out noise",
         args: {
           name: "ignoreBelow",
         },
       },
       {
         name: "--integrations",
-        description: "Integrations are a list of integrations used to notify when alert fires",
+        description:
+          "Integrations are a list of integrations used to notify when alert fires",
         isRepeatable: true,
         args: {
           name: "integrations",
@@ -935,7 +970,8 @@ const serviceAlertSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--period",
-        description: "Period of time to evaluate whether the conditions have been met. The data is polled every minute",
+        description:
+          "Period of time to evaluate whether the conditions have been met. The data is polled every minute",
         isRequired: true,
         args: {
           name: "period",
@@ -992,7 +1028,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--auto-loadbalance",
-        description: "Whether or not this backend should be automatically load balanced",
+        description:
+          "Whether or not this backend should be automatically load balanced",
       },
       autocloneOption,
       {
@@ -1026,42 +1063,48 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--http-ka-time",
-        description: "Configure how long to keep idle HTTP keepalive connections in the connection pool",
+        description:
+          "Configure how long to keep idle HTTP keepalive connections in the connection pool",
         args: {
           name: "http-ka-time",
         },
       },
       {
         name: "--iam-external-id",
-        description: "If the backend is using IAM authentication and the IAM system policy requires a matching external identifier, it should match this value (your Fastly customer ID will be used if this is not set)",
+        description:
+          "If the backend is using IAM authentication and the IAM system policy requires a matching external identifier, it should match this value (your Fastly customer ID will be used if this is not set)",
         args: {
           name: "iam-external-id",
         },
       },
       {
         name: "--iam-product",
-        description: "If the backend is using IAM authentication, the IAM signature will use this as the product element",
+        description:
+          "If the backend is using IAM authentication, the IAM signature will use this as the product element",
         args: {
           name: "iam-product",
         },
       },
       {
         name: "--iam-region",
-        description: "If the backend is using IAM authentication, this region will be used for signing and access",
+        description:
+          "If the backend is using IAM authentication, this region will be used for signing and access",
         args: {
           name: "iam-region",
         },
       },
       {
         name: "--iam-role",
-        description: "If the backend is using IAM authentication, the fully qualified role string supplied by the storage vendor",
+        description:
+          "If the backend is using IAM authentication, the fully qualified role string supplied by the storage vendor",
         args: {
           name: "iam-role",
         },
       },
       {
         name: "--iam-vendor",
-        description: "A label that identifies the storage vendor. Providing a value enables IAM usage",
+        description:
+          "A label that identifies the storage vendor. Providing a value enables IAM usage",
         args: {
           name: "iam-vendor",
         },
@@ -1075,28 +1118,32 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--max-lifetime",
-        description: "Maximum time from creation (in milliseconds) that a pooled HTTP keepalive connection will be eligible for reuse; 0 is treated as unlimited",
+        description:
+          "Maximum time from creation (in milliseconds) that a pooled HTTP keepalive connection will be eligible for reuse; 0 is treated as unlimited",
         args: {
           name: "max-lifetime",
         },
       },
       {
         name: "--max-tls-version",
-        description: "Maximum allowed TLS version on SSL connections to this backend",
+        description:
+          "Maximum allowed TLS version on SSL connections to this backend",
         args: {
           name: "max-tls-version",
         },
       },
       {
         name: "--max-use",
-        description: "Maximum number of requests allowed over a single, pooled HTTP keepalive connection to this backend; 0 is treated as unlimited",
+        description:
+          "Maximum number of requests allowed over a single, pooled HTTP keepalive connection to this backend; 0 is treated as unlimited",
         args: {
           name: "max-use",
         },
       },
       {
         name: "--min-tls-version",
-        description: "Minimum allowed TLS version on SSL connections to this backend",
+        description:
+          "Minimum allowed TLS version on SSL connections to this backend",
         args: {
           name: "min-tls-version",
         },
@@ -1135,7 +1182,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--request-condition",
-        description: "Condition, which if met, will select this backend during a request",
+        description:
+          "Condition, which if met, will select this backend during a request",
         args: {
           name: "request-condition",
         },
@@ -1144,7 +1192,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--shield",
-        description: "The shield POP designated to reduce inbound load on this origin by serving the cached data to the rest of the network",
+        description:
+          "The shield POP designated to reduce inbound load on this origin by serving the cached data to the rest of the network",
         args: {
           name: "shield",
         },
@@ -1158,7 +1207,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--ssl-cert-hostname",
-        description: "Overrides ssl_hostname, but only for cert verification. Does not affect SNI at all",
+        description:
+          "Overrides ssl_hostname, but only for cert verification. Does not affect SNI at all",
         args: {
           name: "ssl-cert-hostname",
         },
@@ -1169,7 +1219,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--ssl-ciphers",
-        description: "List of OpenSSL ciphers (https://www.openssl.org/docs/man1.0.2/man1/ciphers)",
+        description:
+          "List of OpenSSL ciphers (https://www.openssl.org/docs/man1.0.2/man1/ciphers)",
         args: {
           name: "ssl-ciphers",
         },
@@ -1190,7 +1241,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--ssl-sni-hostname",
-        description: "Overrides ssl_hostname, but only for SNI in the handshake. Does not affect cert validation at all",
+        description:
+          "Overrides ssl_hostname, but only for SNI in the handshake. Does not affect cert validation at all",
         args: {
           name: "ssl-sni-hostname",
         },
@@ -1204,21 +1256,24 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--tcp-ka-interval",
-        description: "Configure how long to wait between sending each TCP keepalive probe",
+        description:
+          "Configure how long to wait between sending each TCP keepalive probe",
         args: {
           name: "tcp-ka-interval",
         },
       },
       {
         name: "--tcp-ka-probes",
-        description: "Configure how many unacknowledged TCP keepalive probes to send before considering the connection dead",
+        description:
+          "Configure how many unacknowledged TCP keepalive probes to send before considering the connection dead",
         args: {
           name: "tcp-ka-probes",
         },
       },
       {
         name: "--tcp-ka-time",
-        description: "Configure how long to wait after the last sent data before sending TCP keepalive probes",
+        description:
+          "Configure how long to wait after the last sent data before sending TCP keepalive probes",
         args: {
           name: "tcp-ka-time",
         },
@@ -1257,7 +1312,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a backend on a Fastly service version",
+    description:
+      "Show detailed information about a backend on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -1276,12 +1332,7 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List backends on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -1296,7 +1347,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--auto-loadbalance",
-        description: "Whether or not this backend should be automatically load balanced",
+        description:
+          "Whether or not this backend should be automatically load balanced",
       },
       autocloneOption,
       {
@@ -1330,42 +1382,48 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--http-ka-time",
-        description: "Configure how long to keep idle HTTP keepalive connections in the connection pool",
+        description:
+          "Configure how long to keep idle HTTP keepalive connections in the connection pool",
         args: {
           name: "http-ka-time",
         },
       },
       {
         name: "--iam-external-id",
-        description: "If the backend is using IAM authentication and the IAM system policy requires a matching external identifier, it should match this value (your Fastly customer ID will be used if this is not set)",
+        description:
+          "If the backend is using IAM authentication and the IAM system policy requires a matching external identifier, it should match this value (your Fastly customer ID will be used if this is not set)",
         args: {
           name: "iam-external-id",
         },
       },
       {
         name: "--iam-product",
-        description: "If the backend is using IAM authentication, the IAM signature will use this as the product element",
+        description:
+          "If the backend is using IAM authentication, the IAM signature will use this as the product element",
         args: {
           name: "iam-product",
         },
       },
       {
         name: "--iam-region",
-        description: "If the backend is using IAM authentication, this region will be used for signing and access",
+        description:
+          "If the backend is using IAM authentication, this region will be used for signing and access",
         args: {
           name: "iam-region",
         },
       },
       {
         name: "--iam-role",
-        description: "If the backend is using IAM authentication, the fully qualified role string supplied by the storage vendor",
+        description:
+          "If the backend is using IAM authentication, the fully qualified role string supplied by the storage vendor",
         args: {
           name: "iam-role",
         },
       },
       {
         name: "--iam-vendor",
-        description: "A label that identifies the storage vendor. Providing a value enables IAM usage",
+        description:
+          "A label that identifies the storage vendor. Providing a value enables IAM usage",
         args: {
           name: "iam-vendor",
         },
@@ -1379,28 +1437,32 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--max-lifetime",
-        description: "Maximum time from creation (in milliseconds) that a pooled HTTP keepalive connection will be eligible for reuse; 0 is treated as unlimited",
+        description:
+          "Maximum time from creation (in milliseconds) that a pooled HTTP keepalive connection will be eligible for reuse; 0 is treated as unlimited",
         args: {
           name: "max-lifetime",
         },
       },
       {
         name: "--max-tls-version",
-        description: "Maximum allowed TLS version on SSL connections to this backend",
+        description:
+          "Maximum allowed TLS version on SSL connections to this backend",
         args: {
           name: "max-tls-version",
         },
       },
       {
         name: "--max-use",
-        description: "Maximum number of requests allowed over a single, pooled HTTP keepalive connection to this backend; 0 is treated as unlimited",
+        description:
+          "Maximum number of requests allowed over a single, pooled HTTP keepalive connection to this backend; 0 is treated as unlimited",
         args: {
           name: "max-use",
         },
       },
       {
         name: "--min-tls-version",
-        description: "Minimum allowed TLS version on SSL connections to this backend",
+        description:
+          "Minimum allowed TLS version on SSL connections to this backend",
         args: {
           name: "min-tls-version",
         },
@@ -1447,7 +1509,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--request-condition",
-        description: "Condition, which if met, will select this backend during a request",
+        description:
+          "Condition, which if met, will select this backend during a request",
         args: {
           name: "request-condition",
         },
@@ -1456,7 +1519,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--shield",
-        description: "The shield POP designated to reduce inbound load on this origin by serving the cached data to the rest of the network",
+        description:
+          "The shield POP designated to reduce inbound load on this origin by serving the cached data to the rest of the network",
         args: {
           name: "shield",
         },
@@ -1470,7 +1534,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--ssl-cert-hostname",
-        description: "Overrides ssl_hostname, but only for cert verification. Does not affect SNI at all",
+        description:
+          "Overrides ssl_hostname, but only for cert verification. Does not affect SNI at all",
         args: {
           name: "ssl-cert-hostname",
         },
@@ -1481,7 +1546,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--ssl-ciphers",
-        description: "List of OpenSSL ciphers (https://www.openssl.org/docs/man1.0.2/man1/ciphers)",
+        description:
+          "List of OpenSSL ciphers (https://www.openssl.org/docs/man1.0.2/man1/ciphers)",
         args: {
           name: "ssl-ciphers",
         },
@@ -1502,7 +1568,8 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--ssl-sni-hostname",
-        description: "Overrides ssl_hostname, but only for SNI in the handshake. Does not affect cert validation at all",
+        description:
+          "Overrides ssl_hostname, but only for SNI in the handshake. Does not affect cert validation at all",
         args: {
           name: "ssl-sni-hostname",
         },
@@ -1516,21 +1583,24 @@ const serviceBackendSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--tcp-ka-interval",
-        description: "Configure how long to wait between sending each TCP keepalive probe",
+        description:
+          "Configure how long to wait between sending each TCP keepalive probe",
         args: {
           name: "tcp-ka-interval",
         },
       },
       {
         name: "--tcp-ka-probes",
-        description: "Configure how many unacknowledged TCP keepalive probes to send before considering the connection dead",
+        description:
+          "Configure how many unacknowledged TCP keepalive probes to send before considering the connection dead",
         args: {
           name: "tcp-ka-probes",
         },
       },
       {
         name: "--tcp-ka-time",
-        description: "Configure how long to wait after the last sent data before sending TCP keepalive probes",
+        description:
+          "Configure how long to wait after the last sent data before sending TCP keepalive probes",
         args: {
           name: "tcp-ka-time",
         },
@@ -1575,7 +1645,8 @@ const serviceDictionarySubcommands: Fig.Subcommand[] = [
   },
   {
     name: "delete",
-    description: "Delete a Fastly edge dictionary from a Fastly service version",
+    description:
+      "Delete a Fastly edge dictionary from a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -1612,12 +1683,7 @@ const serviceDictionarySubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List all dictionaries on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -1644,7 +1710,8 @@ const serviceDictionarySubcommands: Fig.Subcommand[] = [
       versionOption,
       {
         name: "--write-only",
-        description: "Whether to mark this dictionary as write-only. Can be true or false (defaults to false)",
+        description:
+          "Whether to mark this dictionary as write-only. Can be true or false (defaults to false)",
         args: {
           name: "write-only",
         },
@@ -1698,7 +1765,8 @@ const serviceDictionaryEntrySubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Fastly edge dictionary item",
+    description:
+      "Show detailed information about a Fastly edge dictionary item",
     options: [
       dictionaryIdOption,
       jsonOption,
@@ -1812,7 +1880,8 @@ const serviceHealthcheckSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--initial",
-        description: "When loading a config, the initial number of probes to be seen as OK",
+        description:
+          "When loading a config, the initial number of probes to be seen as OK",
         args: {
           name: "initial",
         },
@@ -1842,7 +1911,8 @@ const serviceHealthcheckSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--threshold",
-        description: "How many healthchecks must succeed to be considered healthy",
+        description:
+          "How many healthchecks must succeed to be considered healthy",
         args: {
           name: "threshold",
         },
@@ -1857,7 +1927,8 @@ const serviceHealthcheckSubcommands: Fig.Subcommand[] = [
       versionOption,
       {
         name: "--window",
-        description: "The number of most recent healthcheck queries to keep for this healthcheck",
+        description:
+          "The number of most recent healthcheck queries to keep for this healthcheck",
         args: {
           name: "window",
         },
@@ -1884,7 +1955,8 @@ const serviceHealthcheckSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a healthcheck on a Fastly service version",
+    description:
+      "Show detailed information about a healthcheck on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -1903,12 +1975,7 @@ const serviceHealthcheckSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List healthchecks on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -1946,7 +2013,8 @@ const serviceHealthcheckSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--initial",
-        description: "When loading a config, the initial number of probes to be seen as OK",
+        description:
+          "When loading a config, the initial number of probes to be seen as OK",
         args: {
           name: "initial",
         },
@@ -1984,7 +2052,8 @@ const serviceHealthcheckSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--threshold",
-        description: "How many healthchecks must succeed to be considered healthy",
+        description:
+          "How many healthchecks must succeed to be considered healthy",
         args: {
           name: "threshold",
         },
@@ -1999,7 +2068,8 @@ const serviceHealthcheckSubcommands: Fig.Subcommand[] = [
       versionOption,
       {
         name: "--window",
-        description: "The number of most recent healthcheck queries to keep for this healthcheck",
+        description:
+          "The number of most recent healthcheck queries to keep for this healthcheck",
         args: {
           name: "window",
         },
@@ -2016,7 +2086,8 @@ const serviceImageoptimizerSubcommands: Fig.Subcommand[] = [
       jsonOption,
       {
         name: ["-s", "--service-id"],
-        description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+        description:
+          "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
         isRequired: true,
         args: {
           name: "service-id",
@@ -2032,7 +2103,8 @@ const serviceImageoptimizerSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--allow-video",
-        description: "Enables GIF to MP4 transformations on this service [true, false]",
+        description:
+          "Enables GIF to MP4 transformations on this service [true, false]",
         args: {
           name: "allow-video",
         },
@@ -2046,7 +2118,8 @@ const serviceImageoptimizerSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--jpeg-type",
-        description: "The default type of JPEG output to use (auto, baseline, progressive)",
+        description:
+          "The default type of JPEG output to use (auto, baseline, progressive)",
         args: {
           name: "jpeg-type",
         },
@@ -2054,14 +2127,16 @@ const serviceImageoptimizerSubcommands: Fig.Subcommand[] = [
       jsonOption,
       {
         name: "--resize-filter",
-        description: "The type of filter to use while resizing an image (lanczos3, lanczos2, bicubic, bilinear, nearest)",
+        description:
+          "The type of filter to use while resizing an image (lanczos3, lanczos2, bicubic, bilinear, nearest)",
         args: {
           name: "resize-filter",
         },
       },
       {
         name: ["-s", "--service-id"],
-        description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+        description:
+          "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
         isRequired: true,
         args: {
           name: "service-id",
@@ -2070,7 +2145,8 @@ const serviceImageoptimizerSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--upscale",
-        description: "Whether or not we should allow output images to render at sizes larger than input [true, false]",
+        description:
+          "Whether or not we should allow output images to render at sizes larger than input [true, false]",
         args: {
           name: "upscale",
         },
@@ -2078,7 +2154,8 @@ const serviceImageoptimizerSubcommands: Fig.Subcommand[] = [
       versionOption,
       {
         name: "--webp",
-        description: "Controls whether or not to default to WebP output when the client supports it [true, false]",
+        description:
+          "Controls whether or not to default to WebP output when the client supports it [true, false]",
         args: {
           name: "webp",
         },
@@ -2097,11 +2174,13 @@ const serviceImageoptimizerSubcommands: Fig.Subcommand[] = [
 const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create an Azure Blob Storage logging endpoint on a Fastly service version",
+    description:
+      "Create an Azure Blob Storage logging endpoint on a Fastly service version",
     options: [
       {
         name: "--account-name",
-        description: "The unique Azure Blob Storage namespace in which your data objects are stored",
+        description:
+          "The unique Azure Blob Storage namespace in which your data objects are stored",
         args: {
           name: "account-name",
         },
@@ -2110,7 +2189,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
       compressionCodecOption,
       {
         name: "--container",
-        description: "The name of the Azure Blob Storage container in which to store logs",
+        description:
+          "The name of the Azure Blob Storage container in which to store logs",
         args: {
           name: "container",
         },
@@ -2122,7 +2202,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Azure Blob Storage logging object. Used as a primary key for API access",
+        description:
+          "The name of the Azure Blob Storage logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -2132,7 +2213,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Azure Blob Storage. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Azure Blob Storage. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -2141,7 +2223,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
       responseConditionOption,
       {
         name: "--sas-token",
-        description: "The Azure shared access signature providing write access to the blob service objects. Be sure to update your token before it expires or the logging functionality will not work",
+        description:
+          "The Azure shared access signature providing write access to the blob service objects. Be sure to update your token before it expires or the logging functionality will not work",
         args: {
           name: "sas-token",
         },
@@ -2154,7 +2237,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete an Azure Blob Storage logging endpoint on a Fastly service version",
+    description:
+      "Delete an Azure Blob Storage logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -2172,7 +2256,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about an Azure Blob Storage logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about an Azure Blob Storage logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -2190,21 +2275,19 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
   },
   {
     name: "list",
-    description: "List Azure Blob Storage logging endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    description:
+      "List Azure Blob Storage logging endpoints on a Fastly service version",
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update an Azure Blob Storage logging endpoint on a Fastly service version",
+    description:
+      "Update an Azure Blob Storage logging endpoint on a Fastly service version",
     options: [
       {
         name: "--account-name",
-        description: "The unique Azure Blob Storage namespace in which your data objects are stored",
+        description:
+          "The unique Azure Blob Storage namespace in which your data objects are stored",
         args: {
           name: "account-name",
         },
@@ -2213,7 +2296,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
       compressionCodecOption,
       {
         name: "--container",
-        description: "The name of the Azure Blob Storage container in which to store logs",
+        description:
+          "The name of the Azure Blob Storage container in which to store logs",
         args: {
           name: "container",
         },
@@ -2243,7 +2327,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Azure Blob Storage. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Azure Blob Storage. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -2252,7 +2337,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
       responseConditionOption,
       {
         name: "--sas-token",
-        description: "The Azure shared access signature providing write access to the blob service objects. Be sure to update your token before it expires or the logging functionality will not work",
+        description:
+          "The Azure shared access signature providing write access to the blob service objects. Be sure to update your token before it expires or the logging functionality will not work",
         args: {
           name: "sas-token",
         },
@@ -2268,7 +2354,8 @@ const serviceLoggingAzureblobSubcommands: Fig.Subcommand[] = [
 const serviceLoggingBigquerySubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a BigQuery logging endpoint on a Fastly service version",
+    description:
+      "Create a BigQuery logging endpoint on a Fastly service version",
     options: [
       accountNameOption,
       autocloneOption,
@@ -2283,7 +2370,8 @@ const serviceLoggingBigquerySubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the BigQuery logging object. Used as a primary key for API access",
+        description:
+          "The name of the BigQuery logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -2291,7 +2379,8 @@ const serviceLoggingBigquerySubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to BigQuery. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to BigQuery. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -2327,7 +2416,8 @@ const serviceLoggingBigquerySubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a BigQuery logging endpoint on a Fastly service version",
+    description:
+      "Delete a BigQuery logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -2345,7 +2435,8 @@ const serviceLoggingBigquerySubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a BigQuery logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a BigQuery logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -2364,16 +2455,12 @@ const serviceLoggingBigquerySubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List BigQuery endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a BigQuery logging endpoint on a Fastly service version",
+    description:
+      "Update a BigQuery logging endpoint on a Fastly service version",
     options: [
       accountNameOption,
       autocloneOption,
@@ -2404,7 +2491,8 @@ const serviceLoggingBigquerySubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to BigQuery. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to BigQuery. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -2443,7 +2531,8 @@ const serviceLoggingBigquerySubcommands: Fig.Subcommand[] = [
 const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a Cloudfiles logging endpoint on a Fastly service version",
+    description:
+      "Create a Cloudfiles logging endpoint on a Fastly service version",
     options: [
       {
         name: "--access-key",
@@ -2467,7 +2556,8 @@ const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Cloudfiles logging object. Used as a primary key for API access",
+        description:
+          "The name of the Cloudfiles logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -2477,7 +2567,8 @@ const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Cloud Files. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Cloud Files. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -2485,7 +2576,8 @@ const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
       publicKeyOption,
       {
         name: "--region",
-        description: "The region where logs are received and stored by Cloud Files. One of: DFW-Dallas, ORD-Chicago, IAD-Northern Virginia, LON-London, SYD-Sydney, HKG-Hong Kong",
+        description:
+          "The region where logs are received and stored by Cloud Files. One of: DFW-Dallas, ORD-Chicago, IAD-Northern Virginia, LON-London, SYD-Sydney, HKG-Hong Kong",
         args: {
           name: "region",
         },
@@ -2506,7 +2598,8 @@ const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a Cloudfiles logging endpoint on a Fastly service version",
+    description:
+      "Delete a Cloudfiles logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -2524,7 +2617,8 @@ const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Cloudfiles logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Cloudfiles logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -2543,16 +2637,12 @@ const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Cloudfiles endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a Cloudfiles logging endpoint on a Fastly service version",
+    description:
+      "Update a Cloudfiles logging endpoint on a Fastly service version",
     options: [
       {
         name: "--access-key",
@@ -2594,7 +2684,8 @@ const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Cloud Files. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Cloud Files. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -2602,7 +2693,8 @@ const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
       publicKeyOption,
       {
         name: "--region",
-        description: "The region where logs are received and stored by Cloud Files. One of: DFW-Dallas, ORD-Chicago, IAD-Northern Virginia, LON-London, SYD-Sydney, HKG-Hong Kong",
+        description:
+          "The region where logs are received and stored by Cloud Files. One of: DFW-Dallas, ORD-Chicago, IAD-Northern Virginia, LON-London, SYD-Sydney, HKG-Hong Kong",
         args: {
           name: "region",
         },
@@ -2626,7 +2718,8 @@ const serviceLoggingCloudfilesSubcommands: Fig.Subcommand[] = [
 const serviceLoggingDatadogSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a Datadog logging endpoint on a Fastly service version",
+    description:
+      "Create a Datadog logging endpoint on a Fastly service version",
     options: [
       {
         name: "--auth-token",
@@ -2640,7 +2733,8 @@ const serviceLoggingDatadogSubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Datadog logging object. Used as a primary key for API access",
+        description:
+          "The name of the Datadog logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -2648,14 +2742,16 @@ const serviceLoggingDatadogSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Datadog. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Datadog. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
       },
       {
         name: "--region",
-        description: "The region where logs are received and stored by Datadog. One of US, US3, US5, or EU. Defaults to US if undefined",
+        description:
+          "The region where logs are received and stored by Datadog. One of US, US3, US5, or EU. Defaults to US if undefined",
         args: {
           name: "region",
         },
@@ -2668,7 +2764,8 @@ const serviceLoggingDatadogSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a Datadog logging endpoint on a Fastly service version",
+    description:
+      "Delete a Datadog logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -2686,7 +2783,8 @@ const serviceLoggingDatadogSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Datadog logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Datadog logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -2705,16 +2803,12 @@ const serviceLoggingDatadogSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Datadog endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a Datadog logging endpoint on a Fastly service version",
+    description:
+      "Update a Datadog logging endpoint on a Fastly service version",
     options: [
       {
         name: "--auth-token",
@@ -2744,14 +2838,16 @@ const serviceLoggingDatadogSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Datadog. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Datadog. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
       },
       {
         name: "--region",
-        description: "The region where logs are received and stored by Datadog. One of US, US3, US5, or EU. Defaults to US if undefined",
+        description:
+          "The region where logs are received and stored by Datadog. One of US, US3, US5, or EU. Defaults to US if undefined",
         args: {
           name: "region",
         },
@@ -2767,7 +2863,8 @@ const serviceLoggingDatadogSubcommands: Fig.Subcommand[] = [
 const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a DigitalOcean Spaces logging endpoint on a Fastly service version",
+    description:
+      "Create a DigitalOcean Spaces logging endpoint on a Fastly service version",
     options: [
       {
         name: "--access-key",
@@ -2787,7 +2884,8 @@ const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
       compressionCodecOption,
       {
         name: "--domain",
-        description: "The domain of the DigitalOcean Spaces endpoint (default 'nyc3.digitaloceanspaces.com')",
+        description:
+          "The domain of the DigitalOcean Spaces endpoint (default 'nyc3.digitaloceanspaces.com')",
         args: {
           name: "domain",
         },
@@ -2798,7 +2896,8 @@ const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the DigitalOcean Spaces logging object. Used as a primary key for API access",
+        description:
+          "The name of the DigitalOcean Spaces logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -2808,7 +2907,8 @@ const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to DigitalOcean Spaces. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to DigitalOcean Spaces. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -2830,7 +2930,8 @@ const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a DigitalOcean Spaces logging endpoint on a Fastly service version",
+    description:
+      "Delete a DigitalOcean Spaces logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -2848,7 +2949,8 @@ const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a DigitalOcean Spaces logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a DigitalOcean Spaces logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -2866,17 +2968,14 @@ const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
   },
   {
     name: "list",
-    description: "List DigitalOcean Spaces logging endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    description:
+      "List DigitalOcean Spaces logging endpoints on a Fastly service version",
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a DigitalOcean Spaces logging endpoint on a Fastly service version",
+    description:
+      "Update a DigitalOcean Spaces logging endpoint on a Fastly service version",
     options: [
       {
         name: "--access-key",
@@ -2896,7 +2995,8 @@ const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
       compressionCodecOption,
       {
         name: "--domain",
-        description: "The domain of the DigitalOcean Spaces endpoint (default 'nyc3.digitaloceanspaces.com')",
+        description:
+          "The domain of the DigitalOcean Spaces endpoint (default 'nyc3.digitaloceanspaces.com')",
         args: {
           name: "domain",
         },
@@ -2925,7 +3025,8 @@ const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to DigitalOcean Spaces. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to DigitalOcean Spaces. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -2950,28 +3051,32 @@ const serviceLoggingDigitaloceanSubcommands: Fig.Subcommand[] = [
 const serviceLoggingElasticsearchSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create an Elasticsearch logging endpoint on a Fastly service version",
+    description:
+      "Create an Elasticsearch logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       formatOption,
       formatVersionOption,
       {
         name: "--index",
-        description: "The name of the Elasticsearch index to send documents (logs) to. The index must follow the Elasticsearch index format rules (https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). We support strftime (http://man7.org/linux/man-pages/man3/strftime.3.html) interpolated variables inside braces prefixed with a pound symbol. For example, #{%F} will interpolate as YYYY-MM-DD with today's date",
+        description:
+          "The name of the Elasticsearch index to send documents (logs) to. The index must follow the Elasticsearch index format rules (https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). We support strftime (http://man7.org/linux/man-pages/man3/strftime.3.html) interpolated variables inside braces prefixed with a pound symbol. For example, #{%F} will interpolate as YYYY-MM-DD with today's date",
         args: {
           name: "index",
         },
       },
       {
         name: ["-n", "--name"],
-        description: "The name of the Elasticsearch logging object. Used as a primary key for API access",
+        description:
+          "The name of the Elasticsearch logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
       },
       {
         name: "--pipeline",
-        description: "The ID of the Elasticsearch ingest pipeline to apply pre-process transformations to before indexing. For example my_pipeline_id. Learn more about creating a pipeline in the Elasticsearch docs (https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest.html)",
+        description:
+          "The ID of the Elasticsearch ingest pipeline to apply pre-process transformations to before indexing. For example my_pipeline_id. Learn more about creating a pipeline in the Elasticsearch docs (https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest.html)",
         args: {
           name: "pipeline",
         },
@@ -2979,7 +3084,8 @@ const serviceLoggingElasticsearchSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Elasticsearch. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Elasticsearch. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3005,7 +3111,8 @@ const serviceLoggingElasticsearchSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete an Elasticsearch logging endpoint on a Fastly service version",
+    description:
+      "Delete an Elasticsearch logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -3023,7 +3130,8 @@ const serviceLoggingElasticsearchSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about an Elasticsearch logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about an Elasticsearch logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -3042,23 +3150,20 @@ const serviceLoggingElasticsearchSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Elasticsearch endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update an Elasticsearch logging endpoint on a Fastly service version",
+    description:
+      "Update an Elasticsearch logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       formatOption,
       formatVersionOption,
       {
         name: "--index",
-        description: "The name of the Elasticsearch index to send documents (logs) to. The index must follow the Elasticsearch index format rules (https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). We support strftime (http://man7.org/linux/man-pages/man3/strftime.3.html) interpolated variables inside braces prefixed with a pound symbol. For example, #{%F} will interpolate as YYYY-MM-DD with today's date",
+        description:
+          "The name of the Elasticsearch index to send documents (logs) to. The index must follow the Elasticsearch index format rules (https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html). We support strftime (http://man7.org/linux/man-pages/man3/strftime.3.html) interpolated variables inside braces prefixed with a pound symbol. For example, #{%F} will interpolate as YYYY-MM-DD with today's date",
         args: {
           name: "index",
         },
@@ -3080,7 +3185,8 @@ const serviceLoggingElasticsearchSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--pipeline",
-        description: "The ID of the Elasticsearch ingest pipeline to apply pre-process transformations to before indexing. For example my_pipeline_id. Learn more about creating a pipeline in the Elasticsearch docs (https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest.html)",
+        description:
+          "The ID of the Elasticsearch ingest pipeline to apply pre-process transformations to before indexing. For example my_pipeline_id. Learn more about creating a pipeline in the Elasticsearch docs (https://www.elastic.co/guide/en/elasticsearch/reference/current/ingest.html)",
         args: {
           name: "pipeline",
         },
@@ -3088,7 +3194,8 @@ const serviceLoggingElasticsearchSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Elasticsearch. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Elasticsearch. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3133,21 +3240,24 @@ const serviceLoggingFtpSubcommands: Fig.Subcommand[] = [
       gzipLevelOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the FTP logging object. Used as a primary key for API access",
+        description:
+          "The name of the FTP logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
       },
       {
         name: "--password",
-        description: "The password for the server (for anonymous use an email address)",
+        description:
+          "The password for the server (for anonymous use an email address)",
         args: {
           name: "password",
         },
       },
       {
         name: "--path",
-        description: "The path to upload log files to. If the path ends in / then it is treated as a directory",
+        description:
+          "The path to upload log files to. If the path ends in / then it is treated as a directory",
         args: {
           name: "path",
         },
@@ -3157,7 +3267,8 @@ const serviceLoggingFtpSubcommands: Fig.Subcommand[] = [
       portOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to FTP. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to FTP. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3196,7 +3307,8 @@ const serviceLoggingFtpSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about an FTP logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about an FTP logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -3215,12 +3327,7 @@ const serviceLoggingFtpSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List FTP endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -3255,14 +3362,16 @@ const serviceLoggingFtpSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--password",
-        description: "The password for the server (for anonymous use an email address)",
+        description:
+          "The password for the server (for anonymous use an email address)",
         args: {
           name: "password",
         },
       },
       {
         name: "--path",
-        description: "The path to upload log files to. If the path ends in / then it is treated as a directory",
+        description:
+          "The path to upload log files to. If the path ends in / then it is treated as a directory",
         args: {
           name: "path",
         },
@@ -3272,7 +3381,8 @@ const serviceLoggingFtpSubcommands: Fig.Subcommand[] = [
       portOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to FTP. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to FTP. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3315,7 +3425,8 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the GCS logging object. Used as a primary key for API access",
+        description:
+          "The name of the GCS logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -3325,7 +3436,8 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to GCS. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to GCS. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3341,7 +3453,8 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
       responseConditionOption,
       {
         name: "--secret-key",
-        description: "Your GCS account secret key. The private_key field in your service account authentication JSON",
+        description:
+          "Your GCS account secret key. The private_key field in your service account authentication JSON",
         args: {
           name: "secret-key",
         },
@@ -3351,7 +3464,8 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
       timestampFormatOption,
       {
         name: "--user",
-        description: "Your GCS service account email address. The client_email field in your service account authentication JSON",
+        description:
+          "Your GCS service account email address. The client_email field in your service account authentication JSON",
         args: {
           name: "user",
         },
@@ -3379,7 +3493,8 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a GCS logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a GCS logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -3398,12 +3513,7 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List GCS endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -3449,7 +3559,8 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to GCS. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to GCS. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3465,7 +3576,8 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
       responseConditionOption,
       {
         name: "--secret-key",
-        description: "Your GCS account secret key. The private_key field in your service account authentication JSON",
+        description:
+          "Your GCS account secret key. The private_key field in your service account authentication JSON",
         args: {
           name: "secret-key",
         },
@@ -3475,7 +3587,8 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
       timestampFormatOption,
       {
         name: "--user",
-        description: "Your GCS service account email address. The client_email field in your service account authentication JSON",
+        description:
+          "Your GCS service account email address. The client_email field in your service account authentication JSON",
         args: {
           name: "user",
         },
@@ -3488,7 +3601,8 @@ const serviceLoggingGcsSubcommands: Fig.Subcommand[] = [
 const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a Google Cloud Pub/Sub logging endpoint on a Fastly service version",
+    description:
+      "Create a Google Cloud Pub/Sub logging endpoint on a Fastly service version",
     options: [
       accountNameOption,
       autocloneOption,
@@ -3496,7 +3610,8 @@ const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Google Cloud Pub/Sub logging object. Used as a primary key for API access",
+        description:
+          "The name of the Google Cloud Pub/Sub logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -3504,7 +3619,8 @@ const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Google Cloud Pub/Sub. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Google Cloud Pub/Sub. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3522,7 +3638,8 @@ const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--topic",
-        description: "The Google Cloud Pub/Sub topic to which logs will be published",
+        description:
+          "The Google Cloud Pub/Sub topic to which logs will be published",
         args: {
           name: "topic",
         },
@@ -3533,7 +3650,8 @@ const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a Google Cloud Pub/Sub logging endpoint on a Fastly service version",
+    description:
+      "Delete a Google Cloud Pub/Sub logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -3551,7 +3669,8 @@ const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Google Cloud Pub/Sub logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Google Cloud Pub/Sub logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -3569,17 +3688,14 @@ const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
   },
   {
     name: "list",
-    description: "List Google Cloud Pub/Sub endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    description:
+      "List Google Cloud Pub/Sub endpoints on a Fastly service version",
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a Google Cloud Pub/Sub logging endpoint on a Fastly service version",
+    description:
+      "Update a Google Cloud Pub/Sub logging endpoint on a Fastly service version",
     options: [
       accountNameOption,
       autocloneOption,
@@ -3603,7 +3719,8 @@ const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Google Cloud Pub/Sub. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Google Cloud Pub/Sub. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3621,7 +3738,8 @@ const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--topic",
-        description: "The Google Cloud Pub/Sub topic to which logs will be published",
+        description:
+          "The Google Cloud Pub/Sub topic to which logs will be published",
         args: {
           name: "topic",
         },
@@ -3635,7 +3753,8 @@ const serviceLoggingGooglepubsubSubcommands: Fig.Subcommand[] = [
 const serviceLoggingGrafanacloudlogsSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a Grafana Cloud Logs logging endpoint on a Fastly service version",
+    description:
+      "Create a Grafana Cloud Logs logging endpoint on a Fastly service version",
     options: [
       {
         name: "--auth-token",
@@ -3657,7 +3776,8 @@ const serviceLoggingGrafanacloudlogsSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Grafana Cloud Logs logging endpoint. Used as a primary key for API access",
+        description:
+          "The name of the Grafana Cloud Logs logging endpoint. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -3665,7 +3785,8 @@ const serviceLoggingGrafanacloudlogsSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Grafana Cloud Logs. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Grafana Cloud Logs. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3692,7 +3813,8 @@ const serviceLoggingGrafanacloudlogsSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a GrafanaCloudLogs logging endpoint on a Fastly service version",
+    description:
+      "Delete a GrafanaCloudLogs logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -3710,7 +3832,8 @@ const serviceLoggingGrafanacloudlogsSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Grafana Cloud Logs logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Grafana Cloud Logs logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -3728,17 +3851,14 @@ const serviceLoggingGrafanacloudlogsSubcommands: Fig.Subcommand[] = [
   },
   {
     name: "list",
-    description: "List Grafana Cloud Logs endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    description:
+      "List Grafana Cloud Logs endpoints on a Fastly service version",
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a Grafana Cloud Logs logging endpoint on a Fastly service version",
+    description:
+      "Update a Grafana Cloud Logs logging endpoint on a Fastly service version",
     options: [
       {
         name: "--auth-token",
@@ -3776,7 +3896,8 @@ const serviceLoggingGrafanacloudlogsSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Grafana Cloud Logs. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Grafana Cloud Logs. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3810,7 +3931,8 @@ const serviceLoggingHerokuSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--auth-token",
-        description: "The token to use for authentication (https://devcenter.heroku.com/articles/add-on-partner-log-integration)",
+        description:
+          "The token to use for authentication (https://devcenter.heroku.com/articles/add-on-partner-log-integration)",
         args: {
           name: "auth-token",
         },
@@ -3820,7 +3942,8 @@ const serviceLoggingHerokuSubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Heroku logging object. Used as a primary key for API access",
+        description:
+          "The name of the Heroku logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -3828,7 +3951,8 @@ const serviceLoggingHerokuSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Heroku. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Heroku. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3866,7 +3990,8 @@ const serviceLoggingHerokuSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Heroku logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Heroku logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -3885,12 +4010,7 @@ const serviceLoggingHerokuSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Heroku endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -3898,7 +4018,8 @@ const serviceLoggingHerokuSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--auth-token",
-        description: "The token to use for authentication (https://devcenter.heroku.com/articles/add-on-partner-log-integration)",
+        description:
+          "The token to use for authentication (https://devcenter.heroku.com/articles/add-on-partner-log-integration)",
         args: {
           name: "auth-token",
         },
@@ -3924,7 +4045,8 @@ const serviceLoggingHerokuSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Heroku. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Heroku. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3947,11 +4069,13 @@ const serviceLoggingHerokuSubcommands: Fig.Subcommand[] = [
 const serviceLoggingHoneycombSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a Honeycomb logging endpoint on a Fastly service version",
+    description:
+      "Create a Honeycomb logging endpoint on a Fastly service version",
     options: [
       {
         name: "--auth-token",
-        description: "The Write Key from the Account page of your Honeycomb account",
+        description:
+          "The Write Key from the Account page of your Honeycomb account",
         args: {
           name: "auth-token",
         },
@@ -3968,7 +4092,8 @@ const serviceLoggingHoneycombSubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Honeycomb logging object. Used as a primary key for API access",
+        description:
+          "The name of the Honeycomb logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -3976,7 +4101,8 @@ const serviceLoggingHoneycombSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Honeycomb. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Honeycomb. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -3989,7 +4115,8 @@ const serviceLoggingHoneycombSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a Honeycomb logging endpoint on a Fastly service version",
+    description:
+      "Delete a Honeycomb logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -4007,7 +4134,8 @@ const serviceLoggingHoneycombSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Honeycomb logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Honeycomb logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -4026,20 +4154,17 @@ const serviceLoggingHoneycombSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Honeycomb endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a Honeycomb logging endpoint on a Fastly service version",
+    description:
+      "Update a Honeycomb logging endpoint on a Fastly service version",
     options: [
       {
         name: "--auth-token",
-        description: "The Write Key from the Account page of your Honeycomb account",
+        description:
+          "The Write Key from the Account page of your Honeycomb account",
         args: {
           name: "auth-token",
         },
@@ -4072,7 +4197,8 @@ const serviceLoggingHoneycombSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Honeycomb. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Honeycomb. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -4118,7 +4244,8 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--json-format",
-        description: "Enforces valid JSON formatting for log entries. Can be disabled 0, array of json (wraps JSON log batches in an array) 1, or newline delimited json (places each JSON log entry onto a new line in a batch) 2",
+        description:
+          "Enforces valid JSON formatting for log entries. Can be disabled 0, array of json (wraps JSON log batches in an array) 1, or newline delimited json (places each JSON log entry onto a new line in a batch) 2",
         args: {
           name: "json-format",
         },
@@ -4126,14 +4253,16 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: "--method",
-        description: "HTTP method used for request. Can be POST or PUT. Defaults to POST if not specified",
+        description:
+          "HTTP method used for request. Can be POST or PUT. Defaults to POST if not specified",
         args: {
           name: "method",
         },
       },
       {
         name: ["-n", "--name"],
-        description: "The name of the HTTPS logging object. Used as a primary key for API access",
+        description:
+          "The name of the HTTPS logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -4142,7 +4271,8 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to HTTPS. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to HTTPS. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -4158,7 +4288,8 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
       tlsHostnameOption,
       {
         name: "--url",
-        description: "URL that log data will be sent to. Must use the https protocol",
+        description:
+          "URL that log data will be sent to. Must use the https protocol",
         args: {
           name: "url",
         },
@@ -4186,7 +4317,8 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about an HTTPS logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about an HTTPS logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -4205,12 +4337,7 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List HTTPS endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -4242,7 +4369,8 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--json-format",
-        description: "Enforces valid JSON formatting for log entries. Can be disabled 0, array of json (wraps JSON log batches in an array) 1, or newline delimited json (places each JSON log entry onto a new line in a batch) 2",
+        description:
+          "Enforces valid JSON formatting for log entries. Can be disabled 0, array of json (wraps JSON log batches in an array) 1, or newline delimited json (places each JSON log entry onto a new line in a batch) 2",
         args: {
           name: "json-format",
         },
@@ -4250,7 +4378,8 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: "--method",
-        description: "HTTP method used for request. Can be POST or PUT. Defaults to POST if not specified",
+        description:
+          "HTTP method used for request. Can be POST or PUT. Defaults to POST if not specified",
         args: {
           name: "method",
         },
@@ -4274,7 +4403,8 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to HTTPS. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to HTTPS. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -4290,7 +4420,8 @@ const serviceLoggingHttpsSubcommands: Fig.Subcommand[] = [
       tlsHostnameOption,
       {
         name: "--url",
-        description: "URL that log data will be sent to. Must use the https protocol",
+        description:
+          "URL that log data will be sent to. Must use the https protocol",
         args: {
           name: "url",
         },
@@ -4307,7 +4438,8 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--auth-method",
-        description: "SASL authentication method. Valid values are: plain, scram-sha-256, scram-sha-512",
+        description:
+          "SASL authentication method. Valid values are: plain, scram-sha-256, scram-sha-512",
         args: {
           name: "auth-method",
           suggestions: ["plain", "scram-sha-256", "scram-sha-512"],
@@ -4316,14 +4448,16 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
       autocloneOption,
       {
         name: "--brokers",
-        description: "A comma-separated list of IP addresses or hostnames of Kafka brokers",
+        description:
+          "A comma-separated list of IP addresses or hostnames of Kafka brokers",
         args: {
           name: "brokers",
         },
       },
       {
         name: "--compression-codec",
-        description: "The codec used for compression of your logs. One of: gzip, snappy, lz4",
+        description:
+          "The codec used for compression of your logs. One of: gzip, snappy, lz4",
         args: {
           name: "compression-codec",
         },
@@ -4339,7 +4473,8 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
       },
       {
         name: ["-n", "--name"],
-        description: "The name of the Kafka logging object. Used as a primary key for API access",
+        description:
+          "The name of the Kafka logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -4350,7 +4485,8 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--password",
-        description: "SASL authentication password. Required if --auth-method is specified",
+        description:
+          "SASL authentication password. Required if --auth-method is specified",
         args: {
           name: "password",
         },
@@ -4358,14 +4494,16 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Kafka. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Kafka. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
       },
       {
         name: "--required-acks",
-        description: "The Number of acknowledgements a leader must receive before a write is considered successful. One of: 1 (default) One server needs to respond. 0 No servers need to respond. -1 Wait for all in-sync replicas to respond",
+        description:
+          "The Number of acknowledgements a leader must receive before a write is considered successful. One of: 1 (default) One server needs to respond. 0 No servers need to respond. -1 Wait for all in-sync replicas to respond",
         args: {
           name: "required-acks",
         },
@@ -4386,12 +4524,14 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--use-sasl",
-        description: "Enable SASL authentication. Requires --auth-method, --username, and --password to be specified",
+        description:
+          "Enable SASL authentication. Requires --auth-method, --username, and --password to be specified",
       },
       useTlsOption,
       {
         name: "--username",
-        description: "SASL authentication username. Required if --auth-method is specified",
+        description:
+          "SASL authentication username. Required if --auth-method is specified",
         args: {
           name: "username",
         },
@@ -4419,7 +4559,8 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Kafka logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Kafka logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -4438,12 +4579,7 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Kafka endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -4451,7 +4587,8 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--auth-method",
-        description: "SASL authentication method. Valid values are: plain, scram-sha-256, scram-sha-512",
+        description:
+          "SASL authentication method. Valid values are: plain, scram-sha-256, scram-sha-512",
         args: {
           name: "auth-method",
           suggestions: ["plain", "scram-sha-256", "scram-sha-512"],
@@ -4460,14 +4597,16 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
       autocloneOption,
       {
         name: "--brokers",
-        description: "A comma-separated list of IP addresses or hostnames of Kafka brokers",
+        description:
+          "A comma-separated list of IP addresses or hostnames of Kafka brokers",
         args: {
           name: "brokers",
         },
       },
       {
         name: "--compression-codec",
-        description: "The codec used for compression of your logs. One of: gzip, snappy, lz4",
+        description:
+          "The codec used for compression of your logs. One of: gzip, snappy, lz4",
         args: {
           name: "compression-codec",
         },
@@ -4508,7 +4647,8 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--password",
-        description: "SASL authentication password. Required if --auth-method is specified",
+        description:
+          "SASL authentication password. Required if --auth-method is specified",
         args: {
           name: "password",
         },
@@ -4516,14 +4656,16 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Kafka. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Kafka. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
       },
       {
         name: "--required-acks",
-        description: "The Number of acknowledgements a leader must receive before a write is considered successful. One of: 1 (default) One server needs to respond. 0 No servers need to respond. -1 Wait for all in-sync replicas to respond",
+        description:
+          "The Number of acknowledgements a leader must receive before a write is considered successful. One of: 1 (default) One server needs to respond. 0 No servers need to respond. -1 Wait for all in-sync replicas to respond",
         args: {
           name: "required-acks",
         },
@@ -4544,12 +4686,14 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--use-sasl",
-        description: "Enable SASL authentication. Requires --auth-method, --username, and --password to be specified",
+        description:
+          "Enable SASL authentication. Requires --auth-method, --username, and --password to be specified",
       },
       useTlsOption,
       {
         name: "--username",
-        description: "SASL authentication username. Required if --auth-method is specified",
+        description:
+          "SASL authentication username. Required if --auth-method is specified",
         args: {
           name: "username",
         },
@@ -4562,11 +4706,13 @@ const serviceLoggingKafkaSubcommands: Fig.Subcommand[] = [
 const serviceLoggingKinesisSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create an Amazon Kinesis logging endpoint on a Fastly service version",
+    description:
+      "Create an Amazon Kinesis logging endpoint on a Fastly service version",
     options: [
       {
         name: "--access-key",
-        description: "The access key associated with the target Amazon Kinesis stream",
+        description:
+          "The access key associated with the target Amazon Kinesis stream",
         args: {
           name: "access-key",
         },
@@ -4577,7 +4723,8 @@ const serviceLoggingKinesisSubcommands: Fig.Subcommand[] = [
       iamRoleOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Kinesis logging object. Used as a primary key for API access",
+        description:
+          "The name of the Kinesis logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -4585,7 +4732,8 @@ const serviceLoggingKinesisSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Kinesis. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Kinesis. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -4600,7 +4748,8 @@ const serviceLoggingKinesisSubcommands: Fig.Subcommand[] = [
       responseConditionOption,
       {
         name: "--secret-key",
-        description: "The secret key associated with the target Amazon Kinesis stream",
+        description:
+          "The secret key associated with the target Amazon Kinesis stream",
         args: {
           name: "secret-key",
         },
@@ -4619,7 +4768,8 @@ const serviceLoggingKinesisSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a Kinesis logging endpoint on a Fastly service version",
+    description:
+      "Delete a Kinesis logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -4637,7 +4787,8 @@ const serviceLoggingKinesisSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Kinesis logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Kinesis logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -4656,16 +4807,12 @@ const serviceLoggingKinesisSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Kinesis endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a Kinesis logging endpoint on a Fastly service version",
+    description:
+      "Update a Kinesis logging endpoint on a Fastly service version",
     options: [
       {
         name: "--access-key",
@@ -4696,7 +4843,8 @@ const serviceLoggingKinesisSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Kinesis. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Kinesis. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -4737,7 +4885,8 @@ const serviceLoggingLogglySubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--auth-token",
-        description: "The token to use for authentication (https://www.loggly.com/docs/customer-token-authentication-token/)",
+        description:
+          "The token to use for authentication (https://www.loggly.com/docs/customer-token-authentication-token/)",
         args: {
           name: "auth-token",
         },
@@ -4747,7 +4896,8 @@ const serviceLoggingLogglySubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Loggly logging object. Used as a primary key for API access",
+        description:
+          "The name of the Loggly logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -4755,7 +4905,8 @@ const serviceLoggingLogglySubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Loggly. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Loggly. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -4786,7 +4937,8 @@ const serviceLoggingLogglySubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Loggly logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Loggly logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -4805,12 +4957,7 @@ const serviceLoggingLogglySubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Loggly endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -4818,7 +4965,8 @@ const serviceLoggingLogglySubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--auth-token",
-        description: "The token to use for authentication (https://www.loggly.com/docs/customer-token-authentication-token/)",
+        description:
+          "The token to use for authentication (https://www.loggly.com/docs/customer-token-authentication-token/)",
         args: {
           name: "auth-token",
         },
@@ -4844,7 +4992,8 @@ const serviceLoggingLogglySubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Loggly. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Loggly. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -4860,11 +5009,13 @@ const serviceLoggingLogglySubcommands: Fig.Subcommand[] = [
 const serviceLoggingLogshuttleSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a Logshuttle logging endpoint on a Fastly service version",
+    description:
+      "Create a Logshuttle logging endpoint on a Fastly service version",
     options: [
       {
         name: "--auth-token",
-        description: "The data authentication token associated with this endpoint",
+        description:
+          "The data authentication token associated with this endpoint",
         args: {
           name: "auth-token",
         },
@@ -4874,7 +5025,8 @@ const serviceLoggingLogshuttleSubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Logshuttle logging object. Used as a primary key for API access",
+        description:
+          "The name of the Logshuttle logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -4882,7 +5034,8 @@ const serviceLoggingLogshuttleSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Logshuttle. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Logshuttle. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -4902,7 +5055,8 @@ const serviceLoggingLogshuttleSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a Logshuttle logging endpoint on a Fastly service version",
+    description:
+      "Delete a Logshuttle logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -4920,7 +5074,8 @@ const serviceLoggingLogshuttleSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Logshuttle logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Logshuttle logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -4939,20 +5094,17 @@ const serviceLoggingLogshuttleSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Logshuttle endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a Logshuttle logging endpoint on a Fastly service version",
+    description:
+      "Update a Logshuttle logging endpoint on a Fastly service version",
     options: [
       {
         name: "--auth-token",
-        description: "The data authentication token associated with this endpoint",
+        description:
+          "The data authentication token associated with this endpoint",
         args: {
           name: "auth-token",
         },
@@ -4978,7 +5130,8 @@ const serviceLoggingLogshuttleSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Logshuttle. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Logshuttle. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -5001,7 +5154,8 @@ const serviceLoggingLogshuttleSubcommands: Fig.Subcommand[] = [
 const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create an New Relic logging endpoint attached to the specified service version",
+    description:
+      "Create an New Relic logging endpoint attached to the specified service version",
     options: [
       autocloneOption,
       formatOption,
@@ -5016,7 +5170,8 @@ const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--placement",
-        description: "Where in the generated VCL the logging call should be placed",
+        description:
+          "Where in the generated VCL the logging call should be placed",
         args: {
           name: "placement",
         },
@@ -5024,14 +5179,16 @@ const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
       processingRegionOption,
       {
         name: "--region",
-        description: "The region where logs are received and stored by New Relic",
+        description:
+          "The region where logs are received and stored by New Relic",
         args: {
           name: "region",
         },
       },
       {
         name: "--response-condition",
-        description: "The name of an existing condition in the configured endpoint",
+        description:
+          "The name of an existing condition in the configured endpoint",
         args: {
           name: "response-condition",
         },
@@ -5043,12 +5200,14 @@ const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete the New Relic Logs logging object for a particular service and version",
+    description:
+      "Delete the New Relic Logs logging object for a particular service and version",
     options: [
       autocloneOption,
       {
         name: "--name",
-        description: "The name for the real-time logging configuration to delete",
+        description:
+          "The name for the real-time logging configuration to delete",
         isRequired: true,
         args: {
           name: "name",
@@ -5061,7 +5220,8 @@ const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Get the details of a New Relic Logs logging object for a particular service and version",
+    description:
+      "Get the details of a New Relic Logs logging object for a particular service and version",
     options: [
       jsonOption,
       {
@@ -5079,23 +5239,21 @@ const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
   },
   {
     name: "list",
-    description: "List all of the New Relic Logs logging objects for a particular service and version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    description:
+      "List all of the New Relic Logs logging objects for a particular service and version",
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a New Relic Logs logging object for a particular service and version",
+    description:
+      "Update a New Relic Logs logging object for a particular service and version",
     options: [
       autocloneOption,
       formatOption,
       {
         name: "--format-version",
-        description: "The version of the custom logging format used for the configured endpoint",
+        description:
+          "The version of the custom logging format used for the configured endpoint",
         args: {
           name: "format-version",
         },
@@ -5103,7 +5261,8 @@ const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
       keyOption,
       {
         name: "--name",
-        description: "The name for the real-time logging configuration to update",
+        description:
+          "The name for the real-time logging configuration to update",
         isRequired: true,
         args: {
           name: "name",
@@ -5118,7 +5277,8 @@ const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--placement",
-        description: "Where in the generated VCL the logging call should be placed",
+        description:
+          "Where in the generated VCL the logging call should be placed",
         args: {
           name: "placement",
         },
@@ -5126,14 +5286,16 @@ const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
       processingRegionOption,
       {
         name: "--region",
-        description: "The region where logs are received and stored by New Relic",
+        description:
+          "The region where logs are received and stored by New Relic",
         args: {
           name: "region",
         },
       },
       {
         name: "--response-condition",
-        description: "The name of an existing condition in the configured endpoint",
+        description:
+          "The name of an existing condition in the configured endpoint",
         args: {
           name: "response-condition",
         },
@@ -5148,7 +5310,8 @@ const serviceLoggingNewrelicSubcommands: Fig.Subcommand[] = [
 const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create an New Relic logging endpoint attached to the specified service version",
+    description:
+      "Create an New Relic logging endpoint attached to the specified service version",
     options: [
       autocloneOption,
       formatOption,
@@ -5163,7 +5326,8 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--placement",
-        description: "Where in the generated VCL the logging call should be placed",
+        description:
+          "Where in the generated VCL the logging call should be placed",
         args: {
           name: "placement",
         },
@@ -5178,7 +5342,8 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--response-condition",
-        description: "The name of an existing condition in the configured endpoint",
+        description:
+          "The name of an existing condition in the configured endpoint",
         args: {
           name: "response-condition",
         },
@@ -5187,7 +5352,8 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--url",
-        description: "URL of the New Relic Trace Observer, if you are using New Relic Infinite Tracing",
+        description:
+          "URL of the New Relic Trace Observer, if you are using New Relic Infinite Tracing",
         args: {
           name: "url",
         },
@@ -5197,12 +5363,14 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete the New Relic OTLP Logs logging object for a particular service and version",
+    description:
+      "Delete the New Relic OTLP Logs logging object for a particular service and version",
     options: [
       autocloneOption,
       {
         name: "--name",
-        description: "The name for the real-time logging configuration to delete",
+        description:
+          "The name for the real-time logging configuration to delete",
         isRequired: true,
         args: {
           name: "name",
@@ -5215,7 +5383,8 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Get the details of a New Relic OTLP Logs logging object for a particular service and version",
+    description:
+      "Get the details of a New Relic OTLP Logs logging object for a particular service and version",
     options: [
       jsonOption,
       {
@@ -5233,23 +5402,21 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
   },
   {
     name: "list",
-    description: "List all of the New Relic OTLP Logs logging objects for a particular service and version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    description:
+      "List all of the New Relic OTLP Logs logging objects for a particular service and version",
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a New Relic Logs logging object for a particular service and version",
+    description:
+      "Update a New Relic Logs logging object for a particular service and version",
     options: [
       autocloneOption,
       formatOption,
       {
         name: "--format-version",
-        description: "The version of the custom logging format used for the configured endpoint",
+        description:
+          "The version of the custom logging format used for the configured endpoint",
         args: {
           name: "format-version",
         },
@@ -5257,7 +5424,8 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
       keyOption,
       {
         name: "--name",
-        description: "The name for the real-time logging configuration to update",
+        description:
+          "The name for the real-time logging configuration to update",
         isRequired: true,
         args: {
           name: "name",
@@ -5272,7 +5440,8 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--placement",
-        description: "Where in the generated VCL the logging call should be placed",
+        description:
+          "Where in the generated VCL the logging call should be placed",
         args: {
           name: "placement",
         },
@@ -5287,7 +5456,8 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--response-condition",
-        description: "The name of an existing condition in the configured endpoint",
+        description:
+          "The name of an existing condition in the configured endpoint",
         args: {
           name: "response-condition",
         },
@@ -5296,7 +5466,8 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--url",
-        description: "URL of the New Relic Trace Observer, if you are using New Relic Infinite Tracing",
+        description:
+          "URL of the New Relic Trace Observer, if you are using New Relic Infinite Tracing",
         args: {
           name: "url",
         },
@@ -5309,7 +5480,8 @@ const serviceLoggingNewrelicotlpSubcommands: Fig.Subcommand[] = [
 const serviceLoggingOpenstackSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create an OpenStack logging endpoint on a Fastly service version",
+    description:
+      "Create an OpenStack logging endpoint on a Fastly service version",
     options: [
       {
         name: "--access-key",
@@ -5333,7 +5505,8 @@ const serviceLoggingOpenstackSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the OpenStack logging object. Used as a primary key for API access",
+        description:
+          "The name of the OpenStack logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -5343,7 +5516,8 @@ const serviceLoggingOpenstackSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to OpenStack. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to OpenStack. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -5372,7 +5546,8 @@ const serviceLoggingOpenstackSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete an OpenStack logging endpoint on a Fastly service version",
+    description:
+      "Delete an OpenStack logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -5390,7 +5565,8 @@ const serviceLoggingOpenstackSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about an OpenStack logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about an OpenStack logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -5409,16 +5585,12 @@ const serviceLoggingOpenstackSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List OpenStack logging endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update an OpenStack logging endpoint on a Fastly service version",
+    description:
+      "Update an OpenStack logging endpoint on a Fastly service version",
     options: [
       {
         name: "--access-key",
@@ -5460,7 +5632,8 @@ const serviceLoggingOpenstackSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to OpenStack. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to OpenStack. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -5492,7 +5665,8 @@ const serviceLoggingOpenstackSubcommands: Fig.Subcommand[] = [
 const serviceLoggingPapertrailSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a Papertrail logging endpoint on a Fastly service version",
+    description:
+      "Create a Papertrail logging endpoint on a Fastly service version",
     options: [
       addressOption,
       autocloneOption,
@@ -5500,7 +5674,8 @@ const serviceLoggingPapertrailSubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Papertrail logging object. Used as a primary key for API access",
+        description:
+          "The name of the Papertrail logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -5509,7 +5684,8 @@ const serviceLoggingPapertrailSubcommands: Fig.Subcommand[] = [
       portOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Papertrail. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Papertrail. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -5522,7 +5698,8 @@ const serviceLoggingPapertrailSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a Papertrail logging endpoint on a Fastly service version",
+    description:
+      "Delete a Papertrail logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -5540,7 +5717,8 @@ const serviceLoggingPapertrailSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Papertrail logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Papertrail logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -5559,16 +5737,12 @@ const serviceLoggingPapertrailSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Papertrail endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a Papertrail logging endpoint on a Fastly service version",
+    description:
+      "Update a Papertrail logging endpoint on a Fastly service version",
     options: [
       addressOption,
       autocloneOption,
@@ -5593,7 +5767,8 @@ const serviceLoggingPapertrailSubcommands: Fig.Subcommand[] = [
       portOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Papertrail. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Papertrail. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -5609,7 +5784,8 @@ const serviceLoggingPapertrailSubcommands: Fig.Subcommand[] = [
 const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create an Amazon S3 logging endpoint on a Fastly service version",
+    description:
+      "Create an Amazon S3 logging endpoint on a Fastly service version",
     options: [
       {
         name: "--access-key",
@@ -5642,7 +5818,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the S3 logging object. Used as a primary key for API access",
+        description:
+          "The name of the S3 logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -5652,7 +5829,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to S3. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to S3. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -5660,7 +5838,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
       publicKeyOption,
       {
         name: "--redundancy",
-        description: "The S3 storage class. One of: standard, intelligent_tiering, standard_ia, onezone_ia, glacier, glacier_ir, deep_archive, or reduced_redundancy",
+        description:
+          "The S3 storage class. One of: standard, intelligent_tiering, standard_ia, onezone_ia, glacier, glacier_ir, deep_archive, or reduced_redundancy",
         args: {
           name: "redundancy",
           suggestions: [
@@ -5685,7 +5864,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
       },
       {
         name: "--server-side-encryption",
-        description: "Set to enable S3 Server Side Encryption. Can be either AES256 or aws:kms",
+        description:
+          "Set to enable S3 Server Side Encryption. Can be either AES256 or aws:kms",
         args: {
           name: "server-side-encryption",
           suggestions: ["AES256", "aws:kms"],
@@ -5693,7 +5873,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
       },
       {
         name: "--server-side-encryption-kms-key-id",
-        description: "Server-side KMS Key ID. Must be set if server-side-encryption is set to aws:kms",
+        description:
+          "Server-side KMS Key ID. Must be set if server-side-encryption is set to aws:kms",
         args: {
           name: "server-side-encryption-kms-key-id",
         },
@@ -5724,7 +5905,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a S3 logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a S3 logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -5743,12 +5925,7 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List S3 endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -5803,7 +5980,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to S3. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to S3. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -5811,7 +5989,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
       publicKeyOption,
       {
         name: "--redundancy",
-        description: "The S3 storage class. One of: standard, intelligent_tiering, standard_ia, onezone_ia, glacier, glacier_ir, deep_archive, or reduced_redundancy",
+        description:
+          "The S3 storage class. One of: standard, intelligent_tiering, standard_ia, onezone_ia, glacier, glacier_ir, deep_archive, or reduced_redundancy",
         args: {
           name: "redundancy",
           suggestions: [
@@ -5836,7 +6015,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
       },
       {
         name: "--server-side-encryption",
-        description: "Set to enable S3 Server Side Encryption. Can be either AES256 or aws:kms",
+        description:
+          "Set to enable S3 Server Side Encryption. Can be either AES256 or aws:kms",
         args: {
           name: "server-side-encryption",
           suggestions: ["AES256", "aws:kms"],
@@ -5844,7 +6024,8 @@ const serviceLoggingS3Subcommands: Fig.Subcommand[] = [
       },
       {
         name: "--server-side-encryption-kms-key-id",
-        description: "Server-side KMS Key ID. Must be set if server-side-encryption is set to aws:kms",
+        description:
+          "Server-side KMS Key ID. Must be set if server-side-encryption is set to aws:kms",
         args: {
           name: "server-side-encryption-kms-key-id",
         },
@@ -5864,7 +6045,8 @@ const serviceLoggingScalyrSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--auth-token",
-        description: "The token to use for authentication (https://www.scalyr.com/keys)",
+        description:
+          "The token to use for authentication (https://www.scalyr.com/keys)",
         args: {
           name: "auth-token",
         },
@@ -5874,7 +6056,8 @@ const serviceLoggingScalyrSubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Scalyr logging object. Used as a primary key for API access",
+        description:
+          "The name of the Scalyr logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -5882,7 +6065,8 @@ const serviceLoggingScalyrSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Scalyr. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Scalyr. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -5896,7 +6080,8 @@ const serviceLoggingScalyrSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--region",
-        description: "The region where logs are received and stored by Scalyr. Either US or EU. Defaults to US if undefined",
+        description:
+          "The region where logs are received and stored by Scalyr. Either US or EU. Defaults to US if undefined",
         args: {
           name: "region",
         },
@@ -5927,7 +6112,8 @@ const serviceLoggingScalyrSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Scalyr logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Scalyr logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -5946,12 +6132,7 @@ const serviceLoggingScalyrSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Scalyr endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -5959,7 +6140,8 @@ const serviceLoggingScalyrSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--auth-token",
-        description: "The token to use for authentication (https://www.scalyr.com/keys)",
+        description:
+          "The token to use for authentication (https://www.scalyr.com/keys)",
         args: {
           name: "auth-token",
         },
@@ -5985,7 +6167,8 @@ const serviceLoggingScalyrSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Scalyr. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Scalyr. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -5999,7 +6182,8 @@ const serviceLoggingScalyrSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--region",
-        description: "The region where logs are received and stored by Scalyr. Either US or EU. Defaults to US if undefined",
+        description:
+          "The region where logs are received and stored by Scalyr. Either US or EU. Defaults to US if undefined",
         args: {
           name: "region",
         },
@@ -6032,21 +6216,24 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the SFTP logging object. Used as a primary key for API access",
+        description:
+          "The name of the SFTP logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
       },
       {
         name: "--password",
-        description: "The password for the server. If both password and secret_key are passed, secret_key will be used in preference",
+        description:
+          "The password for the server. If both password and secret_key are passed, secret_key will be used in preference",
         args: {
           name: "password",
         },
       },
       {
         name: "--path",
-        description: "The path to upload logs to. The directory must exist on the SFTP server before logs can be saved to it",
+        description:
+          "The path to upload logs to. The directory must exist on the SFTP server before logs can be saved to it",
         args: {
           name: "path",
         },
@@ -6056,7 +6243,8 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
       portOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to SFTP. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to SFTP. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -6065,7 +6253,8 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
       responseConditionOption,
       {
         name: "--secret-key",
-        description: "The SSH private key for the server. If both password and secret_key are passed, secret_key will be used in preference",
+        description:
+          "The SSH private key for the server. If both password and secret_key are passed, secret_key will be used in preference",
         args: {
           name: "secret-key",
         },
@@ -6074,7 +6263,8 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--ssh-known-hosts",
-        description: "A list of host keys for all hosts we can connect to over SFTP",
+        description:
+          "A list of host keys for all hosts we can connect to over SFTP",
         args: {
           name: "ssh-known-hosts",
         },
@@ -6110,7 +6300,8 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about an SFTP logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about an SFTP logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -6129,12 +6320,7 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List SFTP endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -6170,14 +6356,16 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--password",
-        description: "The password for the server. If both password and secret_key are passed, secret_key will be used in preference",
+        description:
+          "The password for the server. If both password and secret_key are passed, secret_key will be used in preference",
         args: {
           name: "password",
         },
       },
       {
         name: "--path",
-        description: "The path to upload logs to. The directory must exist on the SFTP server before logs can be saved to it",
+        description:
+          "The path to upload logs to. The directory must exist on the SFTP server before logs can be saved to it",
         args: {
           name: "path",
         },
@@ -6187,7 +6375,8 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
       portOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to SFTP. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to SFTP. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -6196,7 +6385,8 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
       responseConditionOption,
       {
         name: "--secret-key",
-        description: "The SSH private key for the server. If both password and secret_key are passed, secret_key will be used in preference",
+        description:
+          "The SSH private key for the server. If both password and secret_key are passed, secret_key will be used in preference",
         args: {
           name: "secret-key",
         },
@@ -6205,7 +6395,8 @@ const serviceLoggingSftpSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--ssh-known-hosts",
-        description: "A list of host keys for all hosts we can connect to over SFTP",
+        description:
+          "A list of host keys for all hosts we can connect to over SFTP",
         args: {
           name: "ssh-known-hosts",
         },
@@ -6230,7 +6421,8 @@ const serviceLoggingSplunkSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--auth-token",
-        description: "A Splunk token for use in posting logs over HTTP to your collector",
+        description:
+          "A Splunk token for use in posting logs over HTTP to your collector",
         args: {
           name: "auth-token",
         },
@@ -6240,7 +6432,8 @@ const serviceLoggingSplunkSubcommands: Fig.Subcommand[] = [
       formatVersionOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Splunk logging object. Used as a primary key for API access",
+        description:
+          "The name of the Splunk logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -6248,7 +6441,8 @@ const serviceLoggingSplunkSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Splunk. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Splunk. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -6284,7 +6478,8 @@ const serviceLoggingSplunkSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Splunk logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Splunk logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -6303,12 +6498,7 @@ const serviceLoggingSplunkSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Splunk endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -6341,7 +6531,8 @@ const serviceLoggingSplunkSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Splunk. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Splunk. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -6362,7 +6553,8 @@ const serviceLoggingSplunkSubcommands: Fig.Subcommand[] = [
 const serviceLoggingSumologicSubcommands: Fig.Subcommand[] = [
   {
     name: ["create", "add"],
-    description: "Create a Sumologic logging endpoint on a Fastly service version",
+    description:
+      "Create a Sumologic logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       formatOption,
@@ -6370,7 +6562,8 @@ const serviceLoggingSumologicSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Sumologic logging object. Used as a primary key for API access",
+        description:
+          "The name of the Sumologic logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -6378,7 +6571,8 @@ const serviceLoggingSumologicSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Sumologic. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Sumologic. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -6392,7 +6586,8 @@ const serviceLoggingSumologicSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a Sumologic logging endpoint on a Fastly service version",
+    description:
+      "Delete a Sumologic logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       {
@@ -6410,7 +6605,8 @@ const serviceLoggingSumologicSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Sumologic logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Sumologic logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -6429,16 +6625,12 @@ const serviceLoggingSumologicSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Sumologic endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
-    description: "Update a Sumologic logging endpoint on a Fastly service version",
+    description:
+      "Update a Sumologic logging endpoint on a Fastly service version",
     options: [
       autocloneOption,
       formatOption,
@@ -6462,7 +6654,8 @@ const serviceLoggingSumologicSubcommands: Fig.Subcommand[] = [
       placementOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to Sumologic. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to Sumologic. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -6495,7 +6688,8 @@ const serviceLoggingSyslogSubcommands: Fig.Subcommand[] = [
       messageTypeOption,
       {
         name: ["-n", "--name"],
-        description: "The name of the Syslog logging object. Used as a primary key for API access",
+        description:
+          "The name of the Syslog logging object. Used as a primary key for API access",
         args: {
           name: "name",
         },
@@ -6504,7 +6698,8 @@ const serviceLoggingSyslogSubcommands: Fig.Subcommand[] = [
       portOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to syslog. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to syslog. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -6540,7 +6735,8 @@ const serviceLoggingSyslogSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Syslog logging endpoint on a Fastly service version",
+    description:
+      "Show detailed information about a Syslog logging endpoint on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -6559,12 +6755,7 @@ const serviceLoggingSyslogSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List Syslog endpoints on a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -6601,7 +6792,8 @@ const serviceLoggingSyslogSubcommands: Fig.Subcommand[] = [
       portOption,
       {
         name: "--processing-region",
-        description: "The region where logs will be processed before streaming to syslog. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
+        description:
+          "The region where logs will be processed before streaming to syslog. One of 'none', 'eu', or 'us'. Defaults to 'none' for no specific region",
         args: {
           name: "processing-region",
         },
@@ -6626,7 +6818,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--action",
-        description: "The action to take when a rate limiter violation is detected",
+        description:
+          "The action to take when a rate limiter violation is detected",
         args: {
           name: "action",
           suggestions: ["log_only", "response", "response_object"],
@@ -6635,21 +6828,24 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       autocloneOption,
       {
         name: "--client-key",
-        description: "Comma-separated list of VCL variable used to generate a counter key to identify a client",
+        description:
+          "Comma-separated list of VCL variable used to generate a counter key to identify a client",
         args: {
           name: "client-key",
         },
       },
       {
         name: "--feature-revision",
-        description: "Revision number of the rate limiting feature implementation",
+        description:
+          "Revision number of the rate limiting feature implementation",
         args: {
           name: "feature-revision",
         },
       },
       {
         name: "--http-methods",
-        description: "Comma-separated list of HTTP methods to apply rate limiting to",
+        description:
+          "Comma-separated list of HTTP methods to apply rate limiting to",
         args: {
           name: "http-methods",
         },
@@ -6657,7 +6853,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       jsonOption,
       {
         name: "--logger-type",
-        description: "Name of the type of logging endpoint to be used when action is `log_only`",
+        description:
+          "Name of the type of logging endpoint to be used when action is `log_only`",
         args: {
           name: "logger-type",
           suggestions: [
@@ -6702,7 +6899,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--penalty-box-dur",
-        description: "Length of time in minutes that the rate limiter is in effect after the initial violation is detected",
+        description:
+          "Length of time in minutes that the rate limiter is in effect after the initial violation is detected",
         args: {
           name: "penalty-box-dur",
         },
@@ -6723,7 +6921,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--response-object-name",
-        description: "Name of existing response object. Required if action is response_object",
+        description:
+          "Name of existing response object. Required if action is response_object",
         args: {
           name: "response-object-name",
         },
@@ -6737,7 +6936,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--rps-limit",
-        description: "Upper limit of requests per second allowed by the rate limiter",
+        description:
+          "Upper limit of requests per second allowed by the rate limiter",
         args: {
           name: "rps-limit",
         },
@@ -6754,7 +6954,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       versionOption,
       {
         name: "--window-size",
-        description: "Number of seconds during which the RPS limit must be exceeded in order to trigger a violation",
+        description:
+          "Number of seconds during which the RPS limit must be exceeded in order to trigger a violation",
         args: {
           name: "window-size",
           suggestions: ["1", "10", "60"],
@@ -6794,12 +6995,7 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List all rate limiters for a particular service and version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -6807,7 +7003,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: "--action",
-        description: "The action to take when a rate limiter violation is detected",
+        description:
+          "The action to take when a rate limiter violation is detected",
         args: {
           name: "action",
           suggestions: ["log_only", "response", "response_object"],
@@ -6815,21 +7012,24 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--client-key",
-        description: "Comma-separated list of VCL variable used to generate a counter key to identify a client",
+        description:
+          "Comma-separated list of VCL variable used to generate a counter key to identify a client",
         args: {
           name: "client-key",
         },
       },
       {
         name: "--feature-revision",
-        description: "Revision number of the rate limiting feature implementation",
+        description:
+          "Revision number of the rate limiting feature implementation",
         args: {
           name: "feature-revision",
         },
       },
       {
         name: "--http-methods",
-        description: "Comma-separated list of HTTP methods to apply rate limiting to",
+        description:
+          "Comma-separated list of HTTP methods to apply rate limiting to",
         args: {
           name: "http-methods",
         },
@@ -6845,7 +7045,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       jsonOption,
       {
         name: "--logger-type",
-        description: "Name of the type of logging endpoint to be used when action is `log_only`",
+        description:
+          "Name of the type of logging endpoint to be used when action is `log_only`",
         args: {
           name: "logger-type",
           suggestions: [
@@ -6890,7 +7091,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--penalty-box-dur",
-        description: "Length of time in minutes that the rate limiter is in effect after the initial violation is detected",
+        description:
+          "Length of time in minutes that the rate limiter is in effect after the initial violation is detected",
         args: {
           name: "penalty-box-dur",
         },
@@ -6911,7 +7113,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--response-object-name",
-        description: "Name of existing response object. Required if action is response_object",
+        description:
+          "Name of existing response object. Required if action is response_object",
         args: {
           name: "response-object-name",
         },
@@ -6925,7 +7128,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--rps-limit",
-        description: "Upper limit of requests per second allowed by the rate limiter",
+        description:
+          "Upper limit of requests per second allowed by the rate limiter",
         args: {
           name: "rps-limit",
         },
@@ -6939,7 +7143,8 @@ const serviceRateLimitSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--window-size",
-        description: "Number of seconds during which the RPS limit must be exceeded in order to trigger a violation",
+        description:
+          "Number of seconds during which the RPS limit must be exceeded in order to trigger a violation",
         args: {
           name: "window-size",
           suggestions: ["1", "10", "60"],
@@ -6997,7 +7202,8 @@ const serviceResourceLinkSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a Fastly service resource link",
+    description:
+      "Show detailed information about a Fastly service resource link",
     options: [
       {
         name: "--id",
@@ -7016,12 +7222,7 @@ const serviceResourceLinkSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List all resource links for a Fastly service version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -7059,7 +7260,8 @@ const serviceAuthSubcommands: Fig.Subcommand[] = [
     options: [
       {
         name: ["-p", "--permission"],
-        description: "The permission the user has in relation to the service (default: read_only)",
+        description:
+          "The permission the user has in relation to the service (default: read_only)",
         args: {
           name: "permission",
           suggestions: ["full", "read_only", "purge_select", "purge_all"],
@@ -7110,11 +7312,7 @@ const serviceAuthSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List service authorizations",
-    options: [
-      jsonOption,
-      pageOption,
-      perPageOption,
-    ],
+    options: [jsonOption, pageOption, perPageOption],
   },
   {
     name: "update",
@@ -7201,7 +7399,8 @@ const serviceVclConditionSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Show detailed information about a condition on a Fastly service version",
+    description:
+      "Show detailed information about a condition on a Fastly service version",
     options: [
       jsonOption,
       {
@@ -7220,11 +7419,7 @@ const serviceVclConditionSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List condition on a Fastly service version",
-    options: [
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -7349,12 +7544,7 @@ const serviceVclCustomSubcommands: Fig.Subcommand[] = [
   {
     name: "list",
     description: "List the uploaded VCLs for a particular service and version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -7398,7 +7588,8 @@ const serviceVclSnippetSubcommands: Fig.Subcommand[] = [
       autocloneOption,
       {
         name: "--content",
-        description: "VCL snippet passed as file path or content, e.g. $(< snippet.vcl)",
+        description:
+          "VCL snippet passed as file path or content, e.g. $(< snippet.vcl)",
         args: {
           name: "content",
         },
@@ -7416,7 +7607,8 @@ const serviceVclSnippetSubcommands: Fig.Subcommand[] = [
       },
       {
         name: ["-p", "--priority"],
-        description: "Priority determines execution order. Lower numbers execute first",
+        description:
+          "Priority determines execution order. Lower numbers execute first",
         args: {
           name: "priority",
         },
@@ -7425,10 +7617,23 @@ const serviceVclSnippetSubcommands: Fig.Subcommand[] = [
       serviceNameOption,
       {
         name: "--type",
-        description: "The location in generated VCL where the snippet should be placed",
+        description:
+          "The location in generated VCL where the snippet should be placed",
         args: {
           name: "type",
-          suggestions: ["init", "recv", "hash", "hit", "miss", "pass", "fetch", "error", "deliver", "log", "none"],
+          suggestions: [
+            "init",
+            "recv",
+            "hash",
+            "hit",
+            "miss",
+            "pass",
+            "fetch",
+            "error",
+            "deliver",
+            "log",
+            "none",
+          ],
         },
       },
       versionOption,
@@ -7436,7 +7641,8 @@ const serviceVclSnippetSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["delete", "remove"],
-    description: "Delete a specific snippet for a particular service and version",
+    description:
+      "Delete a specific snippet for a particular service and version",
     options: [
       autocloneOption,
       {
@@ -7454,7 +7660,8 @@ const serviceVclSnippetSubcommands: Fig.Subcommand[] = [
   },
   {
     name: ["describe", "get"],
-    description: "Get the uploaded VCL snippet for a particular service and version",
+    description:
+      "Get the uploaded VCL snippet for a particular service and version",
     options: [
       {
         name: "--content",
@@ -7486,13 +7693,9 @@ const serviceVclSnippetSubcommands: Fig.Subcommand[] = [
   },
   {
     name: "list",
-    description: "List the uploaded VCL snippets for a particular service and version",
-    options: [
-      jsonOption,
-      serviceIdOption,
-      serviceNameOption,
-      versionOption,
-    ],
+    description:
+      "List the uploaded VCL snippets for a particular service and version",
+    options: [jsonOption, serviceIdOption, serviceNameOption, versionOption],
   },
   {
     name: "update",
@@ -7501,7 +7704,8 @@ const serviceVclSnippetSubcommands: Fig.Subcommand[] = [
       autocloneOption,
       {
         name: "--content",
-        description: "VCL snippet passed as file path or content, e.g. $(< snippet.vcl)",
+        description:
+          "VCL snippet passed as file path or content, e.g. $(< snippet.vcl)",
         args: {
           name: "content",
         },
@@ -7526,7 +7730,8 @@ const serviceVclSnippetSubcommands: Fig.Subcommand[] = [
       },
       {
         name: ["-p", "--priority"],
-        description: "Priority determines execution order. Lower numbers execute first",
+        description:
+          "Priority determines execution order. Lower numbers execute first",
         args: {
           name: "priority",
         },
@@ -7542,10 +7747,23 @@ const serviceVclSnippetSubcommands: Fig.Subcommand[] = [
       },
       {
         name: "--type",
-        description: "The location in generated VCL where the snippet should be placed",
+        description:
+          "The location in generated VCL where the snippet should be placed",
         args: {
           name: "type",
-          suggestions: ["init", "recv", "hash", "hit", "miss", "pass", "fetch", "error", "deliver", "log", "none"],
+          suggestions: [
+            "init",
+            "recv",
+            "hash",
+            "hit",
+            "miss",
+            "pass",
+            "fetch",
+            "error",
+            "deliver",
+            "log",
+            "none",
+          ],
         },
       },
       versionOption,
@@ -7559,14 +7777,16 @@ const completionSpec: Fig.Spec = {
   subcommands: [
     {
       name: "acl",
-      description: "Manipulate Fastly ACLs (deprecated: use 'fastly service acl' instead)",
+      description:
+        "Manipulate Fastly ACLs (deprecated: use 'fastly service acl' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceAclSubcommands,
     },
     {
       name: "aclentry",
-      description: "Manipulate Fastly ACLs (deprecated: use 'fastly service acl-entry' instead)",
+      description:
+        "Manipulate Fastly ACLs (deprecated: use 'fastly service acl-entry' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceAclEntrySubcommands,
@@ -7593,7 +7813,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--model",
-                  description: "AI model identifier (e.g. \"claude-sonnet-4-20250514\")",
+                  description:
+                    'AI model identifier (e.g. "claude-sonnet-4-20250514")',
                   isRequired: true,
                   args: {
                     name: "model",
@@ -7609,7 +7830,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--provider",
-                  description: "AI model provider name (e.g. \"Anthropic\")",
+                  description: 'AI model provider name (e.g. "Anthropic")',
                   isRequired: true,
                   args: {
                     name: "provider",
@@ -7619,12 +7840,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["delete", "remove"],
-              description: "Delete a virtual key and any associated security configuration",
+              description:
+                "Delete a virtual key and any associated security configuration",
               options: [
                 jsonOption,
                 {
                   name: "--key-id",
-                  description: "Alphanumeric string identifying the virtual key",
+                  description:
+                    "Alphanumeric string identifying the virtual key",
                   isRequired: true,
                   args: {
                     name: "key-id",
@@ -7639,7 +7862,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--key-id",
-                  description: "Alphanumeric string identifying the virtual key",
+                  description:
+                    "Alphanumeric string identifying the virtual key",
                   isRequired: true,
                   args: {
                     name: "key-id",
@@ -7680,14 +7904,16 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--search",
-                  description: "Search virtual keys by substring match on key name",
+                  description:
+                    "Search virtual keys by substring match on key name",
                   args: {
                     name: "search",
                   },
                 },
                 {
                   name: "--sort",
-                  description: "Sort field. Prefix with '-' for descending order (e.g. \"-created_at\")",
+                  description:
+                    "Sort field. Prefix with '-' for descending order (e.g. \"-created_at\")",
                   args: {
                     name: "sort",
                     default: "created_at",
@@ -7697,11 +7923,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "rotate",
-              description: "Rotate a virtual key, generating a new access token and invalidating the previous one",
+              description:
+                "Rotate a virtual key, generating a new access token and invalidating the previous one",
               options: [
                 {
                   name: "--expires-at",
-                  description: "Expiration timestamp for the rotated key (RFC 3339 format)",
+                  description:
+                    "Expiration timestamp for the rotated key (RFC 3339 format)",
                   isRequired: true,
                   args: {
                     name: "expires-at",
@@ -7710,7 +7938,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--key-id",
-                  description: "Alphanumeric string identifying the virtual key",
+                  description:
+                    "Alphanumeric string identifying the virtual key",
                   isRequired: true,
                   args: {
                     name: "key-id",
@@ -7724,7 +7953,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--expires-at",
-                  description: "An updated expiration timestamp (RFC 3339 format)",
+                  description:
+                    "An updated expiration timestamp (RFC 3339 format)",
                   args: {
                     name: "expires-at",
                   },
@@ -7732,7 +7962,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--key-id",
-                  description: "Alphanumeric string identifying the virtual key",
+                  description:
+                    "Alphanumeric string identifying the virtual key",
                   isRequired: true,
                   args: {
                     name: "key-id",
@@ -7747,7 +7978,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--name",
-                  description: "An updated human-readable name for the virtual key",
+                  description:
+                    "An updated human-readable name for the virtual key",
                   args: {
                     name: "name",
                   },
@@ -7770,9 +8002,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "list",
               description: "List AI providers supported by AI Runtime Control",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "list-models",
@@ -7781,7 +8011,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--provider-id",
-                  description: "Alphanumeric string identifying the provider (e.g. \"anthropic\", \"openai\")",
+                  description:
+                    'Alphanumeric string identifying the provider (e.g. "anthropic", "openai")',
                   isRequired: true,
                   args: {
                     name: "provider-id",
@@ -7809,7 +8040,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--base-url",
-                  description: "Base URL for the provider's API. Must be an absolute http or https URL",
+                  description:
+                    "Base URL for the provider's API. Must be an absolute http or https URL",
                   isRequired: true,
                   args: {
                     name: "base-url",
@@ -7818,7 +8050,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--models",
-                  description: "Comma-separated list of allowed AI model identifiers",
+                  description:
+                    "Comma-separated list of allowed AI model identifiers",
                   isRequired: true,
                   isRepeatable: true,
                   args: {
@@ -7837,11 +8070,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["delete", "remove"],
-              description: "Delete a provider connection. This is rejected if the connection is still referenced by a virtual key's failover policy",
+              description:
+                "Delete a provider connection. This is rejected if the connection is still referenced by a virtual key's failover policy",
               options: [
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying the provider connection",
+                  description:
+                    "Alphanumeric string identifying the provider connection",
                   isRequired: true,
                   args: {
                     name: "id",
@@ -7856,7 +8091,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying the provider connection",
+                  description:
+                    "Alphanumeric string identifying the provider connection",
                   isRequired: true,
                   args: {
                     name: "id",
@@ -7872,7 +8108,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--sort",
-                  description: "Sort field. Prefix with '-' for descending order (e.g. \"-created_at\")",
+                  description:
+                    "Sort field. Prefix with '-' for descending order (e.g. \"-created_at\")",
                   args: {
                     name: "sort",
                     default: "created_at",
@@ -7886,21 +8123,24 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--api-key",
-                  description: "An updated provider secret key for authentication",
+                  description:
+                    "An updated provider secret key for authentication",
                   args: {
                     name: "api-key",
                   },
                 },
                 {
                   name: "--base-url",
-                  description: "An updated base URL for the provider's API. Must be an absolute http or https URL",
+                  description:
+                    "An updated base URL for the provider's API. Must be an absolute http or https URL",
                   args: {
                     name: "base-url",
                   },
                 },
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying the provider connection",
+                  description:
+                    "Alphanumeric string identifying the provider connection",
                   isRequired: true,
                   args: {
                     name: "id",
@@ -7909,7 +8149,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--models",
-                  description: "An updated comma-separated list of allowed AI model identifiers",
+                  description:
+                    "An updated comma-separated list of allowed AI model identifiers",
                   isRepeatable: true,
                   args: {
                     name: "models",
@@ -7966,7 +8207,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--sort",
-                  description: "Sort field. Prefix with '-' for descending order (e.g. \"-created_at\")",
+                  description:
+                    "Sort field. Prefix with '-' for descending order (e.g. \"-created_at\")",
                   args: {
                     name: "sort",
                     default: "created_at",
@@ -7974,7 +8216,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--to",
-                  description: "End of the time range (RFC 3339 format). Defaults to now",
+                  description:
+                    "End of the time range (RFC 3339 format). Defaults to now",
                   args: {
                     name: "to",
                   },
@@ -8021,7 +8264,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--sort",
-                  description: "Sort field. Prefix with '-' for descending order (e.g. \"-date\")",
+                  description:
+                    "Sort field. Prefix with '-' for descending order (e.g. \"-date\")",
                   args: {
                     name: "sort",
                     default: "date",
@@ -8029,7 +8273,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--to",
-                  description: "End of the time range (RFC 3339 format). Defaults to now",
+                  description:
+                    "End of the time range (RFC 3339 format). Defaults to now",
                   args: {
                     name: "to",
                   },
@@ -8071,7 +8316,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--sort",
-                  description: "Sort field. Prefix with '-' for descending order (e.g. \"-date\")",
+                  description:
+                    "Sort field. Prefix with '-' for descending order (e.g. \"-date\")",
                   args: {
                     name: "sort",
                     default: "date",
@@ -8079,7 +8325,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--to",
-                  description: "End of the time range (RFC 3339 format). Defaults to now",
+                  description:
+                    "End of the time range (RFC 3339 format). Defaults to now",
                   args: {
                     name: "to",
                   },
@@ -8092,7 +8339,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "alerts",
-      description: "Manipulate Fastly Alerts (deprecated: use 'fastly service alert' instead)",
+      description:
+        "Manipulate Fastly Alerts (deprecated: use 'fastly service alert' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceAlertSubcommands,
@@ -8119,7 +8367,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--method",
-                  description: "Filters operations by HTTP method (e.g., GET, POST, PUT)",
+                  description:
+                    "Filters operations by HTTP method (e.g., GET, POST, PUT)",
                   args: {
                     name: "method",
                   },
@@ -8133,7 +8382,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: ["-s", "--service-id"],
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   isRequired: true,
                   args: {
                     name: "service-id",
@@ -8142,7 +8392,8 @@ const completionSpec: Fig.Spec = {
                 serviceNameOption,
                 {
                   name: "--status",
-                  description: "Filters operations by status. Valid values are: discovered, saved, ignored",
+                  description:
+                    "Filters operations by status. Valid values are: discovered, saved, ignored",
                   args: {
                     name: "status",
                   },
@@ -8164,14 +8415,16 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--operation-id",
-                  description: "The ID of the discovered operation (comma-separated for multiple)",
+                  description:
+                    "The ID of the discovered operation (comma-separated for multiple)",
                   args: {
                     name: "operation-id",
                   },
                 },
                 {
                   name: ["-s", "--service-id"],
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   isRequired: true,
                   args: {
                     name: "service-id",
@@ -8180,7 +8433,8 @@ const completionSpec: Fig.Spec = {
                 serviceNameOption,
                 {
                   name: "--status",
-                  description: "The new status to apply. Valid values are: 'discovered', 'ignored'",
+                  description:
+                    "The new status to apply. Valid values are: 'discovered', 'ignored'",
                   args: {
                     name: "status",
                   },
@@ -8199,7 +8453,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--file",
-                  description: "Add tags to operations in bulk from a JSON file",
+                  description:
+                    "Add tags to operations in bulk from a JSON file",
                   args: {
                     name: "file",
                     template: "filepaths",
@@ -8208,7 +8463,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--operation-ids",
-                  description: "Comma-separated list of operation IDs to add tags to",
+                  description:
+                    "Comma-separated list of operation IDs to add tags to",
                   isRepeatable: true,
                   args: {
                     name: "operation-ids",
@@ -8216,7 +8472,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: ["-s", "--service-id"],
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   isRequired: true,
                   args: {
                     name: "service-id",
@@ -8263,21 +8520,24 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--method",
-                  description: "The HTTP method for the operation (e.g., GET, POST, PUT)",
+                  description:
+                    "The HTTP method for the operation (e.g., GET, POST, PUT)",
                   args: {
                     name: "method",
                   },
                 },
                 {
                   name: "--path",
-                  description: "The path for the operation, which may include path parameters.(e.g., /api/users)",
+                  description:
+                    "The path for the operation, which may include path parameters.(e.g., /api/users)",
                   args: {
                     name: "path",
                   },
                 },
                 {
                   name: ["-s", "--service-id"],
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   isRequired: true,
                   args: {
                     name: "service-id",
@@ -8286,7 +8546,8 @@ const completionSpec: Fig.Spec = {
                 serviceNameOption,
                 {
                   name: "--tag-ids",
-                  description: "A comma-separated array of operation tag IDs associated with this operation",
+                  description:
+                    "A comma-separated array of operation tag IDs associated with this operation",
                   isRepeatable: true,
                   args: {
                     name: "tag-ids",
@@ -8309,7 +8570,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: ["-s", "--service-id"],
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   isRequired: true,
                   args: {
                     name: "service-id",
@@ -8333,7 +8595,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: ["-s", "--service-id"],
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   isRequired: true,
                   args: {
                     name: "service-id",
@@ -8356,7 +8619,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--method",
-                  description: "Filters operations by HTTP method (e.g., GET, POST, PUT)",
+                  description:
+                    "Filters operations by HTTP method (e.g., GET, POST, PUT)",
                   args: {
                     name: "method",
                   },
@@ -8370,7 +8634,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: ["-s", "--service-id"],
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   isRequired: true,
                   args: {
                     name: "service-id",
@@ -8408,7 +8673,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: ["-s", "--service-id"],
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   isRequired: true,
                   args: {
                     name: "service-id",
@@ -8417,7 +8683,8 @@ const completionSpec: Fig.Spec = {
                 serviceNameOption,
                 {
                   name: "--tag-ids",
-                  description: "Comma-separated list of tag IDs to associate with the operation",
+                  description:
+                    "Comma-separated list of tag IDs to associate with the operation",
                   isRepeatable: true,
                   args: {
                     name: "tag-ids",
@@ -8453,7 +8720,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--service-id",
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   args: {
                     name: "service-id",
                   },
@@ -8468,7 +8736,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--service-id",
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   args: {
                     name: "service-id",
                   },
@@ -8491,7 +8760,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--service-id",
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   args: {
                     name: "service-id",
                   },
@@ -8514,7 +8784,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--service-id",
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   args: {
                     name: "service-id",
                   },
@@ -8545,7 +8816,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--service-id",
-                  description: "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
+                  description:
+                    "Service ID (falls back to FASTLY_SERVICE_ID, then fastly.toml)",
                   args: {
                     name: "service-id",
                   },
@@ -8586,7 +8858,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--event-type",
-                  description: "An audit event type that triggers a notification. Set flag multiple times, or provide a comma-separated list, to specify multiple event types",
+                  description:
+                    "An audit event type that triggers a notification. Set flag multiple times, or provide a comma-separated list, to specify multiple event types",
                   isRequired: true,
                   isRepeatable: true,
                   args: {
@@ -8595,7 +8868,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--integration-id",
-                  description: "The ID of an integration that should receive notifications. Set flag multiple times, or provide a comma-separated list, to specify multiple integrations",
+                  description:
+                    "The ID of an integration that should receive notifications. Set flag multiple times, or provide a comma-separated list, to specify multiple integrations",
                   isRequired: true,
                   isRepeatable: true,
                   args: {
@@ -8613,7 +8887,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--scope-id",
-                  description: "The ID of a service or workspace to scope the mapping to. Set flag multiple times, or provide a comma-separated list, to specify multiple scope IDs. Omit to apply the mapping to all resources of the given scope type",
+                  description:
+                    "The ID of a service or workspace to scope the mapping to. Set flag multiple times, or provide a comma-separated list, to specify multiple scope IDs. Omit to apply the mapping to all resources of the given scope type",
                   isRepeatable: true,
                   args: {
                     name: "scope-id",
@@ -8621,7 +8896,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--scope-type",
-                  description: "The category of Fastly resource the mapping applies to (account, vcl, wasm, ngwaf)",
+                  description:
+                    "The category of Fastly resource the mapping applies to (account, vcl, wasm, ngwaf)",
                   isRequired: true,
                   args: {
                     name: "scope-type",
@@ -8666,7 +8942,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--integration-id",
-                  description: "Filters results to mappings that reference the given integration ID",
+                  description:
+                    "Filters results to mappings that reference the given integration ID",
                   args: {
                     name: "integration-id",
                   },
@@ -8682,14 +8959,16 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--name",
-                  description: "Filters results to mappings whose name contains the given string (case-insensitive)",
+                  description:
+                    "Filters results to mappings whose name contains the given string (case-insensitive)",
                   args: {
                     name: "name",
                   },
                 },
                 {
                   name: "--scope-id",
-                  description: "Filters results to mappings that apply to the given service or workspace ID",
+                  description:
+                    "Filters results to mappings that apply to the given service or workspace ID",
                   args: {
                     name: "scope-id",
                   },
@@ -8704,7 +8983,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--sort",
-                  description: "The order in which to return results by creation date",
+                  description:
+                    "The order in which to return results by creation date",
                   args: {
                     name: "sort",
                     suggestions: ["created_at", "-created_at"],
@@ -8714,12 +8994,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "list-event-types",
-              description: "List the audit event types supported when creating an event mapping",
+              description:
+                "List the audit event types supported when creating an event mapping",
               options: [
                 jsonOption,
                 {
                   name: "--scope-type",
-                  description: "Filters results to event types compatible with the given scope type",
+                  description:
+                    "Filters results to event types compatible with the given scope type",
                   args: {
                     name: "scope-type",
                     suggestions: ["account", "vcl", "wasm", "ngwaf"],
@@ -8727,7 +9009,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--sort",
-                  description: "The order in which to return results, alphabetically by event type",
+                  description:
+                    "The order in which to return results, alphabetically by event type",
                   args: {
                     name: "sort",
                     suggestions: ["event_type", "-event_type"],
@@ -8737,12 +9020,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "list-scope-types",
-              description: "List the scope types supported when creating an event mapping",
+              description:
+                "List the scope types supported when creating an event mapping",
               options: [
                 jsonOption,
                 {
                   name: "--sort",
-                  description: "The order in which to return results, alphabetically by scope type",
+                  description:
+                    "The order in which to return results, alphabetically by scope type",
                   args: {
                     name: "sort",
                     suggestions: ["scope_type", "-scope_type"],
@@ -8752,7 +9037,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "update",
-              description: "Update an audit log event mapping. This replaces the entire mapping, so all required fields must be provided",
+              description:
+                "Update an audit log event mapping. This replaces the entire mapping, so all required fields must be provided",
               options: [
                 {
                   name: "--description",
@@ -8763,7 +9049,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--event-type",
-                  description: "An audit event type that triggers a notification. Set flag multiple times, or provide a comma-separated list, to specify multiple event types",
+                  description:
+                    "An audit event type that triggers a notification. Set flag multiple times, or provide a comma-separated list, to specify multiple event types",
                   isRequired: true,
                   isRepeatable: true,
                   args: {
@@ -8780,7 +9067,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--integration-id",
-                  description: "The ID of an integration that should receive notifications. Set flag multiple times, or provide a comma-separated list, to specify multiple integrations",
+                  description:
+                    "The ID of an integration that should receive notifications. Set flag multiple times, or provide a comma-separated list, to specify multiple integrations",
                   isRequired: true,
                   isRepeatable: true,
                   args: {
@@ -8798,7 +9086,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--scope-id",
-                  description: "The ID of a service or workspace to scope the mapping to. Set flag multiple times, or provide a comma-separated list, to specify multiple scope IDs",
+                  description:
+                    "The ID of a service or workspace to scope the mapping to. Set flag multiple times, or provide a comma-separated list, to specify multiple scope IDs",
                   isRepeatable: true,
                   args: {
                     name: "scope-id",
@@ -8806,7 +9095,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--scope-type",
-                  description: "The category of Fastly resource the mapping applies to (account, vcl, wasm, ngwaf)",
+                  description:
+                    "The category of Fastly resource the mapping applies to (account, vcl, wasm, ngwaf)",
                   isRequired: true,
                   args: {
                     name: "scope-type",
@@ -8838,7 +9128,8 @@ const completionSpec: Fig.Spec = {
           ],
           args: {
             name: "name",
-            description: "Name for this token (pass to --token to use it later); if omitted, uses the API token's name",
+            description:
+              "Name for this token (pass to --token to use it later); if omitted, uses the API token's name",
             isOptional: true,
           },
         },
@@ -8856,25 +9147,30 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "login",
-          description: "Authenticate and store a default token (paste token or use --sso)",
+          description:
+            "Authenticate and store a default token (paste token or use --sso)",
           options: [
             {
               name: "--sso",
-              description: "Authenticate via browser-based SSO (requires --token <name> to specify the stored token name)",
+              description:
+                "Authenticate via browser-based SSO (requires --token <name> to specify the stored token name)",
             },
           ],
         },
         {
           name: "revoke",
-          description: "Revoke a token via the API and remove it from local config",
+          description:
+            "Revoke a token via the API and remove it from local config",
           options: [
             {
               name: "--current",
-              description: "Revoke the token used to authenticate the current request",
+              description:
+                "Revoke the token used to authenticate the current request",
             },
             {
               name: "--file",
-              description: "Path to a newline-delimited file of token IDs to revoke in bulk",
+              description:
+                "Path to a newline-delimited file of token IDs to revoke in bulk",
               args: {
                 name: "file",
                 template: "filepaths",
@@ -8896,7 +9192,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--token-value",
-              description: "Raw API token string to revoke (pass '-' to read from stdin)",
+              description:
+                "Raw API token string to revoke (pass '-' to read from stdin)",
               args: {
                 name: "token-value",
               },
@@ -8914,13 +9211,15 @@ const completionSpec: Fig.Spec = {
           ],
           args: {
             name: "name",
-            description: "Name of the token to show (defaults to the current token)",
+            description:
+              "Name of the token to show (defaults to the current token)",
             isOptional: true,
           },
         },
         {
           name: "token",
-          description: "Output the active API token (for use in shell substitutions)",
+          description:
+            "Output the active API token (for use in shell substitutions)",
         },
         {
           name: "use",
@@ -8934,13 +9233,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "auth-token",
-      description: "Manage API tokens (deprecated: use 'fastly auth' subcommands instead)",
+      description:
+        "Manage API tokens (deprecated: use 'fastly auth' subcommands instead)",
       hidden: true,
       deprecated: true,
       subcommands: [
         {
           name: ["create", "add"],
-          description: "Create an API token (deprecated: use the Fastly API directly)",
+          description:
+            "Create an API token (deprecated: use the Fastly API directly)",
           options: [
             {
               name: "--expires",
@@ -8958,7 +9259,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--password",
-              description: "User password corresponding with --token or $FASTLY_API_TOKEN",
+              description:
+                "User password corresponding with --token or $FASTLY_API_TOKEN",
               isRequired: true,
               args: {
                 name: "password",
@@ -8970,12 +9272,18 @@ const completionSpec: Fig.Spec = {
               isRepeatable: true,
               args: {
                 name: "scope",
-                suggestions: ["global", "purge_select", "purge_all", "global:read"],
+                suggestions: [
+                  "global",
+                  "purge_select",
+                  "purge_all",
+                  "global:read",
+                ],
               },
             },
             {
               name: "--services",
-              description: "A comma-separated list of alphanumeric strings identifying services (default: access to all services)",
+              description:
+                "A comma-separated list of alphanumeric strings identifying services (default: access to all services)",
               isRepeatable: true,
               args: {
                 name: "services",
@@ -8985,7 +9293,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["delete", "remove"],
-          description: "Revoke an API token (deprecated: use the Fastly API directly)",
+          description:
+            "Revoke an API token (deprecated: use the Fastly API directly)",
           options: [
             {
               name: "--current",
@@ -8993,7 +9302,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--file",
-              description: "Revoke tokens in bulk from a newline delimited list of tokens",
+              description:
+                "Revoke tokens in bulk from a newline delimited list of tokens",
               args: {
                 name: "file",
                 template: "filepaths",
@@ -9010,18 +9320,19 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["describe", "get"],
-          description: "Get the current API token (deprecated: use the Fastly API directly)",
-          options: [
-            jsonOption,
-          ],
+          description:
+            "Get the current API token (deprecated: use the Fastly API directly)",
+          options: [jsonOption],
         },
         {
           name: "list",
-          description: "List API tokens (deprecated: use the Fastly API directly)",
+          description:
+            "List API tokens (deprecated: use the Fastly API directly)",
           options: [
             {
               name: "--customer-id",
-              description: "Alphanumeric string identifying the customer (falls back to FASTLY_CUSTOMER_ID)",
+              description:
+                "Alphanumeric string identifying the customer (falls back to FASTLY_CUSTOMER_ID)",
               args: {
                 name: "customer-id",
               },
@@ -9033,7 +9344,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "backend",
-      description: "Manipulate Fastly service version backends (deprecated: use 'fastly service backend' instead)",
+      description:
+        "Manipulate Fastly service version backends (deprecated: use 'fastly service backend' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceBackendSubcommands,
@@ -9105,7 +9417,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--action",
-                  description: "Action applied to requests from the bot ('inherit' applies the category's action)",
+                  description:
+                    "Action applied to requests from the bot ('inherit' applies the category's action)",
                   isRequired: true,
                   args: {
                     name: "action",
@@ -9170,7 +9483,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "list",
-              description: "List the bot categories in a Bot Management workspace",
+              description:
+                "List the bot categories in a Bot Management workspace",
               options: [
                 jsonOption,
                 {
@@ -9185,11 +9499,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "update",
-              description: "Set the action applied to bots in a category that are configured to inherit",
+              description:
+                "Set the action applied to bots in a category that are configured to inherit",
               options: [
                 {
                   name: "--action",
-                  description: "Action applied to every bot in the category configured with the 'inherit' action",
+                  description:
+                    "Action applied to every bot in the category configured with the 'inherit' action",
                   isRequired: true,
                   args: {
                     name: "action",
@@ -9206,7 +9522,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--clear-overrides",
-                  description: "Reset all bot actions in the category to 'inherit', removing individual overrides",
+                  description:
+                    "Reset all bot actions in the category to 'inherit', removing individual overrides",
                 },
                 jsonOption,
                 {
@@ -9227,7 +9544,8 @@ const completionSpec: Fig.Spec = {
           subcommands: [
             {
               name: ["describe", "get"],
-              description: "Show detailed information about a Bot Management workspace",
+              description:
+                "Show detailed information about a Bot Management workspace",
               options: [
                 jsonOption,
                 {
@@ -9243,16 +9561,12 @@ const completionSpec: Fig.Spec = {
             {
               name: "list",
               description: "List Bot Management workspaces",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "update",
               description: "Update a Bot Management workspace",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
           ],
         },
@@ -9314,9 +9628,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "list-acls",
               description: "List all compute ACLs",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "list-entries",
@@ -9332,7 +9644,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: ["-c", "--cursor"],
-                  description: "Pagination cursor (Use 'next_cursor' value from list output)",
+                  description:
+                    "Pagination cursor (Use 'next_cursor' value from list output)",
                   args: {
                     name: "cursor",
                   },
@@ -9393,7 +9706,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--file",
-                  description: "Batch update JSON file passed as file path or content, e.g. $(< batch.json)",
+                  description:
+                    "Batch update JSON file passed as file path or content, e.g. $(< batch.json)",
                   args: {
                     name: "file",
                     template: "filepaths",
@@ -9401,7 +9715,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--operation",
-                  description: "Indicating that this entry is to be added to/updated in the ACL",
+                  description:
+                    "Indicating that this entry is to be added to/updated in the ACL",
                   args: {
                     name: "operation",
                     suggestions: ["create", "update"],
@@ -9409,7 +9724,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--prefix",
-                  description: "An IP prefix defined in Classless Inter-Domain Routing (CIDR) format, i.e. a valid IP address (v4 or v6) followed by a forward slash (/) and a prefix length (0-32 or 0-128, depending on address family)",
+                  description:
+                    "An IP prefix defined in Classless Inter-Domain Routing (CIDR) format, i.e. a valid IP address (v4 or v6) followed by a forward slash (/) and a prefix length (0-32 or 0-128, depending on address family)",
                   args: {
                     name: "prefix",
                   },
@@ -9424,7 +9740,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: ["-C", "--dir"],
-              description: "Project directory to build (default: current directory)",
+              description:
+                "Project directory to build (default: current directory)",
               args: {
                 name: "dir",
                 template: "folders",
@@ -9432,7 +9749,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--env",
-              description: "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
+              description:
+                "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
               args: {
                 name: "env",
               },
@@ -9454,7 +9772,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--metadata-filter-envvars",
-              description: "Redact specified environment variables from [scripts.env_vars] using comma-separated list",
+              description:
+                "Redact specified environment variables from [scripts.env_vars] using comma-separated list",
               args: {
                 name: "metadata-filter-envvars",
               },
@@ -9472,7 +9791,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--timeout",
-              description: "Timeout, in seconds, for the build compilation step",
+              description:
+                "Timeout, in seconds, for the build compilation step",
               args: {
                 name: "timeout",
               },
@@ -9507,7 +9827,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--env",
-              description: "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
+              description:
+                "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
               args: {
                 name: "env",
               },
@@ -9528,7 +9849,8 @@ const completionSpec: Fig.Spec = {
             serviceNameOption,
             {
               name: "--status-check-code",
-              description: "Set the expected status response for the service availability check",
+              description:
+                "Set the expected status response for the service availability check",
               args: {
                 name: "status-check-code",
               },
@@ -9539,7 +9861,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--status-check-path",
-              description: "Specify the URL path for the service availability check",
+              description:
+                "Specify the URL path for the service availability check",
               args: {
                 name: "status-check-path",
                 default: "/",
@@ -9547,7 +9870,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--status-check-timeout",
-              description: "Set a timeout (in seconds) for the service availability check",
+              description:
+                "Set a timeout (in seconds) for the service availability check",
               args: {
                 name: "status-check-timeout",
                 default: "120",
@@ -9555,7 +9879,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--version",
-              description: "'latest', 'active', 'staged', or the number of a specific Fastly service version (default: the active version, or the latest version if none is active)",
+              description:
+                "'latest', 'active', 'staged', or the number of a specific Fastly service version (default: the active version, or the latest version if none is active)",
               args: {
                 name: "version",
               },
@@ -9564,11 +9889,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "hash-files",
-          description: "Generate a SHA512 digest from the contents of the Compute package",
+          description:
+            "Generate a SHA512 digest from the contents of the Compute package",
           options: [
             {
               name: ["-C", "--dir"],
-              description: "Project directory to build (default: current directory)",
+              description:
+                "Project directory to build (default: current directory)",
               args: {
                 name: "dir",
                 template: "folders",
@@ -9576,7 +9903,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--env",
-              description: "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
+              description:
+                "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
               args: {
                 name: "env",
               },
@@ -9598,7 +9926,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--metadata-filter-envvars",
-              description: "Redact specified environment variables from [scripts.env_vars] using comma-separated list",
+              description:
+                "Redact specified environment variables from [scripts.env_vars] using comma-separated list",
               args: {
                 name: "metadata-filter-envvars",
               },
@@ -9628,7 +9957,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--timeout",
-              description: "Timeout, in seconds, for the build compilation step",
+              description:
+                "Timeout, in seconds, for the build compilation step",
               args: {
                 name: "timeout",
               },
@@ -9649,7 +9979,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--branch",
-              description: "Git branch name to clone from package template repository",
+              description:
+                "Git branch name to clone from package template repository",
               hidden: true,
               args: {
                 name: "branch",
@@ -9657,7 +9988,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-p", "--directory"],
-              description: "Destination to write the new package, defaulting to the current directory",
+              description:
+                "Destination to write the new package, defaulting to the current directory",
               args: {
                 name: "directory",
                 template: "folders",
@@ -9665,7 +9997,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-f", "--from"],
-              description: "One of: (a) a starter kit identifier (starter-kit/<lang>/<name>); (b) a local project directory, a Git repository URL, or a URL referencing a .zip/.tar.gz file containing a package template; or (c) the service ID of a service created from a starter kit",
+              description:
+                "One of: (a) a starter kit identifier (starter-kit/<lang>/<name>); (b) a local project directory, a Git repository URL, or a URL referencing a .zip/.tar.gz file containing a package template; or (c) the service ID of a service created from a starter kit",
               args: {
                 name: "from",
               },
@@ -9675,12 +10008,20 @@ const completionSpec: Fig.Spec = {
               description: "Language of the package",
               args: {
                 name: "language",
-                suggestions: ["rust", "javascript", "go", "cpp", "python", "other"],
+                suggestions: [
+                  "rust",
+                  "javascript",
+                  "go",
+                  "cpp",
+                  "python",
+                  "other",
+                ],
               },
             },
             {
               name: "--tag",
-              description: "Git tag name to clone from package template repository",
+              description:
+                "Git tag name to clone from package template repository",
               hidden: true,
               args: {
                 name: "tag",
@@ -9690,7 +10031,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "install-tools",
-          description: "Download and install the tools used by `compute` subcommands (currently the Viceroy binary used by `compute serve`)",
+          description:
+            "Download and install the tools used by `compute` subcommands (currently the Viceroy binary used by `compute serve`)",
         },
         {
           name: "metadata",
@@ -9702,19 +10044,23 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--disable-build",
-              description: "Disable metadata for information regarding the time taken for builds and compilation processes",
+              description:
+                "Disable metadata for information regarding the time taken for builds and compilation processes",
             },
             {
               name: "--disable-machine",
-              description: "Disable metadata for general, non-identifying system specifications (CPU, RAM, operating system)",
+              description:
+                "Disable metadata for general, non-identifying system specifications (CPU, RAM, operating system)",
             },
             {
               name: "--disable-package",
-              description: "Disable metadata for packages and libraries utilized in your source code",
+              description:
+                "Disable metadata for packages and libraries utilized in your source code",
             },
             {
               name: "--disable-script",
-              description: "Disable metadata for script info from the fastly.toml manifest (i.e. [scripts] section)",
+              description:
+                "Disable metadata for script info from the fastly.toml manifest (i.e. [scripts] section)",
             },
             {
               name: "--enable",
@@ -9722,25 +10068,30 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--enable-build",
-              description: "Enable metadata for information regarding the time taken for builds and compilation processes",
+              description:
+                "Enable metadata for information regarding the time taken for builds and compilation processes",
             },
             {
               name: "--enable-machine",
-              description: "Enable metadata for general, non-identifying system specifications (CPU, RAM, operating system)",
+              description:
+                "Enable metadata for general, non-identifying system specifications (CPU, RAM, operating system)",
             },
             {
               name: "--enable-package",
-              description: "Enable metadata for packages and libraries utilized in your source code",
+              description:
+                "Enable metadata for packages and libraries utilized in your source code",
             },
             {
               name: "--enable-script",
-              description: "Enable metadata for script info from the fastly.toml manifest (i.e. [scripts] section)",
+              description:
+                "Enable metadata for script info from the fastly.toml manifest (i.e. [scripts] section)",
             },
           ],
         },
         {
           name: "pack",
-          description: "Package a pre-compiled Wasm binary for a Fastly Compute service",
+          description:
+            "Package a pre-compiled Wasm binary for a Fastly Compute service",
           options: [
             {
               name: ["-w", "--wasm-binary"],
@@ -9766,7 +10117,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-C", "--dir"],
-              description: "Project directory to build (default: current directory)",
+              description:
+                "Project directory to build (default: current directory)",
               args: {
                 name: "dir",
                 template: "folders",
@@ -9781,7 +10133,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--env",
-              description: "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
+              description:
+                "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
               args: {
                 name: "env",
               },
@@ -9803,7 +10156,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--metadata-filter-envvars",
-              description: "Redact specified environment variables from [scripts.env_vars] using comma-separated list",
+              description:
+                "Redact specified environment variables from [scripts.env_vars] using comma-separated list",
               args: {
                 name: "metadata-filter-envvars",
               },
@@ -9835,7 +10189,8 @@ const completionSpec: Fig.Spec = {
             serviceNameOption,
             {
               name: "--status-check-code",
-              description: "Set the expected status response for the service availability check to the root path",
+              description:
+                "Set the expected status response for the service availability check to the root path",
               args: {
                 name: "status-check-code",
               },
@@ -9846,7 +10201,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--status-check-path",
-              description: "Specify the URL path for the service availability check",
+              description:
+                "Specify the URL path for the service availability check",
               args: {
                 name: "status-check-path",
                 default: "/",
@@ -9854,7 +10210,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--status-check-timeout",
-              description: "Set a timeout (in seconds) for the service availability check",
+              description:
+                "Set a timeout (in seconds) for the service availability check",
               args: {
                 name: "status-check-timeout",
                 default: "120",
@@ -9862,14 +10219,16 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--timeout",
-              description: "Timeout, in seconds, for the build compilation step",
+              description:
+                "Timeout, in seconds, for the build compilation step",
               args: {
                 name: "timeout",
               },
             },
             {
               name: "--version",
-              description: "'latest', 'active', 'staged', or the number of a specific Fastly service version (default: the active version, or the latest version if none is active)",
+              description:
+                "'latest', 'active', 'staged', or the number of a specific Fastly service version (default: the active version, or the latest version if none is active)",
               args: {
                 name: "version",
               },
@@ -9895,7 +10254,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-C", "--dir"],
-              description: "Project directory to build (default: current directory)",
+              description:
+                "Project directory to build (default: current directory)",
               args: {
                 name: "dir",
                 template: "folders",
@@ -9903,22 +10263,26 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--env",
-              description: "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
+              description:
+                "The manifest environment config to use (e.g. 'stage' will attempt to read 'fastly.stage.toml')",
               args: {
                 name: "env",
               },
             },
             {
               name: "--experimental-enable-pushpin",
-              description: "Enable experimental Pushpin support for local testing of Fanout",
+              description:
+                "Enable experimental Pushpin support for local testing of Fanout",
             },
             {
               name: "--experimental-websockets-passthrough",
-              description: "Enable WebSocket passthrough support for local testing of WebSockets. Overrides 'local_server.websockets_passthrough.enable' from 'fastly.toml', and if not specified there, defaults to true",
+              description:
+                "Enable WebSocket passthrough support for local testing of WebSockets. Overrides 'local_server.websockets_passthrough.enable' from 'fastly.toml', and if not specified there, defaults to true",
             },
             {
               name: "--file",
-              description: "The Wasm file to run (causes build process to be skipped)",
+              description:
+                "The Wasm file to run (causes build process to be skipped)",
               args: {
                 name: "file",
                 template: "filepaths",
@@ -9941,7 +10305,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--metadata-filter-envvars",
-              description: "Redact specified environment variables from [scripts.env_vars] using comma-separated list",
+              description:
+                "Redact specified environment variables from [scripts.env_vars] using comma-separated list",
               args: {
                 name: "metadata-filter-envvars",
               },
@@ -9959,11 +10324,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--profile-guest",
-              description: "Profile the Wasm guest under Viceroy (requires Viceroy 0.9.1 or higher). View profiles at https://profiler.firefox.com/",
+              description:
+                "Profile the Wasm guest under Viceroy (requires Viceroy 0.9.1 or higher). View profiles at https://profiler.firefox.com/",
             },
             {
               name: "--profile-guest-dir",
-              description: "The directory where the per-request profiles are saved to. Defaults to guest-profiles",
+              description:
+                "The directory where the per-request profiles are saved to. Defaults to guest-profiles",
               args: {
                 name: "profile-guest-dir",
                 template: "folders",
@@ -9971,7 +10338,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--pushpin-path",
-              description: "The path to a user installed version of the Pushpin runner binary",
+              description:
+                "The path to a user installed version of the Pushpin runner binary",
               args: {
                 name: "pushpin-path",
                 template: "filepaths",
@@ -9979,14 +10347,16 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--pushpin-proxy-port",
-              description: "The port to run the Pushpin runner on. Overrides 'local_server.pushpin.proxy_port' from 'fastly.toml', and if not specified there, defaults to 7677",
+              description:
+                "The port to run the Pushpin runner on. Overrides 'local_server.pushpin.proxy_port' from 'fastly.toml', and if not specified there, defaults to 7677",
               args: {
                 name: "pushpin-proxy-port",
               },
             },
             {
               name: "--pushpin-publish-port",
-              description: "The port to run the Pushpin publish handler on. Overrides 'local_server.pushpin.publish_port' from 'fastly.toml', and if not specified there, defaults to 5561",
+              description:
+                "The port to run the Pushpin publish handler on. Overrides 'local_server.pushpin.publish_port' from 'fastly.toml', and if not specified there, defaults to 5561",
               args: {
                 name: "pushpin-publish-port",
               },
@@ -9997,25 +10367,29 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--timeout",
-              description: "Timeout, in seconds, for the build compilation step",
+              description:
+                "Timeout, in seconds, for the build compilation step",
               args: {
                 name: "timeout",
               },
             },
             {
               name: "--viceroy-args",
-              description: "Additional arguments to pass to the Viceroy binary, separated by space",
+              description:
+                "Additional arguments to pass to the Viceroy binary, separated by space",
               args: {
                 name: "viceroy-args",
               },
             },
             {
               name: "--viceroy-check",
-              description: "Force the CLI to check for a newer version of the Viceroy binary",
+              description:
+                "Force the CLI to check for a newer version of the Viceroy binary",
             },
             {
               name: "--viceroy-path",
-              description: "The path to a user installed version of the Viceroy binary",
+              description:
+                "The path to a user installed version of the Viceroy binary",
               args: {
                 name: "viceroy-path",
                 template: "filepaths",
@@ -10023,11 +10397,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--watch",
-              description: "Watch for file changes, then rebuild project and restart local server",
+              description:
+                "Watch for file changes, then rebuild project and restart local server",
             },
             {
               name: "--watch-dir",
-              description: "The directory to watch files from (can be relative or absolute). Defaults to current directory",
+              description:
+                "The directory to watch files from (can be relative or absolute). Defaults to current directory",
               args: {
                 name: "watch-dir",
                 template: "folders",
@@ -10059,7 +10435,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--env",
-              description: "The manifest environment config to validate (e.g. 'stage' will attempt to read 'fastly.stage.toml' inside the package)",
+              description:
+                "The manifest environment config to validate (e.g. 'stage' will attempt to read 'fastly.stage.toml' inside the package)",
               args: {
                 name: "env",
               },
@@ -10086,7 +10463,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-r", "--reset"],
-          description: "Reset the config to a version compatible with the current CLI version",
+          description:
+            "Reset the config to a version compatible with the current CLI version",
         },
       ],
     },
@@ -10112,10 +10490,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "delete",
           description: "Delete a config store",
-          options: [
-            jsonOption,
-            storeIdOption,
-          ],
+          options: [jsonOption, storeIdOption],
         },
         {
           name: ["describe", "get"],
@@ -10132,17 +10507,12 @@ const completionSpec: Fig.Spec = {
         {
           name: "list",
           description: "List config stores",
-          options: [
-            jsonOption,
-          ],
+          options: [jsonOption],
         },
         {
           name: "list-services",
           description: "List config store's services",
-          options: [
-            jsonOption,
-            storeIdOption,
-          ],
+          options: [jsonOption, storeIdOption],
         },
         {
           name: "update",
@@ -10181,7 +10551,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--stdin",
-              description: "Read item value from STDIN. If set, --value will be ignored",
+              description:
+                "Read item value from STDIN. If set, --value will be ignored",
             },
             storeIdOption,
             {
@@ -10203,14 +10574,16 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-b", "--batch-size"],
-              description: "Key batch processing size (ignored when set without the --all flag)",
+              description:
+                "Key batch processing size (ignored when set without the --all flag)",
               args: {
                 name: "batch-size",
               },
             },
             {
               name: ["-c", "--concurrency"],
-              description: "Control thread pool size (ignored when set without the --all flag)",
+              description:
+                "Control thread pool size (ignored when set without the --all flag)",
               args: {
                 name: "concurrency",
               },
@@ -10245,10 +10618,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "list",
           description: "List config store items",
-          options: [
-            jsonOption,
-            storeIdOption,
-          ],
+          options: [jsonOption, storeIdOption],
         },
         {
           name: "update",
@@ -10265,12 +10635,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--stdin",
-              description: "Read item value from STDIN. If set, --value will be ignored",
+              description:
+                "Read item value from STDIN. If set, --value will be ignored",
             },
             storeIdOption,
             {
               name: ["-u", "--upsert"],
-              description: "If true, insert or update an entry in a config store. Otherwise, only update",
+              description:
+                "If true, insert or update an entry in a config store. Otherwise, only update",
             },
             {
               name: "--value",
@@ -10349,7 +10721,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--calculation-method",
-                  description: "The aggregation function to apply to the dataset",
+                  description:
+                    "The aggregation function to apply to the dataset",
                   args: {
                     name: "calculation-method",
                     suggestions: ["avg", "sum", "min", "max", "latest", "p95"],
@@ -10384,7 +10757,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--metric",
-                  description: "The metrics to visualize. Valid options depend on the selected data source. Set flag multiple times to include multiple metrics",
+                  description:
+                    "The metrics to visualize. Valid options depend on the selected data source. Set flag multiple times to include multiple metrics",
                   isRequired: true,
                   isRepeatable: true,
                   args: {
@@ -10411,7 +10785,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--span",
-                  description: "The number of columns for the dashboard item to span. Dashboards are rendered on a 12-column grid on \"desktop\" screen sizes",
+                  description:
+                    'The number of columns for the dashboard item to span. Dashboards are rendered on a 12-column grid on "desktop" screen sizes',
                   args: {
                     name: "span",
                     default: "4",
@@ -10419,7 +10794,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--subtitle",
-                  description: "A human-readable subtitle for the dashboard item. Often a description of the visualization",
+                  description:
+                    "A human-readable subtitle for the dashboard item. Often a description of the visualization",
                   isRequired: true,
                   args: {
                     name: "subtitle",
@@ -10435,7 +10811,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--visualization-type",
-                  description: "The type of visualization to display. Currently, only \"chart\" is supported",
+                  description:
+                    'The type of visualization to display. Currently, only "chart" is supported',
                   args: {
                     name: "visualization-type",
                     suggestions: ["chart"],
@@ -10496,7 +10873,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--calculation-method",
-                  description: "The aggregation function to apply to the dataset",
+                  description:
+                    "The aggregation function to apply to the dataset",
                   args: {
                     name: "calculation-method",
                     suggestions: ["avg", "sum", "min", "max", "latest", "p95"],
@@ -10539,7 +10917,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--metric",
-                  description: "The metrics to visualize. Valid options depend on the selected data source. Set flag multiple times to include multiple metrics",
+                  description:
+                    "The metrics to visualize. Valid options depend on the selected data source. Set flag multiple times to include multiple metrics",
                   isRepeatable: true,
                   args: {
                     name: "metric",
@@ -10563,14 +10942,16 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--span",
-                  description: "The number of columns for the dashboard item to span. Dashboards are rendered on a 12-column grid on \"desktop\" screen sizes",
+                  description:
+                    'The number of columns for the dashboard item to span. Dashboards are rendered on a 12-column grid on "desktop" screen sizes',
                   args: {
                     name: "span",
                   },
                 },
                 {
                   name: "--subtitle",
-                  description: "A human-readable subtitle for the dashboard item. Often a description of the visualization",
+                  description:
+                    "A human-readable subtitle for the dashboard item. Often a description of the visualization",
                   args: {
                     name: "subtitle",
                   },
@@ -10584,7 +10965,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--visualization-type",
-                  description: "The type of visualization to display. Currently, only \"chart\" is supported",
+                  description:
+                    'The type of visualization to display. Currently, only "chart" is supported',
                   args: {
                     name: "visualization-type",
                     suggestions: ["chart"],
@@ -10600,7 +10982,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--cursor",
-              description: "Pagination cursor (Use 'next_cursor' value from list output)",
+              description:
+                "Pagination cursor (Use 'next_cursor' value from list output)",
               args: {
                 name: "cursor",
               },
@@ -10622,7 +11005,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--sort",
-              description: "Sort by one of the following [name, created_at, updated_at]",
+              description:
+                "Sort by one of the following [name, created_at, updated_at]",
               args: {
                 name: "sort",
               },
@@ -10662,14 +11046,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "dictionary",
-      description: "Manipulate FastlyService Dictionaries (deprecated: use 'fastly service dictionary' instead)",
+      description:
+        "Manipulate FastlyService Dictionaries (deprecated: use 'fastly service dictionary' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceDictionarySubcommands,
     },
     {
       name: "dictionary-entry",
-      description: "Manipulate Fastly edge dictionary items (deprecated: use 'fastly service dictionary-entry' instead)",
+      description:
+        "Manipulate Fastly edge dictionary items (deprecated: use 'fastly service dictionary-entry' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceDictionaryEntrySubcommands,
@@ -10688,11 +11074,17 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--algorithm",
-                  description: "The algorithm of the TSIG key. Valid values are: hmac-sha224, hmac-sha256, hmac-sha384, hmac-sha512",
+                  description:
+                    "The algorithm of the TSIG key. Valid values are: hmac-sha224, hmac-sha256, hmac-sha384, hmac-sha512",
                   isRequired: true,
                   args: {
                     name: "algorithm",
-                    suggestions: ["hmac-sha224", "hmac-sha256", "hmac-sha384", "hmac-sha512"],
+                    suggestions: [
+                      "hmac-sha224",
+                      "hmac-sha256",
+                      "hmac-sha384",
+                      "hmac-sha512",
+                    ],
                   },
                 },
                 {
@@ -10758,17 +11150,24 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--name",
-                  description: "Filter TSIG keys to only those containing the provided name",
+                  description:
+                    "Filter TSIG keys to only those containing the provided name",
                   args: {
                     name: "name",
                   },
                 },
                 {
                   name: "--sort",
-                  description: "Order in which to list results. Valid values are: name_asc, name_desc, created_at_asc, created_at_desc",
+                  description:
+                    "Order in which to list results. Valid values are: name_asc, name_desc, created_at_asc, created_at_desc",
                   args: {
                     name: "sort",
-                    suggestions: ["name_asc", "name_desc", "created_at_asc", "created_at_desc"],
+                    suggestions: [
+                      "name_asc",
+                      "name_desc",
+                      "created_at_asc",
+                      "created_at_desc",
+                    ],
                   },
                 },
               ],
@@ -10779,10 +11178,16 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--algorithm",
-                  description: "The algorithm of the TSIG key. Valid values are: hmac-sha224, hmac-sha256, hmac-sha384, hmac-sha512",
+                  description:
+                    "The algorithm of the TSIG key. Valid values are: hmac-sha224, hmac-sha256, hmac-sha384, hmac-sha512",
                   args: {
                     name: "algorithm",
-                    suggestions: ["hmac-sha224", "hmac-sha256", "hmac-sha384", "hmac-sha512"],
+                    suggestions: [
+                      "hmac-sha224",
+                      "hmac-sha256",
+                      "hmac-sha384",
+                      "hmac-sha512",
+                    ],
                   },
                 },
                 {
@@ -10836,7 +11241,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--inbound-tsig-key-id",
-                  description: "The ID of the TSIG key used to secure inbound zone transfers",
+                  description:
+                    "The ID of the TSIG key used to secure inbound zone transfers",
                   args: {
                     name: "inbound-tsig-key-id",
                   },
@@ -10844,7 +11250,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--name",
-                  description: "The domain name for your zone. Must be in FQDN format",
+                  description:
+                    "The domain name for your zone. Must be in FQDN format",
                   isRequired: true,
                   args: {
                     name: "name",
@@ -10852,7 +11259,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--primary-address",
-                  description: "An IPv4 address for the Primary DNS Server (repeatable)",
+                  description:
+                    "An IPv4 address for the Primary DNS Server (repeatable)",
                   isRepeatable: true,
                   args: {
                     name: "primary-address",
@@ -10860,7 +11268,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--primary-description",
-                  description: "A description of the Primary DNS server (requires --primary-address, repeatable)",
+                  description:
+                    "A description of the Primary DNS server (requires --primary-address, repeatable)",
                   isRepeatable: true,
                   args: {
                     name: "primary-description",
@@ -10905,17 +11314,24 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--name",
-                  description: "Filter zones to only those containing the provided name",
+                  description:
+                    "Filter zones to only those containing the provided name",
                   args: {
                     name: "name",
                   },
                 },
                 {
                   name: "--sort",
-                  description: "Order in which to list results. Valid values are: name_asc, name_desc, created_at_asc, created_at_desc",
+                  description:
+                    "Order in which to list results. Valid values are: name_asc, name_desc, created_at_asc, created_at_desc",
                   args: {
                     name: "sort",
-                    suggestions: ["name_asc", "name_desc", "created_at_asc", "created_at_desc"],
+                    suggestions: [
+                      "name_asc",
+                      "name_desc",
+                      "created_at_asc",
+                      "created_at_desc",
+                    ],
                   },
                 },
               ],
@@ -10933,7 +11349,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--inbound-tsig-key-id",
-                  description: "The ID of the TSIG key used to secure inbound zone transfers. Pass 'nil' to dissociate key",
+                  description:
+                    "The ID of the TSIG key used to secure inbound zone transfers. Pass 'nil' to dissociate key",
                   args: {
                     name: "inbound-tsig-key-id",
                   },
@@ -10941,7 +11358,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--primary-address",
-                  description: "An IPv4 address for the Primary DNS Server (repeatable)",
+                  description:
+                    "An IPv4 address for the Primary DNS Server (repeatable)",
                   isRepeatable: true,
                   args: {
                     name: "primary-address",
@@ -10949,7 +11367,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--primary-description",
-                  description: "A description of the Primary DNS server (requires --primary-address, repeatable)",
+                  description:
+                    "A description of the Primary DNS server (requires --primary-address, repeatable)",
                   isRepeatable: true,
                   args: {
                     name: "primary-description",
@@ -11036,14 +11455,16 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--cursor",
-              description: "Cursor value from the next_cursor field of a previous response, used to retrieve the next page",
+              description:
+                "Cursor value from the next_cursor field of a previous response, used to retrieve the next page",
               args: {
                 name: "cursor",
               },
             },
             {
               name: "--fqdn",
-              description: "Filters results by the FQDN using a fuzzy/partial match",
+              description:
+                "Filters results by the FQDN using a fuzzy/partial match",
               args: {
                 name: "fqdn",
               },
@@ -11093,14 +11514,16 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--routing-config-id",
-              description: "The Routing Config Identifier to associate with the domain. Pass 'nil' to remove the association",
+              description:
+                "The Routing Config Identifier to associate with the domain. Pass 'nil' to remove the association",
               args: {
                 name: "routing-config-id",
               },
             },
             {
               name: "--service-id",
-              description: "The service_id associated with your domain (omit to unset)",
+              description:
+                "The service_id associated with your domain (omit to unset)",
               args: {
                 name: "service-id",
               },
@@ -11111,14 +11534,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "healthcheck",
-      description: "Manipulate Fastly service version healthchecks (deprecated: use 'fastly service healthcheck' instead)",
+      description:
+        "Manipulate Fastly service version healthchecks (deprecated: use 'fastly service healthcheck' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceHealthcheckSubcommands,
     },
     {
       name: "imageoptimizerdefaults",
-      description: "Manipulate Fastly Image Optimizer Defaults (deprecated: use 'fastly service imageoptimizer' instead)",
+      description:
+        "Manipulate Fastly Image Optimizer Defaults (deprecated: use 'fastly service imageoptimizer' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceImageoptimizerSubcommands,
@@ -11156,7 +11581,8 @@ const completionSpec: Fig.Spec = {
                 nameOption,
                 {
                   name: "--site",
-                  description: "Datadog site, e.g. \"datadoghq.eu\" (defaults to the US site)",
+                  description:
+                    'Datadog site, e.g. "datadoghq.eu" (defaults to the US site)',
                   args: {
                     name: "site",
                   },
@@ -11185,7 +11611,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--site",
-                  description: "Datadog site, e.g. \"datadoghq.eu\" (defaults to the US site)",
+                  description:
+                    'Datadog site, e.g. "datadoghq.eu" (defaults to the US site)',
                   args: {
                     name: "site",
                   },
@@ -11201,9 +11628,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "delete",
           description: "Delete a notification integration",
-          options: [
-            jsonOption,
-          ],
+          options: [jsonOption],
           args: {
             name: "id",
             description: "Integration ID",
@@ -11212,9 +11637,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["describe", "get"],
           description: "Retrieve a single notification integration",
-          options: [
-            jsonOption,
-          ],
+          options: [jsonOption],
           args: {
             name: "id",
             description: "Integration ID",
@@ -11257,7 +11680,8 @@ const completionSpec: Fig.Spec = {
                 nameOption,
                 {
                   name: "--project-key",
-                  description: "The key of the Jira project where issues will be created",
+                  description:
+                    "The key of the Jira project where issues will be created",
                   isRequired: true,
                   args: {
                     name: "project-key",
@@ -11265,7 +11689,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--username",
-                  description: "The Jira username (email address) used to authenticate",
+                  description:
+                    "The Jira username (email address) used to authenticate",
                   isRequired: true,
                   args: {
                     name: "username",
@@ -11309,14 +11734,16 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--project-key",
-                  description: "The key of the Jira project where issues will be created",
+                  description:
+                    "The key of the Jira project where issues will be created",
                   args: {
                     name: "project-key",
                   },
                 },
                 {
                   name: "--username",
-                  description: "The Jira username (email address) used to authenticate",
+                  description:
+                    "The Jira username (email address) used to authenticate",
                   args: {
                     name: "username",
                   },
@@ -11331,11 +11758,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "jsm",
-          description: "Manage Jira Service Management notification integrations",
+          description:
+            "Manage Jira Service Management notification integrations",
           subcommands: [
             {
               name: ["create", "add"],
-              description: "Create a Jira Service Management notification integration",
+              description:
+                "Create a Jira Service Management notification integration",
               options: [
                 {
                   name: "--api-key",
@@ -11352,7 +11781,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "update",
-              description: "Update a Jira Service Management notification integration",
+              description:
+                "Update a Jira Service Management notification integration",
               options: [
                 {
                   name: "--api-key",
@@ -11429,9 +11859,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "list-types",
           description: "List supported notification integration types",
-          options: [
-            jsonOption,
-          ],
+          options: [jsonOption],
         },
         {
           name: "mail",
@@ -11440,12 +11868,11 @@ const completionSpec: Fig.Spec = {
             {
               name: "confirm",
               description: "Send a mailing list confirmation email",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
               args: {
                 name: "address",
-                description: "The mailing list address to send the confirmation email to",
+                description:
+                  "The mailing list address to send the confirmation email to",
               },
             },
             {
@@ -11831,10 +12258,9 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "get-signing-key",
-              description: "Get the signing key for a Webhook notification integration",
-              options: [
-                jsonOption,
-              ],
+              description:
+                "Get the signing key for a Webhook notification integration",
+              options: [jsonOption],
               args: {
                 name: "id",
                 description: "Integration ID",
@@ -11842,10 +12268,9 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "rotate-signing-key",
-              description: "Rotate the signing key for a Webhook notification integration",
-              options: [
-                jsonOption,
-              ],
+              description:
+                "Rotate the signing key for a Webhook notification integration",
+              options: [jsonOption],
               args: {
                 name: "id",
                 description: "Integration ID",
@@ -11923,7 +12348,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-r", "--concurrency"],
-              description: "The thread pool size (ignored when set without the --all flag)",
+              description:
+                "The thread pool size (ignored when set without the --all flag)",
               args: {
                 name: "concurrency",
               },
@@ -11931,7 +12357,8 @@ const completionSpec: Fig.Spec = {
             jsonOption,
             {
               name: ["-m", "--max-errors"],
-              description: "The number of errors to accept before stopping (ignored when set without the --all flag)",
+              description:
+                "The number of errors to accept before stopping (ignored when set without the --all flag)",
               args: {
                 name: "max-errors",
               },
@@ -11942,17 +12369,12 @@ const completionSpec: Fig.Spec = {
         {
           name: ["describe", "get"],
           description: "Describe a KV Store",
-          options: [
-            jsonOption,
-            storeIdOption,
-          ],
+          options: [jsonOption, storeIdOption],
         },
         {
           name: "list",
           description: "List KV Stores",
-          options: [
-            jsonOption,
-          ],
+          options: [jsonOption],
         },
       ],
     },
@@ -11966,19 +12388,23 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--add",
-              description: "Limit the operation to adding a new item. If an existing item with the specified key exists, the operation will fail (default: false)",
+              description:
+                "Limit the operation to adding a new item. If an existing item with the specified key exists, the operation will fail (default: false)",
             },
             {
               name: "--append",
-              description: "If an item with the specified key exists, the value provided in the operation is appended to the existing value instead of replacing it (default: false)",
+              description:
+                "If an item with the specified key exists, the value provided in the operation is appended to the existing value instead of replacing it (default: false)",
             },
             {
               name: "--background-fetch",
-              description: "If set to true, the new value for the item will not be immediately visible to other users of the KV store; they will receive the existing (stale) value while the platform updates cached copies. Setting this to true ensures that other users of the KV store will receive responses to 'get' operations for this item quickly, although they will be slightly out of date (default: false)",
+              description:
+                "If set to true, the new value for the item will not be immediately visible to other users of the KV store; they will receive the existing (stale) value while the platform updates cached copies. Setting this to true ensures that other users of the KV store will receive responses to 'get' operations for this item quickly, although they will be slightly out of date (default: false)",
             },
             {
               name: "--dir",
-              description: "Path to a directory containing individual files where the filename is the key and the file contents is the value",
+              description:
+                "Path to a directory containing individual files where the filename is the key and the file contents is the value",
               args: {
                 name: "dir",
                 template: "folders",
@@ -11986,11 +12412,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--dir-allow-hidden",
-              description: "Allow hidden files (e.g. dot files) to be included (skipped by default)",
+              description:
+                "Allow hidden files (e.g. dot files) to be included (skipped by default)",
             },
             {
               name: "--dir-concurrency",
-              description: "Limit the number of concurrent network resources allocated",
+              description:
+                "Limit the number of concurrent network resources allocated",
               args: {
                 name: "dir-concurrency",
                 default: "50",
@@ -11998,7 +12426,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--file",
-              description: "Path to a file containing individual JSON objects (e.g., {\"key\":\"...\",\"value\":\"base64_encoded_value\"}) separated by new-line delimiter",
+              description:
+                'Path to a file containing individual JSON objects (e.g., {"key":"...","value":"base64_encoded_value"}) separated by new-line delimiter',
               args: {
                 name: "file",
                 template: "filepaths",
@@ -12006,7 +12435,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--if-generation-match",
-              description: "Value which must match the current generation marker in an item for an update operation to proceed",
+              description:
+                "Value which must match the current generation marker in an item for an update operation to proceed",
               args: {
                 name: "if-generation-match",
               },
@@ -12021,14 +12451,16 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--metadata",
-              description: "An arbitrary data field which can contain up to 2000 bytes of data",
+              description:
+                "An arbitrary data field which can contain up to 2000 bytes of data",
               args: {
                 name: "metadata",
               },
             },
             {
               name: "--prepend",
-              description: "If an item with the specified key exists, the value provided in the operation is prepended to the existing value instead of replacing it (Default: false)",
+              description:
+                "If an item with the specified key exists, the value provided in the operation is prepended to the existing value instead of replacing it (Default: false)",
             },
             {
               name: "--stdin",
@@ -12054,18 +12486,21 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-r", "--concurrency"],
-              description: "The thread pool size (ignored when set without the --all flag)",
+              description:
+                "The thread pool size (ignored when set without the --all flag)",
               args: {
                 name: "concurrency",
               },
             },
             {
               name: "--force",
-              description: "Return a successful result from a 'delete' operation even if the specified key was not found",
+              description:
+                "Return a successful result from a 'delete' operation even if the specified key was not found",
             },
             {
               name: "--if-generation-match",
-              description: "Value which must match the current generation marker in an item for a delete operation to proceed",
+              description:
+                "Value which must match the current generation marker in an item for a delete operation to proceed",
               args: {
                 name: "if-generation-match",
               },
@@ -12080,7 +12515,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-m", "--max-errors"],
-              description: "The number of errors to accept before stopping (ignored when set without the --all flag)",
+              description:
+                "The number of errors to accept before stopping (ignored when set without the --all flag)",
               args: {
                 name: "max-errors",
               },
@@ -12117,7 +12553,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--if-generation-match",
-              description: "Compares if the provided generation marker matches that of the object",
+              description:
+                "Compares if the provided generation marker matches that of the object",
               args: {
                 name: "if-generation-match",
               },
@@ -12140,7 +12577,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--consistency",
-              description: "Determines accuracy of results. i.e. 'eventual' uses caching to improve performance",
+              description:
+                "Determines accuracy of results. i.e. 'eventual' uses caching to improve performance",
               args: {
                 name: "consistency",
                 suggestions: ["eventual", "strong"],
@@ -12150,7 +12588,8 @@ const completionSpec: Fig.Spec = {
             jsonOption,
             {
               name: "--prefix",
-              description: "Restrict results to items whose keys match this prefix",
+              description:
+                "Restrict results to items whose keys match this prefix",
               args: {
                 name: "prefix",
               },
@@ -12211,143 +12650,171 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "logging",
-      description: "Manipulate Fastly service version logging endpoints (deprecated: use 'fastly service logging' instead)",
+      description:
+        "Manipulate Fastly service version logging endpoints (deprecated: use 'fastly service logging' instead)",
       hidden: true,
       deprecated: true,
       subcommands: [
         {
           name: "azureblob",
-          description: "Manipulate Fastly service version Azure Blob Storage logging endpoints",
+          description:
+            "Manipulate Fastly service version Azure Blob Storage logging endpoints",
           subcommands: serviceLoggingAzureblobSubcommands,
         },
         {
           name: "bigquery",
-          description: "Manipulate Fastly service version Google BigQuery logging endpoints",
+          description:
+            "Manipulate Fastly service version Google BigQuery logging endpoints",
           subcommands: serviceLoggingBigquerySubcommands,
         },
         {
           name: "cloudfiles",
-          description: "Manipulate Fastly service version Rackspace Cloud Files logging endpoints",
+          description:
+            "Manipulate Fastly service version Rackspace Cloud Files logging endpoints",
           subcommands: serviceLoggingCloudfilesSubcommands,
         },
         {
           name: "datadog",
-          description: "Manipulate Fastly service version Datadog logging endpoints",
+          description:
+            "Manipulate Fastly service version Datadog logging endpoints",
           subcommands: serviceLoggingDatadogSubcommands,
         },
         {
           name: "digitalocean",
-          description: "Manipulate Fastly service version DigitalOcean Spaces logging endpoints",
+          description:
+            "Manipulate Fastly service version DigitalOcean Spaces logging endpoints",
           subcommands: serviceLoggingDigitaloceanSubcommands,
         },
         {
           name: "elasticsearch",
-          description: "Manipulate Fastly service version Elasticsearch logging endpoints",
+          description:
+            "Manipulate Fastly service version Elasticsearch logging endpoints",
           subcommands: serviceLoggingElasticsearchSubcommands,
         },
         {
           name: "ftp",
-          description: "Manipulate Fastly service version FTP logging endpoints",
+          description:
+            "Manipulate Fastly service version FTP logging endpoints",
           subcommands: serviceLoggingFtpSubcommands,
         },
         {
           name: "gcs",
-          description: "Manipulate Fastly service version Google Cloud Storage logging endpoints",
+          description:
+            "Manipulate Fastly service version Google Cloud Storage logging endpoints",
           subcommands: serviceLoggingGcsSubcommands,
         },
         {
           name: "googlepubsub",
-          description: "Manipulate Fastly service version Google Cloud Pub/Sub logging endpoints",
+          description:
+            "Manipulate Fastly service version Google Cloud Pub/Sub logging endpoints",
           subcommands: serviceLoggingGooglepubsubSubcommands,
         },
         {
           name: "grafanacloudlogs",
-          description: "Manipulate Fastly service version Grafana Cloud Logs logging endpoints",
+          description:
+            "Manipulate Fastly service version Grafana Cloud Logs logging endpoints",
           subcommands: serviceLoggingGrafanacloudlogsSubcommands,
         },
         {
           name: "heroku",
-          description: "Manipulate Fastly service version Heroku logging endpoints",
+          description:
+            "Manipulate Fastly service version Heroku logging endpoints",
           subcommands: serviceLoggingHerokuSubcommands,
         },
         {
           name: "honeycomb",
-          description: "Manipulate Fastly service version Honeycomb logging endpoints",
+          description:
+            "Manipulate Fastly service version Honeycomb logging endpoints",
           subcommands: serviceLoggingHoneycombSubcommands,
         },
         {
           name: "https",
-          description: "Manipulate Fastly service version HTTPS logging endpoints",
+          description:
+            "Manipulate Fastly service version HTTPS logging endpoints",
           subcommands: serviceLoggingHttpsSubcommands,
         },
         {
           name: "kafka",
-          description: "Manipulate Fastly service version Kafka logging endpoints",
+          description:
+            "Manipulate Fastly service version Kafka logging endpoints",
           subcommands: serviceLoggingKafkaSubcommands,
         },
         {
           name: "kinesis",
-          description: "Manipulate Fastly service version Amazon Kinesis logging endpoints",
+          description:
+            "Manipulate Fastly service version Amazon Kinesis logging endpoints",
           subcommands: serviceLoggingKinesisSubcommands,
         },
         {
           name: "loggly",
-          description: "Manipulate Fastly service version Loggly logging endpoints",
+          description:
+            "Manipulate Fastly service version Loggly logging endpoints",
           subcommands: serviceLoggingLogglySubcommands,
         },
         {
           name: "logshuttle",
-          description: "Manipulate Fastly service version Log Shuttle logging endpoints",
+          description:
+            "Manipulate Fastly service version Log Shuttle logging endpoints",
           subcommands: serviceLoggingLogshuttleSubcommands,
         },
         {
           name: "newrelic",
-          description: "Manipulate Fastly service version New Relic logging endpoints",
+          description:
+            "Manipulate Fastly service version New Relic logging endpoints",
           subcommands: serviceLoggingNewrelicSubcommands,
         },
         {
           name: "newrelicotlp",
-          description: "Manipulate Fastly service version New Relic OTLP logging endpoints",
+          description:
+            "Manipulate Fastly service version New Relic OTLP logging endpoints",
           subcommands: serviceLoggingNewrelicotlpSubcommands,
         },
         {
           name: "openstack",
-          description: "Manipulate Fastly service version OpenStack Swift logging endpoints",
+          description:
+            "Manipulate Fastly service version OpenStack Swift logging endpoints",
           subcommands: serviceLoggingOpenstackSubcommands,
         },
         {
           name: "papertrail",
-          description: "Manipulate Fastly service version Papertrail logging endpoints",
+          description:
+            "Manipulate Fastly service version Papertrail logging endpoints",
           subcommands: serviceLoggingPapertrailSubcommands,
         },
         {
           name: "s3",
-          description: "Manipulate Fastly service version Amazon S3 logging endpoints",
+          description:
+            "Manipulate Fastly service version Amazon S3 logging endpoints",
           subcommands: serviceLoggingS3Subcommands,
         },
         {
           name: "scalyr",
-          description: "Manipulate Fastly service version Scalyr logging endpoints",
+          description:
+            "Manipulate Fastly service version Scalyr logging endpoints",
           subcommands: serviceLoggingScalyrSubcommands,
         },
         {
           name: "sftp",
-          description: "Manipulate Fastly service version SFTP logging endpoints",
+          description:
+            "Manipulate Fastly service version SFTP logging endpoints",
           subcommands: serviceLoggingSftpSubcommands,
         },
         {
           name: "splunk",
-          description: "Manipulate Fastly service version Splunk logging endpoints",
+          description:
+            "Manipulate Fastly service version Splunk logging endpoints",
           subcommands: serviceLoggingSplunkSubcommands,
         },
         {
           name: "sumologic",
-          description: "Manipulate Fastly service version Sumo Logic logging endpoints",
+          description:
+            "Manipulate Fastly service version Sumo Logic logging endpoints",
           subcommands: serviceLoggingSumologicSubcommands,
         },
         {
           name: "syslog",
-          description: "Manipulate Fastly service version Syslog logging endpoints",
+          description:
+            "Manipulate Fastly service version Syslog logging endpoints",
           subcommands: serviceLoggingSyslogSubcommands,
         },
       ],
@@ -12386,25 +12853,17 @@ const completionSpec: Fig.Spec = {
             {
               name: "delete",
               description: "Delete an account country list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "get",
               description: "Get an account-level country list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "list",
               description: "List all country lists for your account",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "update",
@@ -12419,7 +12878,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--entries",
-                  description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                  description:
+                    "Entries for the list. Can either be a comma separated list or a path to a file",
                   args: {
                     name: "entries",
                   },
@@ -12448,7 +12908,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--name",
-                  description: "User submitted display name of a custom signal. Is immutable and must be between 3 and 25 characters",
+                  description:
+                    "User submitted display name of a custom signal. Is immutable and must be between 3 and 25 characters",
                   isRequired: true,
                   args: {
                     name: "name",
@@ -12489,9 +12950,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "list",
               description: "List all account-level custom signals",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "update",
@@ -12548,25 +13007,17 @@ const completionSpec: Fig.Spec = {
             {
               name: "delete",
               description: "Delete an account ip list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "get",
               description: "Get an account-level ip list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "list",
               description: "List all ip lists for your account",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "update",
@@ -12581,7 +13032,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--entries",
-                  description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                  description:
+                    "Entries for the list. Can either be a comma separated list or a path to a file",
                   args: {
                     name: "entries",
                   },
@@ -12603,7 +13055,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--path",
-                  description: "Path to a json file that contains the rule schema",
+                  description:
+                    "Path to a json file that contains the rule schema",
                   isRequired: true,
                   args: {
                     name: "path",
@@ -12654,7 +13107,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--enabled",
-                  description: "Filter rules based on whether the rule is enabled",
+                  description:
+                    "Filter rules based on whether the rule is enabled",
                   args: {
                     name: "enabled",
                   },
@@ -12669,7 +13123,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--path",
-                  description: "Path to a json file that contains the rule schema",
+                  description:
+                    "Path to a json file that contains the rule schema",
                   isRequired: true,
                   args: {
                     name: "path",
@@ -12717,25 +13172,17 @@ const completionSpec: Fig.Spec = {
             {
               name: "delete",
               description: "Delete an account signal list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "get",
               description: "Get an account-level signal list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "list",
               description: "List all signal lists for your account",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "update",
@@ -12750,7 +13197,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--entries",
-                  description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                  description:
+                    "Entries for the list. Can either be a comma separated list or a path to a file",
                   args: {
                     name: "entries",
                   },
@@ -12791,25 +13239,17 @@ const completionSpec: Fig.Spec = {
             {
               name: "delete",
               description: "Delete an account string list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "get",
               description: "Get an account-level string list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "list",
               description: "List all string lists for your account",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "update",
@@ -12824,7 +13264,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--entries",
-                  description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                  description:
+                    "Entries for the list. Can either be a comma separated list or a path to a file",
                   args: {
                     name: "entries",
                   },
@@ -12845,14 +13286,16 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--dimensions",
-                  description: "Comma separated list of grouping dimensions to be included in the timeseries. Allowed values are workspaces and time. (Default value is time)",
+                  description:
+                    "Comma separated list of grouping dimensions to be included in the timeseries. Allowed values are workspaces and time. (Default value is time)",
                   args: {
                     name: "dimensions",
                   },
                 },
                 {
                   name: "--from",
-                  description: "The start of a date-time range, expressed in RFC 3339 format",
+                  description:
+                    "The start of a date-time range, expressed in RFC 3339 format",
                   isRequired: true,
                   args: {
                     name: "from",
@@ -12860,7 +13303,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--granularity",
-                  description: "Level of detail of the sample size in seconds. (Default value is 86400)",
+                  description:
+                    "Level of detail of the sample size in seconds. (Default value is 86400)",
                   args: {
                     name: "granularity",
                   },
@@ -12868,7 +13312,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--metrics",
-                  description: "Comma-separated list of metrics to be included in the timeseries. Metrics can be XSS, SQLI, HTTP404, requests_total, requests_attack, requests_total_blocked, or any custom metric",
+                  description:
+                    "Comma-separated list of metrics to be included in the timeseries. Metrics can be XSS, SQLI, HTTP404, requests_total, requests_attack, requests_total_blocked, or any custom metric",
                   isRequired: true,
                   args: {
                     name: "metrics",
@@ -12876,7 +13321,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--to",
-                  description: "The end of a date-time range, expressed in RFC 3339 format",
+                  description:
+                    "The end of a date-time range, expressed in RFC 3339 format",
                   args: {
                     name: "to",
                   },
@@ -12915,25 +13361,17 @@ const completionSpec: Fig.Spec = {
             {
               name: "delete",
               description: "Delete an account wildcard list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "get",
               description: "Get an account-level wildcard list",
-              options: [
-                jsonOption,
-                listIdOption,
-              ],
+              options: [jsonOption, listIdOption],
             },
             {
               name: "list",
               description: "List all wildcard lists for your account",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "update",
@@ -12948,7 +13386,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--entries",
-                  description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                  description:
+                    "Entries for the list. Can either be a comma separated list or a path to a file",
                   args: {
                     name: "entries",
                   },
@@ -13005,28 +13444,17 @@ const completionSpec: Fig.Spec = {
                     {
                       name: "delete",
                       description: "Delete a Datadog alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "get",
                       description: "Get a Datadog alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "list",
                       description: "List Datadog alerts",
-                      options: [
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [jsonOption, workspaceIdOption],
                     },
                     {
                       name: "update",
@@ -13080,7 +13508,8 @@ const completionSpec: Fig.Spec = {
                         },
                         {
                           name: "--issue-type",
-                          description: "An optional Jira issue type associated with the ticket. (Default Task)",
+                          description:
+                            "An optional Jira issue type associated with the ticket. (Default Task)",
                           args: {
                             name: "issue-type",
                           },
@@ -13096,7 +13525,8 @@ const completionSpec: Fig.Spec = {
                         },
                         {
                           name: "--project",
-                          description: "Specifies the Jira project where the issue will be created",
+                          description:
+                            "Specifies the Jira project where the issue will be created",
                           isRequired: true,
                           args: {
                             name: "project",
@@ -13104,7 +13534,8 @@ const completionSpec: Fig.Spec = {
                         },
                         {
                           name: "--username",
-                          description: "Jira username of the user who created the ticket",
+                          description:
+                            "Jira username of the user who created the ticket",
                           isRequired: true,
                           args: {
                             name: "username",
@@ -13116,28 +13547,17 @@ const completionSpec: Fig.Spec = {
                     {
                       name: "delete",
                       description: "Delete a Jira alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "get",
                       description: "Get a Jira alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "list",
                       description: "List Jira alerts",
-                      options: [
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [jsonOption, workspaceIdOption],
                     },
                     {
                       name: "update",
@@ -13154,7 +13574,8 @@ const completionSpec: Fig.Spec = {
                         },
                         {
                           name: "--issue-type",
-                          description: "An optional Jira issue type associated with the ticket. (Default Task)",
+                          description:
+                            "An optional Jira issue type associated with the ticket. (Default Task)",
                           args: {
                             name: "issue-type",
                           },
@@ -13170,7 +13591,8 @@ const completionSpec: Fig.Spec = {
                         },
                         {
                           name: "--project",
-                          description: "Specifies the Jira project where the issue will be created",
+                          description:
+                            "Specifies the Jira project where the issue will be created",
                           isRequired: true,
                           args: {
                             name: "project",
@@ -13178,7 +13600,8 @@ const completionSpec: Fig.Spec = {
                         },
                         {
                           name: "--username",
-                          description: "Jira username of the user who created the ticket",
+                          description:
+                            "Jira username of the user who created the ticket",
                           isRequired: true,
                           args: {
                             name: "username",
@@ -13219,28 +13642,17 @@ const completionSpec: Fig.Spec = {
                     {
                       name: "delete",
                       description: "Delete a Mailing List alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "get",
                       description: "Get a Mailing List alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "list",
                       description: "List Mailing List alerts",
-                      options: [
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [jsonOption, workspaceIdOption],
                     },
                     {
                       name: "update",
@@ -13291,28 +13703,17 @@ const completionSpec: Fig.Spec = {
                     {
                       name: "delete",
                       description: "Delete a Microsoft Teams alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "get",
                       description: "Get a Microsoft Teams alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "list",
                       description: "List Microsoft Teams alerts",
-                      options: [
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [jsonOption, workspaceIdOption],
                     },
                     {
                       name: "update",
@@ -13363,28 +13764,17 @@ const completionSpec: Fig.Spec = {
                     {
                       name: "delete",
                       description: "Delete a Opsgenie alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "get",
                       description: "Get a Opsgenie alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "list",
                       description: "List Opsgenie alerts",
-                      options: [
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [jsonOption, workspaceIdOption],
                     },
                     {
                       name: "update",
@@ -13435,28 +13825,17 @@ const completionSpec: Fig.Spec = {
                     {
                       name: "delete",
                       description: "Delete a PagerDuty alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "get",
                       description: "Get a PagerDuty alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "list",
                       description: "List PagerDuty alerts",
-                      options: [
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [jsonOption, workspaceIdOption],
                     },
                     {
                       name: "update",
@@ -13507,28 +13886,17 @@ const completionSpec: Fig.Spec = {
                     {
                       name: "delete",
                       description: "Delete a Slack alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "get",
                       description: "Get a Slack alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "list",
                       description: "List Slack alerts",
-                      options: [
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [jsonOption, workspaceIdOption],
                     },
                     {
                       name: "update",
@@ -13579,46 +13947,28 @@ const completionSpec: Fig.Spec = {
                     {
                       name: "delete",
                       description: "Delete a Webhook alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "get",
                       description: "Get a Webhook alert",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "get-signing-key",
-                      description: "Retrieves details of a webhook alert signing key",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      description:
+                        "Retrieves details of a webhook alert signing key",
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "list",
                       description: "List Webhook alerts",
-                      options: [
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [jsonOption, workspaceIdOption],
                     },
                     {
                       name: "rotate-signing-key",
                       description: "Rotate webhook alert signing key",
-                      options: [
-                        alertIdOption,
-                        jsonOption,
-                        workspaceIdOption,
-                      ],
+                      options: [alertIdOption, jsonOption, workspaceIdOption],
                     },
                     {
                       name: "update",
@@ -13672,28 +14022,17 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "delete",
                   description: "Delete a workspace country list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "get",
                   description: "Get a workspace-level country list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "list",
                   description: "List all country lists for your workspace",
-                  options: [
-                    jsonOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, workspaceIdOption],
                 },
                 {
                   name: "update",
@@ -13708,7 +14047,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--entries",
-                      description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                      description:
+                        "Entries for the list. Can either be a comma separated list or a path to a file",
                       args: {
                         name: "entries",
                       },
@@ -13726,14 +14066,16 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--attackThresholds",
-                  description: "Attack threshold parameters for system site alerts. Each threshold value is the number of attack signals per IP address that must be detected during the interval before the related IP address is flagged. Input accepted as colon separated string: Immediate:OneMinute:TenMinutes:OneHour",
+                  description:
+                    "Attack threshold parameters for system site alerts. Each threshold value is the number of attack signals per IP address that must be detected during the interval before the related IP address is flagged. Input accepted as colon separated string: Immediate:OneMinute:TenMinutes:OneHour",
                   args: {
                     name: "attackThresholds",
                   },
                 },
                 {
                   name: "--autoEnableNewVirtualPatches",
-                  description: "Automatically enable, in block mode, virtual patches released after this setting is enabled. Virtual patches released before it was enabled are not changed. Use --no-autoEnableNewVirtualPatches to disable",
+                  description:
+                    "Automatically enable, in block mode, virtual patches released after this setting is enabled. Virtual patches released before it was enabled are not changed. Use --no-autoEnableNewVirtualPatches to disable",
                 },
                 {
                   name: "--blockingMode",
@@ -13745,21 +14087,24 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--clientIPHeaders",
-                  description: "Specify the request header containing the client IP address. Input accepted as colon separated string",
+                  description:
+                    "Specify the request header containing the client IP address. Input accepted as colon separated string",
                   args: {
                     name: "clientIPHeaders",
                   },
                 },
                 {
                   name: "--defaultBlockingCode",
-                  description: "Default status code that is returned when a request to your web application is blocked",
+                  description:
+                    "Default status code that is returned when a request to your web application is blocked",
                   args: {
                     name: "defaultBlockingCode",
                   },
                 },
                 {
                   name: "--defaultRedirectURL",
-                  description: "Redirect url to be used if code 301 or 302 is used",
+                  description:
+                    "Redirect url to be used if code 301 or 302 is used",
                   args: {
                     name: "defaultRedirectURL",
                   },
@@ -13774,7 +14119,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--ipAnonymization",
-                  description: "Agents will anonymize IP addresses according to the option selected",
+                  description:
+                    "Agents will anonymize IP addresses according to the option selected",
                   args: {
                     name: "ipAnonymization",
                   },
@@ -13800,7 +14146,8 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--description",
-                      description: "User submitted description of a custom signal",
+                      description:
+                        "User submitted description of a custom signal",
                       args: {
                         name: "description",
                       },
@@ -13808,7 +14155,8 @@ const completionSpec: Fig.Spec = {
                     jsonOption,
                     {
                       name: "--name",
-                      description: "User submitted display name of a custom signal. Is immutable and must be between 3 and 25 characters",
+                      description:
+                        "User submitted display name of a custom signal. Is immutable and must be between 3 and 25 characters",
                       isRequired: true,
                       args: {
                         name: "name",
@@ -13816,7 +14164,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--workspace-id",
-                      description: "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
+                      description:
+                        "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
                       isRequired: true,
                       args: {
                         name: "workspace-id",
@@ -13839,7 +14188,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--workspace-id",
-                      description: "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
+                      description:
+                        "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
                       isRequired: true,
                       args: {
                         name: "workspace-id",
@@ -13862,7 +14212,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--workspace-id",
-                      description: "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
+                      description:
+                        "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
                       isRequired: true,
                       args: {
                         name: "workspace-id",
@@ -13877,7 +14228,8 @@ const completionSpec: Fig.Spec = {
                     jsonOption,
                     {
                       name: "--workspace-id",
-                      description: "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
+                      description:
+                        "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
                       isRequired: true,
                       args: {
                         name: "workspace-id",
@@ -13891,7 +14243,8 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--description",
-                      description: "User submitted description of a custom signal",
+                      description:
+                        "User submitted description of a custom signal",
                       isRequired: true,
                       args: {
                         name: "description",
@@ -13908,7 +14261,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--workspace-id",
-                      description: "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
+                      description:
+                        "Alphanumeric string identifying the NGWAF Workspace (falls back to FASTLY_WORKSPACE_ID)",
                       isRequired: true,
                       args: {
                         name: "workspace-id",
@@ -13979,28 +14333,17 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "delete",
                   description: "Delete an account ip list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "get",
                   description: "Get a workspace-level ip list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "list",
                   description: "List all ip lists for your workspace",
-                  options: [
-                    jsonOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, workspaceIdOption],
                 },
                 {
                   name: "update",
@@ -14015,7 +14358,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--entries",
-                      description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                      description:
+                        "Entries for the list. Can either be a comma separated list or a path to a file",
                       args: {
                         name: "entries",
                       },
@@ -14030,9 +14374,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "list",
               description: "List all workspaces",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
             {
               name: "redaction",
@@ -14044,7 +14386,8 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--field",
-                      description: "The name of the field that should be redacted",
+                      description:
+                        "The name of the field that should be redacted",
                       isRequired: true,
                       args: {
                         name: "field",
@@ -14115,7 +14458,8 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--field",
-                      description: "The name of the field that should be redacted",
+                      description:
+                        "The name of the field that should be redacted",
                       args: {
                         name: "field",
                       },
@@ -14123,7 +14467,8 @@ const completionSpec: Fig.Spec = {
                     jsonOption,
                     {
                       name: "--redaction-id",
-                      description: "A base62-encoded representation of a UUID used to uniquely identify a redaction",
+                      description:
+                        "A base62-encoded representation of a UUID used to uniquely identify a redaction",
                       isRequired: true,
                       args: {
                         name: "redaction-id",
@@ -14152,7 +14497,8 @@ const completionSpec: Fig.Spec = {
                     jsonOption,
                     {
                       name: "--path",
-                      description: "Path to a json file that contains the rule schema",
+                      description:
+                        "Path to a json file that contains the rule schema",
                       isRequired: true,
                       args: {
                         name: "path",
@@ -14207,7 +14553,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--enabled",
-                      description: "Filter rules based on whether the rule is enabled",
+                      description:
+                        "Filter rules based on whether the rule is enabled",
                       args: {
                         name: "enabled",
                       },
@@ -14223,7 +14570,8 @@ const completionSpec: Fig.Spec = {
                     jsonOption,
                     {
                       name: "--path",
-                      description: "Path to a json file that contains the rule schema",
+                      description:
+                        "Path to a json file that contains the rule schema",
                       isRequired: true,
                       args: {
                         name: "path",
@@ -14273,28 +14621,17 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "delete",
                   description: "Delete a workspace signal list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "get",
                   description: "Get a workspace-level signal list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "list",
                   description: "List all signal lists for your workspace",
-                  options: [
-                    jsonOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, workspaceIdOption],
                 },
                 {
                   name: "update",
@@ -14309,7 +14646,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--entries",
-                      description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                      description:
+                        "Entries for the list. Can either be a comma separated list or a path to a file",
                       args: {
                         name: "entries",
                       },
@@ -14352,28 +14690,17 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "delete",
                   description: "Delete a workspace string list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "get",
                   description: "Get a workspace-level string list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "list",
                   description: "List all string lists for your workspace",
-                  options: [
-                    jsonOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, workspaceIdOption],
                 },
                 {
                   name: "update",
@@ -14388,7 +14715,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--entries",
-                      description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                      description:
+                        "Entries for the list. Can either be a comma separated list or a path to a file",
                       args: {
                         name: "entries",
                       },
@@ -14410,7 +14738,8 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--action",
-                      description: "The action to take when the threshold is exceeded. [block, log]",
+                      description:
+                        "The action to take when the threshold is exceeded. [block, log]",
                       isRequired: true,
                       args: {
                         name: "action",
@@ -14418,7 +14747,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--do-not-notify",
-                      description: "Whether to silence notifications when action is taken. [true, false]",
+                      description:
+                        "Whether to silence notifications when action is taken. [true, false]",
                       isRequired: true,
                       args: {
                         name: "do-not-notify",
@@ -14426,7 +14756,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--duration",
-                      description: "The duration the action is in place in seconds. Default duration is 86,400 seconds (1 day)",
+                      description:
+                        "The duration the action is in place in seconds. Default duration is 86,400 seconds (1 day)",
                       isRequired: true,
                       args: {
                         name: "duration",
@@ -14434,7 +14765,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--enabled",
-                      description: "Whether the threshold is active. [true, false]",
+                      description:
+                        "Whether the threshold is active. [true, false]",
                       isRequired: true,
                       args: {
                         name: "enabled",
@@ -14442,7 +14774,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--interval",
-                      description: "The threshold interval in seconds. The default interval is 3600 seconds (1 hour)",
+                      description:
+                        "The threshold interval in seconds. The default interval is 3600 seconds (1 hour)",
                       isRequired: true,
                       args: {
                         name: "interval",
@@ -14451,7 +14784,8 @@ const completionSpec: Fig.Spec = {
                     jsonOption,
                     {
                       name: "--limit",
-                      description: "The threshold limit. Input must be between 1 and 10000. Default limit is 10",
+                      description:
+                        "The threshold limit. Input must be between 1 and 10000. Default limit is 10",
                       isRequired: true,
                       args: {
                         name: "limit",
@@ -14459,7 +14793,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--name",
-                      description: "User submitted display name of a signal threshold. Input must be between 3 and 50 characters",
+                      description:
+                        "User submitted display name of a signal threshold. Input must be between 3 and 50 characters",
                       isRequired: true,
                       args: {
                         name: "name",
@@ -14467,7 +14802,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--signal",
-                      description: "The name of the signal this threshold is acting on",
+                      description:
+                        "The name of the signal this threshold is acting on",
                       isRequired: true,
                       args: {
                         name: "signal",
@@ -14511,10 +14847,7 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "list",
                   description: "List workspace thresholds",
-                  options: [
-                    jsonOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, workspaceIdOption],
                 },
                 {
                   name: "update",
@@ -14522,35 +14855,40 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--action",
-                      description: "The action to take when the threshold is exceeded. [block, log]",
+                      description:
+                        "The action to take when the threshold is exceeded. [block, log]",
                       args: {
                         name: "action",
                       },
                     },
                     {
                       name: "--do-not-notify",
-                      description: "Whether to silence notifications when action is taken. [true, false]",
+                      description:
+                        "Whether to silence notifications when action is taken. [true, false]",
                       args: {
                         name: "do-not-notify",
                       },
                     },
                     {
                       name: "--duration",
-                      description: "The duration the action is in place in seconds. Default duration is 86,400 seconds (1 day)",
+                      description:
+                        "The duration the action is in place in seconds. Default duration is 86,400 seconds (1 day)",
                       args: {
                         name: "duration",
                       },
                     },
                     {
                       name: "--enabled",
-                      description: "Whether the threshold is active. [true, false]",
+                      description:
+                        "Whether the threshold is active. [true, false]",
                       args: {
                         name: "enabled",
                       },
                     },
                     {
                       name: "--interval",
-                      description: "The threshold interval in seconds. The default interval is 3600 seconds (1 hour)",
+                      description:
+                        "The threshold interval in seconds. The default interval is 3600 seconds (1 hour)",
                       args: {
                         name: "interval",
                       },
@@ -14558,21 +14896,24 @@ const completionSpec: Fig.Spec = {
                     jsonOption,
                     {
                       name: "--limit",
-                      description: "The threshold limit. Input must be between 1 and 10000. Default limit is 10",
+                      description:
+                        "The threshold limit. Input must be between 1 and 10000. Default limit is 10",
                       args: {
                         name: "limit",
                       },
                     },
                     {
                       name: "--name",
-                      description: "User submitted display name of a signal threshold. Input must be between 3 and 50 characters",
+                      description:
+                        "User submitted display name of a signal threshold. Input must be between 3 and 50 characters",
                       args: {
                         name: "name",
                       },
                     },
                     {
                       name: "--signal",
-                      description: "The name of the signal this threshold is acting on",
+                      description:
+                        "The name of the signal this threshold is acting on",
                       args: {
                         name: "signal",
                       },
@@ -14600,7 +14941,8 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--from",
-                      description: "The start of a date-time range, expressed in RFC 3339 format",
+                      description:
+                        "The start of a date-time range, expressed in RFC 3339 format",
                       isRequired: true,
                       args: {
                         name: "from",
@@ -14608,7 +14950,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--granularity",
-                      description: "Level of detail of the sample size in seconds (Default value is 86400)",
+                      description:
+                        "Level of detail of the sample size in seconds (Default value is 86400)",
                       args: {
                         name: "granularity",
                       },
@@ -14616,7 +14959,8 @@ const completionSpec: Fig.Spec = {
                     jsonOption,
                     {
                       name: "--metrics",
-                      description: "Comma-separated list of metrics to be included in the timeseries. Metrics can be XSS, SQLI, HTTP404, requests_total, requests_attack, requests_total_blocked, or any custom metric",
+                      description:
+                        "Comma-separated list of metrics to be included in the timeseries. Metrics can be XSS, SQLI, HTTP404, requests_total, requests_attack, requests_total_blocked, or any custom metric",
                       isRequired: true,
                       args: {
                         name: "metrics",
@@ -14624,7 +14968,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--to",
-                      description: "The end of a date-time range, expressed in RFC 3339 format",
+                      description:
+                        "The end of a date-time range, expressed in RFC 3339 format",
                       args: {
                         name: "to",
                       },
@@ -14640,14 +14985,16 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--attackThresholds",
-                  description: "Attack threshold parameters for system site alerts. Each threshold value is the number of attack signals per IP address that must be detected during the interval before the related IP address is flagged. Input accepted as colon separated string: Immediate:OneMinute:TenMinutes:OneHour",
+                  description:
+                    "Attack threshold parameters for system site alerts. Each threshold value is the number of attack signals per IP address that must be detected during the interval before the related IP address is flagged. Input accepted as colon separated string: Immediate:OneMinute:TenMinutes:OneHour",
                   args: {
                     name: "attackThresholds",
                   },
                 },
                 {
                   name: "--autoEnableNewVirtualPatches",
-                  description: "Automatically enable, in block mode, virtual patches released after this setting is enabled. Virtual patches released before it was enabled are not changed. Use --no-autoEnableNewVirtualPatches to disable",
+                  description:
+                    "Automatically enable, in block mode, virtual patches released after this setting is enabled. Virtual patches released before it was enabled are not changed. Use --no-autoEnableNewVirtualPatches to disable",
                 },
                 {
                   name: "--blockingMode",
@@ -14658,21 +15005,24 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--clientIPHeaders",
-                  description: "Specify the request header containing the client IP address. Input accepted as colon separated string",
+                  description:
+                    "Specify the request header containing the client IP address. Input accepted as colon separated string",
                   args: {
                     name: "clientIPHeaders",
                   },
                 },
                 {
                   name: "--defaultBlockingCode",
-                  description: "Default status code that is returned when a request to your web application is blocked",
+                  description:
+                    "Default status code that is returned when a request to your web application is blocked",
                   args: {
                     name: "defaultBlockingCode",
                   },
                 },
                 {
                   name: "--defaultRedirectURL",
-                  description: "Redirect url to be used if code 301 or 302 is used",
+                  description:
+                    "Redirect url to be used if code 301 or 302 is used",
                   args: {
                     name: "defaultRedirectURL",
                   },
@@ -14686,7 +15036,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--ipAnonymization",
-                  description: "Agents will anonymize IP addresses according to the option selected",
+                  description:
+                    "Agents will anonymize IP addresses according to the option selected",
                   args: {
                     name: "ipAnonymization",
                   },
@@ -14757,7 +15108,8 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--enabled",
-                      description: "Specify the toggle status indicator of the virtual patch",
+                      description:
+                        "Specify the toggle status indicator of the virtual patch",
                       args: {
                         name: "enabled",
                       },
@@ -14765,7 +15117,8 @@ const completionSpec: Fig.Spec = {
                     jsonOption,
                     {
                       name: "--mode",
-                      description: "Specify the action to take when a signal for virtual patch is detected",
+                      description:
+                        "Specify the action to take when a signal for virtual patch is detected",
                       args: {
                         name: "mode",
                       },
@@ -14821,28 +15174,17 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "delete",
                   description: "Delete a workspace wildcard list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "get",
                   description: "Get a workspace-level wildcard list",
-                  options: [
-                    jsonOption,
-                    listIdOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, listIdOption, workspaceIdOption],
                 },
                 {
                   name: "list",
                   description: "List all wildcard lists for your workspace",
-                  options: [
-                    jsonOption,
-                    workspaceIdOption,
-                  ],
+                  options: [jsonOption, workspaceIdOption],
                 },
                 {
                   name: "update",
@@ -14857,7 +15199,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--entries",
-                      description: "Entries for the list. Can either be a comma separated list or a path to a file",
+                      description:
+                        "Entries for the list. Can either be a comma separated list or a path to a file",
                       args: {
                         name: "entries",
                       },
@@ -14887,7 +15230,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--bucket",
-                  description: "Bucket to be associated with the access key. Set flag multiple times to include multiple buckets. If omitted, all buckets are associated",
+                  description:
+                    "Bucket to be associated with the access key. Set flag multiple times to include multiple buckets. If omitted, all buckets are associated",
                   isRepeatable: true,
                   args: {
                     name: "bucket",
@@ -14904,7 +15248,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--permission",
-                  description: "Permissions to be given to the access key (read-write-admin, read-only-admin, read-write-objects, read-only-objects)",
+                  description:
+                    "Permissions to be given to the access key (read-write-admin, read-only-admin, read-write-objects, read-only-objects)",
                   isRequired: true,
                   args: {
                     name: "permission",
@@ -14945,9 +15290,7 @@ const completionSpec: Fig.Spec = {
             {
               name: ["list", "list-access-keys"],
               description: "List all access keys",
-              options: [
-                jsonOption,
-              ],
+              options: [jsonOption],
             },
           ],
         },
@@ -14959,7 +15302,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "products",
-      description: "Enable, disable, and check the enablement status of products",
+      description:
+        "Enable, disable, and check the enablement status of products",
       options: [
         {
           name: "--disable",
@@ -15004,13 +15348,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "profile",
-      description: "Manage user profiles (deprecated: use 'fastly auth' instead)",
+      description:
+        "Manage user profiles (deprecated: use 'fastly auth' instead)",
       hidden: true,
       deprecated: true,
       subcommands: [
         {
           name: "create",
-          description: "Create user profile (deprecated: use 'fastly auth login' or 'fastly auth add' instead)",
+          description:
+            "Create user profile (deprecated: use 'fastly auth login' or 'fastly auth add' instead)",
           options: [
             {
               name: "--sso",
@@ -15026,7 +15372,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "delete",
-          description: "Delete user profile (deprecated: use 'fastly auth delete' instead)",
+          description:
+            "Delete user profile (deprecated: use 'fastly auth delete' instead)",
           args: {
             name: "profile",
             description: "Profile to delete",
@@ -15034,14 +15381,14 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "list",
-          description: "List user profiles (deprecated: use 'fastly auth list' instead)",
-          options: [
-            jsonOption,
-          ],
+          description:
+            "List user profiles (deprecated: use 'fastly auth list' instead)",
+          options: [jsonOption],
         },
         {
           name: "switch",
-          description: "Switch user profile (deprecated: use 'fastly auth use' instead)",
+          description:
+            "Switch user profile (deprecated: use 'fastly auth use' instead)",
           args: {
             name: "profile",
             description: "Profile to switch to",
@@ -15049,11 +15396,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "token",
-          description: "Print API token (deprecated: use 'fastly auth show' instead)",
+          description:
+            "Print API token (deprecated: use 'fastly auth show' instead)",
           options: [
             {
               name: "--ttl",
-              description: "Amount of time for which the token must be valid (in seconds 's', minutes 'm', or hours 'h')",
+              description:
+                "Amount of time for which the token must be valid (in seconds 's', minutes 'm', or hours 'h')",
               args: {
                 name: "ttl",
               },
@@ -15067,7 +15416,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "update",
-          description: "Update user profile (deprecated: use 'fastly auth login' or 'fastly auth add' instead)",
+          description:
+            "Update user profile (deprecated: use 'fastly auth login' or 'fastly auth add' instead)",
           options: [
             {
               name: "--sso",
@@ -15076,7 +15426,8 @@ const completionSpec: Fig.Spec = {
           ],
           args: {
             name: "profile",
-            description: "Profile to update (defaults to the currently active profile)",
+            description:
+              "Profile to update (defaults to the currently active profile)",
             isOptional: true,
           },
         },
@@ -15084,7 +15435,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "purge",
-      description: "Invalidate objects in the Fastly cache (deprecated: use 'fastly service purge' instead)",
+      description:
+        "Invalidate objects in the Fastly cache (deprecated: use 'fastly service purge' instead)",
       hidden: true,
       deprecated: true,
       options: [
@@ -15094,7 +15446,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--file",
-          description: "Purge a service of a newline delimited list of Surrogate Keys",
+          description:
+            "Purge a service of a newline delimited list of Surrogate Keys",
           args: {
             name: "file",
             template: "filepaths",
@@ -15111,7 +15464,8 @@ const completionSpec: Fig.Spec = {
         serviceNameOption,
         {
           name: "--soft",
-          description: "A 'soft' purge marks affected objects as stale rather than making them inaccessible",
+          description:
+            "A 'soft' purge marks affected objects as stale rather than making them inaccessible",
         },
         {
           name: "--url",
@@ -15124,14 +15478,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "rate-limit",
-      description: "Manipulate rate-limiters of the Fastly API and web interface (deprecated: use 'fastly service rate-limit' instead)",
+      description:
+        "Manipulate rate-limiters of the Fastly API and web interface (deprecated: use 'fastly service rate-limit' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceRateLimitSubcommands,
     },
     {
       name: "resource-link",
-      description: "Manipulate Fastly service resource links (deprecated: use 'fastly service resource-link' instead)",
+      description:
+        "Manipulate Fastly service resource links (deprecated: use 'fastly service resource-link' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceResourceLinkSubcommands,
@@ -15156,18 +15512,19 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "deactivate",
-          description: "Deactivate a routing config, leaving it without an active version. This does not unlink the routing config from any domains it's associated with; unset those manually with 'fastly domain update --routing-config-id nil'",
-          options: [
-            routingConfigIdOption,
-          ],
+          description:
+            "Deactivate a routing config, leaving it without an active version. This does not unlink the routing config from any domains it's associated with; unset those manually with 'fastly domain update --routing-config-id nil'",
+          options: [routingConfigIdOption],
         },
         {
           name: ["delete", "remove"],
-          description: "Delete a routing config. This is rejected if the routing config is still associated with any domain, regardless of --force; unset those associations first with 'fastly domain update --routing-config-id nil'",
+          description:
+            "Delete a routing config. This is rejected if the routing config is still associated with any domain, regardless of --force; unset those associations first with 'fastly domain update --routing-config-id nil'",
           options: [
             {
               name: "--force",
-              description: "Delete the routing config even if it has an active version, bypassing the active-version check. You still can't delete a routing config that's linked to a domain",
+              description:
+                "Delete the routing config even if it has an active version, bypassing the active-version check. You still can't delete a routing config that's linked to a domain",
             },
             routingConfigIdOption,
           ],
@@ -15175,17 +15532,12 @@ const completionSpec: Fig.Spec = {
         {
           name: ["deploy", "activate"],
           description: "Activate the draft version of a routing config",
-          options: [
-            routingConfigIdOption,
-          ],
+          options: [routingConfigIdOption],
         },
         {
           name: ["describe", "get"],
           description: "Show detailed information about a routing config",
-          options: [
-            jsonOption,
-            routingConfigIdOption,
-          ],
+          options: [jsonOption, routingConfigIdOption],
         },
         {
           name: "draft",
@@ -15193,26 +15545,25 @@ const completionSpec: Fig.Spec = {
           subcommands: [
             {
               name: ["delete", "discard"],
-              description: "Discard a routing config's draft version, reverting it back to the active version",
-              options: [
-                routingConfigIdOption,
-              ],
+              description:
+                "Discard a routing config's draft version, reverting it back to the active version",
+              options: [routingConfigIdOption],
             },
             {
               name: "diff",
-              description: "Show the differences between a routing config's active and draft versions",
-              options: [
-                jsonOption,
-                routingConfigIdOption,
-              ],
+              description:
+                "Show the differences between a routing config's active and draft versions",
+              options: [jsonOption, routingConfigIdOption],
             },
             {
               name: "update",
-              description: "Set the comment on a routing config's draft version",
+              description:
+                "Set the comment on a routing config's draft version",
               options: [
                 {
                   name: "--comment",
-                  description: "A descriptive note about the changes made in the draft",
+                  description:
+                    "A descriptive note about the changes made in the draft",
                   isRequired: true,
                   args: {
                     name: "comment",
@@ -15237,7 +15588,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--state",
-              description: "Filter results by lifecycle state. Set flag multiple times to filter by multiple states",
+              description:
+                "Filter results by lifecycle state. Set flag multiple times to filter by multiple states",
               isRepeatable: true,
               args: {
                 name: "state",
@@ -15255,7 +15607,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--path",
-                  description: "The URL path pattern (max 2048 characters, starts with \"/\")",
+                  description:
+                    'The URL path pattern (max 2048 characters, starts with "/")',
                   isRequired: true,
                   args: {
                     name: "path",
@@ -15267,19 +15620,12 @@ const completionSpec: Fig.Spec = {
             {
               name: ["delete", "remove"],
               description: "Delete a path",
-              options: [
-                pathIdOption,
-                routingConfigIdOption,
-              ],
+              options: [pathIdOption, routingConfigIdOption],
             },
             {
               name: ["describe", "get"],
               description: "Show detailed information about a path",
-              options: [
-                jsonOption,
-                pathIdOption,
-                routingConfigIdOption,
-              ],
+              options: [jsonOption, pathIdOption, routingConfigIdOption],
             },
             {
               name: "list",
@@ -15288,7 +15634,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--match",
-                  description: "Filters results using the given path pattern matching strategy",
+                  description:
+                    "Filters results using the given path pattern matching strategy",
                   args: {
                     name: "match",
                   },
@@ -15312,7 +15659,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "rule",
-              description: "Manipulate rules within a path of a Fastly routing config",
+              description:
+                "Manipulate rules within a path of a Fastly routing config",
               subcommands: [
                 {
                   name: ["create", "add"],
@@ -15320,7 +15668,8 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--file",
-                      description: "Path to a JSON file describing the rule, e.g. {\"action\": {\"type\": \"service\", \"value\": \"...\"}, \"conditions\": [...]}. Omit \"conditions\" to create the default (catch-all) rule for the path",
+                      description:
+                        'Path to a JSON file describing the rule, e.g. {"action": {"type": "service", "value": "..."}, "conditions": [...]}. Omit "conditions" to create the default (catch-all) rule for the path',
                       isRequired: true,
                       args: {
                         name: "file",
@@ -15386,7 +15735,8 @@ const completionSpec: Fig.Spec = {
                   options: [
                     {
                       name: "--file",
-                      description: "Path to a JSON file describing the fields to update, e.g. {\"action\": {\"type\": \"service\", \"value\": \"...\"}, \"conditions\": [...]}. A field omitted from the JSON is left unchanged; set \"conditions\" to an empty array to turn the rule into the default (catch-all) rule for its path",
+                      description:
+                        'Path to a JSON file describing the fields to update, e.g. {"action": {"type": "service", "value": "..."}, "conditions": [...]}. A field omitted from the JSON is left unchanged; set "conditions" to an empty array to turn the rule into the default (catch-all) rule for its path',
                       isRequired: true,
                       args: {
                         name: "file",
@@ -15413,7 +15763,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--path",
-                  description: "The URL path pattern (max 2048 characters, starts with \"/\")",
+                  description:
+                    'The URL path pattern (max 2048 characters, starts with "/")',
                   args: {
                     name: "path",
                   },
@@ -15426,7 +15777,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "version",
-          description: "Manipulate a Fastly routing config's historical versions",
+          description:
+            "Manipulate a Fastly routing config's historical versions",
           subcommands: [
             {
               name: "activate",
@@ -15445,10 +15797,9 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "delete-inactive",
-              description: "Permanently delete all inactive versions of a routing config. This destroys rollback history and cannot be undone",
-              options: [
-                routingConfigIdOption,
-              ],
+              description:
+                "Permanently delete all inactive versions of a routing config. This destroys rollback history and cannot be undone",
+              options: [routingConfigIdOption],
             },
             {
               name: "list",
@@ -15491,18 +15842,12 @@ const completionSpec: Fig.Spec = {
         {
           name: "delete",
           description: "Delete a secret store",
-          options: [
-            jsonOption,
-            storeIdOption,
-          ],
+          options: [jsonOption, storeIdOption],
         },
         {
           name: ["describe", "get"],
           description: "Retrieve a single secret store",
-          options: [
-            jsonOption,
-            storeIdOption,
-          ],
+          options: [jsonOption, storeIdOption],
         },
         {
           name: "list",
@@ -15510,7 +15855,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: ["-c", "--cursor"],
-              description: "Pagination cursor (Use 'next_cursor' value from list output)",
+              description:
+                "Pagination cursor (Use 'next_cursor' value from list output)",
               args: {
                 name: "cursor",
               },
@@ -15555,7 +15901,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--recreate",
-              description: "Recreate secret by name (errors if secret doesn't already exist)",
+              description:
+                "Recreate secret by name (errors if secret doesn't already exist)",
             },
             {
               name: "--recreate-allow",
@@ -15606,7 +15953,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: ["-c", "--cursor"],
-              description: "Pagination cursor (Use 'next_cursor' value from list output)",
+              description:
+                "Pagination cursor (Use 'next_cursor' value from list output)",
               args: {
                 name: "cursor",
               },
@@ -15674,7 +16022,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--type",
-              description: "Service type. Can be one of \"wasm\" or \"vcl\", defaults to \"vcl\"",
+              description:
+                'Service type. Can be one of "wasm" or "vcl", defaults to "vcl"',
               args: {
                 name: "type",
                 suggestions: ["wasm", "vcl"],
@@ -15698,11 +16047,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["describe", "get"],
           description: "Show detailed information about a Fastly service",
-          options: [
-            jsonOption,
-            serviceIdOption,
-            serviceNameOption,
-          ],
+          options: [jsonOption, serviceIdOption, serviceNameOption],
         },
         {
           name: "dictionary",
@@ -15756,7 +16101,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["describe", "get"],
-              description: "Show detailed information about a domain on a Fastly service version",
+              description:
+                "Show detailed information about a domain on a Fastly service version",
               options: [
                 jsonOption,
                 {
@@ -15810,15 +16156,18 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "validate",
-              description: "Checks the status of a specific domain's DNS record for a Service Version",
+              description:
+                "Checks the status of a specific domain's DNS record for a Service Version",
               options: [
                 {
                   name: ["-a", "--all"],
-                  description: "Checks the status of all domains' DNS records for a Service Version",
+                  description:
+                    "Checks the status of all domains' DNS records for a Service Version",
                 },
                 {
                   name: ["-n", "--name"],
-                  description: "The name of the domain associated with this service",
+                  description:
+                    "The name of the domain associated with this service",
                   args: {
                     name: "name",
                   },
@@ -15837,7 +16186,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "imageoptimizer",
-          description: "Manipulate Fastly service Image Optimizer default settings",
+          description:
+            "Manipulate Fastly service Image Optimizer default settings",
           subcommands: serviceImageoptimizerSubcommands,
         },
         {
@@ -15871,22 +16221,26 @@ const completionSpec: Fig.Spec = {
           subcommands: [
             {
               name: "azureblob",
-              description: "Manipulate Fastly service version Azure Blob Storage logging endpoints",
+              description:
+                "Manipulate Fastly service version Azure Blob Storage logging endpoints",
               subcommands: serviceLoggingAzureblobSubcommands,
             },
             {
               name: "bigquery",
-              description: "Manipulate Fastly service version BigQuery logging endpoints",
+              description:
+                "Manipulate Fastly service version BigQuery logging endpoints",
               subcommands: serviceLoggingBigquerySubcommands,
             },
             {
               name: "cloudfiles",
-              description: "Manipulate Fastly service version Cloudfiles logging endpoints",
+              description:
+                "Manipulate Fastly service version Cloudfiles logging endpoints",
               subcommands: serviceLoggingCloudfilesSubcommands,
             },
             {
               name: "datadog",
-              description: "Manipulate Fastly service version Datadog logging endpoints",
+              description:
+                "Manipulate Fastly service version Datadog logging endpoints",
               subcommands: serviceLoggingDatadogSubcommands,
             },
             {
@@ -15928,21 +16282,25 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "digitalocean",
-              description: "Manipulate Fastly service version DigitalOcean Spaces logging endpoints",
+              description:
+                "Manipulate Fastly service version DigitalOcean Spaces logging endpoints",
               subcommands: serviceLoggingDigitaloceanSubcommands,
             },
             {
               name: "elasticsearch",
-              description: "Manipulate Fastly service version Elasticsearch logging endpoints",
+              description:
+                "Manipulate Fastly service version Elasticsearch logging endpoints",
               subcommands: serviceLoggingElasticsearchSubcommands,
             },
             {
               name: "fos",
-              description: "Manipulate Fastly service version Fastly Object Storage logging endpoints",
+              description:
+                "Manipulate Fastly service version Fastly Object Storage logging endpoints",
               subcommands: [
                 {
                   name: ["create", "add"],
-                  description: "Create a Fastly Object Storage logging endpoint on a Fastly service version",
+                  description:
+                    "Create a Fastly Object Storage logging endpoint on a Fastly service version",
                   options: [
                     autocloneOption,
                     {
@@ -15960,7 +16318,8 @@ const completionSpec: Fig.Spec = {
                     messageTypeOption,
                     {
                       name: ["-n", "--name"],
-                      description: "The name of the Fastly Object Storage logging object. Used as a primary key for API access",
+                      description:
+                        "The name of the Fastly Object Storage logging object. Used as a primary key for API access",
                       args: {
                         name: "name",
                       },
@@ -15971,7 +16330,8 @@ const completionSpec: Fig.Spec = {
                     publicKeyOption,
                     {
                       name: "--region",
-                      description: "The region of the Fastly Object Storage bucket",
+                      description:
+                        "The region of the Fastly Object Storage bucket",
                       args: {
                         name: "region",
                       },
@@ -15985,12 +16345,14 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: ["delete", "remove"],
-                  description: "Delete a Fastly Object Storage logging endpoint on a Fastly service version",
+                  description:
+                    "Delete a Fastly Object Storage logging endpoint on a Fastly service version",
                   options: [
                     autocloneOption,
                     {
                       name: ["-n", "--name"],
-                      description: "The name of the Fastly Object Storage logging object",
+                      description:
+                        "The name of the Fastly Object Storage logging object",
                       isRequired: true,
                       args: {
                         name: "name",
@@ -16003,12 +16365,14 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: ["describe", "get"],
-                  description: "Show detailed information about a Fastly Object Storage logging endpoint on a Fastly service version",
+                  description:
+                    "Show detailed information about a Fastly Object Storage logging endpoint on a Fastly service version",
                   options: [
                     jsonOption,
                     {
                       name: ["-n", "--name"],
-                      description: "The name of the Fastly Object Storage logging object",
+                      description:
+                        "The name of the Fastly Object Storage logging object",
                       isRequired: true,
                       args: {
                         name: "name",
@@ -16021,7 +16385,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "list",
-                  description: "List Fastly Object Storage endpoints on a Fastly service version",
+                  description:
+                    "List Fastly Object Storage endpoints on a Fastly service version",
                   options: [
                     jsonOption,
                     serviceIdOption,
@@ -16031,7 +16396,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "update",
-                  description: "Update a Fastly Object Storage logging endpoint on a Fastly service version",
+                  description:
+                    "Update a Fastly Object Storage logging endpoint on a Fastly service version",
                   options: [
                     autocloneOption,
                     {
@@ -16049,7 +16415,8 @@ const completionSpec: Fig.Spec = {
                     messageTypeOption,
                     {
                       name: ["-n", "--name"],
-                      description: "The name of the Fastly Object Storage logging object",
+                      description:
+                        "The name of the Fastly Object Storage logging object",
                       isRequired: true,
                       args: {
                         name: "name",
@@ -16057,7 +16424,8 @@ const completionSpec: Fig.Spec = {
                     },
                     {
                       name: "--new-name",
-                      description: "New name of the Fastly Object Storage logging object",
+                      description:
+                        "New name of the Fastly Object Storage logging object",
                       args: {
                         name: "new-name",
                       },
@@ -16068,7 +16436,8 @@ const completionSpec: Fig.Spec = {
                     publicKeyOption,
                     {
                       name: "--region",
-                      description: "The region of the Fastly Object Storage bucket",
+                      description:
+                        "The region of the Fastly Object Storage bucket",
                       args: {
                         name: "region",
                       },
@@ -16084,37 +16453,44 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "ftp",
-              description: "Manipulate Fastly service version FTP logging endpoints",
+              description:
+                "Manipulate Fastly service version FTP logging endpoints",
               subcommands: serviceLoggingFtpSubcommands,
             },
             {
               name: "gcs",
-              description: "Manipulate Fastly service version GCS logging endpoints",
+              description:
+                "Manipulate Fastly service version GCS logging endpoints",
               subcommands: serviceLoggingGcsSubcommands,
             },
             {
               name: "googlepubsub",
-              description: "Manipulate Fastly service version Google Cloud Pub/Sub logging endpoints",
+              description:
+                "Manipulate Fastly service version Google Cloud Pub/Sub logging endpoints",
               subcommands: serviceLoggingGooglepubsubSubcommands,
             },
             {
               name: "grafanacloudlogs",
-              description: "Manipulate Fastly service version Grafana Cloud Logs logging endpoints",
+              description:
+                "Manipulate Fastly service version Grafana Cloud Logs logging endpoints",
               subcommands: serviceLoggingGrafanacloudlogsSubcommands,
             },
             {
               name: "heroku",
-              description: "Manipulate Fastly service version Heroku logging endpoints",
+              description:
+                "Manipulate Fastly service version Heroku logging endpoints",
               subcommands: serviceLoggingHerokuSubcommands,
             },
             {
               name: "honeycomb",
-              description: "Manipulate Fastly service version Honeycomb logging endpoints",
+              description:
+                "Manipulate Fastly service version Honeycomb logging endpoints",
               subcommands: serviceLoggingHoneycombSubcommands,
             },
             {
               name: "https",
-              description: "Manipulate Fastly service version HTTPS logging endpoints",
+              description:
+                "Manipulate Fastly service version HTTPS logging endpoints",
               subcommands: serviceLoggingHttpsSubcommands,
             },
             {
@@ -16194,12 +16570,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "kafka",
-              description: "Manipulate Fastly service version Kafka logging endpoints",
+              description:
+                "Manipulate Fastly service version Kafka logging endpoints",
               subcommands: serviceLoggingKafkaSubcommands,
             },
             {
               name: "kinesis",
-              description: "Manipulate a Kinesis logging endpoint for a specific Fastly service version",
+              description:
+                "Manipulate a Kinesis logging endpoint for a specific Fastly service version",
               subcommands: serviceLoggingKinesisSubcommands,
             },
             {
@@ -16216,7 +16594,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--filter",
-                  description: "Filter in FIELD,OPERATOR,VALUE format (repeatable)",
+                  description:
+                    "Filter in FIELD,OPERATOR,VALUE format (repeatable)",
                   isRepeatable: true,
                   args: {
                     name: "filter",
@@ -16237,62 +16616,74 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "loggly",
-              description: "Manipulate Fastly service version Loggly logging endpoints",
+              description:
+                "Manipulate Fastly service version Loggly logging endpoints",
               subcommands: serviceLoggingLogglySubcommands,
             },
             {
               name: "logshuttle",
-              description: "Manipulate Fastly service version Logshuttle logging endpoints",
+              description:
+                "Manipulate Fastly service version Logshuttle logging endpoints",
               subcommands: serviceLoggingLogshuttleSubcommands,
             },
             {
               name: "newrelic",
-              description: "Manipulate a NewRelic logging endpoint for a specific Fastly service version",
+              description:
+                "Manipulate a NewRelic logging endpoint for a specific Fastly service version",
               subcommands: serviceLoggingNewrelicSubcommands,
             },
             {
               name: "newrelicotlp",
-              description: "Manipulate a NewRelic OTLP logging endpoint for a specific Fastly service version",
+              description:
+                "Manipulate a NewRelic OTLP logging endpoint for a specific Fastly service version",
               subcommands: serviceLoggingNewrelicotlpSubcommands,
             },
             {
               name: "openstack",
-              description: "Manipulate Fastly service version OpenStack logging endpoints",
+              description:
+                "Manipulate Fastly service version OpenStack logging endpoints",
               subcommands: serviceLoggingOpenstackSubcommands,
             },
             {
               name: "papertrail",
-              description: "Manipulate Fastly service version Papertrail logging endpoints",
+              description:
+                "Manipulate Fastly service version Papertrail logging endpoints",
               subcommands: serviceLoggingPapertrailSubcommands,
             },
             {
               name: "s3",
-              description: "Manipulate Fastly service version S3 logging endpoints",
+              description:
+                "Manipulate Fastly service version S3 logging endpoints",
               subcommands: serviceLoggingS3Subcommands,
             },
             {
               name: "scalyr",
-              description: "Manipulate Fastly service version Scalyr logging endpoints",
+              description:
+                "Manipulate Fastly service version Scalyr logging endpoints",
               subcommands: serviceLoggingScalyrSubcommands,
             },
             {
               name: "sftp",
-              description: "Manipulate Fastly service version SFTP logging endpoints",
+              description:
+                "Manipulate Fastly service version SFTP logging endpoints",
               subcommands: serviceLoggingSftpSubcommands,
             },
             {
               name: "splunk",
-              description: "Manipulate Fastly service version Splunk logging endpoints",
+              description:
+                "Manipulate Fastly service version Splunk logging endpoints",
               subcommands: serviceLoggingSplunkSubcommands,
             },
             {
               name: "sumologic",
-              description: "Manipulate Fastly service version Sumologic logging endpoints",
+              description:
+                "Manipulate Fastly service version Sumologic logging endpoints",
               subcommands: serviceLoggingSumologicSubcommands,
             },
             {
               name: "syslog",
-              description: "Manipulate Fastly service version Syslog logging endpoints",
+              description:
+                "Manipulate Fastly service version Syslog logging endpoints",
               subcommands: serviceLoggingSyslogSubcommands,
             },
           ],
@@ -16307,7 +16698,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--file",
-              description: "Purge a service of a newline delimited list of Surrogate Keys",
+              description:
+                "Purge a service of a newline delimited list of Surrogate Keys",
               args: {
                 name: "file",
                 template: "filepaths",
@@ -16315,7 +16707,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--key",
-              description: "Purge a service of objects tagged with a Surrogate Key",
+              description:
+                "Purge a service of objects tagged with a Surrogate Key",
               args: {
                 name: "key",
               },
@@ -16324,7 +16717,8 @@ const completionSpec: Fig.Spec = {
             serviceNameOption,
             {
               name: "--soft",
-              description: "A 'soft' purge marks affected objects as stale rather than making them inaccessible",
+              description:
+                "A 'soft' purge marks affected objects as stale rather than making them inaccessible",
             },
             {
               name: "--url",
@@ -16337,7 +16731,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "rate-limit",
-          description: "Manipulate rate-limiters of the Fastly API and web interface",
+          description:
+            "Manipulate rate-limiters of the Fastly API and web interface",
           subcommands: serviceRateLimitSubcommands,
         },
         {
@@ -16398,7 +16793,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["describe", "get"],
-              description: "Get the generated VCL for a particular service and version",
+              description:
+                "Get the generated VCL for a particular service and version",
               options: [
                 jsonOption,
                 serviceIdOption,
@@ -16408,7 +16804,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "snippet",
-              description: "Manipulate Fastly VCL snippets (blocks of VCL logic inserted into your service's configuration that don't require custom VCL)",
+              description:
+                "Manipulate Fastly VCL snippets (blocks of VCL logic inserted into your service's configuration that don't require custom VCL)",
               subcommands: serviceVclSnippetSubcommands,
             },
           ],
@@ -16440,29 +16837,17 @@ const completionSpec: Fig.Spec = {
             {
               name: "deactivate",
               description: "Deactivate a Fastly service version",
-              options: [
-                serviceIdOption,
-                serviceNameOption,
-                versionOption,
-              ],
+              options: [serviceIdOption, serviceNameOption, versionOption],
             },
             {
               name: "list",
               description: "List Fastly service versions",
-              options: [
-                jsonOption,
-                serviceIdOption,
-                serviceNameOption,
-              ],
+              options: [jsonOption, serviceIdOption, serviceNameOption],
             },
             {
               name: "lock",
               description: "Lock a Fastly service version",
-              options: [
-                serviceIdOption,
-                serviceNameOption,
-                versionOption,
-              ],
+              options: [serviceIdOption, serviceNameOption, versionOption],
             },
             {
               name: "stage",
@@ -16477,11 +16862,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "unstage",
               description: "Unstage a Fastly service version",
-              options: [
-                serviceIdOption,
-                serviceNameOption,
-                versionOption,
-              ],
+              options: [serviceIdOption, serviceNameOption, versionOption],
             },
             {
               name: "update",
@@ -16516,14 +16897,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "service-auth",
-      description: "Manipulate Fastly Service Authentication (deprecated: use 'fastly service auth' instead)",
+      description:
+        "Manipulate Fastly Service Authentication (deprecated: use 'fastly service auth' instead)",
       hidden: true,
       deprecated: true,
       subcommands: serviceAuthSubcommands,
     },
     {
       name: "service-version",
-      description: "Manipulate Fastly service versions (deprecated: use 'fastly service version' instead)",
+      description:
+        "Manipulate Fastly service versions (deprecated: use 'fastly service version' instead)",
       hidden: true,
       deprecated: true,
       subcommands: [
@@ -16550,29 +16933,17 @@ const completionSpec: Fig.Spec = {
         {
           name: "deactivate",
           description: "Deactivate a Fastly service version",
-          options: [
-            serviceIdOption,
-            serviceNameOption,
-            versionOption,
-          ],
+          options: [serviceIdOption, serviceNameOption, versionOption],
         },
         {
           name: "list",
           description: "List Fastly service versions",
-          options: [
-            jsonOption,
-            serviceIdOption,
-            serviceNameOption,
-          ],
+          options: [jsonOption, serviceIdOption, serviceNameOption],
         },
         {
           name: "lock",
           description: "Lock a Fastly service version",
-          options: [
-            serviceIdOption,
-            serviceNameOption,
-            versionOption,
-          ],
+          options: [serviceIdOption, serviceNameOption, versionOption],
         },
         {
           name: "stage",
@@ -16587,11 +16958,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "unstage",
           description: "Unstage a Fastly service version",
-          options: [
-            serviceIdOption,
-            serviceNameOption,
-            versionOption,
-          ],
+          options: [serviceIdOption, serviceNameOption, versionOption],
         },
         {
           name: "update",
@@ -16614,12 +16981,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "shellcomplete",
-      description: "Hidden command used to prevent help output when using --completion-script-<T>",
+      description:
+        "Hidden command used to prevent help output when using --completion-script-<T>",
       hidden: true,
     },
     {
       name: "sso",
-      description: "Single Sign-On authentication (deprecated: use 'fastly auth login --sso --token <name>' instead)",
+      description:
+        "Single Sign-On authentication (deprecated: use 'fastly auth login --sso --token <name>' instead)",
       hidden: true,
       deprecated: true,
       args: {
@@ -16630,7 +16999,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "stats",
-      description: "View statistics for Fastly services: historical, realtime, aggregate, usage, domain and origin inspection",
+      description:
+        "View statistics for Fastly services: historical, realtime, aggregate, usage, domain and origin inspection",
       subcommands: [
         {
           name: "aggregate",
@@ -16785,7 +17155,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--field",
-              description: "Filter to a single stats field (e.g. bandwidth, requests)",
+              description:
+                "Filter to a single stats field (e.g. bandwidth, requests)",
               args: {
                 name: "field",
               },
@@ -16801,7 +17172,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--from",
-              description: "From time, accepted formats at https://fastly.dev/reference/api/metrics-stats/historical-stats",
+              description:
+                "From time, accepted formats at https://fastly.dev/reference/api/metrics-stats/historical-stats",
               args: {
                 name: "from",
               },
@@ -17002,7 +17374,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--id",
-              description: "Alphanumeric string identifying a TLS configuration",
+              description:
+                "Alphanumeric string identifying a TLS configuration",
               isRequired: true,
               args: {
                 name: "id",
@@ -17046,7 +17419,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--id",
-              description: "Alphanumeric string identifying a TLS configuration",
+              description:
+                "Alphanumeric string identifying a TLS configuration",
               isRequired: true,
               args: {
                 name: "id",
@@ -17078,7 +17452,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying a TLS activation",
+                  description:
+                    "Alphanumeric string identifying a TLS activation",
                   isRequired: true,
                   args: {
                     name: "id",
@@ -17086,10 +17461,15 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--include",
-                  description: "Include related objects (comma-separated values)",
+                  description:
+                    "Include related objects (comma-separated values)",
                   args: {
                     name: "include",
-                    suggestions: ["tls_certificate", "tls_configuration", "tls_domain"],
+                    suggestions: [
+                      "tls_certificate",
+                      "tls_configuration",
+                      "tls_domain",
+                    ],
                   },
                 },
                 jsonOption,
@@ -17097,11 +17477,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["disable", "remove"],
-              description: "Disable TLS on the domain associated with this TLS activation",
+              description:
+                "Disable TLS on the domain associated with this TLS activation",
               options: [
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying a TLS activation",
+                  description:
+                    "Alphanumeric string identifying a TLS activation",
                   isRequired: true,
                   args: {
                     name: "id",
@@ -17111,11 +17493,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["enable", "add"],
-              description: "Enable TLS for a particular TLS domain and certificate combination",
+              description:
+                "Enable TLS for a particular TLS domain and certificate combination",
               options: [
                 {
                   name: "--cert-id",
-                  description: "Alphanumeric string identifying a TLS certificate",
+                  description:
+                    "Alphanumeric string identifying a TLS certificate",
                   isRequired: true,
                   args: {
                     name: "cert-id",
@@ -17123,7 +17507,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--tls-config-id",
-                  description: "Alphanumeric string identifying a TLS configuration",
+                  description:
+                    "Alphanumeric string identifying a TLS configuration",
                   isRequired: true,
                   args: {
                     name: "tls-config-id",
@@ -17131,7 +17516,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--tls-domain",
-                  description: "The domain name associated with the TLS certificate",
+                  description:
+                    "The domain name associated with the TLS certificate",
                   isRequired: true,
                   args: {
                     name: "tls-domain",
@@ -17145,31 +17531,39 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--filter-cert",
-                  description: "Limit the returned activations to a specific certificate",
+                  description:
+                    "Limit the returned activations to a specific certificate",
                   args: {
                     name: "filter-cert",
                   },
                 },
                 {
                   name: "--filter-config",
-                  description: "Limit the returned activations to a specific TLS configuration",
+                  description:
+                    "Limit the returned activations to a specific TLS configuration",
                   args: {
                     name: "filter-config",
                   },
                 },
                 {
                   name: "--filter-domain",
-                  description: "Limit the returned rules to a specific domain name",
+                  description:
+                    "Limit the returned rules to a specific domain name",
                   args: {
                     name: "filter-domain",
                   },
                 },
                 {
                   name: "--include",
-                  description: "Include related objects (comma-separated values)",
+                  description:
+                    "Include related objects (comma-separated values)",
                   args: {
                     name: "include",
-                    suggestions: ["tls_certificate", "tls_configuration", "tls_domain"],
+                    suggestions: [
+                      "tls_certificate",
+                      "tls_configuration",
+                      "tls_domain",
+                    ],
                   },
                 },
                 jsonOption,
@@ -17179,11 +17573,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "update",
-              description: "Update the certificate used to terminate TLS traffic for the domain associated with this TLS activation",
+              description:
+                "Update the certificate used to terminate TLS traffic for the domain associated with this TLS activation",
               options: [
                 {
                   name: "--cert-id",
-                  description: "Alphanumeric string identifying a TLS certificate",
+                  description:
+                    "Alphanumeric string identifying a TLS certificate",
                   isRequired: true,
                   args: {
                     name: "cert-id",
@@ -17191,7 +17587,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying a TLS activation",
+                  description:
+                    "Alphanumeric string identifying a TLS activation",
                   isRequired: true,
                   args: {
                     name: "id",
@@ -17211,14 +17608,16 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--cert-blob",
-                  description: "The PEM-formatted certificate blob, mutually exclusive with --cert-path",
+                  description:
+                    "The PEM-formatted certificate blob, mutually exclusive with --cert-path",
                   args: {
                     name: "cert-blob",
                   },
                 },
                 {
                   name: "--cert-path",
-                  description: "Filepath to a PEM-formatted certificate, mutually exclusive with --cert-blob",
+                  description:
+                    "Filepath to a PEM-formatted certificate, mutually exclusive with --cert-blob",
                   args: {
                     name: "cert-path",
                     template: "filepaths",
@@ -17226,14 +17625,16 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying a TLS certificate",
+                  description:
+                    "Alphanumeric string identifying a TLS certificate",
                   args: {
                     name: "id",
                   },
                 },
                 {
                   name: "--name",
-                  description: "A customizable name for your certificate. Defaults to the certificate's Common Name or first Subject Alternative Names (SAN) entry",
+                  description:
+                    "A customizable name for your certificate. Defaults to the certificate's Common Name or first Subject Alternative Names (SAN) entry",
                   args: {
                     name: "name",
                   },
@@ -17242,11 +17643,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["delete", "remove"],
-              description: "Destroy a TLS certificate. TLS certificates already enabled for a domain cannot be destroyed",
+              description:
+                "Destroy a TLS certificate. TLS certificates already enabled for a domain cannot be destroyed",
               options: [
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying a TLS certificate",
+                  description:
+                    "Alphanumeric string identifying a TLS certificate",
                   isRequired: true,
                   args: {
                     name: "id",
@@ -17260,7 +17663,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying a TLS certificate",
+                  description:
+                    "Alphanumeric string identifying a TLS certificate",
                   isRequired: true,
                   args: {
                     name: "id",
@@ -17275,21 +17679,24 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--filter-domain",
-                  description: "Limit the returned certificates to those that include the specific domain",
+                  description:
+                    "Limit the returned certificates to those that include the specific domain",
                   args: {
                     name: "filter-domain",
                   },
                 },
                 {
                   name: "--filter-not-after",
-                  description: "Limit the returned certificates to those that expire prior to the specified date in UTC",
+                  description:
+                    "Limit the returned certificates to those that expire prior to the specified date in UTC",
                   args: {
                     name: "filter-not-after",
                   },
                 },
                 {
                   name: "--include",
-                  description: "Include related objects (comma-separated values)",
+                  description:
+                    "Include related objects (comma-separated values)",
                   args: {
                     name: "include",
                     suggestions: ["tls_activations"],
@@ -17300,7 +17707,8 @@ const completionSpec: Fig.Spec = {
                 perPageOption,
                 {
                   name: "--sort",
-                  description: "The order in which to list the results by creation date",
+                  description:
+                    "The order in which to list the results by creation date",
                   args: {
                     name: "sort",
                   },
@@ -17309,18 +17717,21 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "update",
-              description: "Replace a TLS certificate with a newly reissued TLS certificate, or update a TLS certificate's name",
+              description:
+                "Replace a TLS certificate with a newly reissued TLS certificate, or update a TLS certificate's name",
               options: [
                 {
                   name: "--cert-blob",
-                  description: "The PEM-formatted certificate blob, mutually exclusive with --cert-path",
+                  description:
+                    "The PEM-formatted certificate blob, mutually exclusive with --cert-path",
                   args: {
                     name: "cert-blob",
                   },
                 },
                 {
                   name: "--cert-path",
-                  description: "Filepath to a PEM-formatted certificate, mutually exclusive with --cert-blob",
+                  description:
+                    "Filepath to a PEM-formatted certificate, mutually exclusive with --cert-blob",
                   args: {
                     name: "cert-path",
                     template: "filepaths",
@@ -17328,7 +17739,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--id",
-                  description: "Alphanumeric string identifying a TLS certificate",
+                  description:
+                    "Alphanumeric string identifying a TLS certificate",
                   isRequired: true,
                   args: {
                     name: "id",
@@ -17336,7 +17748,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "--name",
-                  description: "A customizable name for your certificate. Defaults to the certificate's Common Name or first Subject Alternative Names (SAN) entry",
+                  description:
+                    "A customizable name for your certificate. Defaults to the certificate's Common Name or first Subject Alternative Names (SAN) entry",
                   args: {
                     name: "name",
                   },
@@ -17355,25 +17768,29 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--filter-cert",
-                  description: "Limit the returned domains to those listed in the given TLS certificate's SAN list",
+                  description:
+                    "Limit the returned domains to those listed in the given TLS certificate's SAN list",
                   args: {
                     name: "filter-cert",
                   },
                 },
                 {
                   name: "--filter-in-use",
-                  description: "Limit the returned domains to those currently using Fastly to terminate TLS with SNI",
+                  description:
+                    "Limit the returned domains to those currently using Fastly to terminate TLS with SNI",
                 },
                 {
                   name: "--filter-subscription",
-                  description: "Limit the returned domains to those for a given TLS subscription",
+                  description:
+                    "Limit the returned domains to those for a given TLS subscription",
                   args: {
                     name: "filter-subscription",
                   },
                 },
                 {
                   name: "--include",
-                  description: "Include related objects (comma-separated values)",
+                  description:
+                    "Include related objects (comma-separated values)",
                   args: {
                     name: "include",
                     suggestions: ["tls_activations"],
@@ -17384,7 +17801,8 @@ const completionSpec: Fig.Spec = {
                 perPageOption,
                 {
                   name: "--sort",
-                  description: "The order in which to list the results by creation date",
+                  description:
+                    "The order in which to list the results by creation date",
                   args: {
                     name: "sort",
                   },
@@ -17395,7 +17813,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "private-key",
-          description: "Upload and manage private keys used to sign certificates",
+          description:
+            "Upload and manage private keys used to sign certificates",
           subcommands: [
             {
               name: ["create", "add"],
@@ -17403,14 +17822,16 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--key",
-                  description: "The contents of the private key. Must be a PEM-formatted key, mutually exclusive with --key-path",
+                  description:
+                    "The contents of the private key. Must be a PEM-formatted key, mutually exclusive with --key-path",
                   args: {
                     name: "key",
                   },
                 },
                 {
                   name: "--key-path",
-                  description: "Filepath to a PEM-formatted key, mutually exclusive with --key",
+                  description:
+                    "Filepath to a PEM-formatted key, mutually exclusive with --key",
                   args: {
                     name: "key-path",
                     template: "filepaths",
@@ -17428,7 +17849,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["delete", "remove"],
-              description: "Destroy a TLS private key. Only private keys not already matched to any certificates can be deleted",
+              description:
+                "Destroy a TLS private key. Only private keys not already matched to any certificates can be deleted",
               options: [
                 {
                   name: "--id",
@@ -17461,7 +17883,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--filter-in-use",
-                  description: "Limit the returned keys to those without any matching TLS certificates",
+                  description:
+                    "Limit the returned keys to those without any matching TLS certificates",
                   args: {
                     name: "filter-in-use",
                     suggestions: ["false"],
@@ -17482,11 +17905,13 @@ const completionSpec: Fig.Spec = {
       subcommands: [
         {
           name: ["delete", "remove"],
-          description: "Destroy a certificate. This disables TLS for all domains listed as SAN entries",
+          description:
+            "Destroy a certificate. This disables TLS for all domains listed as SAN entries",
           options: [
             {
               name: "--id",
-              description: "Alphanumeric string identifying a TLS bulk certificate",
+              description:
+                "Alphanumeric string identifying a TLS bulk certificate",
               isRequired: true,
               args: {
                 name: "id",
@@ -17500,7 +17925,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--id",
-              description: "Alphanumeric string identifying a TLS bulk certificate",
+              description:
+                "Alphanumeric string identifying a TLS bulk certificate",
               isRequired: true,
               args: {
                 name: "id",
@@ -17525,7 +17951,8 @@ const completionSpec: Fig.Spec = {
             perPageOption,
             {
               name: "--sort",
-              description: "The order in which to list the results by creation date",
+              description:
+                "The order in which to list the results by creation date",
               args: {
                 name: "sort",
               },
@@ -17534,7 +17961,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "update",
-          description: "Replace a certificate with a newly reissued certificate",
+          description:
+            "Replace a certificate with a newly reissued certificate",
           options: [
             {
               name: "--allow-untrusted",
@@ -17550,7 +17978,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--id",
-              description: "Alphanumeric string identifying a TLS bulk certificate",
+              description:
+                "Alphanumeric string identifying a TLS bulk certificate",
               isRequired: true,
               args: {
                 name: "id",
@@ -17584,7 +18013,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--config",
-              description: "Alphanumeric string identifying a TLS configuration (set flag once per Configuration ID)",
+              description:
+                "Alphanumeric string identifying a TLS configuration (set flag once per Configuration ID)",
               isRepeatable: true,
               args: {
                 name: "config",
@@ -17612,7 +18042,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--cert-auth",
-              description: "The entity that issues and certifies the TLS certificates for your subscription. Valid values are certainly, lets-encrypt, and globalsign",
+              description:
+                "The entity that issues and certifies the TLS certificates for your subscription. Valid values are certainly, lets-encrypt, and globalsign",
               args: {
                 name: "cert-auth",
                 suggestions: ["certainly", "lets-encrypt", "globalsign"],
@@ -17620,21 +18051,24 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--common-name",
-              description: "The domain name associated with the subscription. Default to the first domain specified by --domain",
+              description:
+                "The domain name associated with the subscription. Default to the first domain specified by --domain",
               args: {
                 name: "common-name",
               },
             },
             {
               name: "--config",
-              description: "Alphanumeric string identifying a TLS configuration",
+              description:
+                "Alphanumeric string identifying a TLS configuration",
               args: {
                 name: "config",
               },
             },
             {
               name: "--domain",
-              description: "Domain(s) to add to the TLS certificates generated for the subscription (set flag once per domain)",
+              description:
+                "Domain(s) to add to the TLS certificates generated for the subscription (set flag once per domain)",
               isRequired: true,
               isRepeatable: true,
               args: {
@@ -17645,11 +18079,13 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["delete", "remove"],
-          description: "Destroy a TLS subscription. A subscription cannot be destroyed if there are domains in the TLS enabled state",
+          description:
+            "Destroy a TLS subscription. A subscription cannot be destroyed if there are domains in the TLS enabled state",
           options: [
             {
               name: "--force",
-              description: "A flag that allows you to edit and delete a subscription with active domains",
+              description:
+                "A flag that allows you to edit and delete a subscription with active domains",
             },
             {
               name: "--id",
@@ -17693,11 +18129,13 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--filter-active",
-              description: "Limit the returned subscriptions to those that have currently active orders",
+              description:
+                "Limit the returned subscriptions to those that have currently active orders",
             },
             {
               name: "--filter-domain",
-              description: "Limit the returned subscriptions to those that include the specific domain",
+              description:
+                "Limit the returned subscriptions to those that include the specific domain",
               args: {
                 name: "filter-domain",
               },
@@ -17726,7 +18164,8 @@ const completionSpec: Fig.Spec = {
             perPageOption,
             {
               name: "--sort",
-              description: "The order in which to list the results by creation date",
+              description:
+                "The order in which to list the results by creation date",
               args: {
                 name: "sort",
               },
@@ -17735,7 +18174,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "update",
-          description: "Change the TLS domains or common name associated with this subscription, or update the TLS configuration for this set of domains",
+          description:
+            "Change the TLS domains or common name associated with this subscription, or update the TLS configuration for this set of domains",
           options: [
             {
               name: "--common-name",
@@ -17746,14 +18186,16 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--config",
-              description: "Alphanumeric string identifying a TLS configuration",
+              description:
+                "Alphanumeric string identifying a TLS configuration",
               args: {
                 name: "config",
               },
             },
             {
               name: "--domain",
-              description: "Domain(s) to add to the TLS certificates generated for the subscription (set flag once per domain)",
+              description:
+                "Domain(s) to add to the TLS certificates generated for the subscription (set flag once per domain)",
               isRepeatable: true,
               args: {
                 name: "domain",
@@ -17761,7 +18203,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--force",
-              description: "A flag that allows you to edit and delete a subscription with active domains",
+              description:
+                "A flag that allows you to edit and delete a subscription with active domains",
             },
             {
               name: "--id",
@@ -17790,7 +18233,8 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--scope",
-                  description: "Specify `--scope=estimate` to perform an “estimated” availability check, which checks the DNS and domain aftermarkets, not domain registries",
+                  description:
+                    "Specify `--scope=estimate` to perform an “estimated” availability check, which checks the DNS and domain aftermarkets, not domain registries",
                   args: {
                     name: "scope",
                   },
@@ -17807,7 +18251,8 @@ const completionSpec: Fig.Spec = {
               options: [
                 {
                   name: "--defaults",
-                  description: "Comma-separated list of default zones to include in the search results response, e.g. `--defaults=uk,co.uk`",
+                  description:
+                    "Comma-separated list of default zones to include in the search results response, e.g. `--defaults=uk,co.uk`",
                   args: {
                     name: "defaults",
                   },
@@ -17815,21 +18260,24 @@ const completionSpec: Fig.Spec = {
                 jsonOption,
                 {
                   name: "--keywords",
-                  description: "Comma-separated list of keywords for seeding the search results, e.g. `--keywords=dance,party`",
+                  description:
+                    "Comma-separated list of keywords for seeding the search results, e.g. `--keywords=dance,party`",
                   args: {
                     name: "keywords",
                   },
                 },
                 {
                   name: "--location",
-                  description: "Override IP geolocation with a two-character country code, e.g. `--location=in` to include Indian zones in the search results",
+                  description:
+                    "Override IP geolocation with a two-character country code, e.g. `--location=in` to include Indian zones in the search results",
                   args: {
                     name: "location",
                   },
                 },
                 {
                   name: "--vendor",
-                  description: "The domain name of a specific registrar or vendor, to filter the search results to the list of zones they support",
+                  description:
+                    "The domain name of a specific registrar or vendor, to filter the search results to the list of zones they support",
                   args: {
                     name: "vendor",
                   },
@@ -17859,7 +18307,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--login",
-              description: "The login associated with the user (typically, an email address)",
+              description:
+                "The login associated with the user (typically, an email address)",
               args: {
                 name: "login",
               },
@@ -17873,7 +18322,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--role",
-              description: "The permissions role assigned to the user. Can be user, billing, engineer, or superuser",
+              description:
+                "The permissions role assigned to the user. Can be user, billing, engineer, or superuser",
               args: {
                 name: "role",
                 suggestions: ["user", "billing", "engineer", "superuser"],
@@ -17897,7 +18347,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["describe", "get"],
-          description: "Get a specific user of the Fastly API and web interface",
+          description:
+            "Get a specific user of the Fastly API and web interface",
           options: [
             {
               name: "--current",
@@ -17919,7 +18370,8 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--customer-id",
-              description: "Alphanumeric string identifying the customer (falls back to FASTLY_CUSTOMER_ID)",
+              description:
+                "Alphanumeric string identifying the customer (falls back to FASTLY_CUSTOMER_ID)",
               args: {
                 name: "customer-id",
               },
@@ -17940,7 +18392,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--login",
-              description: "The login associated with the user (typically, an email address)",
+              description:
+                "The login associated with the user (typically, an email address)",
               args: {
                 name: "login",
               },
@@ -17958,7 +18411,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--role",
-              description: "The permissions role assigned to the user. Can be user, billing, engineer, or superuser",
+              description:
+                "The permissions role assigned to the user. Can be user, billing, engineer, or superuser",
               args: {
                 name: "role",
                 suggestions: ["user", "billing", "engineer", "superuser"],
@@ -17970,15 +18424,18 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "vcl",
-      description: "Test VCL on real Fastly edge nodes before deploying, and manipulate service version VCL",
+      description:
+        "Test VCL on real Fastly edge nodes before deploying, and manipulate service version VCL",
       subcommands: [
         {
           name: "check",
-          description: "Check that VCL compiles, using the real Fastly VCL compiler (no service or API token needed)",
+          description:
+            "Check that VCL compiles, using the real Fastly VCL compiler (no service or API token needed)",
           options: [
             {
               name: "--deliver",
-              description: "VCL file with the body of vcl_deliver (final response mutations (resp))",
+              description:
+                "VCL file with the body of vcl_deliver (final response mutations (resp))",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -17986,7 +18443,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--error",
-              description: "VCL file with the body of vcl_error (synthetic and error responses)",
+              description:
+                "VCL file with the body of vcl_error (synthetic and error responses)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -17994,7 +18452,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--fetch",
-              description: "VCL file with the body of vcl_fetch (origin response handling (beresp))",
+              description:
+                "VCL file with the body of vcl_fetch (origin response handling (beresp))",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18002,7 +18461,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--hash",
-              description: "VCL file with the body of vcl_hash (cache key composition)",
+              description:
+                "VCL file with the body of vcl_hash (cache key composition)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18018,7 +18478,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--init",
-              description: "VCL file with the body of vcl_init (one-time setup: backends, ACLs, tables)",
+              description:
+                "VCL file with the body of vcl_init (one-time setup: backends, ACLs, tables)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18035,7 +18496,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--miss",
-              description: "VCL file with the body of vcl_miss (on cache miss, before the origin fetch)",
+              description:
+                "VCL file with the body of vcl_miss (on cache miss, before the origin fetch)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18043,7 +18505,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--origin",
-              description: "Origin server URL, including scheme (repeatable, up to 5). Origins become VCL backends F_origin_0, F_origin_1, ... in flag order, with the first as the default backend. Defaults to https://http-me.fastly.dev, a test origin that echoes requests back",
+              description:
+                "Origin server URL, including scheme (repeatable, up to 5). Origins become VCL backends F_origin_0, F_origin_1, ... in flag order, with the first as the default backend. Defaults to https://http-me.fastly.dev, a test origin that echoes requests back",
               isRepeatable: true,
               args: {
                 name: "URL",
@@ -18051,7 +18514,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--pass",
-              description: "VCL file with the body of vcl_pass (on explicit pass)",
+              description:
+                "VCL file with the body of vcl_pass (on explicit pass)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18059,7 +18523,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--recv",
-              description: "VCL file with the body of vcl_recv (request inspection and routing)",
+              description:
+                "VCL file with the body of vcl_recv (request inspection and routing)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18077,7 +18542,8 @@ const completionSpec: Fig.Spec = {
           ],
           args: {
             name: "file",
-            description: "VCL files holding subroutine bodies, named after their subroutine (recv.vcl, fetch.vcl, ...)",
+            description:
+              "VCL files holding subroutine bodies, named after their subroutine (recv.vcl, fetch.vcl, ...)",
             isOptional: true,
             isVariadic: true,
             template: "filepaths",
@@ -18085,21 +18551,24 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "condition",
-          description: "Manipulate Fastly VCL conditions (deprecated: use 'fastly service vcl condition' instead)",
+          description:
+            "Manipulate Fastly VCL conditions (deprecated: use 'fastly service vcl condition' instead)",
           hidden: true,
           deprecated: true,
           subcommands: serviceVclConditionSubcommands,
         },
         {
           name: "custom",
-          description: "Manipulate Fastly custom VCL files (deprecated: use 'fastly service vcl custom' instead)",
+          description:
+            "Manipulate Fastly custom VCL files (deprecated: use 'fastly service vcl custom' instead)",
           hidden: true,
           deprecated: true,
           subcommands: serviceVclCustomSubcommands,
         },
         {
           name: ["describe", "get"],
-          description: "Get the generated VCL for a particular service and version (deprecated: use 'fastly service vcl describe' instead)",
+          description:
+            "Get the generated VCL for a particular service and version (deprecated: use 'fastly service vcl describe' instead)",
           hidden: true,
           deprecated: true,
           options: [
@@ -18111,7 +18580,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "run",
-          description: "Run VCL on a real Fastly edge node by replaying a request through it (no service or API token needed)",
+          description:
+            "Run VCL on a real Fastly edge node by replaying a request through it (no service or API token needed)",
           options: [
             {
               name: "--body",
@@ -18122,7 +18592,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--client-from",
-              description: "Where the client appears to connect from, for geolocation-dependent VCL: 'client' (your real vantage point), 'server', or a country: brazil, china, germany, japan, russia, south-africa, united-kingdom, united-states",
+              description:
+                "Where the client appears to connect from, for geolocation-dependent VCL: 'client' (your real vantage point), 'server', or a country: brazil, china, germany, japan, russia, south-africa, united-kingdom, united-states",
               args: {
                 name: "client-from",
                 suggestions: [
@@ -18142,7 +18613,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--connection",
-              description: "Protocol between client and edge: h2 (HTTP/2, default), h1 (HTTP/1.1 over TLS), or http (plain HTTP/1.1)",
+              description:
+                "Protocol between client and edge: h2 (HTTP/2, default), h1 (HTTP/1.1 over TLS), or http (plain HTTP/1.1)",
               args: {
                 name: "connection",
                 suggestions: ["http", "h1", "h2"],
@@ -18151,7 +18623,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--deliver",
-              description: "VCL file with the body of vcl_deliver (final response mutations (resp))",
+              description:
+                "VCL file with the body of vcl_deliver (final response mutations (resp))",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18159,7 +18632,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--error",
-              description: "VCL file with the body of vcl_error (synthetic and error responses)",
+              description:
+                "VCL file with the body of vcl_error (synthetic and error responses)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18167,7 +18641,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--fetch",
-              description: "VCL file with the body of vcl_fetch (origin response handling (beresp))",
+              description:
+                "VCL file with the body of vcl_fetch (origin response handling (beresp))",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18179,11 +18654,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--fresh-cache",
-              description: "Start from an empty cache instead of the cache state previous runs built up",
+              description:
+                "Start from an empty cache instead of the cache state previous runs built up",
             },
             {
               name: "--hash",
-              description: "VCL file with the body of vcl_hash (cache key composition)",
+              description:
+                "VCL file with the body of vcl_hash (cache key composition)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18207,7 +18684,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--init",
-              description: "VCL file with the body of vcl_init (one-time setup: backends, ACLs, tables)",
+              description:
+                "VCL file with the body of vcl_init (one-time setup: backends, ACLs, tables)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18224,7 +18702,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--method",
-              description: "HTTP method (GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, PURGE, ...)",
+              description:
+                "HTTP method (GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, PURGE, ...)",
               args: {
                 name: "method",
                 default: "GET",
@@ -18232,7 +18711,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--miss",
-              description: "VCL file with the body of vcl_miss (on cache miss, before the origin fetch)",
+              description:
+                "VCL file with the body of vcl_miss (on cache miss, before the origin fetch)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18244,7 +18724,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--origin",
-              description: "Origin server URL, including scheme (repeatable, up to 5). Origins become VCL backends F_origin_0, F_origin_1, ... in flag order, with the first as the default backend. Defaults to https://http-me.fastly.dev, a test origin that echoes requests back",
+              description:
+                "Origin server URL, including scheme (repeatable, up to 5). Origins become VCL backends F_origin_0, F_origin_1, ... in flag order, with the first as the default backend. Defaults to https://http-me.fastly.dev, a test origin that echoes requests back",
               isRepeatable: true,
               args: {
                 name: "URL",
@@ -18252,7 +18733,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--pass",
-              description: "VCL file with the body of vcl_pass (on explicit pass)",
+              description:
+                "VCL file with the body of vcl_pass (on explicit pass)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18268,7 +18750,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--recv",
-              description: "VCL file with the body of vcl_recv (request inspection and routing)",
+              description:
+                "VCL file with the body of vcl_recv (request inspection and routing)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18285,7 +18768,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--shield",
-              description: "Enable shielding (a second cache layer, as when a shield POP is configured)",
+              description:
+                "Enable shielding (a second cache layer, as when a shield POP is configured)",
             },
             {
               name: "--timeout",
@@ -18298,7 +18782,8 @@ const completionSpec: Fig.Spec = {
           ],
           args: {
             name: "file",
-            description: "VCL files holding subroutine bodies, named after their subroutine (recv.vcl, fetch.vcl, ...)",
+            description:
+              "VCL files holding subroutine bodies, named after their subroutine (recv.vcl, fetch.vcl, ...)",
             isOptional: true,
             isVariadic: true,
             template: "filepaths",
@@ -18306,7 +18791,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "serve",
-          description: "Run VCL as a local HTTP server backed by a real Fastly edge sandbox (no service or API token needed)",
+          description:
+            "Run VCL as a local HTTP server backed by a real Fastly edge sandbox (no service or API token needed)",
           options: [
             {
               name: "--addr",
@@ -18318,7 +18804,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--deliver",
-              description: "VCL file with the body of vcl_deliver (final response mutations (resp))",
+              description:
+                "VCL file with the body of vcl_deliver (final response mutations (resp))",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18326,7 +18813,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--error",
-              description: "VCL file with the body of vcl_error (synthetic and error responses)",
+              description:
+                "VCL file with the body of vcl_error (synthetic and error responses)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18334,7 +18822,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--fetch",
-              description: "VCL file with the body of vcl_fetch (origin response handling (beresp))",
+              description:
+                "VCL file with the body of vcl_fetch (origin response handling (beresp))",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18342,7 +18831,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--hash",
-              description: "VCL file with the body of vcl_hash (cache key composition)",
+              description:
+                "VCL file with the body of vcl_hash (cache key composition)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18358,7 +18848,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--init",
-              description: "VCL file with the body of vcl_init (one-time setup: backends, ACLs, tables)",
+              description:
+                "VCL file with the body of vcl_init (one-time setup: backends, ACLs, tables)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18374,7 +18865,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--miss",
-              description: "VCL file with the body of vcl_miss (on cache miss, before the origin fetch)",
+              description:
+                "VCL file with the body of vcl_miss (on cache miss, before the origin fetch)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18382,7 +18874,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--origin",
-              description: "Origin server URL, including scheme (repeatable, up to 5). Origins become VCL backends F_origin_0, F_origin_1, ... in flag order, with the first as the default backend. Defaults to https://http-me.fastly.dev, a test origin that echoes requests back",
+              description:
+                "Origin server URL, including scheme (repeatable, up to 5). Origins become VCL backends F_origin_0, F_origin_1, ... in flag order, with the first as the default backend. Defaults to https://http-me.fastly.dev, a test origin that echoes requests back",
               isRepeatable: true,
               args: {
                 name: "URL",
@@ -18390,7 +18883,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--pass",
-              description: "VCL file with the body of vcl_pass (on explicit pass)",
+              description:
+                "VCL file with the body of vcl_pass (on explicit pass)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18398,7 +18892,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--recv",
-              description: "VCL file with the body of vcl_recv (request inspection and routing)",
+              description:
+                "VCL file with the body of vcl_recv (request inspection and routing)",
               args: {
                 name: "FILE",
                 template: "filepaths",
@@ -18428,7 +18923,8 @@ const completionSpec: Fig.Spec = {
           ],
           args: {
             name: "file",
-            description: "VCL files holding subroutine bodies, named after their subroutine (recv.vcl, fetch.vcl, ...)",
+            description:
+              "VCL files holding subroutine bodies, named after their subroutine (recv.vcl, fetch.vcl, ...)",
             isOptional: true,
             isVariadic: true,
             template: "filepaths",
@@ -18436,7 +18932,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "snippet",
-          description: "Manipulate Fastly VCL snippets (deprecated: use 'fastly service vcl snippet' instead)",
+          description:
+            "Manipulate Fastly VCL snippets (deprecated: use 'fastly service vcl snippet' instead)",
           hidden: true,
           deprecated: true,
           subcommands: serviceVclSnippetSubcommands,
@@ -18455,7 +18952,8 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["-d", "--accept-defaults"],
-      description: "Accept default options for all interactive prompts apart from Yes/No confirmations",
+      description:
+        "Accept default options for all interactive prompts apart from Yes/No confirmations",
       isPersistent: true,
     },
     {
@@ -18478,17 +18976,20 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-y", "--auto-yes"],
-      description: "Answer yes automatically to all Yes/No confirmations. This may suppress security warnings",
+      description:
+        "Answer yes automatically to all Yes/No confirmations. This may suppress security warnings",
       isPersistent: true,
     },
     {
       name: "--debug-mode",
-      description: "Print API request and response details (NOTE: can disrupt the normal CLI flow output formatting)",
+      description:
+        "Print API request and response details (NOTE: can disrupt the normal CLI flow output formatting)",
       isPersistent: true,
     },
     {
       name: "--enable-sso",
-      description: "[DEPRECATED: use 'fastly auth login --sso --token <name>'] Enable SSO for current profile",
+      description:
+        "[DEPRECATED: use 'fastly auth login --sso --token <name>'] Enable SSO for current profile",
       isPersistent: true,
       hidden: true,
       deprecated: true,
@@ -18500,12 +19001,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-i", "--non-interactive"],
-      description: "Do not prompt for user input - suitable for CI processes. Equivalent to --accept-defaults and --auto-yes",
+      description:
+        "Do not prompt for user input - suitable for CI processes. Equivalent to --accept-defaults and --auto-yes",
       isPersistent: true,
     },
     {
       name: ["-o", "--profile"],
-      description: "[DEPRECATED: use 'fastly auth use'] Switch account profile for single command execution",
+      description:
+        "[DEPRECATED: use 'fastly auth use'] Switch account profile for single command execution",
       isPersistent: true,
       hidden: true,
       deprecated: true,
@@ -18515,12 +19018,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-q", "--quiet"],
-      description: "Silence all output except direct command output. This won't prevent interactive prompts (see: --accept-defaults, --auto-yes, --non-interactive)",
+      description:
+        "Silence all output except direct command output. This won't prevent interactive prompts (see: --accept-defaults, --auto-yes, --non-interactive)",
       isPersistent: true,
     },
     {
       name: ["-t", "--token"],
-      description: "Fastly API token, or name of a stored auth token (use 'default' for the default token). Falls back to FASTLY_API_TOKEN env var",
+      description:
+        "Fastly API token, or name of a stored auth token (use 'default' for the default token). Falls back to FASTLY_API_TOKEN env var",
       isPersistent: true,
       args: {
         name: "token",
