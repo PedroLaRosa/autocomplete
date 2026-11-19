@@ -1,31 +1,74 @@
 const completionSpec: Fig.Spec = {
   name: "http.server",
-  description: "",
+  description: "Serve files from a directory over HTTP",
   options: [
     {
+      name: ["-b", "--bind"],
+      description: "Bind to this address (default: all interfaces)",
+      args: {
+        name: "address",
+        description: "E.g. 127.0.0.1",
+      },
+    },
+    {
       name: ["-d", "--directory"],
-      description: "Choose the directory to initiate the server from",
+      description: "Serve this directory (default: current directory)",
       args: {
         template: "folders",
       },
     },
     {
-      name: ["-b", "--bind"],
-      description: "Bind to a specific IP address",
+      name: ["-p", "--protocol"],
+      description: "Conform to this HTTP version (default: HTTP/1.0)",
       args: {
-        name: "IP Address",
-        description: "E.g. 127.0.0.1",
+        name: "version",
+        suggestions: ["HTTP/1.0", "HTTP/1.1"],
       },
     },
     {
-      name: "--cgi",
-      description: "Enable the CGIHTTPRequestHandler",
+      name: "--content-type",
+      description:
+        "Default content type for unknown extensions (default: application/octet-stream)",
+      args: {
+        name: "content type",
+      },
+    },
+    {
+      name: "--tls-cert",
+      description: "Path to the TLS certificate chain file",
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--tls-key",
+      description: "Path to the TLS key file (requires --tls-cert)",
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--tls-password-file",
+      description:
+        "Path to the password file for the TLS key (requires --tls-cert)",
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: ["-H", "--header"],
+      description: "Add a custom response header",
+      isRepeatable: true,
+      args: [{ name: "header" }, { name: "value" }],
     },
   ],
-  // Only uncomment if http.server takes an argument
   args: {
     name: "port",
-    description: "Port number",
+    description: "Bind to this port (default: 8000)",
+    isOptional: true,
   },
 };
 
