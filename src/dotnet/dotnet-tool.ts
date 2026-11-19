@@ -1,62 +1,19 @@
-import { filepaths } from "@tabsmith/autocomplete-generators";
+import {
+  configFileGenerator,
+  nugetRestoreOptions,
+  nugetSearchGenerator,
+  nugetVersionGenerator,
+  verbosityOption,
+} from "./shared";
 
-type SearchResultData = {
-  id: string;
-  title: string;
-  description: string;
-};
+const packageGenerator = nugetSearchGenerator("DotnetTool");
 
-const packageGenerator: Fig.Generator = {
-  script(context) {
-    const searchTerm = context[context.length - 1];
-    return [
-      "curl",
-      "-s",
-      "-H",
-      "Accept: application/json",
-      `https://azuresearch-usnc.nuget.org/query?packageType=DotnetTool&q=${searchTerm}`,
-    ];
-  },
-  postProcess(out) {
-    const searchResults: SearchResultData[] = JSON.parse(out).data;
-
-    return searchResults.map<Fig.Suggestion>((value) => {
-      return {
-        name: value.title,
-        insertValue: value.id,
-        description: value.description,
-      };
-    });
-  },
-};
-
-const versionSearchGenerator: Fig.Generator = {
-  script(context) {
-    const commands = ["install", "update"];
-    const command = context.filter((ctx) => !ctx.startsWith("-"));
-    const idx = command.findIndex((ctx) => commands.includes(ctx));
-    const searchTerm = command[idx + 1].toLowerCase();
-
-    return [
-      "curl",
-      "-s",
-      "-H",
-      "Accept: application/json",
-      `https://api.nuget.org/v3-flatcontainer/${searchTerm}/index.json`,
-    ];
-  },
-  postProcess(out) {
-    const searchResults: string[] = JSON.parse(out).versions;
-
-    return searchResults.reverse().map<Fig.Suggestion>((value) => {
-      return {
-        name: value,
-      };
-    });
-  },
-};
-
-const configFileGenerator = filepaths({ equals: "nuget.config" });
+const versionSearchGenerator = nugetVersionGenerator([
+  "install",
+  "update",
+  "execute",
+  "exec",
+]);
 
 const toolListGenerator: Fig.Generator = {
   trigger: () => true,
@@ -87,185 +44,207 @@ const toolListGenerator: Fig.Generator = {
   },
 };
 
-const toolInstallCommonOptions: Fig.Option[] = [
-  {
-    name: "--add-source",
-    description:
-      "Adds an additional NuGet package source to use during installation. Feeds are accessed in parallel, not sequentially in some order of precedence. If the same package and version is in multiple feeds, the fastest feed wins",
-    args: {
-      name: "source",
-    },
+const globalOption = (description: string): Fig.Option => ({
+  name: ["-g", "--global"],
+  description,
+  exclusiveOn: ["--local", "--tool-path"],
+});
+
+const localOption = (description: string): Fig.Option => ({
+  name: "--local",
+  description,
+  exclusiveOn: ["--global", "--tool-path"],
+});
+
+const toolPathOption = (description: string): Fig.Option => ({
+  name: "--tool-path",
+  description,
+  exclusiveOn: ["--global", "--local"],
+  args: {
+    name: "path",
+    template: "folders",
   },
-  {
-    name: "--configfile",
-    description:
-      "The NuGet configuration file (nuget.config) to use. If specified, only the settings from this file will be used. If not specified, the hierarchy of configuration files from the current directory will be used",
-    args: {
-      name: "file",
-      generators: configFileGenerator,
-    },
+});
+
+const toolManifestOption: Fig.Option = {
+  name: "--tool-manifest",
+  description: "Path to the manifest file",
+  args: {
+    name: "path",
+    isOptional: true,
+    template: "filepaths",
   },
-  {
-    name: "--disable-parallel",
-    description: "Prevent restoring multiple projects in parallel",
+};
+
+const configFileOption: Fig.Option = {
+  name: "--configfile",
+  description: "The NuGet configuration file to use",
+  args: {
+    name: "file",
+    generators: configFileGenerator,
   },
+};
+
+const sourceOption: Fig.Option = {
+  name: "--source",
+  description:
+    "Replace all NuGet package sources to use during installation with these",
+  isRepeatable: true,
+  args: {
+    name: "source",
+  },
+};
+
+const addSourceOption: Fig.Option = {
+  name: "--add-source",
+  description:
+    "Add an additional NuGet package source to use during installation",
+  isRepeatable: true,
+  args: {
+    name: "addsource",
+  },
+};
+
+const prereleaseOption: Fig.Option = {
+  name: "--prerelease",
+  description: "Include pre-release packages",
+};
+
+const allowRollForwardOption: Fig.Option = {
+  name: "--allow-roll-forward",
+  description:
+    "Allow a .NET tool to roll forward to newer versions of the .NET runtime if the runtime it targets isn't installed",
+};
+
+const versionOption: Fig.Option = {
+  name: "--version",
+  description: "The version of the tool package to install",
+  args: {
+    name: "version",
+    debounce: true,
+    generators: versionSearchGenerator,
+  },
+};
+
+// Shared by `dotnet tool install` and `dotnet tool update`.
+const toolUpdateInstallOptions: Fig.Option[] = [
+  globalOption("Install the tool for the current user"),
+  localOption("Install the tool and add to the local tool manifest (default)"),
+  toolPathOption(
+    "The directory where the tool will be installed. The directory will be created if it does not exist"
+  ),
+  versionOption,
+  configFileOption,
+  toolManifestOption,
+  addSourceOption,
+  sourceOption,
   {
     name: "--framework",
-    description:
-      "Specifies the target framework to install the tool for. By default, the .NET SDK tries to choose the most appropriate target framework",
+    description: "The target framework to install the tool for",
     args: {
       name: "framework",
     },
   },
+  prereleaseOption,
+  ...nugetRestoreOptions(),
+  verbosityOption(
+    "Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]"
+  ),
   {
-    name: ["-g", "--global"],
-    description:
-      "Specifies that the installation is user wide. Can't be combined with the --tool-path option. Omitting both --global and --tool-path specifies a local tool installation",
-    exclusiveOn: ["--tool-path"],
-  },
-  {
-    name: "--ignore-failed-sources",
-    description: "Treat package source failures as warnings",
-  },
-  {
-    name: "--interactive",
-    description:
-      "Allows the command to stop and wait for user input or action. For example, to complete authentication",
-  },
-  {
-    name: "--local",
-    description:
-      "Update the tool and the local tool manifest. Can't be combined with the --global option or the --tool-path option",
-    exclusiveOn: ["--global", "--tool-path"],
-  },
-  {
-    name: "--no-cache",
-    description: "Do not cache packages and HTTP requests",
-  },
-  {
-    name: "--tool-manifest",
-    description: "Path to the manifest file",
-    args: {
-      name: "path",
-      template: "filepaths",
-    },
-  },
-  {
-    name: ["-v", "--verbosity"],
-    description:
-      "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. The default is minimal",
-    args: {
-      name: "verbosity",
-      suggestions: ["quiet", "minimal", "normal", "detailed", "diagnostic"],
-    },
-  },
-  {
-    name: "--version",
-    description:
-      "The version of the tool to install. By default, the latest stable package version is installed. Use this option to install preview or older versions of the tool",
-    args: {
-      name: "version",
-      debounce: true,
-      generators: versionSearchGenerator,
-    },
+    name: "--allow-downgrade",
+    description: "Allow package downgrade when installing a .NET tool package",
   },
 ];
 
 const completionSpec: Fig.Spec = {
   name: "tool",
-  description:
-    "The dotnet tool install command provides a way for you to install .NET tools on your machine",
+  description: "Install or work with tools that extend the .NET experience",
   subcommands: [
     {
       name: "install",
+      description:
+        "Install global or local tool. Local tools are added to manifest and restored",
       args: {
-        name: "package",
+        name: "packageId",
+        description:
+          "Package reference in the form of a package identifier like 'dotnetsay' or package identifier and version separated by '@' like 'dotnetsay@2.1.7'",
         debounce: true,
         generators: packageGenerator,
       },
-      options: toolInstallCommonOptions,
+      options: [
+        ...toolUpdateInstallOptions,
+        {
+          name: ["-a", "--arch"],
+          description: "The target architecture",
+          args: {
+            name: "arch",
+            suggestions: ["x86", "x64", "arm", "arm64"],
+          },
+        },
+        {
+          name: "--create-manifest-if-needed",
+          description:
+            "Create a tool manifest if one isn't found during tool installation. For information on how manifests are located, see https://aka.ms/dotnet/tools/create-manifest-if-needed",
+        },
+        allowRollForwardOption,
+      ],
     },
     {
-      name: "list",
-      description:
-        "The dotnet tool list command provides a way for you to list all .NET global, tool-path, or local tools installed on your machine. The command lists the package name, version installed, and the tool command",
+      name: "uninstall",
+      description: "Uninstall a global tool or local tool",
+      args: {
+        name: "packageId",
+        description: "Package reference",
+        generators: toolListGenerator,
+      },
       options: [
+        globalOption(
+          "Uninstall the tool from the current user's tools directory"
+        ),
+        localOption(
+          "Uninstall the tool and remove it from the local tool manifest"
+        ),
+        toolPathOption("The directory containing the tool to uninstall"),
+        toolManifestOption,
+      ],
+    },
+    {
+      name: "update",
+      description: "Update a global or local tool",
+      args: {
+        name: "packageId",
+        description:
+          "Package reference in the form of a package identifier like 'dotnetsay' or package identifier and version separated by '@' like 'dotnetsay@2.1.7'",
+        isOptional: true,
+        generators: toolListGenerator,
+      },
+      options: [
+        ...toolUpdateInstallOptions,
         {
-          name: ["-g", "--global"],
-          description:
-            "Lists user-wide global tools. Can't be combined with the --tool-path option. Omitting both --global and --tool-path lists local tools",
-          exclusiveOn: ["--tool-path"],
-        },
-        {
-          name: "--local",
-          description:
-            "Lists local tools for the current directory. Can't be combined with the --global or --tool-path options. Omitting both --global and --tool-path lists local tools even if --local is not specified",
-          exclusiveOn: ["--global", "--tool-path"],
-        },
-        {
-          name: "--tool-path",
-          description:
-            "Specifies a custom location where to find global tools. PATH can be absolute or relative. Can't be combined with the --global option. Omitting both --global and --tool-path lists local tools",
-          exclusiveOn: ["--global"],
+          name: "--all",
+          description: "Update all tools",
         },
       ],
     },
     {
-      name: "restore",
-      description:
-        "The dotnet tool restore command finds the tool manifest file that is in scope for the current directory and installs the tools that are listed in it. For information about manifest files, see Install a local tool and Invoke a local tool",
+      name: "list",
+      description: "List tools installed globally or locally",
+      args: {
+        name: "packageId",
+        description: "The NuGet Package Id of the tool to list",
+        isOptional: true,
+        generators: toolListGenerator,
+      },
       options: [
+        globalOption("List tools installed for the current user"),
+        localOption("List the tools installed in the local tool manifest"),
+        toolPathOption("The directory containing the tools to list"),
         {
-          name: "--configfile",
-          description:
-            "The NuGet configuration file (nuget.config) to use. If specified, only the settings from this file will be used. If not specified, the hierarchy of configuration files from the current directory will be used",
+          name: "--format",
+          description: "The output format for the list of tools",
           args: {
-            name: "file",
-            generators: configFileGenerator,
-          },
-        },
-        {
-          name: "--add-source",
-          description:
-            "Adds an additional NuGet package source to use during installation. Feeds are accessed in parallel, not sequentially in some order of precedence. If the same package and version is in multiple feeds, the fastest feed wins",
-          args: {
-            name: "source",
-          },
-        },
-        {
-          name: "--tool-manifest",
-          description: "Path to the manifest file",
-          args: {
-            name: "path",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--ignore-failed-sources",
-          description: "Treat package source failures as warnings",
-        },
-        {
-          name: "--no-cache",
-          description: "Do not cache packages and HTTP requests",
-        },
-        {
-          name: "--interactive",
-          description:
-            "Allows the command to stop and wait for user input or action. For example, to complete authentication",
-        },
-        {
-          name: ["-v", "--verbosity"],
-          description:
-            "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. The default is minimal",
-          args: {
-            name: "verbosity",
-            suggestions: [
-              "quiet",
-              "minimal",
-              "normal",
-              "detailed",
-              "diagnostic",
-            ],
+            name: "format",
+            suggestions: ["table", "json"],
           },
         },
       ],
@@ -273,77 +252,106 @@ const completionSpec: Fig.Spec = {
     {
       name: "run",
       description:
-        "The dotnet tool run command searches tool manifest files that are in scope for the current directory. When it finds a reference to the specified tool, it runs the tool",
-      args: {
-        name: "command",
-        generators: toolListGenerator,
-      },
+        "Run a local tool. Note that this command cannot be used to run a global tool",
+      args: [
+        {
+          name: "commandName",
+          description: "The command name of the tool to run",
+          generators: toolListGenerator,
+        },
+        {
+          name: "toolArguments",
+          description: "Arguments forwarded to the tool",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
+      options: [allowRollForwardOption],
     },
     {
       name: "search",
-      description:
-        "The dotnet tool search command provides a way for you to search NuGet for tools that can be used as .NET global, tool-path, or local tools. The command searches the tool names and metadata such as titles, descriptions, and tags",
+      description: "Search dotnet tools in nuget.org",
+      args: {
+        name: "searchTerm",
+        description:
+          "Search term from package id or package description. Require at least one character",
+      },
       options: [
         {
           name: "--detail",
-          description: "Shows detailed results from the query",
-        },
-        {
-          name: "--prerelease",
-          description: "Includes pre-release packages",
+          description: "Show detail result of the query",
         },
         {
           name: "--skip",
-          description:
-            "Specifies the number of query results to skip. Used for pagination",
+          description: "The number of results to skip, for pagination",
           args: {
-            name: "number",
+            name: "skip",
           },
         },
         {
           name: "--take",
-          description:
-            "Specifies the number of query results to show. Used for pagination",
+          description: "The number of results to return, for pagination",
           args: {
-            name: "number",
+            name: "take",
           },
         },
+        prereleaseOption,
       ],
     },
     {
-      name: "uninstall",
+      name: "restore",
+      description: "Restore tools defined in the local tool manifest",
+      options: [
+        configFileOption,
+        addSourceOption,
+        {
+          ...toolManifestOption,
+          description: "Path to the manifest file",
+        },
+        verbosityOption(
+          "Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]"
+        ),
+        ...nugetRestoreOptions(),
+      ],
+    },
+    {
+      name: ["execute", "exec"],
       description:
-        "The dotnet tool uninstall command provides a way for you to uninstall .NET tools from your machine",
-      args: {
-        name: "package",
-        description:
-          "Name/ID of the NuGet package that contains the .NET tool to uninstall. You can find the package name using the dotnet tool list command",
-        generators: toolListGenerator,
-      },
+        "Executes a tool from source without permanently installing it",
+      args: [
+        {
+          name: "packageId",
+          description:
+            "Package reference in the form of a package identifier like 'dotnetsay' or package identifier and version separated by '@' like 'dotnetsay@2.1.7'",
+          debounce: true,
+          generators: packageGenerator,
+        },
+        {
+          name: "commandArguments",
+          description: "Arguments forwarded to the tool",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
       options: [
         {
-          name: ["-g", "--global"],
-          description:
-            "Specifies that the tool to be removed is from a user-wide installation. Can't be combined with the --tool-path option. Omitting both --global and --tool-path specifies that the tool to be removed is a local tool",
-          exclusiveOn: ["--tool-path"],
+          ...versionOption,
+          description: "The version of the tool package to run",
         },
         {
-          name: "--tool-path",
-          description:
-            "Specifies the location where to uninstall the tool. PATH can be absolute or relative. Can't be combined with the --global option. Omitting both --global and --tool-path specifies that the tool to be removed is a local tool",
-          exclusiveOn: ["--global"],
+          name: ["-y", "--yes"],
+          description: "Accept all confirmation prompts using 'yes'",
         },
+        allowRollForwardOption,
+        prereleaseOption,
+        configFileOption,
+        sourceOption,
+        addSourceOption,
+        verbosityOption(
+          "Set the MSBuild verbosity level. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]"
+        ),
+        ...nugetRestoreOptions(),
       ],
-    },
-    {
-      name: "update",
-      description:
-        "The dotnet tool update command provides a way for you to update .NET tools on your machine to the latest stable version of the package",
-      args: {
-        name: "package",
-        generators: toolListGenerator,
-      },
-      options: toolInstallCommonOptions,
     },
   ],
 };

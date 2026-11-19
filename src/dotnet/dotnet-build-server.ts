@@ -1,6 +1,6 @@
 const completionSpec: Fig.Spec = {
   name: "build-server",
-  description: "Interacts with servers started by a build",
+  description: "Interact with servers started from a build",
   subcommands: [
     {
       name: "shutdown",
@@ -9,15 +9,15 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: "--msbuild",
-          description: "Shuts down the MSBuild build server",
-        },
-        {
-          name: "--razor",
-          description: "Shuts down the Razor build server",
+          description: "Shut down the MSBuild build server",
         },
         {
           name: "--vbcscompiler",
-          description: "Shuts down the VB/C# compiler build server",
+          description: "Shut down the VB/C# compiler build server",
+        },
+        {
+          name: "--razor",
+          description: "Shut down the Razor build server",
         },
       ],
     },

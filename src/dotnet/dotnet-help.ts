@@ -1,10 +1,11 @@
 const completionSpec: Fig.Spec = {
   name: "help",
-  description:
-    "The dotnet help command opens up the reference page for more detailed information about the specified command at docs.microsoft.com",
+  description: ".NET CLI help utility",
   args: {
-    name: "command",
-    description: "Name of the .NET CLI command",
+    name: "command_name",
+    description: "The SDK command to launch online help for",
+    isOptional: true,
+    isVariadic: true,
   },
 };
 

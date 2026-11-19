@@ -20,6 +20,8 @@ import {
 
 const completionSpec: Fig.Spec = {
   name: "build",
+  // The dotnet CLI does not bundle single-dash flags (-lp, -bl, -lang, ...).
+  parserDirectives: { flagsArePosixNoncompliant: true },
   description: ".NET Builder",
   args: {
     name: "project | solution | file",
@@ -33,10 +35,10 @@ const completionSpec: Fig.Spec = {
     ...implicitRestoreOptions(),
     useCurrentRuntimeOption("Use current runtime as the target runtime"),
     frameworkOption(
-      "The target framework to build for. The target framework must also be specified in the project file",
+      "The target framework to build for. The target framework must also be specified in the project file"
     ),
     configurationOption(
-      "The configuration to use for building the project. The default for most projects is 'Debug'",
+      "The configuration to use for building the project. The default for most projects is 'Debug'"
     ),
     versionSuffixOption,
     noRestoreOption,
@@ -49,7 +51,7 @@ const completionSpec: Fig.Spec = {
       description: "Do not use incremental building",
     },
     noDependenciesOption(
-      "Do not build project-to-project references and only build the specified project",
+      "Do not build project-to-project references and only build the specified project"
     ),
     noLogoOption,
     ...selfContainedOptions,

@@ -1,34 +1,24 @@
-import { filepaths } from "@tabsmith/autocomplete-generators";
+import {
+  packageRemoveSubcommand,
+  projectOrFileGenerator,
+  referenceRemoveSubcommand,
+} from "./shared";
 
-const projectGenerator = filepaths({ extensions: ["csproj"] });
-
+// Legacy form of `dotnet package remove` and `dotnet reference remove`.
 const completionSpec: Fig.Spec = {
   name: "remove",
+  description:
+    "Remove a package or reference from a .NET project (legacy form of 'dotnet package remove' and 'dotnet reference remove')",
   args: {
-    name: "project",
+    name: "PROJECT | FILE",
     description:
-      "Specifies the project file. If not specified, the command searches the current directory for one",
+      "The project file or C# file-based app to operate on. If a file is not specified, the command will search the current directory for a project file",
     isOptional: true,
-    generators: projectGenerator,
+    generators: projectOrFileGenerator,
   },
   subcommands: [
-    {
-      name: "package",
-      description:
-        "The dotnet remove package command provides a convenient option to remove a NuGet package reference from a project",
-      args: {
-        name: "id",
-      },
-    },
-    {
-      name: "reference",
-      description:
-        "The dotnet remove reference command provides a convenient option to remove project references from a project",
-      args: {
-        name: "ref",
-        generators: projectGenerator,
-      },
-    },
+    packageRemoveSubcommand("package"),
+    referenceRemoveSubcommand("reference"),
   ],
 };
 
