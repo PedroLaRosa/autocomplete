@@ -1,3 +1,5 @@
+// tsx v4.23.15 (npm latest, 2026-11-19). Source: installed tsx@4.23.15 from npm and ran `tsx --help`,
+// `tsx watch --help` and read dist/cli.mjs flag definitions. Node.js flags that tsx forwards to node are not listed.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const scriptPathArgs: Fig.Arg = {
@@ -18,6 +20,42 @@ const completionSpec: Fig.Spec = {
       name: "watch",
       description: "Run the script and watch for changes",
       args: scriptPathArgs,
+      options: [
+        {
+          name: "--clear-screen",
+          description: "Disable clearing the screen on rerun",
+          insertValue: "--clear-screen=false",
+        },
+        {
+          name: "--exclude",
+          description: "Paths & globs to exclude from being watched",
+          isRepeatable: true,
+          args: {
+            name: "path or glob",
+            template: ["filepaths", "folders"],
+          },
+        },
+        {
+          name: "--ignore",
+          description:
+            "Paths & globs to exclude from being watched (use --exclude)",
+          deprecated: true,
+          isRepeatable: true,
+          args: {
+            name: "path or glob",
+            template: ["filepaths", "folders"],
+          },
+        },
+        {
+          name: "--include",
+          description: "Additional paths & globs to watch",
+          isRepeatable: true,
+          args: {
+            name: "path or glob",
+            template: ["filepaths", "folders"],
+          },
+        },
+      ],
     },
   ],
   options: [
@@ -30,15 +68,6 @@ const completionSpec: Fig.Spec = {
       name: "--no-cache",
       description: "Disable caching",
       isPersistent: true,
-    },
-
-    {
-      name: "--clear-screen",
-      description: "Disable clearing the screen on rerun",
-      isPersistent: true,
-      insertValue: "--clear-screen=false",
-      dependsOn: ["watch"],
-      args: scriptPathArgs,
     },
 
     {
