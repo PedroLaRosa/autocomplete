@@ -1,9 +1,13 @@
-import { keyValue } from "@tabsmith/autocomplete-generators";
+// JMeter v5.6.3 (latest release on Maven Central, 2026-11-19). Source: apache/jmeter tag v5.6.3-rc2 (src/core/.../JMeter.java option descriptors, xdocs/usermanual/get-started.xml full option list)
 
 const completionSpec: Fig.Spec = {
   name: "jmeter",
   description: "Apache JMeter - 100% Java Load Testing Tool",
   options: [
+    {
+      name: ["-?", "--?"],
+      description: "Print command line options and exit",
+    },
     {
       name: ["-v", "--version"],
       description: "Print the JMeter version information and exit",
@@ -24,11 +28,11 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-q", "--addprop"],
       description: "Additional JMeter property file(s)",
+      isRepeatable: true,
       args: {
-        name: "files...",
+        name: "file",
         template: "filepaths",
-        isVariadic: true,
-        description: "Additional JMeter property file(s)",
+        description: "Additional JMeter property file",
       },
     },
     {
@@ -54,19 +58,19 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-i", "--jmeterlogconf"],
-      description: "JMeter logging configuration file",
+      description: "JMeter logging configuration file (log4j2.xml)",
       args: {
         name: "jmeterlogconf",
-        description: "Jmeter logging configuration file",
+        description: "JMeter logging configuration file (log4j2.xml)",
         template: "filepaths",
       },
     },
     {
       name: ["-j", "--jmeterlogfile"],
-      description: "JMeter run log file",
+      description: "JMeter run log file (jmeter.log)",
       args: {
         name: "jmeterlogfile",
-        description: "JMeter run log file",
+        description: "JMeter run log file (jmeter.log)",
         template: "filepaths",
         suggestCurrentToken: true,
       },
@@ -127,33 +131,36 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-J", "--jmeterproperty"],
-      description: "Define additional JMeter properties <argument>=<value>",
+      description: "Define additional JMeter properties",
+      isRepeatable: true,
       args: {
-        name: "jmeterproperty",
-        description: "Define additional JMeter properties <argument>=<value>",
+        name: "name=value",
+        description: "JMeter property, e.g. -Jthreads=10",
       },
     },
     {
       name: ["-G", "--globalproperty"],
       description:
         "Define Global properties (sent to servers) e.g. -Gport=123 or -Gglobal.properties",
+      isRepeatable: true,
       args: {
-        name: "globalproperty",
-        description:
-          "Define Global properties (sent to servers) e.g. -Gport=123 or -Gglobal.properties",
+        name: "name=value",
+        description: "Global property, e.g. -Gport=123",
       },
     },
     {
       name: ["-D", "--systemproperty"],
-      description: "Define additional system properties <argument>=<value>",
+      description: "Define additional system properties",
+      isRepeatable: true,
       args: {
-        name: "systemproperty",
-        description: "Define additional system properties <argument>=<value>",
+        name: "name=value",
+        description: "System property, e.g. -Dhttp.proxyHost=localhost",
       },
     },
     {
       name: ["-S", "--systemPropertyFile"],
       description: "Additional system property file(s)",
+      isRepeatable: true,
       args: {
         name: "systemPropertyFile",
         description: "Additional system property file(s)",
@@ -162,15 +169,26 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-f", "--forceDeleteResultFile"],
-      description: "Force delete existing results files and web report folder",
+      description:
+        "Force delete existing results files and web report folder if present before starting the test",
     },
     {
       name: ["-L", "--loglevel"],
       description:
         "[category=]level e.g. jorphan=INFO, jmeter.util=DEBUG or com.example.foo=WARN",
+      isRepeatable: true,
       args: {
-        name: "loglevel",
-        suggestions: ["OFF", "FATAL", "WARN", "INFO", "DEBUG", "TRACE", "ALL"],
+        name: "[category=]level",
+        suggestions: [
+          "OFF",
+          "FATAL",
+          "ERROR",
+          "WARN",
+          "INFO",
+          "DEBUG",
+          "TRACE",
+          "ALL",
+        ],
       },
     },
     {
@@ -182,7 +200,7 @@ const completionSpec: Fig.Spec = {
       description: "Start these remote servers (overrides remote_hosts)",
       args: {
         name: "servers",
-        isVariadic: true,
+        description: "Comma-separated list of remote servers",
       },
     },
     {
@@ -194,11 +212,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-X", "--remoteexit"],
-      description: "Exit the remote servers at end  of test (non-GUI)",
+      description: "Exit the remote servers at end of test (non-GUI)",
     },
     {
       name: ["-g", "--reportonly"],
       description: "Generate report dashboard only, from a test results file",
+      args: {
+        name: "resultsfile",
+        description: "Test results file (.jtl)",
+        template: "filepaths",
+      },
     },
     {
       name: ["-e", "--reportatendofloadtests"],
