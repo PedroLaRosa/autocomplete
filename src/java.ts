@@ -180,7 +180,10 @@ const completionSpec: Fig.Spec = {
         name: "value",
         suggestions: [
           { name: "allow", description: "Allow without warnings" },
-          { name: "warn", description: "Warn on the first occurrence (default)" },
+          {
+            name: "warn",
+            description: "Warn on the first occurrence (default)",
+          },
           {
             name: "debug",
             description: "Warn with a stack trace on every occurrence",
@@ -216,7 +219,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--add-reads",
-      description: "Make a module read another module, regardless of declaration",
+      description:
+        "Make a module read another module, regardless of declaration",
       isRepeatable: true,
       args: {
         name: "module=target-module(,target-module)*",
@@ -258,7 +262,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--enable-preview",
-      description: "Allow classes to depend on preview features of this release",
+      description:
+        "Allow classes to depend on preview features of this release",
     },
     {
       name: "--finalization",
@@ -293,14 +298,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-ea", "-enableassertions"],
-      description:
-        "Enable assertions, -ea[:<packagename>...|:<classname>]",
+      description: "Enable assertions, -ea[:<packagename>...|:<classname>]",
       isRepeatable: true,
     },
     {
       name: ["-da", "-disableassertions"],
-      description:
-        "Disable assertions, -da[:<packagename>...|:<classname>]",
+      description: "Disable assertions, -da[:<packagename>...|:<classname>]",
       isRepeatable: true,
     },
     {
@@ -331,7 +334,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-splash:",
-      description: "Show a splash screen with the specified image, -splash:<imagepath>",
+      description:
+        "Show a splash screen with the specified image, -splash:<imagepath>",
     },
     {
       name: "-verbose:class",
@@ -397,7 +401,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-Xcomp",
-      description: "Force compilation of methods on first invocation (testing only)",
+      description:
+        "Force compilation of methods on first invocation (testing only)",
     },
     {
       name: "-Xdebug",
@@ -459,8 +464,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-Xshare:on",
-      description:
-        "Require shared class data, otherwise fail (testing only)",
+      description: "Require shared class data, otherwise fail (testing only)",
     },
     {
       name: "-Xshare:off",
@@ -644,11 +648,7 @@ const completionSpec: Fig.Spec = {
       "+ShowMessageBoxOnError",
       "Show a dialog box on an irrecoverable error so a debugger can be attached"
     ),
-    xxValue(
-      "ThreadStackSize",
-      "size",
-      "Java thread stack size in kilobytes"
-    ),
+    xxValue("ThreadStackSize", "size", "Java thread stack size in kilobytes"),
     xxFlag("-UseCompactObjectHeaders", "Disable compact object headers"),
     xxFlag("-UseCompressedOops", "Disable the use of compressed pointers"),
     xxFlag(
@@ -715,11 +715,7 @@ const completionSpec: Fig.Spec = {
       "scale",
       "Scale when methods are first compiled, a floating point value"
     ),
-    xxValue(
-      "ReservedCodeCacheSize",
-      "size",
-      "Maximum code cache size"
-    ),
+    xxValue("ReservedCodeCacheSize", "size", "Maximum code cache size"),
     xxFlag("-TieredCompilation", "Disable tiered compilation"),
     xxFlag(
       "+PrintCompilation",
@@ -762,10 +758,7 @@ const completionSpec: Fig.Spec = {
     // Garbage collection and heap sizing
     xxFlag("+UseG1GC", "Use the garbage-first (G1) garbage collector"),
     xxFlag("+UseZGC", "Use the Z garbage collector (low latency)"),
-    xxFlag(
-      "+UseParallelGC",
-      "Use the parallel (throughput) garbage collector"
-    ),
+    xxFlag("+UseParallelGC", "Use the parallel (throughput) garbage collector"),
     xxFlag("+UseSerialGC", "Use the serial garbage collector"),
     xxFlag(
       "+UseShenandoahGC",
@@ -841,11 +834,7 @@ const completionSpec: Fig.Spec = {
       "size",
       "Class metadata space size that triggers the first garbage collection"
     ),
-    xxValue(
-      "MaxNewSize",
-      "size",
-      "Maximum size of the young generation heap"
-    ),
+    xxValue("MaxNewSize", "size", "Maximum size of the young generation heap"),
     xxValue("NewSize", "size", "Initial size of the young generation heap"),
     xxValue(
       "NewRatio",
@@ -892,13 +881,21 @@ const completionSpec: Fig.Spec = {
       "threads",
       "Number of stop-the-world GC worker threads"
     ),
-    xxValue("ConcGCThreads", "threads", "Number of threads used for concurrent GC"),
+    xxValue(
+      "ConcGCThreads",
+      "threads",
+      "Number of threads used for concurrent GC"
+    ),
     xxValue(
       "SoftRefLRUPolicyMSPerMB",
       "time",
       "Milliseconds a softly reachable object is kept per free megabyte of heap"
     ),
-    xxValue("TLABSize", "size", "Initial size of a thread-local allocation buffer"),
+    xxValue(
+      "TLABSize",
+      "size",
+      "Initial size of a thread-local allocation buffer"
+    ),
     xxValue(
       "ZCollectionInterval",
       "seconds",
@@ -919,7 +916,10 @@ const completionSpec: Fig.Spec = {
       "+UseStringDeduplication",
       "Enable string deduplication (requires G1)"
     ),
-    xxFlag("+UseNUMA", "Optimize for machines with non-uniform memory architecture"),
+    xxFlag(
+      "+UseNUMA",
+      "Optimize for machines with non-uniform memory architecture"
+    ),
     xxFlag(
       "-UseTLAB",
       "Disable thread-local allocation blocks in the young generation"
@@ -929,12 +929,14 @@ const completionSpec: Fig.Spec = {
       "Disable the GC time limit that triggers an OutOfMemoryError"
     ),
     xxFlag("-UseAdaptiveSizePolicy", "Disable adaptive generation sizing"),
-    xxFlag("+PrintAdaptiveSizePolicy", "Print information about adaptive-generation sizing"),
+    xxFlag(
+      "+PrintAdaptiveSizePolicy",
+      "Print information about adaptive-generation sizing"
+    ),
     // Deprecated
     {
       name: "-XX:+FlightRecorder",
-      description:
-        "Enable Java Flight Recorder (not needed since JDK 8u40)",
+      description: "Enable Java Flight Recorder (not needed since JDK 8u40)",
       deprecated: true,
     },
     {
