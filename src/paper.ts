@@ -1,8 +1,9 @@
 // Paper: NOT verified against any release (2026-11-19). No standalone `paper` CLI with this command
-// tree exists on npm, PyPI, crates.io or Homebrew, and web search finds none. Source checked: git history
-// of this repo; the tree below is a name-substituted copy of the early-2022 Open Policy Agent `opa` spec
-// (bench, build, eval, run, ...), so it lacks newer OPA flags. Left as-is apart from removing a
-// user-specific history path default. The maintained OPA spec is src/opa.ts; consider deleting this one.
+// tree exists: npm `paper` is Paper.js, PyPI `paper` is a Django cache lib, crates.io `paper` and the
+// Homebrew `paper` cask (pap.er) are unrelated, and web search finds nothing. Source checked: git
+// history of this repo; the tree below is a name-substituted copy of the early-2022 Open Policy Agent
+// `opa` spec (bench, build, eval, run, ...), so it lacks newer OPA flags. Left as-is apart from
+// removing a user-specific history path default. The maintained OPA spec is src/opa.ts.
 const completionSpec: Fig.Spec = {
   name: "paper",
   description: "The Paper CLI",
