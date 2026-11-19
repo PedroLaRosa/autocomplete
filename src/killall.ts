@@ -1,4 +1,4 @@
-// killall (macOS BSD, man page dated 2020-06-27, 2026-11-19). Source: apple-oss-distributions/shell_cmds tag shell_cmds-329 killall/killall.1 + killall/killall.c (getopt "c:dehIlmqst:u:vz", -help, -SIGNAL parsing, sys_signame list); man page and source only, not run on macOS. Changes: option descriptions refreshed from the man page, -s/-d/-v semantics corrected, -m marked dangerous, process generator no longer lists the ps header. -j (jail) is FreeBSD only and is not listed.
+// killall (macOS BSD, man page dated 2020-06-27, 2026-11-19). Source: apple-oss-distributions/shell_cmds tag shell_cmds-329 killall/killall.1 + killall/killall.c (getopt "c:dehIlmqst:u:vz", -help, -SIGNAL parsing, sys_signame list); man page and source only, not run on macOS. Changes: option descriptions refreshed from the man page, -s/-d/-v semantics corrected, -m marked dangerous, process generator no longer lists the ps header. -j (jail) is FreeBSD only and is not listed. The signal option accepts a name with or without SIG (case-insensitive) or a number; the spec lists the macOS signal names as -SIG<NAME> (TERM, the default, is omitted).
 // Linux incompatible
 
 const signals = [
