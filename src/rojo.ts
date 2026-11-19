@@ -1,4 +1,16 @@
+// Rojo v7.7.1 (GitHub release, 2026-10-02). Source: clap structs in
+// rojo-rbx/rojo src/cli/*.rs at tag v7.7.1, 2026-11-19
 import { filepaths } from "@tabsmith/autocomplete-generators";
+
+const robloxFiles = filepaths({
+  extensions: ["rbxm", "rbxl", "rbxmx", "rbxlx"],
+});
+
+const project = (description: string): Fig.Arg => ({
+  name: "PROJECT",
+  description,
+  isOptional: true,
+});
 
 const completionSpec: Fig.Spec = {
   name: "rojo",
@@ -11,6 +23,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "SUBCOMMAND",
         template: "help",
+        isOptional: true,
       },
     },
     {
@@ -21,15 +34,20 @@ const completionSpec: Fig.Spec = {
           name: ["--output", "-o"],
           description:
             "Where to output the result. Should end in .rbxm, .rbxl, .rbxmx, or .rbxlx",
-          isRequired: true,
+          exclusiveOn: ["--plugin", "-p"],
           args: {
             name: "OUTPUT",
-            description:
-              "Where to output the result. Should end in .rbxm, .rbxl, .rbxmx, or .rbxlx",
-            generators: filepaths({
-              extensions: ["rbxm", "rbxl", "rbxmx", "rbxlx"],
-            }),
+            generators: robloxFiles,
             suggestCurrentToken: true,
+          },
+        },
+        {
+          name: ["--plugin", "-p"],
+          description:
+            "Output the result in the local plugins folder instead. Should end in .rbxm or .rbxmx",
+          exclusiveOn: ["--output", "-o"],
+          args: {
+            name: "PLUGIN",
           },
         },
         {
@@ -38,11 +56,9 @@ const completionSpec: Fig.Spec = {
             "Whether to automatically rebuild when any input files change",
         },
       ],
-      args: {
-        name: "PROJECT",
-        description:
-          "Path to the project to serve. Defaults to the current directory [default: ]",
-      },
+      args: project(
+        "Path to the project to build. Defaults to the current directory"
+      ),
     },
     {
       name: "doc",
@@ -52,11 +68,9 @@ const completionSpec: Fig.Spec = {
       name: "fmt-project",
       description:
         "Reformat a Rojo project using the standard JSON formatting rules",
-      args: {
-        name: "PROJECT",
-        description:
-          "Path to the project to format. Defaults to the current directory [default: ]",
-      },
+      args: project(
+        "Path to the project to format. Defaults to the current directory"
+      ),
     },
     {
       name: "init",
@@ -65,38 +79,73 @@ const completionSpec: Fig.Spec = {
         {
           name: "--kind",
           description:
-            "The kind of project to create, 'place' or 'model'. Defaults to place",
+            "The kind of project to create, 'place', 'plugin', or 'model'. Defaults to place",
           args: {
             name: "KIND",
-            description:
-              "The kind of project to create, 'place' or 'model'. Defaults to place",
-            suggestions: ["place", "model"],
+            suggestions: ["place", "plugin", "model"],
+            default: "place",
           },
+        },
+        {
+          name: "--skip-git",
+          description: "Skips the initialization of a git repository",
         },
       ],
       args: {
         name: "PATH",
         description:
-          "Path to the place to create the project. Defaults to the current directory [default: ]",
+          "Path to the place to create the project. Defaults to the current directory",
+        isOptional: true,
+        template: "folders",
       },
     },
     {
       name: "plugin",
       description: "Install Rojo's plugin",
+      subcommands: [
+        {
+          name: "install",
+          description:
+            "Install the plugin in Roblox Studio's plugins folder, overwriting any installed copy",
+        },
+        {
+          name: "uninstall",
+          description: "Removes the plugin if it is installed",
+        },
+      ],
     },
     {
       name: "serve",
       description: "Expose a Rojo project to the Rojo Studio plugin",
       options: [
         {
-          name: "address",
+          name: "--address",
           description: "The IP address to listen on. Defaults to `127.0.0.1`",
           args: {
             name: "ADDRESS",
-            description: "The IP address to listen on. Defaults to `127.0.0.1`",
+          },
+        },
+        {
+          name: "--port",
+          description:
+            "The port to listen on. Defaults to the project's preference, or `34872` if it has none",
+          args: {
+            name: "PORT",
+          },
+        },
+        {
+          name: "--allowed-hosts",
+          description:
+            "Extra Host/Origin values the server will accept. Repeat or comma-separate to allow several",
+          isRepeatable: true,
+          args: {
+            name: "ALLOWED_HOSTS",
           },
         },
       ],
+      args: project(
+        "Path to the project to serve. Defaults to the current directory"
+      ),
     },
     {
       name: "sourcemap",
@@ -113,41 +162,73 @@ const completionSpec: Fig.Spec = {
             "Where to output the sourcemap. Omit this to use stdout instead of writing to a file. Should end in .json",
           args: {
             name: "OUTPUT",
-            description:
-              "Where to output the sourcemap. Omit this to use stdout instead of writing to a file. Should end in .json",
-            generators: filepaths({
-              extensions: ["rbxm", "rbxl", "rbxmx", "rbxlx"],
-            }),
+            generators: filepaths({ extensions: ["json"] }),
             suggestCurrentToken: true,
           },
         },
+        {
+          name: "--watch",
+          description:
+            "Whether to automatically recreate a snapshot when any input files change",
+        },
+        {
+          name: "--absolute",
+          description:
+            "Whether the sourcemap should use absolute paths instead of relative paths",
+        },
       ],
-      args: {
-        name: "PROJECT",
-        description:
-          "Path to the project to use for the sourcemap. Defaults to the current directory [default: ]",
-      },
+      args: project(
+        "Path to the project to use for the sourcemap. Defaults to the current directory"
+      ),
+    },
+    {
+      name: "syncback",
+      description:
+        "Performs 'syncback' for the provided project, using the input file given",
+      options: [
+        {
+          name: ["--input", "-i"],
+          description: "Path to the Roblox file to pull Instances from",
+          isRequired: true,
+          args: {
+            name: "INPUT",
+            generators: robloxFiles,
+          },
+        },
+        {
+          name: ["--list", "-l"],
+          description:
+            "Emit a list of all files and directories that will be added or removed into stdout",
+        },
+        {
+          name: "--dry-run",
+          description: "Don't write anything to the file system",
+        },
+        {
+          name: ["--non-interactive", "-y"],
+          description: "Skip the prompt for writing to the file system",
+        },
+      ],
+      args: project("Path to the project to sync back to"),
     },
     {
       name: "upload",
       description: "Builds the project and uploads it to Roblox",
       options: [
         {
-          name: "--api-key",
+          name: "--api_key",
           description:
             "API key obtained from create.roblox.com/credentials. Rojo will use the Open Cloud API when this is provided. Only supports uploading to a place",
           args: {
             name: "API_KEY",
-            description:
-              "API key obtained from create.roblox.com/credentials. Rojo will use the Open Cloud API when this is provided. Only supports uploading to a place",
           },
         },
         {
           name: "--asset_id",
           description: "Asset ID to upload to",
+          isRequired: true,
           args: {
             name: "ASSET_ID",
-            description: "Asset ID to upload to",
           },
         },
         {
@@ -156,8 +237,6 @@ const completionSpec: Fig.Spec = {
             "Authenication cookie to use. If not specified, Rojo will attempt to find one from the system automatically",
           args: {
             name: "COOKIE",
-            description:
-              "Authenication cookie to use. If not specified, Rojo will attempt to find one from the system automatically",
           },
         },
         {
@@ -166,12 +245,12 @@ const completionSpec: Fig.Spec = {
             "The Universe ID of the given place. Required when using the Open Cloud API",
           args: {
             name: "UNIVERSE_ID",
-            description:
-              "The Universe ID of the given place. Required when using the Open Cloud API",
           },
         },
       ],
-      args: {},
+      args: project(
+        "Path to the project to upload. Defaults to the current directory"
+      ),
     },
   ],
   options: [

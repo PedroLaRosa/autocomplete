@@ -1,3 +1,4 @@
+// Nextflow v26.10.6 (GitHub release, 2026-11-12). Source: JCommander parsers in modules/nf-cli-v1 and docs/reference/cli at tag v26.10.6
 const sessionid: Fig.Generator = {
   script: ["bash", "-c", "cat .nextflow/history | awk '{ print $7 }'"],
   postProcess: (output) => {
@@ -78,6 +79,444 @@ const secretname: Fig.Generator = {
   },
 };
 
+const help: Fig.Option = {
+  name: ["-h", "-help"],
+  description: "Print the command usage",
+};
+
+const revision: Fig.Option = {
+  name: ["-r", "-revision"],
+  description:
+    "Revision of the project (either a git branch, tag or commit SHA number)",
+  args: {
+    name: "revision",
+  },
+};
+
+const deep: Fig.Option = {
+  name: ["-d", "-deep"],
+  description: "Create a shallow clone of the specified depth",
+  args: {
+    name: "depth",
+  },
+};
+
+const deprecatedDeep: Fig.Option = {
+  ...deep,
+  deprecated: {
+    description: "Ignored by the multi-revision asset management strategy",
+  },
+};
+
+const hubOptions: Fig.Option[] = [
+  {
+    name: "-hub",
+    description: "Service hub where the project is hosted (Default: github)",
+    args: {
+      name: "service hub",
+      suggestions: ["github", "gitlab", "bitbucket"],
+    },
+  },
+  {
+    name: "-user",
+    description: "Private repository user name",
+    args: {
+      name: "username",
+    },
+  },
+];
+
+const profile: Fig.Option = {
+  name: "-profile",
+  description: "Choose a configuration profile",
+  args: {
+    name: "profile",
+  },
+};
+
+const paramsFile: Fig.Option = {
+  name: "-params-file",
+  description: "Load script parameters from a JSON/YAML file",
+  args: {
+    name: "JSON/YAML file",
+    template: ["filepaths"],
+  },
+};
+
+const entry: Fig.Option = {
+  name: "-entry",
+  description: "Entry workflow name to be executed",
+  deprecated: {
+    description: "Use params in the entry workflow to select what to run",
+  },
+  args: {
+    name: "entry workflow name",
+  },
+};
+
+const latest: Fig.Option = {
+  name: "-latest",
+  description: "Pull latest changes before run (Default: false)",
+};
+
+const mainScript: Fig.Option = {
+  name: "-main-script",
+  description:
+    "The script file to be executed when launching a project directory or repository",
+  args: {
+    name: "script file",
+  },
+};
+
+const stubRun: Fig.Option = {
+  name: ["-stub-run", "-stub"],
+  description:
+    "Execute the workflow replacing process scripts with command stubs (Default: false)",
+};
+
+const workDir: Fig.Option = {
+  name: ["-w", "-work-dir"],
+  description: "Directory where intermediate result files are stored",
+  args: {
+    name: "work dir",
+    template: ["folders"],
+  },
+};
+
+const booleanArg: Fig.Arg = {
+  name: "true|false",
+  suggestions: ["true", "false"],
+};
+
+const runOptions: Fig.Option[] = [
+  {
+    name: "-E",
+    description: "Exports all current system environment (Default: false)",
+  },
+  {
+    name: "-ansi-log",
+    description: "Enable/disable ANSI console logging",
+    args: booleanArg,
+  },
+  {
+    name: "-bucket-dir",
+    description: "Remote bucket where intermediate result files are stored",
+    args: {
+      name: "remote bucket",
+    },
+  },
+  {
+    name: "-cache",
+    description: "Enable/disable processes caching",
+    args: booleanArg,
+  },
+  deprecatedDeep,
+  {
+    name: "-disable-jobs-cancellation",
+    description:
+      "Prevent the cancellation of child jobs on execution termination",
+  },
+  {
+    name: "-dump-channels",
+    description: "Dump channels for debugging purpose",
+    args: {
+      name: "channel tags",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-dump-hashes",
+    description: "Dump task hash keys for debugging purpose (Default: false)",
+    args: {
+      name: "format",
+      isOptional: true,
+      suggestions: ["json"],
+    },
+  },
+  {
+    name: "-e",
+    description:
+      "Add the specified variable to execution environment. Syntax: -e.key=value (Default: {})",
+    requiresSeparator: ".",
+    args: {
+      name: "key=value",
+    },
+  },
+  entry,
+  help,
+  ...hubOptions,
+  latest,
+  {
+    name: "-lib",
+    description: "Library extension path",
+    args: {
+      name: "library extension path",
+    },
+  },
+  mainScript,
+  {
+    name: "-name",
+    description: "Assign a mnemonic name to the a pipeline run",
+    args: {
+      name: "name",
+    },
+  },
+  {
+    name: "-offline",
+    description: "Do not check for remote project updates (Default: false)",
+  },
+  {
+    name: ["-o", "-output-dir"],
+    description: "Directory where workflow outputs are stored",
+    args: {
+      name: "output dir",
+      template: ["folders"],
+    },
+  },
+  {
+    name: "-output-format",
+    description: "Output format for printing workflow outputs",
+    args: {
+      name: "format",
+      suggestions: ["text", "json", "none"],
+    },
+  },
+  paramsFile,
+  {
+    name: "-plugins",
+    description:
+      "Specify the plugins to be applied for this run e.g. nf-amazon,nf-tower",
+    args: {
+      name: "plugins ids separated by comma",
+    },
+  },
+  {
+    name: "-preview",
+    description:
+      "Run the workflow script skipping the execution of all processes",
+  },
+  {
+    name: "-process",
+    description: "Set process options. Syntax: -process.key=value (Default: {}",
+    requiresSeparator: ".",
+    args: {
+      name: "key=value",
+    },
+  },
+  profile,
+  {
+    name: ["-qs", "-queue-size"],
+    description:
+      "Max number of processes that can be executed in parallel by each executor",
+    args: {
+      name: "number",
+    },
+  },
+  {
+    name: "-resume",
+    description:
+      "Execute the script using the cached results, useful to continue executions that was stopped by an error",
+    args: {
+      name: "session ID",
+      isOptional: true,
+      generators: sessionid,
+    },
+  },
+  revision,
+  stubRun,
+  {
+    name: "-test",
+    description: "Test a script function with the name specified",
+    args: {
+      name: "name",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-agent-trace",
+    description:
+      "Log a readable trace of agent execution: turns, model reasoning and tool invocations",
+  },
+  {
+    name: "-with-apptainer",
+    description: "Enable process execution in an Apptainer container",
+    args: {
+      name: "container image",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-charliecloud",
+    description: "Enable process execution in a Charliecloud container runtime",
+    args: {
+      name: "container image",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-cloudcache",
+    description:
+      "Enable the use of object storage bucket as storage for cache meta-data",
+    args: {
+      name: "bucket path",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-conda",
+    description:
+      "Use the specified Conda environment package or file (must end with .yml|.yaml suffix)",
+    args: {
+      name: "conda .yml/.yaml file",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-dag",
+    description: "Create pipeline DAG file",
+    args: {
+      name: "filename, e.g. dag.html",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-docker",
+    description: "Enable process execution in a Docker container",
+    args: {
+      name: "a docker container image",
+      isOptional: true,
+      generators: dockerimage,
+    },
+  },
+  {
+    name: ["-N", "-with-notification"],
+    description:
+      "Send a notification email on workflow completion to the specified recipients",
+    args: {
+      name: "email",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-podman",
+    description: "Enable process execution in a Podman container",
+    args: {
+      name: "container image",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-report",
+    description: "Create processes execution html report",
+    args: {
+      name: "report filename e.g. report.html",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-singularity",
+    description: "Enable process execution in a Singularity container",
+    args: {
+      name: "container image",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-spack",
+    description:
+      "Use the specified Spack environment package or file (must end with .yaml suffix)",
+    args: {
+      name: "spack .yaml file",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-timeline",
+    description: "Create processes execution timeline file",
+    args: {
+      name: "timeline filename e.g. timeline.html",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-tower",
+    description:
+      "Monitor workflow execution with Seqera Platform (formerly Tower Cloud)",
+    args: {
+      name: "endpoint URL",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-trace",
+    description: "Create processes execution tracing file",
+    args: {
+      name: "trace text filename e.g. trace.txt",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-wave",
+    description: "Use Wave containers",
+    args: {
+      name: "endpoint URL",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-with-weblog",
+    description: "Send workflow status messages via HTTP to target URL",
+    deprecated: {
+      description: "Use the nf-weblog plugin instead",
+    },
+    args: {
+      name: "target web URL",
+      isOptional: true,
+    },
+  },
+  {
+    name: "-without-docker",
+    description: "Disable process execution with Docker (Default: false)",
+    hidden: true,
+  },
+  {
+    name: "-without-podman",
+    description: "Disable process execution in a Podman container",
+    hidden: true,
+  },
+  workDir,
+];
+
+const lidArg: Fig.Arg = {
+  name: "lid",
+};
+
+const moduleVersion: Fig.Option = {
+  name: "-version",
+  description: "Module version (Default: latest)",
+  args: {
+    name: "version",
+  },
+};
+
+const moduleSchema: Fig.Option = {
+  name: "-schema",
+  description: "URL or local path of the JSON schema used to validate meta.yml",
+  args: {
+    name: "schema",
+    template: ["filepaths"],
+  },
+};
+
+const outputMode = (modes: string[]): Fig.Option => ({
+  name: ["-o", "-output"],
+  description: `Output mode (Default: ${modes[0]})`,
+  args: {
+    name: "mode",
+    suggestions: modes,
+  },
+});
+
 const completionSpec: Fig.Spec = {
   name: "nextflow",
   description:
@@ -88,11 +527,49 @@ const completionSpec: Fig.Spec = {
   },
   subcommands: [
     {
+      name: "auth",
+      description: "Manage Seqera Platform authentication",
+      options: [help],
+      subcommands: [
+        {
+          name: "login",
+          description:
+            "Authenticate with Seqera and save credentials to ~/.nextflow/seqera-auth.config",
+          options: [
+            {
+              name: ["-u", "-url"],
+              description:
+                "Seqera Platform API endpoint (Default: https://api.cloud.seqera.io)",
+              args: {
+                name: "url",
+              },
+            },
+          ],
+        },
+        {
+          name: "logout",
+          description:
+            "Remove Seqera authentication and revoke the Seqera Cloud access token",
+        },
+        {
+          name: "config",
+          description:
+            "Set the Seqera primary compute environment, monitoring, and workspace",
+        },
+        {
+          name: "status",
+          description:
+            "Show the Seqera authentication status and configuration",
+        },
+      ],
+    },
+    {
       name: "clean",
       description:
         "Clean up project cache and work directories (Default: last run)",
       args: {
         name: "run_name|session_id",
+        isOptional: true,
         generators: runname,
       },
       options: [
@@ -129,10 +606,7 @@ const completionSpec: Fig.Spec = {
           name: ["-f", "-force"],
           description: "Force clean command (Default: false)",
         },
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
+        help,
         {
           name: ["-k", "-keep-logs"],
           description:
@@ -147,22 +621,20 @@ const completionSpec: Fig.Spec = {
     {
       name: "clone",
       description: "Clone a project into a folder",
-      args: {
-        name: "namespace/repository_name",
-      },
+      args: [
+        {
+          name: "namespace/repository_name",
+        },
+        {
+          name: "target dir",
+          isOptional: true,
+          template: ["folders"],
+        },
+      ],
       options: [
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
-        {
-          name: "-hub",
-          description:
-            "Service hub where the project is hosted (Default: GitHub)",
-          args: {
-            name: "gitlab|github|bitbucket",
-          },
-        },
+        deep,
+        help,
+        ...hubOptions,
         {
           name: "-r",
           description:
@@ -171,40 +643,43 @@ const completionSpec: Fig.Spec = {
             name: "revision",
           },
         },
-        {
-          name: "-user",
-          description: "Private repository user name",
-          args: {
-            name: "username",
-          },
-        },
       ],
     },
     {
       name: "config",
       description: "Print a project configuration",
       args: {
-        name: "project name",
+        name: "project name or path",
+        isOptional: true,
         generators: projectname,
       },
       options: [
         {
           name: "-flat",
           description: "Print config using flat notation (Default: false)",
+          deprecated: {
+            description: "Use `-o flat` instead",
+          },
         },
+        help,
         {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
+          name: ["-o", "-output"],
+          description: "Print the config using the specified format",
+          args: {
+            name: "format",
+            suggestions: ["canonical", "properties", "flat", "json", "yaml"],
+          },
         },
-        {
-          name: "-profile",
-          description: "Choose a configuration profile",
-        },
+        profile,
         {
           name: "-properties",
           description:
-            "Prints config using Java properties notatio (Default: false)",
+            "Prints config using Java properties notation (Default: false)",
+          deprecated: {
+            description: "Use `-o properties` instead",
+          },
         },
+        revision,
         {
           name: ["-a", "-show-profiles"],
           description: "Show all configuration profiles",
@@ -213,17 +688,25 @@ const completionSpec: Fig.Spec = {
           name: "-sort",
           description: "Sort config attributes (Default: false)",
         },
+        {
+          name: "-value",
+          description:
+            "Print the value of a config option, or fail if the option is not defined",
+          args: {
+            name: "config option",
+          },
+        },
       ],
     },
     {
       name: "console",
       description: "Launch Nextflow interactive console",
-      options: [
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
-      ],
+      args: {
+        name: "script",
+        isOptional: true,
+        template: ["filepaths"],
+      },
+      options: [help],
     },
     {
       name: "drop",
@@ -233,32 +716,98 @@ const completionSpec: Fig.Spec = {
         generators: projectname,
       },
       options: [
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
+        help,
         {
           name: "-f",
           description:
             "Delete the repository without taking care of local changes (Default: false)",
+        },
+        revision,
+      ],
+    },
+    {
+      name: "fs",
+      description: "Perform filesystem operations on local and remote storage",
+      options: [help],
+      subcommands: [
+        {
+          name: "cat",
+          description: "Print the contents of a file to standard output",
+          args: {
+            name: "path",
+            template: ["filepaths"],
+          },
+        },
+        {
+          name: "cp",
+          description: "Copy a file or directory",
+          args: [
+            {
+              name: "source",
+              template: ["filepaths", "folders"],
+            },
+            {
+              name: "target",
+              template: ["filepaths", "folders"],
+            },
+          ],
+        },
+        {
+          name: "ls",
+          description: "List the contents of a directory",
+          args: {
+            name: "path",
+            template: ["folders"],
+          },
+        },
+        {
+          name: "mv",
+          description: "Move a file or directory",
+          args: [
+            {
+              name: "source",
+              template: ["filepaths", "folders"],
+            },
+            {
+              name: "target",
+              template: ["filepaths", "folders"],
+            },
+          ],
+        },
+        {
+          name: "rm",
+          description: "Delete a file or directory",
+          isDangerous: true,
+          args: {
+            name: "path",
+            template: ["filepaths", "folders"],
+          },
+        },
+        {
+          name: "stat",
+          description: "Print the attributes of a file or directory",
+          args: {
+            name: "path",
+            template: ["filepaths", "folders"],
+          },
         },
       ],
     },
     {
       name: "help",
       description: "Print the usage help for a command",
-      options: [
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
-      ],
+      args: {
+        name: "command",
+        isOptional: true,
+      },
+      options: [help],
     },
     {
       name: "info",
       description: "Print project and system runtime information",
       args: {
         name: "project name",
+        isOptional: true,
         generators: projectname,
       },
       options: [
@@ -270,14 +819,46 @@ const completionSpec: Fig.Spec = {
           name: "-d",
           description: "Show detailed information (Default: false)",
         },
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
+        help,
         {
           name: "-o",
-          description: "Output format, either: text (default), json, yaml",
+          description: "Output format (Default: text)",
+          args: {
+            name: "format",
+            suggestions: ["text", "json", "yaml"],
+          },
         },
+      ],
+    },
+    {
+      name: "inspect",
+      description: "Inspect process settings in a pipeline project",
+      args: {
+        name: "project name or repository url",
+        generators: projectname,
+      },
+      options: [
+        {
+          name: "-concretize",
+          description:
+            "Build the container images resolved by the inspect command",
+        },
+        {
+          name: "-format",
+          description: "Inspect output format (Default: json)",
+          args: {
+            name: "format",
+            suggestions: ["json", "config"],
+          },
+        },
+        help,
+        {
+          name: ["-i", "-ignore-errors"],
+          description: "Ignore errors while inspecting the pipeline",
+        },
+        paramsFile,
+        profile,
+        revision,
       ],
     },
     {
@@ -288,317 +869,274 @@ const completionSpec: Fig.Spec = {
         generators: projectname,
       },
       options: [
-        {
-          name: "-E",
-          description:
-            "Exports all current system environment (Default: false)",
-        },
-        {
-          name: "-ansi-log",
-          description: "Enable/disable ANSI console logging",
-        },
-        {
-          name: "-bucket-dir",
-          description:
-            "Remote bucket where intermediate result files are stored",
-          args: {
-            name: "remote bucket",
-          },
-        },
-        {
-          name: "-cache",
-          description: "Enable/disable processes caching",
-        },
-        {
-          name: "-disable-jobs-cancellation",
-          description:
-            "Prevent the cancellation of child jobs on execution termination",
-        },
-        {
-          name: "-dsl1",
-          description:
-            "Execute the workflow using DSL1 syntax (Default: false)",
-        },
-        {
-          name: "-dsl2",
-          description:
-            "Execute the workflow using DSL2 syntax (Default: false)",
-        },
-        {
-          name: "-dump-channels",
-          description: "Dump channels for debugging purpose",
-        },
-        {
-          name: "-dump-hashes",
-          description:
-            "Dump task hash keys for debugging purpose (Default: false)",
-        },
-        {
-          name: "-e",
-          description:
-            "Add the specified variable to execution environment. Syntax: -e.key=value (Default: {})",
-          requiresSeparator: ".",
-          args: {
-            name: "key=value",
-          },
-        },
-        {
-          name: "-entry",
-          description: "Entry workflow name to be executed",
-          args: {
-            name: "entry workflow name",
-          },
-        },
+        ...runOptions,
         {
           name: "-head-cpus",
           description:
-            "Specify number of CPUs requested for the Nextflow pod (Default: 0)",
+            "Specify number of CPUs requested for the Nextflow driver pod",
+          args: {
+            name: "cpus",
+          },
+        },
+        {
+          name: "-head-image",
+          description:
+            "Specify the container image for the Nextflow driver pod",
+          args: {
+            name: "image",
+          },
         },
         {
           name: "-head-memory",
           description:
-            "Specify amount of memory requested for the Nextflow pod",
-        },
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
-        {
-          name: "-hub",
-          description:
-            "Service hub where the project is hosted (Default: github)",
+            "Specify amount of memory requested for the Nextflow driver pod",
           args: {
-            name: "service hub",
+            name: "memory",
           },
         },
         {
-          name: "-latest",
-          description: "Pull latest changes before run (Default: false)",
-        },
-        {
-          name: "-lib",
-          description: "Library extension path",
+          name: "-head-prescript",
+          description: "Specify script to be run before nextflow run starts",
           args: {
-            name: "library extension path",
-          },
-        },
-        {
-          name: "-main-script",
-          description:
-            "The script file to be executed when launching a project directory or repository",
-          args: {
-            name: "script file",
-          },
-        },
-        {
-          name: "-name",
-          description: "Assign a mnemonic name to the a pipeline run",
-          args: {
-            name: "name",
+            name: "script",
+            template: ["filepaths"],
           },
         },
         {
           name: ["-n", "-namespace"],
           description: "Specify the K8s namespace to use",
-        },
-        {
-          name: "-offline",
-          description:
-            "Do not check for remote project updates (Default: false)",
-        },
-        {
-          name: "-params-file",
-          description: "Load script parameters from a JSON/YAML file",
           args: {
-            name: "JSON/YAML file",
-            template: ["filepaths"],
+            name: "namespace",
           },
         },
         {
-          name: "-plugins",
+          name: "-remoteConfig",
           description:
-            "Specify the plugins to be applied for this run e.g. nf-amazon,nf-tower",
+            "Add the specified file from the K8s cluster to configuration set",
           args: {
-            name: "plugins ids separated by comma",
-          },
-        },
-        {
-          name: "-pod-image",
-          description: "Specify the container image for the Nextflow pod",
-        },
-        {
-          name: "-process",
-          description:
-            "Set process options. Syntax: -process.key=value (Default: {}",
-          requiresSeparator: ".",
-          args: {
-            name: "key=value",
-          },
-        },
-        {
-          name: "-profile",
-          description: "Choose a configuration profile",
-          args: {
-            name: "profile",
-          },
-        },
-        {
-          name: ["-qs", "-queue-size"],
-          description:
-            "Max number of processes that can be executed in parallel by each executor",
-          args: {
-            name: "number",
+            name: "config file",
           },
         },
         {
           name: "-remoteProfile",
           description: "Choose a configuration profile in the remoteConfig",
-        },
-        {
-          name: "-resume",
-          description:
-            "Execute the script using the cached results, useful to continue executions that was stopped by an error",
-        },
-        {
-          name: ["-r", "-revision"],
-          description:
-            "Revision of the project to run (either a git branch, tag or commit SHA number)",
           args: {
-            name: "project revision (tag/branch/hash",
-          },
-        },
-        {
-          name: ["-stub-run", "-stub"],
-          description:
-            "Execute the workflow replacing process scripts with command stubs (Default: false)",
-        },
-        {
-          name: "-test",
-          description: "Test a script function with the name specified",
-          args: {
-            name: "name",
-          },
-        },
-        {
-          name: "-user",
-          description: "Private repository user name",
-          args: {
-            name: "username",
+            name: "profile",
           },
         },
         {
           name: ["-v", "-volume-mount"],
           description: "Volume claim mounts eg. my-pvc:/mnt/path",
-        },
-        {
-          name: "-with-charliecloud",
-          description:
-            "Enable process execution in a Charliecloud container runtime",
-        },
-        {
-          name: "-with-conda",
-          description:
-            "Use the specified Conda environment package or file (must end with .yml|.yaml suffix)",
+          isRepeatable: true,
           args: {
-            name: "conda .yml/.yaml file",
+            name: "claim:path",
+          },
+        },
+      ],
+    },
+    {
+      name: "launch",
+      description: "Launch a workflow in Seqera Platform",
+      args: {
+        name: "pipeline repository url",
+        generators: projectname,
+      },
+      options: [
+        {
+          name: "-compute-env",
+          description: "Compute environment name",
+          args: {
+            name: "compute env",
           },
         },
         {
-          name: "-with-dag",
-          description: "Create pipeline DAG file",
+          name: ["-c", "-config"],
+          description: "Add the specified file to configuration set",
+          isRepeatable: true,
           args: {
-            name: "filename, e.g. dag.dot",
+            name: "configuration file",
+            template: ["filepaths"],
           },
         },
+        entry,
+        help,
+        latest,
+        mainScript,
         {
-          name: "-with-docker",
-          description: "Enable process execution in a Docker container",
+          name: "-name",
+          description: "Assign a mnemonic name to the pipeline run",
           args: {
-            name: "a docker container image",
+            name: "name",
+          },
+        },
+        paramsFile,
+        profile,
+        {
+          name: "-resume",
+          description: "Execute the script using the cached results",
+          args: {
+            name: "session ID",
             isOptional: true,
-            generators: dockerimage,
+            generators: sessionid,
+          },
+        },
+        revision,
+        stubRun,
+        {
+          name: "-user-secret",
+          description: "Specify a user secret name to use in the pipeline",
+          isRepeatable: true,
+          args: {
+            name: "secret name",
+          },
+        },
+        workDir,
+        {
+          name: "-workspace",
+          description: "Workspace name",
+          args: {
+            name: "workspace",
           },
         },
         {
-          name: ["-N", "-with-notification"],
+          name: "-workspace-secret",
+          description: "Specify a workspace secret name to use in the pipeline",
+          isRepeatable: true,
+          args: {
+            name: "secret name",
+          },
+        },
+      ],
+    },
+    {
+      name: ["lineage", "li"],
+      description: "Explore workflows lineage metadata",
+      options: [help],
+      subcommands: [
+        {
+          name: "check",
+          description: "Validate the checksum of an output lineage record",
+          args: lidArg,
+        },
+        {
+          name: "diff",
+          description: "Display a git-style diff between two lineage records",
+          args: [lidArg, lidArg],
+        },
+        {
+          name: "find",
           description:
-            "Send a notification email on workflow completion to the specified recipients",
+            "Find all lineage records that match the given field values",
           args: {
-            name: "email",
+            name: "field=value",
+            isVariadic: true,
           },
         },
         {
-          name: "-with-podman",
-          description: "Enable process execution in a Podman container",
+          name: "list",
+          description:
+            "List the Nextflow runs with lineage enabled and print their lineage IDs",
         },
         {
-          name: "-with-report",
-          description: "Create processes execution html report",
+          name: "render",
+          description:
+            "Render the lineage graph for a lineage record as an HTML file",
+          args: [
+            lidArg,
+            {
+              name: "html output file",
+              isOptional: true,
+              template: ["filepaths"],
+            },
+          ],
+        },
+        {
+          name: "view",
+          description: "View a lineage record",
+          args: lidArg,
+        },
+      ],
+    },
+    {
+      name: "lint",
+      description: "Lint Nextflow scripts and config files",
+      args: {
+        name: "paths",
+        isOptional: true,
+        isVariadic: true,
+        template: ["filepaths", "folders"],
+      },
+      options: [
+        {
+          name: "-exclude",
+          description: "File pattern to exclude from error checking",
+          isRepeatable: true,
           args: {
-            name: "report filename e.g. report.html",
+            name: "pattern",
           },
         },
         {
-          name: "-with-singularity",
-          description: "Enable process execution in a Singularity container",
-        },
-        {
-          name: "-with-timeline",
-          description: "Create processes execution timeline file",
+          name: "-files-from",
+          description:
+            "Read list of paths to lint from a text file (one per line, use - for stdin)",
           args: {
-            name: "timeline filename e.g. timeline.html",
+            name: "file",
+            template: ["filepaths"],
           },
         },
         {
-          name: "-with-tower",
-          description: "Monitor workflow execution with Seqera Tower service",
+          name: "-format",
+          description: "Format scripts and config files that have no errors",
         },
         {
-          name: "-with-trace",
-          description: "Create processes execution tracing file",
+          name: "-harshil-alignment",
+          description: "Use Harshil alignment",
+        },
+        help,
+        {
+          name: ["-o", "-output"],
+          description: "Output mode for reporting errors (Default: full)",
           args: {
-            name: "trace text filename e.g. trace.txt",
+            name: "mode",
+            suggestions: ["full", "extended", "concise", "json", "markdown"],
           },
         },
         {
-          name: "-with-weblog",
-          description: "Send workflow status messages via HTTP to target URL",
+          name: "-project-dir",
+          description: "Path to project directory (Default: .)",
           args: {
-            name: "target web URL",
+            name: "dir",
+            template: ["folders"],
           },
         },
         {
-          name: "-without-docker",
-          description: "Disable process execution with Docker (Default: false)",
+          name: "-sort-declarations",
+          description: "Sort script declarations in Nextflow scripts",
         },
         {
-          name: "-without-podman",
-          description: "Disable process execution in a Podman container",
-        },
-        {
-          name: ["-w", "-work-dir"],
-          description: "Directory where intermediate result files are stored",
+          name: "-spaces",
+          description: "Number of spaces to indent (Default: 4)",
           args: {
-            name: "work dir",
+            name: "number",
           },
+        },
+        {
+          name: "-tabs",
+          description: "Indent with tabs",
         },
       ],
     },
     {
       name: "list",
       description: "List all downloaded projects",
-      options: [
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
-      ],
+      options: [help],
     },
     {
       name: "log",
       description: "Print executions log and runtime info",
       args: {
         name: "run name",
+        isOptional: true,
         generators: runname,
       },
       options: [
@@ -637,17 +1175,14 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: ["-F", "filter"],
+          name: ["-F", "-filter"],
           description:
             "Filter log entries by a custom expression e.g. process =~ /foo.*/ && status == 'COMPLETED'",
           args: {
             name: "expression",
           },
         },
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
+        help,
         {
           name: ["-l", "-list-fields"],
           description: "Show all available fields (Default: false)",
@@ -673,34 +1208,294 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "logfile",
+      description: "Print the contents of a Nextflow log file",
+      args: {
+        name: "run name, session id, or .nextflow.log path",
+        isOptional: true,
+        generators: runname,
+        template: ["filepaths"],
+      },
+      options: [
+        {
+          name: ["-f", "-follow"],
+          description: "Output appended data as the file grows",
+        },
+        help,
+        {
+          name: "-keep-ansi",
+          description: "Preserve ANSI escape codes found inside log content",
+        },
+        {
+          name: ["-l", "-level"],
+          description: "Minimum log level to print (no filtering by default)",
+          args: {
+            name: "level",
+            suggestions: ["TRACE", "DEBUG", "INFO", "WARN", "ERROR"],
+          },
+        },
+        {
+          name: ["-n", "-lines"],
+          description: "Print only the last N log entries",
+          args: {
+            name: "N",
+          },
+        },
+        {
+          name: "-no-ansi",
+          description: "Do not add color/style codes to the output",
+        },
+        {
+          name: "-no-pager",
+          description: "Do not pipe the output through a pager",
+        },
+      ],
+    },
+    {
+      name: ["module", "modules"],
+      description: "Manage Nextflow modules",
+      options: [help],
+      subcommands: [
+        {
+          name: "create",
+          description: "Create a new module skeleton",
+          args: {
+            name: "namespace/name",
+            isOptional: true,
+          },
+          options: [
+            {
+              name: "-kind",
+              description: "Module kind (Default: Process)",
+              args: {
+                name: "kind",
+                suggestions: ["Process", "Workflow"],
+              },
+            },
+            {
+              name: "-legacy",
+              description:
+                "Generate a legacy module, i.e. without static typing",
+            },
+          ],
+        },
+        {
+          name: "install",
+          description: "Install a module from the registry",
+          args: {
+            name: "namespace/name",
+          },
+          options: [
+            {
+              name: "-force",
+              description: "Force reinstall even if already installed",
+            },
+            {
+              name: "-update-deps",
+              description:
+                "Update the vendored dependencies of an installed module to match meta.yml",
+            },
+            moduleVersion,
+          ],
+        },
+        {
+          name: "list",
+          description: "List all installed modules",
+          options: [outputMode(["table", "json"])],
+        },
+        {
+          name: "publish",
+          description: "Publish a module to the registry",
+          args: {
+            name: "namespace/name or path",
+            template: ["folders"],
+          },
+          options: [
+            {
+              name: "-dry-run",
+              description: "Validate without uploading",
+            },
+            {
+              name: "-registry",
+              description:
+                "Target registry URL (Default: https://registry.nextflow.io)",
+              args: {
+                name: "url",
+              },
+            },
+            moduleSchema,
+          ],
+        },
+        {
+          name: "remove",
+          description: "Remove an installed module",
+          isDangerous: true,
+          args: {
+            name: "namespace/name",
+          },
+          options: [
+            {
+              name: "-force",
+              description:
+                "Remove the module even if it has local modifications",
+            },
+            {
+              name: "-keep-files",
+              description: "Remove only .module-info keeping the local files",
+            },
+          ],
+        },
+        {
+          name: "run",
+          description: "Run a module directly from the registry",
+          args: {
+            name: "namespace/name or path",
+            template: ["filepaths", "folders"],
+          },
+          options: [...runOptions, moduleVersion],
+        },
+        {
+          name: "search",
+          description: "Search for modules in the registry",
+          args: {
+            name: "query",
+          },
+          options: [
+            {
+              name: "-limit",
+              description: "Maximum number of results",
+              args: {
+                name: "number",
+              },
+            },
+            outputMode(["simple", "json"]),
+          ],
+        },
+        {
+          name: "spec",
+          description: "Generate a meta.yml spec for a local module",
+          args: {
+            name: "namespace/name or path",
+            template: ["folders"],
+          },
+          options: [
+            {
+              name: "-author",
+              description: "Module author",
+              isRepeatable: true,
+              args: {
+                name: "name",
+              },
+            },
+            {
+              name: "-description",
+              description: "Short description of what the module does",
+              args: {
+                name: "text",
+              },
+            },
+            {
+              name: "-dry-run",
+              description:
+                "Print generated YAML to stdout without writing any file",
+            },
+            {
+              name: "-license",
+              description: "Module license identifier (e.g. MIT, Apache-2.0)",
+              args: {
+                name: "identifier",
+              },
+            },
+            {
+              name: "-namespace",
+              description:
+                "Module namespace, required when the argument is a path",
+              args: {
+                name: "namespace",
+              },
+            },
+            {
+              name: "-version",
+              description: "Module version (e.g. 1.0.0)",
+              args: {
+                name: "version",
+              },
+            },
+          ],
+        },
+        {
+          name: "validate",
+          description: "Validate a module structure and metadata",
+          args: {
+            name: "namespace/name or path",
+            template: ["folders"],
+          },
+          options: [moduleSchema],
+        },
+        {
+          name: "view",
+          description: "Show module information and usage template",
+          args: {
+            name: "namespace/name",
+          },
+          options: [moduleVersion, outputMode(["text", "json"])],
+        },
+      ],
+    },
+    {
+      name: ["plugin", "plugins"],
+      description: "Execute plugin-specific commands",
+      options: [help],
+      subcommands: [
+        {
+          name: "create",
+          description: "Create a plugin scaffold from the Nextflow template",
+          args: [
+            {
+              name: "plugin name",
+              isOptional: true,
+            },
+            {
+              name: "provider name",
+              isOptional: true,
+            },
+            {
+              name: "dir",
+              isOptional: true,
+              template: ["folders"],
+            },
+          ],
+        },
+        {
+          name: "install",
+          description: "Install one or more plugins",
+          args: {
+            name: "plugin[@version],..",
+          },
+        },
+      ],
+    },
+    {
       name: "pull",
       description: "Download or update a project",
       args: {
         name: "project name or repository url to pull",
+        isOptional: true,
         generators: projectname,
       },
       options: [
         {
-          name: "-all",
+          name: ["-a", "-all"],
           description: "Update all downloaded projects (Default: false)",
         },
+        deprecatedDeep,
+        help,
+        ...hubOptions,
         {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
+          name: ["-m", "-migrate"],
+          description: "Migrate projects to multi-revision strategy",
         },
-        {
-          name: "-hub",
-          description: "Service hub where the project is hosted",
-        },
-        {
-          name: ["-r", "-revision"],
-          description:
-            "Revision of the project to run (either a git branch, tag or commit SHA number)",
-        },
-        {
-          name: "-user",
-          description: "Private repository user name",
-        },
+        revision,
       ],
     },
     {
@@ -710,296 +1505,21 @@ const completionSpec: Fig.Spec = {
         name: "project name, repository url, or local path",
         generators: projectname,
       },
-      options: [
-        {
-          name: "-E",
-          description:
-            "Exports all current system environment (Default: false)",
-        },
-        {
-          name: "-ansi-log",
-          description: "Enable/disable ANSI console logging",
-        },
-        {
-          name: "-bucket-dir",
-          description:
-            "Remote bucket where intermediate result files are stored",
-          args: {
-            name: "remote bucket",
-          },
-        },
-        {
-          name: "-cache",
-          description: "Enable/disable processes caching",
-        },
-        {
-          name: "-disable-jobs-cancellation",
-          description:
-            "Prevent the cancellation of child jobs on execution termination",
-        },
-        {
-          name: "-dsl1",
-          description:
-            "Execute the workflow using DSL1 syntax (Default: false)",
-        },
-        {
-          name: "-dsl2",
-          description:
-            "Execute the workflow using DSL2 syntax (Default: false)",
-        },
-        {
-          name: "-dump-channels",
-          description: "Dump channels for debugging purpose",
-        },
-        {
-          name: "-dump-hashes",
-          description:
-            "Dump task hash keys for debugging purpose (Default: false)",
-        },
-        {
-          name: "-e.",
-          description:
-            "Add the specified variable to execution environment. Syntax: -e.key=value (Default: {})",
-          insertValue: "-e.{cursor}",
-          args: {
-            name: "key=value",
-          },
-        },
-        {
-          name: "-entry",
-          description: "Entry workflow name to be executed",
-          args: {
-            name: "entry workflow name",
-          },
-        },
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
-        {
-          name: "-hub",
-          description:
-            "Service hub where the project is hosted (Default: github)",
-          args: {
-            name: "service hub",
-          },
-        },
-        {
-          name: "-latest",
-          description: "Pull latest changes before run (Default: false)",
-        },
-        {
-          name: "-lib",
-          description: "Library extension path",
-          args: {
-            name: "library extension path",
-          },
-        },
-        {
-          name: "-main-script",
-          description:
-            "The script file to be executed when launching a project directory or repository",
-          args: {
-            name: "script file",
-          },
-        },
-        {
-          name: "-name",
-          description: "Assign a mnemonic name to the a pipeline run",
-          args: {
-            name: "name",
-          },
-        },
-        {
-          name: "-offline",
-          description:
-            "Do not check for remote project updates (Default: false)",
-        },
-        {
-          name: "-params-file",
-          description: "Load script parameters from a JSON/YAML file",
-          args: {
-            name: "JSON/YAML file",
-            template: ["filepaths"],
-          },
-        },
-        {
-          name: "-plugins",
-          description:
-            "Specify the plugins to be applied for this run e.g. nf-amazon,nf-tower",
-          args: {
-            name: "plugins ids separated by comma",
-          },
-        },
-        {
-          name: "-process.",
-          description:
-            "Set process options. Syntax: -process.key=value (Default: {}",
-          insertValue: "-process.{cursor}",
-          args: {
-            name: "key=value",
-          },
-        },
-        {
-          name: "-profile",
-          description: "Choose a configuration profile",
-          args: {
-            name: "profile",
-          },
-        },
-        {
-          name: ["-qs", "-queue-size"],
-          description:
-            "Max number of processes that can be executed in parallel by each executor",
-          args: {
-            name: "number",
-          },
-        },
-        {
-          name: "-resume",
-          description:
-            "Execute the script using the cached results, useful to continue executions that was stopped by an error",
-          args: {
-            name: "session ID",
-            isOptional: true,
-            generators: sessionid,
-          },
-        },
-        {
-          name: ["-r", "-revision"],
-          description:
-            "Revision of the project to run (either a git branch, tag or commit SHA number)",
-          args: {
-            name: "project revision (tag/branch/hash",
-          },
-        },
-        {
-          name: ["-stub-ru", "-stub"],
-          description:
-            "Execute the workflow replacing process scripts with command stubs (Default: false)",
-        },
-        {
-          name: "-test",
-          description: "Test a script function with the name specified",
-          args: {
-            name: "name",
-          },
-        },
-        {
-          name: "-user",
-          description: "Private repository user name",
-          args: {
-            name: "username",
-          },
-        },
-        {
-          name: "-with-charliecloud",
-          description:
-            "Enable process execution in a Charliecloud container runtime",
-        },
-        {
-          name: "-with-conda",
-          description:
-            "Use the specified Conda environment package or file (must end with .yml|.yaml suffix)",
-          args: {
-            name: "conda .yml/.yaml file",
-          },
-        },
-        {
-          name: "-with-dag",
-          description: "Create pipeline DAG file",
-          args: {
-            name: "filename, e.g. dag.dot",
-          },
-        },
-        {
-          name: "-with-docker",
-          description: "Enable process execution in a Docker container",
-          args: {
-            name: "a docker container image",
-            isOptional: true,
-            generators: dockerimage,
-          },
-        },
-        {
-          name: ["-N", "-with-notification"],
-          description:
-            "Send a notification email on workflow completion to the specified recipients",
-          args: {
-            name: "email",
-          },
-        },
-        {
-          name: "-with-podman",
-          description: "Enable process execution in a Podman container",
-        },
-        {
-          name: "-with-report",
-          description: "Create processes execution html report",
-          args: {
-            name: "report filename e.g. report.html",
-          },
-        },
-        {
-          name: "-with-singularity",
-          description: "Enable process execution in a Singularity container",
-        },
-        {
-          name: "-with-timeline",
-          description: "Create processes execution timeline file",
-          args: {
-            name: "timeline filename e.g. timeline.html",
-          },
-        },
-        {
-          name: "-with-tower",
-          description: "Monitor workflow execution with Seqera Tower service",
-        },
-        {
-          name: "-with-trace",
-          description: "Create processes execution tracing file",
-          args: {
-            name: "trace text filename e.g. trace.txt",
-          },
-        },
-        {
-          name: "-with-weblog",
-          description: "Send workflow status messages via HTTP to target URL",
-          args: {
-            name: "target web URL",
-          },
-        },
-        {
-          name: "-without-docker",
-          description: "Disable process execution with Docker (Default: false)",
-        },
-        {
-          name: "-without-podman",
-          description: "Disable process execution in a Podman container",
-        },
-        {
-          name: ["-w", "-work-dir"],
-          description: "Directory where intermediate result files are stored",
-          args: {
-            name: "work dir",
-          },
-        },
-      ],
+      options: runOptions,
     },
     {
-      name: "secrets",
+      name: ["secrets", "secret"],
       description:
         "Handle and manage sensitive information for pipeline execution in a safe manner",
-      options: [
+      options: [help],
+      subcommands: [
         {
           name: "list",
-          description:
-            "List secrets available in the current store e.g. nextflow secrets list",
+          description: "List secrets available in the current store",
         },
         {
           name: "get",
-          description:
-            "Allows retrieving a secret value e.g. nextflow secrets get FOO",
+          description: "Retrieve a secret value",
           args: {
             name: "secret name",
             generators: secretname,
@@ -1007,19 +1527,22 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "set",
-          description:
-            'Allows creating creating a new secret or overriding an existing one e.g. nextflow secrets set FOO "Hello world"',
+          description: "Create a new secret or override an existing one",
           isDangerous: true,
-          args: {
-            name: "secret name and value",
-            generators: secretname,
-            suggestCurrentToken: true,
-          },
+          args: [
+            {
+              name: "secret name",
+              generators: secretname,
+              suggestCurrentToken: true,
+            },
+            {
+              name: "value",
+            },
+          ],
         },
         {
           name: "delete",
-          description:
-            "Allows deleting an existing secret e.g. nextflow secrets delete FOO",
+          description: "Delete an existing secret",
           isDangerous: true,
           args: {
             name: "secret name",
@@ -1031,12 +1554,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "self-update",
       description: "Update nextflow runtime to the latest available version",
-      options: [
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
-      ],
+      options: [help],
     },
     {
       name: "view",
@@ -1046,10 +1564,7 @@ const completionSpec: Fig.Spec = {
         generators: projectname,
       },
       options: [
-        {
-          name: ["-h", "-help"],
-          description: "Print the command usage (Default: false)",
-        },
+        help,
         {
           name: "-l",
           description: "List repository content (Default: false)",
@@ -1058,6 +1573,7 @@ const completionSpec: Fig.Spec = {
           name: "-q",
           description: "Hide header line (Default: false)",
         },
+        revision,
       ],
     },
   ],
@@ -1066,6 +1582,7 @@ const completionSpec: Fig.Spec = {
       name: "-C",
       description:
         "Use the specified configuration file(s) overriding any defaults",
+      isRepeatable: true,
       args: {
         name: "configuration file",
         template: ["filepaths"],
@@ -1086,37 +1603,56 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-c", "-config"],
       description: "Add the specified file to configuration set",
+      isRepeatable: true,
       args: {
         name: "configuration file",
         template: ["filepaths"],
       },
     },
     {
-      name: ["-d", "-dockerize"],
-      description: "Launch nextflow via Docker (experimental)",
+      name: "-config-ignore-includes",
+      description: "Disable the parsing of config includes",
     },
     {
-      name: "-h",
+      name: ["-h", "-help"],
       description: "Print this help",
     },
     {
       name: "-log",
       description: "Set nextflow log file path",
+      args: {
+        name: "log file",
+        template: ["filepaths"],
+      },
     },
     {
       name: ["-q", "-quiet"],
       description: "Do not print information messages",
     },
     {
+      name: "-remote-debug",
+      description: "Enable JVM interactive remote debugging (experimental)",
+    },
+    {
       name: "-syslog",
       description: "Send logs to syslog server (eg. localhost:514)",
+      args: {
+        name: "host:port",
+        isOptional: true,
+      },
+    },
+    {
+      name: "-trace",
+      description:
+        "Enable trace level logging for the specified package names, separated by comma e.g. nextflow,io.seqera",
+      args: {
+        name: "packages",
+      },
     },
     {
       name: ["-v", "-version"],
       description: "Print the program version",
     },
   ],
-  // Only uncomment if nextflow takes an argument
-  // args: {}
 };
 export default completionSpec;

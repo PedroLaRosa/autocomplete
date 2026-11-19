@@ -1,6 +1,11 @@
+// xcodes v2.2.0 (GitHub release, 2026-11-11). Source: Sources/xcodes/App.swift
+// at tag 2.2.0 and XcodesOrg/XcodesKit enums (DataSource, ArchitectureFilter)
+
+// Version lines start with a digit; skips the "Showing Xcodes for this Mac" footer
 const processXcodeList = (out: string, tokens: string[]) =>
   out
     .split("\n")
+    .filter((line) => /^\d/.test(line))
     .reverse()
     .map((line) => ({
       name: line.slice(0, line.indexOf(" (")),
@@ -24,9 +29,103 @@ const installedXcodes: Fig.Generator = {
   postProcess: processXcodeList,
 };
 
+const colorOptions: Fig.Option[] = [
+  { name: "--color", description: "Color the output" },
+  { name: "--no-color", description: "Do not color the output" },
+];
+
+const directory = (
+  description = "The directory where your Xcodes are installed. Defaults to /Applications"
+): Fig.Option => ({
+  name: "--directory",
+  description,
+  args: { name: "directory", template: "folders" },
+});
+
+const dataSource: Fig.Option = {
+  name: "--data-source",
+  description:
+    "The data source for available Xcode versions (default: xcodeReleases)",
+  args: { name: "data-source", suggestions: ["xcodeReleases", "apple"] },
+};
+
+const architecture = (verb: string): Fig.Option => ({
+  name: "--architecture",
+  description: `${verb} matching the specified architecture`,
+  isRepeatable: true,
+  args: {
+    name: "architecture",
+    suggestions: ["arm64", "x86_64", "appleSilicon", "universal"],
+  },
+});
+
+const aria2Options = (what: string): Fig.Option[] => [
+  {
+    name: "--aria2",
+    description: "The path to an aria2 executable. Searches $PATH by default",
+    args: { name: "aria2", template: "filepaths" },
+  },
+  {
+    name: "--no-aria2",
+    description: `Don't use aria2 to download ${what}, even if it's available`,
+  },
+];
+
+const latestOptions = (verb: string): Fig.Option[] => [
+  {
+    name: "--latest",
+    description: `Update and then ${verb} the latest release version available`,
+  },
+  {
+    name: "--latest-prerelease",
+    description: `Update and then ${verb} the latest prerelease version available, including GM seeds and GMs`,
+  },
+];
+
+const fastlaneOptions: Fig.Option[] = [
+  {
+    name: "--use-fastlane-auth",
+    description: "Use fastlane spaceship session",
+  },
+  {
+    name: "--fastlane-user",
+    description: "The fastlane spaceship user",
+    args: { name: "fastlane-user" },
+  },
+];
+
+const runtimeSubcommand = (verb: "download" | "install"): Fig.Subcommand => ({
+  name: verb,
+  description:
+    verb === "install"
+      ? "Download and install a specific simulator runtime"
+      : "Download a specific simulator runtime",
+  icon: "⬇️",
+  args: { name: "version", description: `The runtime to ${verb}` },
+  options: [
+    ...aria2Options("the runtime"),
+    directory(
+      "The directory to download the runtime archive to. Defaults to ~/Downloads"
+    ),
+    architecture(
+      verb === "install" ? "Install the runtime" : "Download the runtime"
+    ),
+    ...(verb === "install"
+      ? [
+          {
+            name: "--keep-archive",
+            description:
+              "Do not delete the runtime archive after the installation is finished",
+          },
+        ]
+      : []),
+    ...colorOptions,
+  ],
+});
+
 const completionSpec: Fig.Spec = {
   name: "xcodes",
-  description: "Manage the Xcode versions installed on your Mac",
+  description: "Manage the Xcodes installed on your Mac",
   subcommands: [
     {
       name: "help",
@@ -42,46 +141,18 @@ const completionSpec: Fig.Spec = {
       description: "Download a specific version of Xcode",
       icon: "⬇️",
       options: [
-        {
-          name: "--latest",
-          description:
-            "Update and then install the latest non-prerelease version available",
-        },
-
-        {
-          name: "--latest-prerelease",
-          description:
-            "Update and then install the latest prerelease version available, including GM seeds and GMs",
-        },
-        {
-          name: "--aria2",
-          description:
-            "The path to an aria2 executable. Searches $PATH by default",
-          args: { name: "aria2", template: "filepaths" },
-        },
-        {
-          name: "--no-aria2",
-          description:
-            "Don't use aria2 to download Xcode, even if it's available",
-        },
-        {
-          name: "--directory",
-          description:
-            "The directory where your Xcodes are installed. Defaults to /Applications",
-          args: { name: "directory", template: "folders" },
-        },
-        {
-          name: "--data-source",
-          description:
-            "The data source for available Xcode versions. (default: xcodereleases)",
-          args: { name: "dataSource", suggestions: ["xcodereleases", "apple"] },
-        },
-        { name: "--color", description: "Color the output" },
-        { name: "--no-color", description: "Do not color the output" },
+        ...latestOptions("download"),
+        ...aria2Options("Xcode"),
+        directory(
+          "The directory to download Xcode to. Defaults to ~/Downloads"
+        ),
+        ...fastlaneOptions,
+        dataSource,
+        ...colorOptions,
       ],
       args: {
         name: "version",
-        description: "The version to install",
+        description: "The version to download",
         isOptional: true,
         generators: allXcodes,
       },
@@ -93,50 +164,44 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: "--path",
-          description: "Local path to Xcode.xip",
+          description: "Local path to an Xcode .xip or .aea archive",
           args: { name: "path", template: "filepaths" },
         },
+        ...latestOptions("install"),
+        ...aria2Options("Xcode"),
         {
-          name: "--latest",
-          description:
-            "Update and then install the latest non-prerelease version available",
-        },
-
-        {
-          name: "--latest-prerelease",
-          description:
-            "Update and then install the latest prerelease version available, including GM seeds and GMs",
+          name: "--select",
+          description: "Select the installed Xcode version after installation",
         },
         {
-          name: "--aria2",
-          description:
-            "The path to an aria2 executable. Searches $PATH by default",
-          args: { name: "aria2", template: "filepaths" },
+          name: "--update",
+          description: "Whether to update the list before installing",
         },
         {
-          name: "--no-aria2",
-          description:
-            "Don't use aria2 to download Xcode, even if it's available",
+          name: ["-p", "--print-path"],
+          description: "Print the path of the selected Xcode",
         },
         {
           name: "--experimental-unxip",
           description:
-            "Use the experimental unxip functionality. May speed up unarchiving by up to 2-3x",
+            "Use experimental unxip for .xip archives. May speed up unarchiving by up to 2-3x",
         },
         {
-          name: "--directory",
+          name: "--no-superuser",
           description:
-            "The directory where your Xcodes are installed. Defaults to /Applications",
-          args: { name: "directory", template: "folders" },
+            "Don't ask for superuser (root) permission. Some optional steps of the installation will be skipped",
         },
         {
-          name: "--data-source",
+          name: "--empty-trash",
           description:
-            "The data source for available Xcode versions. (default: xcodereleases)",
-          args: { name: "dataSource", suggestions: ["xcodereleases", "apple"] },
+            "Permanently delete the Xcode archive after installation instead of moving it to the Trash",
         },
-        { name: "--color", description: "Color the output" },
-        { name: "--no-color", description: "Do not color the output" },
+        directory(
+          "The directory to install Xcode into. Defaults to /Applications"
+        ),
+        ...fastlaneOptions,
+        dataSource,
+        ...colorOptions,
       ],
       args: {
         name: "version",
@@ -149,36 +214,40 @@ const completionSpec: Fig.Spec = {
       name: "installed",
       description: "List the versions of Xcode that are installed",
       icon: "🔨",
-      options: [
-        {
-          name: "--directory",
-          description:
-            "The directory where your Xcodes are installed. Defaults to /Applications",
-          args: { name: "directory", template: "folders" },
-        },
-        { name: "--color", description: "Color the output" },
-        { name: "--no-color", description: "Do not color the output" },
-      ],
+      options: [directory(), ...colorOptions],
+      args: {
+        name: "version",
+        description: "The installed version to print the path for",
+        isOptional: true,
+        generators: installedXcodes,
+      },
     },
     {
       name: "list",
-      description: "List all versions of Xcode available to install",
+      description: "List all versions of Xcode that are available to install",
       icon: "🔍",
       options: [
+        architecture("Only list Xcodes"),
+        directory(),
+        dataSource,
+        ...colorOptions,
+      ],
+    },
+    {
+      name: "runtimes",
+      description: "List all simulator runtimes that are available to install",
+      icon: "📱",
+      subcommands: [
+        runtimeSubcommand("download"),
+        runtimeSubcommand("install"),
+      ],
+      options: [
         {
-          name: "--directory",
-          description:
-            "The directory where your Xcodes are installed. Defaults to /Applications",
-          args: { name: "directory", template: "folders" },
+          name: "--include-betas",
+          description: "Include beta runtimes available to install",
         },
-        {
-          name: "--data-source",
-          description:
-            "The data source for available Xcode versions. (default: xcodereleases)",
-          args: { name: "dataSource", suggestions: ["xcodereleases", "apple"] },
-        },
-        { name: "--color", description: "Color the output" },
-        { name: "--no-color", description: "Do not color the output" },
+        architecture("Only list runtimes"),
+        ...colorOptions,
       ],
     },
     {
@@ -190,14 +259,8 @@ const completionSpec: Fig.Spec = {
           name: ["-p", "--print-path"],
           description: "Print the path of the selected Xcode",
         },
-        {
-          name: "--directory",
-          description:
-            "The directory where your Xcodes are installed. Defaults to /Applications",
-          args: { name: "directory", template: "folders" },
-        },
-        { name: "--color", description: "Color the output" },
-        { name: "--no-color", description: "Do not color the output" },
+        directory(),
+        ...colorOptions,
       ],
       args: {
         name: "version-or-path",
@@ -219,55 +282,29 @@ const completionSpec: Fig.Spec = {
       },
       options: [
         {
-          name: "--directory",
+          name: "--empty-trash",
           description:
-            "The directory where your Xcodes are installed. Defaults to /Applications",
-          args: { name: "directory", template: "folders" },
+            "Completely delete Xcode, instead of keeping it in the user's Trash",
         },
-        { name: "--color", description: "Color the output" },
-        { name: "--no-color", description: "Do not color the output" },
+        directory(),
+        ...colorOptions,
       ],
     },
     {
       name: "update",
       description: "Update the list of available versions of Xcode",
       icon: "🔄",
-      options: [
-        {
-          name: "--directory",
-          description:
-            "The directory where your Xcodes are installed. Defaults to /Applications",
-          args: { name: "directory", template: "folders" },
-        },
-        {
-          name: "--data-source",
-          description:
-            "The data source for available Xcode versions. (default: xcodereleases)",
-          args: { name: "dataSource", suggestions: ["xcodereleases", "apple"] },
-        },
-        { name: "--color", description: "Color the output" },
-        { name: "--no-color", description: "Do not color the output" },
-      ],
+      options: [directory(), dataSource, ...colorOptions],
     },
     {
       name: "version",
       description: "Print the version number of xcodes itself",
-      options: [
-        { name: "--color", description: "Color the output" },
-        { name: "--no-color", description: "Do not color the output" },
-        {
-          name: ["--help", "-h"],
-          description: "Show help information",
-        },
-      ],
+      options: colorOptions,
     },
     {
       name: "signout",
       description: "Clears the stored username and password",
-      options: [
-        { name: "--color", description: "Color the output" },
-        { name: "--no-color", description: "Do not color the output" },
-      ],
+      options: colorOptions,
     },
   ],
   options: [

@@ -1,3 +1,5 @@
+// Clojure CLI v1.12.7.1681 (GitHub tag clojure/brew-install, 2026-11-18). Source:
+// help text and option parser in src/main/resources/clojure/install/clojure
 /**
  * Adds brackets to some content.
  *
@@ -74,6 +76,8 @@ const completionSpec: Fig.Spec = {
     }),
     alias({
       name: "-X",
+      description:
+        "Use concatenated aliases to modify classpath or supply exec fn/args",
       args: invokeArgs,
     }),
     alias(
@@ -108,10 +112,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-Sdeps",
-      description: "Pass the deps data on the command line",
+      description:
+        "Deps data or file to use as the last deps file to be merged",
       args: {
-        name: "edn",
-        description: "The deps data in edn",
+        name: "edn|file",
+        description: "The deps data in edn, or a deps file",
+        template: "filepaths",
       },
     },
     {
@@ -128,7 +134,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-Sdescribe",
-      description: "Print environment and command parsing information as data",
+      description:
+        "Print environment and command parsing information as data (prefer tools.deps APIs)",
+      deprecated: true,
     },
     {
       name: "-Sforce",
@@ -136,7 +144,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-Spom",
-      description: "Generate (or update) pom.xml with deps and paths",
+      description:
+        "Generate (or update) pom.xml with deps and paths (use -X:deps mvn-pom)",
+      deprecated: true,
     },
     {
       name: "-Srepro",
@@ -146,6 +156,9 @@ const completionSpec: Fig.Spec = {
       name: "-Sthreads",
       description:
         "Set the number of threads to use when downloading dependencies",
+      args: {
+        name: "threads",
+      },
     },
     {
       name: "-Strace",
@@ -160,8 +173,17 @@ const completionSpec: Fig.Spec = {
       description: "Print all path locations",
     },
     {
-      name: ["-version", "--version"],
-      description: "Print the Clojure CLI version",
+      name: "--",
+      description:
+        "Stop parsing dep options and pass remaining arguments to clojure.main",
+    },
+    {
+      name: "--version",
+      description: "Print the version to stdout and exit",
+    },
+    {
+      name: "-version",
+      description: "Print the version to stderr and exit",
     },
     // Init options
     {
@@ -211,7 +233,7 @@ const completionSpec: Fig.Spec = {
     // May want to add `path` and `-` later if someone can figure out how to use those.
     {
       name: ["-h", "-?", "--help"],
-      description: "Show help for clojure",
+      description: "Print this help message and exit",
     },
   ],
 };

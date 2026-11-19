@@ -1,3 +1,4 @@
+// chown (macOS 15.5 BSD, man page dated 2022-08-24, synced 2026-11-19). Source: `man chown`
 export const existingUsersandGroups: Fig.Generator = {
   custom: async function (tokens, executeShellCommand) {
     const colonAdded = tokens.find((token) => token.includes(":"));
@@ -84,7 +85,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "-v",
       description:
-        "Cause chown to be verbose, showing files as the owner is modified",
+        "Cause chown to be verbose, showing files as the owner is modified; repeat to also print old and new numeric user/group IDs",
+      isRepeatable: 2,
+    },
+    {
+      name: "-x",
+      description: "File system mount points are not traversed",
     },
     {
       name: "-R",

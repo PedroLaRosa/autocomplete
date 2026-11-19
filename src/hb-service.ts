@@ -1,3 +1,4 @@
+// homebridge-config-ui-x v5.30.1 (GitHub release, 2026-11-13). Source: src/bin/hb-service.ts on upstream main
 const completionSpec: Fig.Spec = {
   name: "hb-service",
   description: "The hb-service command is provided by homebridge-config-ui-x",
@@ -41,12 +42,43 @@ const completionSpec: Fig.Spec = {
       description: "Tails the homebridge service logs",
     },
     {
+      name: "view",
+      description: "Views the homebridge service logs for 30 seconds",
+    },
+    {
+      name: "status",
+      description: "Check whether the Homebridge UI is running",
+    },
+    {
+      name: "add",
+      description: "Install a plugin (Synology and apt package installs only)",
+      args: {
+        name: "plugin@version",
+      },
+    },
+    {
+      name: "remove",
+      description: "Remove a plugin (Synology and apt package installs only)",
+      args: {
+        name: "plugin",
+      },
+    },
+    {
       name: "update-node",
       description: "Update Node.js",
       args: {
         name: "version",
         isOptional: true,
       },
+    },
+    {
+      name: "update-homebridge",
+      description: "Update Homebridge apt package",
+    },
+    {
+      name: "before-start",
+      description: "Run pre-start checks (called by the service unit)",
+      hidden: true,
     },
   ],
   options: [
@@ -78,9 +110,18 @@ const completionSpec: Fig.Spec = {
     {
       name: "--user",
       description:
-        "The user account the Homebridge service will be installed as (Linux, macOS only)",
+        "The user account the Homebridge service will be installed as (Linux, FreeBSD, macOS only)",
       args: {
         name: "user",
+      },
+      isPersistent: true,
+    },
+    {
+      name: "--group",
+      description:
+        "The group the Homebridge service will be added to (Linux, FreeBSD, macOS only)",
+      args: {
+        name: "group",
       },
       isPersistent: true,
     },

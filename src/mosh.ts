@@ -1,13 +1,23 @@
+// Mosh v1.4.0 (GitHub release mosh-1.4.0, 2022-10-27). Source: usage text and GetOptions in scripts/mosh.pl at mosh-1.4.0 (unchanged on master)
 import { knownHosts, configHosts } from "./ssh";
 
 const completionSpec: Fig.Spec = {
   name: "mosh",
-  description: "",
-  args: {
-    name: "user@hostname",
-    description: "Address of remote machine to log into",
-    generators: [knownHosts, configHosts, { template: "history" }],
-  },
+  description:
+    "Mobile shell, a remote terminal that supports roaming and intermittent connectivity",
+  args: [
+    {
+      name: "user@hostname",
+      description: "Address of remote machine to log into",
+      generators: [knownHosts, configHosts, { template: "history" }],
+    },
+    {
+      name: "command",
+      description: "Command to run on the remote machine",
+      isOptional: true,
+      isVariadic: true,
+    },
+  ],
   options: [
     {
       name: ["--help", "-h"],
@@ -16,10 +26,14 @@ const completionSpec: Fig.Spec = {
     {
       name: "--client",
       description: 'Mosh client on local machine (default: "mosh-client")',
+      requiresEquals: true,
+      args: { name: "path", template: "filepaths" },
     },
     {
       name: "--server",
       description: 'Mosh server on remote machine (default: "mosh-server")',
+      requiresEquals: true,
+      args: { name: "command" },
     },
     {
       name: "--predict",
@@ -41,6 +55,18 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "-a",
+      description: "Use local echo even on fast links (--predict=always)",
+    },
+    {
+      name: "-n",
+      description: "Never use local echo (--predict=never)",
+    },
+    {
+      name: ["--predict-overwrite", "-o"],
+      description: "Prediction overwrites instead of inserting",
+    },
+    {
       name: "-4",
       description: "Use IPv4 only",
     },
@@ -55,14 +81,14 @@ const completionSpec: Fig.Spec = {
       args: {
         suggestions: [
           { name: "inet", description: "Use IPv4 only" },
-          { name: "ine6", description: "Use IPv6 only" },
+          { name: "inet6", description: "Use IPv6 only" },
           {
             name: "auto",
             description: "Autodetect network type for single-family hosts only",
           },
           { name: "all", description: "Try all network types" },
           {
-            name: "prefer-inet4",
+            name: "prefer-inet",
             description: "Use all network types, but try IPv4 first [default]",
           },
           {
@@ -76,11 +102,14 @@ const completionSpec: Fig.Spec = {
       name: ["--port", "-p"],
       description:
         "Server-side UDP port or range, (No effect on server-side SSH port)",
+      args: { name: "PORT[:PORT2]" },
     },
     {
       name: "--bind-server",
       description:
-        '{ssh|any|IP}, ask the server to reply from an IP address, (default: "ssh")',
+        'Ask the server to reply from an IP address, (default: "ssh")',
+      requiresEquals: true,
+      args: { name: "ssh|any|IP", suggestions: ["ssh", "any"] },
     },
     {
       name: "--ssh",
@@ -120,7 +149,5 @@ const completionSpec: Fig.Spec = {
       description: "Version and copyright information",
     },
   ],
-  // Only uncomment if mosh takes an argument
-  // args: {}
 };
 export default completionSpec;

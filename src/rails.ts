@@ -1,9 +1,38 @@
+// Rails v8.1.4.1 (GitHub release "Latest", 2026-11-04). Source: railties v8.1.4.1 generators (app_base.rb, app_generator.rb, base.rb) and commands/{server,console,dbconsole,routes,notes}, commands/help/USAGE
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const RB_ICON =
   "https://raw.githubusercontent.com/vscode-icons/vscode-icons/master/icons/file_type_ruby.svg";
 
-const newCommand = {
+// Thor runtime options shared by `rails new` and `rails generate`
+const runtimeOptions: Fig.Option[] = [
+  {
+    name: ["-f", "--force"],
+    description: "Overwrite files that already exist",
+  },
+  {
+    name: ["-p", "--pretend"],
+    description: "Run but do not make any changes",
+  },
+  {
+    name: ["-q", "--quiet"],
+    description: "Suppress status output",
+  },
+  {
+    name: ["-s", "--skip"],
+    description: "Skip files that already exist",
+  },
+  {
+    name: "--skip-namespace",
+    description: "Skip namespace (affects only isolated engines)",
+  },
+  {
+    name: "--skip-collision-check",
+    description: "Skip collision check",
+  },
+];
+
+const newCommand: Fig.Subcommand = {
   name: "new",
   description: "Create a new rails application",
   args: {
@@ -13,54 +42,50 @@ const newCommand = {
   },
   options: [
     {
-      name: "-skip-namespace",
-      description: "Skip namespace (affects only isolated applications)",
-      args: {},
-    },
-    {
       name: ["-r", "--ruby"],
       description: "Path to the Ruby binary of your choice",
-      args: {},
+      args: { name: "path" },
     },
     {
-      name: "-m",
+      name: ["-n", "--name"],
+      description: "Name of the app",
+      args: { name: "name" },
+    },
+    {
+      name: ["-m", "--template"],
       description:
         "Path to some application template (can be a filesystem path or URL)",
+      args: { name: "template" },
     },
     {
-      name: "-d",
+      name: ["-d", "--database"],
       description: "Preconfigure for selected database - defaults to sqlite3",
       args: {
         name: "database",
         suggestions: [
           "mysql",
+          "trilogy",
           "postgresql",
           "sqlite3",
-          "oracle",
-          "frontbase",
-          "ibm_db",
-          "sqlserver",
-          "jdbcmysql",
-          "jdbcsqlite3",
-          "jdbcpostgresql",
-          "jdbc",
+          "mariadb-mysql",
+          "mariadb-trilogy",
         ],
       },
     },
     {
-      name: "--skip-gemfile",
-      description: "Don't create a Gemfile",
+      name: ["-G", "--skip-git"],
+      description: "Skip git init, .gitignore and .gitattributes",
     },
     {
-      name: "-G",
-      description: "Skip .gitignore file",
+      name: "--skip-docker",
+      description: "Skip Dockerfile, .dockerignore and bin/docker-entrypoint",
     },
     {
       name: "--skip-keeps",
       description: "Skip source control .keep files",
     },
     {
-      name: "-M",
+      name: ["-M", "--skip-action-mailer"],
       description: "Skip Action Mailer files",
     },
     {
@@ -72,44 +97,39 @@ const newCommand = {
       description: "Skip Action Text gem",
     },
     {
-      name: "-O",
+      name: ["-O", "--skip-active-record"],
       description: "Skip Active Record files",
+    },
+    {
+      name: "--skip-active-job",
+      description: "Skip Active Job",
     },
     {
       name: "--skip-active-storage",
       description: "Skip Active Storage files",
     },
     {
-      name: "-P",
-      description: "Skip Puma related files",
-    },
-    {
-      name: "-C",
+      name: ["-C", "--skip-action-cable"],
       description: "Skip Action Cable files",
     },
     {
-      name: "-S",
-      description: "Skip Sprockets files",
+      name: ["-A", "--skip-asset-pipeline"],
+      description: "Skip the asset pipeline setup",
     },
     {
-      name: "--skip-spring",
-      description: "Don't install Spring application preloader",
-    },
-    {
-      name: "--skip-listen",
-      description:
-        "Don't generate configuration that depends on the listen gem",
-    },
-    {
-      name: "-J",
+      name: ["-J", "--skip-javascript", "--skip-js"],
       description: "Skip JavaScript files",
     },
     {
-      name: "--skip-turbolinks",
-      description: "Skip turbolinks gem",
+      name: "--skip-hotwire",
+      description: "Skip Hotwire integration",
     },
     {
-      name: "-T",
+      name: "--skip-jbuilder",
+      description: "Skip jbuilder gem",
+    },
+    {
+      name: ["-T", "--skip-test"],
       description: "Skip test files",
     },
     {
@@ -121,20 +141,61 @@ const newCommand = {
       description: "Skip bootsnap gem",
     },
     {
+      name: "--skip-dev-gems",
+      description: "Skip development gems (e.g., web-console)",
+    },
+    {
+      name: "--skip-thruster",
+      description: "Skip Thruster setup",
+    },
+    {
+      name: "--skip-rubocop",
+      description: "Skip RuboCop setup",
+    },
+    {
+      name: "--skip-brakeman",
+      description: "Skip brakeman setup",
+    },
+    {
+      name: "--skip-bundler-audit",
+      description: "Skip bundler-audit setup",
+    },
+    {
+      name: "--skip-ci",
+      description: "Skip GitHub CI files",
+    },
+    {
+      name: "--skip-kamal",
+      description: "Skip Kamal setup",
+    },
+    {
+      name: "--skip-solid",
+      description: "Skip Solid Cache, Queue, and Cable setup",
+    },
+    {
       name: "--dev",
       description:
-        "Setup the application with Gemfile pointing to your Rails checkout",
+        "Set up the application with Gemfile pointing to your Rails checkout",
+    },
+    {
+      name: "--devcontainer",
+      description: "Generate devcontainer files",
     },
     {
       name: "--edge",
       description:
-        "Setup the application with Gemfile pointing to Rails repository",
+        "Set up the application with a Gemfile pointing to the current stable branch on the Rails repository",
+    },
+    {
+      name: ["--main", "--master"],
+      description:
+        "Set up the application with Gemfile pointing to Rails repository main branch",
     },
     {
       name: "--rc",
       description:
         "Path to file containing extra configuration options for rails command",
-      args: { name: "path" },
+      args: { name: "path", template: "filepaths" },
     },
     {
       name: "--no-rc",
@@ -146,43 +207,42 @@ const newCommand = {
       description: "Preconfigure smaller stack for API only apps",
     },
     {
-      name: "-B",
-      description: "Don't run bundle install",
+      name: "--minimal",
+      description: "Preconfigure a minimal rails app",
     },
     {
-      name: "--webpacker",
-      description: "Preconfigure Webpack with a particular framework",
+      name: ["-j", "--javascript", "--js"],
+      description: "Choose JavaScript approach - defaults to importmap",
       args: {
-        name: "framework",
-        suggestions: ["react", "vue", "angular", "elm", "stimulus"],
+        name: "approach",
+        suggestions: ["importmap", "bun", "webpack", "esbuild", "rollup"],
       },
     },
     {
-      name: "--skip-webpack-install]",
-      description: "Don't run Webpack install",
+      name: ["-c", "--css"],
+      description:
+        "Choose CSS processor. Check https://github.com/rails/cssbundling-rails for more options",
+      args: {
+        name: "processor",
+        suggestions: ["tailwind", "bootstrap", "bulma", "postcss", "sass"],
+      },
     },
     {
-      name: ["--f", "--force"],
-      description: "Overwrite files that already exist",
+      name: ["-B", "--skip-bundle"],
+      description: "Don't run bundle install",
     },
     {
-      name: ["--p", "--pretend"],
-      description: "Run but do not make any changes",
+      name: "--skip-decrypted-diffs",
+      description:
+        "Don't configure git to show decrypted diffs of encrypted credentials",
     },
+    ...runtimeOptions,
     {
-      name: ["--q", "--quiet"],
-      description: "Suppress status output",
-    },
-    {
-      name: ["--s", "--skip"],
-      description: "Skip files that already exist",
-    },
-    {
-      name: ["--h", "--help"],
+      name: ["-h", "--help"],
       description: "Show this help message and quit",
     },
     {
-      name: ["--v", "--version"],
+      name: ["-v", "--version"],
       description: "Show Rails version number and quit",
     },
   ],
@@ -373,7 +433,7 @@ const defaultCommands: Fig.Subcommand[] = [
     ],
   },
   {
-    name: "server",
+    name: ["s", "server"],
     description:
       "Launch a web server to access your application through a browser",
     options: [
@@ -441,15 +501,15 @@ const defaultCommands: Fig.Subcommand[] = [
     options: dbOptions,
   },
   {
-    name: "dbconsole",
+    name: ["db", "dbconsole"],
     description:
-      "Opens a console to your database (supports MySQL, PostgreSQL, and SQLite3)",
+      "Start a console for the database specified in config/database.yml",
     options: [
       {
-        name: "-e",
+        name: ["-e", "--environment"],
         description:
           "Specifies the environment to run this dbconsole under (e.g. test/development/production)",
-        args: {},
+        args: { name: "environment" },
       },
       {
         name: "--mode",
@@ -461,24 +521,24 @@ const defaultCommands: Fig.Subcommand[] = [
         },
       },
       {
-        name: "-p",
+        name: ["-p", "--include-password"],
         description: "Automatically provide the password from database.yml",
-        args: {},
       },
       {
-        name: "-c",
-        description: "Specifies the connection to use",
-        args: { name: "connection" },
+        name: "--header",
+        description: "Turn on column headers (sqlite3 only)",
       },
       {
-        name: ["-db", "--database"],
+        name: ["--db", "--database"],
         description: "Specifies the database to use",
+        args: { name: "database" },
       },
     ],
   },
   {
     name: "notes",
-    description: "Enumerate all annotations",
+    description:
+      "Show comments in your code annotated with FIXME, OPTIMIZE, and TODO",
     options: [
       {
         name: ["-a", "--annotations"],
@@ -492,7 +552,7 @@ const defaultCommands: Fig.Subcommand[] = [
     ],
   },
   {
-    name: "generate",
+    name: ["g", "generate"],
     description: "Use templates to generate Rails resources",
     args: [
       {
@@ -548,30 +608,10 @@ const defaultCommands: Fig.Subcommand[] = [
     ],
     options: [
       {
-        name: "-h",
+        name: ["-h", "--help"],
         description: "Print generator's options and usage",
-        args: {},
       },
-      {
-        name: "-p",
-        description: "Run but do not make any changes",
-        args: {},
-      },
-      {
-        name: "-f",
-        description: "Overwrite files that already exist",
-        args: {},
-      },
-      {
-        name: "-s",
-        description: "Skip files that already exist",
-        args: {},
-      },
-      {
-        name: "-q",
-        description: "Suppress status output",
-        args: {},
-      },
+      ...runtimeOptions,
     ],
   },
   {
@@ -579,25 +619,28 @@ const defaultCommands: Fig.Subcommand[] = [
     description: "List all of the routes defined in your application",
     options: [
       {
-        name: "-c",
+        name: ["-c", "--controller"],
         description:
           "Filter by a specific controller, e.g. PostsController or Admin::PostsController",
-        args: {},
+        args: { name: "controller" },
       },
       {
-        name: "-g",
+        name: ["-g", "--grep"],
         description: "Grep routes by a specific pattern",
-        args: {},
+        args: { name: "pattern" },
       },
       {
-        name: "-E",
+        name: ["-E", "--expanded"],
         description: "Print routes expanded vertically with parts explained",
-        args: {},
+      },
+      {
+        name: ["-u", "--unused"],
+        description: "Print unused routes",
       },
     ],
   },
   {
-    name: "test",
+    name: ["t", "test"],
     description: "Run your test suite",
     args: {
       name: "files or directories",
@@ -642,7 +685,7 @@ export const railsCommandsGenerator: Fig.Generator = {
         args: ["--tasks"],
       });
 
-      const defaultCommandNames = defaultCommands.map((c) => c.name);
+      const defaultCommandNames = defaultCommands.flatMap((c) => c.name);
       const matches = Array.from(helpText.matchAll(/rails ([^ ]+)/g));
       commands = matches
         .map((match) => ({ name: match[1] }))

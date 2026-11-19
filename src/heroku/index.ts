@@ -1,7 +1,7 @@
 import { createVersionedSpec } from "@tabsmith/autocomplete-helpers";
 
-const versionRegex = /heroku\/([0-9]+\.[0-9]+\.[0.9]+)/;
-const versionFiles = ["8.0.0", "8.6.0"];
+const versionRegex = /heroku\/([0-9]+\.[0-9]+\.[0-9]+)/;
+const versionFiles = ["8.0.0", "8.6.0", "11.14.0"];
 
 export const getVersionCommand: Fig.GetVersionCommand = async (
   executeShellCommand

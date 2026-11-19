@@ -1,3 +1,5 @@
+// @wordpress/create-block v5.2.0 (npm "latest", 2026-11-18). Source: packages/create-block/lib/index.js
+// and lib/templates.js in WordPress/gutenberg trunk
 const completionSpec: Fig.Spec = {
   name: "@wordpress/create-block",
   description:
@@ -15,10 +17,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-t", "--template"],
-      description: "Project template type name",
+      description:
+        "Project template type name: standard, es5, an npm package name, or a local directory path",
       args: {
         name: "name",
         suggestions: ["standard", "es5"],
+        template: "folders",
+        default: "standard",
       },
     },
     {
@@ -70,6 +75,24 @@ const completionSpec: Fig.Spec = {
       description: "The variant of the template to use",
       args: {
         name: "variant",
+        // ponytail: built-in templates' variants; external templates define their own
+        suggestions: ["static", "dynamic"],
+      },
+    },
+    {
+      name: "--target-dir",
+      description:
+        "The directory where the files will be scaffolded, defaults to the slug",
+      args: {
+        name: "directory",
+        template: "folders",
+      },
+    },
+    {
+      name: "--textdomain",
+      description: "Text domain for internationalization",
+      args: {
+        name: "value",
       },
     },
     {

@@ -1,3 +1,5 @@
+// npm-check-updates v23.1.1 (GitHub release, 2026-11-19). Source: src/cli-options.ts
+// and src/bin/cli.ts at v23.1.1
 interface NcuOptions {
   cache: Fig.Option;
   cacheClear: Fig.Option;
@@ -7,23 +9,25 @@ interface NcuOptions {
   concurrency: Fig.Option;
   configFileName: Fig.Option;
   configFilePath: Fig.Option;
+  cooldown: Fig.Option;
   cwd: Fig.Option;
   deep: Fig.Option;
   dep: Fig.Option;
   deprecated: Fig.Option;
+  noDeprecated: Fig.Option;
   doctor: Fig.Option;
   doctorInstall: Fig.Option;
   doctorTest: Fig.Option;
   enginesNode: Fig.Option;
   errorLevel: Fig.Option;
   filter: Fig.Option;
-  filterResults: Fig.Option;
   filterVersion: Fig.Option;
   format: Fig.Option;
   global: Fig.Option;
-  groupFunction: Fig.Option;
   help: Fig.Option;
+  install: Fig.Option;
   interactive: Fig.Option;
+  interactiveSelect: Fig.Option;
   jsonAll: Fig.Option;
   jsonDeps: Fig.Option;
   jsonUpgraded: Fig.Option;
@@ -37,11 +41,13 @@ interface NcuOptions {
   pre: Fig.Option;
   prefix: Fig.Option;
   registry: Fig.Option;
+  registryType: Fig.Option;
   reject: Fig.Option;
   rejectVersion: Fig.Option;
   removeRange: Fig.Option;
   retry: Fig.Option;
   root: Fig.Option;
+  noRoot: Fig.Option;
   silent: Fig.Option;
   stdin: Fig.Option;
   target: Fig.Option;
@@ -100,11 +106,12 @@ const optionsDict: NcuOptions = {
   },
   configFileName: {
     name: "--configFileName",
-    description: "Config file name. (default: .ncurc.{json,yml,js,cjs})",
+    description:
+      "Config file name. (default: .ncurc or .ncurc.{json,yaml,yml,js,mjs,cjs})",
     args: {
       name: "s",
       template: "filepaths",
-      default: ".ncurc.{json,yml,js,cjs}",
+      default: ".ncurc",
     },
   },
   configFilePath: {
@@ -115,6 +122,15 @@ const optionsDict: NcuOptions = {
       name: "path",
       template: "folders",
       default: "directory of packageFile",
+    },
+  },
+  cooldown: {
+    name: ["--cooldown", "-c"],
+    description:
+      'Minimum age for package versions to be considered for upgrade: a number (days) or a string with a unit ("7d", "12h", "30m"). Run "ncu --help --cooldown" for details',
+    args: {
+      name: "period",
+      suggestions: ["7d", "12h", "30m"],
     },
   },
   cwd: {
@@ -133,16 +149,27 @@ const optionsDict: NcuOptions = {
   dep: {
     name: "--dep",
     description:
-      'Check one or more sections of dependencies only: dev, optional, peer, prod, or packageManager (comma-delimited). (default: ["prod","dev","optional"])',
+      'Check one or more sections of dependencies only: dev, optional, peer, prod, packageManager, or devEngines (comma-delimited). (default: ["prod","dev","optional","packageManager"])',
     args: {
       name: "value",
-      suggestions: ["dev", "optional", "peer", "prod", "packageManager"],
-      default: "prod,dev,optional",
+      suggestions: [
+        "dev",
+        "optional",
+        "peer",
+        "prod",
+        "packageManager",
+        "devEngines",
+      ],
+      default: "prod,dev,optional,packageManager",
     },
   },
   deprecated: {
     name: "--deprecated",
-    description: "Include deprecated packages",
+    description: "Include deprecated packages. (default: true)",
+  },
+  noDeprecated: {
+    name: "--no-deprecated",
+    description: "Exclude deprecated packages",
   },
   doctor: {
     name: ["--doctor", "-d"],
@@ -152,10 +179,10 @@ const optionsDict: NcuOptions = {
   doctorInstall: {
     name: "--doctorInstall",
     description:
-      "Specifies the install script to use in doctor mode. (default: npm install/yarn)",
+      "Specifies the install script to use in doctor mode. (default: npm install or the equivalent for your package manager)",
     args: {
       name: "command",
-      default: "npm install/yarn",
+      default: "npm install",
     },
   },
   doctorTest: {
@@ -185,19 +212,16 @@ const optionsDict: NcuOptions = {
     name: ["--filter", "-f"],
     description:
       "Include only package names matching the given string, wildcard, glob, comma-or-space-delimited list, /regex/, or predicate function",
+    isRepeatable: true,
     args: {
       name: "p",
     },
   },
-  filterResults: {
-    name: "--filterResults",
-    description:
-      'Filters out upgrades based on a user provided function. Run "ncu --help --filterResults" for details',
-  },
   filterVersion: {
     name: "--filterVersion",
     description:
-      "Filter on package version using comma-or-space-delimited list, /regex/, or predicate function",
+      "Filter on package version using comma-or-space-delimited list or /regex/",
+    isRepeatable: true,
     args: {
       name: "p",
     },
@@ -205,29 +229,58 @@ const optionsDict: NcuOptions = {
   format: {
     name: "--format",
     description:
-      'Modify the output formatting or show additional information. Specify one or more comma-delimited values: group, ownerChanged, repo, time, lines. Run "ncu --help --format" for details. (default: [])',
+      'Modify the output formatting or show additional information. Specify one or more comma-delimited values: dep, group, ownerChanged, repo, time, lines, installedVersion, cooldown. Use "no-group" to disable the default group. Run "ncu --help --format" for details. (default: ["group"])',
     args: {
       name: "value",
-      suggestions: ["group", "ownerChanged", "repo", "time", "lines"],
+      suggestions: [
+        "dep",
+        "group",
+        "homepage",
+        "ownerChanged",
+        "repo",
+        "diff",
+        "time",
+        "lines",
+        "installedVersion",
+        "cooldown",
+        "no-group",
+      ],
+      default: "group",
     },
   },
   global: {
     name: ["--global", "-g"],
     description: "Check global packages instead of in the current project",
   },
-  groupFunction: {
-    name: "--groupFunction",
-    description:
-      'Customize how packages are divided into groups when using --format group. Run "ncu --help --groupFunction" for details',
-  },
   help: {
     name: ["--help", "-h"],
     description: "Show help",
+  },
+  install: {
+    name: "--install",
+    description:
+      'Control the auto-install behavior: always, never, prompt. Run "ncu --help --install" for details. (default: "prompt")',
+    args: {
+      name: "value",
+      suggestions: ["always", "never", "prompt"],
+      default: "prompt",
+    },
   },
   interactive: {
     name: ["--interactive", "-i"],
     description:
       "Enable interactive prompts for each dependency; implies -u unless one of the json options are set",
+  },
+  interactiveSelect: {
+    name: "--interactiveSelect",
+    dependsOn: ["--interactive"],
+    description:
+      'Control which upgrades are pre-selected in interactive mode: auto, none, patch, minor, all. Only applies with --interactive. (default: "auto")',
+    args: {
+      name: "value",
+      suggestions: ["auto", "none", "patch", "minor", "all"],
+      default: "auto",
+    },
   },
   jsonAll: {
     name: ["--jsonAll", "-j"],
@@ -289,10 +342,10 @@ const optionsDict: NcuOptions = {
   packageManager: {
     name: ["--packageManager", "-p"],
     description:
-      'Npm, yarn, pnpm, deno, staticRegistry (default: npm). Run "ncu --help --packageManager" for details',
+      'Npm, yarn, pnpm, deno, bun, staticRegistry (default: npm). Run "ncu --help --packageManager" for details',
     args: {
       name: "s",
-      suggestions: ["npm", "yarn", "pnpm", "deno", "staticRegistry"],
+      suggestions: ["npm", "yarn", "pnpm", "deno", "bun", "staticRegistry"],
       default: "npm",
     },
   },
@@ -320,16 +373,26 @@ const optionsDict: NcuOptions = {
   },
   registry: {
     name: ["--registry", "-r"],
-    description:
-      'Third-party npm registry. Run "ncu --help --registry" for details',
+    description: "Specify the registry to use when looking up package versions",
     args: {
       name: "uri",
+    },
+  },
+  registryType: {
+    name: "--registryType",
+    description:
+      'Specify whether --registry refers to a full npm registry or a simple JSON file or url: npm, json. Run "ncu --help --registryType" for details. (default: npm)',
+    args: {
+      name: "type",
+      suggestions: ["npm", "json"],
+      default: "npm",
     },
   },
   reject: {
     name: ["--reject", "-x"],
     description:
       "Exclude packages matching the given string, wildcard, glob, comma-or-space-delimited list, /regex/, or predicate function",
+    isRepeatable: true,
     args: {
       name: "p",
     },
@@ -337,7 +400,8 @@ const optionsDict: NcuOptions = {
   rejectVersion: {
     name: "--rejectVersion",
     description:
-      "Exclude package.json versions using comma-or-space-delimited list, /regex/, or predicate function",
+      "Exclude package.json versions using comma-or-space-delimited list or /regex/",
+    isRepeatable: true,
     args: {
       name: "p",
     },
@@ -358,7 +422,12 @@ const optionsDict: NcuOptions = {
   root: {
     name: "--root",
     description:
-      "Runs updates on the root project in addition to specified workspaces. Only allowed with --workspace or --workspaces. (default: false)",
+      "Runs updates on the root project in addition to specified workspaces. Only allowed with --workspace or --workspaces. (default: true)",
+  },
+  noRoot: {
+    name: "--no-root",
+    description:
+      "Exclude the root project when using --workspace or --workspaces",
   },
   silent: {
     name: ["--silent", "-s"],
@@ -371,10 +440,10 @@ const optionsDict: NcuOptions = {
   target: {
     name: ["--target", "-t"],
     description:
-      'Determines the version to upgrade to: latest, newest, greatest, minor, patch, @[tag], or [function]. (default: latest) Run "ncu --help --target" for details',
+      'Determines the version to upgrade to: latest, newest, greatest, minor, patch, semver, @[tag], or [function]. (default: latest) Run "ncu --help --target" for details',
     args: {
       name: "value",
-      suggestions: ["latest", "newest", "greatest", "minor", "patch"],
+      suggestions: ["latest", "newest", "greatest", "minor", "patch", "semver"],
       default: "latest",
     },
   },
@@ -397,21 +466,22 @@ const optionsDict: NcuOptions = {
       "Log additional information for debugging. Alias for --loglevel verbose",
   },
   version: {
-    name: ["--version", "-v"],
+    name: ["--version", "-v", "-V"],
     description: "Output the version number of npm-check-updates",
   },
   workspace: {
-    name: ["--workspace", "-w"],
+    name: "--workspace",
     description:
-      "Run on one or more specified workspaces. Add --root to also upgrade the root project. (default: [])",
+      "Run on one or more specified workspaces. Add --no-root to exclude the root project",
+    isRepeatable: true,
     args: {
       name: "s",
     },
   },
   workspaces: {
-    name: ["--workspaces", "-ws"],
+    name: ["--workspaces", "-w"],
     description:
-      "Run on all workspaces. Add --root to also upgrade the root project",
+      "Run on all workspaces. Add --no-root to exclude the root project",
   },
 };
 
@@ -419,9 +489,6 @@ const completionSpec: Fig.Spec = {
   name: "ncu",
   description:
     "Upgrade your npm package.json dependencies to the latest versions, ignoring specified versions",
-  parserDirectives: {
-    flagsArePosixNoncompliant: true,
-  },
   args: {
     name: "filter",
     description:
@@ -438,23 +505,25 @@ const completionSpec: Fig.Spec = {
     optionsDict.concurrency,
     optionsDict.configFileName,
     optionsDict.configFilePath,
+    optionsDict.cooldown,
     optionsDict.cwd,
     optionsDict.deep,
     optionsDict.dep,
     optionsDict.deprecated,
+    optionsDict.noDeprecated,
     optionsDict.doctor,
     optionsDict.doctorInstall,
     optionsDict.doctorTest,
     optionsDict.enginesNode,
     optionsDict.errorLevel,
     optionsDict.filter,
-    optionsDict.filterResults,
     optionsDict.filterVersion,
     optionsDict.format,
     optionsDict.global,
-    optionsDict.groupFunction,
     optionsDict.help,
+    optionsDict.install,
     optionsDict.interactive,
+    optionsDict.interactiveSelect,
     optionsDict.jsonAll,
     optionsDict.jsonDeps,
     optionsDict.jsonUpgraded,
@@ -468,11 +537,13 @@ const completionSpec: Fig.Spec = {
     optionsDict.pre,
     optionsDict.prefix,
     optionsDict.registry,
+    optionsDict.registryType,
     optionsDict.reject,
     optionsDict.rejectVersion,
     optionsDict.removeRange,
     optionsDict.retry,
     optionsDict.root,
+    optionsDict.noRoot,
     optionsDict.silent,
     optionsDict.stdin,
     optionsDict.target,

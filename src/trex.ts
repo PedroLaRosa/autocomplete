@@ -1,3 +1,5 @@
+// Trex v1.13.1 (GitHub release crewdevio/Trex, 2023-08-18; repo dormant since). Source: cli.ts,
+// utils/info.ts and handlers at tag v1.13.1, 2026-11-19
 const dependenciesGenerator: Fig.Generator = {
   script: ["cat", "import_map.json"],
   postProcess: function (out) {
@@ -57,6 +59,7 @@ const trexOptions: Record<string, Fig.Option> = {
     args: {
       name: "package name",
       description: "Deno.land package name",
+      isVariadic: true,
     },
   },
   nest: {
@@ -65,6 +68,7 @@ const trexOptions: Record<string, Fig.Option> = {
     args: {
       name: "package name",
       description: "Nest.land package name",
+      isVariadic: true,
     },
   },
   pkg: {
@@ -108,6 +112,7 @@ const completionSpec: Fig.Spec = {
         name: "package name",
         generators: dependenciesGenerator,
         filterStrategy: "fuzzy",
+        isVariadic: true,
       },
     },
     {
@@ -123,6 +128,11 @@ const completionSpec: Fig.Spec = {
     {
       name: "tree",
       description: "View dependency tree",
+      args: {
+        name: "package name",
+        generators: dependenciesGenerator,
+        filterStrategy: "fuzzy",
+      },
     },
     {
       name: "run",
@@ -157,11 +167,26 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "exec",
-      description: "Execute a cli tool with out install then",
+      description: "Execute any cli tool without install",
       options: [
         {
           name: "--perms",
-          description: "Specify cli permisions",
+          description: "Specify cli permissions",
+          args: {
+            name: "permissions",
+            description: "Comma-separated list, eg: net,read",
+            suggestions: [
+              "A",
+              "env",
+              "hrtime",
+              "net",
+              "plugin",
+              "read",
+              "write",
+              "run",
+              "reload",
+            ],
+          },
         },
       ],
       args: {
@@ -175,6 +200,24 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-f", "--fix"],
           description: "Update outdated dependencies",
+        },
+      ],
+    },
+    {
+      name: "global-config",
+      description: "Set and get global configurations",
+      options: [
+        {
+          name: "--importMap",
+          description: "Set import map default name",
+          requiresSeparator: true,
+          exclusiveOn: ["--getImportMap"],
+          args: { name: "file name", template: "filepaths" },
+        },
+        {
+          name: "--getImportMap",
+          description: "Get current import map name configuration",
+          exclusiveOn: ["--importMap"],
         },
       ],
     },

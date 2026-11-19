@@ -1,3 +1,4 @@
+// macOS cp (BSD, man page dated 2024-03-28, macOS 15.5, synced 2026-11-19). Source: `man cp`
 const completionSpec: Fig.Spec = {
   name: "cp",
   description: "Copy files and directories",
@@ -14,28 +15,11 @@ const completionSpec: Fig.Spec = {
   ],
   options: [
     {
-      name: "-a",
-      description:
-        "Preserves structure and attributes of files but not directory structure",
-    },
-    {
-      name: "-f",
-      description:
-        "If the destination file cannot be opened, remove it and create a new file, without prompting for confirmation",
-      exclusiveOn: ["-n"],
-    },
-    {
       name: "-H",
       description:
         "If the -R option is specified, symbolic links on the command line are followed",
       exclusiveOn: ["-L", "-P"],
       dependsOn: ["-R"],
-    },
-    {
-      name: "-i",
-      description:
-        "Cause cp to write a prompt to the standard error output before copying a file that would overwrite an existing file",
-      exclusiveOn: ["-n"],
     },
     {
       name: "-L",
@@ -45,21 +29,71 @@ const completionSpec: Fig.Spec = {
       dependsOn: ["-R"],
     },
     {
-      name: "-n",
-      description: "Do not overwrite an existing file",
-      exclusiveOn: ["-f", "-i"],
-    },
-    {
       name: "-P",
       description:
-        "If the -R option is specified, no symbolic links are followed",
+        "No symbolic links are followed. This is the default if the -R option is specified",
       exclusiveOn: ["-H", "-L"],
-      dependsOn: ["-R"],
     },
     {
       name: "-R",
       description:
         "If source designates a directory, cp copies the directory and the entire subtree connected at that point. If source ends in a /, the contents of the directory are copied rather than the directory itself",
+    },
+    {
+      name: "-r",
+      description:
+        "Historic recursive copy whose behavior is implementation-dependent; use -R instead",
+      deprecated: true,
+    },
+    {
+      name: "-a",
+      description:
+        "Archive mode, same as -RpP. Preserves structure and attributes of files but not directory structure",
+    },
+    {
+      name: "-c",
+      description:
+        "Copy files using clonefile(2), falling back to copyfile(2) if the target filesystem does not support it",
+    },
+    {
+      name: "-f",
+      description:
+        "For each existing destination pathname, remove it and create a new file, without prompting for confirmation",
+      exclusiveOn: ["-i", "-n"],
+    },
+    {
+      name: "-i",
+      description:
+        "Cause cp to write a prompt to the standard error output before copying a file that would overwrite an existing file",
+      exclusiveOn: ["-f", "-n"],
+    },
+    {
+      name: "-l",
+      description:
+        "Create hard links to regular files in a hierarchy instead of copying",
+    },
+    {
+      name: "-N",
+      description: "When used with -p, suppress copying file flags",
+    },
+    {
+      name: "-n",
+      description: "Do not overwrite an existing file",
+      exclusiveOn: ["-f", "-i"],
+    },
+    {
+      name: "-p",
+      description:
+        "Preserve modification time, access time, file flags, file mode, user ID, group ID, ACLs and extended attributes",
+    },
+    {
+      name: "-S",
+      description: "Do not attempt to preserve holes in sparse files",
+    },
+    {
+      name: "-s",
+      description:
+        "Create symbolic links to regular files in a hierarchy instead of copying",
     },
     {
       name: "-v",
@@ -70,8 +104,8 @@ const completionSpec: Fig.Spec = {
       description: "Do not copy Extended Attributes (EAs) or resource forks",
     },
     {
-      name: "-c",
-      description: "Copy files using clonefile",
+      name: "-x",
+      description: "File system mount points are not traversed",
     },
   ],
 };

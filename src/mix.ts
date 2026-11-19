@@ -1,3 +1,6 @@
+// Elixir v1.20.5 (GitHub release "Latest", 2026-10-29). Source: mix new/run/help
+// task modules and Mix.CLI in elixir-lang/elixir at v1.20.5; other tasks come
+// from the `mix help` generator.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const constants = {
@@ -24,10 +27,6 @@ const completionSpec: Fig.Spec = {
       },
       options: [
         {
-          name: ["-h", "--help"],
-          description: "Output usage information",
-        },
-        {
           name: "--app",
           description: "Name the OTP application for the project",
           args: {
@@ -35,7 +34,7 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--modules",
+          name: "--module",
           description: "Name the modules in the generated code skeleton",
           args: {
             name: "module",
@@ -54,7 +53,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "run",
-      description: "Starts the current application and runs code",
+      description: "Runs the current application",
       args: {
         name: "file",
         generators: preferredScriptFilepaths,
@@ -62,8 +61,12 @@ const completionSpec: Fig.Spec = {
       },
       options: [
         {
-          name: "--config",
-          description: "Loads the given configuration files",
+          name: ["-c", "--config"],
+          description: "Loads the given configuration file",
+          deprecated: {
+            description: "Import configurations from config files",
+          },
+          isRepeatable: true,
           args: {
             name: "file",
             template: "filepaths",
@@ -72,6 +75,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-e", "--eval"],
           description: "Evaluates the given code",
+          isRepeatable: true,
           args: {
             name: "code",
             description: "String containing code to execute",
@@ -81,6 +85,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-r", "--require"],
           description: "Executes the given pattern/file",
+          isRepeatable: true,
           args: {
             name: "file|pattern",
             description: "The file|pattern to execute",
@@ -89,11 +94,16 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-p", "--parallel"],
-          description: "Executes the given pattern/file",
-          args: {
-            name: "file|pattern",
-            generators: preferredScriptFilepaths,
-          },
+          description: "Makes all requires parallel",
+        },
+        {
+          name: "--listeners",
+          description:
+            "Starts Mix listeners (default unless --no-listeners or --no-deps-check)",
+        },
+        {
+          name: "--no-listeners",
+          description: "Does not start Mix listeners",
         },
         {
           name: "--preload-modules",
@@ -132,11 +142,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "help",
       description:
-        "Prints documentation for a given task (Lists all the tasks if no task is specified)",
+        "Prints help for tasks, aliases, modules and applications (lists all tasks if none is given)",
       args: {
         name: "task",
         isOptional: true,
-        description: "Prints documentation for a given task",
+        description:
+          "Task, alias, MODULE, MODULE.FUN, app:APP, c:MODULE.NAME or t:MODULE.NAME",
         generators: {
           cache: { ttl: 10000 },
           script: ["mix", "help"],
@@ -155,6 +166,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--names",
           description: "Prints all task names and aliases",
+        },
+        {
+          name: "--aliases",
+          description: "Prints all aliases",
         },
       ],
     },

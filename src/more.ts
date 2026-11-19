@@ -1,6 +1,8 @@
+// util-linux more v2.42.4 (gh api util-linux tags, 2026-11-19). Source: text-utils/more.c usage() and longopts at v2.42.4
+// ponytail: macOS /usr/bin/more is less 581.2 in more mode (see less.ts); -<number>, +<number> and +/<pattern> are left out
 const completionSpec: Fig.Spec = {
   name: "more",
-  description: "Opposite of less",
+  description: "Display the contents of a file in a terminal",
   options: [
     {
       name: ["-d", "--silent"],
@@ -8,21 +10,26 @@ const completionSpec: Fig.Spec = {
         "Prompt with '[Press space to continue, 'q' to quit.]', and display '[Press 'h' for instructions.]' instead of ringing the bell when an illegal key is pressed",
     },
     {
-      name: ["-l", "--logical"],
-      description: "Do not pause after any line containing a ^L (form feed)",
-    },
-    {
-      name: ["-f", "--no-pause"],
+      name: ["-f", "--logical"],
       description: "Count logical lines, rather than screen lines",
     },
     {
-      name: ["-p", "--print-over"],
-      description: "Instead, clear the whole screen and then display the text",
+      name: ["-l", "--no-pause"],
+      description: "Do not pause after any line containing a ^L (form feed)",
     },
     {
-      name: ["-c", "--clean-print"],
+      name: ["-c", "--print-over"],
       description:
-        "Instead, paint each screen from the top, clearing the remainder of each line as it is displayed",
+        "Do not scroll; paint each screen from the top, clearing the remainder of each line as it is displayed",
+    },
+    {
+      name: ["-p", "--clean-print"],
+      description:
+        "Do not scroll; clear the whole screen and then display the text",
+    },
+    {
+      name: ["-e", "--exit-on-eof"],
+      description: "Exit on end-of-file",
     },
     {
       name: ["-s", "--squeeze"],
@@ -30,15 +37,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-u", "--plain"],
-      description: "Silently ignored as backwards compatibility",
+      description:
+        "Suppress underlining and bold (silently ignored for backwards compatibility)",
     },
     {
       name: ["-n", "--lines"],
       description: "Specify the number of lines per screenful",
-      args: { name: "n" },
+      args: { name: "number" },
     },
     {
-      name: "--help",
+      name: ["-h", "--help"],
       description: "Display help text",
     },
     {

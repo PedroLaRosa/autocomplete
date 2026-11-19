@@ -1,3 +1,4 @@
+// Dashlane CLI v6.2647.2 (GitHub release Dashlane/dashlane-cli, 2026-11-18). Source: src/commands/** at v6.2647.2
 type Device = {
   deviceId: string;
   deviceName: string;
@@ -10,13 +11,11 @@ type Device = {
   isCurrentDevice: boolean;
 };
 
-type TeamCredential = {
+type PublicAPIKey = {
   accessKey: string;
-  deviceName: string;
-  platform: string;
+  description: string;
   creationDateUnix: number;
-  updateDateUnix: number;
-  lastActivityDateUnix: number;
+  valid: boolean;
 };
 
 function unixToDateString(unix: number) {
@@ -50,25 +49,41 @@ const deviceGenerator: Fig.Generator = {
   },
 };
 
-const teamCredentialGenerator: Fig.Generator = {
-  script: ["dcli", "team", "credentials", "list", "--json"],
+const publicAPIKeyGenerator: Fig.Generator = {
+  script: ["dcli", "team", "public-api", "list-keys", "--json"],
   postProcess: function (out) {
     try {
-      const credentials = JSON.parse(out) as TeamCredential[];
-      credentials.sort((a, b) => b.creationDateUnix - a.creationDateUnix);
-
-      return credentials.map((credential) => ({
-        name: `${credential.deviceName} (${credential.accessKey})}`,
-        description: `Created: ${unixToDateString(
-          credential.creationDateUnix
-        )}`,
-        insertValue: credential.accessKey,
-      }));
+      const { publicAPIKeys } = JSON.parse(out) as {
+        publicAPIKeys: PublicAPIKey[];
+      };
+      return publicAPIKeys
+        .filter((key) => key.valid)
+        .sort((a, b) => b.creationDateUnix - a.creationDateUnix)
+        .map((key) => ({
+          name: key.accessKey,
+          // creationDateUnix is in ms here, unlike devices
+          description: `${key.description} (created ${new Date(
+            key.creationDateUnix
+          ).toLocaleString()})`,
+        }));
     } catch (e) {
       return [];
     }
   },
 };
+
+const filtersArg = (what: string, defaults: string): Fig.Arg => ({
+  name: "filters",
+  description: `Filter ${what} based on any parameter using <param>=<value>; if <param> is not specified in the filter, will default to ${defaults}`,
+  isOptional: true,
+  isVariadic: true,
+});
+
+const outputOption = (what: string): Fig.Option => ({
+  name: ["-o", "--output"],
+  description: `How to print the ${what}. The JSON option outputs all the matching ${what}`,
+  args: { name: "type", suggestions: ["text", "json"], default: "text" },
+});
 
 const completionSpec: Fig.Spec = {
   name: "dcli",
@@ -80,8 +95,13 @@ const completionSpec: Fig.Spec = {
       description: "Manually synchronize the local vault with Dashlane",
     },
     {
+      name: "status",
+      description: "Get the status of the CLI (logged in, locked, etc.)",
+    },
+    {
       name: "read",
-      description: "Retrieve a secret from the local vault via its path",
+      description:
+        "Retrieve a secret from the local vault via its path (using <id> is much more efficient)",
       args: {
         name: "path",
         description:
@@ -126,60 +146,41 @@ const completionSpec: Fig.Spec = {
             "How to print the passwords. The JSON option outputs all the matching credentials",
           args: {
             name: "type",
-            suggestions: ["clipboard", "password", "json"],
+            suggestions: ["clipboard", "console", "json"],
             default: "clipboard",
           },
         },
-      ],
-      args: {
-        name: "filters",
-        description:
-          "Filter credentials based on any parameter using <param>=<value>; if <param> is not specified in the filter, will default to url and title",
-        isOptional: true,
-        isVariadic: true,
-      },
-    },
-    {
-      name: ["otp", "o"],
-      description:
-        "Retrieve an OTP code from local vault and copy it to the clipboard",
-      options: [
         {
-          name: "--print",
+          name: ["-f", "--field"],
           description:
-            "Prints just the OTP code, instead of copying it to the clipboard",
+            "What type of field to retrieve (login, email, password, otp)",
+          args: {
+            name: "type",
+            suggestions: ["login", "email", "otp", "password"],
+            default: "password",
+          },
         },
       ],
-      args: {
-        name: "filters",
-        description:
-          "Filter credentials based on any parameter using <param>=<value>; if <param> is not specified in the filter, will default to url and title",
-        isOptional: true,
-        isVariadic: true,
-      },
+      args: filtersArg("credentials", "url and title"),
     },
     {
       name: ["note", "n"],
       description: "Retrieve a secure note from the local vault and open it",
-      options: [
-        {
-          name: ["-o", "--output"],
-          description:
-            "How to print the notes. The JSON option outputs all the matching notes",
-          args: {
-            name: "type",
-            suggestions: ["text", "json"],
-            default: "text",
-          },
-        },
-      ],
-      args: {
-        name: "filters",
-        description:
-          "Filter notes based on any parameter using <param>=<value>; if <param> is not specified in the filter, will default to title only",
-        isOptional: true,
-        isVariadic: true,
-      },
+      options: [outputOption("notes")],
+      args: filtersArg("notes", "title only"),
+    },
+    {
+      name: "secret",
+      description: "Retrieve a secret from the local vault and open it",
+      options: [outputOption("secrets")],
+      args: filtersArg("secrets", "title only"),
+    },
+    {
+      name: "id",
+      description:
+        "Retrieve a personal ID item (passport, ID card, identity, driver license, tax number, ...) from the local vault",
+      options: [outputOption("IDs")],
+      args: filtersArg("items", "type and name fields"),
     },
     {
       name: ["accounts", "a"],
@@ -246,13 +247,15 @@ const completionSpec: Fig.Spec = {
         {
           name: ["credentials", "c"],
           description: "Team credentials operations",
+          // Subcommands now only print a notice pointing to the Admin Console
+          deprecated: {
+            description:
+              "Create CLI keys in the Admin Console (Integrations > Developer Access)",
+          },
           subcommands: [
             {
               name: "generate",
               description: "Generate new team credentials",
-              options: [
-                { name: "--json", description: "Output in JSON format" },
-              ],
             },
             {
               name: "list",
@@ -264,11 +267,34 @@ const completionSpec: Fig.Spec = {
             {
               name: "revoke",
               description: "Revoke credentials by access key",
+            },
+            helpCommand,
+          ],
+        },
+        {
+          name: "public-api",
+          description: "Public API operations",
+          subcommands: [
+            {
+              name: "create-key",
+              description: "Generate a new Public API key (Bearer token)",
+              args: { name: "description", description: "Description" },
+            },
+            {
+              name: "list-keys",
+              description: "List all Public API keys",
+              options: [
+                { name: "--json", description: "Output in JSON format" },
+              ],
+            },
+            {
+              name: "revoke-key",
+              description: "Revoke a Public API key",
               isDangerous: true,
               args: {
                 name: "accessKey",
-                description: "Access key of the credentials to revoke",
-                generators: teamCredentialGenerator,
+                description: "Access key",
+                generators: publicAPIKeyGenerator,
               },
             },
             helpCommand,
@@ -308,22 +334,56 @@ const completionSpec: Fig.Spec = {
                 'End timestamp in ms (use "now" to get the current timestamp)',
               args: { name: "end", default: "now" },
             },
-            {
-              name: "--type",
-              description: "Log type",
-              args: { name: "type" },
-            },
-            {
-              name: "--category",
-              description: "Log category",
-              args: { name: "category" },
-            },
             { name: "--csv", description: "Output in CSV format" },
             {
               name: "--human-readable",
               description: "Output dates in human readable format",
             },
           ],
+        },
+        {
+          name: ["propose-members", "pm"],
+          description: "Propose logins to join the team",
+          options: [
+            {
+              name: "--skip-account-creation-required-alerts",
+              description:
+                "Do not alert about members requiring account creation",
+            },
+            {
+              name: "--skip-proposals",
+              description: "Do not send proposal notifications",
+            },
+            {
+              name: "--skip-removals",
+              description: "Do not send removal notifications",
+            },
+            {
+              name: "--skip-reproposals",
+              description: "Do not send reproposal notifications",
+            },
+            {
+              name: "--sender-email",
+              description:
+                "Email address to use as the sender of notifications",
+              args: { name: "senderEmail" },
+            },
+          ],
+          args: {
+            name: "logins",
+            description: "Logins to be proposed to the team",
+            isVariadic: true,
+          },
+        },
+        {
+          name: ["remove-members", "rm"],
+          description: "Remove members from the team",
+          isDangerous: true,
+          args: {
+            name: "logins",
+            description: "Logins to remove from the team",
+            isVariadic: true,
+          },
         },
         {
           name: ["report", "r"],
@@ -333,6 +393,42 @@ const completionSpec: Fig.Spec = {
             description: "Number of days in history",
             isOptional: true,
           },
+        },
+        {
+          name: ["dark-web-insights", "dwi"],
+          description:
+            "Get Dark Web Insights detailed report for your team's domain (results are paginated)",
+          options: [
+            {
+              name: "--order-by",
+              description: "Order results by",
+              args: {
+                name: "orderBy",
+                suggestions: [
+                  "DEFAULT",
+                  "UNSEEN",
+                  "TEAM_MEMBERS",
+                  "PUBLISH_DATE",
+                ],
+                default: "DEFAULT",
+              },
+            },
+            {
+              name: "--count",
+              description: "Results count per page",
+              args: { name: "count", default: "100" },
+            },
+            {
+              name: "--offset",
+              description: "Page offset",
+              args: { name: "offset", default: "0" },
+            },
+          ],
+          args: { name: "domain", description: "Domain name" },
+        },
+        {
+          name: "mcp",
+          description: "Start the MCP server",
         },
         helpCommand,
       ],
@@ -352,6 +448,19 @@ const completionSpec: Fig.Spec = {
           description:
             "Should the encrypted master password be saved and the OS keychain be used (default: true)",
           args: { name: "boolean", suggestions: ["true", "false"] },
+        },
+        {
+          name: "user-presence",
+          description:
+            "Configure the method used to verify user presence (prevent access to vault without selected method)",
+          options: [
+            {
+              name: ["-m", "--method"],
+              description: "Method used to verify user presence",
+              isRequired: true,
+              args: { name: "type", suggestions: ["none", "biometrics"] },
+            },
+          ],
         },
         helpCommand,
       ],
@@ -375,8 +484,20 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "lock",
+      description:
+        "Lock the vault, next commands will request the master password to unlock it",
+    },
+    {
       name: "logout",
       description: "Logout and clean your local database and OS keychain",
+      options: [
+        {
+          name: "--ignore-revocation",
+          description:
+            "Device credentials won't be revoked on Dashlane's servers",
+        },
+      ],
     },
     helpCommand,
   ],

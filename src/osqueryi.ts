@@ -1,9 +1,13 @@
+// osquery v5.24.1 (GitHub release osquery/osquery, 2026-10-29). Source: macOS
+// tables from specs/CMakeLists.txt and the non-hidden FLAG/CLI_FLAG/SHELL_FLAG
+// declarations in the 5.24.1 source tree (not installed here)
 import { valueList } from "@tabsmith/autocomplete-generators";
 
 const tables = [
   "account_policy_data",
   "acpi_tables",
   "ad_config",
+  "ai_agent_skills",
   "alf",
   "alf_exceptions",
   "alf_explicit_auths",
@@ -11,7 +15,6 @@ const tables = [
   "apps",
   "arp_cache",
   "asl",
-  "atom_packages",
   "augeas",
   "authorization_mechanisms",
   "authorizations",
@@ -23,9 +26,13 @@ const tables = [
   "browser_plugins",
   "carbon_black_info",
   "carves",
+  "certificate_trust_settings",
   "certificates",
   "chrome_extension_content_scripts",
   "chrome_extensions",
+  "chrome_search_engines",
+  "connected_displays",
+  "cpu_info",
   "cpu_time",
   "crashes",
   "crontab",
@@ -74,6 +81,8 @@ const tables = [
   "firefox_addons",
   "gatekeeper",
   "gatekeeper_approved_apps",
+  "gpu_info",
+  "gpu_metrics",
   "groups",
   "hardware_events",
   "hash",
@@ -84,6 +93,7 @@ const tables = [
   "interface_ipv6",
   "iokit_devicetree",
   "iokit_registry",
+  "jetbrains_plugins",
   "kernel_extensions",
   "kernel_info",
   "kernel_panics",
@@ -97,6 +107,7 @@ const tables = [
   "load_average",
   "location_services",
   "logged_in_users",
+  "macports_packages",
   "magic",
   "managed_policies",
   "mdfind",
@@ -142,6 +153,7 @@ const tables = [
   "safari_extensions",
   "sandboxes",
   "screenlock",
+  "secureboot",
   "shared_folders",
   "sharing_preferences",
   "shell_history",
@@ -157,11 +169,13 @@ const tables = [
   "system_controls",
   "system_extensions",
   "system_info",
+  "system_profiler",
   "temperature_sensors",
   "time",
   "time_machine_backups",
   "time_machine_destinations",
   "ulimit_info",
+  "unified_log",
   "uptime",
   "usb_devices",
   "user_events",
@@ -170,14 +184,16 @@ const tables = [
   "user_ssh_keys",
   "users",
   "virtual_memory_info",
+  "vscode_extensions",
   "wifi_networks",
+  "wifi_scan",
   "wifi_status",
-  "wifi_survey",
   "xprotect_entries",
   "xprotect_meta",
   "xprotect_reports",
-  "yara",
   "yara_events",
+  "yara_file",
+  "yara_process",
   "ycloud_instance_metadata",
 ];
 
@@ -196,6 +212,11 @@ const completionSpec: Fig.Spec = {
       name: "--alarm_timeout",
       args: { name: "value" },
       description: "Seconds to allow for shutdown. Minimum is 10",
+    },
+    {
+      name: "--aws_enforce_fips",
+      description:
+        "Whether to enforce AWS FIPS endpoints for all services or not",
     },
     {
       name: "--carver_block_size",
@@ -267,6 +288,11 @@ const completionSpec: Fig.Spec = {
       description: "TLS/HTTPS endpoint for config retrieval",
     },
     {
+      name: "--config_tls_etag",
+      description:
+        "Send an etag with TLS config requests so the server may respond with a minimal body when the config is unchanged",
+    },
+    {
       name: "--config_tls_max_attempts",
       args: { name: "value" },
       description: "Number of attempts to retry a TLS config request",
@@ -313,6 +339,11 @@ const completionSpec: Fig.Spec = {
       name: "--enable_tables",
       args: { name: "value", generators: valueList({ values: tables }) },
       description: "Comma-delimited list of table names to be enabled",
+    },
+    {
+      name: "--enable_watchdog_debug",
+      description:
+        "Enable logging of CPU and memory footprint of watched processes",
     },
     {
       name: "--enroll_always",
@@ -395,6 +426,10 @@ const completionSpec: Fig.Spec = {
       description: "Stderr log level threshold",
     },
     {
+      name: "--tls_accept_gzip",
+      description: "Enable gzip compression for HTTP responses",
+    },
+    {
       name: "--tls_client_cert",
       args: { name: "value", template: "filepaths" },
       description: "Optional path to a TLS client-auth PEM certificate",
@@ -430,6 +465,12 @@ const completionSpec: Fig.Spec = {
       name: "--tls_session_timeout",
       args: { name: "value" },
       description: "TLS session keep alive timeout in seconds",
+    },
+    {
+      name: "--tls_user_agent",
+      args: { name: "value" },
+      description:
+        "User-Agent prefix for TLS requests; the osquery version is appended",
     },
     { name: "--uninstall", description: "Uninstall osqueryd as a service" },
     {
@@ -504,6 +545,11 @@ const completionSpec: Fig.Spec = {
     },
     { name: "--aws_debug", description: "Enable AWS SDK debug logging" },
     {
+      name: "--aws_disable_imdsv1_fallback",
+      description:
+        "Whether to disable support for IMDSv1 and fail if an IMDSv2 token could not be retrieved",
+    },
+    {
       name: "--aws_enable_proxy",
       description:
         "Enable proxying of HTTP/HTTPS requests in AWS client config",
@@ -519,9 +565,26 @@ const completionSpec: Fig.Spec = {
       description: "Seconds between flushing logs to Firehose (default 10)",
     },
     {
+      name: "--aws_firehose_region",
+      args: { name: "value" },
+      description:
+        "Region to use for Firehose instead of the default. This takes precedence over the aws_region flag",
+    },
+    {
       name: "--aws_firehose_stream",
       args: { name: "value" },
       description: "Name of Firehose stream for logging",
+    },
+    {
+      name: "--aws_imdsv2_request_attempts",
+      args: { name: "value" },
+      description: "How many attempts to do at requesting an IMDSv2 token",
+    },
+    {
+      name: "--aws_imdsv2_request_interval",
+      args: { name: "value" },
+      description:
+        "Base seconds to wait between attempts at requesting an IMDSv2 token. Scales quadratically with the number of attempts",
     },
     {
       name: "--aws_kinesis_disable_log_status",
@@ -540,6 +603,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "--aws_kinesis_random_partition_key",
       description: "Enable random kinesis partition keys",
+    },
+    {
+      name: "--aws_kinesis_region",
+      args: { name: "value" },
+      description:
+        "Region to use for Kinesis instead of the default. This takes precedence over the aws_region flag",
     },
     {
       name: "--aws_kinesis_stream",
@@ -580,7 +649,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--aws_region",
       args: { name: "value" },
-      description: "AWS region",
+      description: "Default AWS region for all services",
     },
     {
       name: "--aws_secret_access_key",
@@ -621,7 +690,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--decorations_top_level",
-      description: "Add decorators as top level JSON objects",
+      description: "Add decorators as top level JSON object members",
     },
     {
       name: "--disable_audit",
@@ -663,6 +732,11 @@ const completionSpec: Fig.Spec = {
     },
     { name: "--disable_logging", description: "Disable ERROR/INFO logging" },
     {
+      name: "--distributed_denylist_duration",
+      args: { name: "value" },
+      description: "Seconds to denylist distributed queries (default 1 day)",
+    },
+    {
       name: "--distributed_interval",
       args: { name: "value" },
       description: "Seconds between polling for new queries (default 60)",
@@ -690,6 +764,12 @@ const completionSpec: Fig.Spec = {
       name: "--distributed_tls_write_endpoint",
       args: { name: "value" },
       description: "TLS/HTTPS endpoint for distributed query results",
+    },
+    {
+      name: "--dns_resolver_refresh_interval",
+      args: { name: "value" },
+      description:
+        "Interval in seconds between DNS resolver state refreshes via res_init(). Default: 60 seconds",
     },
     {
       name: "--docker_socket",
@@ -721,6 +801,10 @@ const completionSpec: Fig.Spec = {
       description: "Skip pidfile and database state checks",
     },
     {
+      name: "--es_fim_enable_open_events",
+      description: "Enable open events for EndpointSecurity FIM",
+    },
+    {
       name: "--es_fim_mute_path_literal",
       args: { name: "value" },
       description: "Comma delimited list of path literals to be muted for FIM",
@@ -728,7 +812,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--es_fim_mute_path_prefix",
       args: { name: "value" },
-      description: "Comma delimited list of path prefxes to be muted for FIM",
+      description: "Comma delimited list of path prefixes to be muted for FIM",
     },
     {
       name: "--events_expiry",
@@ -745,6 +829,11 @@ const completionSpec: Fig.Spec = {
       description: "Optimize subscriber select queries (scheduler only)",
     },
     {
+      name: "--experiment_list",
+      args: { name: "value" },
+      description: "Comma-separated list of experiments to enable",
+    },
+    {
       name: "--extensions_default_index",
       description: "Enable INDEX on all extension table columns (default true)",
     },
@@ -758,6 +847,21 @@ const completionSpec: Fig.Spec = {
       args: { name: "value" },
       description:
         "Field used to identify the host running osquery (hostname, uuid, instance, ephemeral, specified)",
+    },
+    {
+      name: "--ignore_table_exceptions",
+      description:
+        "Ignore exceptions thrown by tables. osquery and extensions default to true",
+    },
+    {
+      name: "--keychain_access_cache",
+      description: "Use a cache for keychain accesses (default true)",
+    },
+    {
+      name: "--keychain_access_interval",
+      args: { name: "value" },
+      description:
+        "Minimum minutes required between keychain accesses. Keychain cache must be enabled to use",
     },
     {
       name: "--logger_event_type",
@@ -777,9 +881,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--logger_kafka_compression",
-      args: { name: "value", suggestions: ["none", "gzip"] },
-      description:
-        "Compression codec to use for compressing message sets ('none' or 'gzip')",
+      args: {
+        name: "value",
+        suggestions: ["none", "gzip", "snappy", "lz4", "zstd"],
+      },
+      description: "Compression codec to use for compressing message sets",
     },
     {
       name: "--logger_kafka_topic",
@@ -829,6 +935,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "--logger_syslog_prepend_cee",
       description: "Prepend @cee: tag to logged JSON messages",
+    },
+    {
+      name: "--logger_tls_backoff_max",
+      args: { name: "value" },
+      description:
+        "Maximum seconds to wait before flushing logs over TLS/HTTPS. Backoff kicks in when regular flush fails. Should be a multiple of logger_tls_period. 0 disables backoff",
     },
     {
       name: "--logger_tls_compress",
@@ -935,11 +1047,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--table_delay",
       args: { name: "value" },
-      description: "Add an optional microsecond delay between table scans",
-    },
-    {
-      name: "--table_exceptions",
-      description: "Allow tables to throw exceptions",
+      description: "Add an optional millisecond delay between table scans",
     },
     {
       name: "--thrift_string_size_limit",
@@ -961,13 +1069,19 @@ const completionSpec: Fig.Spec = {
     {
       name: "--worker_threads",
       args: { name: "value" },
-      description: "Number of work dispatch threads",
+      description: "Number of work dispatch threads (no longer used)",
+      deprecated: true,
     },
     {
       name: "--yara_delay",
       args: { name: "value" },
       description:
         "Time in ms to sleep after scan of each file (default 50) to reduce memory spikes",
+    },
+    {
+      name: "--yara_sigurl_authenticate",
+      description:
+        "Enable authentication in yara sigrule requests. Request will be authenticated with the node key like other osquery TLS requests",
     },
     {
       name: "--A",
@@ -992,6 +1106,11 @@ const completionSpec: Fig.Spec = {
     { name: "--line", description: "Set output mode to 'line'" },
     { name: "--list", description: "Set output mode to 'list'" },
     {
+      name: "--output",
+      args: { name: "path", template: "filepaths" },
+      description: "Write results to a file (omit or use '-' for stdout)",
+    },
+    {
       name: "--pack",
       args: { name: "value" },
       description: "Run all queries in a pack",
@@ -1001,6 +1120,16 @@ const completionSpec: Fig.Spec = {
       name: "--profile",
       args: { name: "value" },
       description: "Enable profile mode when non-0, set number of iterations",
+    },
+    {
+      name: "--query",
+      args: { name: "sql" },
+      description: "Execute a single SQL query and exit",
+    },
+    {
+      name: "--query_file",
+      args: { name: "path", template: "filepaths" },
+      description: "Execute SQL query from a file and exit",
     },
     {
       name: "--separator",

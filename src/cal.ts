@@ -1,3 +1,4 @@
+// cal (macOS 15.5 BSD, man page dated 2019-03-07, synced 2026-11-19). Source: `man cal`
 import { monthSuggestions } from "./ncal";
 
 const completionSpec: Fig.Spec = {
@@ -6,11 +7,42 @@ const completionSpec: Fig.Spec = {
     optionsMustPrecedeArguments: true,
   },
   description: "Displays a calendar and the date of Easter",
-  args: {
-    name: "year",
-    description: "Year to print calendar of",
-  },
+  args: [
+    {
+      name: "month",
+      description:
+        "Month as a number or name; given alone, a number is read as the year",
+      isOptional: true,
+      suggestions: monthSuggestions,
+    },
+    {
+      name: "year",
+      description: "Year (1-9999) to print calendar of",
+      isOptional: true,
+    },
+  ],
   options: [
+    {
+      name: "-3",
+      description:
+        "Display the previous, current and next month surrounding today",
+    },
+    {
+      name: "-A",
+      description: "Display the number of months after the current month",
+      args: {
+        name: "number",
+        description: "Number of months to display",
+      },
+    },
+    {
+      name: "-B",
+      description: "Display the number of months before the current month",
+      args: {
+        name: "number",
+        description: "Number of months to display",
+      },
+    },
     {
       name: "-h",
       description: "Turns off highlighting of today",

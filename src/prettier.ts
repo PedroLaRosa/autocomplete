@@ -1,3 +1,4 @@
+// Prettier v3.10.1 (GitHub release, 2026-11-12). Source: `prettier --help` (v3.9.10) and src/cli/cli-options.evaluate.js, src/main/core-options.evaluate.js, language options at tag 3.10.1
 const completionSpec: Fig.Spec = {
   name: "prettier",
   description: "Run Prettier from the command line",
@@ -5,7 +6,8 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["-c", "--check"],
-      description: "Check if your files are formatted",
+      description:
+        "Check if the given files are formatted, print a summary and paths to unformatted files",
       args: {
         name: "file, dir, or glob",
         template: ["filepaths", "folders"],
@@ -32,6 +34,11 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--bracket-same-line",
+      description:
+        "Put > of opening tags on the last line instead of on a new line",
+    },
+    {
       name: "--no-bracket-spacing",
       description: "Do not print spaces between brackets",
     },
@@ -55,6 +62,21 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--experimental-operator-position",
+      description:
+        "Where to print operators when binary expressions wrap lines",
+      args: {
+        name: "position",
+        default: "end",
+        suggestions: ["start", "end"],
+      },
+    },
+    {
+      name: "--experimental-ternaries",
+      description:
+        "Use curious ternaries, with the question mark after the condition",
+    },
+    {
       name: "--html-whitespace-sensitivity",
       description: "How to handle whitespaces in HTML",
       args: {
@@ -66,10 +88,20 @@ const completionSpec: Fig.Spec = {
     {
       name: "--jsx-bracket-same-line",
       description: "Put > on the last line instead of at a new line",
+      deprecated: { description: "Use --bracket-same-line" },
     },
     {
       name: "--jsx-single-quote",
       description: "Use single quotes in JSX",
+    },
+    {
+      name: "--object-wrap",
+      description: "How to wrap object literals",
+      args: {
+        name: "mode",
+        default: "preserve",
+        suggestions: ["preserve", "collapse"],
+      },
     },
     {
       name: "--parser",
@@ -82,6 +114,7 @@ const completionSpec: Fig.Spec = {
           "babel-flow",
           "babel-ts",
           "typescript",
+          "acorn",
           "espree",
           "meriyah",
           "css",
@@ -89,15 +122,18 @@ const completionSpec: Fig.Spec = {
           "scss",
           "json",
           "json5",
+          "jsonc",
           "json-stringify",
           "graphql",
           "markdown",
           "mdx",
           "vue",
           "yaml",
+          "glimmer",
           "html",
           "angular",
           "lwc",
+          "mjml",
         ],
       },
     },
@@ -132,6 +168,10 @@ const completionSpec: Fig.Spec = {
         "Do not print semicolons, except at the beginning of lines which may need them",
     },
     {
+      name: "--single-attribute-per-line",
+      description: "Enforce single attribute per line in HTML, Vue and JSX",
+    },
+    {
       name: "--single-quote",
       description: "Use single quotes instead of double quotes",
     },
@@ -148,8 +188,8 @@ const completionSpec: Fig.Spec = {
       description: "Print trailing commas wherever possible when multi-line",
       args: {
         name: "type",
-        default: "es5",
-        suggestions: ["es5", "none", "all"],
+        default: "all",
+        suggestions: ["all", "es5", "none"],
       },
     },
     {
@@ -193,7 +233,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--find-config-path",
       description:
-        "Finds a path to the configuration file for the given input file",
+        "Find and print the path to a configuration file for the given input file",
       args: {
         name: "file",
         template: "filepaths",
@@ -202,28 +242,19 @@ const completionSpec: Fig.Spec = {
     {
       name: "--ignore-path",
       description: "Path to a file with patterns describing files to ignore",
+      isRepeatable: true,
       args: {
         name: "path",
         template: "filepaths",
-        default: ".prettierignore",
       },
     },
     {
       name: "--plugin",
       description: "Add a plugin",
+      isRepeatable: true,
       args: {
         name: "path",
         template: "folders",
-      },
-    },
-    {
-      name: "--plugin-search-dir",
-      description:
-        "Custom directory that contains prettier plugins in node_modules subdirectory",
-      args: {
-        name: "path",
-        template: "folders",
-        isVariadic: true,
       },
     },
     {
@@ -286,7 +317,7 @@ const completionSpec: Fig.Spec = {
       description: "Insert @format pragma into file's first docblock comment",
     },
     {
-      name: "--loglevel",
+      name: "--log-level",
       description: "What level of logs to report",
       args: {
         name: "level",
@@ -300,8 +331,14 @@ const completionSpec: Fig.Spec = {
         "Require either '@prettier' or '@format' to be present in the file's first docblock comment in order for it to be formatted",
     },
     {
+      name: "--check-ignore-pragma",
+      description:
+        "Check whether the file's first docblock comment contains '@noprettier' or '@noformat' to determine if it should be formatted",
+    },
+    {
       name: "--stdin-filepath",
       description: "Path to the file to pretend that stdin comes from",
+      exclusiveOn: ["--cache"],
       args: {
         name: "path",
         template: "filepaths",
@@ -323,6 +360,27 @@ const completionSpec: Fig.Spec = {
     {
       name: "--no-error-on-unmatched-pattern",
       description: "Prevent errors when pattern is unmatched",
+    },
+    {
+      name: "--cache",
+      description: "Only format changed files",
+      exclusiveOn: ["--stdin-filepath"],
+    },
+    {
+      name: "--cache-location",
+      description: "Path to the cache file",
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--cache-strategy",
+      description: "Strategy for the cache to use for detecting changed files",
+      args: {
+        name: "strategy",
+        suggestions: ["metadata", "content"],
+      },
     },
   ],
   args: {

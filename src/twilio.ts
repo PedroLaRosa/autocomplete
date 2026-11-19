@@ -1,3 +1,7 @@
+// Twilio CLI v7.3.0 (GitHub release twilio/twilio-cli, 2026-11-11). Source:
+// src/commands and package.json oclif plugins at tag 7.3.0, twilio-cli-core
+// 9.3.0 base flags. The generated `api` tree is left out on purpose.
+
 /** A version of Fig.Subcommand with a predictable name prop */
 interface TwilioSubcommand extends Fig.Subcommand {
   name: string;
@@ -132,6 +136,21 @@ const silentOption: Fig.Option = {
 // These options are on subcommands, not on the top level twilio CLI
 const persistentOptions = [logOption, outputFormatOption, silentOption];
 
+// TwilioClientCommand flags: the base options plus the profile selector
+const clientOptions: Fig.Option[] = [
+  ...persistentOptions,
+  {
+    name: ["-p", "--profile"],
+    description: "Shorthand identifier for your profile",
+    args: { name: "profile" },
+  },
+];
+
+const noHeaderOption: Fig.Option = {
+  name: "--no-header",
+  description: "Skip including of headers while listing the data",
+};
+
 const configSubcommand: TwilioSubcommand = {
   name: "config",
   description: "Manage Twilio CLI configurations",
@@ -149,13 +168,17 @@ const configSubcommand: TwilioSubcommand = {
         {
           name: ["-e", "--edge"],
           description: "Sets an Edge configuration",
+          args: { name: "edge" },
         },
         {
           name: "--require-profile-input",
+          description:
+            "Whether the profile flag for Twilio CLI commands is required or not",
           exclusiveOn: ["--no-require-profile-input"],
         },
         {
           name: "--no-require-profile-input",
+          description: "Don't require the profile flag for Twilio CLI commands",
           exclusiveOn: ["--require-profile-input"],
         },
       ],
@@ -174,6 +197,41 @@ const debuggerSubcommand: TwilioSubcommand = {
         {
           name: "list",
           description: "Show a list of log events generated for the account",
+          options: [
+            ...clientOptions,
+            noHeaderOption,
+            {
+              name: "--properties",
+              description:
+                "The event properties you would like to display (JSON output always shows all properties)",
+              args: {
+                name: "properties",
+                default: "dateCreated, logLevel, errorCode, alertText",
+              },
+            },
+            {
+              name: ["-s", "--streaming"],
+              description: "Continuously stream incoming log events",
+            },
+            {
+              name: "--log-level",
+              description: "Only show log events for this log level",
+              args: {
+                name: "level",
+                suggestions: ["error", "warning", "notice", "debug"],
+              },
+            },
+            {
+              name: "--start-date",
+              description: "Only show log events on or after this date",
+              args: { name: "date" },
+            },
+            {
+              name: "--end-date",
+              description: "Only show log events on or before this date",
+              args: { name: "date" },
+            },
+          ],
         },
       ],
     },
@@ -236,17 +294,16 @@ const emailSubcommand: TwilioSubcommand = {
       name: "set",
       description: "Sets a default sending email address and subject line",
       options: [
-        ...persistentOptions,
         {
           name: "--from",
-          description: "Email address of the sender",
+          description: "Default email address of the sender",
           args: {
             name: "from",
           },
         },
         {
           name: "--subject",
-          description: "The subject line for an email",
+          description: "Default subject line for all emails",
           args: {
             name: "subject",
           },
@@ -262,7 +319,7 @@ const feedbackSubcommand: TwilioSubcommand = {
 };
 
 const phoneNumbersBuyOptions: Fig.Option[] = [
-  ...persistentOptions,
+  ...clientOptions,
   {
     name: "--country-code",
     description:
@@ -1124,17 +1181,14 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
       name: "list",
       description: "Show what Twilio phone numbers you have configured",
       options: [
-        ...persistentOptions,
+        ...clientOptions,
+        noHeaderOption,
         {
           name: "--account-sid",
           description: "Access resources for the specified account",
           args: {
             name: "account-sid",
           },
-        },
-        {
-          name: "--no-header",
-          description: "Skip including of headers while listing the data",
         },
         {
           name: "--properties",
@@ -1156,7 +1210,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
           "The SID or E.164 formatted phone number you wish to update",
       },
       options: [
-        ...persistentOptions,
+        ...clientOptions,
         {
           name: "--account-sid",
           args: { name: "account-sid" },
@@ -1264,6 +1318,10 @@ const pluginsSubcommand: TwilioSubcommand = {
         {
           name: ["-v", "--verbose"],
         },
+        {
+          name: "--json",
+          description: "Format output as json",
+        },
       ],
     },
     {
@@ -1326,17 +1384,23 @@ const loginSubcommand: (name: string) => TwilioSubcommand = (name) => ({
   name,
   description:
     "Create a new profile to store Twilio Account credentials and configuration",
+  args: {
+    name: "account-sid",
+    description: "The Account SID for your Twilio Account or Subaccount",
+    isOptional: true,
+  },
   options: [
-    ...persistentOptions,
+    ...clientOptions,
     {
       name: ["-f", "--force"],
       description: "Force overwriting existing profile credentials",
     },
     {
-      name: ["-p", "--profile"],
-      description: "Shorthand identifier for your profile",
+      name: "--edge",
+      description:
+        "Twilio edge location to use. Auto-detected from region if not specified",
       args: {
-        name: "profile",
+        name: "edge",
       },
     },
     {
@@ -1366,22 +1430,7 @@ const profilesSubcommand: TwilioSubcommand = {
     {
       name: "list",
       description: "Show what profiles you have configured",
-      options: [
-        ...persistentOptions,
-        {
-          name: "--no-header",
-          description: "Skip including of headers while listing the data",
-        },
-      ],
-    },
-    {
-      name: "port",
-      description:
-        "Port API keys from keytar to config file. This command ports ALL keys by default, although to only port a specific key append the profile-id as additional argument",
-      args: {
-        name: "profile",
-      },
-      options: persistentOptions,
+      options: [...persistentOptions, noHeaderOption],
     },
     {
       name: "remove",
@@ -1408,11 +1457,51 @@ const updateSubcommand: TwilioSubcommand = {
   args: {
     name: "channel",
     isOptional: true,
+    suggestions: ["stable"],
   },
   options: [
     {
-      name: "--from-local",
-      description: "Interactively choose an already installed version",
+      name: ["-a", "--available"],
+      description: "See available versions",
+      exclusiveOn: ["-v", "--version", "-i", "--interactive"],
+    },
+    {
+      name: "--force",
+      description: "Force a re-download of the requested version",
+      exclusiveOn: ["-i", "--interactive", "-a", "--available"],
+    },
+    {
+      name: ["-i", "--interactive"],
+      description:
+        "Interactively select version to install. This is ignored if a channel is provided",
+      exclusiveOn: ["-v", "--version"],
+    },
+    {
+      name: ["-b", "--verbose"],
+      description: "Show more details about the available versions",
+      dependsOn: ["--available"],
+    },
+    {
+      name: ["-v", "--version"],
+      description: "Install a specific version",
+      exclusiveOn: ["-i", "--interactive"],
+      args: { name: "version" },
+    },
+  ],
+};
+
+const versionSubcommand: TwilioSubcommand = {
+  name: "version",
+  description: "Show the CLI version",
+  options: [
+    {
+      name: "--verbose",
+      description:
+        "Show additional information about the CLI, such as architecture, node version, operating system, and plugin versions",
+    },
+    {
+      name: "--json",
+      description: "Format output as json",
     },
   ],
 };
@@ -1423,6 +1512,7 @@ const autocompleteSubcommand: TwilioSubcommand = {
   args: {
     name: "shell",
     description: "Shell type",
+    isOptional: true,
     suggestions: [
       { name: "bash", icon: "fig://icon?type=string" },
       { name: "zsh", icon: "fig://icon?type=string" },
@@ -1448,6 +1538,7 @@ const subcommands: TwilioSubcommand[] = [
   pluginsSubcommand,
   profilesSubcommand,
   updateSubcommand,
+  versionSubcommand,
 ];
 
 const completionSpec: Fig.Spec = {
@@ -1458,6 +1549,10 @@ const completionSpec: Fig.Spec = {
       name: ["-h", "--help"],
       description: "Show a help message",
       isPersistent: true,
+    },
+    {
+      name: ["-v", "--version"],
+      description: "Show the CLI version",
     },
   ],
   ...createSeparatedSubcommandTree(":", subcommands, {

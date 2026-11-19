@@ -1,806 +1,647 @@
+// dbt-core v1.12.7 (PyPI "dbt-core" / GitHub latest release, 2026-11-12).
+// Source: core/dbt/cli/main.py and core/dbt/cli/params.py at tag v1.12.7
+
+const toggle = (
+  flag: string,
+  description: string,
+  short?: string
+): Fig.Option[] => [
+  { name: short ? [short, `--${flag}`] : `--${flag}`, description },
+  { name: `--no-${flag}`, description: `Negate --${flag}` },
+];
+
+const yamlArg = (name: string): Fig.Arg => ({
+  name,
+  description: "A short YAML string eg. '{my_variable: my_value}'",
+});
+
+const selectionArg: Fig.Arg = {
+  name: "selector",
+  isVariadic: true,
+  suggestions: [
+    "fqn:",
+    "tag:",
+    "group:",
+    "access:",
+    "source:",
+    "path:",
+    "file:",
+    "package:",
+    "config:",
+    "test_name:",
+    "test_type:",
+    "resource_type:",
+    "state:",
+    "exposure:",
+    "metric:",
+    "result:",
+    "source_status:",
+    "version:",
+    "semantic_model:",
+    "saved_query:",
+    "unit_test:",
+    "selector:",
+  ],
+};
+
+const resourceTypes = [
+  "metric",
+  "semantic_model",
+  "saved_query",
+  "source",
+  "analysis",
+  "function",
+  "model",
+  "test",
+  "unit_test",
+  "exposure",
+  "snapshot",
+  "seed",
+  "default",
+];
+
+const logFormats = ["text", "debug", "json", "default"];
+const logLevels = ["debug", "info", "warn", "error", "none"];
+
+const profilesDir: Fig.Option = {
+  name: "--profiles-dir",
+  description:
+    "Which directory to look in for the profiles.yml file (default: current directory, then ~/.dbt/)",
+  args: { name: "directory", template: "folders" },
+};
+
+const projectDir: Fig.Option = {
+  name: "--project-dir",
+  description: "Which directory to look in for the dbt_project.yml file",
+  args: { name: "directory", template: "folders" },
+};
+
+const vars: Fig.Option = {
+  name: "--vars",
+  description: "Supply variables to the project, overriding dbt_project.yml",
+  args: yamlArg("variables"),
+};
+
+const targetPath: Fig.Option = {
+  name: "--target-path",
+  description: "Configure the 'target-path' for the current run",
+  args: { name: "path", template: "folders" },
+};
+
+const threads: Fig.Option = {
+  name: "--threads",
+  description: "Number of threads to use, overriding profiles.yml",
+  args: { name: "threads" },
+};
+
+const select: Fig.Option = {
+  name: ["-s", "--select", "-m", "--models", "--model"],
+  description: "Specify the nodes to include",
+  isRepeatable: true,
+  args: selectionArg,
+};
+
+const exclude: Fig.Option = {
+  name: "--exclude",
+  description: "Specify the nodes to exclude",
+  isRepeatable: true,
+  args: selectionArg,
+};
+
+const selector: Fig.Option = {
+  name: "--selector",
+  description: "The selector name to use, as defined in selectors.yml",
+  args: { name: "name" },
+};
+
+const resourceType: Fig.Option = {
+  name: ["--resource-types", "--resource-type"],
+  description: "Restricts the types of resources that dbt will include",
+  isRepeatable: true,
+  args: {
+    name: "type",
+    isVariadic: true,
+    suggestions: [...resourceTypes, "all"],
+  },
+};
+
+const excludeResourceType: Fig.Option = {
+  name: ["--exclude-resource-types", "--exclude-resource-type"],
+  description: "Specify the types of resources that dbt will exclude",
+  isRepeatable: true,
+  args: { name: "type", isVariadic: true, suggestions: resourceTypes },
+};
+
+const fullRefresh: Fig.Option = {
+  name: ["-f", "--full-refresh"],
+  description:
+    "Drop incremental models and fully recalculate them from the model definition",
+};
+
+const empty = toggle("empty", "Limit input refs and sources to zero rows");
+
+const eventTime: Fig.Option[] = [
+  {
+    name: "--event-time-start",
+    description:
+      "Start datetime used to filter microbatch model inputs (inclusive)",
+    args: { name: "datetime" },
+  },
+  {
+    name: "--event-time-end",
+    description:
+      "End datetime used to filter microbatch model inputs (exclusive)",
+    args: { name: "datetime" },
+  },
+];
+
+const sample: Fig.Option = {
+  name: "--sample",
+  description: "Run in sample mode, sampling ref/source calls by the window",
+  args: { name: "window", description: "E.g. '3 days' or a YAML dict" },
+};
+
+const show: Fig.Option = {
+  name: "--show",
+  description: "Show a sample of the loaded data in the terminal",
+};
+
+const storeFailures: Fig.Option = {
+  name: "--store-failures",
+  description: "Store test results (failing rows) in the database",
+};
+
+const compileOutput: Fig.Option = {
+  name: "--output",
+  description: "Output format",
+  args: { name: "format", suggestions: ["json", "text"], default: "text" },
+};
+
+const inline: Fig.Option = {
+  name: "--inline",
+  description: "Pass SQL inline",
+  args: { name: "sql" },
+};
+
+const introspect = toggle(
+  "introspect",
+  "Scaffold introspective queries as part of compilation"
+);
+
+// Option groups shared across subcommands
+const base = [profilesDir, projectDir, vars];
+const project = [...base, targetPath];
+const withThreads = [...project, threads];
+const selection = [...withThreads, select, exclude, selector];
+
+const globalOptions: Fig.Option[] = (
+  [
+    { name: ["-h", "--help"], description: "Show help" },
+    {
+      name: ["-v", "-V", "--version"],
+      description: "Show version information",
+    },
+    ...toggle(
+      "cache-selected-only",
+      "Populate the relational cache only for schemas containing selected nodes"
+    ),
+    ...toggle("debug", "Display debug logging during dbt execution", "-d"),
+    ...toggle(
+      "defer",
+      "Resolve unselected nodes by deferring to the manifest in --state"
+    ),
+    {
+      name: "--defer-state",
+      description: "Override the state directory for deferral only",
+      args: { name: "directory", template: "folders" },
+    },
+    ...toggle("fail-fast", "Stop execution on first failure", "-x"),
+    ...toggle(
+      "favor-state",
+      "Defer to --state for unselected nodes even if they exist in the current environment"
+    ),
+    ...toggle(
+      "hints-enabled",
+      "Surface occasional hints for speeding up or improving the project"
+    ),
+    {
+      name: "--indirect-selection",
+      description:
+        "Choose which tests to select that are adjacent to selected resources",
+      args: {
+        name: "mode",
+        suggestions: ["eager", "cautious", "buildable", "empty"],
+        default: "eager",
+      },
+    },
+    ...toggle(
+      "log-cache-events",
+      "Enable verbose logging for relational cache events"
+    ),
+    {
+      name: "--log-format",
+      description: "Format of logging to the console and the log file",
+      args: { name: "format", suggestions: logFormats, default: "default" },
+    },
+    {
+      name: "--log-format-file",
+      description: "Format of logging to the log file",
+      args: { name: "format", suggestions: logFormats, default: "debug" },
+    },
+    {
+      name: "--log-level",
+      description:
+        "Minimum severity of events logged to the console and the log file",
+      args: { name: "level", suggestions: logLevels, default: "info" },
+    },
+    {
+      name: "--log-level-file",
+      description: "Minimum severity of events logged to the log file",
+      args: { name: "level", suggestions: logLevels, default: "debug" },
+    },
+    {
+      name: "--log-path",
+      description: "Configure the 'log-path' for the current run",
+      args: { name: "path", template: "folders" },
+    },
+    {
+      name: "--maximum-seed-size-mib",
+      description:
+        "Max size (MiB) of seed files hashed for state comparison, 0 for no limit",
+      args: { name: "mib", default: "1" },
+    },
+    ...toggle(
+      "partial-parse",
+      "Allow partial parsing using the target directory pickle file"
+    ),
+    ...toggle(
+      "populate-cache",
+      "Populate the relational cache at the start of the run"
+    ),
+    ...toggle("print", "Output all {{ print() }} macro calls"),
+    {
+      name: "--printer-width",
+      description: "Sets the width of terminal output",
+      args: { name: "width", default: "80" },
+    },
+    {
+      name: "--profile",
+      description: "Which existing profile to load, overriding dbt_project.yml",
+      args: { name: "name", suggestions: ["default"] },
+    },
+    ...toggle("quiet", "Suppress all non-error logging to stdout", "-q"),
+    {
+      name: ["-r", "--record-timing-info"],
+      description: "Output low-level timing stats to the specified file",
+      args: { name: "file", template: "filepaths" },
+    },
+    ...toggle(
+      "send-anonymous-usage-stats",
+      "Send anonymous usage stats to dbt Labs"
+    ),
+    ...toggle(
+      "snowflake-projects-otel",
+      "Enable OpenTelemetry span instrumentation for node and hook execution"
+    ),
+    ...toggle(
+      "show-all-deprecations",
+      "Show every deprecation warning instance instead of one per type"
+    ),
+    {
+      name: "--state",
+      description: "State directory for both state comparison and deferral",
+      args: { name: "directory", template: "folders" },
+    },
+    ...toggle("static-parser", "Use the static parser"),
+    {
+      name: ["-t", "--target"],
+      description: "Which target to load for the given profile",
+      args: { name: "target", suggestions: ["dev", "prod"] },
+    },
+    ...toggle(
+      "use-colors",
+      "Colorize log output in the console and the log file"
+    ),
+    ...toggle("use-colors-file", "Colorize log file output"),
+    ...toggle(
+      "use-experimental-parser",
+      "Enable experimental parsing features"
+    ),
+    ...toggle(
+      "use-v2-parser",
+      "Delegate parsing to the v2 parser instead of dbt-core's own parser"
+    ),
+    ...toggle(
+      "version-check",
+      "Ensure the installed dbt version matches require-dbt-version"
+    ),
+    {
+      name: "--warn-error",
+      description: "If dbt would normally warn, raise an exception instead",
+    },
+    {
+      name: "--warn-error-options",
+      description:
+        "Raise or warn per event, as a YAML dict with 'error' or 'warn' keys",
+      args: {
+        name: "options",
+        description: `E.g. '{"error": "all", "warn": ["NoNodesForSelectionCriteria"]}'`,
+      },
+    },
+    ...toggle(
+      "write-json",
+      "Write manifest.json and run_results.json to the target directory"
+    ),
+    ...toggle(
+      "upload-to-artifacts-ingest-api",
+      "Upload the artifacts to the dbt Cloud API"
+    ),
+  ] satisfies Fig.Option[]
+).map((option) => ({ ...option, isPersistent: true }));
+
+const listCommand: Fig.Subcommand = {
+  name: "list",
+  description: "List the resources in your project",
+  options: [
+    ...project,
+    { ...select, name: ["-s", "--select"] },
+    { ...select, name: ["-m", "--models", "--model"] },
+    exclude,
+    selector,
+    resourceType,
+    excludeResourceType,
+    {
+      name: "--output",
+      description: "Output format: JSON or a newline-delimited list",
+      args: {
+        name: "format",
+        suggestions: ["json", "name", "path", "selector"],
+        default: "selector",
+      },
+    },
+    {
+      name: "--output-keys",
+      description: "Node properties to include as keys in JSON output",
+      isRepeatable: true,
+      args: { name: "key", isVariadic: true },
+    },
+  ],
+};
+
+const freshnessCommand: Fig.Subcommand = {
+  name: "freshness",
+  description: "Check the current freshness of the project's sources",
+  options: [
+    ...selection,
+    {
+      name: ["-o", "--output"],
+      description:
+        "Output path for the JSON report (default: target/sources.json)",
+      args: { name: "file", template: "filepaths" },
+    },
+  ],
+};
+
 const completionSpec: Fig.Spec = {
   name: "dbt",
-  description: "CLI for dbt - Data Build Tool",
+  description:
+    "An ELT tool for managing your SQL transformations and data models",
   subcommands: [
     {
       name: "build",
-      description: "Run models, test tests, snapshot snapshots, and seed seeds",
+      description: "Run all seeds, models, snapshots, and tests in DAG order",
       options: [
-        {
-          name: "--full-refresh",
-          description: "Treat incremental models as table models",
-        },
-        {
-          name: ["-x", "--fail-fast"],
-          description: "Exit immediately if a single model fails to build",
-        },
-        {
-          name: "--profiles-dir",
-          description: "Set the profiles directory",
-          args: {
-            name: "directory",
-            description: "Directory containing profiles.yml",
-            template: "folders",
-            suggestions: ["profiles"],
-          },
-        },
-        {
-          name: "--profile",
-          description: "Use the selected profile",
-          args: {
-            name: "name",
-            description: "Name of profile to use when running dbt project",
-            suggestions: ["default"],
-          },
-        },
-        {
-          name: "--target",
-          description: "Target profile configuration i.e. prod/dev",
-          args: {
-            name: "profile",
-            description: "Target profile configuration (dev/prod)",
-            suggestions: ["dev", "prod"],
-          },
-        },
-        {
-          name: "--vars",
-          description: "Variable values to override dbt_project.yml",
-          args: {
-            name: "variables",
-            description: "A short YAML string eg. '{my_variable: my_value}'",
-          },
-        },
-        {
-          name: "--threads",
-          description: "Number of concurrent database jobs",
-          args: { name: "THREADS" },
-        },
-        {
-          name: ["-s", "--select"],
-          description: "Select subset of models",
-          args: {
-            name: "subset",
-            description: "Select subset of models",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--exclude",
-          description: "Exclude subset of models",
-          args: {
-            name: "subset",
-            description: "Exclude subset of models",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--bypass-cache",
-          description: "Bypass the cache",
-        },
-      ],
-    },
-    {
-      name: "run",
-      description: "Runs the models in a project",
-      options: [
-        {
-          name: "--full-refresh",
-          description: "Treat incremental models as table models",
-        },
-        {
-          name: ["-x", "--fail-fast"],
-          description: "Exit immediately if a single model fails to build",
-        },
-        {
-          name: "--use-colors",
-          description: "Default value -- colorize run logs",
-        },
-        {
-          name: "--no-use-colors",
-          description: "Disable log colorizing",
-        },
-        {
-          name: "--profiles-dir",
-          description: "Set the profiles directory",
-          args: {
-            name: "directory",
-            description: "Directory containing profiles.yml",
-            template: "folders",
-            suggestions: ["profiles"],
-          },
-        },
-        {
-          name: "--profile",
-          description: "Select the profile to use",
-          args: {
-            name: "name",
-            description: "Name of profile to use when running dbt project",
-            suggestions: ["default"],
-          },
-        },
-        {
-          name: "--target",
-          description: "The target profile",
-          args: {
-            name: "Target profile",
-            description: "Target profile configuration (dev/prod)",
-            suggestions: ["dev", "prod"],
-          },
-        },
-        {
-          name: "--vars",
-          description: "Variable values to override dbt_project.yml",
-          args: {
-            name: "variables",
-            description: "A short YAML string eg. '{my_variable: my_value}'",
-          },
-        },
-        {
-          name: "--threads",
-          description: "Number of concurrent database jobs",
-          args: { name: "threads" },
-        },
-        {
-          name: ["-s", "--select"],
-          description: "Select subset of models",
-          args: {
-            name: "subset",
-            description: "Select subset of models",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--exclude",
-          description: "Exclude subset of models",
-          args: {
-            name: "subset",
-            description: "Exclude subset of models",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--bypass-cache",
-          description: "Bypass the cache",
-        },
-      ],
-    },
-    {
-      name: "debug",
-      description: "Debugs dbt connections and projects",
-      options: [{ name: "--config-dir" }],
-    },
-    {
-      name: "init",
-      description: "Initializes a new dbt project",
-      args: {
-        name: "name",
-      },
-      options: [
-        {
-          name: "--adapter",
-          description: "Add an adapter",
-          args: { name: "adapter", description: "E.g. big query" },
-        },
-      ],
-    },
-    {
-      name: "compile",
-      description: "Compiles (but does not run) the models in a project",
-      options: [
-        {
-          name: "--profiles-dir",
-          description: "Set the profiles directory",
-          args: {
-            name: "directory",
-            description: "Directory containing profiles.yml",
-            template: "folders",
-            suggestions: ["profiles"],
-          },
-        },
-        {
-          name: "--profile",
-          description: "Select the profile to use",
-          args: {
-            name: "name",
-            description: "Name of profile to use when running dbt project",
-            suggestions: ["default"],
-          },
-        },
-        {
-          name: "--target",
-          description: "The target profile",
-          args: {
-            name: "Target profile",
-            description: "Target profile configuration (dev/prod)",
-            suggestions: ["dev", "prod"],
-          },
-        },
-        {
-          name: "--vars",
-          description: "Variable values to override dbt_project.yml",
-          args: {
-            name: "Variable values",
-            description: "A short YAML string eg. '{my_variable: my_value}'",
-          },
-        },
-        {
-          name: "--threads",
-          description: "Number of concurrent database jobs",
-          args: { name: "THREADS" },
-        },
-        {
-          name: "--select",
-          description: "Select subset of models",
-          args: {
-            name: "Select subset",
-            description: "Select subset of models",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--exclude",
-          description: "Exclude subset of models",
-          args: {
-            name: "Exclude subset",
-            description: "Exclude subset of models",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        { name: "--bypass-cache", description: "Bypass the cache" },
-        {
-          name: "--selector",
-          description:
-            "This flag specifies one or more named selectors, defined in a <selector name>.yml file",
-          args: {
-            name: "YAML selector file name",
-            isVariadic: true,
-          },
-        },
-        { name: "--defer", description: "Defer" },
-      ],
-    },
-    {
-      name: "test",
-      description: "Executes tests defined in a project",
-      options: [
-        {
-          name: ["-x", "--fail-fast"],
-          description: "Exit immediately if a single model fails to build",
-        },
-        {
-          name: "--profiles-dir",
-          description: "Set the profiles directory",
-          args: {
-            name: "directory",
-            description: "Directory containing profiles.yml",
-            template: "folders",
-            suggestions: ["profiles"],
-          },
-        },
-        {
-          name: "--profile",
-          description: "Select the profile to use",
-          args: {
-            name: "name",
-            description: "Name of profile to use when running dbt project",
-            suggestions: ["default"],
-          },
-        },
-        {
-          name: "--data",
-          description: "Run only custom data tests",
-        },
-        {
-          name: "--schema",
-          description: "Run only schema tests",
-        },
-        {
-          name: ["-s", "--select"],
-          description: "Select subset of models",
-          args: {
-            name: "subset",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--exclude",
-          description: "Exclude subset of models",
-          args: {
-            name: "subset",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        { name: "--bypass-cache", description: "Bypass the cache" },
-        {
-          name: "--selector",
-          description:
-            "This flag specifies one or more named selectors, defined in a <selector name>.yml file",
-          args: {
-            name: "YAML selector file name",
-            isVariadic: true,
-          },
-        },
-        { name: "--defer", description: "Defer" },
-      ],
-    },
-    { name: "deps", description: "Downloads dependencies for a project" },
-    {
-      name: "snapshot",
-      description: "Executes 'snapshot' jobs defined in a project",
-      options: [
-        {
-          name: "--profiles-dir",
-          description: "Set the profiles directory",
-          args: {
-            name: "profiles directory",
-            description: "Directory containing profiles.yml",
-            template: "folders",
-            suggestions: ["profiles"],
-          },
-        },
-        {
-          name: ["-x", "--fail-fast"],
-          description: "Exit immediately if a single model fails to build",
-        },
-        {
-          name: "--profile",
-          description: "Select the profile to use",
-          args: {
-            name: "Profile name",
-            description: "Name of profile to use when running dbt project",
-            suggestions: ["default"],
-          },
-        },
-        {
-          name: "--target",
-          description: "The target profile",
-          args: {
-            name: "Target profile",
-            description: "Target profile configuration (dev/prod)",
-            suggestions: ["dev", "prod"],
-          },
-        },
-        {
-          name: "--vars",
-          description: "Variable values to override dbt_project.yml",
-          args: {
-            name: "Variable values",
-            description: "A short YAML string eg. '{my_variable: my_value}'",
-          },
-        },
-        {
-          name: "--threads",
-          description: "Number of concurrent database jobs",
-          args: { name: "thread" },
-        },
-        {
-          name: "--select",
-          description: "Select subset of models",
-          args: {
-            name: "subset",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--exclude",
-          description: "Exclude subset of models",
-          args: {
-            name: "Exclude subset",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        { name: "--bypass-cache", description: "Bypass the cache" },
+        ...selection,
+        ...empty,
+        ...eventTime,
+        fullRefresh,
+        resourceType,
+        excludeResourceType,
+        sample,
+        show,
+        storeFailures,
       ],
     },
     {
       name: "clean",
-      description: "Deletes artifacts present in the dbt project",
+      description:
+        "Delete all folders in the clean-targets list (usually dbt_packages and target)",
+      options: [
+        ...project,
+        ...toggle(
+          "clean-project-files-only",
+          "Only delete clean-paths inside the dbt project"
+        ),
+      ],
     },
     {
-      name: "seed",
-      description: "Loads CSV files into the database",
+      name: "clone",
+      description:
+        "Create clones of selected nodes based on their location in the --state manifest",
+      options: [...selection, fullRefresh, resourceType, excludeResourceType],
+    },
+    {
+      name: "compile",
+      description:
+        "Generate executable SQL from source, model, test, and analysis files",
       options: [
+        ...selection,
+        ...empty,
+        ...introspect,
+        fullRefresh,
+        compileOutput,
+        inline,
+      ],
+    },
+    {
+      name: "debug",
+      description:
+        "Show the dbt environment, check dependencies and test the database connection",
+      options: [
+        ...base,
         {
-          name: "--profiles-dir",
-          description: "Set the profiles directory",
-          args: {
-            name: "profiles directory",
-            description: "Directory containing profiles.yml",
-            template: "folders",
-            suggestions: ["profiles"],
-          },
+          name: "--connection",
+          description: "Test the connection to the target database only",
         },
         {
-          name: "--profile",
-          description: "Select the profile to use",
-          args: {
-            name: "Profile name",
-            description: "Name of profile to use when running dbt project",
-            suggestions: ["default"],
-          },
-        },
-        {
-          name: ["-x", "--fail-fast"],
-          description: "Exit immediately if a single model fails to build",
-        },
-        {
-          name: "--select",
-          description: "Run specific seeds",
-          args: {
-            name: "Select subset",
-            description: "E.g. country_codes",
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--exclude",
-          description: "Exclude subset of models",
-          args: {
-            name: "Exclude subset",
-            description: "Exclude subset of models",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        { name: "--bypass-cache", description: "Bypass the cache" },
-        {
-          name: "--selector",
+          name: "--config-dir",
           description:
-            "This flag specifies one or more named selectors, defined in a <selector name>.yml file",
+            "Print the command to access the directory searched for profiles.yml, then exit",
+        },
+      ],
+    },
+    {
+      name: "deps",
+      description: "Install the dbt packages specified",
+      options: [
+        ...base,
+        {
+          name: "--source",
+          description: "Source to download the package from",
           args: {
-            name: "YAML selector file name",
-            isVariadic: true,
+            name: "source",
+            suggestions: ["hub", "git", "local"],
+            default: "hub",
           },
+        },
+        {
+          name: "--lock",
+          description:
+            "Generate the package-lock.yml file without installing the packages",
+        },
+        {
+          name: "--upgrade",
+          description: "Upgrade packages to the latest version",
+        },
+        {
+          name: "--add-package",
+          description: "Add a package to the current package spec",
+          args: { name: "package@version" },
         },
       ],
     },
     {
       name: "docs",
-      description: "Generates documentation for a project",
+      description:
+        "Generate or serve the documentation website for your project",
       subcommands: [
         {
           name: "generate",
-          description: "Generate your project's documentation website",
+          description: "Generate the documentation website for your project",
           options: [
-            { name: "--no-compile", description: "Skip re-compilation" },
+            ...selection,
+            ...toggle(
+              "compile",
+              "Run 'dbt compile' as part of docs generation"
+            ),
+            {
+              name: "--empty-catalog",
+              description: "Generate an empty catalog.json file",
+            },
+            {
+              name: "--static",
+              description:
+                "Generate an additional static_index.html with manifest and catalog built in",
+            },
           ],
         },
         {
           name: "serve",
-          description:
-            "Serve your documentation on a local webserver (default prot 8000)",
+          description: "Serve the documentation website for your project",
           options: [
+            ...project,
+            ...toggle(
+              "browser",
+              "Open a local web browser after starting the server"
+            ),
             {
-              name: "--profiles-dir",
-              description: "Skip re-compilation",
-              args: {
-                name: "PROFILES_DIR",
-                description: "Path to profiles directory",
-                template: "folders",
-              },
-            },
-            {
-              name: "--profile",
-              description: "Choose a profile",
-              args: {
-                name: "PROFILE NAME",
-              },
-            },
-            {
-              name: "--target",
-              description: "The target profile",
-              args: {
-                name: "Target profile",
-                description: "Target profile configuration (dev/prod)",
-                suggestions: ["dev", "prod"],
-              },
+              name: "--host",
+              description: "Host to serve dbt docs on",
+              args: { name: "host", default: "127.0.0.1" },
             },
             {
               name: "--port",
-              description: "Choose a port",
-              args: {
-                name: "port number",
-                description: "Default is 8000",
-              },
+              description: "Port number for the docs server",
+              args: { name: "port", default: "8080" },
             },
           ],
         },
       ],
     },
     {
-      name: "source",
-      description:
-        "Provides tools for working with source data (including validating that sources are 'fresh')",
-      subcommands: [
+      name: "init",
+      description: "Initialize a new dbt project",
+      args: { name: "project_name", isOptional: true },
+      options: [
+        ...base,
         {
-          name: "snapshot-freshness",
-          options: [
-            {
-              name: ["-o", "--output"],
-              description: "Override the destination for sources.json",
-              args: {
-                name: "FILEPATH",
-                template: "filepaths",
-              },
-            },
-            {
-              name: "--select",
-              description:
-                "This flag specifies one or more selection-type arguments used to filter the nodes returned by the dbt ls command",
-              args: {
-                name: "Select subset",
-                isVariadic: true,
-                suggestions: [
-                  "path:",
-                  "tag:",
-                  "config:",
-                  "test_type:",
-                  "test_name:",
-                ],
-              },
-            },
-          ],
+          name: ["-s", "--skip-profile-setup"],
+          description: "Skip interactive profile setup",
+        },
+        {
+          name: "--skip-debug",
+          description: "Skip running dbt debug after project initialization",
         },
       ],
+    },
+    listCommand,
+    { ...listCommand, name: "ls", hidden: true },
+    {
+      name: "parse",
+      description: "Parse the project and provide information on performance",
+      options: withThreads,
+    },
+    {
+      name: "retry",
+      description: "Retry the nodes that failed in the previous run",
+      options: [...withThreads, fullRefresh],
+    },
+    {
+      name: "run",
+      description:
+        "Compile SQL and execute against the current target database",
+      options: [...selection, ...empty, ...eventTime, fullRefresh, sample],
     },
     {
       name: "run-operation",
-      description: "Runs arbitrary maintenance SQL against the database",
-      args: {
-        name: "MACRO",
-        description:
-          "Dbt will call this macro with the supplied arguments and then exit",
-      },
+      description: "Run the named macro with any supplied arguments",
+      args: { name: "macro", isOptional: true },
       options: [
+        ...withThreads,
         {
           name: "--args",
-          description: "Supply arguments to the macro",
-          args: {
-            name: "ARGS",
-            description: "A short YAML string eg. '{my_variable: my_value}'",
-          },
+          description: "Keyword arguments for the macro",
+          args: yamlArg("args"),
+        },
+        {
+          name: "--sql",
+          description: "Execute ad-hoc SQL/Jinja directly, without a macro",
+          args: { name: "sql" },
         },
       ],
     },
     {
-      name: "rpc",
-      description: "Runs an RPC server that clients can submit queries to",
+      name: "seed",
+      description: "Load data from csv files into your data warehouse",
+      options: [...selection, ...empty, fullRefresh, show],
+    },
+    {
+      name: "show",
+      description:
+        "Run SQL for a named resource or inline query and preview the results",
       options: [
+        ...selection,
+        ...introspect,
+        fullRefresh,
+        compileOutput,
+        inline,
         {
-          name: "--host",
-          description: "Specify the host to listen on",
-          args: {
-            name: "HOST",
-            description: "Default: 0.0.0.0",
-          },
-        },
-        {
-          name: "--port",
-          description: "The port to use",
-          args: {
-            name: "PORT",
-            description: "Default: 8580",
-          },
+          name: "--limit",
+          description: "Limit the number of results returned",
+          args: { name: "limit", default: "5" },
         },
       ],
     },
     {
-      name: ["ls", "list"],
-      description: "Lists resources defined in a dbt project",
-      options: [
-        {
-          name: "--resource-type",
-          description:
-            "This flag limits the 'resource types' that dbt will return in the dbt ls command. By default, the following resources are included in the results of dbt ls: models, snapshots, seeds, tests, and sources",
-          args: {
-            name: "resource-type",
-            suggestions: [
-              "source",
-              "analysis",
-              "model",
-              "snapshot",
-              "test",
-              "seed",
-              "default",
-              "all",
-            ],
-          },
-        },
-        {
-          name: ["-s", "--select"],
-          description:
-            "This flag specifies one or more selection-type arguments used to filter the nodes returned by the dbt ls command",
-          args: {
-            name: "SELECTION_ARG",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--exclude",
-          description:
-            "Specify selectors that should be excluded from the list of returned nodes",
-          args: {
-            name: "SELECTOR",
-            isVariadic: true,
-            suggestions: [
-              "path:",
-              "tag:",
-              "config:",
-              "test_type:",
-              "test_name:",
-            ],
-          },
-        },
-        {
-          name: "--selector",
-          description:
-            "This flag specifies one or more named selectors, defined in a <selector name>.yml file",
-          args: {
-            name: "YAML selector file name",
-            isVariadic: true,
-          },
-        },
-        {
-          name: "--output",
-          description:
-            "This flag controls the format of output from the dbt ls command",
-          args: {
-            name: "output",
-            suggestions: ["json", "name", "path", "selector"],
-            isVariadic: true,
-          },
-        },
+      name: "snapshot",
+      description: "Execute snapshots defined in your project",
+      options: [...selection, ...empty],
+    },
+    {
+      name: "source",
+      description: "Manage your project's sources",
+      subcommands: [
+        freshnessCommand,
+        { ...freshnessCommand, name: "snapshot-freshness", hidden: true },
       ],
     },
     {
-      name: "parse",
-      description: "Parse dbt project and write detailed timing information",
+      name: "test",
+      description: "Run tests on data in deployed models",
+      options: [...selection, resourceType, excludeResourceType, storeFailures],
     },
   ],
-  options: [
-    { name: "--version", description: "Currently installed version" },
-    {
-      name: ["-r", "--record-timing-info"],
-      description: "Create a new file to record timing info",
-      args: {
-        name: "file name",
-        description: "Create a new file to record timing info",
-      },
-    },
-    {
-      name: ["-d", "--debug"],
-      description: "Redirect debug logs to standard out",
-    },
-    {
-      name: "--log-format",
-      description: "Specify how dbt's logs should be formatted",
-      args: {
-        name: "log format",
-        suggestions: ["text", "json", "default"],
-      },
-    },
-    {
-      name: "--no-write-json",
-      description:
-        "Prevent dbt from writing JSOn artifacts to the 'target/' directory",
-    },
-    {
-      name: ["-S", "--strict"],
-      description:
-        "Perform extra validation of dbt objects and internal consistency checks during compilation. Use only during development",
-    },
-    {
-      name: "--warn-error",
-      description: "Convert dbt warnings into errors",
-    },
-    {
-      name: "--partial-parse",
-      description: "Configure partial parsing for your project",
-    },
-    {
-      name: "--no-partial-parse",
-      description: "Turn off partial parsing for your project",
-    },
-    {
-      name: "--use-colors",
-      description: "Default value -- colorize run logs",
-    },
-    {
-      name: "--no-use-colors",
-      description: "Disable log colorizing",
-    },
-  ],
-  // Only uncomment if dbt takes an argument
-  // args: {}
+  options: globalOptions,
 };
 
 export default completionSpec;

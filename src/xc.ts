@@ -1,11 +1,8 @@
-/**
- * https://github.com/joerdav/xc
- * xc - Simple, Convenient, Markdown-based task runner.
- * v0.2.0
- */
+// xc v0.9.0 (GitHub release joerdav/xc, 2026-01-05). Source: cmd/xc/main.go and
+// cmd/xc/usage.txt at tag v0.9.0
 const completionSpec: Fig.Spec = {
   name: "xc",
-  description: "List tasks from an xc-compatible markdown file",
+  description: "Run tasks from an xc-compatible markdown or org file",
   generateSpec: async (context, executeShellCommand) => {
     const options: Fig.Option[] = [
       {
@@ -32,12 +29,14 @@ const completionSpec: Fig.Spec = {
     ];
     const { stdout } = await executeShellCommand({
       command: "xc",
-      // eslint-disable-next-line @tabsmith/fig-linter/no-empty-array-values
-      args: [],
+      // Bare `xc` opens an interactive picker; -no-tty prints the list
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
+      args: ["-no-tty"],
     });
     const subcommands: Fig.Subcommand[] = stdout
-      .trim()
       .split("\n")
+      // Task rows are indented 4 spaces; deeper rows continue a description
+      .filter((line) => /^ {4}\S/.test(line))
       .map((line) =>
         line
           .trim()
@@ -80,6 +79,20 @@ const completionSpec: Fig.Spec = {
         suggestions: ["Tasks", "Usage", "Examples"],
       },
       description: 'Specify the heading for xc tasks (default: "Tasks")',
+    },
+    {
+      name: "-type",
+      args: {
+        name: "type",
+        suggestions: ["md", "org"],
+      },
+      description:
+        "Specify the task file type (default: from the file extension)",
+    },
+    {
+      name: "-no-tty",
+      description:
+        "Print the task list instead of opening the interactive picker",
     },
     {
       name: ["-V", "-version"],

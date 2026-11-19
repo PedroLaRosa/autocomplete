@@ -1,11 +1,59 @@
-import { stdCSuggestions, stdCPPSuggestions } from "./clang";
+// GCC v16.2 (gcc.gnu.org/releases.html, released 2026-08-07). Source: GCC 16.2.0 manual for -std and -fhardened; the other options come from clang --help
+// ponytail: -std lists GCC's own values (not clang's); deprecated aliases (c2x, c++2b, ...) still work but are left out
+const stdGccSuggestions: Fig.Suggestion[] = [
+  { name: ["c90", "c89", "iso9899:1990"], description: "ISO C 1990" },
+  { name: "iso9899:199409", description: "ISO C 1990 with amendment 1" },
+  { name: ["c99", "iso9899:1999"], description: "ISO C 1999" },
+  { name: ["c11", "iso9899:2011"], description: "ISO C 2011" },
+  {
+    name: ["c17", "c18", "iso9899:2017", "iso9899:2018"],
+    description: "ISO C 2017",
+  },
+  { name: ["c23", "iso9899:2024"], description: "ISO C 2023" },
+  { name: "c2y", description: "Next ISO C revision (experimental)" },
+  { name: ["gnu90", "gnu89"], description: "GNU dialect of ISO C 1990" },
+  { name: "gnu99", description: "GNU dialect of ISO C 1999" },
+  { name: "gnu11", description: "GNU dialect of ISO C 2011" },
+  { name: ["gnu17", "gnu18"], description: "GNU dialect of ISO C 2017" },
+  { name: "gnu23", description: "GNU dialect of ISO C 2023 (C default)" },
+  {
+    name: "gnu2y",
+    description: "GNU dialect of the next ISO C revision (experimental)",
+  },
+  { name: ["c++98", "c++03"], description: "ISO C++ 1998 with amendments" },
+  {
+    name: ["gnu++98", "gnu++03"],
+    description: "GNU dialect of ISO C++ 1998",
+  },
+  { name: "c++11", description: "ISO C++ 2011 with amendments" },
+  { name: "gnu++11", description: "GNU dialect of ISO C++ 2011" },
+  { name: "c++14", description: "ISO C++ 2014 with amendments" },
+  { name: "gnu++14", description: "GNU dialect of ISO C++ 2014" },
+  { name: "c++17", description: "ISO C++ 2017 with amendments" },
+  { name: "gnu++17", description: "GNU dialect of ISO C++ 2017" },
+  { name: "c++20", description: "ISO C++ 2020 with amendments" },
+  {
+    name: "gnu++20",
+    description: "GNU dialect of ISO C++ 2020 (C++ default)",
+  },
+  { name: "c++23", description: "ISO C++ 2023 (experimental)" },
+  {
+    name: "gnu++23",
+    description: "GNU dialect of ISO C++ 2023 (experimental)",
+  },
+  { name: ["c++26", "c++2c"], description: "ISO C++ 2026 (experimental)" },
+  {
+    name: ["gnu++26", "gnu++2c"],
+    description: "GNU dialect of ISO C++ 2026 (experimental)",
+  },
+];
 
 export const stdOption: Fig.Option = {
   name: "-std",
   description: "Language standard to compile for",
   args: {
     name: "value",
-    suggestions: [...stdCSuggestions, ...stdCPPSuggestions],
+    suggestions: stdGccSuggestions,
   },
   requiresSeparator: true,
 };
@@ -780,6 +828,11 @@ export const gccBase: Fig.Spec = {
       name: "-fgpu-rdc",
       description:
         "Generate relocatable device code, also known as separate compilation mode",
+    },
+    {
+      name: "-fhardened",
+      description:
+        "Enable security hardening flags that keep the ABI (GNU/Linux only)",
     },
     {
       name: "-fhip-new-launch-api",

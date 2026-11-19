@@ -1,3 +1,4 @@
+// Rush rushx v5.182.1 (npm "latest", 2026-11-19). Source: libraries/rush-lib/src/cli/RushXCommandLine.ts on microsoft/rushstack main
 import { npmScriptsGenerator } from "./npm";
 import { yarnScriptParserDirectives } from "./yarn";
 
@@ -21,6 +22,14 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-q", "--quiet"],
       description: "Hide rushx startup information",
+    },
+    {
+      name: ["-d", "--debug"],
+      description: "Run in debug mode",
+    },
+    {
+      name: "--ignore-hooks",
+      description: "Skip the preRushx and postRushx event hooks",
     },
   ],
 };

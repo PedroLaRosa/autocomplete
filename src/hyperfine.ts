@@ -1,12 +1,45 @@
+// hyperfine v2.0.0 (GitHub release, 2026-10-07). Source: src/cli.rs at tag v2.0.0
+const exportOption = (format: string, description: string): Fig.Option => ({
+  name: `--export-${format}`,
+  description,
+  args: { name: "FILE", template: "filepaths" },
+});
+
 const completionSpec: Fig.Spec = {
   name: "hyperfine",
   description: "A command-line benchmarking tool",
 
   options: [
     {
-      name: ["--warmup", "-w"],
+      name: "--metrics",
       description:
-        "Perform warmupruns (number) before the actual benchmarking starts",
+        "Performance metrics to measure, in order: a preset, or a comma-separated list of METRIC[:UNIT]",
+      args: {
+        name: "PRESET|METRIC[:UNIT],…",
+        default: "default",
+        suggestions: [
+          { name: "default", description: "Wall-clock time and peak RSS" },
+          {
+            name: "time",
+            description: "Wall-clock, CPU, user, and system time",
+          },
+          { name: "all", description: "All available metrics" },
+          "time_wall_clock",
+          "time_cpu",
+          "time_user",
+          "time_system",
+          "memory_peak_resident",
+          "cpu_cycles",
+          "instructions",
+          "cache_references",
+          "cache_misses",
+          "branch_misses",
+        ],
+      },
+    },
+    {
+      name: ["--warmup", "-w"],
+      description: "Perform NUM warmup runs before the actual benchmark",
       args: {
         name: "NUM",
       },
@@ -33,29 +66,49 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "NUM",
       },
+      exclusiveOn: ["--min-runs", "-m", "--max-runs", "-M"],
+    },
+    {
+      name: "--env",
+      description:
+        "Set space-separated environment variable assignments for benchmark commands, once for all or once per command",
+      isRepeatable: true,
+      args: {
+        name: "ASSIGNMENTS",
+      },
     },
     {
       name: ["--setup", "-s"],
-      description: "Execute cmd once before each set of timing runs",
+      description: "Execute CMD once before each set of benchmark runs",
       args: {
         name: "CMD",
         isCommand: true,
       },
-      isRepeatable: false,
     },
     {
       name: ["--prepare", "-p"],
       description:
-        "Execute cmd before each timing run. This is useful for clearing disk caches, for example",
+        "Execute CMD before each benchmark run, once for all or once per command",
+      isRepeatable: true,
       args: {
-        name: "CMD ...",
+        name: "CMD",
+        isCommand: true,
+      },
+    },
+    {
+      name: ["--conclude", "-C"],
+      description:
+        "Execute CMD after each benchmark run, once for all or once per command",
+      isRepeatable: true,
+      args: {
+        name: "CMD",
         isCommand: true,
       },
     },
     {
       name: ["--cleanup", "-c"],
       description:
-        "Execute cmd after the completion of all benchmarking runs for each individual command to be benchmarked",
+        "Execute CMD after the completion of all benchmarking runs for each individual command to be benchmarked",
       args: {
         name: "CMD",
         isCommand: true,
@@ -64,7 +117,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--parameter-scan", "-P"],
       description:
-        "Perform benchmark runs for each value in the range min..max",
+        "Perform benchmark runs for each value in the range MIN..MAX, replacing '{VAR}' in each command",
       args: [
         {
           name: "VAR",
@@ -80,31 +133,86 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--parameter-step-size", "-D"],
       description:
-        "This argument requires --parameter-scan to be specified as well. Traverse the range min..max in steps of delta",
+        "This argument requires --parameter-scan to be specified as well. Traverse the range MIN..MAX in steps of DELTA",
       args: {
-        name: "delta",
+        name: "DELTA",
       },
       dependsOn: ["--parameter-scan", "-P"],
     },
     {
       name: ["--parameter-list", "-L"],
       description:
-        "Perform benchmark runs for each value in the comma-separated list of values",
+        "Perform benchmark runs for each value in the comma-separated list VALUES, replacing '{VAR}' in each command",
+      isRepeatable: true,
       args: [
         {
           name: "VAR",
         },
         {
-          name: "VALS",
+          name: "VALUES",
         },
       ],
+      exclusiveOn: ["--parameter-scan", "-P", "--parameter-step-size", "-D"],
+    },
+    {
+      name: "--shell",
+      description:
+        "Set the shell to use for executing benchmarked commands (default: none)",
+      args: {
+        name: "SHELL",
+        suggestions: [
+          {
+            name: "default",
+            description:
+              "Use the platform shell (sh on Unix, cmd.exe on Windows)",
+          },
+          {
+            name: "none",
+            description:
+              "Execute benchmarked commands directly, without a shell",
+          },
+          "bash",
+          "zsh",
+          "sh",
+          "fish",
+          "pwsh",
+          "powershell",
+        ],
+      },
+    },
+    {
+      name: "-S",
+      description:
+        "An alias for '--shell=default' (sh on Unix, cmd.exe on Windows)",
+      exclusiveOn: ["--shell", "-N"],
+    },
+    {
+      name: "-N",
+      description: "An alias for '--shell=none'",
+      exclusiveOn: ["--shell", "-S"],
+    },
+    {
+      name: ["--ignore-failure", "-i"],
+      description:
+        "Ignore failures of the benchmarked programs: all non-zero exit codes, or a comma-separated list of exit codes",
+      requiresSeparator: true,
+      args: {
+        name: "MODE",
+        isOptional: true,
+        suggestions: ["all-non-zero"],
+      },
     },
     {
       name: "--style",
       description: "Set output style type",
       args: {
-        name: "STYLE",
+        name: "TYPE",
+        default: "auto",
         suggestions: [
+          {
+            name: "auto",
+            description: "Pick the style based on the terminal",
+          },
           {
             name: "basic",
             description: "Disable output coloring and interactive elements",
@@ -129,112 +237,102 @@ const completionSpec: Fig.Spec = {
         ],
       },
     },
+    exportOption(
+      "asciidoc",
+      "Export the primary metric summary statistics as an AsciiDoc table to the given FILE"
+    ),
+    exportOption(
+      "csv",
+      "Export summary statistics for all selected metrics as CSV to the given FILE"
+    ),
+    exportOption(
+      "json",
+      "Export all collected metrics and individual runs as JSON to the given FILE"
+    ),
+    exportOption(
+      "markdown",
+      "Export the primary metric summary statistics as a Markdown table to the given FILE"
+    ),
+    exportOption(
+      "orgmode",
+      "Export the primary metric summary statistics as an Emacs org-mode table to the given FILE"
+    ),
     {
-      name: ["--shell", "-S"],
-      description: "Set the shell to use for executing benchmarked commands",
+      name: "--show-output",
+      description:
+        "Print the stdout and stderr of the benchmark instead of suppressing it",
+      exclusiveOn: ["--style", "--output"],
+    },
+    {
+      name: "--output",
+      description:
+        "Control where the output of the benchmark is redirected, once for all or once per command",
+      isRepeatable: true,
       args: {
-        name: "SHELL",
+        name: "WHERE",
+        template: "filepaths",
         suggestions: [
           {
-            name: "bash",
-            description: "Use bash as the shell",
+            name: "null",
+            description: "Redirect output to /dev/null (the default)",
           },
           {
-            name: "zsh",
-            description: "Use zsh as the shell",
+            name: "pipe",
+            description: "Feed the output through a pipe before discarding it",
           },
           {
-            name: "sh",
-            description: "Use sh as the shell",
-          },
-          {
-            name: "fish",
-            description: "Use fish as the shell",
-          },
-          {
-            name: "pwsh",
-            description: "Use pwsh as the shell",
-          },
-          {
-            name: "powershell",
-            description: "Use powershell as the shell",
+            name: "inherit",
+            description: "Don't redirect the output at all",
           },
         ],
       },
     },
     {
-      name: ["--ignore-failure", "-i"],
-      description: "Ignore non-zero exit codes of the benchmarked commands",
-    },
-    {
-      name: ["--time-unit", "-u"],
-      description: "Set the time unit to use for the benchmark results",
+      name: "--input",
+      description: "Control where the input of the benchmark comes from",
       args: {
-        name: "UNIT",
-        suggestions: ["millisecond", "second"],
-        default: "second",
-      },
-    },
-    {
-      name: "--export-asciidoc",
-      description:
-        "Export the timing summary statistics as an AsciiDoc table to the given file",
-      args: {
-        name: "FILE",
+        name: "WHERE",
         template: "filepaths",
+        suggestions: [
+          { name: "null", description: "Read from /dev/null (the default)" },
+        ],
       },
     },
     {
-      name: "--export-csv",
+      name: ["--command-name", "-n"],
       description:
-        "Export the timing summary statistics as CSV to the given file",
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
-    },
-    {
-      name: "--export-json",
-      description:
-        "Export the timing summary statistics and timings of individual runs as JSON to the given file",
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
-    },
-    {
-      name: "--export-markdown",
-      description:
-        "Export the timing summary statistics as a Markdown table to the given file",
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
-    },
-    {
-      name: "--show-output",
-      description:
-        "Print the stdout and stderr of the benchmark instead of suppressing it",
-    },
-    {
-      name: "--command-name",
-      description: "Identify a command with the given name",
+        "Give a meaningful name to a command, once per benchmarked command",
+      isRepeatable: true,
       args: {
         name: "NAME",
       },
     },
     {
-      name: "--help",
-      description: "Prints help message",
+      name: "--min-benchmarking-time",
+      description: "Set the minimum time (in seconds) to run benchmarks",
+      hidden: true,
+      args: {
+        name: "SECONDS",
+      },
     },
     {
-      name: "--version",
-      description: "Shows version information",
+      name: "--debug-mode",
+      description:
+        "Don't run commands; return fake times for 'sleep <time>' commands",
+      hidden: true,
+    },
+    {
+      name: ["--help", "-h"],
+      description: "Print help",
+    },
+    {
+      name: ["--version", "-V"],
+      description: "Print version",
     },
   ],
   args: {
-    name: "CMD",
-    description: "Command to benchmark",
+    name: "command",
+    description: "Command to benchmark; the first one is the reference",
     isCommand: true,
   },
 };

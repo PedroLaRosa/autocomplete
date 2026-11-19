@@ -1,842 +1,578 @@
-// REFERENCE: https://pipenv.pypa.io/en/stable/cli/
+// Pipenv v2026.11.0 (PyPI "latest", 2026-11-09). Source: argparse tree in
+// pipenv/cli/options.py and command.py at tag v2026.11.0, docs/cli.md
 import { filepaths } from "@tabsmith/autocomplete-generators";
 import { packageList } from "./pip";
 
+const packagesArg: Fig.Arg = {
+  name: "package",
+  isOptional: true,
+  isVariadic: true,
+  suggestions: packageList,
+};
+
+const pypiMirror: Fig.Option = {
+  name: "--pypi-mirror",
+  description: "Specify a PyPI mirror",
+  args: { name: "url" },
+};
+
+const python: Fig.Option = {
+  name: "--python",
+  description: "Specify which version of Python virtualenv should use",
+  args: { name: "version" },
+};
+
+const verbose: Fig.Option = {
+  name: ["-v", "--verbose"],
+  description: "Verbose mode",
+  exclusiveOn: ["-q", "--quiet"],
+};
+
+const quiet: Fig.Option = {
+  name: ["-q", "--quiet"],
+  description: "Quiet mode",
+  exclusiveOn: ["-v", "--verbose"],
+};
+
+const clear: Fig.Option = {
+  name: "--clear",
+  description: "Clears caches (pipenv, pip)",
+};
+
+const system: Fig.Option = {
+  name: "--system",
+  description: "System pip management",
+};
+
+const bare: Fig.Option = { name: "--bare", description: "Minimal output" };
+
+const dryRun = (description: string): Fig.Option => ({
+  name: "--dry-run",
+  description,
+});
+
+const dev = (description: string): Fig.Option => ({
+  name: ["-d", "--dev"],
+  description,
+});
+
+const devOnly: Fig.Option = {
+  name: "--dev-only",
+  description: "Emit development dependencies only (overrides --dev)",
+};
+
+const categories: Fig.Option = {
+  name: "--categories",
+  description: "Space/comma-separated list of dependency categories",
+  args: { name: "categories" },
+};
+
+const extras: Fig.Option = {
+  name: "--extras",
+  description: "Install optional extra categories alongside default packages",
+  args: { name: "extras" },
+};
+
+const editable: Fig.Option = {
+  name: ["-e", "--editable"],
+  description: "An editable Python package URL or path",
+  isRepeatable: true,
+  args: { name: "path", template: "folders" },
+};
+
+const skipLock: Fig.Option = {
+  name: "--skip-lock",
+  description: "Install from Pipfile bypassing lock mechanisms",
+};
+
+const lockOnly: Fig.Option = {
+  name: "--lock-only",
+  description: "Only update lock file (specifiers not added to Pipfile)",
+};
+
+const sitePackages: Fig.Option[] = [
+  {
+    name: "--site-packages",
+    description: "Enable site-packages for the virtualenv",
+    exclusiveOn: ["--no-site-packages"],
+  },
+  {
+    name: "--no-site-packages",
+    description: "Disable site-packages for the virtualenv",
+    exclusiveOn: ["--site-packages"],
+  },
+];
+
+// Mirrors upstream's option composers (_add_common_options and friends)
+const commonOptions: Fig.Option[] = [pypiMirror, verbose, quiet, clear, python];
+
+const installBaseOptions: Fig.Option[] = [
+  ...commonOptions,
+  { name: "--pre", description: "Allow pre-releases" },
+  {
+    name: "--extra-pip-args",
+    description: "Additional arguments passed directly to pip",
+    args: { name: "args" },
+  },
+  {
+    name: "--resolver",
+    description:
+      "Select the resolver backend (overrides PIPENV_RESOLVER and the Pipfile setting)",
+    args: { name: "name", suggestions: ["pip"] },
+  },
+];
+
+const syncOptions: Fig.Option[] = [
+  ...installBaseOptions,
+  dev("Install both develop and default packages"),
+  categories,
+  extras,
+  {
+    name: "--all",
+    description: "Install packages from all categories defined in the Pipfile",
+  },
+];
+
+const installOptions: Fig.Option[] = [
+  ...syncOptions,
+  {
+    name: "--config-settings",
+    description:
+      "Pass a build-backend configuration setting to pip for this package",
+    isRepeatable: true,
+    args: { name: "KEY=VALUE" },
+  },
+  {
+    name: ["-i", "--index"],
+    description:
+      "Specify target package index by url or index name from Pipfile",
+    args: { name: "URL" },
+  },
+  {
+    name: ["-r", "--requirements"],
+    description: "Import a requirements.txt file",
+    args: {
+      name: "file",
+      generators: filepaths({ extensions: ["txt", "yml", "yaml"] }),
+    },
+  },
+  {
+    name: "--ignore-pipfile",
+    description: "Ignore Pipfile when installing, using the Pipfile.lock",
+  },
+  editable,
+  skipLock,
+];
+
+const ignoreVuln: Fig.Option = {
+  name: ["-i", "--ignore"],
+  description: "Ignore specified vulnerability",
+  isRepeatable: true,
+  args: { name: "vulnerability ID" },
+};
+
 const completionSpec: Fig.Spec = {
   name: "pipenv",
-  description: "Python package manager",
+  description: "Python Development Workflow for Humans",
   subcommands: [
     {
-      name: "check",
-      description:
-        "Checks for PyUp Safety security vulnerabilities and against PEP 508 markers provided in Pipfile",
-      options: [
-        {
-          name: "--unused",
-          description:
-            "Given a code path, show potentially unused dependencies",
-          args: {
-            name: "code path",
-          },
-        },
-        {
-          name: "--db",
-          description:
-            "Path to a local PyUp Safety vulnerabilities database. Default: ENV PIPENV_SAFETY_DB or None",
-          args: {
-            name: "Database",
-          },
-        },
-        {
-          name: ["-i", "--ignore"],
-          description:
-            "Ignore specified vulnerability during PyUp Safety checks",
-          args: {
-            name: "Vulnerability ID",
-          },
-        },
-        {
-          name: "--output",
-          description:
-            "Translates to –json, –full-report or –bare from PyUp Safety check",
-        },
-        {
-          name: "--key",
-          description:
-            "Safety API key from PyUp.io for scanning dependencies against a live vulnerabilities database. Leave blank for scanning against a database that only updates once a month",
-          args: {
-            name: "API key",
-          },
-        },
-        {
-          name: "--quiet",
-          description: "Quiet standard output, except vulnerability report",
-        },
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-          args: {
-            name: "py_version",
-          },
-        },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
-        {
-          name: "--clear",
-          description: "Clears caches (pipenv, pip, and pip-tools)",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
-        },
-        {
-          name: "--pypi-mirror",
-          description: "Specify a PyPI mirror",
-          args: {
-            name: "mirror",
-          },
-        },
-        {
-          name: "--system",
-          description: "System pip management",
-        },
-      ],
-    },
-    {
-      name: "clean",
-      description: "Uninstalls all packages not specified in Pipfile.lock",
-      options: [
-        {
-          name: "--bare",
-          description: "Minimal output",
-        },
-        {
-          name: "--dry-run",
-          description: "Just output unneeded packages",
-        },
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-          args: {
-            name: "py_version",
-          },
-        },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
-        },
-      ],
-    },
-    {
-      name: "graph",
-      description: "Displays currently-installed dependency graph information",
-      options: [
-        {
-          name: "--bare",
-          description: "Minimal output",
-        },
-        {
-          name: "--json",
-          description: "Output JSON",
-        },
-        {
-          name: "--json-tree",
-          description: "Output JSON in nested tree",
-        },
-        {
-          name: "--reverse",
-          description: "Reversed dependency graph",
-        },
-      ],
-    },
-    {
       name: "install",
-      description:
-        "Initializes a package manager or installs all packages from Pipfile",
-      args: {
-        name: "package",
-        description: "Package to install",
-        isOptional: true,
-        suggestions: packageList,
-      },
+      description: "Install provided packages and add them to Pipfile",
+      args: packagesArg,
       options: [
-        {
-          name: "--system",
-          description: "Install a Pipfile’s contents into its parent system",
-        },
-        {
-          name: ["-c", "--code"],
-          description:
-            "Install packages automatically discovered from import statements",
-        },
+        system,
         {
           name: "--deploy",
           description:
-            "Enforce that your Pipfile.lock is up to date in deployment",
+            "Abort if the Pipfile.lock is out-of-date, or Python version is wrong",
+        },
+        ...sitePackages,
+        ...installOptions,
+      ],
+    },
+    {
+      name: "init",
+      description:
+        "Create a Pipfile for a new project, prompting for its settings",
+      options: [
+        {
+          name: ["-y", "--yes"],
+          description: "Accept all defaults without prompting",
         },
         {
-          name: "--site-packages",
+          name: "--install",
           description:
-            "Enable site-packages for the virtualenv [env var: PIPENV_SITE_PACKAGES]",
+            "Create the virtualenv and lock after writing the Pipfile",
+          exclusiveOn: ["--no-install"],
         },
         {
-          name: "--no-site-packages",
+          name: "--no-install",
+          description: "Don't create the virtualenv or lock",
+          exclusiveOn: ["--install"],
+        },
+        ...commonOptions,
+      ],
+    },
+    {
+      name: "remove",
+      description: "Remove the virtualenv for the current project",
+    },
+    {
+      name: "upgrade",
+      description: "Resolve provided packages and add them to Pipfile",
+      args: packagesArg,
+      options: [system, ...sitePackages, ...installOptions, lockOnly],
+    },
+    {
+      name: "uninstall",
+      description: "Uninstall a provided package and remove it from Pipfile",
+      args: packagesArg,
+      options: [
+        {
+          name: "--all-dev",
+          description: "Uninstall all packages from [dev-packages]",
+        },
+        {
+          name: "--all",
           description:
-            "Enable site-packages for the virtualenv [env var: PIPENV_SITE_PACKAGES]",
+            "Purge all packages from virtualenv. Does not edit Pipfile",
         },
-        {
-          name: "--skip-lock",
-          description:
-            "Skip locking mechanisms and use the Pipfile instead during operation",
-        },
-        {
-          name: ["-e", "--editable"],
-          description:
-            "An editable Python package URL or path, often to a VCS repository",
-          args: {
-            name: "Package URL | path",
-          },
-        },
-        {
-          name: "--ignore-pipfile",
-          description: "Ignore Pipfile when installing, using the Pipfile.lock",
-        },
-        {
-          name: "--selective-upgrade",
-          description: "Update specified packages",
-          args: {
-            name: "package",
-            isVariadic: true,
-          },
-        },
-        {
-          name: ["-r", "--requirements"],
-          description: "Import a requirements.txt file",
-          args: {
-            name: "path",
-            generators: filepaths({ extensions: ["txt", "yml", "yaml"] }),
-          },
-        },
-        {
-          name: "--extra-index-url",
-          description:
-            "URLs to the extra PyPI compatible indexes to query for package look-ups",
-          args: {
-            name: "URL",
-          },
-        },
-        {
-          name: ["-i", "--index"],
-          description: "Target PyPI-compatible package index url",
-          args: {
-            name: "URL",
-          },
-        },
-        {
-          name: "--sequential",
-          description:
-            "Install dependencies one-at-a-time, instead of concurrently",
-        },
-        {
-          name: ["-d", "--dev"],
-          description: "Install both develop and default packages",
-        },
-        {
-          name: "--keep-outdated",
-          description:
-            "Keep out-dated dependencies from being updated in Pipfile.lock",
-        },
-        {
-          name: "--pre",
-          description: "Allow pre-releases",
-        },
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-          args: {
-            name: "py_version",
-          },
-        },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
-        {
-          name: "--clear",
-          description: "Clears caches (pipenv, pip, and pip-tools)",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
-        },
-        {
-          name: "--pypi-mirror",
-          description:
-            "If you would like to override the default PyPI index URLs with the URL for a PyPI mirror",
-          args: {
-            name: "mirror url",
-          },
-        },
+        ...installBaseOptions,
+        categories,
+        extras,
+        dev("Uninstall packages from dev-packages"),
+        editable,
+        skipLock,
       ],
     },
     {
       name: "lock",
-      description: "Generates Pipfile.lock",
-      args: {
-        name: "> requirements.txt",
-        description: "Write packages into requirements.txt",
-        isOptional: true,
-      },
+      description: "Generate Pipfile.lock",
       options: [
+        ...installBaseOptions,
+        dev("Generate both develop and default requirements"),
+        devOnly,
+        categories,
         {
-          name: "--dev-only",
-          description:
-            "Generate a requirements file with only the development requirements",
-        },
-        {
-          name: "--header",
-          description: "Add header to generated requirements",
-        },
-        {
-          name: "--no-header",
-          description: "Generate requirements with no header",
-        },
-        {
-          name: ["-r", "--requirements"],
-          description: "Import a requirements.txt file",
-        },
-        {
-          name: ["-d", "--dev"],
-          description:
-            "Passing --dev will include both the default and development dependencies",
-        },
-        {
-          name: "--keep-outdated",
-          description:
-            "Keep out-dated dependencies from being updated in Pipfile.lock",
-        },
-        {
-          name: "--pre",
-          description: "Allow pre-releases",
-        },
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-        },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
-        {
-          name: "--clear",
-          description: "Clears caches (pipenv, pip, and pip-tools)",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
-        },
-        {
-          name: "--pypi-mirror",
-          description:
-            "If you would like to override the default PyPI index URLs with the URL for a PyPI mirror",
-        },
-      ],
-    },
-    {
-      name: "open",
-      description: "View a given module in your editor",
-      args: {
-        name: "module",
-      },
-      options: [
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-        },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
-        {
-          name: "--clear",
-          description: "Clears caches (pipenv, pip, and pip-tools)",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
-        },
-        {
-          name: "--pypi-mirror",
-          description:
-            "If you would like to override the default PyPI index URLs with the URL for a PyPI mirror",
-        },
-      ],
-    },
-    {
-      name: "run",
-      description: "Spawns a command installed into the virtualenv",
-      subcommands: [
-        {
-          name: "command",
-        },
-      ],
-      options: [
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-          args: {
-            name: "py_version",
-          },
-        },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
-        {
-          name: "--clear",
-          description: "Clears caches (pipenv, pip, and pip-tools)",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
-        },
-        {
-          name: "--pypi-mirror",
-          description:
-            "If you would like to override the default PyPI index URLs with the URL for a PyPI mirror",
-          args: {
-            name: "mirror url",
-          },
-        },
-      ],
-    },
-    {
-      name: "scripts",
-      description: "Lists scripts in current environment config",
-      options: [
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-          args: {
-            name: "py_version",
-          },
-        },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
-        {
-          name: "--clear",
-          description: "Clears caches (pipenv, pip, and pip-tools)",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
-        },
-        {
-          name: "--pypi-mirror",
-          description:
-            "If you would like to override the default PyPI index URLs with the URL for a PyPI mirror",
-          args: {
-            name: "mirror url",
-          },
+          name: "--backend",
+          description: "Resolver backend to use",
+          args: { name: "name", suggestions: ["pip", "pure-python", "uv"] },
         },
       ],
     },
     {
       name: "shell",
-      description: "Start a shell within the environment",
+      description: "Spawn a shell within the virtualenv",
+      args: { name: "shell args", isOptional: true, isVariadic: true },
       options: [
-        {
-          name: "--fancy",
-          description:
-            "Run in shell in fancy mode. Make sure the shell have no path manipulating scripts. Run $pipenv shell for issues with compatibility mode",
-        },
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-          args: {
-            name: "py_version",
-          },
-        },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
+        { name: "--fancy", description: "Run shell in fancy mode" },
         {
           name: "--anyway",
           description:
             "Always spawn a sub-shell, even if one is already spawned",
         },
-        {
-          name: "--pypi-mirror",
-          description:
-            "If you would like to override the default PyPI index URLs with the URL for a PyPI mirror",
-          args: {
-            name: "mirror url",
-          },
-        },
+        { name: ["-q", "--quiet"], description: "Quiet standard output" },
+        pypiMirror,
+        python,
       ],
     },
     {
-      name: "sync",
-      description: "Installs all packages specified in Pipfile.lock",
+      name: "activate",
+      description: "Output the activation command for the virtualenv",
+      options: [pypiMirror, python],
+    },
+    {
+      name: "run",
+      description: "Spawn a command installed into the virtualenv",
+      // Upstream keeps -v/--python off run so they pass through to the command
+      args: { name: "command", isCommand: true },
+      options: [system],
+    },
+    {
+      name: "check",
+      description: "Check for PyUp Safety security vulnerabilities",
+      deprecated: { description: "Use pipenv audit" },
       options: [
         {
-          name: "--system",
-          description: "Install a Pipfile’s contents into its parent system",
+          name: "--db",
+          description: "Path or URL to a PyUp Safety vulnerabilities database",
+          args: { name: "path or URL" },
         },
+        ignoreVuln,
         {
-          name: "--bare",
-          description: "Minimal output",
-        },
-        {
-          name: "--sequential",
-          description:
-            "Install dependencies one-at-a-time, instead of concurrently",
-        },
-        {
-          name: ["-d", "--dev"],
-          description: "Install both develop and default packages",
-        },
-        {
-          name: "--keep-outdated",
-          description:
-            "Keep out-dated dependencies from being updated in Pipfile.lock",
-        },
-        {
-          name: "--pre",
-          description: "Allow pre-releases",
-        },
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
+          name: "--output",
+          description: "Output format",
           args: {
-            name: "py_version",
+            name: "format",
+            suggestions: [
+              "default",
+              "json",
+              "full-report",
+              "bare",
+              "screen",
+              "text",
+              "minimal",
+            ],
           },
         },
         {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
+          name: "--key",
+          description: "Safety API key from PyUp.io",
+          args: { name: "API key" },
         },
         {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
+          name: "--policy-file",
+          description: "Safety policy file",
+          args: { name: "path", template: "filepaths" },
         },
         {
-          name: "--clear",
-          description: "Clears caches (pipenv, pip, and pip-tools)",
+          name: "--exit-code",
+          description: "Exit non-zero when vulnerabilities are found (default)",
+          exclusiveOn: ["--continue-on-error"],
         },
         {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
+          name: "--continue-on-error",
+          description: "Exit zero even when vulnerabilities are found",
+          exclusiveOn: ["--exit-code"],
         },
         {
-          name: "--pypi-mirror",
+          name: "--audit-and-monitor",
+          description: "Send results to Safety audit and monitor (default)",
+          exclusiveOn: ["--disable-audit-and-monitor"],
+        },
+        {
+          name: "--disable-audit-and-monitor",
+          description: "Don't send results to Safety audit and monitor",
+          exclusiveOn: ["--audit-and-monitor"],
+        },
+        {
+          name: "--project",
+          description: "Safety project to associate results with",
+          args: { name: "project" },
+        },
+        {
+          name: "--save-json",
+          description: "Save the JSON report to a file",
+          args: { name: "path", template: "filepaths" },
+        },
+        {
+          name: "--use-installed",
+          description: "Use installed packages instead of the lockfile",
+        },
+        {
+          name: "--categories",
+          description: "Check packages in specified categories",
+          args: { name: "categories" },
+        },
+        {
+          name: "--auto-install",
+          description: "Automatically install safety if not already installed",
+        },
+        {
+          name: "--scan",
           description:
-            "If you would like to override the default PyPI index URLs with the URL for a PyPI mirror",
-          args: {
-            name: "mirror url",
-          },
+            "Use Safety's scan command instead of the legacy check (removed in v2027.0.0)",
         },
+        ...commonOptions,
+        system,
       ],
     },
     {
-      name: "uninstall",
-      description: "Uninstalls a provided package and removes it from Pipfile",
-      args: {
-        name: "package",
-        description: "Package to uninstall",
-        isOptional: true,
-        suggestions: packageList,
-      },
+      name: "audit",
+      description:
+        "Audit packages for security vulnerabilities using pip-audit",
       options: [
         {
-          name: "--all-dev",
-          description: "Uninstall all package from [dev-packages]",
-        },
-        {
-          name: "--all",
-          description:
-            "Purge all package(s) from virtualenv. Does not edit Pipfile",
-        },
-        {
-          name: ["-e", "--editable"],
-          description:
-            "An editable Python package URL or path, often to a VCS repository",
+          name: ["-f", "--output"],
+          description: "Output format",
           args: {
-            name: "path",
-            template: "folders",
+            name: "format",
+            suggestions: [
+              "columns",
+              "json",
+              "cyclonedx-json",
+              "cyclonedx-xml",
+              "markdown",
+            ],
           },
         },
         {
-          name: "--skip-lock",
-          description:
-            "Skip locking mechanisms and use the Pipfile instead during operation",
+          name: ["-s", "--vulnerability-service"],
+          description: "Vulnerability service to query",
+          args: { name: "service", suggestions: ["pypi", "osv"] },
+        },
+        ignoreVuln,
+        {
+          name: "--fix",
+          description: "Upgrade dependencies with known vulnerabilities",
+        },
+        dryRun("Report what --fix would do without changing anything"),
+        {
+          name: "--strict",
+          description: "Fail the audit if any dependency cannot be collected",
         },
         {
-          name: ["-d", "--dev"],
-          description: "Install both develop and default packages",
+          name: "--skip-editable",
+          description: "Don't audit packages installed as editable",
+        },
+        { name: "--no-deps", description: "Don't resolve dependencies" },
+        {
+          name: "--local",
+          description: "Only audit packages in the local environment",
         },
         {
-          name: "--keep-outdated",
-          description:
-            "Keep out-dated dependencies from being updated in Pipfile.lock",
+          name: "--desc",
+          description: "Include a description for each vulnerability",
         },
         {
-          name: "--pre",
-          description: "Allow pre-releases",
+          name: "--aliases",
+          description: "Include alias IDs for each vulnerability",
         },
         {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-          args: {
-            name: "py_version",
-          },
+          name: ["-o", "--output-file"],
+          description: "Write the results to a file",
+          args: { name: "path", template: "filepaths" },
         },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
-        {
-          name: "--clear",
-          description: "Clears caches (pipenv, pip, and pip-tools)",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
-        },
-        {
-          name: "--pypi-mirror",
-          description:
-            "If you would like to override the default PyPI index URLs with the URL for a PyPI mirror",
-          args: {
-            name: "mirror url",
-          },
-        },
+        { name: "--locked", description: "Audit Pipfile.lock" },
+        ...commonOptions,
+        system,
       ],
     },
     {
       name: "update",
-      description: "Runs lock, then sync",
+      description: "Run lock, then sync",
+      args: packagesArg,
+      options: [
+        bare,
+        { name: "--outdated", description: "List out-of-date dependencies" },
+        dryRun("List packages that would be updated without updating"),
+        system,
+        ...installOptions,
+        lockOnly,
+      ],
+    },
+    {
+      name: "graph",
+      description: "Display currently-installed dependency graph information",
+      options: [
+        bare,
+        { name: "--json", description: "Output JSON" },
+        { name: "--json-tree", description: "Output JSON in nested tree" },
+        { name: "--reverse", description: "Reversed dependency graph" },
+      ],
+    },
+    {
+      name: "open",
+      description: "View a given module in your editor",
+      args: { name: "module" },
+      options: commonOptions,
+    },
+    {
+      name: "sync",
+      description: "Install all packages specified in Pipfile.lock",
+      options: [
+        system,
+        bare,
+        {
+          name: "--clean",
+          description: "Also uninstall packages not specified in Pipfile.lock",
+        },
+        ...syncOptions,
+        ...sitePackages,
+      ],
+    },
+    {
+      name: "clean",
+      description: "Uninstall all packages not specified in Pipfile.lock",
+      options: [bare, dryRun("Just output unneeded packages"), verbose, python],
+    },
+    {
+      name: "scripts",
+      description: "List scripts in current environment config",
+      options: commonOptions,
+    },
+    {
+      name: "verify",
+      description: "Verify the hash in Pipfile.lock is up-to-date",
+    },
+    {
+      name: "requirements",
+      description: "Generate a requirements.txt from Pipfile.lock",
+      options: [
+        { name: "--dev", description: "Include development packages" },
+        devOnly,
+        { name: "--hash", description: "Include package hashes" },
+        {
+          name: "--exclude-markers",
+          description: "Exclude PEP 508 markers",
+        },
+        {
+          name: "--exclude-index",
+          description: "Exclude index URLs from the output",
+        },
+        {
+          name: "--categories",
+          description: "Include packages from specified categories",
+          args: { name: "categories" },
+        },
+        {
+          name: "--from-pipfile",
+          description: "Only include packages listed in the Pipfile",
+        },
+        {
+          name: "--no-lock",
+          description: "Generate from the Pipfile without Pipfile.lock",
+        },
+        pypiMirror,
+      ],
+    },
+    {
+      name: "pylock",
+      description: "Manage PEP 751 pylock.toml files",
       options: [
         {
-          name: "--bare",
-          description: "Minimal output",
+          name: "--generate",
+          description: "Generate pylock.toml from Pipfile.lock",
         },
         {
-          name: "--outdated",
-          description: "List out-of-date dependencies",
+          name: "--from-pyproject",
+          description: "Generate a pylock.toml skeleton from pyproject.toml",
+        },
+        { name: "--validate", description: "Validate the pylock.toml file" },
+        {
+          name: ["-o", "--output"],
+          description: "Output path for pylock.toml",
+          args: { name: "path", template: "filepaths" },
         },
         {
-          name: "--dry-run",
-          description: "Just output unneeded packages",
+          name: "--dev-groups",
+          description: "Comma-separated dependency groups (default: dev)",
+          args: { name: "groups" },
         },
-        {
-          name: ["-e", "--editable"],
-          description:
-            "An editable Python package URL or path, often to a VCS repository",
-          args: {
-            name: "path",
-            template: "folders",
-          },
-        },
-        {
-          name: "--ignore-pipfile",
-          description: "Ignore Pipfile when installing, using the Pipfile.lock",
-        },
-        {
-          name: "--selective-upgrade",
-          description: "Update specified packages",
-          args: {
-            name: "packages",
-            isVariadic: true,
-          },
-        },
-        {
-          name: ["-r", "--requirements"],
-          description: "Import a requirements.txt file",
-        },
-        {
-          name: "--extra-index-url",
-          description:
-            "URLs to the extra PyPI compatible indexes to query for package look-ups",
-          args: {
-            name: "url",
-            isVariadic: true,
-          },
-        },
-        {
-          name: ["-i", "--index"],
-          description: "Target PyPI-compatible package index url",
-          args: {
-            name: "index",
-          },
-        },
-        {
-          name: "--sequential",
-          description:
-            "Install dependencies one-at-a-time, instead of concurrently",
-        },
-        {
-          name: ["-d", "--dev"],
-          description: "Install both develop and default packages",
-        },
-        {
-          name: "--keep-outdated",
-          description:
-            "Keep out-dated dependencies from being updated in Pipfile.lock",
-        },
-        {
-          name: "--pre",
-          description: "Allow pre-releases",
-        },
-        {
-          name: "--python",
-          description: "Specify which version of Python virtualenv should use",
-          args: {
-            name: "py_version",
-          },
-        },
-        {
-          name: "--three",
-          description: "Use Python 3 when creating virtualenv",
-        },
-        {
-          name: "--two",
-          description: "Use Python 2 when creating virtualenv",
-        },
-        {
-          name: "--clear",
-          description: "Clears caches (pipenv, pip, and pip-tools)",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description: "Verbose mode",
-        },
-        {
-          name: "--pypi-mirror",
-          description:
-            "If you would like to override the default PyPI index URLs with the URL for a PyPI mirror",
-          args: {
-            name: "mirror url",
-          },
-        },
+        ...commonOptions,
       ],
     },
   ],
-
   options: [
-    {
-      name: "--where",
-      description: "View project home information",
-    },
-    {
-      name: "--venv",
-      description: "View virtualenv information",
-    },
-    {
-      name: "--py",
-      description: "View python interpreter information",
-    },
-    {
-      name: "--envs",
-      description: "View environment variable options",
-    },
+    { name: "--where", description: "Output project home information" },
+    { name: "--venv", description: "Output virtualenv information" },
+    { name: "--py", description: "Output Python interpreter information" },
+    { name: "--envs", description: "Output environment variable options" },
     {
       name: "--rm",
       description: "Remove the virtualenv",
+      deprecated: { description: "Use pipenv remove" },
     },
-    {
-      name: "--bare",
-      description: "Minimal output",
-    },
-    {
-      name: "--completion",
-      description: "Output completion (to be executed by shell)",
-    },
-    {
-      name: "--man",
-      description: "Display manpage",
-    },
+    bare,
+    { name: "--man", description: "Display manpage" },
     {
       name: "--support",
-      description: "View diagnostic information for use in GitHub issues",
+      description: "Output diagnostic information for use in GitHub issues",
     },
-    {
-      name: "--site-packages",
-      description:
-        "Enable site-packages for the virtualenv [env var: PIPENV_SITE_PACKAGES]",
-    },
-    {
-      name: "--no-site-packages",
-      description:
-        "Enable site-packages for the virtualenv [env var: PIPENV_SITE_PACKAGES]",
-    },
-    {
-      name: "--python",
-      description: "Specify which version of Python virtualenv should use",
-      args: {
-        name: "version",
-        description:
-          "Specific a python version e.g --python 3.6 or --python 2.7.14",
-        isOptional: true,
-      },
-    },
-    {
-      name: "--three",
-      description: "Use python 3 when creating virtualenv",
-    },
-    {
-      name: "--two",
-      description: "Use python 2 when creating virtualenv",
-    },
-    {
-      name: "--clear",
-      description:
-        "Clears caches (pipenv, pip, and pip-tools). [env var: PIPENV_CLEAR]",
-    },
-    {
-      name: ["-v", "--verbose"],
-      description: "Verbose mode",
-    },
-    {
-      name: "--pypi-mirror",
-      description: "Specify a PyPi mirror",
-      args: {
-        name: "mirror",
-      },
-    },
-    {
-      name: "--version",
-      description: "View your current pipenv version",
-    },
-    {
-      name: ["-h", "--help"],
-      description: "List commands",
-    },
+    ...commonOptions,
+    ...sitePackages,
+    { name: "--version", description: "Show the version and exit" },
+    { name: ["-h", "--help"], description: "Show this message and exit" },
   ],
 };
 

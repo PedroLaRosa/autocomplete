@@ -1,3 +1,4 @@
+// envchain v1.1.0 (GitHub release sorah/envchain, 2024-04-23). Source: envchain.c usage and argv parser at v1.1.0
 const namespaces: Fig.Generator = {
   script: ["envchain", "--list"],
   postProcess: (output) => {
@@ -17,6 +18,7 @@ const completionSpec: Fig.Spec = {
   args: [
     {
       name: "NAMESPACE",
+      description: "Comma-separated list of namespaces",
       generators: namespaces,
     },
     { name: "CMD", isCommand: true },
@@ -56,8 +58,35 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-l", "--list"],
-      description: "List namespaces that have been created",
+      description:
+        "List namespaces, or the variables of NAMESPACE when one is given",
       icon: "fig://icon?type=option",
+      args: {
+        name: "NAMESPACE",
+        isOptional: true,
+        generators: namespaces,
+      },
+      options: [
+        {
+          name: ["-v", "--show-value"],
+          description: "Print values along with variable names",
+        },
+      ],
+    },
+    {
+      name: "--unset",
+      description: "Remove variables ENV from namespace NAMESPACE",
+      icon: "fig://icon?type=option",
+      args: [
+        {
+          name: "NAMESPACE",
+          generators: namespaces,
+        },
+        {
+          name: "ENV",
+          isVariadic: true,
+        },
+      ],
     },
   ],
 };

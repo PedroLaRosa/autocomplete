@@ -1,3 +1,4 @@
+// yo v7.0.1 (GitHub release, 2026-04-09). Source: lib/cli.js and lib/usage.txt on yeoman/yo v7.0.1
 function toTitleCase(str: string): string {
   return str
     .trim()
@@ -13,41 +14,37 @@ const suggestions: Fig.Suggestion[] = [
     description: "Running sanity checks on your system",
     icon: "fig://icon?type=alert",
   },
-  {
-    name: "completion",
-    description: "To enable shell completion for the yo command",
-    icon: "fig://icon?type=asterisk",
-  },
 ];
 
 // GENERATORS
 const yeomanGeneratorList: Fig.Generator = {
   script: ["yo", "--generators"],
   postProcess: function (out) {
-    try {
-      return out
-        .split("\n")
-        .filter((item) => item.trim() && item !== "Available Generators:")
-        .map(
-          (item) =>
-            ({
-              name: item.trim(),
-              icon: "https://avatars.githubusercontent.com/u/1714870?v=4",
-              displayName: toTitleCase(item),
-              description: `${toTitleCase(item)} Generator`,
-              priority: 100,
-              options: [
-                {
-                  name: "--help",
-                  description: `Help of "${toTitleCase(item)}" generator`,
-                },
-              ],
-            }) as Fig.Suggestion
-        ) as Fig.Suggestion[];
-    } catch (e) {
-      console.error(e);
-      return [];
-    }
+    // Output: "Available Generators:", then "  <gen>" lines each followed by "    <sub>" lines
+    let parent = "";
+    return out.split("\n").flatMap((line) => {
+      const item = line.trim();
+      // Names have no spaces: this drops the header and the "Couldn't find any generators" hint
+      if (!item || /\s/.test(item)) return [];
+      let name = item;
+      if (line.startsWith("    ")) name = `${parent}:${item}`;
+      else parent = item;
+      return [
+        {
+          name,
+          icon: "https://avatars.githubusercontent.com/u/1714870?v=4",
+          displayName: toTitleCase(name),
+          description: `${toTitleCase(name)} Generator`,
+          priority: 100,
+          options: [
+            {
+              name: "--help",
+              description: `Help of "${toTitleCase(name)}" generator`,
+            },
+          ],
+        },
+      ];
+    });
   },
 };
 
@@ -77,15 +74,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--no-color",
-      description: "Disable color",
-    },
-    {
-      name: "--insight",
-      description: "Enable anonymous tracking",
-    },
-    {
-      name: "--no-insight",
-      description: "Disable anonymous tracking",
+      description: "Disable colors",
     },
     {
       name: "--generators",
@@ -94,6 +83,14 @@ const completionSpec: Fig.Spec = {
     {
       name: "--local-only",
       description: "Disable lookup of globally-installed generators",
+    },
+    {
+      name: "--debug",
+      description: "Print the full stack trace on errors",
+    },
+    {
+      name: "--environment-version",
+      description: "Print the yeoman-environment version",
     },
   ],
 };

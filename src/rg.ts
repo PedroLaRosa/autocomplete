@@ -1,3 +1,5 @@
+// ripgrep v15.2.0 (`rg --version` and GitHub latest release, 2026-11-19). Source: `rg --help`
+// and crates/core/flags/defs.rs at tag 15.2.0 (short names, aliases, negations)
 const sortbyArg: Fig.Arg = {
   name: "Sortby",
   default: "none",
@@ -27,6 +29,56 @@ const sortbyArg: Fig.Arg = {
     },
   ],
 };
+
+const sizeArg: Fig.Arg = {
+  name: "NUM+SUFFIX?",
+  description: "Size in bytes, or with a K, M or G suffix",
+};
+
+// "This flag can be disabled with ..." pairs from `rg --help`: [negation, flag]
+const negations: [string, string][] = [
+  ["--no-auto-hybrid-regex", "--auto-hybrid-regex"],
+  ["--no-binary", "--binary"],
+  ["--no-block-buffered", "--block-buffered"],
+  ["--no-byte-offset", "--byte-offset"],
+  ["--no-column", "--column"],
+  ["--no-crlf", "--crlf"],
+  ["--no-encoding", "--encoding"],
+  ["--no-fixed-strings", "--fixed-strings"],
+  ["--no-follow", "--follow"],
+  ["--no-glob-case-insensitive", "--glob-case-insensitive"],
+  ["--no-hidden", "--hidden"],
+  ["--no-ignore-file-case-insensitive", "--ignore-file-case-insensitive"],
+  ["--no-include-zero", "--include-zero"],
+  ["--no-invert-match", "--invert-match"],
+  ["--no-json", "--json"],
+  ["--no-line-buffered", "--line-buffered"],
+  ["--no-max-columns-preview", "--max-columns-preview"],
+  ["--no-mmap", "--mmap"],
+  ["--no-multiline", "--multiline"],
+  ["--no-multiline-dotall", "--multiline-dotall"],
+  ["--no-one-file-system", "--one-file-system"],
+  ["--no-pcre2", "--pcre2"],
+  ["--no-pre", "--pre"],
+  ["--no-search-zip", "--search-zip"],
+  ["--no-sort-files", "--sort-files"],
+  ["--no-stats", "--stats"],
+  ["--no-text", "--text"],
+  ["--no-trim", "--trim"],
+  ["--ignore", "--no-ignore"],
+  ["--ignore-dot", "--no-ignore-dot"],
+  ["--ignore-exclude", "--no-ignore-exclude"],
+  ["--ignore-files", "--no-ignore-files"],
+  ["--ignore-global", "--no-ignore-global"],
+  ["--ignore-messages", "--no-ignore-messages"],
+  ["--ignore-parent", "--no-ignore-parent"],
+  ["--ignore-vcs", "--no-ignore-vcs"],
+  ["--messages", "--no-messages"],
+  ["--pcre2-unicode", "--no-pcre2-unicode"],
+  ["--require-git", "--no-require-git"],
+  ["--unicode", "--no-unicode"],
+];
+
 const completionSpec: Fig.Spec = {
   name: "rg",
   description:
@@ -43,6 +95,7 @@ const completionSpec: Fig.Spec = {
       name: "--auto-hybrid-regex",
       description:
         "When this flag is used, ripgrep will dynamically choose between supported regex engines depending on the features used in a pattern",
+      deprecated: { description: "Use --engine=auto" },
     },
     {
       name: ["-B", "--before-context"],
@@ -98,9 +151,9 @@ const completionSpec: Fig.Spec = {
     {
       name: "--colors",
       description: "Specifies color settings for use in the output",
+      isRepeatable: true,
       args: {
         name: "Color Spec",
-        isVariadic: true,
         description: "{type}:{attribute}:{value}, ex: `match:fg:magenta`",
       },
     },
@@ -124,9 +177,13 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--no-context-separator",
+      description: "Completely disable context separators",
+    },
+    {
       name: ["-c", "--count"],
       description:
-        "Suppresses normal output and shows the number of lines that match the given pattersns for each file searched",
+        "Suppresses normal output and shows the number of lines that match the given patterns for each file searched",
     },
     {
       name: "--count-matches",
@@ -145,15 +202,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--dfa-size-limit",
       description: "The upper size limit of the regex DFA",
-      args: [
-        {
-          name: "NUM",
-        },
-        {
-          name: "suffix",
-          isOptional: true,
-        },
-      ],
+      args: sizeArg,
     },
     {
       name: ["-E", "--encoding"],
@@ -161,6 +210,8 @@ const completionSpec: Fig.Spec = {
         "Specifies the text encoding that ripgrep will use on all files searched",
       args: {
         name: "Encoding",
+        default: "auto",
+        suggestions: ["auto", "none"],
       },
     },
     {
@@ -173,12 +224,30 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--field-context-separator",
+      description:
+        "Set the separator between path, line number, column and the line itself for context lines",
+      args: {
+        name: "Separator",
+        default: "-",
+      },
+    },
+    {
+      name: "--field-match-separator",
+      description:
+        "Set the separator between path, line number, column and the line itself for matching lines",
+      args: {
+        name: "Separator",
+        default: ":",
+      },
+    },
+    {
       name: ["-f", "--file"],
       description:
         "Searches for patterns from the given file, with one pattern per line",
+      isRepeatable: true,
       args: {
         name: "Patternfile",
-        isVariadic: true,
         template: "filepaths",
       },
     },
@@ -205,12 +274,41 @@ const completionSpec: Fig.Spec = {
       description: "Follows symbolic links while traversing directories",
     },
     {
+      name: "--generate",
+      description: "Generate special output, then quit without searching",
+      args: {
+        name: "Kind",
+        suggestions: [
+          {
+            name: "man",
+            description: "Generate a manual page in the roff format",
+          },
+          {
+            name: "complete-bash",
+            description: "Generate a bash completion script",
+          },
+          {
+            name: "complete-zsh",
+            description: "Generate a zsh completion script",
+          },
+          {
+            name: "complete-fish",
+            description: "Generate a fish completion script",
+          },
+          {
+            name: "complete-powershell",
+            description: "Generate a PowerShell completion script",
+          },
+        ],
+      },
+    },
+    {
       name: ["-g", "--glob"],
       description:
         "Includes or excludes files and directories for searching that match the given glob",
+      isRepeatable: true,
       args: {
         name: "GLOB",
-        isVariadic: true,
       },
     },
     {
@@ -221,30 +319,67 @@ const completionSpec: Fig.Spec = {
     {
       name: "--heading",
       description:
-        "Prints the file path above clusters of matches from each file instead of printing the file path as a prefix for reach matched line",
+        "Prints the file path above clusters of matches from each file instead of printing the file path as a prefix for each matched line",
     },
     {
-      name: "--hidden",
+      name: ["-h", "--help"],
+      description: "Show condensed (-h) or verbose (--help) help",
+    },
+    {
+      name: ["-.", "--hidden"],
       description: "Searches hidden files and directories",
+    },
+    {
+      name: "--hostname-bin",
+      description:
+        "Executable whose output ripgrep uses as this system's hostname for hyperlinks",
+      args: {
+        name: "Command",
+      },
+    },
+    {
+      name: "--hyperlink-format",
+      description: "Set the format of hyperlinks to use when printing results",
+      args: {
+        name: "Format",
+        description: "An alias or a format string like file://{host}{path}",
+        suggestions: [
+          "default",
+          "none",
+          "cursor",
+          "file",
+          "grep+",
+          "kitty",
+          "macvim",
+          "textmate",
+          "vscode",
+          "vscode-insiders",
+          "vscodium",
+        ],
+      },
     },
     {
       name: "--iglob",
       description:
         "Includes or excludes files and directories for searching that match given the glob",
+      isRepeatable: true,
       args: {
         name: "GLOB",
         template: ["filepaths", "folders"],
-        isVariadic: true,
       },
+    },
+    {
+      name: ["-i", "--ignore-case"],
+      description: "Search all patterns case insensitively",
     },
     {
       name: "--ignore-file",
       description:
         "Specifies a path to one or more .gitignore format rules files",
+      isRepeatable: true,
       args: {
         name: "Path",
         template: "filepaths",
-        isVariadic: true,
       },
     },
     {
@@ -254,7 +389,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--include-zero",
       description:
-        "Prints the number of matchesfor each file when used with --count or --count matches",
+        "Prints the number of matches for each file when used with --count or --count-matches",
     },
     {
       name: ["-v", "--invert-match"],
@@ -263,10 +398,6 @@ const completionSpec: Fig.Spec = {
     {
       name: "--json",
       description: "Enables printing results in a JSON Lines format",
-    },
-    {
-      name: "--no-json",
-      description: "Disables the JSON Lines format",
     },
     {
       name: "--line-buffered",
@@ -290,7 +421,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--max-columns-preview",
       description:
-        "Completely replaces any line that is too long with a message indicating that a matching line was removed",
+        "Prints a preview for lines exceeding the -M/--max-columns limit instead of omitting them",
     },
     {
       name: ["-m", "--max-count"],
@@ -301,7 +432,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--max-depth",
+      name: ["-d", "--max-depth", "--maxdepth"],
       description:
         "Limits the depth of directory traversal to NUM levels beyond the paths given",
       args: {
@@ -311,18 +442,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "--max-filesize",
       description: "Ignores files larger than NUM in size",
-      args: [
-        {
-          name: "NUM",
-        },
-        {
-          name: "Suffix",
-          isOptional: true,
-        },
-      ],
+      args: sizeArg,
     },
     {
-      name: "-mmap",
+      name: "--mmap",
       description: "Searches using memory maps when possible",
     },
     {
@@ -354,7 +477,7 @@ const completionSpec: Fig.Spec = {
       description: "Don't respect .ignore files",
     },
     {
-      name: "--no-ignore-excluded",
+      name: "--no-ignore-exclude",
       description:
         "Don't respect ignore files that are manually configured for the repository",
     },
@@ -373,7 +496,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--no-ignore-parent",
-      description: "Don't repsect ignore files in parent directories",
+      description: "Don't respect ignore files in parent directories",
     },
     {
       name: "--no-ignore-vcs",
@@ -389,23 +512,18 @@ const completionSpec: Fig.Spec = {
         "Suppresses all error messages related to opening and reading files",
     },
     {
-      name: "--no-map",
-      description: "Never use memory maps, even when they might be faster",
-    },
-    {
       name: "--no-pcre2-unicode",
+      description: "Disable Unicode mode for PCRE2",
+      deprecated: { description: "Use --no-unicode" },
     },
     {
       name: "--no-require-git",
-      description: "Will only respect global gitignore rules",
+      description:
+        "Respect source control ignore files even if no git repository is present",
     },
     {
       name: "--no-unicode",
       description: "Turn off unicode",
-    },
-    {
-      name: "--unicode",
-      description: "Disables --no-unicode flag",
     },
     {
       name: ["-0", "--null"],
@@ -422,16 +540,12 @@ const completionSpec: Fig.Spec = {
         "Will not cross file system boundaries relative to where the search started from",
     },
     {
-      name: "--no-one-file-system",
-      description: "Disables `--one-file-system` flag",
-    },
-    {
       name: ["-o", "--only-matching"],
       description:
         "Prints only the matched (non-empty) parts of a matching line, with each such part on a separate output line",
     },
     {
-      name: "--passthru",
+      name: ["--passthru", "--passthrough"],
       description: "Prints both matching and non-matching lines",
     },
     {
@@ -444,7 +558,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-P", "--pcre2"],
       description:
-        "Usess the PCRE2 regex engine instead of its default regex engine",
+        "Uses the PCRE2 regex engine instead of its default regex engine",
     },
     {
       name: "--pcre2-version",
@@ -462,9 +576,9 @@ const completionSpec: Fig.Spec = {
       name: "--pre-glob",
       description:
         "Only files that match the given set of globs will be handed to the command specified by the `--pre flag`",
+      isRepeatable: true,
       args: {
         name: "GLOB",
-        isVariadic: true,
       },
     },
     {
@@ -479,22 +593,14 @@ const completionSpec: Fig.Spec = {
     {
       name: "--regex-size-limit",
       description: "Sets the upper size limit of the compiled regex",
-      args: [
-        {
-          name: "NUM",
-        },
-        {
-          name: "Suffix",
-          isOptional: true,
-        },
-      ],
+      args: sizeArg,
     },
     {
       name: ["-e", "--regexp"],
       description: "A pattern to search for",
+      isRepeatable: true,
       args: {
         name: "Pattern",
-        isVariadic: true,
       },
     },
     {
@@ -516,6 +622,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--sort",
+      description: "Enables sorting results in ascending order",
       args: sortbyArg,
     },
     {
@@ -524,8 +631,18 @@ const completionSpec: Fig.Spec = {
       args: sortbyArg,
     },
     {
+      name: "--sort-files",
+      description: "Sort search results by file path in ascending order",
+      deprecated: { description: "Use --sort=path" },
+    },
+    {
       name: "--stats",
       description: "Prints aggregate statistics about this ripgrep search",
+    },
+    {
+      name: "--stop-on-nonmatch",
+      description:
+        "Stop reading a file at the first non-matching line after a matching line",
     },
     {
       name: ["-a", "--text"],
@@ -539,6 +656,10 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--trace",
+      description: "Shows trace messages, even more detailed than --debug",
+    },
+    {
       name: "--trim",
       description:
         "All ASCII whitespace at the beginning of each line printed will be trimmed",
@@ -546,25 +667,25 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-t", "--type"],
       description: "Only searches files matching TYPE",
+      isRepeatable: true,
       args: {
         name: "Type",
-        isVariadic: true,
       },
     },
     {
       name: "--type-add",
       description: "Add a new glob for a particular file type",
+      isRepeatable: true,
       args: {
         name: "Type Spec",
-        isVariadic: true,
       },
     },
     {
       name: "--type-clear",
       description: "Clear the file type globs previously defined for type",
+      isRepeatable: true,
       args: {
         name: "type",
-        isVariadic: true,
       },
     },
     {
@@ -575,20 +696,25 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-T", "--type-not"],
       description: "Do not search files matching type",
+      isRepeatable: true,
       args: {
         name: "type",
-        isVariadic: true,
       },
     },
     {
       name: ["-u", "--unrestricted"],
       description:
         "Reduce the level of smart searching, increase by adding `u`s, ex: -uuu",
+      isRepeatable: 3,
+    },
+    {
+      name: ["-V", "--version"],
+      description: "Prints ripgrep's version",
     },
     {
       name: "--vimgrep",
       description:
-        "Shows results with every match on its own line, including line numbers and column nnumbers",
+        "Shows results with every match on its own line, including line numbers and column numbers",
     },
     {
       name: ["-H", "--with-filename"],
@@ -598,6 +724,11 @@ const completionSpec: Fig.Spec = {
       name: ["-w", "--word-regexp"],
       description: "Only shows the matches surrounded by word boundaries",
     },
+    ...negations.map(([name, flag]) => ({
+      name,
+      description: `Disable ${flag}`,
+      priority: 40,
+    })),
   ],
   args: [
     {

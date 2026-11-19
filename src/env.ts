@@ -1,12 +1,11 @@
+// env (macOS 15.5 BSD env, man env(1), 2026-11-19). Source: man env
 const enviromentVariables: Fig.Generator = {
   custom: async (_tokens, _executeCommand, generatorContext) => {
-    return Object.values(generatorContext.environmentVariables).map(
-      (envVar) => ({
-        name: envVar,
-        description: "Environment variable",
-        icon: "🌎",
-      })
-    );
+    return Object.keys(generatorContext.environmentVariables).map((envVar) => ({
+      name: envVar,
+      description: "Environment variable",
+      icon: "🌎",
+    }));
   },
 };
 
@@ -24,14 +23,25 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-v",
-      description: "Print verbose logs",
+      description: "Print verbose logs; repeat for more detail",
+      isRepeatable: true,
     },
     {
       name: "-u",
       description: "Remove variable from the environment",
+      isRepeatable: true,
       args: {
         name: "name",
         generators: enviromentVariables,
+      },
+    },
+    {
+      name: "-C",
+      description:
+        "Change to the given working directory before running the utility",
+      args: {
+        name: "altwd",
+        template: "folders",
       },
     },
     {

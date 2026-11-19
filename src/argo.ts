@@ -1,15 +1,123 @@
-import fig from "./fig";
+// Argo Workflows v4.1.6 (GitHub release "Latest", 2026-10-22). Source:
+// docs/cli/*.md at tag v4.1.6 of argoproj/argo-workflows
 
 const sharedArgs = {
-  UID: {
-    name: "UID",
+  WORKFLOW: {
+    name: "WORKFLOW",
+    description: "Workflow name or UID",
   },
 };
+
+const files: Fig.Arg = {
+  name: "FILE",
+  isVariadic: true,
+  template: "filepaths",
+};
+
+const nameOrUidOptions: Fig.Option[] = [
+  {
+    name: "--name",
+    description: "Force the argument to be treated as a name",
+    exclusiveOn: ["--uid"],
+  },
+  {
+    name: "--uid",
+    description: "Force the argument to be treated as a UID",
+    exclusiveOn: ["--name"],
+  },
+];
+
+const outputOption = (formats: string[]): Fig.Option => ({
+  name: ["--output", "-o"],
+  description: `Output format. One of: ${formats.join("|")}`,
+  args: { name: "string", suggestions: formats },
+});
+
+const cronWorkflowOptions = (withSchedule: boolean): Fig.Option[] => [
+  {
+    name: "--entrypoint",
+    description: "Override entrypoint",
+    args: { name: "string" },
+  },
+  {
+    name: "--generate-name",
+    description: "Override metadata.generateName",
+    args: { name: "string" },
+  },
+  {
+    name: ["--labels", "-l"],
+    description:
+      "Comma separated labels to apply to the workflow. Will override previous values",
+    args: { name: "string" },
+  },
+  {
+    name: "--name",
+    description: "Override metadata.name",
+    args: { name: "string" },
+  },
+  outputOption(["name", "json", "yaml", "wide"]),
+  {
+    name: ["--parameter", "-p"],
+    description: "Pass an input parameter",
+    isRepeatable: true,
+    args: { name: "stringArray" },
+  },
+  {
+    name: ["--parameter-file", "-f"],
+    description: "Pass a file containing all input parameters",
+    args: { name: "string", template: "filepaths" },
+  },
+  ...(withSchedule
+    ? [
+        {
+          name: "--schedule",
+          description: "Override cron workflow schedule",
+          args: { name: "string" },
+        },
+      ]
+    : []),
+  {
+    name: "--serviceaccount",
+    description: "Run all pods in the workflow using specified serviceaccount",
+    args: { name: "string" },
+  },
+  {
+    name: "--strict",
+    description: "Perform strict workflow validation (default true)",
+  },
+];
+
+const templateUpdate = (kind: string): Fig.Subcommand => ({
+  name: "update",
+  description: `Update a ${kind}`,
+  args: files,
+  options: [
+    outputOption(["name", "json", "yaml", "wide"]),
+    {
+      name: "--strict",
+      description: "Perform strict workflow validation (default true)",
+    },
+  ],
+});
+
+const syncLimitOptions: Fig.Option[] = [
+  {
+    name: "--cm-name",
+    description: "ConfigMap name (required if type is configmap)",
+    args: { name: "string" },
+  },
+  {
+    name: "--type",
+    description: "Type of sync limit (database or configmap)",
+    args: { name: "string", suggestions: ["database", "configmap"] },
+  },
+];
+
 let globalOptions: Fig.Option[] = [
   {
     name: "--argo-base-href",
     description:
-      "An path to use with HTTP client (e.g. due to BASE_HREF). Defaults to the ARGO_BASE_HREF environment variable",
+      "Path to use with HTTP client due to Base HREF. Defaults to the ARGO_BASE_HREF environment variable",
     args: {
       name: "string",
     },
@@ -50,7 +158,7 @@ let globalOptions: Fig.Option[] = [
     },
   },
   {
-    name: "--certificate-authorityk",
+    name: "--certificate-authority",
     description: "Path to a cert file for the certificate authority",
     args: {
       name: "string",
@@ -85,6 +193,11 @@ let globalOptions: Fig.Option[] = [
     },
   },
   {
+    name: "--disable-compression",
+    description:
+      "If true, opt-out of response compression for all requests to the server",
+  },
+  {
     name: "--gloglevel",
     description: "Set the glog logging level",
     args: {
@@ -94,9 +207,10 @@ let globalOptions: Fig.Option[] = [
   {
     name: ["--header", "-H"],
     description:
-      "Sets additional header to all requests made by Argo CLI. (Can be repeated multiple times to add multiple headers",
+      "Sets additional header to all requests made by Argo CLI (repeatable or comma separated). Used only when either ARGO_HTTP1 or --argo-http1 is set to true",
+    isRepeatable: true,
     args: {
-      name: "int",
+      name: "strings",
     },
   },
   {
@@ -129,11 +243,21 @@ let globalOptions: Fig.Option[] = [
     },
   },
   {
+    name: "--log-format",
+    description:
+      'The formatter to use for logs. One of: text|json (default "text")',
+    args: {
+      name: "string",
+      suggestions: ["text", "json"],
+    },
+  },
+  {
     name: "--loglevel",
     description:
       'Set the logging level. One of: debug|info|warn|error (default "info")',
     args: {
       name: "string",
+      suggestions: ["debug", "info", "warn", "error"],
     },
   },
   {
@@ -219,7 +343,7 @@ globalOptions = globalOptions.map((option) => ({
 
 const completionSpec: Fig.Spec = {
   name: "argo",
-  description: "",
+  description: "Argo Workflows command line interface",
   subcommands: [
     {
       name: "archive",
@@ -228,13 +352,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "delete",
           description: "Delete a workflow in the archive",
-          args: sharedArgs.UID,
+          args: { ...sharedArgs.WORKFLOW, isVariadic: true },
+          options: nameOrUidOptions,
         },
         {
           name: "get",
           description: "Get a workflow in the archive",
-          args: sharedArgs.UID,
+          args: sharedArgs.WORKFLOW,
           options: [
+            ...nameOrUidOptions,
             {
               name: ["--output", "-o"],
               description:
@@ -264,9 +390,10 @@ const completionSpec: Fig.Spec = {
             {
               name: ["--output", "-o"],
               description:
-                'Output format. One of: json|yaml|wide (default "wide")',
+                'Output format. One of: name|json|yaml|wide (default "wide")',
               args: {
                 name: "string",
+                suggestions: ["name", "json", "yaml", "wide"],
               },
             },
             {
@@ -293,6 +420,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["--selector", "-l"],
+              description:
+                "Selector (label query) to query on, allows 1 value (e.g. -l key1)",
               args: {
                 name: "string",
               },
@@ -302,8 +431,9 @@ const completionSpec: Fig.Spec = {
         {
           name: "resubmit",
           description: "Resubmit one or more workflows",
-          args: sharedArgs.UID,
+          args: { ...sharedArgs.WORKFLOW, isVariadic: true, isOptional: true },
           options: [
+            ...nameOrUidOptions,
             {
               name: "--field-selector",
               description:
@@ -370,8 +500,9 @@ const completionSpec: Fig.Spec = {
         {
           name: "retry",
           description: "Retry zero or more workflows",
-          args: sharedArgs.UID,
+          args: { ...sharedArgs.WORKFLOW, isVariadic: true, isOptional: true },
           options: [
+            ...nameOrUidOptions,
             {
               name: "--field-selector",
               description: "Selector (field query) to filter on, supports '='",
@@ -454,9 +585,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "create",
           description: "Create a cluster workflow template",
-          args: {
-            name: "files",
-          },
+          args: files,
           options: [
             {
               name: ["--help", "-h"],
@@ -495,35 +624,23 @@ const completionSpec: Fig.Spec = {
         {
           name: "get",
           description: "Display details about a cluster workflow template",
-          args: [
-            {
-              name: "CLUSTER",
-            },
-            {
-              name: "WORKFLOW_TEMPLATE",
-            },
-          ],
+          args: {
+            name: "WORKFLOW_TEMPLATE",
+            isVariadic: true,
+          },
           options: [
             {
               name: ["--help", "-h"],
               description: "Help for get",
             },
-            {
-              name: ["--output", "-o"],
-              description: "Output format. One of: json|yaml|wide",
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(["name", "json", "yaml", "wide"]),
           ],
         },
         {
           name: "lint",
           description:
             "Validate files or directories of cluster workflow template manifests",
-          args: {
-            name: "FILE",
-          },
+          args: files,
           options: [
             {
               name: ["--help", "-h"],
@@ -560,17 +677,35 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
+        templateUpdate("cluster workflow template"),
       ],
     },
     {
       name: "completion",
       description:
-        "Output shell completion code for the specified shell (bash or zsh)",
-      args: { name: "SHELL" },
+        "Output shell completion code for the specified shell (bash, zsh or fish)",
+      args: { name: "SHELL", suggestions: ["bash", "zsh", "fish"] },
       options: [
         {
           name: ["--help", "-h"],
           description: "Help for completion",
+        },
+      ],
+    },
+    {
+      name: "convert",
+      description:
+        "Convert workflow manifests from legacy format to current format",
+      args: files,
+      options: [
+        {
+          name: "--no-color",
+          description: "Disable colorized output",
+        },
+        {
+          name: ["--output", "-o"],
+          description: 'Output format. One of: yaml|json (default "yaml")',
+          args: { name: "string", suggestions: ["yaml", "json"] },
         },
       ],
     },
@@ -619,98 +754,68 @@ const completionSpec: Fig.Spec = {
       description: "Manage cron workflows",
       options: [
         {
-          name: "--help",
+          name: ["--help", "-h"],
           description: "Help for cron",
         },
       ],
       subcommands: [
         {
-          name: "create",
-          description: "Create a cron workflow",
-          args: {
-            name: "FILE1 FILE2...",
-          },
+          name: "backfill",
+          description: "Create a cron backfill (alpha)",
+          args: { name: "CRON_WORKFLOW" },
           options: [
             {
-              name: "--entrypoint",
-              description: "Override entrypoint",
-              args: {
-                name: "string",
-              },
-            },
-            {
-              name: "--generate-name",
-              description: "Override metadata.generateName",
-              args: {
-                name: "string",
-              },
-            },
-            {
-              name: ["--help", "-h"],
-              description: "Help for create",
-            },
-            {
-              name: ["--labels", "-l"],
+              name: "--argname",
               description:
-                "Comma separated labels to apply to the workflow. Will override previous values",
-              args: {
-                name: "string",
-              },
+                'Schedule time argument name for workflow (default "cronScheduleTime")',
+              args: { name: "string" },
+            },
+            {
+              name: "--end",
+              description: "End date",
+              args: { name: "string" },
+            },
+            {
+              name: "--format",
+              description:
+                'Date format for schedule time value (default "Mon, 02 Jan 2006 15:04:05 MST")',
+              args: { name: "string" },
+            },
+            {
+              name: "--maxworkflowcount",
+              description:
+                "Maximum number of generated backfill workflows (default 1000)",
+              args: { name: "int" },
             },
             {
               name: "--name",
-              description: "Override metadata.name",
-              args: {
-                name: "string",
-              },
+              description: "Backfill name",
+              args: { name: "string" },
             },
             {
-              name: ["--output", "-o"],
-              description: "Output format. One of: name|json|yaml|wide",
-              args: {
-                name: "string",
-              },
+              name: "--parallel",
+              description: "Run all backfill workflows in parallel",
             },
             {
-              name: ["--parameter", "-p"],
-              description: "Pass an input parameter",
-              args: {
-                name: "stringArray",
-              },
-            },
-            {
-              name: ["--parameter-file", "-f"],
-              description: "Pass a file containing all input parameters",
-              args: {
-                name: "string",
-              },
-            },
-            {
-              name: "--schedule",
-              description: "Override cron workflow schedule",
-              args: {
-                name: "string",
-              },
-            },
-            {
-              name: "--serviceaccount",
-              description:
-                "Run all pods in the workflow using specified serviceaccount",
-              args: {
-                name: "string",
-              },
-            },
-            {
-              name: "--strict",
-              description: "Perform strict workflow validation (default true)",
+              name: "--start",
+              description: "Start date",
+              args: { name: "string" },
             },
           ],
+        },
+        {
+          name: "create",
+          description: "Create a cron workflow",
+          args: files,
+          options: cronWorkflowOptions(true),
         },
         {
           name: "delete",
           description: "Delete a cron workflow",
           args: {
-            name: "[CRON_WORKFLOW... | --all]",
+            name: "CRON_WORKFLOW",
+            isVariadic: true,
+            isOptional: true,
           },
           options: [
             {
@@ -728,28 +833,21 @@ const completionSpec: Fig.Spec = {
           description: "Display details about a cron workflow",
           args: {
             name: "CRON_WORKFLOW",
+            isVariadic: true,
           },
           options: [
             {
               name: ["--help", "-h"],
               description: "Help for get",
             },
-            {
-              name: ["--output", "-o"],
-              description: "Output format. One of: json|yaml|wide",
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(["name", "json", "yaml", "wide"]),
           ],
         },
         {
           name: "lint",
           description:
             "Validate files or directories of cron workflow manifests",
-          args: {
-            name: "FILE",
-          },
+          args: files,
           options: [
             {
               name: ["--help", "-h"],
@@ -778,85 +876,16 @@ const completionSpec: Fig.Spec = {
               description: "Show workflows from all namespaces",
             },
             {
-              name: "--chunk-size",
-              description:
-                "Return large lists in chunks rather than all at once. Pass 0 to disable",
-              args: {
-                name: "int",
-              },
-            },
-            {
-              name: "--completed",
-              description:
-                "Show completed workflows. Mutually exclusive with --running",
-            },
-            {
-              name: "--field-selector",
-              description:
-                "Selector (field query) to filter on. Supports '=' '==' and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
-              args: {
-                name: "string",
-              },
-            },
-            {
               name: ["--help", "-h"],
               description: "Help for list",
             },
-            {
-              name: "--no-headers",
-              description: "Don't print headers (default print headers)",
-            },
-            {
-              name: "--older",
-              description:
-                "List completed workflows finished before the specified duration (e.g. 10m 3h 1d)",
-              args: {
-                name: "string",
-              },
-            },
-            {
-              name: ["--output", "-o"],
-              description: "Output format. One of: name|wide|yaml|json",
-              args: {
-                name: "string",
-              },
-            },
-            {
-              name: "--prefix",
-              description: "Filter workflows by prefix",
-              args: {
-                name: "string",
-              },
-            },
-            {
-              name: "--resubmitted",
-              description: "Show resubmitted workflows",
-            },
-            {
-              name: "--running",
-              description:
-                "Show running workflows. Mutually exclusive with --completed",
-            },
+            outputOption(["wide", "name"]),
             {
               name: ["--selector", "-l"],
-              description: "Selector (label query) to filter on",
-              args: {
-                name: "string",
-              },
-            },
-            {
-              name: "--since",
               description:
-                "Show only workflows created after than a relative duration",
+                "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
               args: {
                 name: "string",
-              },
-            },
-            {
-              name: "--status",
-              description: "Filter by status (comma separated)",
-              args: {
-                name: "strings",
               },
             },
           ],
@@ -866,6 +895,8 @@ const completionSpec: Fig.Spec = {
           description: "Resume zero or more cron workflows",
           args: {
             name: "CRON_WORKFLOW",
+            isVariadic: true,
+            isOptional: true,
           },
         },
         {
@@ -873,16 +904,21 @@ const completionSpec: Fig.Spec = {
           description: "Suspend zero or more cron workflows",
           args: {
             name: "CRON_WORKFLOW",
+            isVariadic: true,
           },
+        },
+        {
+          name: "update",
+          description: "Update a cron workflow",
+          args: files,
+          options: cronWorkflowOptions(false),
         },
       ],
     },
     {
       name: "delete",
       description: "Delete workflows",
-      args: {
-        name: "WORKFLOW",
-      },
+      args: { name: "WORKFLOW", isVariadic: true, isOptional: true },
       options: [
         {
           name: "--all",
@@ -933,6 +969,14 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--query-chunk-size",
+          description:
+            "Run the list query in chunks (deletes will still be executed individually)",
+          args: {
+            name: "int",
+          },
+        },
+        {
           name: "--resubmitted",
           description: "Delete resubmitted workflows",
         },
@@ -942,6 +986,13 @@ const completionSpec: Fig.Spec = {
             "Selector (label query) to filter on not including uninitialized ones supports '=''=='and '!='.(e.g. -l key1=value1,key2=value2)",
           args: {
             name: "string",
+          },
+        },
+        {
+          name: "--status",
+          description: "Delete by status (comma separated)",
+          args: {
+            name: "strings",
           },
         },
       ],
@@ -962,9 +1013,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "get",
       description: "Display details about a workflow",
-      args: {
-        name: "WORKFLOW",
-      },
+      args: { name: "WORKFLOW", isVariadic: true },
       options: [
         {
           name: ["--help", "-h"],
@@ -986,13 +1035,7 @@ const completionSpec: Fig.Spec = {
             name: "string",
           },
         },
-        {
-          name: ["--output", "-o"],
-          description: "Output format. One of: json|yaml|short|wide",
-          args: {
-            name: "string",
-          },
-        },
+        outputOption(["name", "json", "yaml", "short", "wide"]),
         {
           name: "--status",
           description:
@@ -1010,9 +1053,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "lint",
       description: "Validate files or directories of manifests",
-      args: {
-        name: "FILE",
-      },
+      args: files,
       options: [
         {
           name: ["--help", "-h"],
@@ -1027,8 +1068,13 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--no-color",
+          description: "Disable colorized output",
+        },
+        {
           name: "--offline",
-          description: "Perform offline linting",
+          description:
+            "Perform offline linting. References to other resources are resolved from the provided args",
         },
         {
           name: ["--output", "-o"],
@@ -1089,13 +1135,7 @@ const completionSpec: Fig.Spec = {
             name: "string",
           },
         },
-        {
-          name: ["--output", "-o"],
-          description: "Output format. One of: name|wide|yaml|json",
-          args: {
-            name: "string",
-          },
-        },
+        outputOption(["name", "json", "yaml", "wide"]),
         {
           name: "--prefix",
           description: "Filter workflows by prefix",
@@ -1142,7 +1182,7 @@ const completionSpec: Fig.Spec = {
       description: "View logs of a pod or workflow",
       args: [
         {
-          name: "WORKFOW",
+          name: "WORKFLOW",
         },
         {
           name: "POD",
@@ -1221,17 +1261,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "node",
       description: "Perform action on a node in a workflow",
-      args: [
-        {
-          name: "ACTION",
-        },
-        {
-          name: "WORKFLOW",
-        },
-        {
-          name: "FLAGS",
-        },
-      ],
+      args: [{ name: "ACTION", suggestions: ["set"] }, { name: "WORKFLOW" }],
       options: [
         {
           name: ["--help", "-h"],
@@ -1272,7 +1302,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "resubmit",
       description: "Resubmit one or more workflows",
-      args: { name: "WORKFLOW..." },
+      args: { name: "WORKFLOW", isVariadic: true, isOptional: true },
       options: [
         {
           name: "--field-selector",
@@ -1338,15 +1368,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "resume",
-      description: "Resume zero or more workflows",
-      args: [
-        {
-          name: "WORKFLOW1",
-        },
-        {
-          name: "WORKFLOW2...",
-        },
-      ],
+      description: "Resume zero or more workflows (opposite of suspend)",
+      args: { name: "WORKFLOW", isVariadic: true },
       options: [
         {
           name: ["--help", "-h"],
@@ -1363,9 +1386,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "retry",
       description: "Retry zero or more workflows",
-      args: {
-        name: "WORKFLOW...",
-      },
+      args: { name: "WORKFLOW", isVariadic: true, isOptional: true },
       options: [
         {
           name: "--field-selector",
@@ -1446,7 +1467,8 @@ const completionSpec: Fig.Spec = {
         {
           name: "--allowed-link-protocol",
           description:
-            "Allowed link protocol in configMap. Used if the allowed configMap links protocol are different from http https. Defaults to the environment variable ALLOWED_LINK_PROTOCOL (default [http https])",
+            "Allowed protocols for links feature (default [http,https])",
+          isRepeatable: true,
           args: {
             name: "stringArray",
           },
@@ -1467,9 +1489,9 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--basehref",
+          name: "--base-href",
           description:
-            'Value for base href in index.html. Used if the server is running behind reverse proxy under subpath different from /. Defaults to the environment variable BASE_HREF. (default " /")',
+            'Value for base href in index.html. Used if the server is running behind reverse proxy under subpath different from / (default "/")',
           args: {
             name: "string",
           },
@@ -1515,11 +1537,19 @@ const completionSpec: Fig.Spec = {
             "Whether or not we should add a HTTP Secure Transport Security header. This only has effect if secure is enabled. (default true)",
         },
         {
-          name: "--log-format",
+          name: "--kube-api-burst",
           description:
-            'The formatter to use for logs. One of: text|json (default "text")',
+            "Burst to use while talking with kube-apiserver (default 30)",
           args: {
-            name: "string",
+            name: "int",
+          },
+        },
+        {
+          name: "--kube-api-qps",
+          description:
+            "QPS to use while talking with kube-apiserver (default 20)",
+          args: {
+            name: "float32",
           },
         },
         {
@@ -1538,7 +1568,7 @@ const completionSpec: Fig.Spec = {
           name: ["-p", "--port"],
           description: "Port to listen on (default 2746)",
           args: {
-            name: "string",
+            name: "int",
           },
         },
         {
@@ -1563,14 +1593,7 @@ const completionSpec: Fig.Spec = {
       name: "stop",
       description:
         "Stop zero or more workflows allowing all exit handlers to run",
-      args: [
-        {
-          name: "WORKFLOW1",
-        },
-        {
-          name: "WORKFLOW2...",
-        },
-      ],
+      args: { name: "WORKFLOW", isVariadic: true },
       options: [
         {
           name: "--dry-run",
@@ -1617,9 +1640,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "submit",
       description: "Submit a workflow",
-      args: {
-        name: "FILE...",
-      },
+      args: { ...files, isOptional: true },
       options: [
         {
           name: "--dry-run",
@@ -1752,19 +1773,56 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "suspend",
-      description: "Suspend zero or more workflow",
-      args: [
-        {
-          name: "WORKFLOW1",
-        },
-        {
-          name: "WORKFLOW2...",
-        },
-      ],
+      description: "Suspend zero or more workflows (opposite of resume)",
+      args: { name: "WORKFLOW", isVariadic: true },
       options: [
         {
           name: ["-h", "--help"],
           description: "Help for suspend",
+        },
+      ],
+    },
+    {
+      name: "sync",
+      description: "Manage sync limits",
+      subcommands: [
+        {
+          name: "create",
+          description: "Create a sync limit",
+          args: { name: "KEY" },
+          options: [
+            ...syncLimitOptions,
+            {
+              name: "--limit",
+              description: "Sync limit",
+              args: { name: "int32" },
+            },
+          ],
+        },
+        {
+          name: "delete",
+          description: "Delete a sync limit",
+          args: { name: "KEY" },
+          options: syncLimitOptions,
+        },
+        {
+          name: "get",
+          description: "Get a sync limit",
+          args: { name: "KEY" },
+          options: syncLimitOptions,
+        },
+        {
+          name: "update",
+          description: "Update a sync limit",
+          args: { name: "KEY" },
+          options: [
+            ...syncLimitOptions,
+            {
+              name: "--limit",
+              description: "New sync limit",
+              args: { name: "int32" },
+            },
+          ],
         },
       ],
     },
@@ -1781,14 +1839,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "create",
           description: "Create a workflow template",
-          args: [
-            {
-              name: "FILE1",
-            },
-            {
-              name: "FILE2...",
-            },
-          ],
+          args: files,
           options: [
             {
               name: ["--help", "-h"],
@@ -1829,33 +1880,21 @@ const completionSpec: Fig.Spec = {
           description: "Display details about a workflow template",
           args: {
             name: "WORKFLOW_TEMPLATE",
+            isVariadic: true,
           },
           options: [
             {
               name: ["-h", "--help"],
               description: "Help for get",
             },
-            {
-              name: ["-o", "--output"],
-              args: {
-                name: "string",
-              },
-              description: "Output format. One of: json|yaml|wide",
-            },
+            outputOption(["name", "json", "yaml", "wide"]),
           ],
         },
         {
           name: "lint",
           description:
             "Validate a file or directory of workflow template manifests",
-          args: [
-            {
-              name: "DIRECTORY",
-            },
-            {
-              name: "FILE1 FILE2 FILE3...",
-            },
-          ],
+          args: files,
           options: [
             {
               name: ["--help", "-h"],
@@ -1894,15 +1933,25 @@ const completionSpec: Fig.Spec = {
                 name: "string",
               },
             },
+            {
+              name: ["--selector", "-l"],
+              description:
+                "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
+              args: {
+                name: "string",
+              },
+            },
           ],
         },
+        templateUpdate("workflow template"),
       ],
     },
     {
       name: "terminate",
       description: "Terminate zero or more workflows immediately",
       args: {
-        name: "WORKFLOOW WORKFLOW2...",
+        name: "WORKFLOW",
+        isVariadic: true,
       },
       options: [
         {
@@ -1949,9 +1998,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "wait",
       description: "Waits for workflows to complete",
-      args: {
-        name: "[WORKFLOW...]",
-      },
+      args: { name: "WORKFLOW", isVariadic: true, isOptional: true },
       options: [
         {
           name: ["-h", "--help"],

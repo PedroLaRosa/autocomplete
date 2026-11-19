@@ -1,6 +1,5 @@
+// WP-CLI v2.12.0 (GitHub release wp-cli/wp-cli, 2026-11-19). Source: wp-cli/handbook command docs at the v2.12 release (ad034c4), diffed against v2.5.0
 // https://wp-cli.org/
-// wp-cli version 2.5.0
-// 19 June 2021
 
 // To learn more about Fig's autocomplete standard visit: https://fig.io/docs/concepts/cli-skeleton
 const global_parameter_path: Fig.Option = {
@@ -27,7 +26,7 @@ const global_parameter_ssh: Fig.Option = {
   name: "--ssh",
   requiresSeparator: true,
   description:
-    "Perform operation against a remote server over SSH (or a container using scheme of “docker”, “docker-compose”, “vagrant”)",
+    "Perform operation against a remote server over SSH (or a container using scheme of “docker”, “docker-compose”, “docker-compose-run”, “vagrant”)",
   args: {
     name: "options",
     suggestions: [
@@ -168,6 +167,91 @@ const global_parameter_quiet: Fig.Option = {
   description: "Suppress informational messages",
 };
 
+const global_parameter_context: Fig.Option = {
+  name: "--context",
+  requiresSeparator: true,
+  description: "Load WordPress in a given context",
+  args: {
+    name: "context",
+    suggestions: ["cli", "admin", "auto", "frontend"],
+    default: "cli",
+  },
+};
+
+const formatOption = (
+  formats: string[],
+  defaultFormat?: string
+): Fig.Option => ({
+  name: "--format",
+  requiresSeparator: true,
+  description: "Render output in a particular format",
+  args: { name: "format", suggestions: formats, default: defaultFormat },
+});
+
+const cacheGroupOption: Fig.Option = {
+  name: "--group",
+  requiresSeparator: true,
+  description:
+    "Method for grouping data within the cache which allows the same key to be used across groups",
+  args: { name: "group", default: "default" },
+};
+
+const configFileOption: Fig.Option = {
+  name: "--config-file",
+  requiresSeparator: true,
+  description:
+    "Specify the file path to the config file. Defaults to wp-config.php in the root of the WordPress installation",
+  args: { name: "path", template: "filepaths" },
+};
+
+const singleOption: Fig.Option = {
+  name: "--single",
+  description: "Whether to return a single value",
+};
+
+const dbDefaultsOption: Fig.Option = {
+  name: "--defaults",
+  description:
+    "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
+};
+
+const excludeOption = (what: string): Fig.Option => ({
+  name: "--exclude",
+  requiresSeparator: true,
+  description: `Comma separated list of ${what} to exclude`,
+  args: { name: "names" },
+});
+
+const transientNetworkOption: Fig.Option = {
+  name: "--network",
+  description:
+    "Get the value of a network|site transient. On single site, this is a specially-named cache key. On multisite, this is a global cache (instead of local to the site)",
+};
+
+const appPasswordUserArg: Fig.Arg = {
+  name: "user",
+  description: "The user login, user email, or user ID",
+};
+
+const appPasswordUuidArg: Fig.Arg = {
+  name: "uuid",
+  description: "The universally unique ID of the application password",
+};
+
+const signupArg: Fig.Arg = {
+  name: "signup",
+  description:
+    "The signup ID, user login, user email, or activation key of the signup",
+};
+
+const siteSlugOption: Fig.Option = {
+  name: "--slug",
+  requiresSeparator: true,
+  description:
+    "Path of the site. Subdomain on subdomain installs, directory on subdirectory installs",
+  args: { name: "slug" },
+};
+
 // The below is a dummy example for git. Make sure to change the file name!
 const completionSpec: Fig.Spec = {
   name: "wp",
@@ -205,6 +289,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -270,6 +355,15 @@ const completionSpec: Fig.Spec = {
           description: "Flushes the object cache",
         },
         {
+          name: "flush-group",
+          description:
+            "Removes all cache items in a group, if the object cache implementation supports it",
+          args: {
+            name: "group",
+            description: "Cache group key",
+          },
+        },
+        {
           name: "get",
           description: "Gets a value from the object cache",
           args: [
@@ -301,6 +395,64 @@ const completionSpec: Fig.Spec = {
               description:
                 "Method for grouping data within the cache which allows the same key to be used across groups",
             },
+          ],
+        },
+        {
+          name: "patch",
+          description: "Updates a nested value from the cache",
+          args: [
+            {
+              name: "action",
+              description: "Patch action to perform",
+              suggestions: ["insert", "update", "delete"],
+            },
+            {
+              name: "key",
+              description: "Cache key",
+            },
+            {
+              name: "key-path",
+              description:
+                "The name(s) of the keys within the value to locate the value to patch",
+              isVariadic: true,
+            },
+            {
+              name: "value",
+              description:
+                "The new value. If omitted, the value is read from STDIN",
+              isOptional: true,
+            },
+          ],
+          options: [
+            cacheGroupOption,
+            {
+              name: "--expiration",
+              requiresSeparator: true,
+              description:
+                "Define how long to keep the value, in seconds. 0 means as long as possible",
+              args: { name: "expiration", default: "0" },
+            },
+            formatOption(["plaintext", "json"], "plaintext"),
+          ],
+        },
+        {
+          name: "pluck",
+          description: "Gets a nested value from the cache",
+          args: [
+            {
+              name: "key",
+              description: "Cache key",
+            },
+            {
+              name: "key-path",
+              description:
+                "The name(s) of the keys within the value to locate the value to pluck",
+              isVariadic: true,
+            },
+          ],
+          options: [
+            cacheGroupOption,
+            formatOption(["plaintext", "json", "yaml"], "plaintext"),
           ],
         },
         {
@@ -354,6 +506,15 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
+          name: "supports",
+          description:
+            "Determines whether the object cache implementation supports a particular feature",
+          args: {
+            name: "feature",
+            description: "Name of the feature to check for",
+          },
+        },
+        {
           name: "type",
           description: "Attempts to determine which object cache is being used",
         },
@@ -382,6 +543,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -480,6 +642,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -567,6 +730,14 @@ const completionSpec: Fig.Spec = {
             {
               name: "get",
               description: "Gets the value for an alias",
+              args: {
+                name: "key",
+                description: "Key for the alias",
+              },
+            },
+            {
+              name: "is-group",
+              description: "Check whether an alias is a group",
               args: {
                 name: "key",
                 description: "Key for the alias",
@@ -844,6 +1015,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -1093,6 +1265,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -1384,6 +1557,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -1469,6 +1643,7 @@ const completionSpec: Fig.Spec = {
               name: "--force",
               description: "Overwrites existing files, if present",
             },
+            configFileOption,
             {
               name: "--insecure",
               description:
@@ -1499,11 +1674,13 @@ const completionSpec: Fig.Spec = {
                 ],
               },
             },
+            configFileOption,
           ],
         },
         {
           name: "edit",
           description: "Launches system editor to edit the wp-config.php file",
+          options: [configFileOption],
         },
         {
           name: "get",
@@ -1538,9 +1715,11 @@ const completionSpec: Fig.Spec = {
                   { name: "var_export" },
                   { name: "json" },
                   { name: "yaml" },
+                  { name: "dotenv" },
                 ],
               },
             },
+            configFileOption,
           ],
         },
         {
@@ -1566,6 +1745,30 @@ const completionSpec: Fig.Spec = {
                 ],
               },
             },
+            configFileOption,
+          ],
+        },
+        {
+          name: "is-true",
+          description:
+            "Determines whether value of a specific defined constant or variable is truthy",
+          args: {
+            name: "name",
+            description: "Name of the wp-config.php constant or variable",
+          },
+          options: [
+            {
+              name: "--type",
+              requiresSeparator: true,
+              description:
+                "Type of config value to retrieve. Defaults to ‘all’",
+              args: {
+                name: "type",
+                suggestions: ["constant", "variable", "all"],
+                default: "all",
+              },
+            },
+            configFileOption,
           ],
         },
         {
@@ -1595,6 +1798,7 @@ const completionSpec: Fig.Spec = {
                   { name: "csv" },
                   { name: "json" },
                   { name: "yaml" },
+                  { name: "dotenv" },
                 ],
               },
             },
@@ -1602,6 +1806,7 @@ const completionSpec: Fig.Spec = {
               name: "--strict",
               description: "Enforce strict matching when a filter is provided",
             },
+            configFileOption,
           ],
         },
         {
@@ -1676,6 +1881,7 @@ const completionSpec: Fig.Spec = {
                 ],
               },
             },
+            configFileOption,
           ],
         },
         {
@@ -1692,6 +1898,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "If an unknown key is requested to be shuffled, add it instead of throwing a warning",
             },
+            configFileOption,
             {
               name: "--insecure",
               description:
@@ -1725,6 +1932,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -1739,6 +1947,11 @@ const completionSpec: Fig.Spec = {
             {
               name: "--major",
               description: "Compare only the first part of the version number",
+            },
+            {
+              name: "--force-check",
+              description:
+                "Bypass the transient cache and force a fresh update check",
             },
             {
               name: "--field",
@@ -1819,6 +2032,15 @@ const completionSpec: Fig.Spec = {
               description:
                 "Retry download without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack",
             },
+            {
+              name: "--extract",
+              description:
+                "Whether to extract the downloaded file. Defaults to true",
+            },
+            {
+              name: "--no-extract",
+              description: "Keep the downloaded archive without extracting it",
+            },
           ],
         },
         {
@@ -1855,6 +2077,13 @@ const completionSpec: Fig.Spec = {
               requiresSeparator: true,
               description: "The email address for the admin user",
               args: { name: "email" },
+            },
+            {
+              name: "--locale",
+              requiresSeparator: true,
+              description:
+                "The locale/language for the installation (e.g. `de_DE`). Default is `en_US`",
+              args: { name: "locale" },
             },
             {
               name: "--skip-email",
@@ -1898,6 +2127,10 @@ const completionSpec: Fig.Spec = {
               name: "--subdomains",
               description:
                 "If passed, the network will use subdomains, instead of subdirectories. Doesn’t work with ‘localhost’",
+            },
+            {
+              name: "--skip-config",
+              description: "Don’t add multisite constants to wp-config.php",
             },
           ],
         },
@@ -2042,7 +2275,19 @@ const completionSpec: Fig.Spec = {
             {
               name: "--insecure",
               description:
-                "Verify checksums against a specific locale of WordPress",
+                "Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack",
+            },
+            {
+              name: "--include-root",
+              description:
+                "Verify all files and folders in the root directory, and warn if any non-WordPress items are found",
+            },
+            {
+              name: "--exclude",
+              requiresSeparator: true,
+              description:
+                "Exclude specific files from the checksum verification. Provide a comma-separated list of file paths",
+              args: { name: "files" },
             },
           ],
         },
@@ -2082,6 +2327,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -2094,8 +2340,21 @@ const completionSpec: Fig.Spec = {
                 "Deletes all scheduled cron events for the given hook",
               args: {
                 name: "hook",
-                description: "The hook name",
+                description: "One or more hooks to delete",
+                isOptional: true,
+                isVariadic: true,
               },
+              options: [
+                {
+                  name: "--due-now",
+                  description: "Delete all hooks due right now",
+                },
+                excludeOption("hooks"),
+                {
+                  name: "--all",
+                  description: "Delete all hooks",
+                },
+              ],
             },
             {
               name: "list",
@@ -2150,6 +2409,7 @@ const completionSpec: Fig.Spec = {
                   name: "--due-now",
                   description: "Run all hooks due right now",
                 },
+                excludeOption("hooks"),
                 {
                   name: "--all",
                   description: "Run all hooks",
@@ -2266,6 +2526,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -2292,11 +2553,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysqlcheck. Refer to mysqlcheck docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2322,6 +2579,7 @@ const completionSpec: Fig.Spec = {
               name: "--yes",
               description: "Answer yes to the confirmation message",
             },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2360,11 +2618,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysql. Refer to mysql docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2407,6 +2661,7 @@ const completionSpec: Fig.Spec = {
               description: "Password to pass to mysql. Defaults to DB_PASSWORD",
               args: { name: "value" },
             },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2429,6 +2684,7 @@ const completionSpec: Fig.Spec = {
               name: "--yes",
               description: "Answer yes to the confirmation message",
             },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2483,10 +2739,11 @@ const completionSpec: Fig.Spec = {
               description: "Output filename for the exported database",
             },
             {
-              name: "--defaults",
+              name: "--add-drop-table",
               description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
+                "Include a `DROP TABLE IF EXISTS` statement before each `CREATE TABLE` statement",
             },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2527,11 +2784,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "When using an SQL file, do not include speed optimization such as disabling auto-commit and key checks",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2564,11 +2817,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysqldump. Refer to mysqldump docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2608,11 +2857,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysql. Refer to mysql docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2645,11 +2890,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysqlcheck. Refer to mysqlcheck docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2678,6 +2919,7 @@ const completionSpec: Fig.Spec = {
               name: "--yes",
               description: "Answer yes to the confirmation message",
             },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2789,6 +3031,13 @@ const completionSpec: Fig.Spec = {
                 "Percent color code to use for the match (unless both before and after context are 0, when no color code is used). For a list of available percent color codes, see below. Default ‘%3%k’ (black on a mustard background)",
               args: { name: "match_color" },
             },
+            {
+              name: "--fields",
+              requiresSeparator: true,
+              description: "Get a specific subset of the fields",
+              args: { name: "fields" },
+            },
+            formatOption(["table", "csv", "json", "yaml", "ids", "count"]),
           ],
         },
         {
@@ -2862,6 +3111,25 @@ const completionSpec: Fig.Spec = {
               name: "--all-tables",
               description:
                 "List all tables in the database, regardless of the prefix, and even if not registered on $wpdb. Overrides –all-tables-with-prefix",
+            },
+            {
+              name: "--decimals",
+              requiresSeparator: true,
+              description:
+                "Number of digits after decimal point. Defaults to 0",
+              args: { name: "decimals" },
+            },
+            {
+              name: "--order",
+              requiresSeparator: true,
+              description: "Ascending or Descending order",
+              args: { name: "order", suggestions: ["asc", "desc"] },
+            },
+            {
+              name: "--orderby",
+              requiresSeparator: true,
+              description: "Order by fields",
+              args: { name: "orderby", suggestions: ["name", "size"] },
             },
           ],
         },
@@ -2939,6 +3207,25 @@ const completionSpec: Fig.Spec = {
             suggestions: [{ name: "zip" }, { name: "targz" }],
           },
         },
+        {
+          name: "--force",
+          description:
+            "Forces overwriting of the archive file if it already exists",
+        },
+        {
+          name: "--plugin-dirname",
+          requiresSeparator: true,
+          description:
+            "Set the archive extract directory name. Defaults to project directory name",
+          args: { name: "plugin-slug" },
+        },
+        {
+          name: "--filename-format",
+          requiresSeparator: true,
+          description:
+            "Use a custom format for archive filename. Available substitutions: {name}, {version}. Ignored if <target> is provided or the version cannot be determined",
+          args: { name: "filename-format", default: "{name}.{version}" },
+        },
         global_parameter_path,
         global_parameter_url,
         global_parameter_ssh,
@@ -2958,6 +3245,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -2983,6 +3271,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -3151,6 +3440,11 @@ const completionSpec: Fig.Spec = {
               description: "Lists all available oEmbed providers",
               options: [
                 {
+                  name: "--force-regex",
+                  description:
+                    "Turn the asterisk-type provider URLs into regexes",
+                },
+                {
                   name: "--field",
                   requiresSeparator: true,
                   description: "Display the value of a single field",
@@ -3244,6 +3538,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3266,6 +3561,11 @@ const completionSpec: Fig.Spec = {
           name: "--skip-wordpress",
           description: "Load and execute file without loading WordPress",
         },
+        {
+          name: "--use-include",
+          description:
+            "Process the provided file via include instead of evaluating its contents",
+        },
         global_parameter_path,
         global_parameter_url,
         global_parameter_ssh,
@@ -3285,6 +3585,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3306,6 +3607,26 @@ const completionSpec: Fig.Spec = {
         {
           name: "--skip_comments",
           description: "Don’t include comments in the WXR export file",
+        },
+        {
+          name: "--include_once",
+          requiresSeparator: true,
+          description:
+            "Include specified export section only in the first export file. Separate multiple sections with a comma",
+          args: {
+            name: "before_posts",
+            suggestions: [
+              "categories",
+              "tags",
+              "nav_menu_items",
+              "custom_taxonomies_terms",
+            ],
+          },
+        },
+        {
+          name: "--allow_orphan_terms",
+          description:
+            "Export orphaned terms with `parent=0`, instead of throwing an exception",
         },
         {
           name: "--max_file_size",
@@ -3474,6 +3795,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3503,6 +3825,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3528,6 +3851,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -3550,13 +3874,39 @@ const completionSpec: Fig.Spec = {
           ],
           options: [
             {
+              name: "--domain",
+              requiresSeparator: true,
+              description:
+                "Text domain to use for the JSON file name. Overrides the default one extracted from the PO file",
+              args: { name: "domain" },
+            },
+            {
+              name: "--extensions",
+              requiresSeparator: true,
+              description:
+                "Additional custom JS extensions, comma separated list. By default searches for .min.js and .js extensions",
+              args: { name: "extensions" },
+            },
+            {
               name: "--purge",
               description:
                 "Whether to purge the strings that were extracted from the original source file. Defaults to true, use --no-purge to skip the removal",
             },
             {
+              name: "--update-mo-files",
+              description:
+                "Whether MO files should be updated as well after updating PO files. Only has an effect when used with --purge",
+            },
+            {
               name: "--pretty-print",
               description: "Pretty-print resulting JSON files",
+            },
+            {
+              name: "--use-map",
+              requiresSeparator: true,
+              description:
+                "Whether to use a mapping file for the strings, as a JSON value, array to specify multiple",
+              args: { name: "paths_or_maps", template: "filepaths" },
             },
           ],
         },
@@ -3575,6 +3925,25 @@ const completionSpec: Fig.Spec = {
               template: "folders",
               description:
                 "Path to the destination directory for the resulting JSON files. Defaults to the source directory",
+            },
+          ],
+        },
+        {
+          name: "make-php",
+          description: "Create PHP files from PO files",
+          args: [
+            {
+              name: "source",
+              template: "filepaths",
+              description:
+                "Path to an existing PO file or a directory containing multiple PO files",
+            },
+            {
+              name: "destination",
+              template: "folders",
+              description:
+                "Path to the destination directory for the resulting PHP files. Defaults to the source directory",
+              isOptional: true,
             },
           ],
         },
@@ -3626,6 +3995,11 @@ const completionSpec: Fig.Spec = {
               args: { name: "paths" },
             },
             {
+              name: "--subtract-and-merge",
+              description:
+                "Add source code references and comments from the generated POT file to the POT file used for subtraction instead. Warning: this modifies the files passed to --subtract",
+            },
+            {
               name: "--include",
               requiresSeparator: true,
               description:
@@ -3647,6 +4021,15 @@ const completionSpec: Fig.Spec = {
               args: { name: "headers" },
             },
             {
+              name: "--location",
+              description:
+                "Whether to write `#: filename:line` lines. Defaults to true",
+            },
+            {
+              name: "--no-location",
+              description: "Skip writing `#: filename:line` lines",
+            },
+            {
               name: "--skip-js",
               description:
                 "Skips JavaScript string extraction. Useful when this is done in another build step, e.g. through Babel",
@@ -3656,8 +4039,16 @@ const completionSpec: Fig.Spec = {
               description: "Skips PHP string extraction",
             },
             {
+              name: "--skip-blade",
+              description: "Skips Blade-PHP string extraction",
+            },
+            {
               name: "--skip-block-json",
               description: "Skips string extraction from block.json files",
+            },
+            {
+              name: "--skip-theme-json",
+              description: "Skips string extraction from theme.json files",
             },
             {
               name: "--skip-audit",
@@ -3677,6 +4068,24 @@ const completionSpec: Fig.Spec = {
               description:
                 "Name to use for package name in the resulting POT file’s Project-Id-Version header. Overrides plugin or theme name, if applicable",
               args: { name: "name" },
+            },
+          ],
+        },
+        {
+          name: "update-po",
+          description: "Update PO files from a POT file",
+          args: [
+            {
+              name: "source",
+              template: "filepaths",
+              description: "Path to an existing POT file to use for updating",
+            },
+            {
+              name: "destination",
+              template: "filepaths",
+              description:
+                "PO file to update or a directory containing multiple PO files. Defaults to all PO files in the source directory",
+              isOptional: true,
             },
           ],
         },
@@ -3725,6 +4134,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3750,6 +4160,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -3818,6 +4229,7 @@ const completionSpec: Fig.Spec = {
                       { name: "table" },
                       { name: "csv" },
                       { name: "json" },
+                      { name: "count" },
                     ],
                   },
                 },
@@ -3938,6 +4350,7 @@ const completionSpec: Fig.Spec = {
                       { name: "table" },
                       { name: "csv" },
                       { name: "json" },
+                      { name: "count" },
                     ],
                   },
                 },
@@ -3950,11 +4363,21 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "plugin",
                   description: "Plugin to uninstall language for",
+                  isOptional: true,
                 },
                 {
                   name: "language",
                   description: "Language code to uninstall",
+                  isVariadic: true,
                 },
+              ],
+              options: [
+                {
+                  name: "--all",
+                  description:
+                    "If set, languages for all plugins will be uninstalled",
+                },
+                formatOption(["table", "csv", "json", "summary"]),
               ],
             },
             {
@@ -4074,6 +4497,7 @@ const completionSpec: Fig.Spec = {
                       { name: "table" },
                       { name: "csv" },
                       { name: "json" },
+                      { name: "count" },
                     ],
                   },
                 },
@@ -4086,11 +4510,21 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "theme",
                   description: "Theme to uninstall language for",
+                  isOptional: true,
                 },
                 {
                   name: "language",
                   description: "Language code to uninstall",
+                  isVariadic: true,
                 },
+              ],
+              options: [
+                {
+                  name: "--all",
+                  description:
+                    "If set, languages for all themes will be uninstalled",
+                },
+                formatOption(["table", "csv", "json", "summary"]),
               ],
             },
             {
@@ -4140,6 +4574,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -4190,6 +4625,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -4252,6 +4688,18 @@ const completionSpec: Fig.Spec = {
               args: { name: "post_id" },
             },
             {
+              name: "--post_name",
+              requiresSeparator: true,
+              description: "Name of the post to attach the imported files to",
+              args: { name: "post_name" },
+            },
+            {
+              name: "--file_name",
+              requiresSeparator: true,
+              description: "Attachment name (post_name field)",
+              args: { name: "name" },
+            },
+            {
               name: "--title",
               requiresSeparator: true,
               description: "Attachment title (post title field)",
@@ -4293,7 +4741,9 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--porcelain",
-              description: "Output just the new attachment ID",
+              description:
+                "Output a single field for each imported image. Defaults to attachment ID when used as flag",
+              args: { name: "field", isOptional: true, suggestions: ["url"] },
             },
           ],
         },
@@ -4321,6 +4771,11 @@ const completionSpec: Fig.Spec = {
               name: "--only-missing",
               description:
                 "Only generate thumbnails for images missing image sizes",
+            },
+            {
+              name: "--delete-unknown",
+              description:
+                "Only delete thumbnails for old unregistered image sizes",
             },
             {
               name: "--yes",
@@ -4355,6 +4810,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -4796,6 +5252,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -4872,6 +5329,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -5087,6 +5545,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -5119,7 +5578,7 @@ const completionSpec: Fig.Spec = {
               description: "Should this option be automatically loaded",
               args: {
                 name: "autoload",
-                suggestions: [{ name: "'yes'" }, { name: "'no'" }],
+                suggestions: ["on", "off", "yes", "no"],
               },
             },
           ],
@@ -5154,6 +5613,14 @@ const completionSpec: Fig.Spec = {
               },
             },
           ],
+        },
+        {
+          name: "get-autoload",
+          description: "Gets the 'autoload' value for an option",
+          args: {
+            name: "key",
+            description: "The name of the option to get 'autoload' of",
+          },
         },
         {
           name: "list",
@@ -5317,6 +5784,21 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
+          name: "set-autoload",
+          description: "Sets the 'autoload' value for an option",
+          args: [
+            {
+              name: "key",
+              description: "The name of the option to set 'autoload' for",
+            },
+            {
+              name: "autoload",
+              description: "Should this option be automatically loaded",
+              suggestions: ["on", "off", "yes", "no"],
+            },
+          ],
+        },
+        {
           name: "update",
           description: "Updates an option value",
           args: [
@@ -5338,7 +5820,7 @@ const completionSpec: Fig.Spec = {
                 "Requires WP 4.2. Should this option be automatically loaded",
               args: {
                 name: "autoload",
-                suggestions: [{ name: "'yes'" }, { name: "'no" }],
+                suggestions: ["on", "off", "yes", "no"],
               },
             },
             {
@@ -5377,6 +5859,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -5468,6 +5951,13 @@ const completionSpec: Fig.Spec = {
             name: "name",
             description: "Name of the package to uninstall",
           },
+          options: [
+            {
+              name: "--insecure",
+              description:
+                "Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack",
+            },
+          ],
         },
         {
           name: "update",
@@ -5500,6 +5990,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -5514,6 +6005,7 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description: "If set, all plugins will be activated",
             },
+            excludeOption("plugin slugs"),
             {
               name: "--network",
               description:
@@ -5595,6 +6087,10 @@ const completionSpec: Fig.Spec = {
                   description: "Only show the provided field",
                   args: { name: "field" },
                 },
+                formatOption(
+                  ["table", "csv", "json", "yaml", "count"],
+                  "table"
+                ),
               ],
             },
           ],
@@ -5615,6 +6111,7 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description: "If set, all plugins will be deactivated",
             },
+            excludeOption("plugin slugs"),
             {
               name: "--network",
               description:
@@ -5635,6 +6132,7 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description: "If set, all plugins will be deleted",
             },
+            excludeOption("plugin slugs"),
           ],
         },
         {
@@ -5695,6 +6193,11 @@ const completionSpec: Fig.Spec = {
               name: "--force",
               description:
                 "If set, the command will overwrite any installed version of the plugin, without prompting for confirmation",
+            },
+            {
+              name: "--ignore-requirements",
+              description:
+                "If set, the command will install the plugin while ignoring any WordPress or PHP version requirements specified by the plugin authors",
             },
             {
               name: "--activate",
@@ -5785,6 +6288,15 @@ const completionSpec: Fig.Spec = {
                   { name: "must-use" },
                 ],
               },
+            },
+            {
+              name: "--skip-update-check",
+              description: "If set, the plugin update check will be skipped",
+            },
+            {
+              name: "--recently-active",
+              description:
+                "If set, only recently active plugins will be shown and the status filter will be ignored",
             },
           ],
         },
@@ -5937,6 +6449,7 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description: "If set, all plugins will be uninstalled",
             },
+            excludeOption("plugin slugs"),
           ],
         },
         {
@@ -6019,6 +6532,12 @@ const completionSpec: Fig.Spec = {
                 "If set, even “soft changes” like readme.txt changes will trigger checksum errors",
             },
             {
+              name: "--version",
+              requiresSeparator: true,
+              description: "Verify checksums against a specific plugin version",
+              args: { name: "version" },
+            },
+            {
               name: "--format",
               requiresSeparator: true,
               description: "Render output in a particular format",
@@ -6038,6 +6557,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack",
             },
+            excludeOption("plugin names"),
           ],
         },
       ],
@@ -6065,6 +6585,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -6534,6 +7055,20 @@ const completionSpec: Fig.Spec = {
           description: "Adds, updates, deletes, and lists post custom fields",
           subcommands: [
             {
+              name: "clean-duplicates",
+              description: "Cleans up duplicate post meta values on a post",
+              args: [
+                {
+                  name: "id",
+                  description: "ID of the post to clean",
+                },
+                {
+                  name: "key",
+                  description: "Meta key to clean up",
+                },
+              ],
+            },
+            {
               name: "add",
               description: "Add a meta field",
               args: [
@@ -6602,6 +7137,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -7166,6 +7702,14 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
+        {
+          name: "url-to-id",
+          description: "Gets the post ID for a given URL",
+          args: {
+            name: "url",
+            description: "The URL of the post to get",
+          },
+        },
       ],
     },
     {
@@ -7191,6 +7735,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7296,6 +7841,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7553,6 +8099,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7660,6 +8207,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7773,6 +8321,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7944,9 +8493,10 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "provider",
                 suggestions: [
-                  { name: "travis" },
                   { name: "circle" },
                   { name: "gitlab", icon: "fig://icon?type=gitlab" },
+                  { name: "bitbucket" },
+                  { name: "github", icon: "fig://icon?type=github" },
                 ],
               },
             },
@@ -7955,7 +8505,7 @@ const completionSpec: Fig.Spec = {
               description: "Activate the newly created plugin",
             },
             {
-              name: "--enable-network",
+              name: "--activate-network",
               description: "Network activate the newly generated plugin",
             },
             {
@@ -7988,10 +8538,10 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "provider",
                 suggestions: [
-                  { name: "travis" },
                   { name: "circle" },
                   { name: "gitlab", icon: "fig://icon?type=gitlab" },
                   { name: "bitbucket" },
+                  { name: "github", icon: "fig://icon?type=github" },
                 ],
               },
             },
@@ -8123,10 +8673,10 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "provider",
                 suggestions: [
-                  { name: "travis" },
                   { name: "circle" },
                   { name: "gitlab", icon: "fig://icon?type=gitlab" },
                   { name: "bitbucket" },
+                  { name: "github", icon: "fig://icon?type=github" },
                 ],
               },
             },
@@ -8425,6 +8975,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -8482,6 +9033,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -8513,6 +9065,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -8538,6 +9091,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -8594,6 +9148,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -8602,7 +9157,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to activate",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "archive",
@@ -8610,7 +9168,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to archive",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "create",
@@ -8660,7 +9221,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to deactivate",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "delete",
@@ -8707,6 +9271,45 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
+          name: "generate",
+          description: "Generate some sites",
+          options: [
+            {
+              name: "--count",
+              requiresSeparator: true,
+              description: "How many sites to generate",
+              args: { name: "number", default: "100" },
+            },
+            {
+              name: "--slug",
+              requiresSeparator: true,
+              description:
+                "Path for the new site. Subdomain on subdomain installs, directory on subdirectory installs",
+              args: { name: "slug" },
+            },
+            {
+              name: "--email",
+              requiresSeparator: true,
+              description:
+                "Email for admin user. User will be created if none exists. Assignment to super admin if not included",
+              args: { name: "email" },
+            },
+            {
+              name: "--network_id",
+              requiresSeparator: true,
+              description:
+                "Network to associate new site with. Defaults to current network (typically 1)",
+              args: { name: "network-id" },
+            },
+            {
+              name: "--private",
+              description:
+                "If set, the new site will be non-public (not indexed)",
+            },
+            formatOption(["progress", "ids"], "progress"),
+          ],
+        },
+        {
           name: "list",
           description: "Lists all sites in a multisite installation",
           options: [
@@ -8722,10 +9325,16 @@ const completionSpec: Fig.Spec = {
               description: "The serialization format for the value",
             },
             {
-              name: "--site_in",
+              name: "--site__in",
               requiresSeparator: true,
               description:
                 "Only list the sites with these blog_id values (comma-separated)",
+              args: { name: "value" },
+            },
+            {
+              name: "--site_user",
+              requiresSeparator: true,
+              description: "Only list the sites with this user",
               args: { name: "value" },
             },
             {
@@ -8764,7 +9373,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as mature",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "meta",
@@ -8839,6 +9451,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -9244,7 +9857,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as private",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "public",
@@ -9252,7 +9868,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as public",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "spam",
@@ -9260,7 +9879,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as spam",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "switch-language",
@@ -9276,7 +9898,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to unarchive",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "unmature",
@@ -9284,7 +9909,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as unmature",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "unspam",
@@ -9292,7 +9920,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to remove from spam",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
       ],
     },
@@ -9320,6 +9951,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -9346,6 +9978,7 @@ const completionSpec: Fig.Spec = {
                   { name: "csv" },
                   { name: "json" },
                   { name: "count" },
+                  { name: "ids" },
                   { name: "yaml" },
                 ],
               },
@@ -9385,6 +10018,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -9491,6 +10125,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -9764,6 +10399,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -10070,6 +10706,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -10118,7 +10755,7 @@ const completionSpec: Fig.Spec = {
                     "If set, auto-updates will be enabled for all themes",
                 },
                 {
-                  name: "--enabled-only",
+                  name: "--disabled-only",
                   description:
                     "If set, filters list of themes to only include the ones that have auto-updates disabled",
                 },
@@ -10154,6 +10791,10 @@ const completionSpec: Fig.Spec = {
                   description: "Only show the provided field",
                   args: { name: "field" },
                 },
+                formatOption(
+                  ["table", "csv", "json", "yaml", "count"],
+                  "table"
+                ),
               ],
             },
           ],
@@ -10272,6 +10913,11 @@ const completionSpec: Fig.Spec = {
                 "If set, the command will overwrite any installed version of the theme, without prompting for confirmation",
             },
             {
+              name: "--ignore-requirements",
+              description:
+                "If set, the command will install the theme while ignoring any WordPress or PHP version requirements specified by the theme authors",
+            },
+            {
               name: "--activate",
               description:
                 "If set, the theme is activated for the current site. Note that the “network” flag has no influence on this",
@@ -10347,6 +10993,10 @@ const completionSpec: Fig.Spec = {
                   { name: "inactive" },
                 ],
               },
+            },
+            {
+              name: "--skip-update-check",
+              description: "If set, the theme update check will be skipped",
             },
           ],
         },
@@ -10575,6 +11225,16 @@ const completionSpec: Fig.Spec = {
                 "If set, all themes that have updates will be updated",
             },
             {
+              name: "--minor",
+              description:
+                "Only perform updates for minor releases (e.g. from 1.3 to 1.4 instead of 2.0)",
+            },
+            {
+              name: "--patch",
+              description:
+                "Only perform updates for patch releases (e.g. from 1.3 to 1.3.3 instead of 1.4)",
+            },
+            {
               name: "--exclude",
               requiresSeparator: true,
               description:
@@ -10639,6 +11299,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -10747,6 +11408,63 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
+          name: "patch",
+          description: "Updates a nested value from a transient",
+          args: [
+            {
+              name: "action",
+              description: "Patch action to perform",
+              suggestions: ["insert", "update", "delete"],
+            },
+            {
+              name: "key",
+              description: "Key for the transient",
+            },
+            {
+              name: "key-path",
+              description:
+                "The name(s) of the keys within the value to locate the value to patch",
+              isVariadic: true,
+            },
+            {
+              name: "value",
+              description:
+                "The new value. If omitted, the value is read from STDIN",
+              isOptional: true,
+            },
+          ],
+          options: [
+            formatOption(["plaintext", "json"], "plaintext"),
+            {
+              name: "--expiration",
+              requiresSeparator: true,
+              description: "Time until expiration, in seconds",
+              args: { name: "expiration" },
+            },
+            transientNetworkOption,
+          ],
+        },
+        {
+          name: "pluck",
+          description: "Gets a nested value from a transient",
+          args: [
+            {
+              name: "key",
+              description: "Key for the transient",
+            },
+            {
+              name: "key-path",
+              description:
+                "The name(s) of the keys within the value to locate the value to pluck",
+              isVariadic: true,
+            },
+          ],
+          options: [
+            formatOption(["plaintext", "json", "yaml"], "plaintext"),
+            transientNetworkOption,
+          ],
+        },
+        {
           name: "set",
           description: "Sets a transient value",
           args: [
@@ -10801,6 +11519,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -10827,7 +11546,165 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "role",
-              description: "Add the specified role to the user",
+              description: "Add the specified role(s) to the user",
+              isOptional: true,
+              isVariadic: true,
+            },
+          ],
+        },
+        {
+          name: "application-password",
+          description:
+            "Creates, updates, deletes, lists and retrieves application passwords",
+          subcommands: [
+            {
+              name: "create",
+              description: "Creates a new application password",
+              args: [
+                appPasswordUserArg,
+                {
+                  name: "app-name",
+                  description:
+                    "Unique name of the application to create an application password for",
+                },
+              ],
+              options: [
+                {
+                  name: "--app-id",
+                  requiresSeparator: true,
+                  description:
+                    "Application ID to attribute to the application password",
+                  args: { name: "app-id" },
+                },
+                {
+                  name: "--porcelain",
+                  description: "Output just the new password",
+                },
+              ],
+            },
+            {
+              name: "delete",
+              description: "Delete an existing application password",
+              args: [
+                appPasswordUserArg,
+                {
+                  name: "uuid",
+                  description: "UUIDs of the application passwords to delete",
+                  isOptional: true,
+                  isVariadic: true,
+                },
+              ],
+              options: [
+                {
+                  name: "--all",
+                  description: "Delete all of the user's application passwords",
+                },
+              ],
+            },
+            {
+              name: "exists",
+              description:
+                "Checks whether an application password for a given application exists",
+              args: [
+                appPasswordUserArg,
+                {
+                  name: "app-name",
+                  description:
+                    "Name of the application to check the existence of an application password for",
+                },
+              ],
+            },
+            {
+              name: "get",
+              description: "Gets a specific application password",
+              args: [appPasswordUserArg, appPasswordUuidArg],
+              options: [
+                {
+                  name: "--field",
+                  requiresSeparator: true,
+                  description:
+                    "Prints the value of a single field for the application password",
+                  args: { name: "field" },
+                },
+                {
+                  name: "--fields",
+                  requiresSeparator: true,
+                  description: "Limit the output to specific fields",
+                  args: { name: "fields" },
+                },
+                formatOption(["table", "csv", "json", "yaml"], "table"),
+              ],
+            },
+            {
+              name: "list",
+              description:
+                "Lists all application passwords associated with a user",
+              args: appPasswordUserArg,
+              options: [
+                {
+                  name: "--field",
+                  requiresSeparator: true,
+                  description:
+                    "Prints the value of a single field for each application password",
+                  args: { name: "field" },
+                },
+                {
+                  name: "--fields",
+                  requiresSeparator: true,
+                  description: "Limit the output to specific fields",
+                  args: { name: "fields" },
+                },
+                formatOption(
+                  ["table", "csv", "json", "count", "yaml", "ids"],
+                  "table"
+                ),
+                {
+                  name: "--orderby",
+                  requiresSeparator: true,
+                  description: "Set orderby which field",
+                  args: {
+                    name: "fields",
+                    suggestions: [
+                      "uuid",
+                      "app_id",
+                      "name",
+                      "password",
+                      "created",
+                      "last_used",
+                      "last_ip",
+                    ],
+                    default: "created",
+                  },
+                },
+                {
+                  name: "--order",
+                  requiresSeparator: true,
+                  description: "Set ascending or descending order",
+                  args: {
+                    name: "order",
+                    suggestions: ["asc", "desc"],
+                    default: "desc",
+                  },
+                },
+              ],
+            },
+            {
+              name: "record-usage",
+              description: "Record usage of an application password",
+              args: [appPasswordUserArg, appPasswordUuidArg],
+            },
+            {
+              name: "update",
+              description: "Updates an existing application password",
+              args: [appPasswordUserArg, appPasswordUuidArg],
+              options: [
+                {
+                  name: "--name",
+                  requiresSeparator: true,
+                  description: "New name of the application password",
+                  args: { name: "name" },
+                },
+              ],
             },
           ],
         },
@@ -10985,6 +11862,14 @@ const completionSpec: Fig.Spec = {
               description: "Answer yes to any confirmation prompts",
             },
           ],
+        },
+        {
+          name: "exists",
+          description: "Verifies whether a user exists",
+          args: {
+            name: "id",
+            description: "The ID of the user to check",
+          },
         },
         {
           name: "generate",
@@ -11147,6 +12032,21 @@ const completionSpec: Fig.Spec = {
                   { name: "yaml" },
                 ],
               },
+            },
+            {
+              name: "--origin",
+              requiresSeparator: true,
+              description: "Origin of the capabilities to list",
+              args: {
+                name: "origin",
+                suggestions: ["all", "user", "role"],
+                default: "all",
+              },
+            },
+            {
+              name: "--exclude-role-names",
+              description:
+                "Exclude capabilities that match role names from output",
             },
           ],
         },
@@ -11426,6 +12326,12 @@ const completionSpec: Fig.Spec = {
               description: "The capability to be removed",
             },
           ],
+          options: [
+            {
+              name: "--force",
+              description: "Forcefully remove a capability",
+            },
+          ],
         },
         {
           name: "remove-role",
@@ -11438,6 +12344,8 @@ const completionSpec: Fig.Spec = {
             {
               name: "role",
               description: "A specific role to remove",
+              isOptional: true,
+              isVariadic: true,
             },
           ],
         },
@@ -11453,6 +12361,14 @@ const completionSpec: Fig.Spec = {
               name: "--skip-email",
               description:
                 "Don’t send an email notification to the affected user(s)",
+            },
+            {
+              name: "--show-password",
+              description: "Show the new password(s)",
+            },
+            {
+              name: "--porcelain",
+              description: "Output only the new password(s)",
             },
           ],
         },
@@ -11531,11 +12447,87 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
+          name: "signup",
+          description: "Manages signups on a multisite installation",
+          subcommands: [
+            {
+              name: "activate",
+              description: "Activates one or more signups",
+              args: { ...signupArg, isVariadic: true },
+            },
+            {
+              name: "delete",
+              description: "Deletes one or more signups",
+              args: { ...signupArg, isOptional: true, isVariadic: true },
+              options: [
+                {
+                  name: "--all",
+                  description: "If set, all signups will be deleted",
+                },
+              ],
+            },
+            {
+              name: "get",
+              description: "Gets details about a signup",
+              args: signupArg,
+              options: [
+                {
+                  name: "--field",
+                  requiresSeparator: true,
+                  description:
+                    "Instead of returning the whole signup, returns the value of a single field",
+                  args: { name: "field" },
+                },
+                {
+                  name: "--fields",
+                  requiresSeparator: true,
+                  description:
+                    "Limit the output to specific fields. Defaults to all fields",
+                  args: { name: "fields" },
+                },
+                formatOption(["table", "csv", "json", "yaml"], "table"),
+              ],
+            },
+            {
+              name: "list",
+              description: "Lists signups",
+              options: [
+                {
+                  name: "--field",
+                  requiresSeparator: true,
+                  description:
+                    "Prints the value of a single field for each signup",
+                  args: { name: "field" },
+                },
+                {
+                  name: "--fields",
+                  requiresSeparator: true,
+                  description: "Limit the output to specific object fields",
+                  args: { name: "fields" },
+                },
+                formatOption(
+                  ["table", "csv", "ids", "json", "count", "yaml"],
+                  "table"
+                ),
+                {
+                  name: "--per_page",
+                  requiresSeparator: true,
+                  description:
+                    "Limits the signups to the given number. Defaults to none",
+                  args: { name: "per_page" },
+                },
+              ],
+            },
+          ],
+        },
+        {
           name: "spam",
           description: "Marks one or more users as spam",
           args: {
-            name: "id",
-            description: "One or more IDs of users to mark as spam",
+            name: "user",
+            description:
+              "One or more user IDs, user emails, or user logins to mark as spam",
+            isVariadic: true,
           },
         },
         {
@@ -11688,8 +12680,10 @@ const completionSpec: Fig.Spec = {
           name: "unspam",
           description: "Removes one or more users from spam",
           args: {
-            name: "id",
-            description: "One or more IDs of users to remove from spam",
+            name: "user",
+            description:
+              "One or more user IDs, user emails, or user logins to remove from spam",
+            isVariadic: true,
           },
         },
         {
@@ -11818,6 +12812,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {

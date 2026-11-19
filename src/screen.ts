@@ -1,5 +1,7 @@
+// GNU Screen v5.0.2 (Homebrew stable, 2026-11-19). Source: `screen -h` and man page (5.0.1 installed), src/screen.c and ChangeLog of the 5.0.2 tarball
 const identifierArg: Fig.Arg = {
   name: "identifier",
+  isOptional: true,
   suggestions: [
     "pid",
     "pid.tty",
@@ -82,6 +84,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-R",
+      description: "Reattach if possible, otherwise start a new session",
+      icon: "fig://icon?type=option",
+      args: identifierArg,
+    },
+    {
+      name: "-RR",
       description:
         "Attempts to resume the first detached screen session it finds",
       icon: "fig://icon?type=option",
@@ -98,6 +106,14 @@ const completionSpec: Fig.Spec = {
     },
   ],
   options: [
+    {
+      name: "-4",
+      description: "Resolve hostnames only to IPv4 addresses",
+    },
+    {
+      name: "-6",
+      description: "Resolve hostnames only to IPv6 addresses",
+    },
     {
       name: "-a",
       description: "Force all capabilities into each window's termcap",
@@ -148,12 +164,32 @@ const completionSpec: Fig.Spec = {
       description: "Interrupt output sooner when flow control is on",
     },
     {
+      name: "-l",
+      description: "Turn login mode on (for /etc/utmp updating)",
+    },
+    {
+      name: "-ln",
+      description: "Turn login mode off",
+    },
+    {
       name: ["-list", "-ls"],
-      description: "Do nothing, just list our SockDir",
+      description: "Do nothing, just list our SocketDir",
+      args: {
+        name: "match",
+        isOptional: true,
+      },
     },
     {
       name: "-L",
       description: "Turn on output logging",
+    },
+    {
+      name: "-Logfile",
+      description: "Set logfile name",
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
     },
     {
       name: "-m",
@@ -168,12 +204,38 @@ const completionSpec: Fig.Spec = {
       description: "Preselect the named window if it exists",
       args: {
         name: "window",
+        suggestions: [
+          { name: "-", description: "The blank window" },
+          { name: "+", description: "Create a new window" },
+        ],
       },
+    },
+    {
+      name: "-P",
+      description: "Tell screen to enable authentication",
     },
     {
       name: "-q",
       description:
         "Quiet startup. Exits with non-zero return code if unsuccessful",
+    },
+    {
+      name: "-Q",
+      description:
+        "Query a command; the response goes to the stdout of the querying process",
+      args: {
+        name: "command",
+        suggestions: [
+          "echo",
+          "info",
+          "lastmsg",
+          "number",
+          "select",
+          "time",
+          "title",
+          "windows",
+        ],
+      },
     },
     {
       name: "-s",
@@ -209,12 +271,16 @@ const completionSpec: Fig.Spec = {
       description: "Tell screen to use UTF-8 encoding",
     },
     {
-      name: "-v",
-      description: "Print 'Screen version 4.00.03 (FAU) 23-Oct-06'",
+      name: ["-v", "--version"],
+      description: "Print version number",
+    },
+    {
+      name: "--help",
+      description: "Show usage",
     },
     {
       name: "-wipe",
-      description: "Do nothing, just clean up SockDir",
+      description: "Do nothing, just clean up SocketDir",
       args: {
         name: "match",
         description: "Screen session to match",

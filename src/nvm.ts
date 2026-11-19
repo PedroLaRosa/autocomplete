@@ -1,3 +1,5 @@
+// nvm v0.41.0 (gh release view -R nvm-sh/nvm, 2026-11-19). Source: `nvm --help` text and option parsing in nvm.sh@v0.41.0
+
 // args
 const version: Fig.Arg = {
   name: "version",
@@ -15,6 +17,15 @@ const version: Fig.Arg = {
       name: "system",
       description: "System-installed version of node",
     },
+  ],
+};
+
+const versionOrCurrent: Fig.Arg = {
+  ...version,
+  isOptional: true,
+  suggestions: [
+    ...(version.suggestions as Fig.Suggestion[]),
+    { name: "current", description: "The currently active version" },
   ],
 };
 
@@ -66,27 +77,52 @@ const lts: Fig.Option = {
 const ltsWithName: Fig.Option = {
   name: "--lts",
   description: "Uses automatic alias for provided LTS line, if available",
+  requiresSeparator: true,
   args: ltsName,
+};
+
+const only: Fig.Option = {
+  name: "--only",
+  description:
+    "Only select from these version categories (comma-separated; default: $NVM_ONLY or lts,non-lts,iojs)",
+  requiresSeparator: true,
+  args: {
+    name: "categories",
+    suggestions: ["alpha", "lts", "non-lts", "iojs", "lts,non-lts,iojs"],
+  },
+};
+
+const save: Fig.Option = {
+  name: ["--save", "-w"],
+  description: "Write the specified version to .nvmrc",
 };
 
 const completionSpec: Fig.Spec = {
   name: "nvm",
-  description: "Node Package Manager",
+  description: "Node Version Manager",
   subcommands: [
     {
       name: "install",
       description:
-        "Download and install a <version>. Uses .nvmrc if available and version is omitted",
+        "Download and install a <version>. Uses .nvmrc if version is omitted; otherwise errors",
       args: { ...version, isOptional: true },
       options: [
         {
           name: "-s",
           description: "Skip binary download, install from source only",
+          exclusiveOn: ["-b"],
+        },
+        {
+          name: "-b",
+          description:
+            "Skip source download, install from binary only (NVM_NO_SOURCE_FALLBACK=1 makes this the default)",
+          exclusiveOn: ["-s"],
         },
         {
           name: "--reinstall-packages-from",
           description:
             "When installing, reinstall packages installed in <version>",
+          requiresSeparator: true,
           args: version,
         },
         {
@@ -99,6 +135,7 @@ const completionSpec: Fig.Spec = {
           description:
             "When installing, only select from versions for a specific LTS line",
         },
+        only,
         {
           name: "--skip-default-packages",
           description:
@@ -114,15 +151,27 @@ const completionSpec: Fig.Spec = {
           description: "Disable the progress bar on any downloads",
         },
         {
+          name: "--offline",
+          description: "Install from cache only, without downloading anything",
+        },
+        {
           name: "--alias",
           description:
             "After installing, set the alias specified to the version specified. (same as: nvm alias <name> <version>)",
+          requiresSeparator: true,
+          exclusiveOn: ["--default"],
           args: name,
         },
         {
           name: "--default",
           description:
             "After installing, set default alias to the version specified. (same as: nvm alias default <version>)",
+          exclusiveOn: ["--alias"],
+        },
+        {
+          ...save,
+          description:
+            "After installing, write the specified version to .nvmrc",
         },
       ],
     },
@@ -141,39 +190,41 @@ const completionSpec: Fig.Spec = {
           description:
             "Uninstall using automatic alias for provided LTS line, if available",
         },
+        only,
       ],
     },
     {
       name: "use",
       description:
-        "Modify PATH to use <version>. Uses .nvmrc if available and version is omitted",
-      args: { ...version, isOptional: true },
-      options: [silent, lts, ltsWithName],
+        "Modify PATH to use <version>. Uses .nvmrc if version is omitted; otherwise errors",
+      args: versionOrCurrent,
+      options: [silent, lts, ltsWithName, only, save],
     },
     {
       name: "exec",
       description:
-        "Run <command> on <version>. Uses .nvmrc if available and version is omitted",
-      args: [{ ...version, isOptional: true }, command],
-      options: [silent, lts, ltsWithName],
+        "Run <command> on <version>. Uses .nvmrc if version is omitted; otherwise errors",
+      args: [versionOrCurrent, command],
+      options: [silent, lts, ltsWithName, only],
     },
     {
       name: "run",
       description:
-        "Run `node` on <version> with <args> as arguments. Uses .nvmrc if available and version is omitted",
-      args: [{ ...version, isOptional: true }, args],
-      options: [silent, lts, ltsWithName],
+        "Run `node` on <version> with <args> as arguments. Uses .nvmrc if version is omitted; otherwise errors",
+      args: [versionOrCurrent, args],
+      options: [silent, lts, ltsWithName, only],
     },
     {
       name: "current",
-      description: "Display currently activated version of Node",
+      description:
+        "Display the active node version (resolved via $PATH; not affected by .nvmrc)",
     },
     {
       name: "ls",
       description:
         "List installed versions, matching a given <version> if provided",
       args: version,
-      options: [noColors, noAlias],
+      options: [noColors, noAlias, only],
     },
     {
       name: "ls-remote",
@@ -191,6 +242,7 @@ const completionSpec: Fig.Spec = {
           description:
             "When listing, only show versions for a specific LTS line",
         },
+        only,
         noColors,
       ],
     },
@@ -198,6 +250,7 @@ const completionSpec: Fig.Spec = {
       name: "version",
       description: "Resolve the given description to a single local version",
       args: version,
+      options: [only],
     },
     {
       name: "version-remote",
@@ -214,6 +267,7 @@ const completionSpec: Fig.Spec = {
           description:
             "When listing, only show versions for a specific LTS line",
         },
+        only,
       ],
     },
     {
@@ -235,6 +289,24 @@ const completionSpec: Fig.Spec = {
           isOptional: true,
         },
       ],
+      options: [
+        noColors,
+        {
+          ...lts,
+          description:
+            "Only resolve to installed LTS (long-term support) versions",
+        },
+        {
+          ...ltsWithName,
+          description:
+            "Only resolve to installed versions of a specific LTS line",
+        },
+        {
+          ...only,
+          description:
+            "Only resolve to installed versions in these categories (comma-separated)",
+        },
+      ],
     },
     {
       name: "unalias",
@@ -251,6 +323,7 @@ const completionSpec: Fig.Spec = {
       description:
         "Reinstall global `npm` packages contained in <version> to current version",
       args: version,
+      options: [only],
     },
     {
       name: "unload",
@@ -259,7 +332,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "which",
       description:
-        "Display path to installed node version. Uses .nvmrc if available and version is omitted",
+        "Display path to installed node version. Uses .nvmrc if version is omitted; otherwise errors",
       args: { ...version, isOptional: true },
       subcommands: [
         {
@@ -272,6 +345,7 @@ const completionSpec: Fig.Spec = {
           description:
             "Silences stdout/stderr output when a version is omitted",
         },
+        only,
       ],
     },
     {
