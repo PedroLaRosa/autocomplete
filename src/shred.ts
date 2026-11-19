@@ -1,4 +1,4 @@
-// shred (GNU coreutils v9.12, tag v9.12 released 2026-09-14, 2026-11-19). Source: coreutils/coreutils src/shred.c at v9.12 (long_opts table + usage() text); not run (local binary is 9.4). Changes: added -u, --remove takes an optional HOW argument (--remove[=HOW]), -v description refreshed, FILE may be - for standard output. GNU-only tool: not shipped with macOS (available as gshred via Homebrew coreutils).
+// shred (GNU coreutils v9.12, tag v9.12 released 2026-09-14, 2026-11-19). Source: coreutils/coreutils src/shred.c at v9.12 (long_opts table + usage() text); not run (local binary is 9.4). Changes: added -u, --remove takes an optional HOW argument (--remove[=HOW]), -v description refreshed, FILE may be - for standard output. -s accepts the size suffixes cbBkKMGTPEZYRQ0 (xnumtoumax in shred.c), -n defaults to 3 passes (DEFAULT_PASSES), --remove without HOW means wipesync. GNU-only tool: not shipped with macOS (available as gshred via Homebrew coreutils).
 const completionSpec: Fig.Spec = {
   name: "shred",
   description:

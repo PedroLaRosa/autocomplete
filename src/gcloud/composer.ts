@@ -1,3 +1,217 @@
+const optAccessTokenFile: Fig.Option = {
+  name: "--access-token-file",
+  description:
+    "A file path to read the access token. Use this flag to authenticate `gcloud` with an access token. The credentials of the active account (if exists) will be ignored. The file should only contain an access token with no other information. Overrides the default *auth/access_token_file* property value for this command invocation",
+  args: {
+    name: "ACCESS_TOKEN_FILE",
+    description: "String",
+    template: "filepaths",
+  },
+};
+
+const optAccount: Fig.Option = {
+  name: "--account",
+  description:
+    "Google Cloud user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
+  args: {
+    name: "ACCOUNT",
+    description: "String",
+  },
+};
+
+const optAsync: Fig.Option = {
+  name: "--async",
+  description:
+    "Return immediately, without waiting for the operation in progress to complete",
+};
+
+const optBillingProject: Fig.Option = {
+  name: "--billing-project",
+  description:
+    "The Google Cloud project that will be charged quota for operations performed in `gcloud`. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
+  args: {
+    name: "BILLING_PROJECT",
+    description: "String",
+  },
+};
+
+const optConfiguration: Fig.Option = {
+  name: "--configuration",
+  description:
+    "File name of the configuration to use for this command invocation. For more information on how to use configurations, run: `gcloud topic configurations`. You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment variable to set the equivalent of this flag for a terminal session",
+  args: {
+    name: "CONFIGURATION",
+    description: "String",
+  },
+};
+
+const optDestination: Fig.Option = {
+  name: "--destination",
+  description:
+    "The path to an existing local directory or a Cloud Storage bucket/directory into which to export files",
+  priority: 100,
+  args: {
+    name: "DESTINATION",
+    description: "String",
+  },
+};
+
+const optEnvironment: Fig.Option = {
+  name: "--environment",
+  description:
+    "ID of the environment or fully qualified identifier for the environment",
+  priority: 100,
+  args: {
+    name: "ENVIRONMENT",
+    description: "String",
+  },
+};
+
+const optFilter: Fig.Option = {
+  name: "--filter",
+  description:
+    "Apply a Boolean filter _EXPRESSION_ to each resource item to be listed. If the expression evaluates `True`, then that item is listed. For more details and examples of filter expressions, run $ gcloud topic filters. This flag interacts with other flags that are applied in this order: *--flatten*, *--sort-by*, *--filter*, *--limit*",
+  args: {
+    name: "EXPRESSION",
+    description: "String",
+  },
+};
+
+const optFlagsFile: Fig.Option = {
+  name: "--flags-file",
+  description:
+    "A YAML or JSON file that specifies a *--flag*:*value* dictionary. Useful for specifying complex flag values with special characters that work with any command interpreter. Additionally, each *--flags-file* arg is replaced by its constituent flags. See $ gcloud topic flags-file for more information",
+  args: {
+    name: "YAML_FILE",
+    description: "String",
+    template: "filepaths",
+  },
+};
+
+const optFlatten: Fig.Option = {
+  name: "--flatten",
+  description:
+    "Flatten _name_[] output resource slices in _KEY_ into separate records for each item in each slice. Multiple keys and slices may be specified. This also flattens keys for *--format* and *--filter*. For example, *--flatten=abc.def* flattens *abc.def[].ghi* references to *abc.def.ghi*. A resource record containing *abc.def[]* with N elements will expand to N records in the flattened output. This allows us to specify what `resource-key` the `filter` will operate on. This flag interacts with other flags that are applied in this order: *--flatten*, *--sort-by*, *--filter*, *--limit*",
+  args: {
+    name: "KEY",
+    description: "List",
+  },
+};
+
+const optFormat: Fig.Option = {
+  name: "--format",
+  description:
+    "Sets the format for printing command output resources. The default is a command-specific human-friendly output format. If both `core/format` and `--format` are specified, `--format` takes precedence. `--format` and `core/format` both take precedence over `core/default_format`. The supported formats are limited to: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats. Run `$ gcloud config set --help` to see more information about `core/format`",
+  args: {
+    name: "FORMAT",
+    description: "String",
+  },
+};
+
+const optImpersonateServiceAccount: Fig.Option = {
+  name: "--impersonate-service-account",
+  description:
+    "For this `gcloud` invocation, all API requests will be made as the given service account or target service account in an impersonation delegation chain instead of the currently selected account. You can specify either a single service account as the impersonator, or a comma-separated list of service accounts to create an impersonation delegation chain. The impersonation is done without needing to create, download, and activate a key for the service account or accounts",
+  args: {
+    name: "SERVICE_ACCOUNT_EMAILS",
+    description: "String",
+  },
+};
+
+const optLimit: Fig.Option = {
+  name: "--limit",
+  description:
+    "Maximum number of resources to list. The default is *unlimited*. This flag interacts with other flags that are applied in this order: *--flatten*, *--sort-by*, *--filter*, *--limit*",
+  args: {
+    name: "LIMIT",
+  },
+};
+
+const optLocation: Fig.Option = {
+  name: "--location",
+  description:
+    "Region where Composer environment runs or in which to create the environment",
+  args: {
+    name: "LOCATION",
+    description: "String",
+  },
+};
+
+const optLogHttp: Fig.Option = {
+  name: "--log-http",
+  description:
+    "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
+};
+
+const optNoAsync: Fig.Option = {
+  name: "--no-async",
+  description:
+    "Return immediately, without waiting for the operation in progress to complete",
+  hidden: true,
+};
+
+const optPageSize: Fig.Option = {
+  name: "--page-size",
+  description:
+    "Some services group resource list output into pages. This flag specifies the maximum number of resources per page. The default is determined by the service if it supports paging, otherwise it is *unlimited* (no paging). Paging may be applied before or after *--filter* and *--limit* depending on the service",
+  args: {
+    name: "PAGE_SIZE",
+  },
+};
+
+const optProject: Fig.Option = {
+  name: "--project",
+  description:
+    "The Google Cloud project ID to use for this invocation. If omitted, then the current project is assumed; the current project can be listed using `gcloud config list --format='text(core.project)'` and can be set using `gcloud config set project PROJECTID`",
+  args: {
+    name: "PROJECT_ID",
+    description: "String",
+  },
+};
+
+const optQuiet: Fig.Option = {
+  name: "--quiet",
+  description:
+    "Disable all interactive prompts when running `gcloud` commands. If input is required, defaults will be used, or an error will be raised",
+};
+
+const optSortBy: Fig.Option = {
+  name: "--sort-by",
+  description:
+    "Comma-separated list of resource field key names to sort by. The default order is ascending. Prefix a field with ``~'' for descending order on that field. This flag interacts with other flags that are applied in this order: *--flatten*, *--sort-by*, *--filter*, *--limit*",
+  args: {
+    name: "FIELD",
+    description: "List",
+  },
+};
+
+const optTraceToken: Fig.Option = {
+  name: "--trace-token",
+  description:
+    "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
+  args: {
+    name: "TRACE_TOKEN",
+    description: "String",
+  },
+};
+
+const optUserOutputEnabled: Fig.Option = {
+  name: "--user-output-enabled",
+  description:
+    "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
+};
+
+const optVerbosity: Fig.Option = {
+  name: "--verbosity",
+  description:
+    "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
+  args: {
+    name: "VERBOSITY",
+    description: "String",
+    suggestions: ["debug", "info", "warning", "error", "critical", "none"],
+  },
+};
+
 const completionSpec: Fig.Spec = {
   name: "composer",
   description: "Create and manage Cloud Composer Environments",
@@ -7,160 +221,26 @@ const completionSpec: Fig.Spec = {
       description: "Create and manage Cloud Composer environments",
       subcommands: [
         {
-          name: "create",
-          description: "Create and initialize a Cloud Composer environment",
+          name: "check-upgrade",
+          description:
+            "Check that upgrading a Cloud Composer environment does not result in PyPI module conflicts",
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--airflow-configs",
-              description:
-                "A list of Airflow software configuration override KEY=VALUE pairs to set. For\ninformation on how to structure KEYs and VALUEs, run\n`$ {top_command} help composer environments update`",
-              args: {
-                name: "KEY=VALUE",
-                description: "Dict",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
             {
               name: "--airflow-version",
               description:
-                "Version of Airflow to run in the environment.\n+\n      Must be of the form `X.Y[.Z]`.\n+\n      The latest supported Cloud Composer version will be used within\n      the created environment",
+                "Upgrade the environment to a later Apache Airflow version in-place",
               args: {
                 name: "AIRFLOW_VERSION",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
               },
             },
-            {
-              name: "--async",
-              description:
-                "Return immediately, without waiting for the operation in progress to\ncomplete",
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--cloud-sql-ipv4-cidr",
-              description:
-                "IPv4 CIDR range to use for the Cloud SQL network. This should have a size\nof the netmask not greater than 24.\n+\nCannot be specified unless '--enable-private-environment' is also\nspecified",
-              args: {
-                name: "CLOUD_SQL_IPV4_CIDR",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--cluster-ipv4-cidr",
-              description:
-                "IP address range for the pods in this cluster in CIDR notation\n(e.g. 10.0.0.0/14).\n+\nCannot be specified unless '--enable-ip-alias' is also specified",
-              args: {
-                name: "CLUSTER_IPV4_CIDR",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--cluster-secondary-range-name",
-              description:
-                "Secondary range to be used as the source for pod IPs. Alias ranges will be\nallocated from this secondary range. NAME must be the name of an existing\nsecondary range in the cluster subnetwork.\n+\nCannot be specified unless '--enable-ip-alias' is also specified",
-              args: {
-                name: "CLUSTER_SECONDARY_RANGE_NAME",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--disk-size",
-              description:
-                "The disk size for each VM node in the environment. The minimum size is 20GB, and the maximum is 64TB. Specified value must be an integer multiple of gigabytes. Cannot be updated after the environment has been created. If units are not provided, defaults to GB",
-              args: {
-                name: "DISK_SIZE",
-                description:
-                  "Googlecloudsdk.calliope.arg_parsers:ParseWithBoundsChecking",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--enable-ip-alias",
-              description:
-                "Enable use of alias IPs (https://cloud.google.com/compute/docs/alias-ip/)\nfor Pod IPs. This will require at least two secondary ranges in the\nsubnetwork, one for the pod IPs and another to reserve space for the\nservices range",
-            },
-            {
-              name: "--enable-private-endpoint",
-              description:
-                "Environment cluster is managed using the private IP address of the master\nAPI endpoint. Therefore access to the master endpoint must be from\ninternal IP addresses.\n+\nIf not specified, the master API endpoint will be accessible by its public\nIP address.\n+\nCannot be specified unless '--enable-private-environment' is also\nspecified",
-            },
-            {
-              name: "--enable-private-environment",
-              description:
-                "Environment cluster is created with no public IP addresses on the cluster\nnodes.\n+\nIf not specified, cluster nodes will be assigned public IP addresses.\n+\nCannot be specified unless '--enable-ip-alias' is also specified",
-            },
-            {
-              name: "--env-variables",
-              description:
-                "A comma-delimited list of environment variable `NAME=VALUE` pairs to provide to the Airflow scheduler, worker, and webserver processes. NAME may contain upper and lowercase letters, digits, and underscores, but they may not begin with a digit. To include commas as part of a `VALUE`, see `{top_command} topics escaping` for information about overriding the delimiter",
-              args: {
-                name: "NAME=VALUE",
-                description: "Dict",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAsync,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
@@ -168,78 +248,511 @@ const completionSpec: Fig.Spec = {
             {
               name: "--image-version",
               description:
-                "Version of the image to run in the environment.\n+\n      The image version encapsulates the versions of both Cloud Composer\n      and Apache Airflow. Must be of the form\n      `composer-A.B.C[-D.E]-airflow-X.Y[.Z]`.\n+\n      The Cloud Composer and Airflow versions are semantic versions.\n      `latest` can be provided instead of an explicit Cloud Composer\n      version number indicating that the server will replace `latest`\n      with the current Cloud Composer version. For the Apache Airflow\n      portion, the patch version can be omitted and the current\n      version will be selected. The version numbers that are used will\n      be stored",
+                "Upgrade the environment to a later version in-place",
               args: {
                 name: "IMAGE_VERSION",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
+              },
+            },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            optNoAsync,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
+          ],
+          args: {
+            name: "ENVIRONMENT",
+            description:
+              "ID of the environment or fully qualified identifier for the environment",
+          },
+        },
+        {
+          name: "create",
+          description: "Create and initialize a Cloud Composer environment",
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            {
+              name: "--airflow-configs",
+              description:
+                "A list of Airflow software configuration override KEY=VALUE pairs to set. For information on how to structure KEYs and VALUEs, run `$ {top_command} help composer environments update`",
+              args: {
+                name: "KEY=VALUE",
+                description: "Dict",
               },
             },
             {
-              name: "--impersonate-service-account",
+              name: "--airflow-database-retention-days",
               description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
+                "The number of days for the Airflow database retention period. If set to 0, the Airflow database retention mechanism will be disabled",
               args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
+                name: "AIRFLOW_DATABASE_RETENTION_DAYS",
+                description: "Int",
+              },
+            },
+            {
+              name: "--airflow-version",
+              description:
+                "Version of Apache Airflow to run in the environment",
+              args: {
+                name: "AIRFLOW_VERSION",
+              },
+            },
+            optAsync,
+            optBillingProject,
+            {
+              name: "--cloud-sql-ipv4-cidr",
+              description:
+                "IPv4 CIDR range to use for the Cloud SQL network. This should have a size of the netmask not greater than 24",
+              args: {
+                name: "CLOUD_SQL_IPV4_CIDR",
+              },
+            },
+            {
+              name: "--cloud-sql-machine-type",
+              description:
+                "Cloud SQL machine type used by the Airflow database. The list of available machine types is available here: https://cloud.google.com/composer/pricing#db-machine-types",
+              args: {
+                name: "CLOUD_SQL_MACHINE_TYPE",
                 description: "String",
-                suggestions: [],
+              },
+            },
+            {
+              name: "--cloud-sql-preferred-zone",
+              description:
+                "Select cloud sql preferred zone, supported for Composer 2 Environments",
+              args: {
+                name: "CLOUD_SQL_PREFERRED_ZONE",
+                description: "String",
+              },
+            },
+            {
+              name: "--cluster-ipv4-cidr",
+              description:
+                "IP address range for the pods in this cluster in CIDR notation (e.g. 10.0.0.0/14)",
+              args: {
+                name: "CLUSTER_IPV4_CIDR",
+              },
+            },
+            {
+              name: "--cluster-secondary-range-name",
+              description:
+                "Secondary range to be used as the source for pod IPs. Alias ranges will be allocated from this secondary range. NAME must be the name of an existing secondary range in the cluster subnetwork",
+              args: {
+                name: "CLUSTER_SECONDARY_RANGE_NAME",
+                description: "String",
+              },
+            },
+            {
+              name: "--composer-internal-ipv4-cidr-block",
+              description:
+                "The IP range in CIDR notation to use internally by Cloud Composer. This should have a netmask length of 20. Can be specified for Composer 3 or greater",
+              args: {
+                name: "COMPOSER_INTERNAL_IPV4_CIDR_BLOCK",
+              },
+            },
+            {
+              name: "--composer-network-ipv4-cidr",
+              description:
+                "IPv4 CIDR range to use for the Composer network. This must have a size of the netmask between 24 and 29",
+              args: {
+                name: "COMPOSER_NETWORK_IPV4_CIDR",
+              },
+            },
+            optConfiguration,
+            {
+              name: "--connection-subnetwork",
+              description:
+                "Subnetwork from which an IP address for internal communications will be reserved. Needs to belong to the Compute network to which the environment is connected. Can be the same subnetwork as the one to which the environment is connected",
+              args: {
+                name: "CONNECTION_SUBNETWORK",
+                description: "String",
+              },
+            },
+            {
+              name: "--connection-type",
+              description:
+                "Mode of internal communication within the Composer environment. Must be one of `VPC_PEERING` or `PRIVATE_SERVICE_CONNECT`",
+              args: {
+                name: "CONNECTION_TYPE",
+                suggestions: [
+                  "connection-type-unspecified",
+                  "private-service-connect",
+                  "vpc-peering",
+                ],
+              },
+            },
+            {
+              name: "--dag-processor-count",
+              description:
+                "Number of dag processors, supported in Composer 3 environments or greater",
+              args: {
+                name: "DAG_PROCESSOR_COUNT",
+                description: "Int",
+              },
+            },
+            {
+              name: "--dag-processor-cpu",
+              description:
+                "CPU allocated to Airflow dag processor, supported in Composer 3 environments or greater",
+              args: {
+                name: "DAG_PROCESSOR_CPU",
+                description: "Float",
+              },
+            },
+            {
+              name: "--dag-processor-memory",
+              description:
+                "Memory allocated to Airflow dag processor, ex. 1GB, 3GB, 2. If units are not provided, defaults to GB, supported in Composer 3 environments or greater",
+              args: {
+                name: "DAG_PROCESSOR_MEMORY",
+              },
+            },
+            {
+              name: "--dag-processor-storage",
+              description:
+                "Storage allocated to Airflow dag processor, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB, supported in Composer 3 environments or greater",
+              args: {
+                name: "DAG_PROCESSOR_STORAGE",
+              },
+            },
+            {
+              name: "--disable-cloud-data-lineage-integration",
+              description:
+                "Disable Cloud Data Lineage integration, supported for Composer 2 Environments",
+            },
+            {
+              name: "--disable-logs-in-cloud-logging-only",
+              description:
+                "Disable logs in cloud logging only, supported for Composer 2 Environments",
+            },
+            {
+              name: "--disable-private-builds-only",
+              description:
+                "Builds performed during operations that install Python packages have an access to the internet, supported in Composer 3 or greater",
+            },
+            {
+              name: "--disable-private-environment",
+              description:
+                "Enables internet connection for Composer components",
+            },
+            {
+              name: "--disk-size",
+              description:
+                "The disk size for each VM node in the environment. The minimum size is 20GB, and the maximum is 64TB. Specified value must be an integer multiple of gigabytes. Cannot be updated after the environment has been created. If units are not provided, defaults to GB",
+              args: {
+                name: "DISK_SIZE",
+              },
+            },
+            {
+              name: "--enable-cloud-data-lineage-integration",
+              description:
+                "Enable Cloud Data Lineage integration, supported for Composer 2 Environments",
+            },
+            {
+              name: "--enable-high-resilience",
+              description:
+                "Enable high resilience, supported for Composer 2 Environments",
+            },
+            {
+              name: "--enable-ip-alias",
+              description:
+                "Enable use of link:https://cloud.google.com/compute/docs/alias-ip[alias IPs] for Pod IPs. This will require at least two secondary ranges in the subnetwork, one for the pod IPs and another to reserve space for the services range",
+            },
+            {
+              name: "--enable-ip-masq-agent",
+              description:
+                "When enabled, the link:https://cloud.google.com/composer/docs/enable-ip-masquerade-agent[IP Masquerade Agent] is deployed to your environment's cluster. It performs many-to-one IP address translations to hide a pod's IP address behind the cluster node's IP address. This is done when sending traffic to destinations outside the cluster's pod CIDR range",
+            },
+            {
+              name: "--enable-logs-in-cloud-logging-only",
+              description:
+                "Enable logs in cloud logging only, supported for Composer 2 Environments",
+            },
+            {
+              name: "--enable-master-authorized-networks",
+              description:
+                "Enable link:https://cloud.google.com/kubernetes-engine/docs/how-to/authorized-networks[Master Authorized Networks feature] in the Composer Environment's GKE cluster",
+            },
+            {
+              name: "--enable-private-builds-only",
+              description:
+                "Builds performed during operations that install Python packages have only private connectivity to Google services, supported in Composer 3 or greater",
+            },
+            {
+              name: "--enable-private-endpoint",
+              description:
+                "Environment cluster is managed using the private IP address of the master API endpoint. Therefore access to the master endpoint must be from internal IP addresses",
+            },
+            {
+              name: "--enable-private-environment",
+              description:
+                "Disables internet connection from any Composer component",
+            },
+            {
+              name: "--enable-privately-used-public-ips",
+              description:
+                "When enabled GKE pods and services may use public(non-RFC1918) IP ranges privately. The ranges are specified by '--cluster-ipv4-cidr' and `--services-ipv4-cidr` flags",
+            },
+            {
+              name: "--enable-scheduled-snapshot-creation",
+              description:
+                "When specified, snapshots of the environment will be created according to a schedule. Can be specified for Composer 2.0.32 or greater",
+              priority: 100,
+            },
+            {
+              name: "--enable-triggerer",
+              description:
+                "(DEPRECATED) Enable use of a triggerer, supported in the Environments with Composer 2.0.31 and Airflow 2.2.5 and greater",
+              deprecated: true,
+            },
+            {
+              name: "--env-variables",
+              description:
+                "A comma-delimited list of environment variable `NAME=VALUE` pairs to provide to the Airflow scheduler, worker, and webserver processes. NAME may contain upper and lowercase letters, digits, and underscores, but they may not begin with a digit. To include commas as part of a `VALUE`, see `{top_command} topic escaping` for information about overriding the delimiter",
+              args: {
+                name: "NAME=VALUE",
+                description: "Dict",
+              },
+            },
+            {
+              name: "--environment-size",
+              description:
+                "Size of the environment. Unspecified means that the default option will be chosen. _ENVIRONMENT_SIZE_ must be one of: *extra-large*, *large*, *medium*, *small*, *unspecified*",
+              args: {
+                name: "ENVIRONMENT_SIZE",
+                suggestions: [
+                  "extra-large",
+                  "large",
+                  "medium",
+                  "small",
+                  "unspecified",
+                ],
+              },
+            },
+            optFlagsFile,
+            optFlatten,
+            optFormat,
+            {
+              name: "--help",
+              description: "Display detailed help",
+            },
+            {
+              name: "--image-version",
+              description: "Version of the image to run in the environment",
+              args: {
+                name: "IMAGE_VERSION",
+              },
+            },
+            optImpersonateServiceAccount,
+            {
+              name: "--kms-key",
+              description:
+                "ID of the key or fully qualified identifier for the key",
+              priority: 100,
+              args: {
+                name: "KMS_KEY",
+                description: "String",
+              },
+            },
+            {
+              name: "--kms-keyring",
+              description: "The KMS keyring of the key",
+              args: {
+                name: "KMS_KEYRING",
+                description: "String",
+              },
+            },
+            {
+              name: "--kms-location",
+              description: "The Google Cloud location for the key",
+              args: {
+                name: "KMS_LOCATION",
+                description: "String",
+              },
+            },
+            {
+              name: "--kms-project",
+              description: "The Google Cloud project for the key",
+              args: {
+                name: "KMS_PROJECT",
+                description: "String",
               },
             },
             {
               name: "--labels",
-              description:
-                "List of label KEY=VALUE pairs to add.\n+\nKeys must start with a lowercase character and contain only hyphens (`-`), underscores (```_```), lowercase characters, and numbers. Values must contain only hyphens (`-`), underscores (```_```), lowercase characters, and numbers",
+              description: "List of label KEY=VALUE pairs to add",
               args: {
                 name: "KEY=VALUE",
                 description: "Dict",
-                suggestions: [],
               },
             },
-            {
-              name: "--location",
-              description:
-                "Compute Engine region in which to create the environment",
-              args: {
-                name: "LOCATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
+            optLocation,
+            optLogHttp,
             {
               name: "--machine-type",
               description:
-                "The Compute Engine machine type (https://cloud.google.com/compute/docs/machine-types) to use for nodes. For example `--machine-type=n1-standard-1`",
+                "The Compute Engine link:https://cloud.google.com/compute/docs/machine-types[machine type] to use for nodes. For example `--machine-type=n1-standard-1`",
               args: {
                 name: "MACHINE_TYPE",
                 description: "String",
-                suggestions: [],
+              },
+            },
+            {
+              name: "--maintenance-window-end",
+              description:
+                "End time of the mantenance window in the form of the full date. Only the time of the day is used as a reference for an ending time of the window with a provided recurrence. Specified date must take place after the one specified as a start date, the difference between will be used as a length of a single maintenance window. See $ gcloud topic datetimes for information on time formats",
+              priority: 100,
+              args: {
+                name: "MAINTENANCE_WINDOW_END",
+              },
+            },
+            {
+              name: "--maintenance-window-recurrence",
+              description:
+                "An RFC 5545 RRULE, specifying how the maintenance window will recur. The minimum requirement for the length of the maintenance window is 12 hours a week. Only FREQ=DAILY and FREQ=WEEKLY rules are supported",
+              priority: 100,
+              args: {
+                name: "MAINTENANCE_WINDOW_RECURRENCE",
+                description: "String",
+              },
+            },
+            {
+              name: "--maintenance-window-start",
+              description:
+                "Start time of the mantenance window in the form of the full date. Only the time of the day is used as a reference for a starting time of the window with a provided recurrence. See $ gcloud topic datetimes for information on time formats",
+              priority: 100,
+              args: {
+                name: "MAINTENANCE_WINDOW_START",
+              },
+            },
+            {
+              name: "--master-authorized-networks",
+              description:
+                "Comma separated Master Authorized Networks specified in CIDR notation",
+              args: {
+                name: "NETWORK",
+                description: "List",
               },
             },
             {
               name: "--master-ipv4-cidr",
               description:
-                "IPv4 CIDR range to use for the cluste master network. This should have a\nsize of the netmask between 23 and 28.\n+\nCannot be specified unless '--enable-private-environment' is also\nspecified",
+                "IPv4 CIDR range to use for the cluster master network. This should have a size of the netmask between 23 and 28",
               args: {
                 name: "MASTER_IPV4_CIDR",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
+              },
+            },
+            {
+              name: "--max-workers",
+              description: "Maximum number of workers in the Environment",
+              args: {
+                name: "MAX_WORKERS",
+                description: "Int",
+              },
+            },
+            {
+              name: "--min-workers",
+              description: "Minimum number of workers in the Environment",
+              args: {
+                name: "MIN_WORKERS",
+                description: "Int",
               },
             },
             {
               name: "--network",
               description:
                 "The Compute Engine Network to which the environment will be connected. If a 'Custom Subnet Network' is provided, `--subnetwork` must be specified as well",
+              priority: 100,
               args: {
                 name: "NETWORK",
                 description: "String",
-                suggestions: [],
               },
-              priority: 100,
+            },
+            {
+              name: "--network-attachment",
+              description:
+                "Cloud Composer Network Attachment, which provides connectivity with a user's VPC network, supported in Composer 3 environments or greater",
+              args: {
+                name: "NETWORK_ATTACHMENT",
+                description: "String",
+              },
+            },
+            optNoAsync,
+            {
+              name: "--no-disable-cloud-data-lineage-integration",
+              description:
+                "Disable Cloud Data Lineage integration, supported for Composer 2 Environments",
+              hidden: true,
+            },
+            {
+              name: "--no-disable-private-environment",
+              description:
+                "Enables internet connection for Composer components",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-cloud-data-lineage-integration",
+              description:
+                "Enable Cloud Data Lineage integration, supported for Composer 2 Environments",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-ip-alias",
+              description:
+                "Enable use of link:https://cloud.google.com/compute/docs/alias-ip[alias IPs] for Pod IPs. This will require at least two secondary ranges in the subnetwork, one for the pod IPs and another to reserve space for the services range",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-ip-masq-agent",
+              description:
+                "When enabled, the link:https://cloud.google.com/composer/docs/enable-ip-masquerade-agent[IP Masquerade Agent] is deployed to your environment's cluster. It performs many-to-one IP address translations to hide a pod's IP address behind the cluster node's IP address. This is done when sending traffic to destinations outside the cluster's pod CIDR range",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-master-authorized-networks",
+              description:
+                "Enable link:https://cloud.google.com/kubernetes-engine/docs/how-to/authorized-networks[Master Authorized Networks feature] in the Composer Environment's GKE cluster",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-private-endpoint",
+              description:
+                "Environment cluster is managed using the private IP address of the master API endpoint. Therefore access to the master endpoint must be from internal IP addresses",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-private-environment",
+              description:
+                "Disables internet connection from any Composer component",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-privately-used-public-ips",
+              description:
+                "When enabled GKE pods and services may use public(non-RFC1918) IP ranges privately. The ranges are specified by '--cluster-ipv4-cidr' and `--services-ipv4-cidr` flags",
+              hidden: true,
+            },
+            {
+              name: "--no-support-web-server-plugins",
+              description:
+                "Enable the support for web server plugins, supported in Composer 3 or greater",
+              hidden: true,
+            },
+            {
+              name: "--no-web-server-allow-all",
+              description:
+                "Allows all IP addresses to access the Airflow web server",
+              hidden: true,
+            },
+            {
+              name: "--no-web-server-deny-all",
+              description:
+                "Denies all incoming traffic to the Airflow web server",
+              hidden: true,
             },
             {
               name: "--node-count",
@@ -247,8 +760,7 @@ const completionSpec: Fig.Spec = {
                 "The number of nodes to create to run the environment",
               args: {
                 name: "NODE_COUNT",
-                description: "String",
-                suggestions: [],
+                description: "Int",
               },
             },
             {
@@ -258,73 +770,130 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "SCOPE",
                 description: "List",
-                suggestions: [],
               },
             },
-            {
-              name: "--project",
-              description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optProject,
             {
               name: "--python-version",
               description:
-                "The Python version to be used within the created environment. Supplied value should represent the desired major Python version. Cannot be updated. _PYTHON_VERSION_ must be one of:\n+\n*2*::: Created environment will use Python 2\n*3*::: Created environment will use Python 3\n:::\n+",
+                "The Python version to be used within the created environment. Supplied value should represent the desired major Python version. Cannot be updated. _PYTHON_VERSION_ must be one of:",
               args: {
                 name: "PYTHON_VERSION",
                 description: "String",
                 suggestions: ["2", "3"],
               },
             },
+            optQuiet,
             {
-              name: "--quiet",
+              name: "--scheduler-count",
               description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
+                "Number of schedulers, supported in the Environments with Airflow 2.0.1 and later",
+              args: {
+                name: "SCHEDULER_COUNT",
+                description: "Int",
+              },
+            },
+            {
+              name: "--scheduler-cpu",
+              description: "CPU allocated to Airflow scheduler",
+              args: {
+                name: "SCHEDULER_CPU",
+                description: "Float",
+              },
+            },
+            {
+              name: "--scheduler-memory",
+              description:
+                "Memory allocated to Airflow scheduler, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "SCHEDULER_MEMORY",
+              },
+            },
+            {
+              name: "--scheduler-storage",
+              description:
+                "Storage allocated to Airflow scheduler, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "SCHEDULER_STORAGE",
+              },
             },
             {
               name: "--service-account",
               description:
-                'The Google Cloud Platform service account to be used by the node VMs. If a service account is not specified, the "default" Compute Engine service account for the project is used. Cannot be updated',
+                "The Google Cloud Platform service account to be used by the node VMs. You must explicitly specify a service account. Cannot be updated",
               args: {
                 name: "SERVICE_ACCOUNT",
                 description: "String",
-                suggestions: [],
               },
             },
             {
               name: "--services-ipv4-cidr",
-              description:
-                "IP range for the services IPs.\n+\nCan be specified as a netmask size (e.g. '/20') or as in CIDR notion\n(e.g. '10.100.0.0/20'). If given as a netmask size, the IP range will\nbe chosen automatically from the available space in the network.\n+\nIf unspecified, the services CIDR range will be chosen with a default\nmask size.\n+\nCannot be specified unless '--enable-ip-alias' is also specified",
+              description: "IP range for the services IPs",
               args: {
                 name: "SERVICES_IPV4_CIDR",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
               },
             },
             {
               name: "--services-secondary-range-name",
               description:
-                "Secondary range to be used for services (e.g. ClusterIPs). NAME must be the\nname of an existing secondary range in the cluster subnetwork.\n+\nCannot be specified unless '--enable-ip-alias' is also specified",
+                "Secondary range to be used for services (e.g. ClusterIPs). NAME must be the name of an existing secondary range in the cluster subnetwork",
               args: {
                 name: "SERVICES_SECONDARY_RANGE_NAME",
                 description: "String",
-                suggestions: [],
+              },
+            },
+            {
+              name: "--snapshot-creation-schedule",
+              description:
+                "Cron expression specifying when snapshots of the environment should be created. Can be specified for Composer 2.0.32 or greater",
+              priority: 100,
+              args: {
+                name: "SNAPSHOT_CREATION_SCHEDULE",
+                description: "String",
+              },
+            },
+            {
+              name: "--snapshot-location",
+              description:
+                "The Cloud Storage location for storing automatically created snapshots. Can be specified for Composer 2.0.32 or greater",
+              priority: 100,
+              args: {
+                name: "SNAPSHOT_LOCATION",
+                description: "String",
+              },
+            },
+            {
+              name: "--snapshot-schedule-timezone",
+              description:
+                "Timezone that sets the context to interpret snapshot_creation_schedule. Can be specified for Composer 2.0.32 or greater",
+              priority: 100,
+              args: {
+                name: "SNAPSHOT_SCHEDULE_TIMEZONE",
+                description: "String",
+              },
+            },
+            {
+              name: "--storage-bucket",
+              description:
+                "Name of an exisiting Cloud Storage bucket to be used by the environment. Supported only for Composer 2.4.X and above",
+              args: {
+                name: "STORAGE_BUCKET",
+                description: "String",
               },
             },
             {
               name: "--subnetwork",
               description:
-                "The Compute Engine subnetwork (https://cloud.google.com/compute/docs/subnetworks) to which the environment will be connected",
+                "The link:https://cloud.google.com/compute/docs/subnetworks[Compute Engine Subnetwork] to which the environment will be connected",
               args: {
                 name: "SUBNETWORK",
                 description: "String",
-                suggestions: [],
               },
+            },
+            {
+              name: "--support-web-server-plugins",
+              description:
+                "Enable the support for web server plugins, supported in Composer 3 or greater",
             },
             {
               name: "--tags",
@@ -333,49 +902,120 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "TAG",
                 description: "List",
-                suggestions: [],
               },
             },
+            optTraceToken,
             {
-              name: "--trace-token",
+              name: "--triggerer-count",
               description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
+                "Number of triggerers, supported in the Environments with Composer 2.0.31 and Airflow 2.2.5 and greater",
               args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
+                name: "TRIGGERER_COUNT",
+                description: "Int",
               },
             },
             {
-              name: "--user-output-enabled",
+              name: "--triggerer-cpu",
               description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
+                "CPU allocated to Airflow triggerer. Supported in the Environments with Composer 2.0.31 and Airflow 2.2.5 and greater",
               args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
+                name: "TRIGGERER_CPU",
+                description: "Float",
               },
+            },
+            {
+              name: "--triggerer-memory",
+              description:
+                "Memory allocated to Airflow triggerer, ex. 512MB, 3GB, 2. If units are not provided, defaults to GB. Supported in the Environments with Composer 2.0.31 and Airflow 2.2.5 and greater",
+              args: {
+                name: "TRIGGERER_MEMORY",
+              },
+            },
+            optUserOutputEnabled,
+            optVerbosity,
+            {
+              name: "--web-server-allow-all",
+              description:
+                "Allows all IP addresses to access the Airflow web server",
+            },
+            {
+              name: "--web-server-allow-ip",
+              description:
+                "Specifies a list of IPv4 or IPv6 ranges that will be allowed to access the Airflow web server. By default, all IPs are allowed to access the web server",
+              isRepeatable: true,
+              args: {
+                name: "WEB_SERVER_ALLOW_IP",
+                description: "Dict",
+              },
+            },
+            {
+              name: "--web-server-cpu",
+              description: "CPU allocated to each Airflow web server",
+              args: {
+                name: "WEB_SERVER_CPU",
+                description: "Float",
+              },
+            },
+            {
+              name: "--web-server-deny-all",
+              description:
+                "Denies all incoming traffic to the Airflow web server",
             },
             {
               name: "--web-server-ipv4-cidr",
               description:
-                "IPv4 CIDR range to use for the Airflow web server network. This should have\na size of the netmask between 24 and 29.\n+\nCannot be specified unless '--enable-private-environment' is also\nspecified",
+                "IPv4 CIDR range to use for the Airflow web server network. This should have a size of the netmask between 24 and 29",
               args: {
                 name: "WEB_SERVER_IPV4_CIDR",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
+              },
+            },
+            {
+              name: "--web-server-machine-type",
+              description:
+                "Machine type used by the Airflow web server. The list of available machine types is available here: https://cloud.google.com/composer/pricing",
+              args: {
+                name: "WEB_SERVER_MACHINE_TYPE",
+                description: "String",
+              },
+            },
+            {
+              name: "--web-server-memory",
+              description:
+                "Memory allocated to Airflow web server, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "WEB_SERVER_MEMORY",
+              },
+            },
+            {
+              name: "--web-server-storage",
+              description:
+                "Storage allocated to Airflow web server, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "WEB_SERVER_STORAGE",
+              },
+            },
+            {
+              name: "--worker-cpu",
+              description: "CPU allocated to each Airflow worker",
+              args: {
+                name: "WORKER_CPU",
+                description: "Float",
+              },
+            },
+            {
+              name: "--worker-memory",
+              description:
+                "Memory allocated to Airflow worker, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "WORKER_MEMORY",
+              },
+            },
+            {
+              name: "--worker-storage",
+              description:
+                "Storage allocated to Airflow worker, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "WORKER_STORAGE",
               },
             },
             {
@@ -385,9 +1025,40 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "ZONE",
                 description: "String",
-                suggestions: [],
               },
             },
+          ],
+          args: {
+            name: "ENVIRONMENT",
+            description:
+              "ID of the environment or fully qualified identifier for the environment",
+          },
+        },
+        {
+          name: "database-failover",
+          description: "Run a database failover operation",
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            optAsync,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
+            {
+              name: "--help",
+              description: "Display detailed help",
+            },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            optNoAsync,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
           ],
           args: {
             name: "ENVIRONMENT",
@@ -399,147 +1070,27 @@ const completionSpec: Fig.Spec = {
           name: "delete",
           description: "Delete one or more Cloud Composer environments",
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--async",
-              description:
-                "Return immediately, without waiting for the operation in progress to\ncomplete",
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
+            optAsync,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
-            {
-              name: "--impersonate-service-account",
-              description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-              args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--location",
-              description:
-                "Compute Engine region in which to create the environments",
-              args: {
-                name: "LOCATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
-            {
-              name: "--project",
-              description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
-            {
-              name: "--trace-token",
-              description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-              args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--user-output-enabled",
-              description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-              args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
-              },
-            },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            optNoAsync,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
           ],
           args: {
             name: "ENVIRONMENTS",
@@ -552,142 +1103,55 @@ const completionSpec: Fig.Spec = {
           name: "describe",
           description: "Get details about a Cloud Composer environment",
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
+          ],
+          args: {
+            name: "ENVIRONMENT",
+            description:
+              "ID of the environment or fully qualified identifier for the environment",
+          },
+        },
+        {
+          name: "fetch-database-properties",
+          description: "Fetch database properties",
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
-              name: "--impersonate-service-account",
-              description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-              args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
-              },
+              name: "--help",
+              description: "Display detailed help",
             },
-            {
-              name: "--location",
-              description:
-                "Compute Engine region in which to create the environment",
-              args: {
-                name: "LOCATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
-            {
-              name: "--project",
-              description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
-            {
-              name: "--trace-token",
-              description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-              args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--user-output-enabled",
-              description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-              args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
-              },
-            },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
           ],
           args: {
             name: "ENVIRONMENT",
@@ -700,331 +1164,214 @@ const completionSpec: Fig.Spec = {
           description:
             "List the Cloud Composer environments under a project and location",
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--filter",
-              description:
-                "Apply a Boolean filter _EXPRESSION_ to each resource item to be listed.\nIf the expression evaluates `True`, then that item is listed. For more\ndetails and examples of filter expressions, run $ gcloud topic filters. This\nflag interacts with other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "EXPRESSION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFilter,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
-            {
-              name: "--impersonate-service-account",
-              description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-              args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--limit",
-              description:
-                "Maximum number of resources to list. The default is *unlimited*.\nThis flag interacts with other flags that are applied in this order:\n*--flatten*, *--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "LIMIT",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
-              },
-            },
+            optImpersonateServiceAccount,
+            optLimit,
             {
               name: "--locations",
               description:
                 "IDs of the locations or fully qualified identifiers for the locations",
+              priority: 100,
               args: {
                 name: "LOCATIONS",
                 description: "List",
-                suggestions: [],
-              },
-              priority: 100,
-            },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
-            {
-              name: "--page-size",
-              description:
-                "Some services group resource list output into pages. This flag specifies\nthe maximum number of resources per page. The default is determined by the\nservice if it supports paging, otherwise it is *unlimited* (no paging).\nPaging may be applied before or after *--filter* and *--limit* depending\non the service",
-              args: {
-                name: "PAGE_SIZE",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
               },
             },
+            optLogHttp,
             {
-              name: "--project",
+              name: "--no-uri",
               description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
+                "Print a list of resource URIs instead of the default output, and change the command output to a list of URIs. If this flag is used with *--format*, the formatting is applied on this URI list. To display URIs alongside other keys instead, use the *uri()* transform",
+              hidden: true,
             },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
-            {
-              name: "--sort-by",
-              description:
-                "Comma-separated list of resource field key names to sort by. The\ndefault order is ascending. Prefix a field with ``~'' for descending\norder on that field. This flag interacts with other flags that are applied\nin this order: *--flatten*, *--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "FIELD",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--trace-token",
-              description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-              args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optPageSize,
+            optProject,
+            optQuiet,
+            optSortBy,
+            optTraceToken,
             {
               name: "--uri",
               description:
-                "Print a list of resource URIs instead of the default output",
+                "Print a list of resource URIs instead of the default output, and change the command output to a list of URIs. If this flag is used with *--format*, the formatting is applied on this URI list. To display URIs alongside other keys instead, use the *uri()* transform",
             },
-            {
-              name: "--user-output-enabled",
-              description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-              args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
-              },
-            },
+            optUserOutputEnabled,
+            optVerbosity,
           ],
+        },
+        {
+          name: "list-packages",
+          description: "List all PyPI modules installed in an Airflow worker",
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
+            {
+              name: "--help",
+              description: "Display detailed help",
+            },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            {
+              name: "--no-tree",
+              description:
+                'List PyPI packages, their versions and a dependency tree, as displayed by the "python -m pipdeptree --warn" command',
+              hidden: true,
+            },
+            optProject,
+            optQuiet,
+            optTraceToken,
+            {
+              name: "--tree",
+              description:
+                'List PyPI packages, their versions and a dependency tree, as displayed by the "python -m pipdeptree --warn" command',
+            },
+            optUserOutputEnabled,
+            optVerbosity,
+          ],
+          args: {
+            name: "ENVIRONMENT",
+            description:
+              "ID of the environment or fully qualified identifier for the environment",
+          },
+        },
+        {
+          name: "list-upgrades",
+          description:
+            "List the Cloud Composer image version upgrades for a specific environment",
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFilter,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
+            {
+              name: "--help",
+              description: "Display detailed help",
+            },
+            optImpersonateServiceAccount,
+            optLimit,
+            optLocation,
+            optLogHttp,
+            optPageSize,
+            optProject,
+            optQuiet,
+            optSortBy,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
+          ],
+          args: {
+            name: "ENVIRONMENT",
+            description:
+              "ID of the environment or fully qualified identifier for the environment",
+          },
+        },
+        {
+          name: "list-workloads",
+          description:
+            "List Composer workloads, supported in Composer 3 environments or greater",
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
+            {
+              name: "--help",
+              description: "Display detailed help",
+            },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
+          ],
+          args: {
+            name: "ENVIRONMENT",
+            description:
+              "ID of the environment or fully qualified identifier for the environment",
+          },
+        },
+        {
+          name: "restart-web-server",
+          description: "Restart web server for a Cloud Composer environment",
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            optAsync,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
+            {
+              name: "--help",
+              description: "Display detailed help",
+            },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            optNoAsync,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
+          ],
+          args: {
+            name: "ENVIRONMENT",
+            description:
+              "ID of the environment or fully qualified identifier for the environment",
+          },
         },
         {
           name: "run",
           description:
             "Run an Airflow sub-command remotely in a Cloud Composer environment",
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
-            {
-              name: "--impersonate-service-account",
-              description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-              args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--location",
-              description:
-                "Compute Engine region in which to create the environment",
-              args: {
-                name: "LOCATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
-            {
-              name: "--project",
-              description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
-            {
-              name: "--trace-token",
-              description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-              args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--user-output-enabled",
-              description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-              args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
-              },
-            },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
           ],
           args: [
             {
@@ -1035,13 +1382,173 @@ const completionSpec: Fig.Spec = {
             {
               name: "SUBCOMMAND",
               description:
-                "The Airflow CLI subcommand to run. Available subcommands include: backfill, clear, connections, dag_state, delete_dag, kerberos, list_dag_runs, list_dags, list_tasks, next_execution, pause, pool, render, run, task_failed_deps, task_state, test, trigger_dag, unpause, variables, version (see https://airflow.apache.org/cli.html for more info). Note that delete_dag is available from Airflow 1.10.1, and list_dag_runs, next_execution are available from Airflow 1.10.2",
+                "The Airflow CLI subcommand to run. Available subcommands include (listed with Airflow versions that support): backfill [**, 2.0.0), clear [**, 2.0.0), connections [**, 3.2.0), dag_state [**, 2.0.0), dags [1.10.14, 3.2.0), db [2.3.0, 3.0.0), delete_dag [1.10.1, 2.0.0), kerberos [**, 3.2.0), kubernetes [2.1.4, 3.2.0), list-import-errors [**, 3.0.0), list_dag_runs [1.10.2, 2.0.0), list_dags [**, 2.0.0), list_tasks [**, 2.0.0), next_execution [1.10.2, 2.0.0), pause [**, 2.0.0), pool [**, 2.0.0), pools [1.10.14, 3.2.0), render [**, 2.0.0), roles [2.0.0, 3.2.0), run [**, 2.0.0), sync-perm [1.10.14, 3.2.0), sync_perm [1.10.2, 2.0.0), task_failed_deps [**, 2.0.0), task_state [**, 2.0.0), tasks [1.10.14, 3.2.0), test [**, 2.0.0), trigger_dag [**, 2.0.0), unpause [**, 2.0.0), upgrade_check [1.10.15, 2.0.0), users [1.10.14, 3.2.0), variables [**, 3.2.0), version [**, 3.2.0) (see https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html for more info)",
+            },
+            {
+              name: "SUBCOMMAND_NESTED",
+              description:
+                "Additional subcommand in case it is nested. The following is a list of allowed nested subcommands: - db: check, trim - all other subcommands: all nested subcommands are allowed",
+              isOptional: true,
             },
             {
               name: "CMD_ARGS",
-              description:
-                "Command line arguments to the subcommand.\n+\nThe '--' argument must be specified between gcloud specific args on the left and CMD_ARGS on the right. Example:\n+\n{command} myenv trigger_dag -- some_dag --run_id=foo",
+              description: "Command line arguments to the subcommand",
+              isVariadic: true,
+              isOptional: true,
             },
+          ],
+        },
+        {
+          name: "snapshots",
+          description: "Save and load snapshots of environment",
+          subcommands: [
+            {
+              name: "load",
+              description: "Load a snapshot into the environment",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optAsync,
+                optBillingProject,
+                optConfiguration,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optNoAsync,
+                {
+                  name: "--no-skip-airflow-overrides-setting",
+                  description:
+                    "When specified, skips setting Airflow overrides from the snapshot",
+                  hidden: true,
+                },
+                {
+                  name: "--no-skip-environment-variables-setting",
+                  description:
+                    "When specified, skips setting environment variables from the snapshot",
+                  hidden: true,
+                },
+                {
+                  name: "--no-skip-gcs-data-copying",
+                  description:
+                    "When specified, skips copying dags, plugins and data folders from the snapshot",
+                  hidden: true,
+                },
+                {
+                  name: "--no-skip-pypi-packages-installation",
+                  description:
+                    "When specified, skips the installation of custom PyPI packages from the snapshot",
+                  hidden: true,
+                },
+                optProject,
+                optQuiet,
+                {
+                  name: "--skip-airflow-overrides-setting",
+                  description:
+                    "When specified, skips setting Airflow overrides from the snapshot",
+                },
+                {
+                  name: "--skip-environment-variables-setting",
+                  description:
+                    "When specified, skips setting environment variables from the snapshot",
+                },
+                {
+                  name: "--skip-gcs-data-copying",
+                  description:
+                    "When specified, skips copying dags, plugins and data folders from the snapshot",
+                },
+                {
+                  name: "--skip-pypi-packages-installation",
+                  description:
+                    "When specified, skips the installation of custom PyPI packages from the snapshot",
+                },
+                {
+                  name: "--snapshot-path",
+                  description:
+                    "The Cloud Storage path to load the snapshot from. It must start with prefix gs:// and one needs to specify a single snapshot that should be loaded",
+                  priority: 100,
+                  args: {
+                    name: "SNAPSHOT_PATH",
+                    description: "String",
+                  },
+                },
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+              args: {
+                name: "ENVIRONMENT",
+                description:
+                  "ID of the environment or fully qualified identifier for the environment",
+              },
+            },
+            {
+              name: "save",
+              description: "Save a snapshot of the environment",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optAsync,
+                optBillingProject,
+                optConfiguration,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optNoAsync,
+                optProject,
+                optQuiet,
+                {
+                  name: "--snapshot-location",
+                  description:
+                    "The Cloud Storage location where to save the snapshot. It must start with the prefix gs://. Default value is /snapshots directory in the Cloud Storage bucket of the environment",
+                  args: {
+                    name: "SNAPSHOT_LOCATION",
+                    description: "String",
+                  },
+                },
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+              args: {
+                name: "ENVIRONMENT",
+                description:
+                  "ID of the environment or fully qualified identifier for the environment",
+              },
+            },
+          ],
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
+            {
+              name: "--help",
+              description: "Display detailed help",
+            },
+            optImpersonateServiceAccount,
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
           ],
         },
         {
@@ -1058,158 +1565,32 @@ const completionSpec: Fig.Spec = {
                   description:
                     "Delete DAG files from an Cloud Composer environment's Cloud Storage bucket",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                   args: {
                     name: "TARGET",
                     description:
-                      "A relative path to a file or subdirectory to delete within the\ndags Cloud Storage subdirectory. If not specified, the entire contents\nof the dags subdirectory will be deleted",
+                      "A relative path to a file or subdirectory to delete within the dags Cloud Storage subdirectory. If not specified, the entire contents of the dags subdirectory will be deleted",
+                    isOptional: true,
                   },
                 },
                 {
@@ -1217,174 +1598,36 @@ const completionSpec: Fig.Spec = {
                   description:
                     "Export DAGs from an environment into local storage or Cloud Storage",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--destination",
-                      description:
-                        "The path to an existing local directory or a Cloud Storage\nbucket/directory into which to export files",
-                      args: {
-                        name: "DESTINATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
+                    optDestination,
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
                     {
                       name: "--source",
                       description:
-                        "An optional relative path to a file or directory to be exported from the\ndags/ subdirectory in the environment's Cloud Storage bucket",
+                        "An optional relative path to a file or directory to be exported from the dags/ subdirectory in the environment's Cloud Storage bucket",
                       args: {
                         name: "SOURCE",
                         description: "String",
-                        suggestions: [],
                       },
                     },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                 },
                 {
@@ -1392,174 +1635,45 @@ const completionSpec: Fig.Spec = {
                   description:
                     "Import DAGs from local storage or Cloud Storage into an environment",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
                     {
                       name: "--destination",
                       description:
-                        "An optional subdirectory under the dags/ directory in the environment's\nCloud Storage bucket into which to import files. May contain forward\nslashes to delimit multiple levels of subdirectory nesting, but should not\ncontain leading or trailing slashes. If the DESTINATION does not exist, it\nwill be created",
+                        "An optional subdirectory under the dags/ directory in the environment's Cloud Storage bucket into which to import files. May contain forward slashes to delimit multiple levels of subdirectory nesting, but should not contain leading or trailing slashes. If the DESTINATION does not exist, it will be created",
                       args: {
                         name: "DESTINATION",
                         description: "String",
-                        suggestions: [],
                       },
                     },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
                     {
                       name: "--source",
                       description:
-                        "Path to a local directory/file or Cloud Storage bucket/object to be\nimported into the dags/ subdirectory in the environment's Cloud Storage\nbucket. Cloud Storage paths must begin with 'gs://'",
+                        "Path to a local directory/file or Cloud Storage bucket/object to be imported into the dags/ subdirectory in the environment's Cloud Storage bucket. Cloud Storage paths must begin with 'gs://'",
+                      priority: 100,
                       args: {
                         name: "SOURCE",
                         description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
                       },
                     },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                 },
                 {
@@ -1567,283 +1681,48 @@ const completionSpec: Fig.Spec = {
                   description:
                     "List the DAG files for a Cloud Composer environment",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                 },
               ],
               options: [
-                {
-                  name: "--account",
-                  description:
-                    "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                  args: {
-                    name: "ACCOUNT",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--billing-project",
-                  description:
-                    "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                  args: {
-                    name: "BILLING_PROJECT",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--configuration",
-                  description:
-                    "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                  args: {
-                    name: "CONFIGURATION",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--flags-file",
-                  description:
-                    "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                  args: {
-                    name: "YAML_FILE",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--flatten",
-                  description:
-                    "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                  args: {
-                    name: "KEY",
-                    description: "List",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--format",
-                  description:
-                    "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                  args: {
-                    name: "FORMAT",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
                 {
                   name: "--help",
                   description: "Display detailed help",
                 },
-                {
-                  name: "--impersonate-service-account",
-                  description:
-                    "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                  args: {
-                    name: "SERVICE_ACCOUNT_EMAIL",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--log-http",
-                  description:
-                    "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                },
-                {
-                  name: "--project",
-                  description:
-                    "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                  args: {
-                    name: "PROJECT_ID",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--quiet",
-                  description:
-                    "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                },
-                {
-                  name: "--trace-token",
-                  description:
-                    "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                  args: {
-                    name: "TRACE_TOKEN",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--user-output-enabled",
-                  description:
-                    "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                },
-                {
-                  name: "--verbosity",
-                  description:
-                    "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                  args: {
-                    name: "VERBOSITY",
-                    description: "String",
-                    suggestions: [
-                      "debug",
-                      "info",
-                      "warning",
-                      "error",
-                      "critical",
-                      "none",
-                    ],
-                  },
-                },
+                optImpersonateServiceAccount,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
               ],
             },
             {
@@ -1855,158 +1734,32 @@ const completionSpec: Fig.Spec = {
                   description:
                     "Delete data from an Cloud Composer environment's Cloud Storage bucket",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                   args: {
                     name: "TARGET",
                     description:
-                      "A relative path to a file or subdirectory to delete within the\ndata Cloud Storage subdirectory. If not specified, the entire contents\nof the data subdirectory will be deleted",
+                      "A relative path to a file or subdirectory to delete within the data Cloud Storage subdirectory. If not specified, the entire contents of the data subdirectory will be deleted",
+                    isOptional: true,
                   },
                 },
                 {
@@ -2014,174 +1767,36 @@ const completionSpec: Fig.Spec = {
                   description:
                     "Export data from an environment into local storage or Cloud Storage",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--destination",
-                      description:
-                        "The path to an existing local directory or a Cloud Storage\nbucket/directory into which to export files",
-                      args: {
-                        name: "DESTINATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
+                    optDestination,
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
                     {
                       name: "--source",
                       description:
-                        "An optional relative path to a file or directory to be exported from the\ndata/ subdirectory in the environment's Cloud Storage bucket",
+                        "An optional relative path to a file or directory to be exported from the data/ subdirectory in the environment's Cloud Storage bucket",
                       args: {
                         name: "SOURCE",
                         description: "String",
-                        suggestions: [],
                       },
                     },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                 },
                 {
@@ -2189,457 +1804,93 @@ const completionSpec: Fig.Spec = {
                   description:
                     "Import data from local storage or Cloud Storage into an environment",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
                     {
                       name: "--destination",
                       description:
-                        "An optional subdirectory under the data/ directory in the environment's\nCloud Storage bucket into which to import files. May contain forward\nslashes to delimit multiple levels of subdirectory nesting, but should not\ncontain leading or trailing slashes. If the DESTINATION does not exist, it\nwill be created",
+                        "An optional subdirectory under the data/ directory in the environment's Cloud Storage bucket into which to import files. May contain forward slashes to delimit multiple levels of subdirectory nesting, but should not contain leading or trailing slashes. If the DESTINATION does not exist, it will be created",
                       args: {
                         name: "DESTINATION",
                         description: "String",
-                        suggestions: [],
                       },
                     },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
                     {
                       name: "--source",
                       description:
-                        "Path to a local directory/file or Cloud Storage bucket/object to be\nimported into the data/ subdirectory in the environment's Cloud Storage\nbucket. Cloud Storage paths must begin with 'gs://'",
+                        "Path to a local directory/file or Cloud Storage bucket/object to be imported into the data/ subdirectory in the environment's Cloud Storage bucket. Cloud Storage paths must begin with 'gs://'",
+                      priority: 100,
                       args: {
                         name: "SOURCE",
                         description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
                       },
                     },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                 },
                 {
                   name: "list",
                   description: "List the data for a Cloud Composer environment",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                 },
               ],
               options: [
-                {
-                  name: "--account",
-                  description:
-                    "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                  args: {
-                    name: "ACCOUNT",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--billing-project",
-                  description:
-                    "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                  args: {
-                    name: "BILLING_PROJECT",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--configuration",
-                  description:
-                    "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                  args: {
-                    name: "CONFIGURATION",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--flags-file",
-                  description:
-                    "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                  args: {
-                    name: "YAML_FILE",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--flatten",
-                  description:
-                    "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                  args: {
-                    name: "KEY",
-                    description: "List",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--format",
-                  description:
-                    "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                  args: {
-                    name: "FORMAT",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
                 {
                   name: "--help",
                   description: "Display detailed help",
                 },
-                {
-                  name: "--impersonate-service-account",
-                  description:
-                    "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                  args: {
-                    name: "SERVICE_ACCOUNT_EMAIL",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--log-http",
-                  description:
-                    "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                },
-                {
-                  name: "--project",
-                  description:
-                    "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                  args: {
-                    name: "PROJECT_ID",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--quiet",
-                  description:
-                    "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                },
-                {
-                  name: "--trace-token",
-                  description:
-                    "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                  args: {
-                    name: "TRACE_TOKEN",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--user-output-enabled",
-                  description:
-                    "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                },
-                {
-                  name: "--verbosity",
-                  description:
-                    "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                  args: {
-                    name: "VERBOSITY",
-                    description: "String",
-                    suggestions: [
-                      "debug",
-                      "info",
-                      "warning",
-                      "error",
-                      "critical",
-                      "none",
-                    ],
-                  },
-                },
+                optImpersonateServiceAccount,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
               ],
             },
             {
@@ -2651,158 +1902,32 @@ const completionSpec: Fig.Spec = {
                   description:
                     "Delete plugins from an Cloud Composer environment's Cloud Storage bucket",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                   args: {
                     name: "TARGET",
                     description:
-                      "A relative path to a file or subdirectory to delete within the\nplugins Cloud Storage subdirectory. If not specified, the entire contents\nof the plugins subdirectory will be deleted",
+                      "A relative path to a file or subdirectory to delete within the plugins Cloud Storage subdirectory. If not specified, the entire contents of the plugins subdirectory will be deleted",
+                    isOptional: true,
                   },
                 },
                 {
@@ -2810,174 +1935,36 @@ const completionSpec: Fig.Spec = {
                   description:
                     "Export plugins from an environment into local storage or Cloud Storage",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--destination",
-                      description:
-                        "The path to an existing local directory or a Cloud Storage\nbucket/directory into which to export files",
-                      args: {
-                        name: "DESTINATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
+                    optDestination,
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
                     {
                       name: "--source",
                       description:
-                        "An optional relative path to a file or directory to be exported from the\nplugins/ subdirectory in the environment's Cloud Storage bucket",
+                        "An optional relative path to a file or directory to be exported from the plugins/ subdirectory in the environment's Cloud Storage bucket",
                       args: {
                         name: "SOURCE",
                         description: "String",
-                        suggestions: [],
                       },
                     },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                 },
                 {
@@ -2985,174 +1972,45 @@ const completionSpec: Fig.Spec = {
                   description:
                     "Import plugins from local storage or Cloud Storage into an environment",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
                     {
                       name: "--destination",
                       description:
-                        "An optional subdirectory under the plugins/ directory in the environment's\nCloud Storage bucket into which to import files. May contain forward\nslashes to delimit multiple levels of subdirectory nesting, but should not\ncontain leading or trailing slashes. If the DESTINATION does not exist, it\nwill be created",
+                        "An optional subdirectory under the plugins/ directory in the environment's Cloud Storage bucket into which to import files. May contain forward slashes to delimit multiple levels of subdirectory nesting, but should not contain leading or trailing slashes. If the DESTINATION does not exist, it will be created",
                       args: {
                         name: "DESTINATION",
                         description: "String",
-                        suggestions: [],
                       },
                     },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
                     {
                       name: "--source",
                       description:
-                        "Path to a local directory/file or Cloud Storage bucket/object to be\nimported into the plugins/ subdirectory in the environment's Cloud Storage\nbucket. Cloud Storage paths must begin with 'gs://'",
+                        "Path to a local directory/file or Cloud Storage bucket/object to be imported into the plugins/ subdirectory in the environment's Cloud Storage bucket. Cloud Storage paths must begin with 'gs://'",
+                      priority: 100,
                       args: {
                         name: "SOURCE",
                         description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
                       },
                     },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                 },
                 {
@@ -3160,444 +2018,97 @@ const completionSpec: Fig.Spec = {
                   description:
                     "List the plugins for a Cloud Composer environment",
                   options: [
-                    {
-                      name: "--account",
-                      description:
-                        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                      args: {
-                        name: "ACCOUNT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--billing-project",
-                      description:
-                        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                      args: {
-                        name: "BILLING_PROJECT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--configuration",
-                      description:
-                        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                      args: {
-                        name: "CONFIGURATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--environment",
-                      description:
-                        "ID of the environment or fully qualified identifier for the environment",
-                      args: {
-                        name: "ENVIRONMENT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                      priority: 100,
-                    },
-                    {
-                      name: "--flags-file",
-                      description:
-                        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                      args: {
-                        name: "YAML_FILE",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--flatten",
-                      description:
-                        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                      args: {
-                        name: "KEY",
-                        description: "List",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--format",
-                      description:
-                        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                      args: {
-                        name: "FORMAT",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
+                    optAccessTokenFile,
+                    optAccount,
+                    optBillingProject,
+                    optConfiguration,
+                    optEnvironment,
+                    optFlagsFile,
+                    optFlatten,
+                    optFormat,
                     {
                       name: "--help",
                       description: "Display detailed help",
                     },
-                    {
-                      name: "--impersonate-service-account",
-                      description:
-                        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                      args: {
-                        name: "SERVICE_ACCOUNT_EMAIL",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--location",
-                      description:
-                        "Compute Engine region in which to create the environment",
-                      args: {
-                        name: "LOCATION",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--log-http",
-                      description:
-                        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                    },
-                    {
-                      name: "--project",
-                      description:
-                        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                      args: {
-                        name: "PROJECT_ID",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--quiet",
-                      description:
-                        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                    },
-                    {
-                      name: "--trace-token",
-                      description:
-                        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                      args: {
-                        name: "TRACE_TOKEN",
-                        description: "String",
-                        suggestions: [],
-                      },
-                    },
-                    {
-                      name: "--user-output-enabled",
-                      description:
-                        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                    },
-                    {
-                      name: "--verbosity",
-                      description:
-                        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                      args: {
-                        name: "VERBOSITY",
-                        description: "String",
-                        suggestions: [
-                          "debug",
-                          "info",
-                          "warning",
-                          "error",
-                          "critical",
-                          "none",
-                        ],
-                      },
-                    },
+                    optImpersonateServiceAccount,
+                    optLocation,
+                    optLogHttp,
+                    optProject,
+                    optQuiet,
+                    optTraceToken,
+                    optUserOutputEnabled,
+                    optVerbosity,
                   ],
                 },
               ],
               options: [
-                {
-                  name: "--account",
-                  description:
-                    "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-                  args: {
-                    name: "ACCOUNT",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--billing-project",
-                  description:
-                    "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-                  args: {
-                    name: "BILLING_PROJECT",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--configuration",
-                  description:
-                    "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-                  args: {
-                    name: "CONFIGURATION",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--flags-file",
-                  description:
-                    "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-                  args: {
-                    name: "YAML_FILE",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--flatten",
-                  description:
-                    "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-                  args: {
-                    name: "KEY",
-                    description: "List",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--format",
-                  description:
-                    "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-                  args: {
-                    name: "FORMAT",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
                 {
                   name: "--help",
                   description: "Display detailed help",
                 },
-                {
-                  name: "--impersonate-service-account",
-                  description:
-                    "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-                  args: {
-                    name: "SERVICE_ACCOUNT_EMAIL",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--log-http",
-                  description:
-                    "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-                },
-                {
-                  name: "--project",
-                  description:
-                    "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-                  args: {
-                    name: "PROJECT_ID",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--quiet",
-                  description:
-                    "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-                },
-                {
-                  name: "--trace-token",
-                  description:
-                    "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-                  args: {
-                    name: "TRACE_TOKEN",
-                    description: "String",
-                    suggestions: [],
-                  },
-                },
-                {
-                  name: "--user-output-enabled",
-                  description:
-                    "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-                },
-                {
-                  name: "--verbosity",
-                  description:
-                    "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-                  args: {
-                    name: "VERBOSITY",
-                    description: "String",
-                    suggestions: [
-                      "debug",
-                      "info",
-                      "warning",
-                      "error",
-                      "critical",
-                      "none",
-                    ],
-                  },
-                },
+                optImpersonateServiceAccount,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
               ],
             },
           ],
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
-            {
-              name: "--impersonate-service-account",
-              description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-              args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
-            {
-              name: "--project",
-              description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
-            {
-              name: "--trace-token",
-              description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-              args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--user-output-enabled",
-              description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-              args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
-              },
-            },
+            optImpersonateServiceAccount,
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
           ],
         },
         {
           name: "update",
           description: "Update properties of a Cloud Composer environment",
           options: [
+            optAccessTokenFile,
+            optAccount,
             {
-              name: "--account",
+              name: "--airflow-database-retention-days",
               description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
+                "The number of days for the Airflow database retention period. If set to 0, the Airflow database retention mechanism will be disabled",
               args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
+                name: "AIRFLOW_DATABASE_RETENTION_DAYS",
+                description: "Int",
               },
             },
             {
-              name: "--async",
+              name: "--airflow-version",
               description:
-                "Return immediately, without waiting for the operation in progress to\ncomplete",
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
+                "Upgrade the environment to a later Apache Airflow version in-place",
               args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
+                name: "AIRFLOW_VERSION",
               },
             },
+            optAsync,
+            optBillingProject,
             {
               name: "--clear-airflow-configs",
               description:
@@ -3606,86 +2117,342 @@ const completionSpec: Fig.Spec = {
             {
               name: "--clear-env-variables",
               description:
-                "Removes all environment variables from the environment.\n+\nEnvironment variables that have system-provided defaults cannot be unset\nwith the `--remove-env-variables` or `--clear-env-variables` flags; only\nthe user-supplied overrides will be removed",
+                "Removes all environment variables from the environment",
             },
             {
               name: "--clear-labels",
               description:
-                'Remove all labels. If `--update-labels` is also specified then\n`--clear-labels` is applied first.\n+\nFor example, to remove all labels:\n+\n    $ {command} --clear-labels\n+\nTo set the labels to exactly "foo" and "baz":\n+\n    $ {command} --clear-labels --update-labels foo=bar,baz=qux',
+                "Remove all labels. If `--update-labels` is also specified then `--clear-labels` is applied first",
+            },
+            {
+              name: "--clear-maintenance-window",
+              description:
+                "Clears the maintenance window settings. Can be specified for Composer 3 or greater",
             },
             {
               name: "--clear-pypi-packages",
-              description:
-                "Removes all PyPI packages from the environment.\n+\nPyPI packages that are required by the environment's core software\ncannot be uninstalled with the `--remove-pypi-packages` or\n`--clear-pypi-packages` flags",
+              description: "Removes all PyPI packages from the environment",
             },
             {
-              name: "--configuration",
+              name: "--cloud-sql-machine-type",
               description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
+                "Cloud SQL machine type used by the Airflow database. The list of available machine types is available here: https://cloud.google.com/composer/pricing#db-machine-types",
               args: {
-                name: "CONFIGURATION",
+                name: "CLOUD_SQL_MACHINE_TYPE",
                 description: "String",
-                suggestions: [],
+              },
+            },
+            optConfiguration,
+            {
+              name: "--dag-processor-count",
+              description:
+                "Number of dag processors, supported in Composer 3 environments or greater",
+              args: {
+                name: "DAG_PROCESSOR_COUNT",
+                description: "Int",
               },
             },
             {
-              name: "--flags-file",
+              name: "--dag-processor-cpu",
               description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
+                "CPU allocated to Airflow dag processor, supported in Composer 3 environments or greater",
               args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
+                name: "DAG_PROCESSOR_CPU",
+                description: "Float",
               },
             },
             {
-              name: "--flatten",
+              name: "--dag-processor-memory",
               description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
+                "Memory allocated to Airflow dag processor, ex. 1GB, 3GB, 2. If units are not provided, defaults to GB, supported in Composer 3 environments or greater",
               args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
+                name: "DAG_PROCESSOR_MEMORY",
               },
             },
             {
-              name: "--format",
+              name: "--dag-processor-storage",
               description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
+                "Storage allocated to Airflow dag processor, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB, supported in Composer 3 environments or greater",
               args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
+                name: "DAG_PROCESSOR_STORAGE",
               },
             },
+            {
+              name: "--disable-cloud-data-lineage-integration",
+              description:
+                "Disable Cloud Data Lineage integration, supported for Composer 2 Environments",
+            },
+            {
+              name: "--disable-high-resilience",
+              description:
+                "Disable high resilience, supported for Composer 2 Environments",
+            },
+            {
+              name: "--disable-logs-in-cloud-logging-only",
+              description:
+                "Disable logs in cloud logging only, supported for Composer 2 Environments",
+            },
+            {
+              name: "--disable-master-authorized-networks",
+              description:
+                "Disable link:https://cloud.google.com/kubernetes-engine/docs/how-to/authorized-networks[Master Authorized Networks feature] in the Composer Environment's GKE cluster",
+            },
+            {
+              name: "--disable-private-builds-only",
+              description:
+                "Builds performed during operations that install Python packages have an access to the internet, supported in Composer 3 or greater",
+            },
+            {
+              name: "--disable-private-environment",
+              description:
+                "Enable internet connection from any Composer component, supported in Composer 3 environments or greater",
+            },
+            {
+              name: "--disable-scheduled-snapshot-creation",
+              description:
+                "Disables automated snapshots creation. Can be specified for Composer 2.0.32 or greater",
+            },
+            {
+              name: "--disable-triggerer",
+              description:
+                "(DEPRECATED) Disable a triggerer, supported in the Environments with Composer 2.0.31 and Airflow 2.2.5 and greater",
+              deprecated: true,
+            },
+            {
+              name: "--disable-vpc-connectivity",
+              description:
+                "Disable connectivity with a user's VPC network, supported in Composer 3 environments or greater",
+            },
+            {
+              name: "--enable-cloud-data-lineage-integration",
+              description:
+                "Enable Cloud Data Lineage integration, supported for Composer 2 Environments",
+            },
+            {
+              name: "--enable-high-resilience",
+              description:
+                "Enable high resilience, supported for Composer 2 Environments",
+            },
+            {
+              name: "--enable-logs-in-cloud-logging-only",
+              description:
+                "Enable logs in cloud logging only, supported for Composer 2 Environments",
+            },
+            {
+              name: "--enable-master-authorized-networks",
+              description:
+                "Enable link:https://cloud.google.com/kubernetes-engine/docs/how-to/authorized-networks[Master Authorized Networks feature] in the Composer Environment's GKE cluster",
+            },
+            {
+              name: "--enable-private-builds-only",
+              description:
+                "Builds performed during operations that install Python packages have only private connectivity to Google services, supported in Composer 3 or greater",
+            },
+            {
+              name: "--enable-private-environment",
+              description:
+                "Disable internet connection from any Composer component, supported in Composer 3 environments or greater",
+            },
+            {
+              name: "--enable-scheduled-snapshot-creation",
+              description:
+                "When specified, snapshots of the environment will be created according to a schedule. Can be specified for Composer 2.0.32 or greater",
+              priority: 100,
+            },
+            {
+              name: "--enable-triggerer",
+              description:
+                "(DEPRECATED) Enable use of a triggerer, supported in the Environments with Composer 2.0.31 and Airflow 2.2.5 and greater",
+              deprecated: true,
+            },
+            {
+              name: "--environment-size",
+              description:
+                "Size of the environment. Unspecified means that the default option will be chosen. _ENVIRONMENT_SIZE_ must be one of: *extra-large*, *large*, *medium*, *small*, *unspecified*",
+              args: {
+                name: "ENVIRONMENT_SIZE",
+                suggestions: [
+                  "extra-large",
+                  "large",
+                  "medium",
+                  "small",
+                  "unspecified",
+                ],
+              },
+            },
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
             {
-              name: "--impersonate-service-account",
+              name: "--image-version",
               description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
+                "Upgrade the environment to a later version in-place",
               args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
+                name: "IMAGE_VERSION",
+              },
+            },
+            optImpersonateServiceAccount,
+            optLocation,
+            optLogHttp,
+            {
+              name: "--maintenance-window-end",
+              description:
+                "End time of the mantenance window in the form of the full date. Only the time of the day is used as a reference for an ending time of the window with a provided recurrence. Specified date must take place after the one specified as a start date, the difference between will be used as a length of a single maintenance window. See $ gcloud topic datetimes for information on time formats",
+              priority: 100,
+              args: {
+                name: "MAINTENANCE_WINDOW_END",
               },
             },
             {
-              name: "--location",
+              name: "--maintenance-window-recurrence",
               description:
-                "Compute Engine region in which to create the environment",
+                "An RFC 5545 RRULE, specifying how the maintenance window will recur. The minimum requirement for the length of the maintenance window is 12 hours a week. Only FREQ=DAILY and FREQ=WEEKLY rules are supported",
+              priority: 100,
               args: {
-                name: "LOCATION",
+                name: "MAINTENANCE_WINDOW_RECURRENCE",
                 description: "String",
-                suggestions: [],
               },
             },
             {
-              name: "--log-http",
+              name: "--maintenance-window-start",
               description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
+                "Start time of the mantenance window in the form of the full date. Only the time of the day is used as a reference for a starting time of the window with a provided recurrence. See $ gcloud topic datetimes for information on time formats",
+              priority: 100,
+              args: {
+                name: "MAINTENANCE_WINDOW_START",
+              },
+            },
+            {
+              name: "--master-authorized-networks",
+              description:
+                "Comma separated Master Authorized Networks specified in CIDR notation",
+              args: {
+                name: "NETWORK",
+                description: "List",
+              },
+            },
+            {
+              name: "--max-workers",
+              description: "Maximum number of workers in the Environment",
+              args: {
+                name: "MAX_WORKERS",
+                description: "Int",
+              },
+            },
+            {
+              name: "--min-workers",
+              description: "Minimum number of workers in the Environment",
+              args: {
+                name: "MIN_WORKERS",
+                description: "Int",
+              },
+            },
+            {
+              name: "--network",
+              description:
+                "The Compute Engine Network to which the environment will be connected. If a 'Custom Subnet Network' is provided, `--subnetwork` must be specified as well",
+              priority: 100,
+              args: {
+                name: "NETWORK",
+                description: "String",
+              },
+            },
+            {
+              name: "--network-attachment",
+              description:
+                "Cloud Composer Network Attachment, which provides connectivity with a user's VPC network, supported in Composer 3 environments or greater",
+              args: {
+                name: "NETWORK_ATTACHMENT",
+                description: "String",
+              },
+            },
+            optNoAsync,
+            {
+              name: "--no-clear-airflow-configs",
+              description:
+                "Removes all Airflow config overrides from the environment",
+              hidden: true,
+            },
+            {
+              name: "--no-clear-env-variables",
+              description:
+                "Removes all environment variables from the environment",
+              hidden: true,
+            },
+            {
+              name: "--no-clear-labels",
+              description:
+                "Remove all labels. If `--update-labels` is also specified then `--clear-labels` is applied first",
+              hidden: true,
+            },
+            {
+              name: "--no-clear-maintenance-window",
+              description:
+                "Clears the maintenance window settings. Can be specified for Composer 3 or greater",
+              hidden: true,
+            },
+            {
+              name: "--no-clear-pypi-packages",
+              description: "Removes all PyPI packages from the environment",
+              hidden: true,
+            },
+            {
+              name: "--no-disable-cloud-data-lineage-integration",
+              description:
+                "Disable Cloud Data Lineage integration, supported for Composer 2 Environments",
+              hidden: true,
+            },
+            {
+              name: "--no-disable-master-authorized-networks",
+              description:
+                "Disable link:https://cloud.google.com/kubernetes-engine/docs/how-to/authorized-networks[Master Authorized Networks feature] in the Composer Environment's GKE cluster",
+              hidden: true,
+            },
+            {
+              name: "--no-disable-private-environment",
+              description:
+                "Enable internet connection from any Composer component, supported in Composer 3 environments or greater",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-cloud-data-lineage-integration",
+              description:
+                "Enable Cloud Data Lineage integration, supported for Composer 2 Environments",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-master-authorized-networks",
+              description:
+                "Enable link:https://cloud.google.com/kubernetes-engine/docs/how-to/authorized-networks[Master Authorized Networks feature] in the Composer Environment's GKE cluster",
+              hidden: true,
+            },
+            {
+              name: "--no-enable-private-environment",
+              description:
+                "Disable internet connection from any Composer component, supported in Composer 3 environments or greater",
+              hidden: true,
+            },
+            {
+              name: "--no-support-web-server-plugins",
+              description:
+                "Enable the support for web server plugins, supported in Composer 3 or greater",
+              hidden: true,
+            },
+            {
+              name: "--no-web-server-allow-all",
+              description:
+                "Allows all IP addresses to access the Airflow web server",
+              hidden: true,
+            },
+            {
+              name: "--no-web-server-deny-all",
+              description:
+                "Denies all incoming traffic to the Airflow web server",
+              hidden: true,
             },
             {
               name: "--node-count",
@@ -3693,145 +2460,270 @@ const completionSpec: Fig.Spec = {
                 "The new number of nodes running the environment. Must be >= 3",
               args: {
                 name: "NODE_COUNT",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
               },
             },
-            {
-              name: "--project",
-              description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
+            optProject,
+            optQuiet,
             {
               name: "--remove-airflow-configs",
               description: "A list of Airflow config override keys to remove",
               args: {
                 name: "KEY",
                 description: "List",
-                suggestions: [],
               },
             },
             {
               name: "--remove-env-variables",
-              description:
-                "A list of environment variables to remove.\n+\nEnvironment variables that have system-provided defaults cannot be unset\nwith the `--remove-env-variables` or `--clear-env-variables` flags; only\nthe user-supplied overrides will be removed",
+              description: "A list of environment variables to remove",
               args: {
                 name: "NAME",
                 description: "List",
-                suggestions: [],
               },
             },
             {
               name: "--remove-labels",
               description:
-                "List of label keys to remove. If a label does not exist it is\nsilently ignored. If `--update-labels` is also specified then\n`--remove-labels` is applied first",
+                "List of label keys to remove. If a label does not exist it is silently ignored. If `--update-labels` is also specified then `--update-labels` is applied first",
               args: {
                 name: "KEY",
                 description: "List",
-                suggestions: [],
               },
             },
             {
               name: "--remove-pypi-packages",
-              description:
-                "A list of PyPI package names to remove.\n+\nPyPI packages that are required by the environment's core software\ncannot be uninstalled with the `--remove-pypi-packages` or\n`--clear-pypi-packages` flags",
+              description: "A list of PyPI package names to remove",
               args: {
                 name: "PACKAGE",
                 description: "List",
-                suggestions: [],
               },
             },
             {
-              name: "--trace-token",
+              name: "--scheduler-count",
               description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
+                "Number of schedulers, supported in the Environments with Airflow 2.0.1 and later",
               args: {
-                name: "TRACE_TOKEN",
+                name: "SCHEDULER_COUNT",
+                description: "Int",
+              },
+            },
+            {
+              name: "--scheduler-cpu",
+              description: "CPU allocated to Airflow scheduler",
+              args: {
+                name: "SCHEDULER_CPU",
+                description: "Float",
+              },
+            },
+            {
+              name: "--scheduler-memory",
+              description:
+                "Memory allocated to Airflow scheduler, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "SCHEDULER_MEMORY",
+              },
+            },
+            {
+              name: "--scheduler-storage",
+              description:
+                "Storage allocated to Airflow scheduler, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "SCHEDULER_STORAGE",
+              },
+            },
+            {
+              name: "--snapshot-creation-schedule",
+              description:
+                "Cron expression specifying when snapshots of the environment should be created. Can be specified for Composer 2.0.32 or greater",
+              priority: 100,
+              args: {
+                name: "SNAPSHOT_CREATION_SCHEDULE",
                 description: "String",
-                suggestions: [],
+              },
+            },
+            {
+              name: "--snapshot-location",
+              description:
+                "The Cloud Storage location for storing automatically created snapshots. Can be specified for Composer 2.0.32 or greater",
+              priority: 100,
+              args: {
+                name: "SNAPSHOT_LOCATION",
+                description: "String",
+              },
+            },
+            {
+              name: "--snapshot-schedule-timezone",
+              description:
+                "Timezone that sets the context to interpret snapshot_creation_schedule. Can be specified for Composer 2.0.32 or greater",
+              priority: 100,
+              args: {
+                name: "SNAPSHOT_SCHEDULE_TIMEZONE",
+                description: "String",
+              },
+            },
+            {
+              name: "--subnetwork",
+              description:
+                "The link:https://cloud.google.com/compute/docs/subnetworks[Compute Engine Subnetwork] to which the environment will be connected",
+              args: {
+                name: "SUBNETWORK",
+                description: "String",
+              },
+            },
+            {
+              name: "--support-web-server-plugins",
+              description:
+                "Enable the support for web server plugins, supported in Composer 3 or greater",
+            },
+            optTraceToken,
+            {
+              name: "--triggerer-count",
+              description:
+                "Number of triggerers, supported in the Environments with Composer 2.0.31 and Airflow 2.2.5 and greater",
+              args: {
+                name: "TRIGGERER_COUNT",
+                description: "Int",
+              },
+            },
+            {
+              name: "--triggerer-cpu",
+              description:
+                "CPU allocated to Airflow triggerer. Supported in the Environments with Composer 2.0.31 and Airflow 2.2.5 and greater",
+              args: {
+                name: "TRIGGERER_CPU",
+                description: "Float",
+              },
+            },
+            {
+              name: "--triggerer-memory",
+              description:
+                "Memory allocated to Airflow triggerer, ex. 512MB, 3GB, 2. If units are not provided, defaults to GB. Supported in the Environments with Composer 2.0.31 and Airflow 2.2.5 and greater",
+              args: {
+                name: "TRIGGERER_MEMORY",
               },
             },
             {
               name: "--update-airflow-configs",
               description:
-                "A list of Airflow config override KEY=VALUE pairs to set. If a config\noverride exists, its value is updated; otherwise, a new config override\nis created.\n+\nKEYs should specify the configuration section and property name,\nseparated by a hyphen, for example `core-print_stats_interval`. The\nsection may not contain a closing square brace or period. The property\nname must be non-empty and may not contain an equals sign, semicolon,\nor period. By convention, property names are spelled with\n`snake_case.` VALUEs may contain any character",
+                "A list of Airflow config override KEY=VALUE pairs to set. If a config override exists, its value is updated; otherwise, a new config override is created",
               args: {
                 name: "KEY=VALUE",
                 description: "Dict",
-                suggestions: [],
               },
             },
             {
               name: "--update-env-variables",
               description:
-                "A list of environment variable NAME=VALUE pairs to set and provide to the\nAirflow scheduler, worker, and webserver processes. If an environment\nvariable exists, its value is updated; otherwise, a new environment\nvariable is created.\n+\nNAMEs are the environment variable names and may contain upper and\nlowercase letters, digits, and underscores; they must not begin with a\ndigit.\n+\nUser-specified environment variables should not be used to set Airflow\nconfiguration properties. Instead use the `--update-airflow-configs` flag",
+                "A list of environment variable NAME=VALUE pairs to set and provide to the Airflow scheduler, worker, and webserver processes. If an environment variable exists, its value is updated; otherwise, a new environment variable is created",
               args: {
                 name: "NAME=VALUE",
                 description: "Dict",
-                suggestions: [],
               },
             },
             {
               name: "--update-labels",
               description:
-                "List of label KEY=VALUE pairs to update. If a label exists its value is modified, otherwise a new label is created.\n+\nKeys must start with a lowercase character and contain only hyphens (`-`), underscores (```_```), lowercase characters, and numbers. Values must contain only hyphens (`-`), underscores (```_```), lowercase characters, and numbers",
+                "List of label KEY=VALUE pairs to update. If a label exists, its value is modified. Otherwise, a new label is created",
               args: {
                 name: "KEY=VALUE",
                 description: "Dict",
-                suggestions: [],
               },
             },
             {
               name: "--update-pypi-package",
               description:
-                "A PyPI package to add to the environment. If a package exists, its\nvalue is updated; otherwise, a new package is installed.\n+\nThe value takes the form of: `PACKAGE[EXTRAS_LIST]VERSION_SPECIFIER`,\nas one would specify in a pip requirements file.\n+\nPACKAGE is specified as a package name, such as `numpy.` EXTRAS_LIST is\na comma-delimited list of PEP 508 distribution extras that may be\nempty, in which case the enclosing square brackets may be omitted.\nVERSION_SPECIFIER is an optional PEP 440 version specifier. If both\nEXTRAS_LIST and VERSION_SPECIFIER are omitted, the `=` and\neverything to the right may be left empty.\n+\nThis is a repeated argument that can be specified multiple times to\nupdate multiple packages. If PACKAGE appears more than once, the last\nvalue will be used",
+                "A PyPI package to add to the environment. If a package exists, its value is updated; otherwise, a new package is installed",
               isRepeatable: true,
               args: {
-                name: "PACKAGE[EXTRAS_LIST]VERSION_SPECIFIER",
+                name: "PACKAGEEXTRAS_LISTVERSION_SPECIFIER",
                 description: "String",
-                suggestions: [],
               },
             },
             {
               name: "--update-pypi-packages-from-file",
               description:
-                "The path to a file containing a list of PyPI packages to install in\nthe environment. Each line in the file should contain a package\nspecification in the format of the update-pypi-package argument\ndefined above. The path can be a local file path or a Google Cloud Storage\nfile path (Cloud Storage file path starts with 'gs://')",
+                "The path to a file containing a list of PyPI packages to install in the environment. Each line in the file should contain a package specification in the format of the update-pypi-package argument defined above. The path can be a local file path or a Google Cloud Storage file path (Cloud Storage file path starts with 'gs://')",
               args: {
                 name: "UPDATE_PYPI_PACKAGES_FROM_FILE",
                 description: "String",
-                suggestions: [],
+                template: "filepaths",
               },
             },
             {
-              name: "--user-output-enabled",
+              name: "--update-web-server-allow-ip",
               description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
+                "Specifies a list of IPv4 or IPv6 ranges that will be allowed to access the Airflow web server. By default, all IPs are allowed to access the web server",
+              args: {
+                name: "UPDATE_WEB_SERVER_ALLOW_IP",
+                description: "Dict",
+              },
+            },
+            optUserOutputEnabled,
+            optVerbosity,
+            {
+              name: "--web-server-allow-all",
+              description:
+                "Allows all IP addresses to access the Airflow web server",
             },
             {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
+              name: "--web-server-cpu",
+              description: "CPU allocated to each Airflow web server",
               args: {
-                name: "VERBOSITY",
+                name: "WEB_SERVER_CPU",
+                description: "Float",
+              },
+            },
+            {
+              name: "--web-server-deny-all",
+              description:
+                "Denies all incoming traffic to the Airflow web server",
+            },
+            {
+              name: "--web-server-machine-type",
+              description:
+                "Machine type used by the Airflow web server. The list of available machine types is available here: https://cloud.google.com/composer/pricing",
+              args: {
+                name: "WEB_SERVER_MACHINE_TYPE",
                 description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
+              },
+            },
+            {
+              name: "--web-server-memory",
+              description:
+                "Memory allocated to Airflow web server, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "WEB_SERVER_MEMORY",
+              },
+            },
+            {
+              name: "--web-server-storage",
+              description:
+                "Storage allocated to Airflow web server, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "WEB_SERVER_STORAGE",
+              },
+            },
+            {
+              name: "--worker-cpu",
+              description: "CPU allocated to each Airflow worker",
+              args: {
+                name: "WORKER_CPU",
+                description: "Float",
+              },
+            },
+            {
+              name: "--worker-memory",
+              description:
+                "Memory allocated to Airflow worker, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "WORKER_MEMORY",
+              },
+            },
+            {
+              name: "--worker-storage",
+              description:
+                "Storage allocated to Airflow worker, ex. 600MB, 3GB, 2. If units are not provided, defaults to GB",
+              args: {
+                name: "WORKER_STORAGE",
               },
             },
           ],
@@ -3841,134 +2733,404 @@ const completionSpec: Fig.Spec = {
               "ID of the environment or fully qualified identifier for the environment",
           },
         },
+        {
+          name: "user-workloads-config-maps",
+          description:
+            "Create and manage user workloads ConfigMaps of environment",
+          subcommands: [
+            {
+              name: "create",
+              description: "Create a user workloads ConfigMap",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                {
+                  name: "--config-map-file-path",
+                  description:
+                    "Path to a local file with a single Kubernetes ConfigMap in YAML format",
+                  priority: 100,
+                  args: {
+                    name: "CONFIG_MAP_FILE_PATH",
+                    description: "String",
+                    template: "filepaths",
+                  },
+                },
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+            },
+            {
+              name: "delete",
+              description: "Delete a user workloads ConfigMap",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+              args: {
+                name: "CONFIG_MAP_NAME",
+                description: "Name of the ConfigMap",
+                isOptional: true,
+              },
+            },
+            {
+              name: "describe",
+              description: "Get details about a user workloads ConfigMap",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+              args: {
+                name: "CONFIG_MAP_NAME",
+                description: "Name of the ConfigMap",
+                isOptional: true,
+              },
+            },
+            {
+              name: "list",
+              description: "List user workloads ConfigMaps",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+            },
+            {
+              name: "update",
+              description: "Update a user workloads ConfigMap",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                {
+                  name: "--config-map-file-path",
+                  description:
+                    "Path to a local file with a single Kubernetes ConfigMap in YAML format",
+                  priority: 100,
+                  args: {
+                    name: "CONFIG_MAP_FILE_PATH",
+                    description: "String",
+                    template: "filepaths",
+                  },
+                },
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+            },
+          ],
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
+            {
+              name: "--help",
+              description: "Display detailed help",
+            },
+            optImpersonateServiceAccount,
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
+          ],
+        },
+        {
+          name: "user-workloads-secrets",
+          description:
+            "Create and manage user workloads Secrets of environment",
+          subcommands: [
+            {
+              name: "create",
+              description: "Create a user workloads Secret",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                {
+                  name: "--secret-file-path",
+                  description:
+                    "Path to a local file with a single Kubernetes Secret in YAML format",
+                  priority: 100,
+                  args: {
+                    name: "SECRET_FILE_PATH",
+                    description: "String",
+                    template: "filepaths",
+                  },
+                },
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+            },
+            {
+              name: "delete",
+              description: "Delete a user workloads Secret",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+              args: {
+                name: "SECRET_NAME",
+                description: "Name of the Secret",
+                isOptional: true,
+              },
+            },
+            {
+              name: "describe",
+              description: "Get details about a user workloads Secret",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+              args: {
+                name: "SECRET_NAME",
+                description: "Name of the Secret",
+                isOptional: true,
+              },
+            },
+            {
+              name: "list",
+              description: "List user workloads Secrets",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+            },
+            {
+              name: "update",
+              description: "Update a user workloads Secret",
+              options: [
+                optAccessTokenFile,
+                optAccount,
+                optBillingProject,
+                optConfiguration,
+                optEnvironment,
+                optFlagsFile,
+                optFlatten,
+                optFormat,
+                {
+                  name: "--help",
+                  description: "Display detailed help",
+                },
+                optImpersonateServiceAccount,
+                optLocation,
+                optLogHttp,
+                optProject,
+                optQuiet,
+                {
+                  name: "--secret-file-path",
+                  description:
+                    "Path to a local file with a single Kubernetes Secret in YAML format",
+                  priority: 100,
+                  args: {
+                    name: "SECRET_FILE_PATH",
+                    description: "String",
+                    template: "filepaths",
+                  },
+                },
+                optTraceToken,
+                optUserOutputEnabled,
+                optVerbosity,
+              ],
+            },
+          ],
+          options: [
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
+            {
+              name: "--help",
+              description: "Display detailed help",
+            },
+            optImpersonateServiceAccount,
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
+          ],
+        },
       ],
       options: [
-        {
-          name: "--account",
-          description:
-            "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-          args: {
-            name: "ACCOUNT",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--billing-project",
-          description:
-            "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-          args: {
-            name: "BILLING_PROJECT",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--configuration",
-          description:
-            "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-          args: {
-            name: "CONFIGURATION",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--flags-file",
-          description:
-            "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-          args: {
-            name: "YAML_FILE",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--flatten",
-          description:
-            "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-          args: {
-            name: "KEY",
-            description: "List",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--format",
-          description:
-            "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-          args: {
-            name: "FORMAT",
-            description: "String",
-            suggestions: [],
-          },
-        },
+        optAccessTokenFile,
+        optAccount,
+        optBillingProject,
+        optConfiguration,
+        optFlagsFile,
+        optFlatten,
+        optFormat,
         {
           name: "--help",
           description: "Display detailed help",
         },
-        {
-          name: "--impersonate-service-account",
-          description:
-            "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-          args: {
-            name: "SERVICE_ACCOUNT_EMAIL",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--log-http",
-          description:
-            "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-        },
-        {
-          name: "--project",
-          description:
-            "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-          args: {
-            name: "PROJECT_ID",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--quiet",
-          description:
-            "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-        },
-        {
-          name: "--trace-token",
-          description:
-            "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-          args: {
-            name: "TRACE_TOKEN",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--user-output-enabled",
-          description:
-            "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-        },
-        {
-          name: "--verbosity",
-          description:
-            "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-          args: {
-            name: "VERBOSITY",
-            description: "String",
-            suggestions: [
-              "debug",
-              "info",
-              "warning",
-              "error",
-              "critical",
-              "none",
-            ],
-          },
-        },
+        optImpersonateServiceAccount,
+        optLogHttp,
+        optProject,
+        optQuiet,
+        optTraceToken,
+        optUserOutputEnabled,
+        optVerbosity,
       ],
     },
     {
@@ -3979,80 +3141,18 @@ const completionSpec: Fig.Spec = {
           name: "delete",
           description: "Delete one or more completed Cloud Composer operations",
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
-            {
-              name: "--impersonate-service-account",
-              description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-              args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optImpersonateServiceAccount,
             {
               name: "--location",
               description:
@@ -4060,61 +3160,14 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "LOCATION",
                 description: "String",
-                suggestions: [],
               },
             },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
-            {
-              name: "--project",
-              description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
-            {
-              name: "--trace-token",
-              description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-              args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--user-output-enabled",
-              description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-              args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
-              },
-            },
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
           ],
           args: {
             name: "OPERATIONS",
@@ -4127,80 +3180,18 @@ const completionSpec: Fig.Spec = {
           name: "describe",
           description: "Get details about an asynchronous operation",
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
-            {
-              name: "--impersonate-service-account",
-              description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-              args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optImpersonateServiceAccount,
             {
               name: "--location",
               description:
@@ -4208,61 +3199,14 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "LOCATION",
                 description: "String",
-                suggestions: [],
               },
             },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
-            {
-              name: "--project",
-              description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
-            {
-              name: "--trace-token",
-              description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-              args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--user-output-enabled",
-              description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-              args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
-              },
-            },
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
           ],
           args: {
             name: "OPERATION",
@@ -4274,268 +3218,67 @@ const completionSpec: Fig.Spec = {
           name: "list",
           description: "Lists environment operations",
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--filter",
-              description:
-                "Apply a Boolean filter _EXPRESSION_ to each resource item to be listed.\nIf the expression evaluates `True`, then that item is listed. For more\ndetails and examples of filter expressions, run $ gcloud topic filters. This\nflag interacts with other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "EXPRESSION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFilter,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
-            {
-              name: "--impersonate-service-account",
-              description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-              args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--limit",
-              description:
-                "Maximum number of resources to list. The default is *unlimited*.\nThis flag interacts with other flags that are applied in this order:\n*--flatten*, *--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "LIMIT",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
-              },
-            },
+            optImpersonateServiceAccount,
+            optLimit,
             {
               name: "--locations",
               description:
                 "IDs of the locations or fully qualified identifiers for the locations",
+              priority: 100,
               args: {
                 name: "LOCATIONS",
                 description: "List",
-                suggestions: [],
-              },
-              priority: 100,
-            },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
-            {
-              name: "--page-size",
-              description:
-                "Some services group resource list output into pages. This flag specifies\nthe maximum number of resources per page. The default is determined by the\nservice if it supports paging, otherwise it is *unlimited* (no paging).\nPaging may be applied before or after *--filter* and *--limit* depending\non the service",
-              args: {
-                name: "PAGE_SIZE",
-                description: "Googlecloudsdk.calliope.arg_parsers:Parse",
-                suggestions: [],
               },
             },
+            optLogHttp,
             {
-              name: "--project",
+              name: "--no-uri",
               description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
+                "Print a list of resource URIs instead of the default output, and change the command output to a list of URIs. If this flag is used with *--format*, the formatting is applied on this URI list. To display URIs alongside other keys instead, use the *uri()* transform",
+              hidden: true,
             },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
-            {
-              name: "--sort-by",
-              description:
-                "Comma-separated list of resource field key names to sort by. The\ndefault order is ascending. Prefix a field with ``~'' for descending\norder on that field. This flag interacts with other flags that are applied\nin this order: *--flatten*, *--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "FIELD",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--trace-token",
-              description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-              args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optPageSize,
+            optProject,
+            optQuiet,
+            optSortBy,
+            optTraceToken,
             {
               name: "--uri",
               description:
-                "Print a list of resource URIs instead of the default output",
+                "Print a list of resource URIs instead of the default output, and change the command output to a list of URIs. If this flag is used with *--format*, the formatting is applied on this URI list. To display URIs alongside other keys instead, use the *uri()* transform",
             },
-            {
-              name: "--user-output-enabled",
-              description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-              args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
-              },
-            },
+            optUserOutputEnabled,
+            optVerbosity,
           ],
         },
         {
           name: "wait",
           description: "Wait for asynchronous operation to complete",
           options: [
-            {
-              name: "--account",
-              description:
-                "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-              args: {
-                name: "ACCOUNT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--billing-project",
-              description:
-                "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-              args: {
-                name: "BILLING_PROJECT",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--configuration",
-              description:
-                "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-              args: {
-                name: "CONFIGURATION",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flags-file",
-              description:
-                "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-              args: {
-                name: "YAML_FILE",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--flatten",
-              description:
-                "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-              args: {
-                name: "KEY",
-                description: "List",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--format",
-              description:
-                "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-              args: {
-                name: "FORMAT",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optAccessTokenFile,
+            optAccount,
+            optBillingProject,
+            optConfiguration,
+            optFlagsFile,
+            optFlatten,
+            optFormat,
             {
               name: "--help",
               description: "Display detailed help",
             },
-            {
-              name: "--impersonate-service-account",
-              description:
-                "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-              args: {
-                name: "SERVICE_ACCOUNT_EMAIL",
-                description: "String",
-                suggestions: [],
-              },
-            },
+            optImpersonateServiceAccount,
             {
               name: "--location",
               description:
@@ -4543,61 +3286,14 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "LOCATION",
                 description: "String",
-                suggestions: [],
               },
             },
-            {
-              name: "--log-http",
-              description:
-                "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-            },
-            {
-              name: "--project",
-              description:
-                "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-              args: {
-                name: "PROJECT_ID",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--quiet",
-              description:
-                "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-            },
-            {
-              name: "--trace-token",
-              description:
-                "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-              args: {
-                name: "TRACE_TOKEN",
-                description: "String",
-                suggestions: [],
-              },
-            },
-            {
-              name: "--user-output-enabled",
-              description:
-                "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-            },
-            {
-              name: "--verbosity",
-              description:
-                "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-              args: {
-                name: "VERBOSITY",
-                description: "String",
-                suggestions: [
-                  "debug",
-                  "info",
-                  "warning",
-                  "error",
-                  "critical",
-                  "none",
-                ],
-              },
-            },
+            optLogHttp,
+            optProject,
+            optQuiet,
+            optTraceToken,
+            optUserOutputEnabled,
+            optVerbosity,
           ],
           args: {
             name: "OPERATION",
@@ -4607,255 +3303,46 @@ const completionSpec: Fig.Spec = {
         },
       ],
       options: [
-        {
-          name: "--account",
-          description:
-            "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-          args: {
-            name: "ACCOUNT",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--billing-project",
-          description:
-            "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-          args: {
-            name: "BILLING_PROJECT",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--configuration",
-          description:
-            "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-          args: {
-            name: "CONFIGURATION",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--flags-file",
-          description:
-            "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-          args: {
-            name: "YAML_FILE",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--flatten",
-          description:
-            "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-          args: {
-            name: "KEY",
-            description: "List",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--format",
-          description:
-            "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-          args: {
-            name: "FORMAT",
-            description: "String",
-            suggestions: [],
-          },
-        },
+        optAccessTokenFile,
+        optAccount,
+        optBillingProject,
+        optConfiguration,
+        optFlagsFile,
+        optFlatten,
+        optFormat,
         {
           name: "--help",
           description: "Display detailed help",
         },
-        {
-          name: "--impersonate-service-account",
-          description:
-            "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-          args: {
-            name: "SERVICE_ACCOUNT_EMAIL",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--log-http",
-          description:
-            "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-        },
-        {
-          name: "--project",
-          description:
-            "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-          args: {
-            name: "PROJECT_ID",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--quiet",
-          description:
-            "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-        },
-        {
-          name: "--trace-token",
-          description:
-            "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-          args: {
-            name: "TRACE_TOKEN",
-            description: "String",
-            suggestions: [],
-          },
-        },
-        {
-          name: "--user-output-enabled",
-          description:
-            "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-        },
-        {
-          name: "--verbosity",
-          description:
-            "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-          args: {
-            name: "VERBOSITY",
-            description: "String",
-            suggestions: [
-              "debug",
-              "info",
-              "warning",
-              "error",
-              "critical",
-              "none",
-            ],
-          },
-        },
+        optImpersonateServiceAccount,
+        optLogHttp,
+        optProject,
+        optQuiet,
+        optTraceToken,
+        optUserOutputEnabled,
+        optVerbosity,
       ],
     },
   ],
   options: [
-    {
-      name: "--account",
-      description:
-        "Google Cloud Platform user account to use for invocation. Overrides the default *core/account* property value for this command invocation",
-      args: {
-        name: "ACCOUNT",
-        description: "String",
-        suggestions: [],
-      },
-    },
-    {
-      name: "--billing-project",
-      description:
-        "The Google Cloud Platform project that will be charged quota for operations performed in gcloud. If you need to operate on one project, but need quota against a different project, you can use this flag to specify the billing project. If both `billing/quota_project` and `--billing-project` are specified, `--billing-project` takes precedence. Run `$ gcloud config set --help` to see more information about `billing/quota_project`",
-      args: {
-        name: "BILLING_PROJECT",
-        description: "String",
-        suggestions: [],
-      },
-    },
-    {
-      name: "--configuration",
-      description:
-        "The configuration to use for this command invocation. For more\ninformation on how to use configurations, run:\n`gcloud topic configurations`.  You can also use the CLOUDSDK_ACTIVE_CONFIG_NAME environment\nvariable to set the equivalent of this flag for a terminal\nsession",
-      args: {
-        name: "CONFIGURATION",
-        description: "String",
-        suggestions: [],
-      },
-    },
-    {
-      name: "--flags-file",
-      description:
-        "A YAML or JSON file that specifies a *--flag*:*value* dictionary.\nUseful for specifying complex flag values with special characters\nthat work with any command interpreter. Additionally, each\n*--flags-file* arg is replaced by its constituent flags. See\n$ gcloud topic flags-file for more information",
-      args: {
-        name: "YAML_FILE",
-        description: "String",
-        suggestions: [],
-      },
-    },
-    {
-      name: "--flatten",
-      description:
-        "Flatten _name_[] output resource slices in _KEY_ into separate records\nfor each item in each slice. Multiple keys and slices may be specified.\nThis also flattens keys for *--format* and *--filter*. For example,\n*--flatten=abc.def* flattens *abc.def[].ghi* references to\n*abc.def.ghi*. A resource record containing *abc.def[]* with N elements\nwill expand to N records in the flattened output. This flag interacts\nwith other flags that are applied in this order: *--flatten*,\n*--sort-by*, *--filter*, *--limit*",
-      args: {
-        name: "KEY",
-        description: "List",
-        suggestions: [],
-      },
-    },
-    {
-      name: "--format",
-      description:
-        "Set the format for printing command output resources. The default is a\ncommand-specific human-friendly output format. The supported formats\nare: `config`, `csv`, `default`, `diff`, `disable`, `flattened`, `get`, `json`, `list`, `multi`, `none`, `object`, `table`, `text`, `value`, `yaml`. For more details run $ gcloud topic formats",
-      args: {
-        name: "FORMAT",
-        description: "String",
-        suggestions: [],
-      },
-    },
+    optAccessTokenFile,
+    optAccount,
+    optBillingProject,
+    optConfiguration,
+    optFlagsFile,
+    optFlatten,
+    optFormat,
     {
       name: "--help",
       description: "Display detailed help",
     },
-    {
-      name: "--impersonate-service-account",
-      description:
-        "For this gcloud invocation, all API requests will be made as the given service account instead of the currently selected account. This is done without needing to create, download, and activate a key for the account. In order to perform operations as the service account, your currently selected account must have an IAM role that includes the iam.serviceAccounts.getAccessToken permission for the service account. The roles/iam.serviceAccountTokenCreator role has this permission or you may create a custom role. Overrides the default *auth/impersonate_service_account* property value for this command invocation",
-      args: {
-        name: "SERVICE_ACCOUNT_EMAIL",
-        description: "String",
-        suggestions: [],
-      },
-    },
-    {
-      name: "--log-http",
-      description:
-        "Log all HTTP server requests and responses to stderr. Overrides the default *core/log_http* property value for this command invocation",
-    },
-    {
-      name: "--project",
-      description:
-        "The Google Cloud Platform project ID to use for this invocation. If\nomitted, then the current project is assumed; the current project can\nbe listed using `gcloud config list --format='text(core.project)'`\nand can be set using `gcloud config set project PROJECTID`.\n+\n`--project` and its fallback `core/project` property play two roles\nin the invocation. It specifies the project of the resource to\noperate on. It also specifies the project for API enablement check,\nquota, and billing. To specify a different project for quota and\nbilling, use `--billing-project` or `billing/quota_project` property",
-      args: {
-        name: "PROJECT_ID",
-        description: "String",
-        suggestions: [],
-      },
-    },
-    {
-      name: "--quiet",
-      description:
-        "Disable all interactive prompts when running gcloud commands. If input\nis required, defaults will be used, or an error will be raised.\nOverrides the default core/disable_prompts property value for this\ncommand invocation. This is equivalent to setting the environment\nvariable `CLOUDSDK_CORE_DISABLE_PROMPTS` to 1",
-    },
-    {
-      name: "--trace-token",
-      description:
-        "Token used to route traces of service requests for investigation of issues. Overrides the default *core/trace_token* property value for this command invocation",
-      args: {
-        name: "TRACE_TOKEN",
-        description: "String",
-        suggestions: [],
-      },
-    },
-    {
-      name: "--user-output-enabled",
-      description:
-        "Print user intended output to the console. Overrides the default *core/user_output_enabled* property value for this command invocation. Use *--no-user-output-enabled* to disable",
-    },
-    {
-      name: "--verbosity",
-      description:
-        "Override the default verbosity for this command. Overrides the default *core/verbosity* property value for this command invocation. _VERBOSITY_ must be one of: *debug*, *info*, *warning*, *error*, *critical*, *none*",
-      args: {
-        name: "VERBOSITY",
-        description: "String",
-        suggestions: ["debug", "info", "warning", "error", "critical", "none"],
-      },
-    },
+    optImpersonateServiceAccount,
+    optLogHttp,
+    optProject,
+    optQuiet,
+    optTraceToken,
+    optUserOutputEnabled,
+    optVerbosity,
   ],
 };
 
