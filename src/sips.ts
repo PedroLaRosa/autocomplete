@@ -1,3 +1,6 @@
+// sips (macOS built-in tool, no standalone version; man page bundled with Xcode 27.3 beta 2, 2026-11-19).
+// Source: sips(1) from the keith/xcode-man-pages mirror (commit 6ddd0b2) plus the existing spec; NOT a live run on macOS.
+// Added -1/--oneLine, --cropOffset, --optimizeColorForSharing, -o/--out, -j/--js; renamed -padColor to --padColor; -i/--addIcon takes no argument.
 const propertySuggestions: (string | Fig.Suggestion)[] = [
   "all",
   "allxml",
@@ -82,8 +85,14 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "tagFile",
+          template: "filepaths",
         },
       ],
+    },
+    {
+      name: ["-1", "--oneLine"],
+      description:
+        "Output for each file on a single line (profiles: pipe-delimited values, images: tab-delimited values)",
     },
     {
       name: "--verify",
@@ -95,6 +104,7 @@ const completionSpec: Fig.Spec = {
         "Get the embedded profile from image and write it to profile",
       args: {
         name: "profile",
+        template: "filepaths",
       },
     },
     {
@@ -175,12 +185,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-r", "--rotate"],
+      description: "Rotate image clockwise by the specified degrees",
       args: {
         name: "degreesCW",
       },
     },
     {
       name: ["-f", "--flip"],
+      description: "Flip image horizontally or vertically",
       args: {
         name: "axis",
         suggestions: ["horizontal", "vertical"],
@@ -199,6 +211,18 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "--cropOffset",
+      description: "Crop offset from top left corner",
+      args: [
+        {
+          name: "offsetY",
+        },
+        {
+          name: "offsetH",
+        },
+      ],
+    },
+    {
       name: ["-p", "--padToHeightWidth"],
       description: "Pad image with pixels to fit specified size",
       args: [
@@ -211,9 +235,9 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "-padColor",
+      name: "--padColor",
       description:
-        "Use this color when padding.  White=FFFFFF, Red=FF0000, Default=Black=000000",
+        "Use this color when padding. White=FFFFFF, Red=FF0000, Default=Black=000000",
       args: {
         name: "hexcolor",
       },
@@ -221,7 +245,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-z", "--resampleHeightWidth"],
       description:
-        "Resample image at specified size. Image apsect ratio may be altered",
+        "Resample image at specified size. Image aspect ratio may be altered",
       args: [
         {
           name: "pixelsH",
@@ -256,8 +280,24 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-i", "--addIcon"],
       description: "Add a Finder icon to image file",
+    },
+    {
+      name: "--optimizeColorForSharing",
+      description: "Optimize color for sharing",
+    },
+    {
+      name: ["-o", "--out"],
+      description: "Write the result to the given file or directory",
       args: {
-        name: "icon",
+        name: "file-or-directory",
+        template: ["filepaths", "folders"],
+      },
+    },
+    {
+      name: ["-j", "--js"],
+      description: "Execute a JavaScript file to modify or generate images",
+      args: {
+        name: "file",
         template: "filepaths",
       },
     },
