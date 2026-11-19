@@ -1,7 +1,9 @@
+// Sake v1.0.3 (kattouf/Sake tag 1.0.3, 2026-11-19). Source: read statically from a shallow clone of tag 1.0.3 (Sources/SakeCLI/*.swift command definitions, Sources/SakeCLILibrary/CommonOptions.swift, Sources/SakeShared); not run. `run` is the default subcommand upstream.
 const commonOptions: Fig.Option[] = [
   {
     name: ["--config-path", "-c"],
-    description: "Specify the path to the configuration file",
+    description:
+      "Specify the path to the configuration file (default: .sake.yml in the current directory)",
     args: {
       name: "path",
       template: "filepaths",
@@ -10,7 +12,8 @@ const commonOptions: Fig.Option[] = [
   },
   {
     name: ["--sake-app-path", "-s"],
-    description: "Specify the path for the SakeApp package",
+    description:
+      "Specify the path for the SakeApp package (default: SakeApp in the current directory)",
     args: {
       name: "path",
       template: "folders",
@@ -31,7 +34,8 @@ const commonCommandSpecificOptions: Fig.Option[] = [
   },
   {
     name: ["--sake-app-prebuilt-binary-path", "-b"],
-    description: "Specify the path to the prebuilt SakeApp binary",
+    description:
+      "Specify the path to the prebuilt SakeApp binary, to share a ready to use binary and avoid the build process (between CI runs for example)",
     args: {
       name: "path",
       template: "filepaths",
@@ -40,10 +44,17 @@ const commonCommandSpecificOptions: Fig.Option[] = [
   },
 ];
 
+const commandArgs: Fig.Arg = {
+  name: "args",
+  description: "Arguments to pass to the command",
+  isOptional: true,
+  isVariadic: true,
+};
+
 const completionSpec: Fig.Spec = {
   name: "sake",
   description:
-    "🍶 Swift-based utility for managing project commands, inspired by Make",
+    "🍶 Swift-based utility for managing command execution with dependencies and conditions, inspired by Make",
   generateSpec: async (_tokens, executeShellCommand) => {
     const { stdout } = await executeShellCommand({
       command: "sake",
@@ -62,6 +73,7 @@ const completionSpec: Fig.Spec = {
               priority: 76,
               icon: "🍶",
               options: [...commonOptions, ...commonCommandSpecificOptions],
+              args: commandArgs,
             };
           }),
         ];
@@ -92,7 +104,7 @@ const completionSpec: Fig.Spec = {
       options: [...commonOptions],
     },
     {
-      name: "list",
+      name: ["list", "ls"],
       description: "List all available commands defined in the SakeApp",
       options: [
         ...commonOptions,
@@ -106,7 +118,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "build",
-      description: "Manually trigger a rebuild of the SakeApp",
+      description:
+        "Manually trigger a rebuild of the SakeApp (typically unnecessary, can be used to warm up the build)",
       options: [
         ...commonOptions,
         {
@@ -119,30 +132,33 @@ const completionSpec: Fig.Spec = {
     {
       name: "run",
       description: "Run the specified command from the SakeApp",
-      args: {
-        name: "command",
-        description: "The command to run",
-        generators: {
-          script: ["sake", "list", "--json"],
-          postProcess: (output) => {
-            const commands = JSON.parse(output);
-            return Object.keys(commands.groups).reduce((acc, groupName) => {
-              const group = commands.groups[groupName];
-              return [
-                ...acc,
-                ...group.map((command) => {
-                  return {
-                    name: command.name,
-                    description: command.description,
-                    priority: 76,
-                    icon: "🍶",
-                  };
-                }),
-              ];
-            }, []);
+      args: [
+        {
+          name: "command",
+          description: "The name of the command to execute",
+          generators: {
+            script: ["sake", "list", "--json"],
+            postProcess: (output) => {
+              const commands = JSON.parse(output);
+              return Object.keys(commands.groups).reduce((acc, groupName) => {
+                const group = commands.groups[groupName];
+                return [
+                  ...acc,
+                  ...group.map((command) => {
+                    return {
+                      name: command.name,
+                      description: command.description,
+                      priority: 76,
+                      icon: "🍶",
+                    };
+                  }),
+                ];
+              }, []);
+            },
           },
         },
-      },
+        commandArgs,
+      ],
       options: [...commonOptions, ...commonCommandSpecificOptions],
     },
   ],
