@@ -1,6 +1,11 @@
+// palera1n v2.4 (latest stable upstream tag, released 2026-07-27; v3.0.0-beta.x are pre-releases and not covered, 2026-11-19).
+// Source: getopt_long table and usage() text in src/optparse.c at tag v2.4 (palera1n/palera1n).
+// Flags only built into some variants (rootful -B/-c/-C/-f/-l, TUI -t/--cli, macOS-only --override-libcheckra1nhelper) are kept.
+// The usage text lists --jbinit-log-to-file for -L but v2.4 does not register that long name in getopt_long, so only -L works.
 const completionSpec: Fig.Spec = {
   name: "palera1n",
-  description: "Jailbreaking tool for iOS/iPadOS 15.x-16.x arm64",
+  description:
+    "Jailbreaking tool for iOS/iPadOS/tvOS 15-26 and bridgeOS 5-10 arm64",
   options: [
     {
       name: "--version",
@@ -11,12 +16,20 @@ const completionSpec: Fig.Spec = {
       description: "Remove jailbreak",
     },
     {
+      name: "--force-enable-ssv",
+      description: "Force SSV detection to result in YES",
+    },
+    {
       name: ["--setup-partial-fakefs", "-B"],
       description: "Setup partial fakefs",
     },
     {
       name: ["--setup-fakefs", "-c"],
       description: "Setup fakefs",
+    },
+    {
+      name: ["--clean-fakefs", "-C"],
+      description: "Clean fakefs",
     },
     {
       name: ["--demote", "-d"],
@@ -46,6 +59,11 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--override-checkra1n", "-i"],
       description: "Override checkra1n",
+      args: { name: "FILE", template: "filepaths" },
+    },
+    {
+      name: "--override-libcheckra1nhelper",
+      description: "Custom checkra1n hook dylib (macOS only)",
       args: { name: "FILE", template: "filepaths" },
     },
     {
@@ -105,6 +123,20 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--no-colors", "-S"],
       description: "Disable colors on the command line",
+    },
+    {
+      name: ["--telnetd", "-T"],
+      description: "Enable TELNET daemon on port 46 (insecure)",
+    },
+    {
+      name: ["--tui", "-t"],
+      description: "Force interactive TUI",
+      exclusiveOn: ["--cli"],
+    },
+    {
+      name: "--cli",
+      description: "Force CLI mode",
+      exclusiveOn: ["--tui", "-t"],
     },
     {
       name: ["--debug-logging", "-v"],
