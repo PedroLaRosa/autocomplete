@@ -1,3 +1,8 @@
+// create-vite v9.3.4 (npm latest, 2026-11-19). Source: npm tarball dist/index.js (built-in help text, mri argument
+// config, template table) + README, read statically (package not executed).
+// Notes: the removed react-swc/react-swc-ts templates were dropped and react-compiler/react-compiler-ts added.
+// Only the 18 template presets documented in the README are suggested; the CLI also accepts further variants
+// that delegate to other scaffolders (custom-*, rsc, redwoodsdk-standard, ember-app, ...).
 const FAVICONS = {
   vanilla:
     "https://upload.wikimedia.org/wikipedia/commons/6/6a/JavaScript-logo.png?20120221235433",
@@ -24,12 +29,14 @@ const spec: Fig.Spec = {
   icon: "https://vitejs.dev/logo.svg",
   args: {
     name: "projectName",
-    description: "Project name",
+    description: "Project name (use . to scaffold in the current directory)",
+    template: "folders",
+    isOptional: true,
   },
   options: [
     {
-      name: "--template",
-      isRequired: true,
+      name: ["-t", "--template"],
+      description: "Use a specific template",
       args: {
         name: "template",
         suggestions: [
@@ -39,8 +46,8 @@ const spec: Fig.Spec = {
           iconWrap("vue-ts"),
           iconWrap("react"),
           iconWrap("react-ts"),
-          iconWrap("react-swc"),
-          iconWrap("react-swc-ts"),
+          iconWrap("react-compiler"),
+          iconWrap("react-compiler-ts"),
           iconWrap("preact"),
           iconWrap("preact-ts"),
           iconWrap("lit"),
@@ -53,6 +60,44 @@ const spec: Fig.Spec = {
           iconWrap("qwik-ts"),
         ],
       },
+    },
+    {
+      name: ["-i", "--immediate"],
+      description: "Install dependencies and start dev",
+      exclusiveOn: ["--no-immediate"],
+    },
+    {
+      name: "--no-immediate",
+      description: "Do not install dependencies and start dev",
+      exclusiveOn: ["-i", "--immediate"],
+    },
+    {
+      name: "--eslint",
+      description: "Use ESLint instead of Oxlint (only for React templates)",
+      exclusiveOn: ["--no-eslint"],
+    },
+    {
+      name: "--no-eslint",
+      description: "Use Oxlint instead of ESLint (only for React templates)",
+      exclusiveOn: ["--eslint"],
+    },
+    {
+      name: "--overwrite",
+      description: "Remove existing files if target directory is not empty",
+    },
+    {
+      name: "--interactive",
+      description: "Force interactive mode",
+      exclusiveOn: ["--no-interactive"],
+    },
+    {
+      name: "--no-interactive",
+      description: "Force non-interactive mode",
+      exclusiveOn: ["--interactive"],
+    },
+    {
+      name: ["-h", "--help"],
+      description: "Display this help message",
     },
   ],
 };
