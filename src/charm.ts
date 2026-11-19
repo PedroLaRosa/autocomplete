@@ -1,3 +1,8 @@
+// Charm CLI v0.12.6 (latest git tag; upstream main is only dependency bumps since, last commit 2025-02-24; 2026-11-19).
+// Source: cobra command definitions in cmd/*.go and main.go of charmbracelet/charm v0.12.6, read statically (not executed); cmd/ is identical on main.
+const remotePathArg: Fig.Arg = { name: "[charm:]PATH" };
+const dbArg: Fig.Arg = { name: "@DB", isOptional: true };
+
 const completionSpec: Fig.Spec = {
   name: "charm",
   description:
@@ -6,10 +11,25 @@ const completionSpec: Fig.Spec = {
     {
       name: "backup-keys",
       description: "Backup your Charm account keys",
+      options: [
+        {
+          name: ["--output", "-o"],
+          description: "Keys backup filepath",
+          args: {
+            name: "file",
+            default: "charm-keys-backup.tar",
+            template: "filepaths",
+          },
+        },
+      ],
     },
     {
       name: "completion",
       description: "Generate shell completion",
+      args: {
+        name: "shell",
+        suggestions: ["bash", "zsh", "fish", "powershell"],
+      },
     },
     {
       name: "crypt",
@@ -18,10 +38,17 @@ const completionSpec: Fig.Spec = {
         {
           name: "decrypt",
           description: "Decrypt stdin with your Charm account encryption key",
+          args: {
+            name: "file",
+            description: "Encrypted file to read instead of stdin",
+            isOptional: true,
+            template: "filepaths",
+          },
         },
         {
           name: "decrypt-lookup",
           description: "Decrypt arg deterministically",
+          args: { name: "value" },
         },
         {
           name: "encrypt",
@@ -30,32 +57,24 @@ const completionSpec: Fig.Spec = {
         {
           name: "encrypt-lookup",
           description: "Encrypt arg deterministically",
+          args: { name: "value" },
         },
       ],
     },
     {
       name: "fs",
-      description: "Use the Charm file systems",
+      description: "Use the Charm file system",
       subcommands: [
         {
           name: "cat",
           description: "Output the content of the file at path",
-          args: {
-            name: "[charm:]PATH",
-          },
+          args: remotePathArg,
         },
         {
           name: "cp",
           description:
             'Copy a file, preface source or destination with "charm:" to specify a remote path',
-          args: [
-            {
-              name: "[charm:]PATH",
-            },
-            {
-              name: "[charm:]PATH",
-            },
-          ],
+          args: [remotePathArg, remotePathArg],
           options: [
             {
               name: ["--recursive", "-r"],
@@ -66,36 +85,29 @@ const completionSpec: Fig.Spec = {
         {
           name: "ls",
           description: "List file or directory at path",
-          args: {
-            name: "[charm:]PATH",
-          },
+          args: remotePathArg,
         },
         {
           name: "mv",
           description:
-            'Move a file, preface source or destination with "charm" to specify a remote  path',
-          args: [
+            'Move a file, preface source or destination with "charm:" to specify a remote path',
+          args: [remotePathArg, remotePathArg],
+          options: [
             {
-              name: "[charm:]PATH",
-            },
-            {
-              name: "[charm:]PATH",
+              name: ["--recursive", "-r"],
+              description: "Move directories recursively",
             },
           ],
         },
         {
           name: "rm",
           description: "Remove file or directory at path",
-          args: {
-            name: "[charm:]PATH",
-          },
+          args: remotePathArg,
         },
         {
           name: "tree",
           description: "Print a file system tree from path",
-          args: {
-            name: "[charm:]PATH",
-          },
+          args: remotePathArg,
         },
       ],
     },
@@ -112,6 +124,8 @@ const completionSpec: Fig.Spec = {
       description: "Import previously backed up Charm account keys",
       args: {
         name: "BACKUP.tar",
+        description: "Backup archive to read (defaults to stdin)",
+        isOptional: true,
         suggestions: ["BACKUP.tar"],
         template: "filepaths",
       },
@@ -125,6 +139,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "jwt",
       description: "Print a JWT",
+      args: {
+        name: "audience",
+        description: "Audience of the token",
+        isOptional: true,
+        isVariadic: true,
+      },
     },
     {
       name: "keys",
@@ -158,23 +178,46 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "KEY[@DB]",
           },
+          options: [
+            {
+              name: ["--show-binary", "-b"],
+              description: "Print binary values",
+            },
+          ],
         },
         {
           name: "list",
           description: "List all key value pairs with an optional @ db",
-          args: {
-            name: "KEY[@DB]",
-            isOptional: true,
-          },
+          args: dbArg,
+          options: [
+            {
+              name: ["--reverse", "-r"],
+              description: "List in reverse lexicographic order",
+            },
+            {
+              name: ["--keys-only", "-k"],
+              description: "Only print keys and don't fetch values from the db",
+            },
+            {
+              name: ["--values-only", "-v"],
+              description: "Only print values",
+            },
+            {
+              name: ["--show-binary", "-b"],
+              description: "Print binary values",
+            },
+            {
+              name: ["--delimiter", "-d"],
+              description: "Delimiter to separate keys and values",
+              args: { name: "delimiter", default: "\\t" },
+            },
+          ],
         },
         {
           name: "reset",
           description:
             "Delete local db and pull down fresh copy from Charm Cloud",
-          args: {
-            name: "KEY[@DB]",
-            isOptional: true,
-          },
+          args: dbArg,
         },
         {
           name: "set",
@@ -185,15 +228,15 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "VALUE",
+              description: "Value to store (read from stdin if omitted)",
+              isOptional: true,
             },
           ],
         },
         {
           name: "sync",
           description: "Sync local db with latest Charm Cloud db",
-          args: {
-            name: "KEY[@DB]",
-          },
+          args: dbArg,
         },
       ],
     },
@@ -214,8 +257,15 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "serve",
+      name: ["serve", "server"],
       description: "Start a self-hosted Charm Cloud server",
+      subcommands: [
+        {
+          name: ["migrate", "migration"],
+          description: "Run the server migration tool",
+          hidden: true,
+        },
+      ],
       options: [
         {
           name: "--data-dir",
@@ -258,6 +308,61 @@ const completionSpec: Fig.Spec = {
           },
         },
       ],
+    },
+    {
+      name: "where",
+      description:
+        "Find where your cloud.charm.sh folder resides on your machine",
+    },
+    // Hidden upstream commands
+    {
+      name: "bio",
+      description: "Print your Charm account bio as JSON",
+      hidden: true,
+    },
+    {
+      name: "man",
+      description: "Generate man pages",
+      hidden: true,
+    },
+    {
+      name: "migrate-account",
+      description: "Migrate your account from an RSA key to an Ed25519 key",
+      hidden: true,
+      options: [
+        {
+          name: ["--verbose", "-v"],
+          description: "Print debug output",
+        },
+      ],
+    },
+    {
+      name: "post-news",
+      description: "Post news to the self-hosted Charm server",
+      hidden: true,
+      args: { name: "file", template: "filepaths" },
+      options: [
+        {
+          name: "--data-dir",
+          description: "Directory to store SQLite db, SSH keys and file data",
+          args: { name: "DATA_DIR", template: "folders" },
+        },
+        {
+          name: ["--subject", "-s"],
+          description: "Subject for news post",
+          args: { name: "subject" },
+        },
+        {
+          name: ["--tags", "-t"],
+          description: "Tags for news post, comma separated",
+          args: { name: "tags", default: "server" },
+        },
+      ],
+    },
+    {
+      name: "sync-keys",
+      description: "Re-encrypt encrypt keys for all linked public keys",
+      hidden: true,
     },
   ],
   options: [
