@@ -1,3 +1,6 @@
+// K9s v0.51.0 (latest GitHub release tag / Homebrew, 2026-11-19). Source: derailed/k9s tag v0.51.0 (cmd/root.go, cmd/info.go, cmd/version.go cobra flag definitions; cobra v1.10.2 default help/completion commands).
+// Not run: the binary could not be built in the sandbox, so `k9s --help` output itself was not captured.
+
 const namespaces: Fig.Generator = {
   script: ["kubectl", "get", "namespaces"],
   postProcess: (out) => {
@@ -13,11 +16,85 @@ const namespaces: Fig.Generator = {
   },
 };
 
+const kubeContexts: Fig.Generator = {
+  script: ["kubectl", "config", "get-contexts", "-o", "name"],
+  postProcess: (out) =>
+    out
+      .split("\n")
+      .filter(Boolean)
+      .map((name) => ({ name, description: "Kubeconfig context" })),
+};
+
+const kubeClusters: Fig.Generator = {
+  script: ["kubectl", "config", "get-clusters"],
+  postProcess: (out) =>
+    out
+      .split("\n")
+      .slice(1)
+      .filter(Boolean)
+      .map((name) => ({ name, description: "Kubeconfig cluster" })),
+};
+
+const kubeUsers: Fig.Generator = {
+  script: ["kubectl", "config", "view", "-o", "jsonpath={.users[*].name}"],
+  postProcess: (out) =>
+    out
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((name) => ({ name, description: "Kubeconfig user" })),
+};
+
 const completionSpec: Fig.Spec = {
   name: "k9s",
   description:
     "K9s is a terminal based UI to interact with your Kubernetes clusters",
   subcommands: [
+    {
+      name: "completion",
+      description: "Generate the autocompletion script for the specified shell",
+      subcommands: [
+        {
+          name: "bash",
+          description: "Generate the autocompletion script for bash",
+          options: [
+            {
+              name: "--no-descriptions",
+              description: "Disable completion descriptions",
+            },
+          ],
+        },
+        {
+          name: "fish",
+          description: "Generate the autocompletion script for fish",
+          options: [
+            {
+              name: "--no-descriptions",
+              description: "Disable completion descriptions",
+            },
+          ],
+        },
+        {
+          name: "powershell",
+          description: "Generate the autocompletion script for powershell",
+          options: [
+            {
+              name: "--no-descriptions",
+              description: "Disable completion descriptions",
+            },
+          ],
+        },
+        {
+          name: "zsh",
+          description: "Generate the autocompletion script for zsh",
+          options: [
+            {
+              name: "--no-descriptions",
+              description: "Disable completion descriptions",
+            },
+          ],
+        },
+      ],
+    },
     {
       name: "help",
       description: "Help about any command",
@@ -25,7 +102,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "info",
-      description: "Print configuration info",
+      description: "List K9s configurations info",
       options: [
         {
           name: ["-h", "--help"],
@@ -79,6 +156,15 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--client-certificate",
+      description: "Path to a client certificate file for TLS",
+      args: {
+        name: "string",
+        description: "The path to a client certificate file",
+        template: "filepaths",
+      },
+    },
+    {
       name: "--client-key",
       description: "Path to a client key file for TLS",
       args: {
@@ -97,11 +183,21 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--cluster",
+      description: "The name of the kubeconfig cluster to use",
+      args: {
+        name: "string",
+        description: "The name of the kubeconfig cluster",
+        generators: kubeClusters,
+      },
+    },
+    {
       name: "--context",
       description: "The name of the kubeconfig context to use",
       args: {
         name: "string",
         description: "The name of the kubeconfig context",
+        generators: kubeContexts,
       },
     },
     {
@@ -115,6 +211,11 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-h", "--help"],
       description: "Show help for k9s",
+    },
+    {
+      name: "--invert",
+      description:
+        "Invert skin (dark to light, light to dark), preserving colors",
     },
     {
       name: "--insecure-skip-tls-verify",
@@ -143,12 +244,12 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-l", "--logLevel"],
       description:
-        "Specify a log level (info, warn, debug, trace, error) (default 'info')",
+        "Specify a log level (error, warn, info, debug) (default 'info')",
       args: {
         name: "string",
         description: "The log level",
         default: "info",
-        suggestions: ["info", "warn", "debug", "trace", "error"],
+        suggestions: ["error", "warn", "info", "debug"],
       },
     },
     {
@@ -173,9 +274,9 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-r", "--refresh"],
       description:
-        "Specify the default refresh rate as an integer (sec) (default 2)",
+        "Specify the default refresh rate as a float (sec) (default 2)",
       args: {
-        name: "int",
+        name: "float",
         description: "The refresh rate (sec)",
         default: "2",
       },
@@ -195,7 +296,12 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "string",
         description: "The path to a dir for a screen dumps",
+        template: "folders",
       },
+    },
+    {
+      name: "--splashless",
+      description: "Turn K9s splash screen off",
     },
     {
       name: "--token",
@@ -211,6 +317,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "string",
         description: "The name of the kubeconfig user",
+        generators: kubeUsers,
       },
     },
     {
