@@ -1,3 +1,5 @@
+// Browsersync v3.0.4 (npm latest, published 2025-04-02, 2026-11-19). Source: the published browser-sync@3.0.4 npm tarball read statically, not executed
+// (dist/bin.js yargs commands, cli-options/opts.{start,reload,recipe}.json). Removed --xip (not present in 3.0.4).
 const completionSpec: Fig.Spec = {
   name: "browser-sync",
   description:
@@ -21,6 +23,11 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-s", "--server"],
           description: "Run a Local server (uses your cwd as the web root)",
+          args: {
+            name: "directory",
+            isOptional: true,
+            template: "folders",
+          },
         },
         {
           name: "--cwd",
@@ -34,6 +41,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--serveStatic", "--ss"],
           description: "Directories to serve static files from",
+          isRepeatable: true,
           args: { name: "directories", template: "folders" },
         },
         {
@@ -41,7 +49,11 @@ const completionSpec: Fig.Spec = {
           description: "Specify a port to use",
           args: { name: "port" },
         },
-        { name: ["-p", "--proxy"], description: "Proxy an existing server" },
+        {
+          name: ["-p", "--proxy"],
+          description: "Proxy an existing server",
+          args: { name: "url" },
+        },
         {
           name: "--ws",
           description: "Proxy mode only - enable websocket proxying",
@@ -49,6 +61,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-b", "--browser"],
           description: "Choose which browser should be auto-opened",
+          isRepeatable: true,
           args: { name: "name" },
         },
         {
@@ -58,11 +71,13 @@ const completionSpec: Fig.Spec = {
         {
           name: "--ignore",
           description: "Ignore patterns for file watchers",
+          isRepeatable: true,
           args: { name: "patterns" },
         },
         {
           name: ["-f", "--files"],
           description: "File paths to watch",
+          isRepeatable: true,
           args: { name: "paths", template: "filepaths" },
         },
         {
@@ -73,11 +88,13 @@ const completionSpec: Fig.Spec = {
         {
           name: "--plugins",
           description: "Load Browsersync plugins",
+          isRepeatable: true,
           args: { name: "plugins" },
         },
         {
           name: "--extensions",
           description: "Specify file extension fallbacks",
+          isRepeatable: true,
           args: { name: "extensions" },
         },
         {
@@ -94,10 +111,6 @@ const completionSpec: Fig.Spec = {
         {
           name: "--directory",
           description: "Show a directory listing for the server",
-        },
-        {
-          name: "--xip",
-          description: "Use xip.io domain routing",
         },
         { name: "--tunnel", description: "Use a public URL" },
         {
@@ -160,6 +173,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--watchEvents",
           description: "Specify which file events to respond to",
+          isRepeatable: true,
           args: { name: "events" },
         },
         {
@@ -199,6 +213,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-f", "--files"],
           description: "File paths to reload",
+          isRepeatable: true,
           args: { name: "paths", template: "filepaths" },
         },
         {
@@ -209,7 +224,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-u", "--url"],
           description:
-            "Provide the full URL to the running browsersync isntance",
+            "Provide the full URL to the running Browsersync instance",
           args: { name: "url" },
         },
         {
