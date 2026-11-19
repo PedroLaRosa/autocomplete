@@ -1,3 +1,5 @@
+// ansible-galaxy v2.22.0 (ansible-core latest on PyPI, 2026-11-19). Source: `ansible-galaxy [role|collection] <action> --help` of ansible-core 2.22.0 run from a venv, plus ansible/cli/galaxy.py (argument parser); the legacy implicit-role forms such as `ansible-galaxy install` are not modelled
+
 const serverOptions: Fig.Option[] = [
   {
     name: ["--server", "-s"],
@@ -10,20 +12,54 @@ const serverOptions: Fig.Option[] = [
   {
     name: ["--token", "--api-key"],
     description:
-      "The Ansible Galaxy API key which can be found at https://galaxy.ansible.com/me/preferences",
+      "The Ansible Galaxy API key which can be found at https://galaxy.ansible.com/ui/token",
     args: {
       name: "api_key",
       description:
-        "The Ansible Galaxy API key which can be found at https://galaxy.ansible.com/me/preferences",
+        "The Ansible Galaxy API key which can be found at https://galaxy.ansible.com/ui/token",
     },
   },
   {
     name: ["--ignore-certs", "-c"],
     description: "Ignore SSL certificate validation errors",
   },
+  {
+    name: "--timeout",
+    description:
+      "The time to wait for operations against the galaxy server, defaults to 60s",
+    args: {
+      name: "timeout",
+      description: "Time in seconds to wait for operations",
+    },
+  },
+  {
+    name: "--api-version",
+    description: "Galaxy API version, only meant to be used in tests",
+    hidden: true,
+    args: {
+      name: "api_version",
+      suggestions: ["2", "3"],
+    },
+  },
 ];
 
-const collectionDownloadOptions: Fig.Option[] = [
+const forceOption: Fig.Option = {
+  name: ["--force", "-f"],
+  description: "Force overwriting an existing role or collection",
+};
+
+const extraVarsOption: Fig.Option = {
+  name: ["--extra-vars", "-e"],
+  description:
+    "Set additional variables as key=value or YAML/JSON, if filename prepend with @",
+  isRepeatable: true,
+  args: {
+    name: "extra_vars",
+    description: "Additional variables as key=value or YAML/JSON, or @file",
+  },
+};
+
+const cacheOptions: Fig.Option[] = [
   {
     name: "--clear-response-cache",
     description: "Clear the existing server response cache",
@@ -32,6 +68,94 @@ const collectionDownloadOptions: Fig.Option[] = [
     name: "--no-cache",
     description: "Do not use the server response cache",
   },
+];
+
+const preOption: Fig.Option = {
+  name: "--pre",
+  description:
+    "Include pre-release versions; semantic versioning pre-releases are ignored by default",
+};
+
+const noDepsOption = (type: "collection" | "role"): Fig.Option => ({
+  name: ["--no-deps", "-n"],
+  description: `Don't download ${type}s listed as dependencies`,
+  exclusiveOn: ["--force-with-deps"],
+});
+
+const forceWithDepsOption = (type: "collection" | "role"): Fig.Option => ({
+  name: "--force-with-deps",
+  description: `Force overwriting an existing ${type} and its dependencies`,
+  exclusiveOn: ["--no-deps", "-n"],
+});
+
+const keyringOption: Fig.Option = {
+  name: "--keyring",
+  description: "The keyring used during signature verification",
+  args: {
+    name: "keyring",
+    description: "The keyring used during signature verification",
+    template: ["filepaths"],
+  },
+};
+
+const requiredSignatureCountOption: Fig.Option = {
+  name: "--required-valid-signature-count",
+  description:
+    "The number of signatures that must successfully verify the collection: a positive integer or all; prepend the value with + to fail if no valid signatures are found (e.g. +all)",
+  args: {
+    name: "required_valid_signature_count",
+    description: "Number of signatures that must verify",
+    suggestions: ["1", "all", "+1", "+all"],
+  },
+};
+
+const signatureStatusCodes = [
+  "EXPSIG",
+  "EXPKEYSIG",
+  "REVKEYSIG",
+  "BADSIG",
+  "ERRSIG",
+  "NO_PUBKEY",
+  "MISSING_PASSPHRASE",
+  "BAD_PASSPHRASE",
+  "NODATA",
+  "UNEXPECTED",
+  "ERROR",
+  "FAILURE",
+  "BADARMOR",
+  "KEYEXPIRED",
+  "KEYREVOKED",
+  "NO_SECKEY",
+];
+
+const ignoreSignatureStatusCodeOptions: Fig.Option[] = [
+  {
+    name: "--ignore-signature-status-code",
+    description: "A GnuPG status code to ignore during signature verification",
+    hidden: true,
+    isRepeatable: true,
+    args: {
+      name: "status_code",
+      suggestions: signatureStatusCodes,
+    },
+  },
+  {
+    name: "--ignore-signature-status-codes",
+    description:
+      "A space separated list of status codes to ignore during signature verification (for example, NO_PUBKEY FAILURE); specify these after positional arguments or use -- to separate them",
+    args: {
+      name: "status_codes",
+      isVariadic: true,
+      suggestions: signatureStatusCodes,
+    },
+  },
+];
+
+const collectionsPathDescription =
+  "One or more directories to search for collections in addition to the default COLLECTIONS_PATHS; separate multiple paths with ':'";
+
+const collectionDownloadOptions: Fig.Option[] = [
+  ...cacheOptions,
   {
     name: ["--no-deps", "-n"],
     description: "Don't download collection(s) listed as dependencies",
@@ -43,6 +167,7 @@ const collectionDownloadOptions: Fig.Option[] = [
       name: "download_path",
       description: "The directory to download the collections to",
       template: ["folders"],
+      default: "./collections",
     },
   },
   {
@@ -54,20 +179,15 @@ const collectionDownloadOptions: Fig.Option[] = [
       template: ["filepaths"],
     },
   },
-  {
-    name: "--pre",
-    description: "Include pre-release versions",
-  },
+  preOption,
 ];
 
 const collectionInitOptions: Fig.Option[] = [
-  {
-    name: ["--force", "-f"],
-    description: "Force overwriting an existing role or collection",
-  },
+  forceOption,
   {
     name: "--init-path",
-    description: "The path in which the skeleton collection will be created",
+    description:
+      "The path in which the skeleton collection will be created, the default is the current working directory",
     args: {
       name: "init_path",
       description: "The path in which the skeleton collection will be created",
@@ -86,16 +206,15 @@ const collectionInitOptions: Fig.Option[] = [
       template: ["folders"],
     },
   },
+  extraVarsOption,
 ];
 
 const collectionBuildOptions: Fig.Option[] = [
-  {
-    name: ["--force", "-f"],
-    description: "Force overwriting an existing role or collection",
-  },
+  forceOption,
   {
     name: "--output-path",
-    description: "The path in which the collection is built to",
+    description:
+      "The path in which the collection is built to, the default is the current working directory",
     args: {
       name: "output_path",
       description: "The path in which the collection is built to",
@@ -118,20 +237,77 @@ const collectionPublishOptions: Fig.Option[] = [
       description:
         "The time to wait for the collection import process to finish",
       suggestions: ["60", "300", "600", "900"],
-      default: "60",
+      default: "0",
     },
+  },
+];
+
+const collectionInstallOptions: Fig.Option[] = [
+  forceOption,
+  ...cacheOptions,
+  {
+    name: ["--ignore-errors", "-i"],
+    description:
+      "Ignore errors during installation and continue with the next specified collection; this will not ignore dependency conflict errors",
+  },
+  noDepsOption("collection"),
+  forceWithDepsOption("collection"),
+  {
+    name: ["--collections-path", "-p"],
+    description: "The path to the directory containing your collections",
+    args: {
+      name: "collections_path",
+      description: "The path to the directory containing your collections",
+      template: ["folders"],
+    },
+  },
+  {
+    name: ["--requirements-file", "-r"],
+    description: "A file containing a list of collections to be installed",
+    args: {
+      name: "requirements",
+      description: "A file containing a list of collections to be installed",
+      template: ["filepaths"],
+    },
+  },
+  preOption,
+  {
+    name: ["--upgrade", "-U"],
+    description:
+      "Upgrade installed collection artifacts; this will also update dependencies unless --no-deps is provided",
+  },
+  keyringOption,
+  {
+    name: "--disable-gpg-verify",
+    description:
+      "Disable GPG signature verification when installing collections from a Galaxy server",
+  },
+  {
+    name: "--signature",
+    description:
+      "An additional signature source to verify the authenticity of the MANIFEST.json before installing the collection from a Galaxy server; use with a positional collection name (mutually exclusive with --requirements-file)",
+    isRepeatable: true,
+    args: {
+      name: "signature",
+      description: "Signature source (URL or file path)",
+    },
+  },
+  requiredSignatureCountOption,
+  ...ignoreSignatureStatusCodeOptions,
+  {
+    name: "--offline",
+    description:
+      "Install collection artifacts (tarballs) without contacting any distribution servers; does not apply to collections in remote Git repositories or URLs to remote tarballs",
   },
 ];
 
 const collectionListOptions: Fig.Option[] = [
   {
     name: ["--collections-path", "-p"],
-    description:
-      "One or more directories to search for collections in addition to the default COLLECTIONS_PATHS; separate multiple paths with ':'",
+    description: collectionsPathDescription,
     args: {
       name: "collections_path",
-      description:
-        "One or more directories to search for collections in addition to the default COLLECTIONS_PATHS; separate multiple paths with ':'",
+      description: collectionsPathDescription,
       template: ["folders"],
       suggestions: ["~/.ansible/collections:/usr/share/ansible/collections"],
       default: "~/.ansible/collections:/usr/share/ansible/collections",
@@ -152,12 +328,10 @@ const collectionListOptions: Fig.Option[] = [
 const collectionVerifyOptions: Fig.Option[] = [
   {
     name: ["--collections-path", "-p"],
-    description:
-      "One or more directories to search for collections in addition to the default COLLECTIONS_PATHS; separate multiple paths with ':'",
+    description: collectionsPathDescription,
     args: {
       name: "collections_path",
-      description:
-        "One or more directories to search for collections in addition to the default COLLECTIONS_PATHS; separate multiple paths with ':'",
+      description: collectionsPathDescription,
       template: ["folders"],
       suggestions: ["~/.ansible/collections:/usr/share/ansible/collections"],
       default: "~/.ansible/collections:/usr/share/ansible/collections",
@@ -169,19 +343,38 @@ const collectionVerifyOptions: Fig.Option[] = [
       "Ignore errors during verification and continue with the next specified collection",
   },
   {
+    name: "--offline",
+    description:
+      "Validate collection integrity locally without contacting server for canonical manifest hash",
+  },
+  {
     name: ["--requirements-file", "-r"],
-    description: "A file containing a list of collections to be downloaded",
+    description: "A file containing a list of collections to be verified",
     args: {
       name: "requirements",
-      description: "A file containing a list of collections to be downloaded",
+      description: "A file containing a list of collections to be verified",
       template: ["filepaths"],
     },
   },
+  keyringOption,
+  {
+    name: "--signature",
+    description:
+      "An additional signature source to verify the authenticity of the MANIFEST.json before using it to verify the rest of the contents of a collection from a Galaxy server; use with a positional collection name (mutually exclusive with --requirements-file)",
+    isRepeatable: true,
+    args: {
+      name: "signature",
+      description: "Signature source (URL or file path)",
+    },
+  },
+  requiredSignatureCountOption,
+  ...ignoreSignatureStatusCodeOptions,
 ];
 
 const collectionsListArg: Fig.Arg = {
   name: "collection",
   description: "Name of the collection",
+  isOptional: true,
   isVariadic: true,
   // https://docs.ansible.com/ansible/latest/collections/index.html
   suggestions: [
@@ -290,33 +483,49 @@ const collectionsListArg: Fig.Arg = {
   ],
 };
 
+const rolesPathOption: Fig.Option = {
+  name: ["--roles-path", "-p"],
+  description:
+    "The path to the directory containing your roles, the default is the first writable one configured via DEFAULT_ROLES_PATH",
+  args: {
+    name: "roles_path",
+    description: "The path to the directory containing your roles",
+    template: ["folders"],
+    suggestions: [
+      "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
+    ],
+    default: "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
+  },
+};
+
+const offlineRoleOption: Fig.Option = {
+  name: "--offline",
+  description: "Don't query the galaxy API when creating roles",
+};
+
 const roleInitOptions: Fig.Option[] = [
-  {
-    name: ["--force", "-f"],
-    description: "Force overwriting an existing role or collection",
-  },
-  {
-    name: "--offline",
-    description: "Don't query the galaxy API when creating roles",
-  },
+  forceOption,
+  offlineRoleOption,
   {
     name: "--init-path",
-    description: "The path in which the skeleton collection will be created",
+    description:
+      "The path in which the skeleton role will be created, the default is the current working directory",
     args: {
       name: "init_path",
-      description: "The path in which the skeleton collection will be created",
+      description: "The path in which the skeleton role will be created",
       template: ["folders"],
       default: ".",
     },
   },
   {
     name: "--role-skeleton",
-    description: "The path in which the skeleton role will be created",
+    description:
+      "The path to a role skeleton that the new role should be based upon",
     args: {
       name: "role_skeleton",
-      description: "The path in which the skeleton role will be created",
+      description:
+        "The path to a role skeleton that the new role should be based upon",
       template: ["folders"],
-      default: ".",
     },
   },
   {
@@ -326,39 +535,10 @@ const roleInitOptions: Fig.Option[] = [
       name: "role_type",
       description: "Initialize using an alternate role type",
       suggestions: ["container", "apb", "network"],
-      default: "container",
+      default: "default",
     },
   },
-];
-
-const roleRemoveOptions: Fig.Option[] = [
-  {
-    name: ["--roles-path", "--role-path"],
-    description: "The path to the directory containing your roles",
-    args: {
-      name: "roles_path",
-      description: "The path to the directory containing your roles",
-      suggestions: [
-        "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-      ],
-      default: "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-    },
-  },
-];
-
-const roleListOptions: Fig.Option[] = [
-  {
-    name: ["--roles-path", "--role-path"],
-    description: "The path to the directory containing your roles",
-    args: {
-      name: "roles_path",
-      description: "The path to the directory containing your roles",
-      suggestions: [
-        "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-      ],
-      default: "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-    },
-  },
+  extraVarsOption,
 ];
 
 const roleSearchOptions: Fig.Option[] = [
@@ -391,6 +571,10 @@ const roleSearchOptions: Fig.Option[] = [
 
 const roleImportOptions: Fig.Option[] = [
   {
+    name: "--no-wait",
+    description: "Don't wait for import results",
+  },
+  {
     name: "--branch",
     description:
       "The name of a branch to import. Defaults to the repository's default branch (usually master)",
@@ -420,18 +604,7 @@ const roleImportOptions: Fig.Option[] = [
 ];
 
 const roleSetupOptions: Fig.Option[] = [
-  {
-    name: ["--roles-path", "--role-path"],
-    description: "The path to the directory containing your roles",
-    args: {
-      name: "roles_path",
-      description: "The path to the directory containing your roles",
-      suggestions: [
-        "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-      ],
-      default: "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-    },
-  },
+  rolesPathOption,
   {
     name: "--remove",
     description:
@@ -450,52 +623,21 @@ const roleSetupOptions: Fig.Option[] = [
   },
 ];
 
-const roleInfoOptions: Fig.Option[] = [
-  {
-    name: ["--roles-path", "--role-path"],
-    description: "The path to the directory containing your roles",
-    args: {
-      name: "roles_path",
-      description: "The path to the directory containing your roles",
-      suggestions: [
-        "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-      ],
-      default: "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-    },
-  },
-  {
-    name: "--offline",
-    description: "Don't query the galaxy API when creating roles",
-  },
-];
-
 const roleInstallOptions: Fig.Option[] = [
+  forceOption,
+  rolesPathOption,
   {
-    name: ["--roles-path", "--role-path"],
-    description: "The path to the directory containing your roles",
-    args: {
-      name: "roles_path",
-      description: "The path to the directory containing your roles",
-      suggestions: [
-        "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-      ],
-      default: "~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles",
-    },
+    name: ["--ignore-errors", "-i"],
+    description: "Ignore errors and continue with the next specified role",
   },
+  noDepsOption("role"),
+  forceWithDepsOption("role"),
   {
-    name: ["--no-deps", "-n"],
-    description: "Don't download roles listed as dependencies",
-  },
-  {
-    name: "--force-with-deps",
-    description: "Force overwriting an existing role and its dependencies",
-  },
-  {
-    name: ["--requirements-file", "-r"],
-    description: "A file containing a list of collections to be downloaded",
+    name: ["--role-file", "-r"],
+    description: "A file containing a list of roles to be installed",
     args: {
       name: "requirements",
-      description: "A file containing a list of collections to be downloaded",
+      description: "A file containing a list of roles to be installed",
       template: ["filepaths"],
     },
   },
@@ -506,23 +648,36 @@ const roleInstallOptions: Fig.Option[] = [
   },
 ];
 
+const githubArgs: Fig.Arg[] = [
+  {
+    name: "github_user",
+    description: "GitHub username",
+  },
+  {
+    name: "github_repo",
+    description: "GitHub repository",
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "ansible-galaxy",
   description: "Perform various Role and Collection related operations",
   subcommands: [
     {
       name: "collection",
-      description: "Operate on collections",
+      description: "Manage an Ansible Galaxy collection",
       subcommands: [
         {
           name: "download",
-          description: "Download collections",
+          description:
+            "Download collections and their dependencies as a tarball for an offline install",
           options: [...serverOptions, ...collectionDownloadOptions],
           args: collectionsListArg,
         },
         {
           name: "init",
-          description: "Initialize collections",
+          description:
+            "Initialize new collection with the base structure of a collection",
           options: [...serverOptions, ...collectionInitOptions],
           args: {
             name: "collection_name",
@@ -531,29 +686,45 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "build",
-          description: "Build collections",
+          description:
+            "Build an Ansible collection artifact that can be published to Ansible Galaxy",
           options: [...serverOptions, ...collectionBuildOptions],
           args: {
             name: "collection",
             description: "Path(s) to the collection to be built",
             template: ["folders"],
+            isOptional: true,
+            isVariadic: true,
             default: ".",
           },
         },
         {
           name: "publish",
-          description: "Publish collections",
+          description: "Publish a collection artifact to Ansible Galaxy",
           options: [...serverOptions, ...collectionPublishOptions],
           args: {
             name: "collection_path",
             description: "The path to the collection tarball to publish",
-            template: ["folders"],
-            default: ".",
+            template: ["filepaths"],
+          },
+        },
+        {
+          name: "install",
+          description:
+            "Install collection(s) from file(s), URL(s) or Ansible Galaxy",
+          options: [...serverOptions, ...collectionInstallOptions],
+          args: {
+            ...collectionsListArg,
+            name: "collection_name",
+            description:
+              "The collection(s) name or path/url to a tar.gz collection artifact; mutually exclusive with --requirements-file",
+            template: ["filepaths"],
           },
         },
         {
           name: "list",
-          description: "List collections",
+          description:
+            "Show the name and version of each collection installed in the collections_path",
           options: [...serverOptions, ...collectionListOptions],
           args: {
             name: "collection",
@@ -563,23 +734,26 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "verify",
-          description: "Verify collections",
+          description:
+            "Compare checksums with the collection(s) found on the server and the installed copy; does not verify dependencies",
           options: [...serverOptions, ...collectionVerifyOptions],
           args: {
             name: "collection_name",
-            description: "The collections to verify",
+            description:
+              "The installed collection(s) name; mutually exclusive with --requirements-file",
             isOptional: true,
+            isVariadic: true,
           },
         },
       ],
     },
     {
       name: "role",
-      description: "Operate on roles",
+      description: "Manage an Ansible Galaxy role",
       subcommands: [
         {
           name: "init",
-          description: "Initialize roles",
+          description: "Initialize new role with the base structure of a role",
           options: [...serverOptions, ...roleInitOptions],
           args: {
             name: "role_name",
@@ -588,17 +762,26 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "remove",
-          description: "Remove roles",
-          options: [...serverOptions, ...roleRemoveOptions],
+          description: "Delete roles from roles_path",
+          options: [...serverOptions, rolesPathOption],
           args: {
-            name: "role_name",
-            description: "The role to remove",
+            name: "role",
+            description: "The role(s) to remove",
+            isVariadic: true,
           },
         },
         {
+          name: "delete",
+          description:
+            "Removes the role from Galaxy; it does not remove or alter the actual GitHub repository",
+          options: serverOptions,
+          args: githubArgs,
+        },
+        {
           name: "list",
-          description: "List roles",
-          options: [...serverOptions, ...roleListOptions],
+          description:
+            "Show the name and version of each role installed in the roles_path",
+          options: [...serverOptions, rolesPathOption],
           args: {
             name: "role",
             description: "The role to list",
@@ -607,44 +790,61 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "search",
-          description: "Search roles",
+          description:
+            "Search the Galaxy database by tags, platforms, author and multiple keywords",
           options: [...serverOptions, ...roleSearchOptions],
           args: {
             name: "searchterm",
             description: "Search terms",
             isOptional: true,
+            isVariadic: true,
           },
         },
         {
           name: "import",
-          description: "Import roles",
+          description: "Import a role into a galaxy server",
           options: [...serverOptions, ...roleImportOptions],
+          args: githubArgs,
+        },
+        {
+          name: "setup",
+          description:
+            "Manage the integration between Galaxy and the given source",
+          options: [...serverOptions, ...roleSetupOptions],
           args: [
             {
-              name: "github_user",
-              description: "GitHub username",
-              isOptional: true,
+              name: "source",
+              description: "Source",
             },
+            ...githubArgs,
             {
-              name: "github_repo",
-              description: "GitHub repository",
+              name: "secret",
+              description: "Secret",
             },
           ],
         },
         {
-          name: "setup",
-          description: "Set up roles",
-          options: [...serverOptions, ...roleSetupOptions],
-        },
-        {
           name: "info",
-          description: "Role information",
-          options: [...serverOptions, ...roleInfoOptions],
+          description: "View more details about a specific role",
+          options: [...serverOptions, rolesPathOption, offlineRoleOption],
+          args: {
+            name: "role_name[,version]",
+            description: "The role(s) to show, optionally with a version",
+            isVariadic: true,
+          },
         },
         {
           name: "install",
-          description: "Install roles",
+          description: "Install role(s) from file(s), URL(s) or Ansible Galaxy",
           options: [...serverOptions, ...roleInstallOptions],
+          args: {
+            name: "role_name",
+            description:
+              "Role name, URL or tar file; mutually exclusive with -r",
+            isOptional: true,
+            isVariadic: true,
+            template: ["filepaths"],
+          },
         },
       ],
     },
@@ -656,24 +856,16 @@ const completionSpec: Fig.Spec = {
       isPersistent: true,
     },
     {
-      name: "--verbose",
+      name: ["--verbose", "-v"],
       description:
-        "Verbose mode (-vvv for more, -vvvv to enable connection debugging)",
-      exclusiveOn: ["-v"],
-      isPersistent: true,
-    },
-    {
-      name: "-v",
-      description:
-        "Verbose mode (-vvv for more, -vvvv to enable connection debugging)",
-      isRepeatable: 4,
-      exclusiveOn: ["--verbose"],
+        "Print more debug messages; -vvv is a reasonable level to start, connection debugging might require -vvvv",
+      isRepeatable: 6,
       isPersistent: true,
     },
     {
       name: "--version",
       description:
-        "Shows version number, config file location, module search path, module location, executable location and exit",
+        "Show program's version number, config file location, configured module search path, module location, executable location",
       isPersistent: true,
     },
   ],
