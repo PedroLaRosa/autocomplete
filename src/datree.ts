@@ -1,15 +1,14 @@
+// Datree v1.9.19 (latest stable tag of datreeio/datree, 2026-11-19; main HEAD is the 2023-08-01 deprecation notice,
+// project is DEPRECATED/archived and gets no further releases besides 1.9.20-22-rc tags). Source: cobra command
+// definitions read statically from the repo (cmd/**/*.go); binary not run.
 const testOptions: Fig.Option[] = [
-  {
-    name: ["--help", "-h"],
-    description: "Help for 'test'",
-  },
   {
     name: "--ignore-missing-schemas",
     description: "Ignore missing schemas when executing schema validation step",
   },
   {
     name: "--no-record",
-    description: "Do not send policy checks metadata to the backend",
+    description: "Don't send policy checks metadata to the backend",
   },
   {
     name: "--only-k8s-files",
@@ -18,7 +17,7 @@ const testOptions: Fig.Option[] = [
   },
   {
     name: ["-o", "--output"],
-    description: "Define output format (simple, yaml, json, xml, JUnit)",
+    description: "Define output format (simple, yaml, json, xml, JUnit, sarif)",
     args: {
       name: "output",
       description: "Output format",
@@ -40,8 +39,12 @@ const testOptions: Fig.Option[] = [
           description: "XML output",
         },
         {
-          name: "junit",
+          name: "JUnit",
           description: "JUnit output",
+        },
+        {
+          name: "sarif",
+          description: "SARIF output",
         },
       ],
     },
@@ -65,6 +68,7 @@ const testOptions: Fig.Option[] = [
     name: "--schema-location",
     description:
       "Override schemas location search path (can be specified multiple times)",
+    isRepeatable: true,
     args: {
       name: "stringArray",
       description: "String array",
@@ -73,7 +77,49 @@ const testOptions: Fig.Option[] = [
   {
     name: ["-s", "--schema-version"],
     description:
-      "Set kubernetes version to validate against. Defaults to 1.19.0",
+      "Set kubernetes version to validate against. Defaults to 1.24.0",
+    args: {
+      name: "version",
+      description: "Kubernetes version in the form MAJOR.MINOR.PATCH",
+    },
+  },
+  {
+    name: "--exclude",
+    description: "Exclude paths pattern (regex)",
+    args: {
+      name: "pattern",
+    },
+  },
+  {
+    name: "--save-results",
+    description:
+      "Enter the path to the directory where you want to save the output file",
+    args: {
+      name: "directory",
+      template: "folders",
+    },
+  },
+  {
+    name: "--skip-validation",
+    description: "Skip validation step",
+    args: {
+      name: "step",
+      suggestions: [{ name: "schema", description: "Skip schema validation" }],
+    },
+  },
+  {
+    name: "--save-rendered",
+    description:
+      "Don't delete rendered files after the policy check (e.g. helm, kustomize)",
+  },
+  {
+    name: "--permissive-schema",
+    description:
+      "Perform non-strict schema validation (i.e. allow additional properties)",
+  },
+  {
+    name: "--quiet",
+    description: "Don't print skipped rules messages",
   },
   {
     name: "--verbose",
@@ -81,14 +127,23 @@ const testOptions: Fig.Option[] = [
   },
 ];
 
+const configKeyArg: Fig.Arg = {
+  name: "key",
+  suggestions: ["token", "offline", "policy_config", "schema_locations"],
+};
+
 const datreeSpec: Fig.Spec = {
   name: "datree",
   description:
-    "Datree can be used on the command line to run policies against Kubernetes manifests YAML files or Helm charts",
+    "Policy management tool for your Kubernetes (deprecated upstream)",
   subcommands: [
     {
       name: "completion",
       description: "Generate completion script for bash,zsh,fish,powershell",
+      args: {
+        name: "shell",
+        suggestions: ["bash", "zsh", "fish", "powershell"],
+      },
     },
     {
       name: "config",
@@ -96,33 +151,21 @@ const datreeSpec: Fig.Spec = {
       subcommands: [
         {
           name: "get",
-          description: "Get configuration value",
-          options: [
-            {
-              name: ["-h", "--help"],
-              description:
-                "Get value for specific key from datree config.yaml file. Defaults to $HOME/.datree/config.yaml",
-            },
-          ],
+          description:
+            "Get value for specific key from datree config.yaml file. Defaults to $HOME/.datree/config.yaml",
+          args: configKeyArg,
         },
         {
           name: "set",
-          description: "Set configuration value",
-          options: [
-            {
-              name: ["-h", "--help"],
-              description:
-                "Apply value for specific key in datree config.yaml file. Defaults to $HOME/.datree/config.yaml",
-            },
-          ],
+          description:
+            "Apply value for specific key in datree config.yaml file. Defaults to $HOME/.datree/config.yaml",
+          args: [configKeyArg, { name: "value" }],
         },
       ],
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Help for config",
-        },
-      ],
+    },
+    {
+      name: ["docs", "documentation"],
+      description: "Open the default browser with datree documentation page",
     },
     {
       name: "help",
@@ -133,18 +176,18 @@ const datreeSpec: Fig.Spec = {
     },
     {
       name: "kustomize",
-      description: "Generate kustomization files from manifests",
+      description:
+        "Render resources defined in a kustomization.yaml file and run a policy check against them",
       subcommands: [
         {
           name: "test",
-          description: "Test kustomization files",
+          description:
+            "Execute datree test for kustomize build <args>. Input should be a kustomize build directory or file",
+          args: {
+            name: "directory",
+            template: ["folders", "filepaths"],
+          },
           options: testOptions,
-        },
-      ],
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Help for kustomize",
         },
       ],
     },
@@ -152,12 +195,6 @@ const datreeSpec: Fig.Spec = {
       name: "publish",
       description:
         "Publish policies configuration for given <fileName>. Input should be the path to the Policy-as-Code yaml configuration file. ## Note You need to first enable Policy-as-Code (PaC) on the settings page in the dashboard",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Help for publish",
-        },
-      ],
       args: {
         name: "file path",
         template: "filepaths",
@@ -166,12 +203,17 @@ const datreeSpec: Fig.Spec = {
     {
       name: "test",
       description:
-        "Trigger a policy check, provide a Kubernetes configuration file path or a glob pattern",
+        "Execute static analysis for given <pattern>. Input should be glob or `-` for stdin",
       args: {
         name: "file path",
         template: "filepaths",
+        isVariadic: true,
       },
       options: testOptions,
+    },
+    {
+      name: "upgrade",
+      description: "Upgrade datree to the latest version",
     },
     {
       name: "version",
@@ -182,9 +224,8 @@ const datreeSpec: Fig.Spec = {
     {
       name: ["--help", "-h"],
       description: "Show help for datree",
+      isPersistent: true,
     },
   ],
-  // Only uncomment if datree takes an argument
-  // args: {}
 };
 export default datreeSpec;
