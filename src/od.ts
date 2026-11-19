@@ -1,3 +1,9 @@
+// od (macOS BSD, od.1 dated 2011-12-22, apple-oss-distributions/shell_cmds-329 hexdump/od.1 + odsyntax.c, 2026-11-19). Source: man page + source from Apple's OSS mirror (not run on macOS)
+const integerSizes = ["", "C", "S", "I", "L"];
+const integerTypes = ["d", "o", "u", "x"].flatMap((kind) =>
+  integerSizes.map((size) => kind + size)
+);
+
 const completionSpec: Fig.Spec = {
   name: "od",
   description: "Octal, decimal, hex, ASCII dump",
@@ -7,13 +13,29 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: "-A",
-      description: `Specify the input address base.  The argument base may be
-one of d, o, x or n, which specify decimal, octal,
-hexadecimal addresses or no address, respectively`,
+      description:
+        "Specify the input address base: decimal, octal, hexadecimal or no address (default is octal)",
       args: {
         name: "base",
-        suggestions: ["d", "o", "x", "n"],
-        default: "d",
+        suggestions: [
+          {
+            name: "d",
+            description: "Decimal addresses",
+          },
+          {
+            name: "o",
+            description: "Octal addresses",
+          },
+          {
+            name: "x",
+            description: "Hexadecimal addresses",
+          },
+          {
+            name: "n",
+            description: "No address",
+          },
+        ],
+        default: "o",
       },
     },
     {
@@ -68,10 +90,8 @@ hexadecimal addresses or no address, respectively`,
     },
     {
       name: "-j",
-      description: `Skip skip bytes of the combined input before dumping.  The
-number may be followed by one of b, k, m or g which
-specify the units of the number as blocks (512 bytes),
-kilobytes, megabytes and gigabytes, respectively`,
+      description:
+        "Skip skip bytes of the combined input before dumping.  The number may be followed by one of b, k, m or g which specify the units of the number as blocks (512 bytes), kilobytes, megabytes and gigabytes, respectively",
       args: {
         name: "skip",
       },
@@ -93,38 +113,19 @@ kilobytes, megabytes and gigabytes, respectively`,
     },
     {
       name: "-t",
-      description: `Specify the output format.  The type argument is a string
-containing one or more of the following kinds of type specificers: a,
-c, [d|o|u|x][C|S|I|L|n], or f[F|D|L|n]. See the man page for meanings`,
+      description:
+        "Specify the output format: a (named characters), c (C-style escaped characters), [d|o|u|x] followed by an optional size (C, S, I, L or a byte count) for integers, or f followed by an optional size (F, D, L or a byte count) for floating point numbers (default is oS)",
+      isRepeatable: true,
       args: {
         name: "type",
         suggestions: [
           "a",
           "c",
-          "dC",
-          "dS",
-          "dI",
-          "dL",
-          "dn",
-          "oC",
-          "oS",
-          "oI",
-          "oL",
-          "on",
-          "uC",
-          "uS",
-          "uI",
-          "uL",
-          "un",
-          "xC",
-          "xS",
-          "xI",
-          "xL",
-          "xn",
+          ...integerTypes,
+          "f",
           "fF",
           "fD",
           "fL",
-          "fn",
         ],
       },
     },
@@ -137,9 +138,8 @@ c, [d|o|u|x][C|S|I|L|n], or f[F|D|L|n]. See the man page for meanings`,
   args: [
     {
       name: "[+]offset[.][Bb]",
-      description: "Offset",
-      suggestions: ["+0b"],
-      default: "+0b",
+      description:
+        "Offset into the input: octal by default, hexadecimal with a leading 0x or x, decimal with a trailing dot, in 512 (b) or 1024 (B) byte units with a trailing b or B",
       isOptional: true,
     },
     {
