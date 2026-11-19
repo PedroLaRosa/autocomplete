@@ -1,3 +1,12 @@
+// authchanger v2.1.0 (jamf/authchanger open-source repo, archived read-only 2024-01-02, commit 8743d07; checked 2026-11-19). Source: authchanger/main.swift, Preferences.swift (-help text) and README.md,
+// read statically (macOS tool, not run). The Jamf Connect build of authchanger is closed source and its docs (learn.jamf.com) were not reachable, so -jamfconnect and -verbose
+// (not in the open-source build; -JamfConnect confirmed only by jamf/jamfconnect's Notify script) were kept as they were. All flags are case-insensitive in the tool.
+const mechanismsArg: Fig.Arg = {
+  name: "mechanism",
+  description: "Mechanisms in the form Bundle:Mechanism[,privileged]",
+  isVariadic: true,
+};
+
 const completionSpec: Fig.Spec = {
   name: "authchanger",
   parserDirectives: {
@@ -29,17 +38,29 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-demobilize",
-      description: "Sets up Jamf Connect Login to only demobilze accounts",
+      description:
+        "Sets up the login mechanisms to demobilize the account, taking into account any other -AD or -OIDC setup",
     },
     {
       name: "-notify",
       description:
-        "Adds the DEP Notify addition to the corresponding -AD, or -Setup argument",
+        "Adds the DEP Notify addition to the corresponding -AD, -Okta, -OIDC, or -Setup argument",
     },
     {
       name: "-setup",
-      description:
-        "Adds the DEP Notify addition to the corresponding -AD, or -Setup argument",
+      description: "Sets up the NoMAD Login Setup mechanisms",
+    },
+    {
+      name: "-ad",
+      description: "Sets up NoMAD Login AD",
+    },
+    {
+      name: "-okta",
+      description: "Sets up NoMAD Login+Okta",
+    },
+    {
+      name: "-oidc",
+      description: "Sets up Jamf Connect Login for Open ID Connect auth",
     },
     {
       name: "-jamfconnect",
@@ -52,30 +73,52 @@ const completionSpec: Fig.Spec = {
     {
       name: "-prelogin",
       description: "Mechs to be used before the actual UI is shown",
+      args: mechanismsArg,
     },
     {
       name: "-preauth",
       description:
         "Mechs to be used between the login UI and actual authentication",
+      args: mechanismsArg,
     },
     {
       name: "-postauth",
       description: "Mechs to be used after system authentication",
+      args: mechanismsArg,
     },
     {
       name: "-customrule",
       description:
-        "Allows the printout of any authorizationDB rule as well as setting of that rule to any custom mechanism(s)",
+        "Allows the printout of any authorizationDB rule as well as setting of that rule to any custom mechanism(s) or rule(s)",
+      args: [
+        {
+          name: "rule",
+          description:
+            "Authorization database right to print or overwrite (e.g. system.login.console)",
+        },
+        {
+          name: "type",
+          description: "Whether to set the rule's mechanisms or its rules",
+          isOptional: true,
+          suggestions: ["mechanisms", "rules"],
+        },
+        {
+          name: "mechanisms or rules",
+          description: "Mechanisms or rules to set, separated by spaces",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
     },
     {
       name: "-sysprefs",
       description:
-        "Enables Azure authentication for the Network Preference Pane",
+        "Enables OIDC authentication for the Network Preference Pane",
     },
     {
       name: "-sysprefsreset",
       description:
-        "Removes Azure authentication for the Network Preference Pane",
+        "Removes OIDC authentication for the Network Preference Pane",
     },
     {
       name: "-defaultjcright",
