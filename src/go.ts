@@ -1,6 +1,12 @@
-// Go v1.26.2 (installed `go version`, brew, 2026-11-19). Source: `go help`,
-// `go help <command>` for every command and mod/work subcommand, `go help
-// testflag`, flag sets in $GOROOT/src/cmd/go/internal
+// Go v1.27.4 (latest stable tag go1.27.4, proxy.golang.org/git tags, 2026-11-20).
+// Source: cmd/go/alldocs.go (`go help` text for every command, mod/work
+// subcommand and `go help testflag`), flag definitions in
+// cmd/go/internal/** and the Go 1.27 release notes, all read statically from
+// the go1.27.4 source tag and diffed against go1.26.2 (go 1.27 not executed here).
+// Changes vs 1.26: `go doc -ex`; `-diff` of go fix/vet now exits non-zero on a
+// non-empty diff; `go mod edit`/`go work edit` document `none` for -go/-toolchain.
+// Also corrected against the flag registration in source: no -cover* flags on
+// clean/generate/get and no -mod on get.
 
 const buildModeSuggestions: Fig.Suggestion[] = [
   {
@@ -188,6 +194,7 @@ do not delete it when exiting`,
       "Name of compiler to use, as in runtime.Compiler (gccgo or gc)",
     args: {
       name: "name",
+      suggestions: ["gc", "gccgo"],
     },
   },
   {
@@ -295,6 +302,14 @@ do not delete it when exiting`,
   },
 ];
 
+// Per cmd/go/internal/work.AddBuildFlags: clean, generate and get do not register the
+// coverage flags (AddCoverFlags is only called for build, install, list, run and test)
+// and get does not register -mod
+const withoutOptions = (options: Fig.Option[], names: string[]): Fig.Option[] =>
+  options.filter((o) => !names.includes(o.name as string));
+
+const coverOptionNames = ["-cover", "-covermode", "-coverpkg"];
+
 const packagesArg: Fig.Arg = {
   name: "packages",
   isVariadic: true,
@@ -318,6 +333,29 @@ const modEditRepeatable = (
     description,
     args: { name: arg },
   }));
+
+// `go mod edit` / `go work edit` -go and -toolchain; "none" removes the directive
+const goEditOption: Fig.Option = {
+  name: "-go",
+  requiresSeparator: true,
+  description: "Set the expected Go language version",
+  args: {
+    name: "version",
+    suggestions: [{ name: "none", description: "Remove the go directive" }],
+  },
+};
+
+const toolchainEditOption: Fig.Option = {
+  name: "-toolchain",
+  requiresSeparator: true,
+  description: "Set the Go toolchain to use",
+  args: {
+    name: "name",
+    suggestions: [
+      { name: "none", description: "Remove the toolchain directive" },
+    ],
+  },
+};
 
 const vendorOptions: Fig.Option[] = [
   {
@@ -483,7 +521,7 @@ const testFlags: Fig.Option[] = (
 const diffOption: Fig.Option = {
   name: "-diff",
   description:
-    "Instead of applying each fix, print the patch as a unified diff",
+    "Instead of applying each fix, print the patch as a unified diff; exit with a non-zero status if the diff is not empty",
 };
 
 const completionSpec: Fig.Spec = {
@@ -518,7 +556,7 @@ const completionSpec: Fig.Spec = {
       name: "clean",
       description: "Remove object files and cached files",
       options: [
-        ...globalOptions,
+        ...withoutOptions(globalOptions, coverOptionNames),
         {
           name: "-i",
           description: "Remove the corresponding installed archive or binary",
@@ -556,6 +594,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "-all",
           description: "Show all the documentation for the package",
+          exclusiveOn: ["-short"],
         },
         {
           name: "-c",
@@ -567,12 +606,18 @@ const completionSpec: Fig.Spec = {
             "Treat a command (package main) like a regular package. Otherwise package main's exported symbols are hidden when showing the package's top-level documentation",
         },
         {
+          name: "-ex",
+          description: "Include executable examples",
+        },
+        {
           name: "-http",
           description: "Serve HTML docs over HTTP",
         },
         {
           name: "-short",
-          description: "One-line representation for each symbol",
+          description:
+            "One-line representation for each symbol; cannot be combined with -all",
+          exclusiveOn: ["-all"],
         },
         {
           name: "-src",
@@ -673,7 +718,7 @@ const completionSpec: Fig.Spec = {
       name: "generate",
       description: "Generate Go files by processing source",
       options: [
-        ...globalOptions,
+        ...withoutOptions(globalOptions, coverOptionNames),
         {
           name: "-run",
           insertValue: '-run "{cursor}"',
@@ -692,7 +737,7 @@ const completionSpec: Fig.Spec = {
       name: "get",
       description: "Add dependencies to current module and install them",
       options: [
-        ...globalOptions,
+        ...withoutOptions(globalOptions, [...coverOptionNames, "-mod"]),
         {
           name: "-t",
           description:
@@ -869,22 +914,8 @@ const completionSpec: Fig.Spec = {
                 name: "path",
               },
             },
-            {
-              name: "-go",
-              requiresSeparator: true,
-              description: "Set the expected Go language version",
-              args: {
-                name: "version",
-              },
-            },
-            {
-              name: "-toolchain",
-              requiresSeparator: true,
-              description: "Set the Go toolchain to use",
-              args: {
-                name: "version",
-              },
-            },
+            goEditOption,
+            toolchainEditOption,
             ...modEditRepeatable([
               [
                 "godebug",
@@ -1082,64 +1113,32 @@ const completionSpec: Fig.Spec = {
             {
               name: "-fmt",
               description:
-                "The -fmt flag reformats the go.work file without making other changes. This reformatting is also implied by any other modifications that use or rewrite the go.mod file. The only time this flag is needed is if no other flags are specified, as in 'go work edit -fmt'",
+                "Reformat the go.work file without making other changes",
             },
-            {
-              name: "-use",
-              requiresSeparator: true,
-              isRepeatable: true,
-              description:
-                "The -use=path and -dropuse=path flags add and drop a use directive from the go.work file's set of module directories",
-              args: {
-                name: "path",
-              },
-            },
-            {
-              name: "-dropuse",
-              requiresSeparator: true,
-              isRepeatable: true,
-              description:
-                "The -use=path and -dropuse=path flags add and drop a use directive from the go.work file's set of module directories",
-              args: {
-                name: "path",
-              },
-            },
-            {
-              name: "-replace",
-              requiresSeparator: true,
-              isRepeatable: true,
-              description:
-                "The -replace=old[@v]=new[@v] flag adds a replacement of the given module path and version pair. If the @v in old@v is omitted, a replacement without a version on the left side is added, which applies to all versions of the old module path. If the @v in new@v is omitted, the new path should be a local module root directory, not a module path. Note that -replace overrides any redundant replacements for old[@v], so omitting @v will drop existing replacements for specific versions",
-              args: {
-                name: "old[@v]=new[@v]",
-              },
-            },
-            {
-              name: "-dropreplace",
-              requiresSeparator: true,
-              isRepeatable: true,
-              description:
-                "The -dropreplace=old[@v] flag drops a replacement of the given module path and version pair. If the @v is omitted, a replacement without a version on the left side is dropped",
-              args: {
-                name: "old[@v]",
-              },
-            },
-            {
-              name: "-go",
-              requiresSeparator: true,
-              description: "Set the expected Go language version",
-              args: {
-                name: "version",
-              },
-            },
-            {
-              name: "-toolchain",
-              requiresSeparator: true,
-              description: "Set the Go toolchain to use",
-              args: {
-                name: "name",
-              },
-            },
+            ...modEditRepeatable([
+              [
+                "use",
+                "path",
+                "Add a use directive to the go.work file's set of module directories",
+              ],
+              [
+                "dropuse",
+                "path",
+                "Drop a use directive from the go.work file's set of module directories",
+              ],
+              [
+                "replace",
+                "old[@v]=new[@v]",
+                "Add a replacement of the given module path and version pair",
+              ],
+              [
+                "dropreplace",
+                "old[@v]",
+                "Drop a replacement of the given module path and version pair",
+              ],
+            ]),
+            goEditOption,
+            toolchainEditOption,
             {
               name: "-godebug",
               requiresSeparator: true,
@@ -1160,12 +1159,12 @@ const completionSpec: Fig.Spec = {
             {
               name: "-print",
               description:
-                "The -print flag prints the final go.work in its text format instead of writing it back to go.mod",
+                "Print the final go.work in its text format instead of writing it back to disk",
             },
             {
               name: "-json",
               description:
-                "The -json flag prints the final go.work file in JSON format instead of writing it back to go.mod",
+                "Print the final go.work file in JSON format instead of writing it back to disk",
             },
           ],
         },
@@ -1188,7 +1187,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "-r",
               description:
-                "The -r flag searches recursively for modules in the argument directories, and the use command operates as if each of the directories were specified as arguments: namely, use directives will be added for directories that exist, and removed for directories that do not exist",
+                "Search recursively for modules in the argument directories, ignoring symlinks to directories within them",
             },
           ],
           args: {
