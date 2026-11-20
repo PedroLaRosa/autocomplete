@@ -1,3 +1,35 @@
+// Cicada v0.1.50 (latest upstream release, tag v0.1.50 / npm @cicadahq/cicada, 2026-11-20). Source: clap definitions in crates/cli/src/{main,debug,oci}.rs of cicadahq/cicada
+// read statically (binary not run); release features per .github/workflows/release.yaml. Upstream has had no release since 2023-04 and no commit since 2023-09.
+// The `fig-completion` command is only compiled with the `fig-completions` cargo feature, which the release builds do not enable, so it is omitted.
+// `--dotenv`/`--secrets-json`/`--oci-backend`/`--platform` are single-use options (clap ArgAction::Set), only `--secret` can be repeated.
+const help = (description = "Print help"): Fig.Option => ({
+  name: ["-h", "--help"],
+  description,
+});
+
+const helpSubcommandDescription =
+  "Print this message or the help of the given subcommand(s)";
+
+const ociBackendOption: Fig.Option = {
+  name: "--oci-backend",
+  description: "The OCI backend to use",
+  args: {
+    name: "oci_backend",
+    default: "docker",
+    suggestions: ["docker", "podman"],
+  },
+};
+
+const jsonOption: Fig.Option = {
+  name: ["-j", "--json"],
+};
+
+const debugCommandOptions: Fig.Option[] = [
+  ociBackendOption,
+  jsonOption,
+  help(),
+];
+
 const completion: Fig.Spec = {
   name: "cicada",
   description: "Write CI/CD Pipelines in TypeScript",
@@ -13,26 +45,21 @@ const completion: Fig.Spec = {
           isRepeatable: true,
           args: {
             name: "secret",
-            isOptional: true,
           },
         },
         {
           name: "--dotenv",
           description: "Load a custom .env file",
-          isRepeatable: true,
           args: {
             name: "dotenv",
-            isOptional: true,
             template: "filepaths",
           },
         },
         {
           name: "--secrets-json",
           description: "Load secrets from a json file",
-          isRepeatable: true,
           args: {
             name: "secrets_json",
-            isOptional: true,
             template: "filepaths",
           },
         },
@@ -40,23 +67,12 @@ const completion: Fig.Spec = {
           name: "--cicada-dockerfile",
           description: "A custom dockerfile to load the cicada bin from",
           hidden: true,
-          isRepeatable: true,
           args: {
             name: "cicada_dockerfile",
-            isOptional: true,
             template: "filepaths",
           },
         },
-        {
-          name: "--oci-backend",
-          description: "The OCI backend to use",
-          isRepeatable: true,
-          args: {
-            name: "oci_backend",
-            isOptional: true,
-            suggestions: ["docker", "podman"],
-          },
-        },
+        ociBackendOption,
         {
           name: "--no-dotenv",
           description: "Do not load .env file",
@@ -66,9 +82,20 @@ const completion: Fig.Spec = {
           description: "Disable caching",
         },
         {
-          name: ["-h", "--help"],
-          description: "Print help (see more with '--help')",
+          name: "--gh-action-cache",
+          description: "Enable gh action caching",
+          hidden: true,
         },
+        {
+          name: "--platform",
+          description: "Sets the default platform to use",
+          args: {
+            name: "platform",
+            default: "linux/amd64",
+            suggestions: ["linux/amd64", "linux/arm64"],
+          },
+        },
+        help("Print help (see more with '--help')"),
       ],
       args: {
         name: "pipeline",
@@ -80,12 +107,7 @@ const completion: Fig.Spec = {
       name: "step",
       description: "Run a step in a cicada workflow",
       hidden: true,
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Print help",
-        },
-      ],
+      options: [help()],
       args: [
         {
           name: "workflow",
@@ -99,12 +121,7 @@ const completion: Fig.Spec = {
       name: "init",
       description:
         "Initialize a cicada project, you can optionally specify a pipeline to create",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Print help",
-        },
-      ],
+      options: [help()],
       args: {
         name: "pipeline",
         isOptional: true,
@@ -113,12 +130,7 @@ const completion: Fig.Spec = {
     {
       name: "new",
       description: "Create a cicada pipeline",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Print help",
-        },
-      ],
+      options: [help()],
       args: {
         name: "pipeline",
       },
@@ -126,46 +138,21 @@ const completion: Fig.Spec = {
     {
       name: "update",
       description: "Update cicada",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Print help",
-        },
-      ],
+      options: [help()],
     },
     {
       name: "completions",
       description: "List all available completions",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Print help",
-        },
-      ],
+      options: [help()],
       args: {
         name: "shell",
         suggestions: ["bash", "elvish", "fish", "powershell", "zsh"],
       },
     },
     {
-      name: "fig-completion",
-      description: "Create fig completions",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Print help",
-        },
-      ],
-    },
-    {
       name: "open",
       description: "Open a pipeline in your editor",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Print help",
-        },
-      ],
+      options: [help()],
       args: {
         name: "pipeline",
         template: "filepaths",
@@ -175,22 +162,7 @@ const completion: Fig.Spec = {
       name: "doctor",
       description: "Check for common issues",
       hidden: true,
-      options: [
-        {
-          name: "--oci-backend",
-          description: "The OCI backend to use",
-          isRepeatable: true,
-          args: {
-            name: "oci_backend",
-            isOptional: true,
-            suggestions: ["docker", "podman"],
-          },
-        },
-        {
-          name: ["-h", "--help"],
-          description: "Print help",
-        },
-      ],
+      options: [ociBackendOption, help()],
     },
     {
       name: "debug",
@@ -199,74 +171,19 @@ const completion: Fig.Spec = {
       subcommands: [
         {
           name: "daemon-info",
-          options: [
-            {
-              name: "--oci-backend",
-              description: "The OCI backend to use",
-              isRepeatable: true,
-              args: {
-                name: "oci_backend",
-                isOptional: true,
-                suggestions: ["docker", "podman"],
-              },
-            },
-            {
-              name: ["-j", "--json"],
-            },
-            {
-              name: ["-h", "--help"],
-              description: "Print help",
-            },
-          ],
+          options: debugCommandOptions,
         },
         {
           name: ["disk-usage", "du"],
-          options: [
-            {
-              name: "--oci-backend",
-              description: "The OCI backend to use",
-              isRepeatable: true,
-              args: {
-                name: "oci_backend",
-                isOptional: true,
-                suggestions: ["docker", "podman"],
-              },
-            },
-            {
-              name: ["-j", "--json"],
-            },
-            {
-              name: ["-h", "--help"],
-              description: "Print help",
-            },
-          ],
+          options: debugCommandOptions,
         },
         {
           name: "workers",
-          options: [
-            {
-              name: "--oci-backend",
-              description: "The OCI backend to use",
-              isRepeatable: true,
-              args: {
-                name: "oci_backend",
-                isOptional: true,
-                suggestions: ["docker", "podman"],
-              },
-            },
-            {
-              name: ["-j", "--json"],
-            },
-            {
-              name: ["-h", "--help"],
-              description: "Print help",
-            },
-          ],
+          options: debugCommandOptions,
         },
         {
           name: "help",
-          description:
-            "Print this message or the help of the given subcommand(s)",
+          description: helpSubcommandDescription,
           subcommands: [
             {
               name: "daemon-info",
@@ -279,22 +196,16 @@ const completion: Fig.Spec = {
             },
             {
               name: "help",
-              description:
-                "Print this message or the help of the given subcommand(s)",
+              description: helpSubcommandDescription,
             },
           ],
         },
       ],
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Print help",
-        },
-      ],
+      options: [help()],
     },
     {
       name: "help",
-      description: "Print this message or the help of the given subcommand(s)",
+      description: helpSubcommandDescription,
       subcommands: [
         {
           name: "run",
@@ -323,10 +234,6 @@ const completion: Fig.Spec = {
           description: "List all available completions",
         },
         {
-          name: "fig-completion",
-          description: "Create fig completions",
-        },
-        {
           name: "open",
           description: "Open a pipeline in your editor",
         },
@@ -353,21 +260,14 @@ const completion: Fig.Spec = {
         },
         {
           name: "help",
-          description:
-            "Print this message or the help of the given subcommand(s)",
+          description: helpSubcommandDescription,
         },
       ],
     },
   ],
   options: [
-    {
-      name: ["-h", "--help"],
-      description: "Print help",
-    },
-    {
-      name: ["-V", "--version"],
-      description: "Print version",
-    },
+    help(),
+    { name: ["-V", "--version"], description: "Print version" },
   ],
 };
 
