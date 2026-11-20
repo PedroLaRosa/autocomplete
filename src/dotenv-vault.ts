@@ -1,6 +1,7 @@
-// dotenv-vault v1.27.0 (GitHub release v1.27.0, 2025-06-25; synced 2026-11-19).
-// Source: src/commands/*.ts in dotenv-org/dotenv-vault, plus the `help` and
-// `update` commands from @oclif/plugin-help and @oclif/plugin-update.
+// dotenv-vault v1.27.0 (latest on npm and newest git tag, published 2025-06-25; verified 2026-11-20).
+// Source: oclif.manifest.json and dist/commands of the npm tarball plus src/commands/*.ts in
+// dotenv-org/dotenv-vault, plus the `help` and `update` commands (@oclif/plugin-help 5.2.20,
+// @oclif/plugin-update 3.2.4) and the root `--version` flag handled by @oclif/core 1.x.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 // Common Options
@@ -57,6 +58,10 @@ const completionSpec: Fig.Spec = {
       name: "--help",
       description: "Get documentation for the command",
       isPersistent: true,
+    },
+    {
+      name: "--version",
+      description: "Show the CLI version (only as the first argument)",
     },
   ],
   subcommands: [
