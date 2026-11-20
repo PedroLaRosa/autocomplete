@@ -1,5 +1,11 @@
-// Dart SDK v3.14.1 (GitHub dart-lang/sdk tag 3.14.1, 2026-11-17). Source: arg
-// parsers in pkg/dartdev, dart_style, pub and dart2js at that tag
+// Dart SDK v3.14.1 (latest stable per storage.googleapis.com dart-archive
+// channels/stable and dart-lang/sdk tag 3.14.1, released 2026-11-17; verified
+// 2026-11-20). Source: arg parsers read statically at that tag (not run):
+// pkg/dartdev (all commands, global flags), pkg/dds (devtools), dart2js usage
+// text (pkg/compiler), pub and dart_style at the revisions pinned in DEPS,
+// perf_witness and tools/experimental_features.yaml. Hidden server commands
+// (development-service, language-server, tooling-daemon) only list --help
+// because their flags come from other packages.
 
 const dartEntryPoint: Fig.Arg = {
   name: "dart-entry-point",
@@ -206,6 +212,14 @@ const targetSanitizer: Fig.Option = {
   },
 };
 
+// Single-file executables cannot be symbolized by the sanitizers
+const exeTargetSanitizer: Fig.Option = {
+  ...targetSanitizer,
+  description:
+    "Compile to a specific target sanitizer (sanitizers are not offered with single-file executables)",
+  args: { name: "sanitizer", default: "none", suggestions: ["none"] },
+};
+
 const globalOptions: Fig.Option[] = [
   {
     name: ["-h", "--help"],
@@ -223,7 +237,7 @@ const compileOptions: Fig.Option[] = [
   enableExperiment,
 ];
 
-const nativeCompileOptions: Fig.Option[] = [
+const nativeCompileOptions = (sanitizer: Fig.Option): Fig.Option[] => [
   ...compileOptions,
   {
     name: "--enable-asserts",
@@ -241,7 +255,7 @@ const nativeCompileOptions: Fig.Option[] = [
   recordedUses,
   targetOs,
   targetArch,
-  targetSanitizer,
+  sanitizer,
 ];
 
 const residentCompilerInfoFile: Fig.Option = {
@@ -330,6 +344,11 @@ const completionSpec: Fig.Spec = {
           args: { name: "path", template: "folders" },
         },
         {
+          name: "--memory",
+          description:
+            "Attempt to print memory usage before exiting. Will only print if format is json",
+        },
+        {
           name: "--packages",
           description: "The path to the package resolution configuration file",
           args: { name: "path", template: "filepaths" },
@@ -399,13 +418,13 @@ const completionSpec: Fig.Spec = {
           name: "aot-snapshot",
           description: "Compile Dart to an AOT snapshot",
           args: dartEntryPoint,
-          options: nativeCompileOptions,
+          options: nativeCompileOptions(targetSanitizer),
         },
         {
           name: "exe",
           description: "Compile Dart to a self-contained executable",
           args: dartEntryPoint,
-          options: nativeCompileOptions,
+          options: nativeCompileOptions(exeTargetSanitizer),
         },
         {
           name: "jit-snapshot",
@@ -453,27 +472,135 @@ const completionSpec: Fig.Spec = {
             {
               name: "--packages",
               description:
-                "Use the package config file at <path> to resolve package: imports",
+                "Path to the package resolution configuration file, which supplies a mapping of package names to paths",
               args: { name: "path", template: "filepaths" },
             },
             {
-              name: "--no-source-maps",
-              description: "Do not generate a source map file",
+              name: "--version",
+              description: "Display version information",
             },
             {
-              name: "--csp",
-              description:
-                "Disable dynamic generation of code that is not permitted by CSP",
-            },
-            {
-              name: "--server-mode",
-              description:
-                "Compile with server support, without dart:html or dart:svg",
+              name: "--suppress-warnings",
+              description: "Do not display any warnings",
             },
             {
               name: "--fatal-warnings",
               description: "Treat warnings as compilation errors",
             },
+            {
+              name: "--suppress-hints",
+              description: "Do not display any hints",
+            },
+            {
+              name: "--enable-diagnostic-colors",
+              description: "Add colors to diagnostic messages",
+            },
+            {
+              name: "--terse",
+              description:
+                "Emit diagnostics without suggestions for how to get rid of the diagnosed problems",
+            },
+            {
+              name: "--show-package-warnings",
+              description: "Show warnings and hints generated from packages",
+            },
+            {
+              name: "--csp",
+              description:
+                "Disable dynamic generation of code in the generated output (necessary to satisfy CSP restrictions)",
+            },
+            {
+              name: "--no-source-maps",
+              description: "Do not generate a source map file",
+            },
+            ...negatable(
+              "omit-late-names",
+              "Do not include names of late variables in error messages"
+            ),
+            ...negatable(
+              "native-null-assertions",
+              "Add assertions to web library APIs to ensure that non-nullable APIs do not return null (defaults to on unless -O3 or higher is passed)"
+            ),
+            {
+              name: "--no-deprecated-js-interop",
+              description:
+                "Disallow the deprecated JS interop libraries (dart:html, dart:js, dart:js_util, dart:svg and others)",
+            },
+            {
+              name: "--omit-implicit-checks",
+              description:
+                "Omit implicit runtime checks, such as parameter checks and implicit downcasts",
+            },
+            {
+              name: "--trust-primitives",
+              description:
+                "Assume that operations on numbers, strings, and lists have valid inputs",
+            },
+            {
+              name: "--lax-runtime-type-to-string",
+              description:
+                "Omit reified class type arguments when these are only needed for toString on runtimeType",
+            },
+            {
+              name: "--throw-on-error",
+              description:
+                "Throw an exception if a compile-time error is detected",
+            },
+            {
+              name: "--libraries-spec",
+              description:
+                "A .json file containing the SDK libraries specification",
+              requiresSeparator: true,
+              args: { name: "file", template: "filepaths" },
+            },
+            {
+              name: "--disable-native-live-type-analysis",
+              description:
+                "Disable the optimization that removes unused native types from dart:html and related libraries",
+            },
+            {
+              name: "--server-mode",
+              description:
+                "Compile with server support, using a library specification that disables dart:html but supports dart:js in conditional imports",
+            },
+            {
+              name: "--categories",
+              description:
+                "Deprecated, use --server-mode instead of --categories=Server",
+              deprecated: true,
+              requiresSeparator: true,
+              args: { name: "categories" },
+            },
+            {
+              name: "--deferred-map",
+              description:
+                "Generate a json file with a mapping from each deferred import to the part.js files that will be loaded",
+              requiresSeparator: true,
+              args: { name: "file", template: "filepaths" },
+            },
+            {
+              name: "--dump-info",
+              description:
+                "Generate information about the generated code, readable with package:dart2js_info",
+              requiresSeparator: true,
+              args: {
+                name: "format",
+                isOptional: true,
+                suggestions: ["json", "binary"],
+              },
+            },
+            {
+              name: "--generate-code-with-compile-time-errors",
+              description:
+                "Generate output even if the program contains compile-time errors",
+            },
+            {
+              name: "--no-frequency-based-minification",
+              description:
+                "Disable the new frequency based minifying namer and use the old namer instead (experimental)",
+            },
+            // dart2js only accepts the --enable-experiment=<name> form
+            { ...enableExperiment, requiresSeparator: true },
           ],
         },
         {
@@ -488,10 +615,6 @@ const completionSpec: Fig.Spec = {
           args: dartEntryPoint,
           options: [
             ...compileOptions,
-            {
-              name: "--enable-asserts",
-              description: "Enable assert statements",
-            },
             ...negatable(
               "link-platform",
               "Include the platform kernel in the resulting kernel file (defaults to on)"
@@ -695,7 +818,11 @@ const completionSpec: Fig.Spec = {
           name: "--record-memory-profile",
           description:
             "Start devtools headlessly and write memory profiling samples to the indicated file",
-          args: { name: "file", template: "filepaths" },
+          args: {
+            name: "file",
+            default: "memory_samples.json",
+            template: "filepaths",
+          },
         },
         {
           name: "--app-size-base",
@@ -706,8 +833,49 @@ const completionSpec: Fig.Spec = {
         {
           name: "--app-size-test",
           description:
-            "Path to the test app size file used for app size debugging",
+            "Path to the test app size file used for app size debugging (only with --app-size-base)",
           args: { name: "file", template: "filepaths" },
+        },
+        {
+          name: "--try-ports",
+          description:
+            "The number of ascending ports to try binding to before failing with an error",
+          args: { name: "count", default: "10" },
+        },
+        {
+          name: "--dds-host",
+          description:
+            "The address the Dart Development Service (DDS) should attempt to bind to if a DDS instance isn't active and a VM service URI is provided",
+          args: { name: "bind-address", default: "127.0.0.1" },
+        },
+        {
+          name: "--dds-port",
+          description:
+            "The port the Dart Development Service (DDS) should attempt to bind to if a DDS instance isn't active and a VM service URI is provided",
+          args: { name: "port", default: "0" },
+        },
+        {
+          name: "--enable-notifications",
+          description:
+            "Requests notification permissions immediately when a client connects back to the server",
+        },
+        ...negatable(
+          "allow-embedding",
+          "Allow embedding DevTools inside an iframe (defaults to on)"
+        ),
+        ...negatable(
+          "disable-cors",
+          "Disable CORS so that the DevTools server can communicate with a front end served on a different origin"
+        ),
+        {
+          name: "--headless",
+          description:
+            "Cause the server to spawn Chrome in headless mode for use in automated testing",
+        },
+        {
+          name: "--print-dtd",
+          description:
+            "Print the address of the Dart Tooling Daemon, if one is hosted by the DevTools server",
         },
       ],
     },
@@ -760,6 +928,11 @@ const completionSpec: Fig.Spec = {
           description: "Apply fixes for one (or more) diagnostic codes",
           isRepeatable: true,
           args: { name: "code1,code2,..." },
+        },
+        {
+          name: "--compare-to-golden",
+          description:
+            "Compare the result of applying fixes to a golden file for testing",
         },
         enableExperiment,
       ],
@@ -923,6 +1096,34 @@ const completionSpec: Fig.Spec = {
         template: ["filepaths", "folders"],
         isVariadic: true,
       },
+    },
+    {
+      name: "help",
+      description: "Display help information for dart",
+      args: {
+        name: "command",
+        description: "The command to show help for",
+        isOptional: true,
+        suggestions: [
+          "analyze",
+          "build",
+          "compile",
+          "create",
+          "devtools",
+          "doc",
+          "fix",
+          "format",
+          "info",
+          "install",
+          "installed",
+          "migrate",
+          "pub",
+          "run",
+          "test",
+          "uninstall",
+        ],
+      },
+      options: globalOptions,
     },
     {
       name: "info",
@@ -1097,6 +1298,10 @@ const completionSpec: Fig.Spec = {
           name: ["-v", "--verbose"],
           description: "Print detailed logging",
         },
+        ...negatable(
+          "color",
+          "Use colors in terminal output (defaults to color when connected to a terminal)"
+        ),
         {
           name: ["-C", "--directory"],
           description: "Run the subcommand in the directory <dir>",
