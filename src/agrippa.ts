@@ -1,218 +1,156 @@
+// Agrippa v2.0.4 (npm latest dist-tag, 2026-11-19; upstream last released 2023-06). Source: yargs definitions in src/cli at
+// NitzanHen/agrippa HEAD (package.json 2.0.4), cross-checked with bin/index.mjs of the npm tarball; read statically, not run.
+// v2 replaced the v1 flags (--props, --children, --memo, --react-native, --flat, --separate-index) with the ones below.
 const completionSpec: Fig.Spec = {
   name: "agrippa",
-  description: "",
+  description: "Generate frontend components without the boilerplate",
   subcommands: [
     {
       name: "init",
-      description:
-        "Generates a basic .agripparc.json file, with some default values for options that agrippa accepts",
+      description: "Initialize Agrippa's configuration for this project",
+      options: [
+        {
+          name: "--bare",
+          description:
+            "Generate a config that does not import agrippa (used for global installations)",
+        },
+      ],
     },
     {
       name: ["generate", "gen"],
-      description:
-        "This is the core of the CLI - this command generates a new React component, based on the name and options passed to it",
+      description: "Generate a component",
       args: {
-        name: "component",
+        name: "name",
+        description: "The name of the component to be generated",
       },
       options: [
         {
-          name: "--props",
+          name: ["--framework", "--fw"],
           description:
-            "Determines which prop declaration/validation solution to generate. Defaults to `ts` if `typescript` flag is `true`, `none` otherwise",
+            "Which framework to generate the components for. Defaults to the framework detected from package.json",
           args: {
+            name: "framework",
+            suggestions: ["react", "solidjs", "preact", "react-native"],
+          },
+        },
+        {
+          name: "--styling",
+          description: "Which styling solution to use",
+          args: {
+            name: "styling",
             suggestions: [
-              {
-                name: "ts",
-                description:
-                  "Generate a TypeScript interface for props (this requires the typescript option to be true)",
-              },
-              {
-                name: "jsdoc",
-                description:
-                  "Generates JSDoc type hints for props (a @typedef and a @type)",
-              },
-              {
-                name: "prop-types",
-                description: "Generates prop-types for props",
-              },
-              {
-                name: "none",
-                description: "Generates no props",
-              },
+              "css",
+              "scss",
+              "jss",
+              "styled-components",
+              "react-native",
             ],
           },
         },
         {
-          name: "--children",
+          name: ["--styling-module", "--stylingModule"],
           description:
-            "Whether the component is meant to have children or not. Defaults to `false`",
-          args: {},
+            "Whether to generate a scoped `module` stylesheet. Relevant only for `css` or `scss` styling options",
         },
         {
           name: ["--typescript", "--ts"],
           description:
-            "Option to generate Typescript components, defaults to `true` if the CLI manages to find a `tsconfig.json` file, false otherwise",
-          args: {},
+            "Whether to use Typescript. Defaults to true if a tsconfig.json is found",
         },
         {
-          name: "--import-react",
+          name: ["--ts-props-declaration", "--tsPropsDeclaration"],
           description:
-            "Option to import React at the top of the component. Defaults to `true` if the CLI manages to find a `tsconfig.json` file and it has a `jsx` field under `compilerOptions` with `react-jsx` or `react-jsxdev` as the value, `false` otherwise",
-          args: {},
-        },
-        {
-          name: "--export-type",
-          description:
-            "Whether to export the component as a named export or a default export. Defaults to `named`",
+            "For TS components, whether to declare props as an interface or a type",
           args: {
-            suggestions: [
-              {
-                name: "named",
-              },
-              {
-                name: "default",
-              },
-            ],
+            name: "declaration",
+            suggestions: ["interface", "type"],
+          },
+        },
+        {
+          name: ["--import-react", "--importReact"],
+          description:
+            "Whether to import React. Relevant only for `react` or `react-native`",
+        },
+        {
+          name: "--overwrite",
+          description: "Overwrite existing files, if any are found",
+        },
+        {
+          name: ["--base-dir", "--baseDir"],
+          description:
+            "Path to a base directory which components should be generated in or relative to",
+          args: {
+            name: "path",
+            template: "folders",
+          },
+        },
+        {
+          name: ["--destination", "--dest"],
+          description:
+            "The path in which the component folder/files should be generated, relative to baseDir",
+          args: {
+            name: "path",
+            template: "folders",
+          },
+        },
+        {
+          name: ["--allow-outside-base", "--allowOutsideBase"],
+          description:
+            "Allow components to be generated outside the resolved baseDir",
+        },
+        {
+          name: ["--export-type", "--exportType"],
+          description:
+            "Whether to use a named export or a default export for the component",
+          args: {
+            name: "type",
+            suggestions: ["named", "default"],
           },
         },
         {
           name: "--declaration",
           description:
-            "Whether to declare the component as a `const` with an arrow function, or as a `function` declaration. Defaults to `const`",
+            "Whether to declare the component as a const with an arrow function or a function declaration",
           args: {
-            suggestions: [
-              {
-                name: "const",
-              },
-              {
-                name: "function",
-              },
-            ],
+            name: "declaration",
+            suggestions: ["const", "function"],
           },
-        },
-        {
-          name: "--memo",
-          description:
-            "Generates a component as a memo component. Defaults to `false`",
-          args: {},
-        },
-        {
-          name: "--react-native",
-          description:
-            "Generates a React Native component. Defaults to `true` if `react-native` is a dependency in the project's `package.json`, `false` otherwise",
-          args: {},
-        },
-        {
-          name: "--styling",
-          description: "Which styling solution to generate. Defaults to `none`",
-          args: {
-            suggestions: [
-              {
-                name: "none",
-                description: "Generates no style",
-              },
-              {
-                name: "css",
-                description: "Generates a `css` file",
-              },
-              {
-                name: "scss",
-                description: "Generates a `scss` file",
-              },
-              {
-                name: "jss",
-                description:
-                  "Generates a `useStyles` hook above the component with `react-jss`'s `createUseStyles`",
-              },
-              {
-                name: "mui",
-                description:
-                  "Generates a `useStyles` hook above the component with `material-ui`'s `makeStyles`. Note that this generates styles for `material-ui` v4",
-              },
-              {
-                name: "react-native",
-                description: "Generates a React Native `StyleSheet`",
-              },
-            ],
-          },
-        },
-        {
-          name: "--styling-module",
-          description:
-            "Whether to generate a scoped `module` stylesheet. This option is only relevant for `css` or `scss` styling, and will be ignored for other values. Defaults to `true`",
-          args: {},
-        },
-        {
-          name: "--base-dir",
-          description:
-            "Path to a base directory which components should be generated inside of (directly or nested). Defaults to the current working directory",
-          args: {
-            name: "path",
-            isOptional: true,
-            isVariadic: true,
-            template: "folders",
-          },
-        },
-        {
-          name: ["--dest", "--destination"],
-          isRequired: true,
-          description:
-            "Allows the user to generate the component at a path relative to `baseDir`. It's mostly used to augment or modify the generation path in the command-line when creating the component itself. `dest` is resolved relative to `baseDir`",
-          args: {
-            name: "path",
-            isOptional: true,
-            isVariadic: true,
-            template: "folders",
-          },
-        },
-        {
-          name: "--allow-outside-base",
-          description:
-            "Overrides default Agrippa behaviour to allow components to be specified outside `baseDir`. Defaults to current working directory",
-          args: {
-            name: "path",
-            isOptional: true,
-            isVariadic: true,
-            template: "folders",
-          },
-        },
-        {
-          name: "--flat",
-          description:
-            "By default, Agrippa generates a dedicated directory for the generated component; this directory has the same name as the component, and will contain the component file (as `index.tsx` or `index.jsx`), and the style file (if one is generated). Defaults to `false`",
-          args: {},
-        },
-        {
-          name: "--separate-index",
-          description:
-            "In the `separateIndex` generation scheme, Agrippa creates one file for the component's code, and one `index` file, whose purpose is to allow importing exports from the component's directory elegantly (the import path can then be `<path>/<to>/<directory>/Component` instead of `<path>/<to>/<directory>/Component/Component`). Defaults to `true`",
-          args: {},
         },
         {
           name: ["--post-command", "--postCommand"],
           description:
-            "Allows a custom command to be run after having generated a component. This allows for some cool functionality, such as opening an IDE at the newly generated files automatically or linting them. Defaults to `none`",
+            "A command to run after the component has been generated (variables such as <path> are substituted)",
           args: {
-            isCommand: true,
+            name: "command",
           },
         },
         {
-          name: "--overwrite",
-          description:
-            "By default, Agrippa prevents the generation of a component over an existing components, to prevent a loss of code. `--overwrite` tells Agrippa to replace existing files, if any are found. Defaults to `false`",
-          args: {},
+          name: "--debug",
+          description: "Print additional debug information",
         },
         {
-          name: "--debug",
+          name: ["--look-for-updates", "--lookForUpdates"],
           description:
-            "The `debug` flag makes Agrippa print out additional debug information. It's quite useful when debugging. Defaults to `false`",
-          args: {},
+            "Whether to look for updates when running Agrippa or not",
+        },
+        {
+          name: ["--report-telemetry", "--reportTelemetry"],
+          description: "Whether to report (anonymous) telemetry or not",
         },
       ],
     },
   ],
-  args: {
-    name: "component's name",
-  },
+  options: [
+    {
+      name: "--help",
+      description: "Show help",
+      isPersistent: true,
+    },
+    {
+      name: "--version",
+      description: "Show version number",
+      isPersistent: true,
+    },
+  ],
 };
 export default completionSpec;

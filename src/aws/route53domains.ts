@@ -27,7 +27,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -35,10 +43,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -46,7 +54,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "associate-delegation-signer-to-domain",
       description:
-        "Creates a delegation signer (DS) record in the registry zone for this domain name. Note that creating DS record at the registry impacts DNSSEC validation of your DNS records. This action may render your domain name unavailable on the internet if the steps are completed in the wrong order, or with incorrect timing. For more information about DNSSEC signing, see Configuring DNSSEC signing in the Route\u00a053 developer guide",
+        "Creates a delegation signer (DS) record in the registry zone for this domain name. Note that creating DS record at the registry impacts DNSSEC validation of your DNS records. This action may render your domain name unavailable on the internet if the steps are completed in the wrong order, or with incorrect timing. For more information about DNSSEC signing, see Configuring DNSSEC signing in the Route 53 developer guide",
       options: [
         {
           name: "--domain-name",
@@ -66,7 +74,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -74,10 +90,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -98,7 +114,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -106,10 +130,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -137,7 +161,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -145,10 +177,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -177,7 +209,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -185,10 +225,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -196,7 +236,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "delete-domain",
       description:
-        "This operation deletes the specified domain. This action is permanent. For more information, see Deleting a domain name registration. To transfer the domain registration to another registrar, use the transfer process that\u2019s provided by the registrar to which you want to transfer the registration. Otherwise, the following apply:   You can\u2019t get a refund for the cost of a deleted domain registration.   The registry for the top-level domain might hold the domain name for a brief time before releasing it for other users to register (varies by registry).    When the registration has been deleted, we'll send you a confirmation to the registrant contact. The email will come from noreply@domainnameverification.net or noreply@registrar.amazon.com",
+        "This operation deletes the specified domain. This action is permanent. For more information, see Deleting a domain name registration. To transfer the domain registration to another registrar, use the transfer process that’s provided by the registrar to which you want to transfer the registration. Otherwise, the following apply:   You can’t get a refund for the cost of a deleted domain registration.   The registry for the top-level domain might hold the domain name for a brief time before releasing it for other users to register (varies by registry).    When the registration has been deleted, we'll send you a confirmation to the registrant contact. The email will come from noreply@domainnameverification.net or noreply@emailverification.info or noreply@registrar.amazon",
       options: [
         {
           name: "--domain-name",
@@ -208,7 +248,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -216,10 +264,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -247,7 +295,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -255,10 +311,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -279,7 +335,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -287,10 +351,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -311,7 +375,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -319,10 +391,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -342,7 +414,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--id",
           description:
-            "An internal identification number assigned to each DS record after it\u2019s created. You can retrieve it as part of DNSSEC information returned by GetDomainDetail",
+            "An internal identification number assigned to each DS record after it’s created. You can retrieve it as part of DNSSEC information returned by GetDomainDetail",
           args: {
             name: "string",
           },
@@ -350,7 +422,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -358,10 +438,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -382,7 +462,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -390,10 +478,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -414,7 +502,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -422,10 +518,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -446,7 +542,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -454,10 +558,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -478,7 +582,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -486,10 +598,50 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
+          },
+        },
+      ],
+    },
+    {
+      name: "get-domain-prices",
+      description:
+        "Returns the following prices for the specified domain:   Registration   Transfer   Owner change   Renewal   Restoration   For most domains, the prices match the standard prices for the TLD that the ListPrices operation returns. For a premium domain, the registry sets the price individually. Premium prices might differ from the standard prices and can change over time",
+      options: [
+        {
+          name: "--domain-name",
+          description:
+            "The name of the domain that you want to get the prices for",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-json",
+          description:
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--generate-cli-skeleton",
+          description:
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
+          args: {
+            name: "string",
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -510,7 +662,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--suggestion-count",
           description:
-            "The number of suggested domain names that you want Route 53 to return. Specify a value between 1 and 50",
+            "The number of suggested domain names that you want Route 53 to return. Specify a value between 1 and 50. Note that fewer than the requested number might be returned",
           args: {
             name: "integer",
           },
@@ -518,17 +670,35 @@ const completionSpec: Fig.Spec = {
         {
           name: "--only-available",
           description:
-            "If OnlyAvailable is true, Route 53 returns only domain names that are available. If OnlyAvailable is false, Route 53 returns domain names without checking whether they're available to be registered. To determine whether the domain is available, you can call checkDomainAvailability for each suggestion",
+            "If OnlyAvailable is true, Route 53 returns only domain names that are available. If OnlyAvailable is false, Route 53 returns domain names without checking whether they're available to be registered. To determine whether the domain is available, call checkDomainAvailability for each suggestion. If OnlyAvailable is false, Route 53 does not return pricing information for the suggested domain names",
         },
         {
           name: "--no-only-available",
           description:
-            "If OnlyAvailable is true, Route 53 returns only domain names that are available. If OnlyAvailable is false, Route 53 returns domain names without checking whether they're available to be registered. To determine whether the domain is available, you can call checkDomainAvailability for each suggestion",
+            "If OnlyAvailable is true, Route 53 returns only domain names that are available. If OnlyAvailable is false, Route 53 returns domain names without checking whether they're available to be registered. To determine whether the domain is available, call checkDomainAvailability for each suggestion. If OnlyAvailable is false, Route 53 does not return pricing information for the suggested domain names",
+        },
+        {
+          name: "--only-standard-prices",
+          description:
+            "If true, Route 53 returns only domain names that are priced at the standard registration rate for their TLD. If false, Route 53 includes domain names with premium pricing in the suggestions list. The default is true",
+        },
+        {
+          name: "--no-only-standard-prices",
+          description:
+            "If true, Route 53 returns only domain names that are priced at the standard registration rate for their TLD. If false, Route 53 includes domain names with premium pricing in the suggestions list. The default is true",
         },
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -536,10 +706,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -560,7 +730,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -568,10 +746,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -616,7 +794,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -640,10 +826,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -696,6 +882,7 @@ const completionSpec: Fig.Spec = {
           description: "The sort type for returned values",
           args: {
             name: "string",
+            suggestions: ["SubmittedDate"],
           },
         },
         {
@@ -704,12 +891,21 @@ const completionSpec: Fig.Spec = {
             "The sort order for returned values, either ascending or descending",
           args: {
             name: "string",
+            suggestions: ["ASC", "DESC"],
           },
         },
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -733,10 +929,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -744,12 +940,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "list-prices",
       description:
-        "Lists the following prices for either all the TLDs supported by Route\u00a053, or the specified TLD:   Registration   Transfer   Owner change   Domain renewal   Domain restoration",
+        "Lists the following prices for either all the TLDs supported by Route 53, or the specified TLD:   Registration   Transfer   Owner change   Renewal   Restoration    The prices that ListPrices returns are the standard rates for a TLD. ListPrices doesn't return registry premium prices, which apply to individual domain names rather than to a TLD. To get accurate pricing for a specific domain name, including premium prices, call GetDomainPrices",
       options: [
         {
           name: "--tld",
           description:
-            "The TLD for which you want to receive the pricing information. For example. .net. If a Tld value is not provided, a list of prices for all TLDs supported by Route\u00a053 is returned",
+            "The TLD for which you want to receive the pricing information. For example. .net. If a Tld value is not provided, a list of prices for all TLDs supported by Route 53 is returned",
           args: {
             name: "string",
           },
@@ -773,7 +969,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -797,10 +1001,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -820,7 +1024,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -828,10 +1040,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -858,7 +1070,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -866,10 +1086,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -985,9 +1205,25 @@ const completionSpec: Fig.Spec = {
             'Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS ("who is") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the billing contact.  You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts',
         },
         {
+          name: "--consent",
+          description:
+            "Specifies the maximum price that you agree to pay to register the domain name. This element is required if the domain has registry premium pricing, and optional if the domain is priced at the standard rate for its TLD. If you include it and the registration price is more than MaxPrice, the request fails",
+          args: {
+            name: "structure",
+          },
+        },
+        {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -995,10 +1231,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1019,7 +1255,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1027,10 +1271,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1064,9 +1308,25 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--consent",
+          description:
+            "Specifies the maximum price that you agree to pay to renew the domain name. This element is required if the domain has registry premium pricing, and optional if the domain is priced at the standard rate for its TLD. If you include it and the renewal price is more than MaxPrice, the request fails",
+          args: {
+            name: "structure",
+          },
+        },
+        {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1074,10 +1334,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1098,7 +1358,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1106,10 +1374,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1128,7 +1396,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1136,10 +1412,58 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
+          },
+        },
+      ],
+    },
+    {
+      name: "restore-domain",
+      description:
+        "Restores a domain that has expired, or was deleted, before it becomes available for others to register. The cost of restoring your domain is billed to your Amazon Web Services account. Not every TLD registry supports restoring domains, and the period during which a domain can be restored varies by TLD. To find out whether your domain can be restored and the period during which you can restore it, see Domains that you can register with Amazon Route 53 in the Amazon Route 53 Developer Guide.  Restoring a domain typically costs more, and sometimes much more, than registering or renewing a domain. To get the restoration price for a domain before you restore it, use GetDomainPrices.  Restoration is asynchronous. The response includes an operation ID that you can use with GetOperationDetail to track the progress of the request. When the restoration succeeds, the domain reappears in the response to ListDomains. For more information, see Restoring an expired or deleted domain in the Amazon Route 53 Developer Guide",
+      options: [
+        {
+          name: "--domain-name",
+          description:
+            "The name of the domain that you want to restore. The domain must have been registered to the Amazon Web Services account that submits the request",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--consent",
+          description:
+            "Specifies the maximum price that you agree to pay to restore the domain name. This element is required if the domain has registry premium pricing, and optional if the domain is priced at the standard rate for its TLD. If you include it and the restoration price is more than MaxPrice, the request fails",
+          args: {
+            name: "structure",
+          },
+        },
+        {
+          name: "--cli-input-json",
+          description:
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--generate-cli-skeleton",
+          description:
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
+          args: {
+            name: "string",
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1160,7 +1484,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1168,10 +1500,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1199,7 +1531,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--duration-in-years",
           description:
-            "The number of years that you want to register the domain for. Domains are registered for a minimum of one year. The maximum period depends on the top-level domain. Default: 1",
+            "Reserved for future use. Currently, the effect of a domain transfer on the registration period varies by TLD. For information about how transferring a domain affects the expiration date, see the Transfer Term column in the pricing information at Amazon Route 53 Pricing. Default: 1",
           args: {
             name: "integer",
           },
@@ -1298,9 +1630,25 @@ const completionSpec: Fig.Spec = {
             'Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS ("who is") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the billing contact.   You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts',
         },
         {
+          name: "--consent",
+          description:
+            "Specifies the maximum price that you agree to pay to transfer the domain name to Route 53. This element is required if the domain has registry premium pricing, and optional if the domain is priced at the standard rate for its TLD. If you include it and the transfer price is more than MaxPrice, the request fails",
+          args: {
+            name: "structure",
+          },
+        },
+        {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1308,10 +1656,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1340,7 +1688,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1348,10 +1704,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1393,7 +1749,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--consent",
           description:
-            "Customer's consent for the owner change request. Required if the domain is not free (consent price is more than $0.00)",
+            "The maximum amount that you agree to pay for the owner change. Required if the domain is not free (consent price is more than USD $0.00)",
           args: {
             name: "structure",
           },
@@ -1408,7 +1764,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1416,10 +1780,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1480,7 +1844,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1488,10 +1860,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1526,7 +1898,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1534,10 +1914,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1565,7 +1945,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1573,10 +1961,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -1619,17 +2007,17 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--start",
+          name: "--cli-input-json",
           description:
-            "The beginning date and time for the time period for which you want a list of billing records. Specify the date and time in Unix time format and Coordinated Universal time (UTC)",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
           args: {
-            name: "timestamp",
+            name: "string",
           },
         },
         {
-          name: "--cli-input-json",
+          name: "--cli-input-yaml",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -1653,14 +2041,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
     },
   ],
 };
+
 export default completionSpec;

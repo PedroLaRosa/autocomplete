@@ -1,3 +1,5 @@
+// whois (macOS 15.5 BSD whois, apple-oss-distributions/adv_cmds adv_cmds-235, whois.1 dated 2019-08-01, 2026-11-19). Source: whois.1 man page and
+// whois.c (getopt "aAbc:fgh:iIklmp:PQrRS"); every option was already present and matched. Not run on macOS.
 const completionSpec: Fig.Spec = {
   name: "whois",
   description: "Query a database for information about a domain registrant",

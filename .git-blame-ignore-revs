@@ -1,0 +1,20 @@
+# Bulk commits that changed no spec behavior (renames, formatting, lint fixes).
+# Skipped by `git blame --ignore-revs-file`, GitHub's blame view, and the
+# "Last updated" column of SUPPORTED_CLIS.md (scripts/generate-cli-list.js).
+
+# build(deps): move off fig packages to @tabsmith and pin exact versions (2026-11-04)
+cca16a40d52cd40f07bedef937e66fe32d5771fd
+# build(deps): upgrade to TypeScript 7, ESLint 10 and pnpm 12 (2026-11-04)
+d206f90bac3389f1a19cbf0d21e1b2ae13138c57
+# style: remove more empty lines (2022-04-24)
+a831f7238e6e045def93f71474cee76db8b31fae
+# style: remove empty lines (2022-04-24)
+b6bca50ad7d8646164daedd460f7eaaa31a013d2
+# style: remove useless `isVariadic: false` (2022-04-24)
+281bd1ef8aef80a950c745f5bee3218c53cf03af
+# style: update prettier (2022-04-09)
+ac9c85b838a5ca827a3218ebb560d13a90cb41b9
+# style: apply new `no-default-value-props` lint rule (2022-03-25)
+d8e767c3783f2bbef99699013d8fce0bd39c2b0b
+# build(deps-dev): bump prettier from 3.0.3 to 3.1.0 (#2185) (2023-11-30), whitespace only
+4c2c944e70721b32350d66170eaf6288a0ed041c

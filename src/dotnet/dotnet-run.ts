@@ -1,3 +1,15 @@
+import {
+  artifactsPathOption,
+  configurationOption,
+  disableBuildServersOption,
+  frameworkOption,
+  interactiveOption,
+  noRestoreOption,
+  selfContainedOptions,
+  targetPlatformOptions,
+  verbosityOption,
+} from "./shared";
+
 type LaunchProfile = {
   commandName: string;
 };
@@ -6,56 +18,49 @@ type LaunchProfiles = Record<string, LaunchProfile>;
 
 const completionSpec: Fig.Spec = {
   name: "run",
-  description:
-    "The dotnet run command provides a convenient option to run your application from the source code with one command. It's useful for fast iterative development from the command line. The command depends on the dotnet build command to build the code. Any requirements for the build, such as that the project must be restored first, apply to dotnet run as well",
+  // The dotnet CLI does not bundle single-dash flags (-lp, -bl, -lang, ...).
+  parserDirectives: { flagsArePosixNoncompliant: true },
+  description: ".NET Run Command",
   options: [
+    configurationOption(
+      "The configuration to run for. The default for most projects is 'Debug'"
+    ),
+    frameworkOption(
+      "The target framework to run for. The target framework must also be specified in the project file"
+    ),
     {
-      name: "--",
+      name: "--project",
       description:
-        "Delimits arguments to dotnet run from arguments for the application being run. All arguments after this delimiter are passed to the application run",
-    },
-    {
-      name: ["-a", "--arch"],
-      description:
-        "Specifies the target architecture. This is a shorthand syntax for setting the Runtime Identifier (RID), where the provided value is combined with the default RID. For example, on a win-x64 machine, specifying --arch x86 sets the RID to win-x86. If you use this option, don't use the -r|--runtime option. Available since .NET 6 Preview 7",
+        "Defines the path of the project file to run. Use path to the project file, or path to the directory containing the project file. If not specified, it defaults to the current directory",
       args: {
-        name: "arch",
-        suggestions: ["x86", "x64", "arm", "arm64"],
+        name: "project-path",
+        template: ["folders", "filepaths"],
       },
     },
     {
-      name: ["-c", "--configuration"],
+      name: "--file",
       description:
-        "Defines the build configuration. The default for most projects is Debug, but you can override the build configuration settings in your project",
+        "The path to the file-based app to run (can be also passed as the first argument if there is no project in the current directory)",
       args: {
-        name: "configuration",
-        suggestions: ["Debug", "Release"],
+        name: "file-path",
+        template: "filepaths",
       },
     },
     {
-      name: ["-f", "--framework"],
-      description:
-        "Builds and runs the app using the specified framework. The framework must be specified in the project file",
+      name: ["-p", "--property"],
+      description: "Set or override MSBuild properties (NAME=VALUE)",
+      hidden: true,
+      isRepeatable: true,
       args: {
-        name: "framework",
+        name: "name=value",
       },
     },
     {
-      name: "--force",
+      name: ["-lp", "--launch-profile"],
       description:
-        "Forces all dependencies to be resolved even if the last restore was successful. Specifying this flag is the same as deleting the project.assets.json file",
-    },
-    {
-      name: "--interactive",
-      description:
-        "Allows the command to stop and wait for user input or action. For example, to complete authentication. Available since .NET Core 3.0 SDK",
-    },
-    {
-      name: "--launch-profile",
-      description:
-        "The name of the launch profile (if any) to use when launching the application. Launch profiles are defined in the launchSettings.json file and are typically called Development, Staging, and Production",
+        "The name of the launch profile (if any) to use when launching the application",
       args: {
-        name: "name",
+        name: "launch-profile",
         suggestions: ["Development", "Staging", "Production"],
         generators: {
           script: ["cat", "Properties/launchSettings.json"],
@@ -73,60 +78,64 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--no-build",
-      description:
-        "Doesn't build the project before running. It also implicit sets the --no-restore flag",
-    },
-    {
-      name: "--no-dependencies",
-      description:
-        "When restoring a project with project-to-project (P2P) references, restores the root project and not the references",
-    },
-    {
       name: "--no-launch-profile",
       description:
-        "Doesn't try to use launchSettings.json to configure the application",
+        "Do not attempt to use launchSettings.json or [app].run.json to configure the application",
     },
     {
-      name: "--no-restore",
+      name: "--no-launch-profile-arguments",
       description:
-        "Doesn't execute an implicit restore when running the command",
+        "Do not use arguments specified in launch profile to run the application",
     },
     {
-      name: "--os",
-      description:
-        "Specifies the target operating system (OS). This is a shorthand syntax for setting the Runtime Identifier (RID), where the provided value is combined with the default RID. For example, on a win-x64 machine, specifying --os os sets the RID to os-x64. If you use this option, don't use the -r|--runtime option. Available since .NET 6 Preview 7",
+      name: "--device",
+      description: "The device identifier to use for running the application",
       args: {
-        name: "os",
+        name: "device",
       },
     },
     {
-      name: "--project",
+      name: "--list-devices",
+      description: "List available devices for running the application",
+    },
+    {
+      name: "--no-build",
       description:
-        "Specifies the path of the project file to run (folder name or full path). If not specified, it defaults to the current directory. The -p abbreviation for --project is deprecated starting in .NET 6 Preview SDK",
+        "Do not build the project before running. Implies --no-restore",
+    },
+    interactiveOption,
+    noRestoreOption,
+    {
+      name: "--no-cache",
+      description:
+        "Skip up to date checks and always build the program before running",
+    },
+    ...selfContainedOptions,
+    verbosityOption(),
+    ...targetPlatformOptions("The target runtime to run for"),
+    disableBuildServersOption,
+    artifactsPathOption,
+    {
+      name: ["-e", "--environment"],
+      description:
+        "Sets the value of an environment variable. Creates the variable if it does not exist, overrides if it does. This argument can be specified multiple times to provide multiple variables",
+      isRepeatable: true,
       args: {
-        name: "path",
-        template: ["folders", "filepaths"],
+        name: "name=value",
       },
     },
     {
-      name: ["-r", "--runtime"],
+      name: "--",
       description:
-        "Specifies the target runtime to restore packages for. For a list of Runtime Identifiers (RIDs), see the RID catalog. -r short option available since .NET Core 3.0 SDK",
-      args: {
-        name: "runtime",
-      },
-    },
-    {
-      name: ["-v", "--verbosity"],
-      description:
-        "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. The default is minimal. For more information, see LoggerVerbosity",
-      args: {
-        name: "verbosity",
-        suggestions: ["quiet", "minimal", "normal", "detailed", "diagnostic"],
-      },
+        "Delimits arguments to dotnet run from arguments for the application being run. All arguments after this delimiter are passed to the application run",
     },
   ],
+  args: {
+    name: "applicationArguments",
+    description: "Arguments passed to the application that is being run",
+    isOptional: true,
+    isVariadic: true,
+  },
 };
 
 export default completionSpec;

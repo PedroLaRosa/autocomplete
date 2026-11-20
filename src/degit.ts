@@ -1,3 +1,7 @@
+// degit v3.10.1 (npm latest / GitHub tag Rich-Harris/degit v3.10.1, checked 2026-11-19). Source: the npm tarball's
+// assets/help.md and dist/bin.js option parser (mri aliases), cross-checked with src/bin.ts, src/aliases.ts and
+// docs/CHANGELOG.md in the repo; not run. Excluded: --no-actions and --allow-env, which are only on the unreleased
+// main branch (3.11.0). Note -h is documented in help.md but is not an alias in the parser, so only --help is listed.
 export interface Repository {
   id: number;
   node_id: string;
@@ -107,36 +111,95 @@ export interface Owner {
   site_admin: boolean;
 }
 
+const aliasGenerator: Fig.Generator = {
+  // `degit ls` prints one "name -> repo" line per saved alias, or "no aliases"
+  custom: async (_tokens, executeShellCommand) => {
+    const { stdout } = await executeShellCommand({
+      command: "degit",
+      // eslint-disable-next-line @tabsmith/fig-linter/no-useless-arrays
+      args: ["ls"],
+    });
+    return stdout.split("\n").flatMap((line) => {
+      const [name, repo] = line.split(" -> ");
+      if (!name || !repo) return [];
+      return [
+        {
+          name: name.trim(),
+          description: repo.trim(),
+          icon: "fig://icon?type=git",
+        },
+      ];
+    });
+  },
+};
+
 const completionSpec: Fig.Spec = {
   name: "degit",
   description: "Straightforward project scaffolding",
-  args: [
+  subcommands: [
     {
-      name: "user/repo",
-      generators: {
-        trigger: (newToken, oldToken) =>
-          newToken.indexOf("/") !== oldToken.indexOf("/"),
-        custom: async (tokens, executeShellCommand) => {
-          const lastToken = tokens[tokens.length - 1];
-          if (lastToken.includes(":")) return [];
-          const username = lastToken.slice(0, lastToken.indexOf("/"));
-          const { stdout } = await executeShellCommand({
-            command: "curl",
-            args: ["-sL", `https://api.github.com/users/${username}/repos`],
-          });
-          const repos = JSON.parse(stdout) as Repository[];
-          return repos.map((repo) => ({
-            name: repo.full_name,
-            description: repo.description ?? "Repository",
-            priority: repo.is_template ? 51 : 50,
-            displayName: repo.name,
-            icon: "fig://icon?type=git",
-          }));
+      name: "alias",
+      description: "Save an alias for a repository",
+      args: [
+        {
+          name: "repo",
+          description: "Repository to alias, such as github:user/repo",
         },
+        {
+          name: "name",
+          description: "Name of the alias",
+        },
+      ],
+    },
+    {
+      name: "unalias",
+      description: "Remove a saved alias",
+      args: {
+        name: "name",
+        description: "Alias to remove",
+        generators: aliasGenerator,
       },
     },
     {
-      name: "location",
+      name: "ls",
+      description: "List saved aliases",
+    },
+  ],
+  args: [
+    {
+      name: "user/repo",
+      description:
+        "Source: user/repo, a github:, gitlab:, bitbucket: or gist: shorthand, a repository URL or a saved alias; append #ref for a branch, tag or commit",
+      generators: [
+        {
+          trigger: (newToken, oldToken) =>
+            newToken.indexOf("/") !== oldToken.indexOf("/"),
+          custom: async (tokens, executeShellCommand) => {
+            const lastToken = tokens[tokens.length - 1];
+            if (lastToken.includes(":")) return [];
+            const username = lastToken.slice(0, lastToken.indexOf("/"));
+            const { stdout } = await executeShellCommand({
+              command: "curl",
+              args: ["-sL", `https://api.github.com/users/${username}/repos`],
+            });
+            const repos = JSON.parse(stdout) as Repository[];
+            if (!Array.isArray(repos)) return [];
+            return repos.map((repo) => ({
+              name: repo.full_name,
+              description: repo.description ?? "Repository",
+              priority: repo.is_template ? 51 : 50,
+              displayName: repo.name,
+              icon: "fig://icon?type=git",
+            }));
+          },
+        },
+        aliasGenerator,
+      ],
+    },
+    {
+      name: "dest",
+      description:
+        "Destination directory (default: the current directory, which must be empty unless --force is used)",
       isOptional: true,
       template: "folders",
       suggestCurrentToken: true,
@@ -145,23 +208,40 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: "--help",
-      description: "Print help",
+      description: "Show the help message",
+    },
+    {
+      name: ["-V", "--version"],
+      description: "Show the version",
     },
     {
       name: ["-f", "--force"],
-      description: "Overwrite existing files",
+      description: "Allow a non-empty destination directory",
     },
     {
       name: ["-c", "--cache"],
-      description: "Use a cache",
+      description: "Only use the local cache (no network)",
+    },
+    {
+      name: ["-F", "--files"],
+      description:
+        "Clone only the listed files or directories (comma-separated)",
+      isRepeatable: true,
+      args: {
+        name: "paths",
+      },
+    },
+    {
+      name: ["-r", "--repo-name"],
+      description: "Clone into a directory named after the repository",
     },
     {
       name: ["-v", "--verbose"],
-      description: "Be verbose?",
+      description: "Extra logging",
     },
     {
       name: ["-m", "--mode"],
-      description: "Clone mode",
+      description: "Clone mode, kept for compatibility; tar is the default",
       args: {
         name: "mode",
         suggestions: ["git", "tar"],

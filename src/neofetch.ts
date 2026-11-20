@@ -1,26 +1,87 @@
+// Neofetch v7.1.0 (latest git tag in dylanaraps/neofetch, 2026-11-20; upstream repo is archived).
+// Source: usage() and get_args() of the `neofetch` script at tag 7.1.0, read statically from
+// raw.githubusercontent.com (script not executed), diffed against master ccd5d9f. Unreleased
+// master-only flags (--ip_interface, --catimg, --catimg_size, --ueberzug, --viu) are omitted.
 const infoLines = {
   name: "Information lines",
   suggestions: [
-    "os",
-    "host",
+    "title",
+    "underline",
+    "distro",
+    "model",
     "kernel",
     "uptime",
     "packages",
     "shell",
+    "resolution",
+    "de",
+    "wm",
+    "wm_theme",
+    "theme",
+    "icons",
     "term",
+    "term_font",
     "cpu",
     "gpu",
     "memory",
+    "gpu_driver",
+    "cpu_usage",
     "disk",
     "battery",
-    "resolution",
-    "wm",
-    "de",
-    "theme",
-    "wm_theme",
-    "icons",
+    "font",
+    "song",
+    "local_ip",
+    "public_ip",
+    "users",
+    "locale",
+    "cols",
   ],
 };
+
+const musicPlayers = [
+  "auto",
+  "amarok",
+  "audacious",
+  "banshee",
+  "bluemindo",
+  "clementine",
+  "cmus",
+  "deadbeef",
+  "deepin-music",
+  "dragon",
+  "elisa",
+  "exaile",
+  "gnome-music",
+  "gmusicbrowser",
+  "gogglesmm",
+  "guayadeque",
+  "io.elementary.music",
+  "iTunes",
+  "juk",
+  "lollypop",
+  "mocp",
+  "mopidy",
+  "mpd",
+  "muine",
+  "netease-cloud-music",
+  "olivia",
+  "playerctl",
+  "pogo",
+  "pragha",
+  "qmmp",
+  "quodlibet",
+  "rhythmbox",
+  "sayonara",
+  "smplayer",
+  "spotify",
+  "strawberry",
+  "tauonmb",
+  "tomahawk",
+  "vlc",
+  "xmms2d",
+  "xnoise",
+  "yarock",
+];
 
 const onOff: Fig.Arg = {
   name: "on/off",
@@ -43,19 +104,32 @@ const bar: Fig.Arg = {
   suggestions: ["bar", "infobar", "barinfo", "off"],
 };
 
+const imageSource: Fig.Arg = {
+  name: "source",
+  description: "Image, ascii file, directory or command output to display",
+  isOptional: true,
+  template: "filepaths",
+};
+
+const backendShortcut = (backend: string): Fig.Option => ({
+  name: `--${backend}`,
+  description: `Same as --backend ${backend}`,
+  args: imageSource,
+});
+
 const completionSpec: Fig.Spec = {
   name: "neofetch",
   description: "The most complete system information CLI tool",
   args: { ...infoLines, isVariadic: true },
   options: [
     {
-      name: ["--help", "-h"],
+      name: "--help",
       description: "Show help for neofetch",
     },
     {
       name: "--disable",
       description: "Disable information line",
-      args: infoLines,
+      args: { ...infoLines, isVariadic: true },
     },
     {
       name: "--title_fqdn",
@@ -80,6 +154,7 @@ const completionSpec: Fig.Spec = {
         suggestions: [
           "current",
           "min",
+          "max",
           "bios",
           "scaling_current",
           "scaling_min",
@@ -186,7 +261,9 @@ const completionSpec: Fig.Spec = {
       description: "Which disks to display",
       args: {
         name: "disk",
+        isVariadic: true,
         suggestions: [
+          "/",
           "/dev/sd",
           "/dev/nvme",
           "/dev/mmcblk",
@@ -221,6 +298,19 @@ const completionSpec: Fig.Spec = {
       args: { name: "X seconds" },
     },
     {
+      name: "--song_format",
+      description: "Print the song data in a specific format",
+      args: {
+        name: "format",
+        suggestions: ["%artist% - %album% - %title%"],
+      },
+    },
+    {
+      name: "--song_shorthand",
+      description: "Print the Artist/Album/Title on separate lines",
+      args: onOff,
+    },
+    {
       name: "--memory_percent",
       description: "Display memory percentage",
       args: onOff,
@@ -231,6 +321,14 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "unit",
         suggestions: ["kib", "mib", "gib"],
+      },
+    },
+    {
+      name: "--music_player",
+      description: "Manually specify a music player to use",
+      args: {
+        name: "player-name",
+        suggestions: musicPlayers,
       },
     },
     {
@@ -364,54 +462,18 @@ const completionSpec: Fig.Spec = {
         template: "filepaths",
       },
     },
-    {
-      name: "--ascii",
-      description: "Same as --backend ascii",
-    },
-    {
-      name: "--caca",
-      description: "Same as --backend caca",
-    },
-    {
-      name: "--chafa",
-      description: "Same as --backend chafa",
-    },
-    {
-      name: "--iterm2",
-      description: "Same as --backend iterm2",
-    },
-    {
-      name: "--jp2a",
-      description: "Same as --backend jp2a",
-    },
-    {
-      name: "--kitty",
-      description: "Same as --backend kitty",
-    },
-    {
-      name: "--pot",
-      description: "Same as --backend pot",
-    },
-    {
-      name: "--pixterm",
-      description: "Same as --backend pixterm",
-    },
-    {
-      name: "--sixel",
-      description: "Same as --backend sixel",
-    },
-    {
-      name: "--termpix",
-      description: "Same as --backend termpix",
-    },
-    {
-      name: "--tycat",
-      description: "Same as --backend tycat",
-    },
-    {
-      name: "--w3m",
-      description: "Same as --backend w3m",
-    },
+    backendShortcut("ascii"),
+    backendShortcut("caca"),
+    backendShortcut("chafa"),
+    backendShortcut("iterm2"),
+    backendShortcut("jp2a"),
+    backendShortcut("kitty"),
+    backendShortcut("pot"),
+    backendShortcut("pixterm"),
+    backendShortcut("sixel"),
+    backendShortcut("termpix"),
+    backendShortcut("tycat"),
+    backendShortcut("w3m"),
     {
       name: "--off",
       description: "Same as --backend off",
@@ -451,7 +513,7 @@ const completionSpec: Fig.Spec = {
       description: "How to size the image",
       args: {
         name: "size",
-        suggestions: ["auto", anyNum + "px", anyNum + "%"],
+        suggestions: ["auto", anyNum + "px", anyNum + "%", "none"],
       },
     },
     {
@@ -467,7 +529,17 @@ const completionSpec: Fig.Spec = {
       description: "Change the crop offset for normal mode",
       args: {
         name: "offset",
-        suggestions: ["northwest", "north", "northeast"],
+        suggestions: [
+          "northwest",
+          "north",
+          "northeast",
+          "west",
+          "center",
+          "east",
+          "southwest",
+          "south",
+          "southeast",
+        ],
       },
     },
     {
@@ -481,6 +553,12 @@ const completionSpec: Fig.Spec = {
       description:
         "How close the image will be to the top edge of the window. This only works with w3m",
       args: num,
+    },
+    {
+      name: "--bg_color",
+      description:
+        "Background color to display behind transparent image. This only works with w3m",
+      args: { name: "color" },
     },
     {
       name: "--gap",
@@ -527,6 +605,17 @@ const completionSpec: Fig.Spec = {
     {
       name: "--gen-man",
       description: "Generate a manpage for neofetch in your PWD",
+    },
+    {
+      name: "--json",
+      description: "Print the information as JSON (undocumented)",
+      hidden: true,
+    },
+    {
+      name: "--travis",
+      description:
+        "Print a fixed test output used by upstream CI (undocumented)",
+      hidden: true,
     },
   ],
 };

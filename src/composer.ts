@@ -1,3 +1,8 @@
+// Composer v2.11.2 (latest getcomposer.org release; phar from the GitHub release asset, sha256 matches the Homebrew formula; 2026-11-19).
+// Source: the spec builds its command tree at runtime from `composer list --format=json`, so only the static parts were checked:
+// Application default options and command classes read from composer/composer at tag 2.11.2 (bundled symfony/console 5.4.55),
+// the JSON shape checked against a local composer 2.8.12 `composer list --format=json` (the 2.11.2 phar was not executed here),
+// the packagist.org search endpoint probed live, and the Symfony Flex recipe commands read from symfony/flex v2.12.0.
 const composerIcon =
   "https://getcomposer.org/img/logo-composer-transparent5.png";
 
@@ -14,9 +19,9 @@ interface ComposerOption {
   shortcut: string;
   accept_value: boolean;
   is_value_required: boolean;
-  is_multiple: boolean; // not supported by fig
+  is_multiple: boolean;
   description: string;
-  default: null | boolean; // not supported by fig
+  default: null | boolean | string | Array<string>; // not supported by fig
 }
 
 interface ComposerCommandDefinition {
@@ -152,18 +157,22 @@ const completionSpec: Fig.Spec = {
 
           options: Object.keys(command.definition.options).map((optionKey) => {
             const option = command.definition.options[optionKey];
-            const names = [option.name];
 
-            const shortCut = option.shortcut;
-            if (shortCut.trim().length > 0) {
-              names.push(shortCut);
-            }
+            // Symfony joins several shortcuts with "|", e.g. "-v|-vv|-vvv"
+            const names = [
+              option.name,
+              ...option.shortcut
+                .split("|")
+                .filter((shortCut) => shortCut.trim().length > 0),
+            ];
 
             return {
               name: names,
               description: option.description,
-              isRequired: option.is_value_required,
-              args: option.accept_value ? {} : undefined,
+              isRepeatable: option.is_multiple || undefined,
+              args: option.accept_value
+                ? { isOptional: !option.is_value_required }
+                : undefined,
             };
           }),
         });
@@ -195,6 +204,11 @@ const completionSpec: Fig.Spec = {
           description: "Display timing and memory usage information",
         },
         { name: "--no-plugins", description: "Whether to disable plugins" },
+        {
+          name: "--no-scripts",
+          description:
+            "Skips the execution of all scripts defined in composer.json file",
+        },
         {
           name: ["-d", "--working-dir"],
           description:
@@ -261,6 +275,55 @@ const completionSpec: Fig.Spec = {
               description:
                 "Overwrite existing files when a new version of a recipe is available",
               isDangerous: true,
+            },
+            {
+              name: "--reset",
+              description:
+                "Reset all recipes back to their initial state (should be combined with --force)",
+            },
+            {
+              name: "--yes",
+              description:
+                "Answer prompt questions with 'yes' for all questions",
+            },
+            ...recipesCommonOptions,
+          ],
+        });
+
+        subcommands.push({
+          name: ["recipes:update", "symfony:recipes:update"],
+          description:
+            "Updates an already-installed recipe to the latest version",
+          icon: composerIcon,
+          args: {
+            name: "package",
+            description: "Recipe that should be updated",
+            isOptional: true,
+          },
+          options: [
+            {
+              name: "--no-changelog",
+              description:
+                "Do not generate the changelog after updating the recipe",
+            },
+            ...recipesCommonOptions,
+          ],
+        });
+
+        subcommands.push({
+          name: ["dump-env", "symfony:dump-env"],
+          description: "Compiles .env files to .env.local.php",
+          icon: composerIcon,
+          args: {
+            name: "env",
+            description:
+              'The application environment to dump .env files for - e.g. "prod"',
+            isOptional: true,
+          },
+          options: [
+            {
+              name: "--empty",
+              description: "Ignore the content of .env files",
             },
             ...recipesCommonOptions,
           ],

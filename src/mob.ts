@@ -1,3 +1,20 @@
+// mob v5.4.2 (latest git tag of remotemobprogramming/mob, 2026-11-19). Source: `mob help` text (help/help.go), argument parsing (configuration/configuration.go) and command dispatch (mob.go) at v5.4.2; binary not run.
+const branchOption: Fig.Option = {
+  name: ["--branch", "-b"],
+  description: "Set wip branch to 'mob/<base-branch>/<branch-postfix>'",
+  args: {
+    name: "branch-postfix",
+  },
+};
+
+const roomOption: Fig.Option = {
+  name: "--room",
+  description: "Set room name for timer.mob.sh once",
+  args: {
+    name: "room-name",
+  },
+};
+
 const completionSpec: Fig.Spec = {
   name: "mob",
   description: "Fast git handover for remote collaboration with mob.sh",
@@ -11,12 +28,19 @@ const completionSpec: Fig.Spec = {
           description: "Move uncommitted changes to wip branch",
         },
         {
-          name: ["--branch", "-b"],
-          description: "Set wip branch to 'mob/<base-branch>/<branch-postfix>'",
-          args: {
-            name: "branch-postfix",
-          },
+          name: ["--discard-uncommitted-changes", "-d"],
+          description: "Discard uncommitted changes",
         },
+        branchOption,
+        {
+          name: ["--create", "-c"],
+          description: "Create the remote branch",
+        },
+        {
+          name: ["--join", "-j"],
+          description: "Join existing wip branch",
+        },
+        roomOption,
       ],
       args: {
         name: "minutes",
@@ -47,7 +71,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["done", "d"],
-      description: "Squashes all changes in wip branch to index in base branch",
+      description: "Squash all changes in wip branch to index in base branch",
       options: [
         {
           name: "--no-squash",
@@ -67,14 +91,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "reset",
-      description: "Removes local and remote wip branch",
+      description: "Remove local and remote wip branch",
       options: [
+        branchOption,
         {
-          name: ["--branch", "-b"],
-          description: "Set wip branch to 'mob/<base-branch>/<branch-postfix>'",
-          args: {
-            name: "branch-postfix",
-          },
+          name: "--delete-remote-wip-branch",
+          description:
+            "Actually delete the local and remote wip branch for everyone (without it reset only prints a warning)",
+          isDangerous: true,
         },
       ],
     },
@@ -85,6 +109,14 @@ const completionSpec: Fig.Spec = {
     {
       name: ["timer", "t"],
       description: "Start a <minutes> timer",
+      options: [roomOption],
+      subcommands: [
+        {
+          name: ["open", "o"],
+          description: "Opens the timer website",
+          options: [roomOption],
+        },
+      ],
       args: {
         name: "minutes",
       },
@@ -97,8 +129,24 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: ["goal", "g"],
+      description:
+        "Gives you the current goal of your timer.mob.sh room, or sets it",
+      options: [
+        {
+          name: "--delete",
+          description: "Deletes the goal of your timer.mob.sh room",
+        },
+      ],
+      args: {
+        name: "your-goal",
+        description: "Sets the goal of your timer.mob.sh room",
+        isOptional: true,
+      },
+    },
+    {
       name: "status",
-      description: "Show the status of the current session",
+      description: "Show status of the current session",
     },
     {
       name: "fetch",
@@ -114,7 +162,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "version",
-      description: "Show the version",
+      description: "Show tool version",
     },
     {
       name: "help",
@@ -129,6 +177,15 @@ const completionSpec: Fig.Spec = {
     {
       name: "--debug",
       description: "Enable verbose logging",
+      isPersistent: true,
+    },
+    {
+      name: ["--help", "-h"],
+      description: "Show help",
+    },
+    {
+      name: ["--version", "-v"],
+      description: "Show tool version",
     },
   ],
 };

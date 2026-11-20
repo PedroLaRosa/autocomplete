@@ -1,3 +1,19 @@
+// Sapphire CLI v1.9.3 (@sapphire/cli on npm, 2026-11-19). Source: installed the npm package and walked `sapphire --help` / `help <command>` for every command, plus dist/cli.js and templates/components for the `generate` component names.
+
+const pieceNames = [
+  "argument",
+  "autocompleteinteractionhandler",
+  "buttoninteractionhandler",
+  "contextmenucommand",
+  "listener",
+  "messagecommand",
+  "modalinteractionhandler",
+  "precondition",
+  "route",
+  "selectmenuinteractionhandler",
+  "slashcommand",
+];
+
 const completionSpec: Fig.Spec = {
   name: "sapphire",
   description: "CLI for the Sapphire Framework",
@@ -28,6 +44,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "component",
           description: "Component/piece name",
+          suggestions: pieceNames,
         },
         {
           name: "name",
@@ -38,10 +55,16 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: ["generate-loader", "gl"],
+      priority: 85,
+      description: "Generates a piece loader",
+      displayName: "Generate a piece loader 🔌",
+    },
+    {
       name: ["init", "i"],
       priority: 80,
       description: "Creates a config file on an existing Sapphire project",
-      displayName: "Initalize CLI on an existing project ⚙️",
+      displayName: "Initialize CLI on an existing project ⚙️",
     },
     {
       name: "help",

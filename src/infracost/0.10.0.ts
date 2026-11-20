@@ -1,3 +1,10 @@
+// Infracost v0.10.50 (legacy CLI, GitHub release infracost/infracost 2026-11-13, verified 2026-11-20). Source: cmd/infracost/*.go at v0.10.50
+const jsonFormatOption: Fig.Option = {
+  name: "--format",
+  description: "Output format: json",
+  args: { name: "format", suggestions: ["json"] },
+};
+
 const completion: Fig.Subcommand = {
   name: "infracost",
   description: "Cloud cost estimates for Terraform",
@@ -90,7 +97,7 @@ const completion: Fig.Subcommand = {
         },
         {
           name: "--show-skipped",
-          description: "List unsupported and free resources",
+          description: "List unsupported resources",
         },
         {
           name: "--sync-usage-file",
@@ -127,13 +134,15 @@ const completion: Fig.Subcommand = {
           name: "--terraform-var",
           description:
             "Set value for an input variable, similar to Terraform's -var flag",
+          isRepeatable: true,
           args: { name: "terraform-var" },
         },
         {
           name: "--terraform-var-file",
           description:
             "Load variable files, similar to Terraform's -var-file flag. Provided files must be relative to the --path flag",
-          args: { name: "terraform-var-file" },
+          isRepeatable: true,
+          args: { name: "terraform-var-file", template: ["filepaths"] },
         },
         {
           name: "--terraform-workspace",
@@ -159,10 +168,10 @@ const completion: Fig.Subcommand = {
           description: "Post an Infracost comment to Azure Repos",
           options: [
             {
-              name: "--additional-comment-data-path",
-              description: "Path to additional comment text (experimental)",
+              name: "--comment-path",
+              description: "Path to comment content file (experimental)",
               hidden: true,
-              args: { name: "additional-comment-data-path" },
+              args: { name: "comment-path", template: ["filepaths"] },
             },
             {
               name: "--azure-access-token",
@@ -186,11 +195,6 @@ const completion: Fig.Subcommand = {
                     description: "Create a new comment",
                   },
                   {
-                    name: "hide-and-new",
-                    description:
-                      "Hide previous matching comments and create a new comment",
-                  },
-                  {
                     name: "delete-and-new",
                     description:
                       "Delete previous matching comments and create a new comment",
@@ -202,6 +206,12 @@ const completion: Fig.Subcommand = {
               name: "--dry-run",
               description:
                 "Generate comment without actually posting to Azure Repos",
+            },
+            jsonFormatOption,
+            {
+              name: "--init-active",
+              description:
+                "Initialize the comment as active instead of the default: closed",
             },
             {
               name: ["--path", "-p"],
@@ -244,7 +254,7 @@ const completion: Fig.Subcommand = {
             },
             {
               name: "--show-skipped",
-              description: "List unsupported and free resources",
+              description: "List unsupported resources",
             },
             {
               name: "--skip-no-diff",
@@ -265,10 +275,10 @@ const completion: Fig.Subcommand = {
           description: "Post an Infracost comment to Bitbucket",
           options: [
             {
-              name: "--additional-comment-data-path",
-              description: "Path to additional comment text (experimental)",
+              name: "--comment-path",
+              description: "Path to comment content file (experimental)",
               hidden: true,
-              args: { name: "additional-comment-data-path" },
+              args: { name: "comment-path", template: ["filepaths"] },
             },
             {
               name: "--behavior",
@@ -325,6 +335,7 @@ const completion: Fig.Subcommand = {
               description:
                 "Exclude CLI output so comment has just the summary table",
             },
+            jsonFormatOption,
             {
               name: ["--path", "-p"],
               description:
@@ -365,7 +376,7 @@ const completion: Fig.Subcommand = {
             },
             {
               name: "--show-skipped",
-              description: "List unsupported and free resources",
+              description: "List unsupported resources",
             },
             {
               name: "--skip-no-diff",
@@ -386,10 +397,10 @@ const completion: Fig.Subcommand = {
           description: "Post an Infracost comment to GitHub",
           options: [
             {
-              name: "--additional-comment-data-path",
-              description: "Path to additional comment text (experimental)",
+              name: "--comment-path",
+              description: "Path to comment content file (experimental)",
               hidden: true,
-              args: { name: "additional-comment-data-path" },
+              args: { name: "comment-path", template: ["filepaths"] },
             },
             {
               name: "--behavior",
@@ -431,6 +442,7 @@ const completion: Fig.Subcommand = {
               description:
                 "Generate comment without actually posting to GitHub",
             },
+            jsonFormatOption,
             {
               name: "--github-api-url",
               description: "GitHub API URL",
@@ -503,7 +515,7 @@ const completion: Fig.Subcommand = {
             },
             {
               name: "--show-skipped",
-              description: "List unsupported and free resources",
+              description: "List unsupported resources",
             },
             {
               name: "--skip-no-diff",
@@ -524,10 +536,10 @@ const completion: Fig.Subcommand = {
           description: "Post an Infracost comment to GitLab",
           options: [
             {
-              name: "--additional-comment-data-path",
-              description: "Path to additional comment text (experimental)",
+              name: "--comment-path",
+              description: "Path to comment content file (experimental)",
               hidden: true,
-              args: { name: "additional-comment-data-path" },
+              args: { name: "comment-path", template: ["filepaths"] },
             },
             {
               name: "--behavior",
@@ -564,6 +576,7 @@ const completion: Fig.Subcommand = {
               description:
                 "Generate comment without actually posting to GitLab",
             },
+            jsonFormatOption,
             {
               name: "--gitlab-server-url",
               description: "GitLab Server URL",
@@ -619,7 +632,7 @@ const completion: Fig.Subcommand = {
             },
             {
               name: "--show-skipped",
-              description: "List unsupported and free resources",
+              description: "List unsupported resources",
             },
             {
               name: "--skip-no-diff",
@@ -644,7 +657,10 @@ const completion: Fig.Subcommand = {
         {
           name: "--shell",
           description: "Supported shell formats: bash, zsh, fish, powershell",
-          args: { name: "shell" },
+          args: {
+            name: "shell",
+            suggestions: ["bash", "zsh", "fish", "powershell"],
+          },
           isRequired: true,
         },
       ],
@@ -723,7 +739,11 @@ const completion: Fig.Subcommand = {
         {
           name: "--format",
           description: "Output format: json, diff",
-          args: { name: "format", default: "diff" },
+          args: {
+            name: "format",
+            default: "diff",
+            suggestions: ["json", "diff"],
+          },
         },
         {
           name: "--git-diff-target",
@@ -759,7 +779,7 @@ const completion: Fig.Subcommand = {
         },
         {
           name: "--show-skipped",
-          description: "List unsupported and free resources",
+          description: "List unsupported resources",
         },
         {
           name: "--sync-usage-file",
@@ -790,13 +810,15 @@ const completion: Fig.Subcommand = {
           name: "--terraform-var",
           description:
             "Set value for an input variable, similar to Terraform's -var flag",
+          isRepeatable: true,
           args: { name: "terraform-var" },
         },
         {
           name: "--terraform-var-file",
           description:
             "Load variable files, similar to Terraform's -var-file flag. Provided files must be relative to the --path flag",
-          args: { name: "terraform-var-file" },
+          isRepeatable: true,
+          args: { name: "terraform-var-file", template: ["filepaths"] },
         },
         {
           name: "--terraform-workspace",
@@ -841,7 +863,13 @@ const completion: Fig.Subcommand = {
               name: "--template-path",
               description:
                 "Path to the Infracost template file that will generate the config-file yaml output",
-              args: { name: "template-path" },
+              args: { name: "template-path", template: ["filepaths"] },
+            },
+            {
+              name: "--tree-file",
+              description:
+                "Save a simplified tree of the detected projects and var files to a file",
+              args: { name: "tree-file" },
             },
           ],
         },
@@ -865,7 +893,22 @@ const completion: Fig.Subcommand = {
           name: "--format",
           description:
             "Output format: json, diff, table, html, github-comment, gitlab-comment, azure-repos-comment, bitbucket-comment, bitbucket-comment-summary, slack-message",
-          args: { name: "format", default: "table" },
+          args: {
+            name: "format",
+            default: "table",
+            suggestions: [
+              "json",
+              "diff",
+              "table",
+              "html",
+              "github-comment",
+              "gitlab-comment",
+              "azure-repos-comment",
+              "bitbucket-comment",
+              "bitbucket-comment-summary",
+              "slack-message",
+            ],
+          },
         },
         {
           name: ["--out-file", "-o"],
@@ -886,7 +929,7 @@ const completion: Fig.Subcommand = {
         },
         {
           name: "--show-skipped",
-          description: "List unsupported and free resources",
+          description: "List unsupported resources",
         },
       ],
     },
@@ -900,6 +943,7 @@ const completion: Fig.Subcommand = {
           args: { name: "path", default: "p", template: ["filepaths"] },
           isRequired: true,
         },
+        jsonFormatOption,
       ],
     },
     {
@@ -1021,12 +1065,15 @@ const completion: Fig.Subcommand = {
       isPersistent: true,
     },
     { name: ["--help", "-h"], description: "Display help", isPersistent: true },
+    { name: ["--version", "-v"], description: "Version for infracost" },
   ],
 };
 
 const versions: Fig.VersionDiffMap = {};
 
 versions["0.10.30"] = {};
+
+versions["0.10.50"] = {};
 
 export { versions };
 export default completion;

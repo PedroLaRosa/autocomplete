@@ -1,3 +1,7 @@
+// Velociraptor (vr) v1.5.0 (GitHub tag umbopepato/velociraptor 1.5.0, 2026-11-19). Source: cliffy command definitions in src/cli/commands/*.ts and src/scripts_info.ts at v1.5.0.
+// Upstream is dormant: 1.5.0 (2022-03-07) is still the latest release and the HEAD commit. Not run (needs Deno), spec checked against the source only.
+// Fixed: --out-dir belongs to `export` (it was on `upgrade`); added the additional script arguments; export takes optional scripts.
+
 const SCRIPT_KEYWORD = "    • ";
 
 const scriptGenerator: Fig.Generator = {
@@ -35,6 +39,18 @@ const scriptGenerator: Fig.Generator = {
   },
 };
 
+const scriptArg: Fig.Arg = {
+  name: "script",
+  generators: scriptGenerator,
+};
+
+const additionalArgs: Fig.Arg = {
+  name: "additionalArgs",
+  description: "Additional arguments passed to the script",
+  isOptional: true,
+  isVariadic: true,
+};
+
 const completionSpec: Fig.Spec = {
   name: "vr",
   description: "The npm-style script runner for Deno",
@@ -42,19 +58,27 @@ const completionSpec: Fig.Spec = {
     {
       name: "run",
       description: "Run a script",
-      args: {
-        name: "script",
-        generators: scriptGenerator,
-      },
+      args: [scriptArg, additionalArgs],
     },
     {
       name: "export",
       description: "Export one or more scripts as standalone executable files",
       args: {
-        name: "script",
+        ...scriptArg,
+        isOptional: true,
         isVariadic: true,
-        generators: scriptGenerator,
       },
+      options: [
+        {
+          name: ["-o", "--out-dir"],
+          description: "The folder where the scripts will be exported",
+          args: {
+            name: "dir",
+            isOptional: true,
+            template: "folders",
+          },
+        },
+      ],
     },
     {
       name: "upgrade",
@@ -64,13 +88,19 @@ const completionSpec: Fig.Spec = {
         name: "version",
         isOptional: true,
       },
-      options: [
+    },
+    {
+      name: "run-hook",
+      description: "Run a git hook",
+      hidden: true,
+      args: [
         {
-          name: ["-o", "--out-dir"],
-          description: "The folder where the scripts will be exported",
-          args: {
-            name: "dir",
-          },
+          name: "hook",
+        },
+        {
+          name: "args",
+          isOptional: true,
+          isVariadic: true,
         },
       ],
     },
@@ -88,10 +118,7 @@ const completionSpec: Fig.Spec = {
     },
   ],
 
-  args: {
-    name: "script",
-    generators: scriptGenerator,
-  },
+  args: [{ ...scriptArg, isOptional: true }, additionalArgs],
 };
 
 export default completionSpec;

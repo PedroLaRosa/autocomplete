@@ -1,11 +1,13 @@
+// nginx v1.30.7 stable and v1.31.9 mainline (GitHub tags nginx/nginx, 2026-11-19). Source: src/core/nginx.c (ngx_get_options, usage text) and docs/man/nginx.8 at both tags; -l is mainline-only
 const completionSpec: Fig.Spec = {
   name: "nginx",
   description:
-    "Nginx (pronounced ``engine x'') is an HTTP and reverse proxy server, a mail proxy server, and a generic TCP/UDP proxy server.  It is known for its high performance, stability, rich feature set, simple configuration, and low resource consumption",
-  args: {
-    isVariadic: true,
-  },
+    "HTTP and reverse proxy server, mail proxy server, and generic TCP/UDP proxy server",
   options: [
+    {
+      name: ["-?", "-h"],
+      description: "Print help",
+    },
     {
       name: "-c",
       description: "Use an alternative configuration file",
@@ -17,9 +19,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "-e",
       description:
-        "Use an alternative error log file.  Special value stderr indicates that the standard error output should be used",
+        "Use an alternative error log file. Special value stderr indicates that the standard error output should be used",
       args: {
         name: "file",
+        template: "filepaths",
         suggestions: ["stderr"],
       },
     },
@@ -33,10 +36,21 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "-l",
+      description:
+        "Set a control socket listen address (mainline 1.31+, nginx must be built with --with-control-api)",
+      args: {
+        name: "address",
+        description:
+          "Address such as 127.0.0.1:8888, [::1]:8888 or unix:/path/to/socket",
+      },
+    },
+    {
       name: "-p",
-      description: "Set the prefix path.  The default value is %%PREFIX%%",
+      description: "Set the prefix path",
       args: {
         name: "prefix",
+        template: "folders",
       },
     },
     {
@@ -44,35 +58,11 @@ const completionSpec: Fig.Spec = {
       description: "Suppress non-error messages during configuration testing",
     },
     {
-      name: "-T",
-      description:
-        "Same as -t, but additionally dump configuration files to standard output",
-    },
-    {
-      name: "-t",
-      description:
-        "Do not run, just test the configuration file.  nginx checks the configuration file syntax and then tries to open files referenced in the configuration file",
-    },
-    {
-      name: "-V",
-      description:
-        "Print the nginx version, compiler version, and configure script parameters",
-    },
-    {
-      name: "-v",
-      description: "Print the nginx version",
-    },
-    {
-      name: ["-?", "-h"],
-      description: "Print help",
-    },
-    {
       name: "-s",
       description:
-        "Send a signal to the master process.  The argument signal can be one of: stop, quit, reopen, reload",
+        "Send a signal to the master process. The argument signal can be one of: stop, quit, reopen, reload",
       args: {
         name: "signal",
-
         suggestions: [
           {
             name: "stop",
@@ -92,6 +82,25 @@ const completionSpec: Fig.Spec = {
           },
         ],
       },
+    },
+    {
+      name: "-T",
+      description:
+        "Same as -t, but additionally dump configuration files to standard output",
+    },
+    {
+      name: "-t",
+      description:
+        "Do not run, just test the configuration file. nginx checks the configuration file syntax and then tries to open files referenced in the configuration file, including binding to configured listen addresses",
+    },
+    {
+      name: "-V",
+      description:
+        "Print the nginx version, compiler version, and configure script parameters",
+    },
+    {
+      name: "-v",
+      description: "Print the nginx version",
     },
   ],
 };

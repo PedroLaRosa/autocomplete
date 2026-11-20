@@ -1,3 +1,7 @@
+// Cargo v1.100.0 (latest stable: rust-lang/rust tag 1.100.0 = cargo 3acc79c0c = rust-lang/cargo tag 0.101.0, 2026-11-20).
+// Source: `cargo --help` / `cargo help <cmd> --help` of the installed cargo 1.100.0 for every built-in command (incl. config get, report future-incompatibilities|timings|sessions|rebuilds),
+// cross-checked against the clap definitions in src/bin/cargo/commands + util/command_prelude.rs and the generated man pages at tag 0.101.0.
+// Not covered: unstable hidden subcommands (clean gc), undocumented aliases (install --vers), and the fmt/clippy/fuzz/make sections, which are generated or kept as before.
 import { filepaths, keyValue } from "@tabsmith/autocomplete-generators";
 
 const rustEditions: Fig.Suggestion[] = [
@@ -12,6 +16,10 @@ const rustEditions: Fig.Suggestion[] = [
   {
     name: "2021",
     description: "2021 edition",
+  },
+  {
+    name: "2024",
+    description: "2024 edition",
   },
 ];
 
@@ -358,6 +366,46 @@ const tripleGenerator: Fig.Generator = {
   },
 };
 
+const keepGoingOption: Fig.Option = {
+  name: "--keep-going",
+  description: "Do not abort the build as soon as there is an error",
+};
+
+const messageFormats = [
+  "human",
+  "short",
+  "json",
+  "json-diagnostic-short",
+  "json-diagnostic-rendered-ansi",
+  "json-render-diagnostics",
+];
+
+const docOutputFormatOption: Fig.Option = {
+  name: "--output-format",
+  description: "The output type to write (unstable)",
+  args: {
+    name: "FMT",
+    suggestions: ["html", "json"],
+  },
+};
+
+const reportManifestPathOption: Fig.Option = {
+  name: ["-m", "--manifest-path"],
+  description: "Path to Cargo.toml",
+  args: {
+    name: "manifest-path",
+    generators: filepaths({ equals: "Cargo.toml" }),
+  },
+};
+
+const reportSessionIdOption: Fig.Option = {
+  name: "--id",
+  description: "Session ID to report on",
+  args: {
+    name: "ID",
+  },
+};
+
 const tomlBool: Fig.Suggestion[] = [
   {
     name: "true",
@@ -501,6 +549,61 @@ const configGenerator: Fig.Generator = keyValue({
   separator: "=",
 });
 
+// Flags shared by every command, repeated on the `cargo report` subcommands
+const reportCommonOptions: Fig.Option[] = [
+  {
+    name: ["-v", "--verbose"],
+    description: "Use verbose output (-vv very verbose/build.rs output)",
+    isRepeatable: true,
+  },
+  {
+    name: ["-q", "--quiet"],
+    description: "Do not print cargo log messages",
+  },
+  {
+    name: "--color",
+    description: "Coloring: auto, always, never",
+    args: {
+      name: "color",
+      suggestions: ["auto", "always", "never"],
+    },
+  },
+  {
+    name: "--config",
+    description: "Override a configuration value",
+    isRepeatable: true,
+    args: {
+      name: "config",
+      generators: configGenerator,
+    },
+  },
+  {
+    name: "-Z",
+    description:
+      "Unstable (nightly-only) flags to Cargo, see 'cargo -Z help' for details",
+    isRepeatable: true,
+    args: {
+      name: "unstable-features",
+    },
+  },
+  {
+    name: ["-h", "--help"],
+    description: "Print help",
+  },
+  {
+    name: "--locked",
+    description: "Assert that `Cargo.lock` will remain unchanged",
+  },
+  {
+    name: "--offline",
+    description: "Run without accessing the network",
+  },
+  {
+    name: "--frozen",
+    description: "Equivalent to specifying both --locked and --offline",
+  },
+];
+
 const completionSpec: (toolchain?: boolean) => Fig.Spec = (
   toolchain = true
 ) => ({
@@ -593,7 +696,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -604,7 +707,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Build for the target triple",
+          description: "Build for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -620,7 +723,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -633,6 +736,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -679,11 +783,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--tests",
-          description: "Benchmark all tests",
+          description: "Benchmark all targets that have `test = true` set",
         },
         {
           name: "--benches",
-          description: "Benchmark all benches",
+          description: "Benchmark all targets that have `bench = true` set",
         },
         {
           name: "--all-targets",
@@ -733,11 +837,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -745,15 +849,17 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
       args: [
         {
           name: "BENCHNAME",
+          isOptional: true,
         },
         {
           name: "args",
+          isOptional: true,
           isVariadic: true,
         },
       ],
@@ -763,6 +869,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       icon: "📦",
       description: "Compile a local package and all of its dependencies",
       options: [
+        keepGoingOption,
         {
           name: ["-p", "--package"],
           description: "Package to build (see `cargo help pkgid`)",
@@ -843,7 +950,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -854,7 +961,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Build for the target triple",
+          description: "Build for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -870,14 +977,15 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--out-dir",
+          name: "--artifact-dir",
           description: "Copy final artifacts to this directory (unstable)",
           args: {
-            name: "out-dir",
+            name: "artifact-dir",
+            template: "folders",
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -890,6 +998,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -945,11 +1054,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--tests",
-          description: "Build all tests",
+          description: "Build all targets that have `test = true` set",
         },
         {
           name: "--benches",
-          description: "Build all benches",
+          description: "Build all targets that have `bench = true` set",
         },
         {
           name: "--all-targets",
@@ -972,10 +1081,6 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           description: "Ignore `rust-version` specification in packages",
         },
         {
-          name: "--build-plan",
-          description: "Output the build plan in JSON (unstable)",
-        },
-        {
           name: "--unit-graph",
           description: "Output build graph in JSON (unstable)",
         },
@@ -995,11 +1100,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -1007,7 +1112,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
     },
@@ -1017,6 +1122,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description:
         "Check a local package and all of its dependencies for errors",
       options: [
+        keepGoingOption,
         {
           name: ["-p", "--package"],
           description: "Package(s) to check",
@@ -1097,7 +1203,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -1108,7 +1214,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Check for the target triple",
+          description: "Check for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -1124,7 +1230,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -1137,6 +1243,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -1192,11 +1299,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--tests",
-          description: "Check all tests",
+          description: "Check all targets that have `test = true` set",
         },
         {
           name: "--benches",
-          description: "Check all benches",
+          description: "Check all targets that have `bench = true` set",
         },
         {
           name: "--all-targets",
@@ -1238,11 +1345,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -1250,7 +1357,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
     },
@@ -1271,7 +1378,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -1280,7 +1387,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Target triple to clean output for",
+          description: "Target tuple to clean output for",
           isRepeatable: true,
           args: {
             name: "target",
@@ -1297,10 +1404,19 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--profile",
-          description: "Clean artifacts of the specified profile",
+          description: "Clean only artifacts of the specified profile",
           args: {
             name: "profile",
           },
+        },
+        {
+          name: ["-n", "--dry-run"],
+          description:
+            "Display what would be deleted without deleting anything",
+        },
+        {
+          name: "--workspace",
+          description: "Clean artifacts of the workspace members",
         },
         {
           name: "--color",
@@ -1334,12 +1450,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: ["-r", "--release"],
-          description: "Whether or not to clean release artifacts",
+          description: "Clean only release artifacts",
         },
         {
           name: "--doc",
-          description:
-            "Whether or not to clean just the documentation directory",
+          description: "Clean only the documentation directory",
         },
         {
           name: ["-h", "--help"],
@@ -1352,11 +1467,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -1371,6 +1486,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       subcommands: [
         {
           name: "get",
+          args: {
+            name: "key",
+            description: "The config key to display",
+            isOptional: true,
+          },
           options: [
             {
               name: "--format",
@@ -1415,8 +1535,8 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
               },
             },
             {
-              name: "--version",
-              description: "Print version information",
+              name: ["-q", "--quiet"],
+              description: "Do not print cargo log messages",
             },
             {
               name: "--show-origin",
@@ -1434,11 +1554,12 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
             },
             {
               name: "--frozen",
-              description: "Require Cargo.lock and cache are up to date",
+              description:
+                "Equivalent to specifying both --locked and --offline",
             },
             {
               name: "--locked",
-              description: "Require Cargo.lock is up to date",
+              description: "Assert that `Cargo.lock` will remain unchanged",
             },
             {
               name: "--offline",
@@ -1478,10 +1599,6 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
               },
             },
             {
-              name: "--version",
-              description: "Print version information",
-            },
-            {
               name: ["-h", "--help"],
               description: "Print help information",
             },
@@ -1493,11 +1610,12 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
             },
             {
               name: "--frozen",
-              description: "Require Cargo.lock and cache are up to date",
+              description:
+                "Equivalent to specifying both --locked and --offline",
             },
             {
               name: "--locked",
-              description: "Require Cargo.lock is up to date",
+              description: "Assert that `Cargo.lock` will remain unchanged",
             },
             {
               name: "--offline",
@@ -1537,6 +1655,10 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
+          name: ["-q", "--quiet"],
+          description: "Do not print cargo log messages",
+        },
+        {
           name: ["-h", "--help"],
           description: "Print help information",
         },
@@ -1547,11 +1669,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -1564,6 +1686,8 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       icon: "📄",
       description: "Build a package's documentation",
       options: [
+        docOutputFormatOption,
+        keepGoingOption,
         {
           name: ["-p", "--package"],
           description: "Package to document",
@@ -1622,7 +1746,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -1634,7 +1758,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Build for the target triple",
+          description: "Build for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -1650,7 +1774,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -1663,6 +1787,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -1670,6 +1795,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           description: "Coloring: auto, always, never",
           args: {
             name: "color",
+            suggestions: ["auto", "always", "never"],
           },
         },
         {
@@ -1758,11 +1884,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -1770,7 +1896,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
     },
@@ -1780,7 +1906,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description: "Fetch dependencies of a package from the network",
       options: [
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -1789,7 +1915,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Fetch dependencies for the target triple",
+          description: "Fetch dependencies for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -1838,11 +1964,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -1855,6 +1981,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       icon: "🔧",
       description: "Automatically fix lint warnings reported by rustc",
       options: [
+        keepGoingOption,
         {
           name: ["-p", "--package"],
           description: "Package(s) to fix",
@@ -1935,7 +2062,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -1946,7 +2073,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Fix for the target triple",
+          description: "Fix for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -1962,7 +2089,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -1975,6 +2102,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -2030,11 +2158,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--tests",
-          description: "Fix all tests",
+          description: "Fix all targets that have `test = true` set",
         },
         {
           name: "--benches",
-          description: "Fix all benches",
+          description: "Fix all targets that have `bench = true` set",
         },
         {
           name: "--all-targets",
@@ -2092,11 +2220,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -2104,7 +2232,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
     },
@@ -2114,7 +2242,19 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description: "Generate the lockfile for a package",
       options: [
         {
-          name: "--manifest-path",
+          name: "--ignore-rust-version",
+          description: "Ignore `rust-version` specification in packages",
+        },
+        {
+          name: "--publish-time",
+          description:
+            "Latest publish time allowed for registry packages (unstable)",
+          args: {
+            name: "yyyy-mm-ddThh:mm:ssZ",
+          },
+        },
+        {
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -2162,11 +2302,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -2217,11 +2357,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -2315,11 +2455,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -2328,6 +2468,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       ],
       args: {
         name: "path",
+        isOptional: true,
       },
     },
     {
@@ -2336,6 +2477,15 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description:
         "Install a Rust binary. Default location is $HOME/.cargo/bin",
       options: [
+        {
+          name: ["-n", "--dry-run"],
+          description: "Perform all checks without installing (unstable)",
+        },
+        {
+          name: "--ignore-rust-version",
+          description: "Ignore `rust-version` specification in packages",
+        },
+        keepGoingOption,
         {
           name: "--version",
           description: "Specify a version to install",
@@ -2389,7 +2539,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -2429,7 +2579,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Build for the target triple",
+          description: "Build for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -2473,6 +2623,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -2548,11 +2699,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -2560,11 +2711,12 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
       args: {
         name: "crate",
+        isOptional: true,
         generators: searchGenerator,
         filterStrategy: "fuzzy",
         debounce: true,
@@ -2579,7 +2731,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         "Print a JSON representation of a Cargo.toml file's location",
       options: [
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -2588,9 +2740,10 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--message-format",
-          description: "Output representation [possible values: json, plain]",
+          description: "Output representation",
           args: {
             name: "message-format",
+            suggestions: ["json", "plain"],
           },
         },
         {
@@ -2638,11 +2791,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -2704,11 +2857,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -2717,6 +2870,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       ],
       args: {
         name: "token",
+        isOptional: true,
       },
     },
     {
@@ -2772,11 +2926,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -2791,7 +2945,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         "Output the resolved dependencies of a package, the concrete used versions including overrides, in machine-readable format",
       options: [
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -2803,14 +2957,14 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         {
           name: "--filter-platform",
           description:
-            "Only include resolve dependencies matching the given target-triple",
+            "Only include resolve dependencies matching the given target tuple",
           isRepeatable: true,
           args: {
             name: "filter-platform",
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -2879,11 +3033,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -2977,11 +3131,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -3016,7 +3170,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--index",
-          description: "Registry index to modify owners for",
+          description: "Registry index URL to modify owners for",
           args: {
             name: "index",
           },
@@ -3080,11 +3234,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -3093,6 +3247,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       ],
       args: {
         name: "crate",
+        isOptional: true,
       },
     },
     {
@@ -3101,8 +3256,35 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description: "Assemble the local package into a distributable tarball",
       options: [
         {
+          name: "--index",
+          description: "Registry index URL to prepare the package for",
+          args: {
+            name: "index",
+          },
+        },
+        {
+          name: "--registry",
+          description: "Registry to prepare the package for",
+          args: {
+            name: "registry",
+          },
+        },
+        {
+          name: "--exclude-lockfile",
+          description: "Don't include the lock file when packaging",
+        },
+        {
+          name: "--message-format",
+          description: "Output representation (unstable)",
+          args: {
+            name: "FMT",
+            suggestions: ["human", "json"],
+          },
+        },
+        keepGoingOption,
+        {
           name: "--target",
-          description: "Build for the target triple",
+          description: "Build for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -3118,7 +3300,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -3149,7 +3331,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -3232,11 +3414,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -3260,7 +3442,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -3308,11 +3490,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -3321,6 +3503,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       ],
       args: {
         name: "SPEC",
+        isOptional: true,
         filterStrategy: "fuzzy",
         generators: packageGenerator,
       },
@@ -3331,6 +3514,21 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description: "Upload a package to the registry",
       options: [
         {
+          name: "--workspace",
+          description: "Publish all packages in the workspace",
+        },
+        {
+          name: "--exclude",
+          description: "Don't publish specified packages",
+          isRepeatable: true,
+          args: {
+            name: "exclude",
+            filterStrategy: "fuzzy",
+            generators: packageGenerator,
+          },
+        },
+        keepGoingOption,
+        {
           name: "--index",
           description: "Registry index URL to upload the package to",
           args: {
@@ -3339,14 +3537,16 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--token",
-          description: "Token to use when uploading",
+          description:
+            "Token to use when uploading (deprecated, use `cargo login` or environment variables)",
+          deprecated: true,
           args: {
             name: "token",
           },
         },
         {
           name: "--target",
-          description: "Build for the target triple",
+          description: "Build for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -3363,7 +3563,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: ["-p", "--package"],
-          description: "Package to publish",
+          description: "Package(s) to publish",
           args: {
             name: "package",
             isVariadic: true,
@@ -3372,7 +3572,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -3380,7 +3580,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -3399,7 +3599,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--registry",
-          description: "Registry to publish to",
+          description: "Registry to upload the package to",
           args: {
             name: "registry",
           },
@@ -3451,7 +3651,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           description: "Do not activate the `default` feature",
         },
         {
-          name: "--dry-run",
+          name: ["-n", "--dry-run"],
           description: "Perform all checks without uploading",
         },
         {
@@ -3465,11 +3665,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -3485,7 +3685,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       hidden: true,
       options: [
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -3533,11 +3733,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -3551,7 +3751,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description: "Generate and display various kinds of reports",
       subcommands: [
         {
-          name: "future-incompatibilities",
+          name: ["future-incompatibilities", "future-incompat"],
           description:
             "Reports any crates which will eventually stop compiling",
           options: [
@@ -3562,6 +3762,10 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
               args: {
                 name: "id",
               },
+            },
+            {
+              name: ["-q", "--quiet"],
+              description: "Do not print cargo log messages",
             },
             {
               name: ["-p", "--package"],
@@ -3600,10 +3804,6 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
               },
             },
             {
-              name: "--version",
-              description: "Print version information",
-            },
-            {
               name: ["-h", "--help"],
               description: "Print help information",
             },
@@ -3615,16 +3815,57 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
             },
             {
               name: "--frozen",
-              description: "Require Cargo.lock and cache are up to date",
+              description:
+                "Equivalent to specifying both --locked and --offline",
             },
             {
               name: "--locked",
-              description: "Require Cargo.lock is up to date",
+              description: "Assert that `Cargo.lock` will remain unchanged",
             },
             {
               name: "--offline",
               description: "Run without accessing the network",
             },
+          ],
+        },
+        {
+          name: "timings",
+          description:
+            "Reports the build timings of previous sessions (unstable)",
+          options: [
+            reportManifestPathOption,
+            {
+              name: "--open",
+              description: "Opens the timing report in a browser",
+            },
+            reportSessionIdOption,
+            ...reportCommonOptions,
+          ],
+        },
+        {
+          name: "sessions",
+          description: "Reports the previous sessions (unstable)",
+          options: [
+            reportManifestPathOption,
+            {
+              name: "--limit",
+              description: "Limit the number of results",
+              args: {
+                name: "N",
+                default: "10",
+              },
+            },
+            ...reportCommonOptions,
+          ],
+        },
+        {
+          name: "rebuilds",
+          description:
+            "Reports rebuild reasons from previous sessions (unstable)",
+          options: [
+            reportManifestPathOption,
+            reportSessionIdOption,
+            ...reportCommonOptions,
           ],
         },
         {
@@ -3659,10 +3900,6 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
               },
             },
             {
-              name: "--version",
-              description: "Print version information",
-            },
-            {
               name: ["-h", "--help"],
               description: "Print help information",
             },
@@ -3674,11 +3911,12 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
             },
             {
               name: "--frozen",
-              description: "Require Cargo.lock and cache are up to date",
+              description:
+                "Equivalent to specifying both --locked and --offline",
             },
             {
               name: "--locked",
-              description: "Require Cargo.lock is up to date",
+              description: "Assert that `Cargo.lock` will remain unchanged",
             },
             {
               name: "--offline",
@@ -3691,6 +3929,10 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
       ],
       options: [
+        {
+          name: ["-q", "--quiet"],
+          description: "Do not print cargo log messages",
+        },
         {
           name: "--color",
           description: "Coloring: auto, always, never",
@@ -3728,11 +3970,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -3745,6 +3987,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       icon: "📦",
       description: "Run a binary or example of the local package",
       options: [
+        keepGoingOption,
         {
           name: "--bin",
           description: "Name of the bin target to run",
@@ -3792,7 +4035,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -3804,7 +4047,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Build for the target triple",
+          description: "Build for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -3820,7 +4063,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -3833,6 +4076,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -3896,11 +4140,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -3908,7 +4152,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
       args: {
@@ -3922,6 +4166,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       icon: "📦",
       description: "Compile a package, and pass extra options to the compiler",
       options: [
+        keepGoingOption,
         {
           name: ["-p", "--package"],
           description: "Package to build",
@@ -3991,7 +4236,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -4003,7 +4248,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Target triple which compiles will be for",
+          description: "Target tuple which compiles will be for",
           isRepeatable: true,
           args: {
             name: "target",
@@ -4035,7 +4280,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -4048,6 +4293,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -4094,11 +4340,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--tests",
-          description: "Build all tests",
+          description: "Build all targets that have `test = true` set",
         },
         {
           name: "--benches",
-          description: "Build all benches",
+          description: "Build all targets that have `bench = true` set",
         },
         {
           name: "--all-targets",
@@ -4140,11 +4386,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -4152,11 +4398,12 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
       args: {
         name: "args",
+        isOptional: true,
         isVariadic: true,
       },
     },
@@ -4166,6 +4413,8 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description:
         "Build a package's documentation, using specified custom flags",
       options: [
+        docOutputFormatOption,
+        keepGoingOption,
         {
           name: ["-p", "--package"],
           description: "Package to document",
@@ -4235,7 +4484,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -4246,7 +4495,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Build for the target triple",
+          description: "Build for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -4262,7 +4511,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -4275,6 +4524,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -4325,11 +4575,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--tests",
-          description: "Build all tests",
+          description: "Build all targets that have `test = true` set",
         },
         {
           name: "--benches",
-          description: "Build all benches",
+          description: "Build all targets that have `bench = true` set",
         },
         {
           name: "--all-targets",
@@ -4366,11 +4616,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -4378,11 +4628,12 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
       args: {
         name: "args",
+        isOptional: true,
         isVariadic: true,
       },
     },
@@ -4393,7 +4644,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       options: [
         {
           name: "--index",
-          description: "Registry index URL to upload the package to",
+          description: "Registry index URL to search packages in",
           args: {
             name: "index",
           },
@@ -4417,6 +4668,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           description: "Coloring: auto, always, never",
           args: {
             name: "color",
+            suggestions: ["auto", "always", "never"],
           },
         },
         {
@@ -4452,11 +4704,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -4465,6 +4717,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       ],
       args: {
         name: "query",
+        isOptional: true,
         generators: searchGenerator,
         filterStrategy: "fuzzy",
         debounce: true,
@@ -4558,7 +4811,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -4570,7 +4823,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--target",
-          description: "Build for the target triple",
+          description: "Build for the target tuple",
           isRepeatable: true,
           args: {
             name: "target",
@@ -4586,7 +4839,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -4599,6 +4852,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           isRepeatable: true,
           args: {
             name: "message-format",
+            suggestions: messageFormats,
           },
         },
         {
@@ -4645,11 +4899,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--tests",
-          description: "Test all tests",
+          description: "Test all targets that have `test = true` set",
         },
         {
           name: "--benches",
-          description: "Test all benches",
+          description: "Test all targets that have `bench = true` set",
         },
         {
           name: "--all-targets",
@@ -4712,11 +4966,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -4724,7 +4978,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--timings",
-          description: "Timing output formats (unstable)",
+          description: "Output a build timing report at the end of the build",
         },
       ],
       args: [
@@ -4745,7 +4999,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description: "Display a tree visualization of a dependency graph",
       options: [
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -4774,7 +5028,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--features",
+          name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
           isRepeatable: true,
           args: {
@@ -4786,7 +5040,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         {
           name: "--target",
           description:
-            "Filter dependencies matching the given target-triple (default host platform). Pass `all` to include all targets",
+            "Filter dependencies matching the given target tuple (default host platform). Pass `all` to include all targets",
           isRepeatable: true,
           args: {
             name: "target",
@@ -4798,7 +5052,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         {
           name: ["-e", "--edges"],
           description:
-            "The kinds of dependencies to display (features, normal, build, dev, all, no-normal, no-build, no-dev, no-proc-macro)",
+            "The kinds of dependencies to display (features, normal, build, dev, public, all, no-normal, no-build, no-dev, no-proc-macro)",
           isRepeatable: true,
           args: {
             name: "edges",
@@ -4807,6 +5061,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
               "normal",
               "build",
               "dev",
+              "public",
               "all",
               "no-normal",
               "no-build",
@@ -4905,9 +5160,15 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: ["-a", "--all"],
+          description: "Deprecated, use --no-dedupe instead",
+          deprecated: true,
+          hidden: true,
         },
         {
           name: "--all-targets",
+          description: "Deprecated, use --target=all instead",
+          deprecated: true,
+          hidden: true,
         },
         {
           name: "--all-features",
@@ -4919,12 +5180,21 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--no-dev-dependencies",
+          description: "Deprecated, use -e=no-dev instead",
+          deprecated: true,
+          hidden: true,
         },
         {
           name: "--no-indent",
+          description: "Deprecated, use --prefix=none instead",
+          deprecated: true,
+          hidden: true,
         },
         {
           name: "--prefix-depth",
+          description: "Deprecated, use --prefix=depth instead",
+          deprecated: true,
+          hidden: true,
         },
         {
           name: "--no-dedupe",
@@ -4937,6 +5207,8 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: ["-V", "--version"],
+          description: "Print version info and exit",
+          hidden: true,
         },
         {
           name: ["-h", "--help"],
@@ -4949,11 +5221,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -5031,11 +5303,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -5044,6 +5316,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       ],
       args: {
         name: "SPEC",
+        isOptional: true,
         generators: {
           script: [
             "bash",
@@ -5063,6 +5336,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         {
           name: ["-p", "--package"],
           description: "Package to update",
+          hidden: true,
           isRepeatable: true,
           args: {
             name: "package",
@@ -5073,15 +5347,17 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--precise",
-          description:
-            "Update a single dependency to exactly PRECISE when used with -p",
-          dependsOn: ["--package", "-p"],
+          description: "Update [SPEC] to exactly PRECISE",
           args: {
             name: "precise",
           },
         },
         {
-          name: "--manifest-path",
+          name: "--ignore-rust-version",
+          description: "Ignore `rust-version` specification in packages",
+        },
+        {
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -5123,12 +5399,17 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           description: "Only update the workspace packages",
         },
         {
-          name: "--aggressive",
-          description:
-            "Force updating all dependencies of SPEC as well when used with -p",
+          name: "--recursive",
+          description: "Force updating all dependencies of [SPEC]... as well",
         },
         {
-          name: "--dry-run",
+          name: "--aggressive",
+          description: "Deprecated, use --recursive instead",
+          deprecated: true,
+          hidden: true,
+        },
+        {
+          name: ["-n", "--dry-run"],
           description: "Don't actually write the lockfile",
         },
         {
@@ -5142,17 +5423,25 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
           description: "Run without accessing the network",
         },
       ],
+      args: {
+        name: "SPEC",
+        description: "Package to update",
+        isOptional: true,
+        isVariadic: true,
+        filterStrategy: "fuzzy",
+        generators: dependencyGenerator,
+      },
     },
     {
       name: "vendor",
@@ -5160,7 +5449,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description: "Vendor all dependencies for a project locally",
       options: [
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -5220,18 +5509,6 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           description: "Always include version in subdir name",
         },
         {
-          name: "--no-merge-sources",
-        },
-        {
-          name: "--relative-path",
-        },
-        {
-          name: "--only-git-deps",
-        },
-        {
-          name: "--disallow-duplicates",
-        },
-        {
           name: ["-h", "--help"],
           description: "Print help information",
         },
@@ -5242,11 +5519,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -5255,15 +5532,17 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       ],
       args: {
         name: "path",
+        isOptional: true,
       },
     },
     {
       name: "verify-project",
       icon: "📦",
       description: "Check correctness of crate manifest",
+      deprecated: true,
       options: [
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
           args: {
             name: "manifest-path",
@@ -5311,11 +5590,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -5369,11 +5648,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -5387,15 +5666,24 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       description: "Remove a pushed crate from the index",
       options: [
         {
-          name: "--vers",
+          name: "--version",
           description: "The version to yank or un-yank",
           args: {
-            name: "vers",
+            name: "VERSION",
+          },
+        },
+        {
+          name: "--vers",
+          description: "Deprecated, use --version instead",
+          deprecated: true,
+          hidden: true,
+          args: {
+            name: "VERSION",
           },
         },
         {
           name: "--index",
-          description: "Registry index to yank from",
+          description: "Registry index URL to yank from",
           args: {
             name: "index",
           },
@@ -5459,11 +5747,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -5472,6 +5760,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       ],
       args: {
         name: "crate",
+        isOptional: true,
       },
     },
     {
@@ -5479,6 +5768,14 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       icon: "📦",
       description: "Print this message or the help of the given subcommand(s)",
       options: [
+        {
+          name: ["-h", "--help"],
+          description: "Print help",
+        },
+        {
+          name: ["-q", "--quiet"],
+          description: "Do not print cargo log messages",
+        },
         {
           name: "--color",
           description: "Coloring: auto, always, never",
@@ -5512,11 +5809,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -5525,6 +5822,10 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       ],
       args: {
         name: "subcommand",
+        description:
+          "Command to show help for; nested levels separated by spaces (e.g. report future-incompatibilities)",
+        isOptional: true,
+        isVariadic: true,
       },
     },
     {
@@ -5543,10 +5844,53 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         {
           name: ["-F", "--features"],
           description: "Space or comma separated list of features to activate",
+          isRepeatable: true,
+          args: {
+            name: "FEATURES",
+          },
         },
         {
           name: "--optional",
           description: "Mark the dependency as optional",
+        },
+        {
+          name: "--public",
+          description: "Mark the dependency as public (unstable)",
+        },
+        {
+          name: "--no-public",
+          description: "Mark the dependency as private (unstable)",
+        },
+        {
+          name: "--ignore-rust-version",
+          description: "Ignore `rust-version` specification in packages",
+        },
+        {
+          name: "--base",
+          description:
+            "The path base to use when adding from a local crate (unstable)",
+          dependsOn: ["--path"],
+          args: {
+            name: "BASE",
+          },
+        },
+        {
+          name: "--config",
+          description: "Override a configuration value",
+          isRepeatable: true,
+          args: {
+            name: "config",
+            generators: configGenerator,
+          },
+        },
+        {
+          name: "-Z",
+          description:
+            "Unstable (nightly-only) flags to Cargo, see 'cargo -Z help' for details",
+          isRepeatable: true,
+          args: {
+            name: "unstable-features",
+          },
         },
         {
           name: ["-v", "--verbose"],
@@ -5572,15 +5916,19 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
+          args: {
+            name: "manifest-path",
+            generators: filepaths({ equals: "Cargo.toml" }),
+          },
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: ["-p", "--package"],
@@ -5600,7 +5948,7 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           description: "Do not print cargo log messages",
         },
         {
-          name: "--dry-run",
+          name: ["-n", "--dry-run"],
           description: "Don't actually write the manifest",
         },
         {
@@ -5687,15 +6035,15 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
       options: [
         {
           name: "--dev",
-          description: "Remove as development dependency",
+          description: "Remove from dev-dependencies",
         },
         {
           name: "--build",
-          description: "Remove as build dependency",
+          description: "Remove from build-dependencies",
         },
         {
           name: "--target",
-          description: "Remove as dependency to the given target platform",
+          description: "Remove from target-dependencies",
           args: {
             name: "TARGET",
             filterStrategy: "fuzzy",
@@ -5712,16 +6060,38 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
           },
         },
         {
-          name: "--manifest-path",
+          name: ["-m", "--manifest-path"],
           description: "Path to Cargo.toml",
+          args: {
+            name: "manifest-path",
+            generators: filepaths({ equals: "Cargo.toml" }),
+          },
         },
         {
           name: ["-q", "--quiet"],
           description: "Do not print cargo log messages",
         },
         {
-          name: "--dry-run",
+          name: ["-n", "--dry-run"],
           description: "Don't actually write the manifest",
+        },
+        {
+          name: "--config",
+          description: "Override a configuration value",
+          isRepeatable: true,
+          args: {
+            name: "config",
+            generators: configGenerator,
+          },
+        },
+        {
+          name: "-Z",
+          description:
+            "Unstable (nightly-only) flags to Cargo, see 'cargo -Z help' for details",
+          isRepeatable: true,
+          args: {
+            name: "unstable-features",
+          },
         },
         {
           name: ["-v", "--verbose"],
@@ -5736,11 +6106,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         },
         {
           name: "--frozen",
-          description: "Require Cargo.lock and cache are up to date",
+          description: "Equivalent to specifying both --locked and --offline",
         },
         {
           name: "--locked",
-          description: "Require Cargo.lock is up to date",
+          description: "Assert that `Cargo.lock` will remain unchanged",
         },
         {
           name: "--offline",
@@ -5758,8 +6128,96 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
         isVariadic: true,
       },
     },
+    {
+      name: "info",
+      icon: "📦",
+      description: "Display information about a package",
+      options: [
+        {
+          name: "--index",
+          description: "Registry index URL to search packages in",
+          args: {
+            name: "INDEX",
+          },
+        },
+        {
+          name: "--registry",
+          description: "Registry to search packages in",
+          args: {
+            name: "REGISTRY",
+          },
+        },
+        {
+          name: ["-v", "--verbose"],
+          description: "Use verbose output (-vv very verbose/build.rs output)",
+          isRepeatable: true,
+        },
+        {
+          name: ["-q", "--quiet"],
+          description: "Do not print cargo log messages",
+        },
+        {
+          name: "--color",
+          description: "Coloring: auto, always, never",
+          args: {
+            name: "WHEN",
+            suggestions: ["auto", "always", "never"],
+          },
+        },
+        {
+          name: "--config",
+          description: "Override a configuration value",
+          isRepeatable: true,
+          args: {
+            name: "config",
+            generators: configGenerator,
+          },
+        },
+        {
+          name: "-Z",
+          description:
+            "Unstable (nightly-only) flags to Cargo, see 'cargo -Z help' for details",
+          isRepeatable: true,
+          args: {
+            name: "unstable-features",
+          },
+        },
+        {
+          name: ["-h", "--help"],
+          description: "Print help information",
+        },
+        {
+          name: "--locked",
+          description: "Assert that `Cargo.lock` will remain unchanged",
+        },
+        {
+          name: "--offline",
+          description: "Run without accessing the network",
+        },
+        {
+          name: "--frozen",
+          description: "Equivalent to specifying both --locked and --offline",
+        },
+      ],
+      args: {
+        name: "SPEC",
+        description: "Package to inspect",
+        generators: searchGenerator,
+        filterStrategy: "fuzzy",
+        debounce: true,
+        suggestCurrentToken: true,
+      },
+    },
   ],
   options: [
+    {
+      name: "-C",
+      description: "Change to DIRECTORY before doing anything (nightly-only)",
+      args: {
+        name: "DIRECTORY",
+        template: "folders",
+      },
+    },
     {
       name: "--explain",
       description: "Run `rustc --explain CODE`",
@@ -5816,11 +6274,11 @@ const completionSpec: (toolchain?: boolean) => Fig.Spec = (
     },
     {
       name: "--frozen",
-      description: "Require Cargo.lock and cache are up to date",
+      description: "Equivalent to specifying both --locked and --offline",
     },
     {
       name: "--locked",
-      description: "Require Cargo.lock is up to date",
+      description: "Assert that `Cargo.lock` will remain unchanged",
     },
     {
       name: "--offline",

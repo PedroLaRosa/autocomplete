@@ -1,3 +1,9 @@
+// cut (macOS 15 BSD, `man cut` dated 2017-08-03, 2026-11-19). Source: apple-oss-distributions/text_cmds tag text_cmds-195 (2025-04-30 drop; cut/cut.1 and cut/cut.c getopt "b:c:d:f:snw"); not a live run on macOS
+const listArg = (description: string): Fig.Arg => ({
+  name: "list",
+  description: `${description}, as a comma or whitespace separated set of numbers and ranges (e.g. 1,3-5)`,
+});
+
 const completionSpec: Fig.Spec = {
   name: "cut",
   description: "Cut out selected portions of each line of a file",
@@ -9,51 +15,48 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: "-b",
-      description: "Byte positions as a comma or - separated list of numbers",
-      args: {
-        name: "list",
-        description: "Specifies byte positions",
-      },
+      description: "Select byte positions",
+      exclusiveOn: ["-f"],
+      args: listArg("Byte positions"),
     },
     {
       name: "-c",
-      description: "Column positions as a comma or - separated list of numbers",
-      args: {
-        name: "list",
-        description: "Specifies column positions",
-      },
+      description: "Select character positions",
+      exclusiveOn: ["-f"],
+      args: listArg("Character positions"),
     },
     {
       name: "-f",
-      description: "Field positions as a comma or - separated list of numbers",
-      args: {
-        name: "list",
-        description: "Specifies column positions",
-      },
+      description:
+        "Select fields, separated in the input by the field delimiter character",
+      exclusiveOn: ["-b", "-c"],
+      args: listArg("Fields"),
     },
     {
       name: "-n",
-      description: "Do not split multi-byte characters",
+      description: "Do not split multi-byte characters (only valid with -b)",
+      exclusiveOn: ["-f"],
     },
     {
       name: "-d",
       description:
         "Use delim as the field delimiter character instead of the tab character",
+      exclusiveOn: ["-w"],
       args: {
         name: "delim",
-        description: "Field deliminator to use instead of the tab character",
-        isOptional: true,
+        description: "Field delimiter to use instead of the tab character",
       },
     },
     {
       name: "-s",
       description:
-        "Suppress lines with no field delimiter characters.  unless specified, lines with no delimiters are passed through unmodified",
+        "Suppress lines with no field delimiter characters.  Unless specified, lines with no delimiters are passed through unmodified",
     },
     {
       name: "-w",
       description:
         "Use whitespace (spaces and tabs) as the delimiter.  Consecutive spaces and tabs count as one single field separator",
+      exclusiveOn: ["-d"],
     },
   ],
 };

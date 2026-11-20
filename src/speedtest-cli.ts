@@ -1,3 +1,6 @@
+// speedtest-cli v2.1.3 (latest release on PyPI and GitHub tags, 2026-11-20). Source: parse_args() in speedtest.py from the 2.1.3 sdist read statically (not run), diffed against master (2.1.4b1, identical options).
+// Upstream is unmaintained: last release 2021-04-08, deprecated in Homebrew 2026-01-18.
+// The Ookla "speedtest" CLI (a different tool with different flags) is not covered here.
 const completionSpec: Fig.Spec = {
   name: "speedtest-cli",
   description:
@@ -36,7 +39,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--csv-delimiter",
       description:
-        "Single character delimiter to use in CSV ouput. Default ','",
+        "Single character delimiter to use in CSV output. Default ','",
       args: { name: "CSV_DELIMITER" },
     },
     { name: "--csv-header", description: "Print CSV headers" },
@@ -53,17 +56,19 @@ const completionSpec: Fig.Spec = {
       name: "--server",
       description:
         "Specify a server ID to test against. Can be supplied multiple times",
+      isRepeatable: true,
       args: { name: "SERVER" },
     },
     {
       name: "--exclude",
       description:
         "Exclude a server from selection. Can be supplied multiple times",
+      isRepeatable: true,
       args: { name: "EXCLUDE" },
     },
     {
       name: "--mini",
-      description: "URL for the Speedtest Mini server",
+      description: "URL of the Speedtest Mini server",
       args: { name: "MINI" },
     },
     {
@@ -87,8 +92,7 @@ const completionSpec: Fig.Spec = {
         "Do not pre allocate upload data. Pre allocation is enabled by default to improve upload performance. To support systems with insufficient memory, use this option to avoid a MemoryError",
     },
     { name: "--version", description: "Show the version number and exit" },
+    { name: "--debug", description: "Print debug output", hidden: true },
   ],
-  // Only uncomment if speedtest-cli takes an argument
-  // args: {}
 };
 export default completionSpec;

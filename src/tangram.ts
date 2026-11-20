@@ -1,3 +1,5 @@
+// Tangram (no tagged release; upstream main e84d2007, 2026-11-19). NOT synced to a current release: tangramdotdev/tangram was rewritten into a different product (a build system and package manager, binary tangram/tg with build, run, checkin, tag, ...) that no longer has app, migrate, predict or train.
+// No git tags exist, the canary release assets return 404 and the CLI could not be built or run here, so no authoritative current version or flag set was obtained; the commands below are the legacy Tangram ML CLI (v0.x) and are kept unchanged.
 const completionSpec: Fig.Spec = {
   name: "tangram",
   description: "",

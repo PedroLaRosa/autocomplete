@@ -1,3 +1,7 @@
+// kubens v0.11.0 (latest tag of ahmetb/kubectx, same as Homebrew, 2026-11-19).
+// Source: static read of cmd/kubens/flags.go and help.go plus the shipped completion/ scripts at tag v0.11.0; the binary was not run.
+// Added -V/--version, -u/--unset and -f/--force.
+
 const completionSpec: Fig.Spec = {
   name: "kubens",
   description: "Switch between Kubernetes-namespaces",
@@ -18,8 +22,21 @@ const completionSpec: Fig.Spec = {
       description: "Show help for kubens",
     },
     {
+      name: ["--version", "-V"],
+      description: "Show version",
+    },
+    {
       name: ["--current", "-c"],
       description: "Show current namespace",
+    },
+    {
+      name: ["--unset", "-u"],
+      description: "Unset the namespace choice (set to 'default')",
+    },
+    {
+      name: ["--force", "-f"],
+      description:
+        "Force change the active namespace of the current context, even if it does not exist",
     },
   ],
   args: {

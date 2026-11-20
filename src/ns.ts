@@ -1,3 +1,9 @@
+// NativeScript CLI v9.1.2 (npm `nativescript` latest, 2026-11-19). Source: the published npm package, i.e. its shipped
+// docs/man_pages/** (command and option docs), lib/options.js (accepted options) and the registered command tree in lib/**.
+// `ns --help` was run from the package; per-command options come from the man pages, not from a live device or build run.
+// `ns`, `nativescript` and `tns` are aliases of the same binary (package.json "bin"), so src/nativescript.ts and src/tns.ts re-export this spec.
+// Left out: internal dev-* commands, post-install-cli and the cloud commands that come from the separate nativescript-cloud extension.
+
 /**
  * Common options used throughout the CLI
  */
@@ -77,7 +83,9 @@ const releaseOption: Fig.Option = {
 
 const bundleOption: Fig.Option = {
   name: "--bundle",
-  description: "Bundle the application",
+  description:
+    "Has no effect any more, the bundler is selected with the bundler key of the project's NativeScript configuration",
+  deprecated: true,
 };
 
 const helpOption = (label: string): Fig.Option => {
@@ -87,6 +95,112 @@ const helpOption = (label: string): Fig.Option => {
     priority: 0,
   };
 };
+
+const deviceTimeoutOption: Fig.Option = {
+  name: "--timeout",
+  description:
+    "Sets the time in milliseconds for the operation to search for connected devices before completing. If not set, the default value is 4000",
+  args: {
+    name: "milliseconds",
+  },
+};
+
+const noWatchOption: Fig.Option = {
+  name: "--no-watch",
+  description:
+    "Changes in your code will not be reflected during the execution of this command",
+};
+
+const hmrOption: Fig.Option = {
+  name: "--hmr",
+  description: "Enables the hot module replacement (HMR) feature",
+};
+
+const gradleFlavorOption: Fig.Option = {
+  name: "--gradleFlavor",
+  description:
+    "Builds the given product flavor, when the app declares any. For example, --gradleFlavor foo runs the assembleFooDebug/assembleFooRelease gradle task instead of assembleDebug/assembleRelease",
+  args: {
+    name: "flavor",
+  },
+};
+
+const copyToOption = (extension?: string): Fig.Option => ({
+  name: "--copy-to",
+  description: extension
+    ? `Specifies the file path where the built ${extension} will be copied. If it points to a non-existent directory path, it will be created. If the specified value is existing directory, the original file name will be used`
+    : "Copies the generated typings to the specified folder",
+  args: {
+    name: "path",
+    template: "folders",
+  },
+});
+
+const teamIdOption: Fig.Option = {
+  name: "--team-id",
+  description:
+    "Specifies the team id for which Xcode will try to find distribution certificate and provisioning profile when exporting for AppStore submission",
+  args: {
+    name: "team id",
+  },
+};
+
+const appleCredentialArgs: Fig.Arg[] = [
+  {
+    name: "apple id",
+    description:
+      "Apple ID for logging in iTunes Connect. If you do not provide it when running the command, the NativeScript CLI will prompt you to provide it",
+    isOptional: true,
+  },
+  {
+    name: "password",
+    description: "Password for logging in iTunes Connect",
+    isOptional: true,
+  },
+];
+
+const appleUploadOptions: Fig.Option[] = [
+  {
+    name: "--ipa",
+    description: "Use the provided .ipa file instead of building the project",
+    args: {
+      name: "ipa file path",
+      template: "filepaths",
+    },
+  },
+  {
+    name: "--appleApplicationSpecificPassword",
+    description:
+      "Specifies the password for accessing the information you store in iTunes Transporter application",
+    args: {
+      name: "password",
+    },
+  },
+  {
+    name: "--appleSessionBase64",
+    description:
+      "The session that will be used instead of triggering a new login each time NativeScript CLI communicates with Apple's APIs",
+    args: {
+      name: "base64",
+    },
+  },
+];
+
+const appleUploadArgs: Fig.Arg[] = [
+  ...appleCredentialArgs,
+  {
+    name: "mobile provisioning profile identifier",
+    description:
+      "The identifier of the mobile provision(e.g. d5d40f61-b303-4fc8-aea3-fbb229a8171c) which will be used for building. This can easily be acquired through the iPhone Configuration Utility",
+    isOptional: true,
+  },
+  {
+    name: "code sign identity",
+    description:
+      "The code sign identity which will be used for building. You can set it to something generic like 'iPhone Distribution' to let the build automatically detect a code sign identity",
+    isOptional: true,
+  },
+];
 
 /**
  * Platform options used across many commands of the CLI
@@ -218,6 +332,7 @@ const platformOptions = {
     both: [
       ...platformGeneralOptions,
       justLaunchOption,
+      noWatchOption,
       releaseOption,
       bundleOption,
     ],
@@ -230,7 +345,11 @@ const platformOptions = {
         },
       },
     ],
-    android: [...androidGeneralOptions, ...androidKeyOptions],
+    android: [
+      ...androidGeneralOptions,
+      ...androidKeyOptions,
+      gradleFlavorOption,
+    ],
   },
   debug: {
     both: [
@@ -244,10 +363,7 @@ const platformOptions = {
         name: "--start",
         description: "Attaches the debug tools to a deployed and running app",
       },
-      {
-        name: "--no-watch",
-        description: "Changes in your code will not be livesynced",
-      },
+      noWatchOption,
     ],
     ios: [
       {
@@ -260,8 +376,14 @@ const platformOptions = {
         description:
           "The developer tools in the Safari Web Inspector are used for debugging the application",
       },
+      {
+        name: "--chrome",
+        description:
+          "Allows debugging in Chrome Developer Tools. This is the default behavior, so the option is not needed any more",
+        deprecated: true,
+      },
     ],
-    android: androidGeneralOptions,
+    android: [...androidGeneralOptions, gradleFlavorOption],
   },
   test: {
     both: [
@@ -287,24 +409,7 @@ const platformOptions = {
     both: [
       ...platformEnvOptions,
       releaseOption,
-      {
-        name: "--copy-to",
-        description:
-          "Specifies the file path where the built .ipa|.apk will be copied. If it points to a non-existent directory path, it will be created. If the specified value is existing directory, the original file name will be used",
-        args: {
-          name: "path",
-          template: "folders" as Fig.Template,
-        },
-      },
-      {
-        name: "--path",
-        description:
-          "Specifies the directory where you want to create the project, if different from the current directory",
-        args: {
-          name: "directory",
-          template: "folders" as Fig.Template,
-        },
-      },
+      copyToOption(".ipa|.apk"),
       forceOption,
       cleanOption,
       deviceOption,
@@ -314,12 +419,13 @@ const platformOptions = {
       {
         name: "--compileSdk",
         description:
-          "Sets the Android SDK that will be used to build the project",
+          "Sets the Android SDK that will be used to build the project. The minimum supported SDK is 28",
         args: {
           name: "api level",
         },
       },
       ...androidKeyOptions,
+      gradleFlavorOption,
     ],
     ios: [
       {
@@ -369,7 +475,13 @@ const platformOptions = {
 // General Commands
 const helpCommand: Fig.Subcommand = {
   name: "help",
-  description: "Open the CLI's documentation in your web browser",
+  description:
+    "Opens the command reference for all commands in your browser or shows information about the selected command in the browser",
+  args: {
+    name: "command",
+    description: "A command as listed by ns help",
+    isOptional: true,
+  },
   options: [helpOption("help")],
 };
 
@@ -383,7 +495,7 @@ const infoCommand: Fig.Subcommand = {
 const updateCommand: Fig.Subcommand = {
   name: "update",
   description:
-    "Updates the project with the latest versions of platform runtimes, cross-platform modules and webpack",
+    "Updates the project with the latest versions of iOS/Android runtimes, cross-platform modules and @nativescript/webpack",
   isDangerous: true,
   subcommands: [
     {
@@ -410,7 +522,11 @@ const packageManagerCommand: Fig.Subcommand = {
     {
       name: "set",
       description:
-        "Enables the specified package manager for the NativeScript CLI. Supported values are npm, yarn and pnpm",
+        "Enables the specified package manager for the NativeScript CLI",
+      args: {
+        name: "package manager",
+        suggestions: ["npm", "pnpm", "yarn", "yarn2", "bun"],
+      },
     },
   ],
   options: [helpOption("package-manager")],
@@ -458,15 +574,17 @@ const proxyCommand: Fig.Subcommand = {
           name: "proxy url",
           description:
             "Full url of the proxy. For example, http://127.0.0.1:8888. If you do not provide the url when running the command, the NativeScript CLI will prompt you to provide it",
+          isOptional: true,
         },
         {
           name: "username",
-          description: "Credentials for the proxy",
+          description:
+            "Credentials for the proxy, can be set only on Windows. If you provide a username you need to provide a password too",
           isOptional: true,
         },
         {
           name: "password",
-          description: "Credentials for the proxy",
+          description: "Credentials for the proxy, can be set only on Windows",
           isOptional: true,
         },
       ],
@@ -528,6 +646,100 @@ const errorReportingCommand: Fig.Subcommand = {
   priority: 1,
 };
 
+const autocompleteCommand: Fig.Subcommand = {
+  name: "autocomplete",
+  description:
+    "Prints your current command-line completion settings. If disabled, prompts you to enable it",
+  subcommands: [
+    {
+      name: "status",
+      description: "Prints your current command-line completion settings",
+    },
+    {
+      name: "enable",
+      description:
+        "Enables command-line completion for bash and zsh shells. You need to restart the shell to complete the operation",
+    },
+    {
+      name: "disable",
+      description:
+        "Disables command-line completion for bash and zsh shells. You need to restart the shell to complete the operation",
+    },
+  ],
+  options: [helpOption("autocomplete")],
+};
+
+const configCommand: Fig.Subcommand = {
+  name: "config",
+  description:
+    "View and manage your project's NativeScript configuration stored in nativescript.config.(js|ts)",
+  subcommands: [
+    {
+      name: "get",
+      description:
+        "Prints the value for a specific key from the project's NativeScript configuration",
+      args: {
+        name: "key",
+        description:
+          "The configuration key in dot-notation, for example ios.id, android.codeCache or bundler",
+      },
+    },
+    {
+      name: "set",
+      description:
+        "Sets the value for a specific key in the project's NativeScript configuration. Setting whole objects is not supported",
+      args: [
+        {
+          name: "key",
+          description:
+            "The configuration key in dot-notation, for example ios.id, android.codeCache or bundler",
+        },
+        {
+          name: "value",
+          description:
+            "The value to set. Parsed as JSON when possible (for example true, 42), otherwise treated as a string",
+        },
+      ],
+    },
+  ],
+  options: [helpOption("config")],
+};
+
+const extensionCommand: Fig.Subcommand = {
+  name: "extension",
+  description: "Prints information about all installed extensions",
+  subcommands: [
+    {
+      name: "install",
+      description:
+        "Installs the specified extension, which adds additional functionality to the NativeScript CLI",
+      args: {
+        name: "extension",
+        description:
+          "A package name (optionally with @version), a local path to a directory or .tar.gz archive, or a URL to a .tar.gz archive",
+      },
+    },
+    {
+      name: "uninstall",
+      description:
+        "Uninstalls the specified extension, after which you will no longer be able to use the functionality it adds to the NativeScript CLI",
+      args: {
+        name: "extension",
+        description:
+          "The name of the extension as listed in its package.json file",
+      },
+    },
+  ],
+  options: [helpOption("extension")],
+};
+
+const setupCommand: Fig.Subcommand = {
+  name: "setup",
+  description:
+    "Run the setup script to automatically install the NativeScript dependencies and configure your environment for local builds",
+  options: [helpOption("setup")],
+};
+
 // Project Development Commands
 const createCommand: Fig.Subcommand = {
   name: "create",
@@ -570,7 +782,7 @@ const createCommand: Fig.Subcommand = {
       description: "Create a project using the Angular template",
     },
     {
-      name: "--react",
+      name: ["--react", "--reactjs"],
       description: "Create a project using the React template",
     },
     {
@@ -580,6 +792,35 @@ const createCommand: Fig.Subcommand = {
     {
       name: "--svelte",
       description: "Create a project using the Svelte template",
+    },
+    {
+      name: "--solid",
+      description: "Create a project using the Solid template",
+    },
+    {
+      name: "--vision",
+      description:
+        "Create a visionOS project. Combine it with a flavor flag (like --ng, --react, --solid, --svelte or --vue) to pick the flavor, otherwise the TypeScript template is used",
+    },
+    {
+      name: "--vision-ng",
+      description: "Create a visionOS project using the Angular template",
+    },
+    {
+      name: "--vision-react",
+      description: "Create a visionOS project using the React template",
+    },
+    {
+      name: "--vision-solid",
+      description: "Create a visionOS project using the Solid template",
+    },
+    {
+      name: "--vision-svelte",
+      description: "Create a visionOS project using the Svelte template",
+    },
+    {
+      name: "--vision-vue",
+      description: "Create a visionOS project using the Vue template",
     },
     {
       name: ["--typescript", "--tsc", "--ts"],
@@ -614,7 +855,14 @@ const createCommand: Fig.Subcommand = {
 const cleanCommand: Fig.Subcommand = {
   name: "clean",
   description: "Clean your Nativescript project",
-  options: [helpOption("clean")],
+  options: [
+    {
+      name: "--dry-run",
+      description: "Shows what would be cleaned without deleting any files",
+    },
+    jsonOption,
+    helpOption("clean"),
+  ],
 };
 
 const previewCommand: Fig.Subcommand = {
@@ -661,6 +909,17 @@ const platformCommand: Fig.Subcommand = {
           description: "The defined ios platform eg. 1.0.0",
           options: [frameworkPathOption],
         },
+        {
+          name: "visionos",
+          description: "The latest visionOS platform",
+          options: [frameworkPathOption],
+        },
+        {
+          name: "visionos@[Version]",
+          insertValue: "visionos@{cursor}",
+          description: "The defined visionOS platform eg. 1.0.0",
+          options: [frameworkPathOption],
+        },
       ],
     },
     {
@@ -676,6 +935,10 @@ const platformCommand: Fig.Subcommand = {
           name: "ios",
           description: "The latest ios platform",
         },
+        {
+          name: "visionos",
+          description: "The visionOS platform",
+        },
       ],
     },
     {
@@ -690,6 +953,32 @@ const platformCommand: Fig.Subcommand = {
         {
           name: "ios",
           description: "The latest ios platform",
+        },
+        {
+          name: "visionos",
+          description: "The latest visionOS platform",
+        },
+      ],
+    },
+    {
+      name: "clean",
+      description:
+        "Removes and adds the selected platform to the project. The latest platform version is installed, unless a version or --framework-path is specified",
+      subcommands: [
+        {
+          name: "android",
+          description: "Cleans the android platform",
+          options: [frameworkPathOption],
+        },
+        {
+          name: "ios",
+          description: "Cleans the ios platform",
+          options: [frameworkPathOption],
+        },
+        {
+          name: "visionos",
+          description: "Cleans the visionOS platform",
+          options: [frameworkPathOption],
         },
       ],
     },
@@ -711,6 +1000,12 @@ const runCommand: Fig.Subcommand = {
     {
       name: "ios",
       description: "The latest ios platform",
+      options: [...platformOptions.run.both, ...platformOptions.run.ios],
+      priority: 90,
+    },
+    {
+      name: ["visionos", "vision"],
+      description: "The visionOS platform",
       options: [...platformOptions.run.both, ...platformOptions.run.ios],
       priority: 90,
     },
@@ -754,10 +1049,11 @@ const testCommand: Fig.Subcommand = {
       options: [
         {
           name: "--framework",
-          description: "Sets the unit testing framework to install",
+          description:
+            "Sets the unit testing framework to install. vitest is recommended, the Karma-based frameworks (mocha, jasmine, qunit) are deprecated",
           args: {
             name: "framework",
-            suggestions: ["mocha", "jasmine", "qunit"],
+            suggestions: ["vitest", "mocha", "jasmine", "qunit"],
           },
         },
       ],
@@ -776,6 +1072,20 @@ const testCommand: Fig.Subcommand = {
       options: [...platformOptions.test.both, ...platformOptions.test.ios],
       priority: 90,
     },
+    {
+      name: ["visionos", "vision"],
+      description:
+        "Run unit tests in the visionOS Simulator or on connected Apple Vision Pro devices. Requires the Vitest framework",
+      options: [
+        deviceOption,
+        {
+          name: "--env.codeCoverage",
+          description: "Collects code coverage for the test run",
+        },
+        forceOption,
+      ],
+      priority: 90,
+    },
   ],
   options: [helpOption("test")],
 };
@@ -785,11 +1095,12 @@ const pluginCommand: Fig.Subcommand = {
   description: "Manage the plugins for your project",
   subcommands: [
     {
-      name: "add",
+      name: ["add", "install"],
       description: "Installs the specified plugin and its dependencies",
       args: {
         name: "plugin",
-        description: "A valid Nativescript plugin",
+        description:
+          "A valid Nativescript plugin: a name (optionally with @version), a local path to a directory or .tar.gz archive, a URL or a git remote URL",
       },
     },
     {
@@ -806,7 +1117,10 @@ const pluginCommand: Fig.Subcommand = {
         "Uninstalls and installs the specified plugin(s) and its dependencies",
       args: {
         name: "plugin(s)",
-        description: "A valid Nativescript plugin",
+        description:
+          "A valid Nativescript plugin or a list of plugins. If not specified, the currently installed plugins in the project are used",
+        isOptional: true,
+        isVariadic: true,
       },
     },
     {
@@ -882,18 +1196,29 @@ const pluginCommand: Fig.Subcommand = {
 
 const resourcesCommand: Fig.Subcommand = {
   name: "resources",
-  description: "Manage the plugins for your project",
+  description: "Manage the App_Resources of your project",
   subcommands: [
     {
       name: "update",
       description:
-        "Updates the App_Resources's internal folder structure to conform to that of an Android Studio project",
+        "Updates the App_Resources/<platform>'s internal folder structure to conform to that of an Android Studio project",
+      subcommands: [
+        {
+          name: "android",
+          description:
+            "Updates the App_Resources/Android's folder structure (the default)",
+        },
+      ],
     },
     {
       name: "generate",
+      description:
+        "Generates icons or splashscreens for Android and iOS from an image",
       subcommands: [
         {
           name: "splashes",
+          description:
+            "Generates all splashscreens for Android and iOS platforms and places them in the correct directories under App_Resources/<platform>",
           args: {
             name: "image path",
             description:
@@ -903,7 +1228,8 @@ const resourcesCommand: Fig.Subcommand = {
           options: [
             {
               name: "--background",
-              description: "Sets the background color of the splashscreen",
+              description:
+                "Sets the background color of the splashscreen. Can be a color name or a HEX value, for example #FFFFFF",
               args: {
                 name: "color",
                 default: "white",
@@ -913,17 +1239,30 @@ const resourcesCommand: Fig.Subcommand = {
         },
         {
           name: "icons",
+          description:
+            "Generates all icons for Android and iOS platforms and places them in the correct directories under App_Resources/<platform>",
           args: {
             name: "image path",
             description:
-              "Path to an image that will be used to generate all splashscreens",
+              "Path to an image that will be used to generate all icons",
             template: "filepaths",
           },
+          options: [
+            {
+              name: "--background",
+              description:
+                "Sets the background color of the icon. Can be a color name or a HEX value, for example #FFFFFF",
+              args: {
+                name: "color",
+                default: "transparent",
+              },
+            },
+          ],
         },
       ],
     },
   ],
-  options: [helpOption("plugin")],
+  options: [helpOption("resources")],
 };
 
 const prepareCommand: Fig.Subcommand = {
@@ -934,34 +1273,20 @@ const prepareCommand: Fig.Subcommand = {
     {
       name: "android",
       description: "Prepares your project for an Android build",
-      options: [
-        {
-          name: "--hmr",
-          description: "Enables the hot module replacement (HMR) feature",
-        },
-        forceOption,
-      ],
+      options: [hmrOption, forceOption],
     },
     {
       name: "ios",
       description: "Prepares your project for an iOS build",
-      options: [
-        {
-          name: "--hmr",
-          description: "Enables the hot module replacement (HMR) feature",
-        },
-        forceOption,
-      ],
+      options: [hmrOption, forceOption],
     },
-  ],
-  options: [
     {
-      name: "--hmr",
-      description: "Enables the hot module replacement (HMR) feature",
+      name: "visionos",
+      description: "Prepares your project for a visionOS build",
+      options: [hmrOption, forceOption],
     },
-    forceOption,
-    helpOption("prepare"),
   ],
+  options: [hmrOption, forceOption, helpOption("prepare")],
 };
 
 const buildCommand: Fig.Subcommand = {
@@ -982,13 +1307,16 @@ const buildCommand: Fig.Subcommand = {
       options: [...platformOptions.build.both, ...platformOptions.build.ios],
       priority: 90,
     },
+    {
+      name: ["visionos", "vision"],
+      description: "Builds the project for visionOS",
+      options: [...platformOptions.build.both, ...platformOptions.build.ios],
+      priority: 90,
+    },
   ],
   options: [
     ...platformOptions.build.both,
-    {
-      name: "--hmr",
-      description: "Enables the hot module replacement (HMR) feature",
-    },
+    hmrOption,
     justLaunchOption,
     helpOption("build"),
   ],
@@ -1045,7 +1373,240 @@ const installCommand: Fig.Subcommand = {
   ],
 };
 
+const generateCommand: Fig.Subcommand = {
+  name: "generate",
+  description: "Modifies the project by executing a specified schematic to it",
+  args: [
+    {
+      name: "schematic name",
+      description:
+        "Name of the schematic to be executed. The schematic should be specified in the used collection",
+    },
+    {
+      name: "option=value",
+      description: "Options for the executed schematic",
+      isOptional: true,
+      isVariadic: true,
+    },
+  ],
+  options: [
+    {
+      name: "--collection",
+      description:
+        "Specifies the node package to be used as schematics collection. If it's not specified, @nativescript/schematics will be used",
+      args: {
+        name: "collection",
+      },
+    },
+    helpOption("generate"),
+  ],
+};
+
+const nativeAddArg = (kind: string, example: string): Fig.Arg => ({
+  name: `${kind} name`,
+  description: `The name of the ${kind} to create, for example ${example}`,
+});
+
+const nativeCommand: Fig.Subcommand = {
+  name: "native",
+  description:
+    "Commands to add native files to the application placing them in the correct directory",
+  subcommands: [
+    {
+      name: "add",
+      description:
+        "Adds a newly generated native file with the specified name to the application",
+      subcommands: [
+        {
+          name: "swift",
+          description:
+            "Adds a newly generated Swift file, which includes a class with the specified name",
+          args: nativeAddArg("Swift class", "SomeClass"),
+        },
+        {
+          name: "objective-c",
+          description:
+            "Adds newly generated Objective-C files, which include an interface with the specified name",
+          args: nativeAddArg("Objective-C interface", "SomeInterface"),
+        },
+        {
+          name: "java",
+          description:
+            "Adds a newly generated Java file, which includes a class with the specified name",
+          args: nativeAddArg(
+            "fully qualified Java class",
+            "org.nativescript.SomeClass"
+          ),
+        },
+        {
+          name: "kotlin",
+          description:
+            "Adds a newly generated Kotlin file, which includes a class with the specified name",
+          args: nativeAddArg(
+            "fully qualified Kotlin class",
+            "org.nativescript.SomeClass"
+          ),
+        },
+      ],
+    },
+  ],
+  options: [helpOption("native")],
+};
+
+const openCommand: Fig.Subcommand = {
+  name: "open",
+  description:
+    "Opens the native project from the corresponding platforms directory. If the native project has not been generated yet, the prepare command is issued first",
+  subcommands: [
+    {
+      name: "android",
+      description: "Opens the Android project in Android Studio",
+    },
+    {
+      name: "ios",
+      description: "Opens the native iOS project in Xcode",
+    },
+    {
+      name: ["visionos", "vision"],
+      description: "Opens the native visionOS project in Xcode",
+    },
+  ],
+  options: [helpOption("open")],
+};
+
+const widgetCommand: Fig.Subcommand = {
+  name: "widget",
+  description:
+    "Interactively adds a new iOS widget based on a predefined template",
+  subcommands: [
+    {
+      name: "ios",
+      description:
+        "Interactively adds a new iOS widget based on a predefined template",
+    },
+  ],
+  options: [helpOption("widget")],
+};
+
+const hooksCommand: Fig.Subcommand = {
+  name: "hooks",
+  description: "Manages lifecycle hooks from installed plugins",
+  subcommands: [
+    {
+      name: "install",
+      description: "Installs hooks from each installed plugin dependency",
+    },
+    {
+      name: "list",
+      description:
+        "Lists the plugins which have hooks and which scripts they install",
+    },
+    {
+      name: "lock",
+      description:
+        "Generates a hooks-lock.json containing the hooks that are in the current versions of the plugins",
+    },
+    {
+      name: "verify",
+      description:
+        "Verifies that the hooks contained in the installed plugins match those listed in the hooks-lock.json file",
+    },
+  ],
+  options: [helpOption("hooks")],
+};
+
+const typingsCommand: Fig.Subcommand = {
+  name: "typings",
+  description:
+    "Generates iOS and Android typings (respecting platform support, so no iOS typings are generated on Windows or Linux)",
+  subcommands: [
+    {
+      name: "android",
+      description: "Generates typings for Android",
+      options: [
+        {
+          name: "--jar",
+          description:
+            "Path to a jar file to generate typings for. Can be passed multiple times",
+          isRepeatable: true,
+          args: {
+            name: "jar",
+            template: "filepaths",
+          },
+        },
+        {
+          name: "--aar",
+          description:
+            "Path to an aar file to generate typings for (currently unsupported)",
+          args: {
+            name: "aar",
+            template: "filepaths",
+          },
+        },
+        copyToOption(),
+      ],
+    },
+    {
+      name: "ios",
+      description: "Generates typings for iOS",
+      options: [
+        {
+          name: "--filter",
+          description: "Regex to filter typings (currently unsupported)",
+          args: {
+            name: "filter",
+          },
+        },
+        copyToOption(),
+      ],
+    },
+  ],
+  options: [helpOption("typings")],
+};
+
+const fontsCommand: Fig.Subcommand = {
+  name: "fonts",
+  description:
+    "Lists the custom fonts (.ttf and .otf) found in the project's fonts folder along with the CSS properties to use them",
+  options: [helpOption("fonts")],
+};
+
+const startCommand: Fig.Subcommand = {
+  name: "start",
+  description:
+    "Starts an interactive session with key commands to run the app on Android, iOS and visionOS",
+  options: [helpOption("start")],
+};
+
+const embedCommand: Fig.Subcommand = {
+  name: "embed",
+  description:
+    "Prepares the project for embedding into a native host app. The host project path and module name default to the embed keys of the project's NativeScript configuration",
+  args: [
+    {
+      name: "platform",
+      description: "The platform to prepare the project for",
+      suggestions: ["android", "ios", "visionos"],
+    },
+    {
+      name: "host project path",
+      description: "The path to the native host project",
+      template: "folders",
+      isOptional: true,
+    },
+    {
+      name: "host project module name",
+      description: "The name of the module in the host project",
+      isOptional: true,
+    },
+  ],
+  options: [helpOption("embed")],
+};
+
 // Publishing Commands
+const uploadDescription =
+  "Uploads project to iTunes Connect. The command either issues a production build and uploads it to iTunes Connect, or uses an already built package to upload";
+
 const appStoreCommand: Fig.Subcommand = {
   name: "appstore",
   description:
@@ -1053,79 +1614,35 @@ const appStoreCommand: Fig.Subcommand = {
   subcommands: [
     {
       name: "upload",
-      description:
-        "Uploads project to iTunes Connect. The command either issues a production build and uploads it to iTunes Connect, or uses an already built package to upload",
-      args: [
-        {
-          name: "appleId",
-          description: "Apple id for logging in iTunes Connect",
-        },
-        {
-          name: "password",
-          description: "Password for logging in iTunes Connect",
-        },
-        {
-          name: "mobile provisioning profile identifier",
-          description:
-            "The identifier of the mobile provision(e.g. d5d40f61-b303-4fc8-aea3-fbb229a8171c) which will be used for building. This can easily be acquired through the iPhone Configuration Utility",
-        },
-        {
-          name: "code sign identity",
-          description:
-            "The code sign identity which will be used for building. You can set it to something generic like 'iPhone Distribution' to let the build automatically detect a code sign identity",
-        },
-      ],
-      options: [
-        {
-          name: "--ipa",
-          description:
-            "Use the provided .ipa file instead of building the project",
-          args: {
-            name: "ipa file path",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--appleApplicationSpecificPassword",
-          description:
-            "Specifies the password for accessing the information you store in iTunes Transporter application",
-          args: {
-            name: "password",
-          },
-        },
-        {
-          name: "--appleSessionBase64",
-          description:
-            "The session that will be used instead of triggering a new login each time NativeScript CLI communicates with Apple's APIs",
-          args: {
-            name: "base64",
-          },
-        },
-      ],
+      description: uploadDescription,
+      args: appleUploadArgs,
+      options: appleUploadOptions,
     },
   ],
-  args: [
+  args: appleCredentialArgs,
+  options: [teamIdOption, helpOption("appstore")],
+};
+
+const publishCommand: Fig.Subcommand = {
+  name: "publish",
+  description: "Uploads project to an application store",
+  subcommands: [
     {
-      name: "appleId",
-      description:
-        "Credentials for logging in iTunes Connect. If you do not provide them when running the command, the NativeScript CLI will prompt you to provide them",
-    },
-    {
-      name: "password",
-      description: "Password for logging in iTunes Connect",
+      name: "ios",
+      description: uploadDescription,
+      args: appleUploadArgs,
+      options: [...appleUploadOptions, teamIdOption],
     },
   ],
-  options: [
-    {
-      name: "--team-id",
-      description:
-        "Specifies the team id for which Xcode will try to find distribution certificate and provisioning profile when exporting for AppStore submission",
-      args: {
-        name: "team id",
-      },
-    },
-    helpOption("appstore"),
-  ],
+  options: [helpOption("publish")],
+};
+
+const appleLoginCommand: Fig.Subcommand = {
+  name: "apple-login",
+  description:
+    "Uses the provided Apple credentials to obtain an Apple session which can be used when publishing to the Apple App Store",
+  args: appleCredentialArgs,
+  options: [helpOption("apple-login")],
 };
 
 // Devices Commands
@@ -1140,7 +1657,7 @@ const deviceCommand: Fig.Subcommand = {
       description:
         "Lists all recognized connected Android physical and running Android virtual devices",
       options: [
-        timeoutOption,
+        deviceTimeoutOption,
         {
           name: "--available-devices",
           description: "Lists all available Android devices",
@@ -1153,7 +1670,7 @@ const deviceCommand: Fig.Subcommand = {
       description:
         "Lists all recognized connected iOS devices with serial number and index",
       options: [
-        timeoutOption,
+        deviceTimeoutOption,
         {
           name: "--available-devices",
           description: "Lists all available iOS devices",
@@ -1195,6 +1712,89 @@ const deviceCommand: Fig.Subcommand = {
       },
       options: [deviceOption],
     },
+    {
+      name: "get-file",
+      description:
+        "Copies a file from the application's sandbox on a connected device to the local machine",
+      hidden: true,
+      args: [
+        {
+          name: "device file path",
+          description: "The path of the file on the device",
+        },
+        {
+          name: "application id",
+          description:
+            "The application identifier. Defaults to the identifier of the current project",
+          isOptional: true,
+        },
+      ],
+      options: [
+        deviceOption,
+        {
+          name: "--file",
+          description: "The local path where the file will be saved",
+          args: {
+            name: "file",
+            template: "filepaths",
+          },
+        },
+      ],
+    },
+    {
+      name: "put-file",
+      description:
+        "Copies a local file to the application's sandbox on a connected device",
+      hidden: true,
+      args: [
+        {
+          name: "local file path",
+          description: "The path of the local file to copy",
+          template: "filepaths",
+        },
+        {
+          name: "device file path",
+          description: "The destination path on the device",
+        },
+        {
+          name: "application id",
+          description:
+            "The application identifier. Defaults to the identifier of the current project",
+          isOptional: true,
+        },
+      ],
+      options: [deviceOption],
+    },
+    {
+      name: "list-files",
+      description:
+        "Lists the files at a path in the application's sandbox on a connected device",
+      hidden: true,
+      args: [
+        {
+          name: "device path",
+          description: "The path on the device to list",
+        },
+        {
+          name: "application id",
+          description:
+            "The application identifier. Defaults to the identifier of the current project",
+          isOptional: true,
+        },
+      ],
+      options: [deviceOption],
+    },
+    {
+      name: "uninstall",
+      description:
+        "Uninstalls the selected application from a connected device",
+      hidden: true,
+      args: {
+        name: "application id",
+        description: "The application identifier",
+      },
+      options: [deviceOption],
+    },
   ],
   options: [
     {
@@ -1212,6 +1812,7 @@ const deviceCommand: Fig.Subcommand = {
  */
 const generalCommands: Array<Fig.Subcommand> = [
   helpCommand,
+  autocompleteCommand,
   infoCommand,
   updateCommand,
   packageManagerCommand,
@@ -1220,13 +1821,15 @@ const generalCommands: Array<Fig.Subcommand> = [
   usageReportingCommand,
   errorReportingCommand,
   proxyCommand,
-  // autoCompleteCommand,
+  configCommand,
+  extensionCommand,
 ];
 
 const projectDevelopmentCommands: Array<Fig.Subcommand> = [
   createCommand,
   cleanCommand,
   previewCommand,
+  startCommand,
   platformCommand,
   runCommand,
   debugCommand,
@@ -1237,18 +1840,26 @@ const projectDevelopmentCommands: Array<Fig.Subcommand> = [
   buildCommand,
   deployCommand,
   installCommand,
+  generateCommand,
+  nativeCommand,
+  openCommand,
+  widgetCommand,
+  hooksCommand,
+  typingsCommand,
+  fontsCommand,
+  embedCommand,
 ];
 
-const publishingCommands: Array<Fig.Subcommand> = [appStoreCommand];
+const publishingCommands: Array<Fig.Subcommand> = [
+  appStoreCommand,
+  publishCommand,
+  appleLoginCommand,
+];
 
 const devicesCommand: Array<Fig.Subcommand> = [deviceCommand];
 
 // Environment Configuration Commands
-// const setupCommand: Fig.Subcommand = {}
-
-const environmentConfigurationCommands: Array<Fig.Subcommand> = [
-  // setupCommand
-];
+const environmentConfigurationCommands: Array<Fig.Subcommand> = [setupCommand];
 
 const allCommands = [
   ...generalCommands,
@@ -1261,12 +1872,46 @@ const allCommands = [
 const completionSpec: Fig.Spec = {
   name: "ns",
   description:
-    "The NativeScript CLI lets you create, build, and deploy NativeScript based apps on iOS and Android devices",
+    "The NativeScript CLI lets you create, build, and deploy NativeScript based apps on iOS, Android and visionOS devices",
   subcommands: allCommands,
   options: [
     {
       name: ["-v", "--version"],
       description: "View your current Nativescript CLI version",
+    },
+    {
+      name: ["--help", "-h"],
+      description: "Print help about the selected command in the console",
+    },
+    {
+      name: ["--path", "-p"],
+      description:
+        "Specifies the directory that contains the project. If not set, the project is searched for in the current directory and all directories above it",
+      isPersistent: true,
+      args: {
+        name: "directory",
+        template: "folders",
+      },
+    },
+    {
+      name: ["--config", "-c"],
+      description:
+        "Specifies the name of the NativeScript configuration file to load (relative to the project directory). The default is nativescript.config.ts or nativescript.config.js (as a fallback)",
+      isPersistent: true,
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--log",
+      description:
+        "Sets the log level of the NativeScript CLI. trace prints a detailed diagnostic log for the execution of the current command",
+      isPersistent: true,
+      args: {
+        name: "level",
+        suggestions: ["trace", "debug", "info", "warn", "error", "fatal"],
+      },
     },
   ],
 };

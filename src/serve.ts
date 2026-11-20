@@ -1,3 +1,4 @@
+// serve v14.2.8 (GitHub release vercel/serve, 2026-11-13). Source: source/utilities/cli.ts on main
 const completionSpec: Fig.Spec = {
   name: "serve",
   description: "Static file serving and directory listing",
@@ -16,9 +17,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-l", "--listen"],
-
       description:
         "Specify a URI endpoint on which to listen - more than one may be specified to listen in multiple places",
+      isRepeatable: true,
       args: {
         name: "listen_uri",
         suggestions: [
@@ -41,15 +42,17 @@ const completionSpec: Fig.Spec = {
           },
           {
             name: "windows pipe",
-            description: "E.g. serve -l pipe:\\.pipePipeName",
-            insertValue: "pipe:\\.pipePipeName",
+            description: "E.g. serve -l pipe:\\\\.\\pipe\\PipeName",
+            insertValue: "pipe:\\\\.\\pipe\\PipeName",
           },
         ],
       },
     },
     {
       name: "-p",
-      description: "Specify custom port",
+      description: "Specify custom port (alias of --listen)",
+      deprecated: { description: "Use --listen" },
+      isRepeatable: true,
       args: { name: "port" },
     },
     {
@@ -67,6 +70,10 @@ const completionSpec: Fig.Spec = {
         name: "path to config file",
         template: "filepaths",
       },
+    },
+    {
+      name: ["-L", "--no-request-logging"],
+      description: "Do not log any request information to the console",
     },
     {
       name: ["-C", "--cors"],
@@ -91,7 +98,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--ssl-cert",
       description:
-        "Optional path to an SSL/TLS certificate to serve with HTTPS",
+        "Optional path to an SSL/TLS certificate to serve with HTTPS (PEM or PKCS12/PFX)",
       args: {
         name: "path to SSL/TLS certificate",
         template: "filepaths",
@@ -99,7 +106,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--ssl-key",
-      description: "Optional path to the SSL/TLS certificate's private key",
+      description:
+        "Optional path to the SSL/TLS certificate's private key (PEM certificates only)",
       args: {
         name: "path to private key",
         template: "filepaths",

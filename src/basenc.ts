@@ -1,3 +1,4 @@
+// GNU coreutils basenc v9.12 (coreutils NEWS + src/basenc.c at v9.12, 2026-11-19). Source: `basenc --help` (9.11)
 const completionSpec: Fig.Spec = {
   name: "basenc",
   description: "Encode/decode data and print to standard output",
@@ -6,7 +7,7 @@ const completionSpec: Fig.Spec = {
   },
   options: [
     {
-      name: ["--help", "-h"],
+      name: "--help",
       description: "Display this help and exit",
     },
     {
@@ -16,6 +17,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "--base64url",
       description: "File- and url-safe base64 (RFC4648 section 5)",
+    },
+    {
+      name: "--base58",
+      description: "Visually unambiguous base58 encoding",
     },
     {
       name: "--base32",
@@ -67,7 +72,7 @@ const completionSpec: Fig.Spec = {
   ],
   args: {
     name: "FILE",
-    description: "File(s) to encode/decode",
+    description: "File to encode/decode",
     template: "filepaths",
   },
 };

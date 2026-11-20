@@ -1,13 +1,83 @@
+// lp (macOS 26 CUPS lp, apple-oss-distributions/cups tag cups-522.4 (Apple fork based on CUPS 2.3.x), 2026-11-19). Source: man/lp.1 and systemv/lp.c usage text and option parser; not run on macOS.
+// Cross-checked against upstream OpenPrinting CUPS v2.4.20 man/lp.1 (only difference: -o print-as-raster, not in Apple's CUPS). Legacy options that lp parses but ignores with a warning (-f, -S, -T, -y) and the undocumented aliases -w (= -m) and -p (= -q) are omitted.
+// Verified against the Apple lp.c usage text (options -c -d -E -h -H -i -m -n -o -P -q -s -t -U, --, --help).
+// Fixed from the previous spec: -H (hold/immediate/restart/resume/HH:MM) and -P (page-list) had swapped argument names and suggestions.
 const prioritySuggestions: (string | Fig.Suggestion)[] = Array.from(
   { length: 100 },
   (_, i) => i + 1
 ).map((item) => item.toString());
 
-const timeSuggestions: (string | Fig.Suggestion)[] = [
-  "hold",
-  "immediate",
-  "restart",
-  "resume",
+const holdSuggestions: Fig.Suggestion[] = [
+  { name: "hold", description: "Hold the job indefinitely" },
+  { name: "immediate", description: "Print the job as soon as possible" },
+  {
+    name: "restart",
+    description: "Reprint a completed job (use with -i)",
+  },
+  { name: "resume", description: "Resume a held job (use with -i)" },
+];
+
+const jobOptionSuggestions: Fig.Suggestion[] = [
+  {
+    name: "job-sheets=standard",
+    description: "Print a banner page with the job",
+  },
+  {
+    name: "job-sheets=classified",
+    description: "Print a classified banner page",
+  },
+  {
+    name: "job-sheets=confidential",
+    description: "Print a confidential banner page",
+  },
+  { name: "job-sheets=secret", description: "Print a secret banner page" },
+  {
+    name: "job-sheets=topsecret",
+    description: "Print a top secret banner page",
+  },
+  {
+    name: "job-sheets=unclassified",
+    description: "Print an unclassified banner page",
+  },
+  { name: "media=a4", description: "Use A4 paper" },
+  { name: "media=letter", description: "Use Letter paper" },
+  { name: "media=legal", description: "Use Legal paper" },
+  { name: "number-up=2", description: "Print 2 input pages per output page" },
+  { name: "number-up=4", description: "Print 4 input pages per output page" },
+  { name: "number-up=6", description: "Print 6 input pages per output page" },
+  { name: "number-up=9", description: "Print 9 input pages per output page" },
+  {
+    name: "number-up=16",
+    description: "Print 16 input pages per output page",
+  },
+  {
+    name: "orientation-requested=3",
+    description: "Print in portrait orientation",
+  },
+  {
+    name: "orientation-requested=4",
+    description: "Print in landscape (rotated 90 degrees counter-clockwise)",
+  },
+  {
+    name: "orientation-requested=5",
+    description: "Print in landscape (rotated 90 degrees clockwise)",
+  },
+  {
+    name: "orientation-requested=6",
+    description: "Print in reverse portrait (rotated 180 degrees)",
+  },
+  { name: "print-quality=3", description: "Draft output quality" },
+  { name: "print-quality=4", description: "Normal output quality" },
+  { name: "print-quality=5", description: "Best output quality" },
+  { name: "sides=one-sided", description: "Print on one side of the paper" },
+  {
+    name: "sides=two-sided-long-edge",
+    description: "Print on both sides of the paper for portrait output",
+  },
+  {
+    name: "sides=two-sided-short-edge",
+    description: "Print on both sides of the paper for landscape output",
+  },
 ];
 
 const completionSpec: Fig.Spec = {
@@ -20,53 +90,62 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-U",
-      description:
-        "Specifies the username to use when connecting to the server",
+      description: "Specify the username to use when connecting to the server",
       args: {
-        name: "Username",
+        name: "username",
       },
     },
     {
       name: "-c",
       description:
-        "This  option is provided for backwards-compatibility only. On systems that support it, this option forces the print file to be copied to the spool directory before printing.  In CUPS, print files are always sent to the scheduler via IPP which has the  same effect",
+        "Copy the print file to the spool directory before printing (accepted for backwards compatibility only, CUPS always does this)",
     },
     {
       name: "-d",
       description: "Print files to the named printer",
       args: {
-        name: "Destination printer name",
+        name: "destination",
       },
     },
     {
       name: "-h",
-      description: "Chooses an alternate server",
+      description: "Choose an alternate server",
       args: {
         name: "hostname[:port]",
       },
     },
     {
       name: "-i",
-      description: "Specifies an existing job to modify",
+      description: "Specify an existing job to modify",
       args: {
         name: "job-id",
       },
     },
     {
       name: "-m",
-      description: "Sends an email when the job is completed",
+      description: "Send an email when the job is completed",
     },
     {
       name: "-n",
-      description: "Sets the number of copies to print",
+      description: "Set the number of copies to print",
       args: {
         name: "copies",
       },
     },
     {
+      name: "-o",
+      description:
+        "Set a job option, for example media, sides, number-up, orientation-requested, print-quality or job-sheets",
+      isRepeatable: true,
+      args: {
+        name: "name=value",
+        suggestions: jobOptionSuggestions,
+      },
+    },
+    {
       name: "-q",
       description:
-        "Sets the job priority from 1 (lowest) to 100 (highest). The default priority is 50",
+        "Set the job priority from 1 (lowest) to 100 (highest), the default priority is 50",
       args: {
         name: "priority",
         suggestions: prioritySuggestions,
@@ -79,7 +158,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-t",
-      description: "Sets the job name",
+      description: "Set the job name",
       args: {
         name: "name",
       },
@@ -87,26 +166,25 @@ const completionSpec: Fig.Spec = {
     {
       name: "-H",
       description:
-        "Specifies when the job should be printed.  A value of immediate will print the file immediately, a value of hold will hold the job indefinitely, and a UTC time value (HH:MM) will hold the job until the specified UTC (not local) time. Use a value of resume with the -i option to resume a held job.  Use a value of restart with the -i option to restart a completed job",
+        "Specify when the job should be printed: immediately, held indefinitely, or held until the given UTC (not local) time",
       args: {
-        name: "pages",
+        name: "hh:mm",
+        description:
+          "Time (HH:MM, UTC) to hold the job until, or hold, immediate, restart, resume",
+        suggestions: holdSuggestions,
       },
     },
     {
       name: "-P",
       description:
-        'Specifies which pages to print in the document. The list can contain a list of numbers and ranges (#-#) separated by commas, e.g., "1,3-5,16". The page numbers refer to the output pages and not the document\'s original  pages - options like  "number-up" can affect the numbering of the pages',
+        "Specify which output pages to print, for example 1,3-5,16 (numbering follows output pages, so options like number-up affect it)",
       args: {
-        name: "hh:mm",
-        suggestions: timeSuggestions,
+        name: "page-list",
       },
     },
     {
-      name: "-o",
-      description: "Sets one or more job options",
-      args: {
-        name: "name=value",
-      },
+      name: "--",
+      description: "Mark the end of options, to print a file starting with -",
     },
     {
       name: "--help",
@@ -117,6 +195,8 @@ const completionSpec: Fig.Spec = {
     template: "filepaths",
     suggestCurrentToken: true,
     description: "Filepath you want to print",
+    isOptional: true,
+    isVariadic: true,
   },
 };
 export default completionSpec;

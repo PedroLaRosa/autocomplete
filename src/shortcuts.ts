@@ -1,3 +1,4 @@
+// shortcuts (macOS 15.5 /usr/bin/shortcuts, 2026-11-19). Source: `shortcuts help <subcommand>` on macOS 15.5
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const shortcut: Fig.Arg = {
@@ -17,13 +18,14 @@ const subcommands: Fig.Subcommand[] = [
     description: "Run a shortcut",
     icon: "▶️",
     args: {
-      name: "shortcut-name",
-      description: "The name of the shortcut to run",
+      name: "shortcut-name-or-identifier",
+      description: "The shortcut name or identifier to run",
       generators: shortcut.generators,
     },
     options: [
       {
         name: ["-i", "--input-path"],
+        isRepeatable: true,
         args: {
           name: "input-path",
           template: "filepaths",
@@ -81,9 +83,13 @@ const subcommands: Fig.Subcommand[] = [
     options: [
       {
         name: ["--folder-name", "-f"],
-        description: "The name of the folder to list",
+        description:
+          'The folder name or identifier to list shortcuts in, or "none" for shortcuts not in a folder',
         args: {
           name: "folder-name",
+          suggestions: [
+            { name: "none", description: "Shortcuts not in a folder" },
+          ],
           generators: {
             script: ["shortcuts", "list", "--folders"],
             postProcess: (list) =>
@@ -99,6 +105,10 @@ const subcommands: Fig.Subcommand[] = [
         description: "List folders instead of shortcuts",
         icon: "📂",
       },
+      {
+        name: "--show-identifiers",
+        description: "Show identifiers with each result",
+      },
     ],
   },
   {
@@ -107,7 +117,7 @@ const subcommands: Fig.Subcommand[] = [
     icon: "🔍",
     args: {
       name: "shortcut-name",
-      description: "The name of the shortcut to view",
+      description: "The shortcut name to view in the Shortcuts app",
       generators: shortcut.generators,
     },
   },
@@ -119,6 +129,7 @@ const subcommands: Fig.Subcommand[] = [
       {
         name: ["--input", "-i"],
         description: "The shortcut file to sign",
+        isRequired: true,
         args: {
           name: "input",
           generators: filepaths({
@@ -129,6 +140,7 @@ const subcommands: Fig.Subcommand[] = [
       {
         name: ["--output", "-o"],
         description: "Output path for the signed shortcut file",
+        isRequired: true,
         args: {
           name: "output",
           template: "filepaths",
@@ -136,7 +148,7 @@ const subcommands: Fig.Subcommand[] = [
       },
       {
         name: ["--mode", "-m"],
-        description: "The signing mode. (default: people-who-know-me)",
+        description: "The signing mode (default: people-who-know-me)",
         args: {
           name: "mode",
           suggestions: ["people-who-know-me", "anyone"],

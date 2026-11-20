@@ -1,3 +1,7 @@
+// create-t3-app v7.40.0 (npm latest, 2026-11-19). Source: npm tarball dist/index.js (commander option definitions,
+// CI-mode validation, interactive prompts) + package.json, read statically (package not executed).
+// Notes: --import-alias is declared as a boolean commander flag upstream (no value is consumed), so it takes no argument here;
+// --nextAuth/--betterAuth, --prisma/--drizzle and --eslint/--biome are rejected together by the CLI in --CI mode.
 const dirArgument: Fig.Arg = {
   name: "dir",
   description:
@@ -6,6 +10,29 @@ const dirArgument: Fig.Arg = {
   isOptional: true,
   suggestCurrentToken: true,
 };
+
+const booleanArg = (what: string): Fig.Arg => ({
+  name: "boolean",
+  isOptional: true,
+  suggestions: [
+    { name: "true", description: `Install ${what}` },
+    { name: "false", description: `Do not install ${what}` },
+  ],
+});
+
+// Experimental package toggles, only honoured together with --CI
+const packageOption = (
+  name: string,
+  what: string,
+  exclusiveOn?: string[]
+): Fig.Option => ({
+  name,
+  description: `Experimental: Boolean value if we should install ${what}. Must be used in conjunction with \`--CI\``,
+  args: booleanArg(what),
+  dependsOn: ["--CI"],
+  ...(exclusiveOn && { exclusiveOn }),
+  priority: 49,
+});
 
 const completionSpec: Fig.Spec = {
   name: "create-t3-app",
@@ -34,73 +61,44 @@ const completionSpec: Fig.Spec = {
       description: "Boolean value if we're running in CI (default: false)",
       priority: 49,
     },
-    {
-      name: "--tailwind",
-      description:
-        "Experimental: Boolean value if we should install Tailwind CSS. Must be used in conjunction with `--CI`",
-      args: {
-        name: "boolean",
-        suggestions: [
-          { name: "true", description: "Install Tailwind CSS" },
-          { name: "false", description: "Do not install Tailwind CSS" },
-        ],
-      },
-      dependsOn: ["--CI"],
-      priority: 49,
-    },
-    {
-      name: "--nextAuth",
-      description:
-        "Experimental: Boolean value if we should install NextAuth.js. Must be used in conjunction with `--CI`",
-      args: {
-        name: "boolean",
-        suggestions: [
-          { name: "true", description: "Install NextAuth.js" },
-          { name: "false", description: "Do not install NextAuth.js" },
-        ],
-      },
-      dependsOn: ["--CI"],
-      priority: 49,
-    },
-    {
-      name: "--prisma",
-      description:
-        "Experimental: Boolean value if we should install Prisma. Must be used in conjunction with `--CI`",
-      args: {
-        name: "boolean",
-        suggestions: [
-          { name: "true", description: "Install Prisma" },
-          { name: "false", description: "Do not install Prisma" },
-        ],
-      },
-      dependsOn: ["--CI"],
-      priority: 49,
-    },
-    {
-      name: "--trpc",
-      description:
-        "Experimental: Boolean value if we should install tRPC. Must be used in conjunction with `--CI`",
-      args: {
-        name: "boolean",
-        suggestions: [
-          { name: "true", description: "Install tRPC" },
-          { name: "false", description: "Do not install tRPC" },
-        ],
-      },
-      dependsOn: ["--CI"],
-      priority: 49,
-    },
+    packageOption("--tailwind", "Tailwind CSS"),
+    packageOption("--nextAuth", "NextAuth.js", ["--betterAuth"]),
+    packageOption("--betterAuth", "BetterAuth", ["--nextAuth"]),
+    packageOption("--prisma", "Prisma", ["--drizzle"]),
+    packageOption("--drizzle", "Drizzle", ["--prisma"]),
+    packageOption("--trpc", "tRPC"),
     {
       name: ["-i", "--import-alias"],
-      description: "Explicitly tell the CLI to use a custom import alias",
+      description:
+        'Explicitly tell the CLI to use a custom import alias (default: "~/")',
+    },
+    {
+      name: "--dbProvider",
+      description: "Choose a database provider to use (default: sqlite)",
       args: {
-        name: "alias",
+        name: "provider",
         suggestions: [
-          { name: "~/", description: "Use the ~/ alias" },
-          { name: "@/", description: "Use the @/ alias" },
+          { name: "sqlite", description: "SQLite (LibSQL)" },
+          { name: "mysql", description: "MySQL" },
+          { name: "postgres", description: "PostgreSQL" },
+          { name: "planetscale", description: "PlanetScale" },
         ],
       },
     },
+    {
+      name: "--appRouter",
+      description: "Explicitly tell the CLI to use the new Next.js app router",
+      args: {
+        name: "boolean",
+        isOptional: true,
+        suggestions: [
+          { name: "true", description: "Use the Next.js app router" },
+          { name: "false", description: "Use the Next.js pages router" },
+        ],
+      },
+    },
+    packageOption("--eslint", "eslint and prettier", ["--biome"]),
+    packageOption("--biome", "biome", ["--eslint"]),
     {
       name: ["-v", "--version"],
       description: "Display the version number",

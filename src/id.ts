@@ -1,4 +1,5 @@
-const exclusiveOptions = ["-A", "-F", "-G", "-M", "-P", "-g", "-p", "-u"];
+// id (macOS BSD id from Apple OSS shell_cmds-329, man page dated 2011-03-05, 2026-11-19). Source: apple-oss-distributions/shell_cmds id/id.1 + id.c (getopt string "AFPGagnpru" on __APPLE__). Removed -M (FreeBSD only, #ifndef __APPLE__). Not run on macOS.
+const exclusiveOptions = ["-A", "-F", "-G", "-P", "-g", "-p", "-u"];
 
 const completionSpec: Fig.Spec = {
   name: "id",
@@ -23,14 +24,13 @@ const completionSpec: Fig.Spec = {
       exclusiveOn: exclusiveOptions,
     },
     {
-      name: "-M",
-      description: "Display the MAC label of the current process",
-      exclusiveOn: exclusiveOptions,
-    },
-    {
       name: "-P",
       description: "Display the id as a password file entry",
       exclusiveOn: exclusiveOptions,
+    },
+    {
+      name: "-a",
+      description: "Ignored for compatibility with other id implementations",
     },
     {
       name: "-g",
@@ -42,12 +42,17 @@ const completionSpec: Fig.Spec = {
       description:
         "Display the name of the user or group ID for the -G, -g and -u options instead of the number.  If any of the ID numbers cannot be mapped into names the number will be displayed as usual",
       dependsOn: ["-G", "-g", "-u"],
-      exclusiveOn: exclusiveOptions,
     },
     {
       name: "-p",
       description: "Make the output human-readable",
       exclusiveOn: exclusiveOptions,
+    },
+    {
+      name: "-r",
+      description:
+        "Display the real ID for the -g and -u options instead of the effective ID",
+      dependsOn: ["-g", "-u"],
     },
     {
       name: "-u",

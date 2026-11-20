@@ -1,17 +1,24 @@
+// Hexo CLI hexo-cli v4.3.2 with hexo v8.1.2 and hexo-server v3.0.0 (latest on npm, 2026-11-20).
+// Source: statically read the npm packages (hexo-cli dist/console + completion, hexo dist/plugins/console, hexo-server
+// index.js/lib/server.js) and the hexojs/site docs (commands.md, migration.md); the CLI was not run.
 const draftGenerator: Fig.Generator = {
-  script: ["bash", "-c", "hexo list post | grep -E ^Draft"],
+  // Drafts are only loaded when --draft is passed (or render_drafts is true)
+  script: ["bash", "-c", "hexo list post --draft | grep -E ^Draft"],
   postProcess: (out) => {
-    return out.split("\n").map(function (file) {
-      const title = file
-        .replace(/^.*   *_drafts\//g, "")
-        .replace(/  *(.*)$/g, "")
-        .replace(/.md$/g, "");
-      return {
-        name: title,
-        description: "Draft for " + title,
-        icon: "fig://icon?type=md",
-      };
-    });
+    return out
+      .split("\n")
+      .filter((file) => file.trim() !== "")
+      .map(function (file) {
+        const title = file
+          .replace(/^.*   *_drafts\//g, "")
+          .replace(/  *(.*)$/g, "")
+          .replace(/\.[^.]+$/g, "");
+        return {
+          name: title,
+          description: "Draft for " + title,
+          icon: "fig://icon?type=md",
+        };
+      });
   },
 };
 
@@ -132,7 +139,6 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "concurrency",
             description: "The number of files to generate in parallel",
-            isOptional: true,
           },
         },
       ],
@@ -173,12 +179,12 @@ const completionSpec: Fig.Spec = {
           description: "Override default port",
           args: {
             name: "port",
-            description: "Only serve static files",
+            description: "The port to listen on (default 4000)",
           },
         },
         {
           name: ["-s", "--static"],
-          description: "Serve static files from the given directory",
+          description: "Only serve static files",
         },
         {
           name: ["-l", "--log"],
@@ -220,15 +226,19 @@ const completionSpec: Fig.Spec = {
         {
           name: "--engine",
           description: "Specify render engine",
+          args: {
+            name: "engine",
+            description: "The render engine to use, e.g. md or ejs",
+          },
         },
         {
           name: ["-o", "--output"],
           description:
             "Output destination. Result will be printed in the terminal if the output destination is not set",
           args: {
-            name: "output directory",
-            description: "The path to output directory",
-            template: "folders",
+            name: "output file",
+            description: "The path of the output file",
+            template: "filepaths",
           },
         },
         {
@@ -249,7 +259,8 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "type",
         description:
-          "The type of migration. check https://hexo.io/docs/migration for more details",
+          "The type of migration (needs the matching hexo-migrator-* plugin). See https://hexo.io/docs/migration for more details",
+        suggestions: ["rss", "jekyll", "octopress", "wordpress", "joomla"],
       },
     },
     {
@@ -259,7 +270,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "list",
-      description: "List all routes",
+      description: "List the information of the site",
       args: {
         name: "type",
         description: "The type of routes to list",
@@ -272,6 +283,28 @@ const completionSpec: Fig.Spec = {
     },
   ],
   options: [
+    {
+      name: ["-h", "--help"],
+      description: "Display help for a command",
+      isPersistent: true,
+    },
+    {
+      name: ["-v", "--version"],
+      description: "Display version information",
+    },
+    {
+      name: "--console-list",
+      description: "List the registered commands",
+    },
+    {
+      name: "--completion",
+      description: "Print a shell completion script",
+      args: {
+        name: "shell",
+        description: "The shell to print the completion script for",
+        suggestions: ["bash", "zsh", "fish"],
+      },
+    },
     {
       name: "--config",
       description:

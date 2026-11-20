@@ -1,3 +1,4 @@
+// killall (macOS BSD, man page dated 2020-06-27, 2026-11-19). Source: apple-oss-distributions/shell_cmds tag shell_cmds-329 killall/killall.1 + killall/killall.c (getopt "c:dehIlmqst:u:vz", -help, -SIGNAL parsing, sys_signame list); man page and source only, not run on macOS. Changes: option descriptions refreshed from the man page, -s/-d/-v semantics corrected, -m marked dangerous, process generator no longer lists the ps header. -j (jail) is FreeBSD only and is not listed. The signal option accepts a name with or without SIG (case-insensitive) or a number; the spec lists the macOS signal names as -SIG<NAME> (TERM, the default, is omitted).
 // Linux incompatible
 
 const signals = [
@@ -43,7 +44,7 @@ const completionSpec: Fig.Spec = {
     isVariadic: true,
     generators: {
       // All processes, only display the path
-      script: ["bash", "-c", "ps -A -o comm | sort -u"],
+      script: ["bash", "-c", "ps -A -o comm= | sort -u"],
       postProcess: (out) =>
         out
           .trim()
@@ -71,20 +72,22 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: "-d",
-      description: "Be verbose (dry run) and display number of user processes",
+      description:
+        "Be more verbose about what will be done, but do not send any signal; shows the number of user processes and the real user ID",
     },
     {
       name: "-e",
       description:
-        "Use the effective user ID instead of the real user ID for matching processes with -u",
+        "Use the effective user ID instead of the (default) real user ID for matching processes specified with -u",
     },
     {
       name: "-help",
-      description: "Display help and exit",
+      description: "Give help on the command usage and exit",
     },
     {
       name: "-I",
-      description: "Request confirmation before killing each process",
+      description:
+        "Request confirmation before attempting to signal each process",
     },
     {
       name: "-l",
@@ -92,15 +95,17 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-m",
-      description: "Match the process name as a regular expression",
+      description:
+        "Match the process name as a (case sensitive) regular expression; dangerous, a single dot matches any process running under your real UID",
+      isDangerous: true,
     },
     {
       name: "-v",
-      description: "Be verbose",
+      description: "Be verbose about what will be done",
     },
     {
       name: "-s",
-      description: "Be verbose (dry run)",
+      description: "Same as -v, but do not send any signal",
     },
     ...signals.map((signal) => ({
       name: "-SIG" + signal.toUpperCase(),
@@ -109,7 +114,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-u",
       description:
-        "Limit potentially matching processes to those belonging to the user",
+        "Limit potentially matching processes to those belonging to the specified user",
       args: {
         name: "user",
         generators: {
@@ -128,14 +133,15 @@ const completionSpec: Fig.Spec = {
     {
       name: "-t",
       description:
-        "Limit matching processes to those running on the specified TTY",
+        "Limit potentially matching processes to those running on the specified tty",
       args: {
         name: "tty",
       },
     },
     {
       name: "-c",
-      description: "Limit matching processes to those matching the given name",
+      description:
+        "Limit potentially matching processes to those matching the specified process name",
       args: {
         name: "name",
       },
@@ -146,7 +152,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-z",
-      description: "Do not skip zombies",
+      description:
+        "Do not skip zombies (only affects error messages for matching zombie processes)",
     },
   ],
 };

@@ -1,3 +1,5 @@
+// tfsec v1.28.14 (GitHub release aquasecurity/tfsec, 2026-11-19). Source: internal/app/tfsec/cmd/flags.go, root.go and output.go at tag v1.28.14 (2025-05-02).
+// Upstream is in maintenance mode: scanning has moved to Trivy and v1.28.14 is the latest release.
 const workspaceGenerator: Fig.Generator = {
   script: ["terraform", "workspace", "list"],
   postProcess: function (out) {
@@ -14,8 +16,22 @@ const completionSpec: Fig.Spec = {
     "Tfsec is a simple tool to detect potential security vulnerabilities in your terraformed infrastructure",
   options: [
     {
+      name: ["-p", "--allow-checks-to-panic"],
+      description: "Allow panics to propagate up from rule checking",
+      hidden: true,
+    },
+    {
       name: "--concise-output",
       description: "Reduce the amount of output and no statistics",
+    },
+    {
+      name: "--code-theme",
+      description: "Theme for annotated code",
+      args: {
+        name: "code-theme",
+        default: "dark",
+        suggestions: ["light", "dark"],
+      },
     },
     {
       name: "--config-file",
@@ -26,10 +42,26 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--config-file-url",
+      description:
+        "Config file to download from a remote location. Must be json or yaml",
+      args: {
+        name: "config-file-url",
+      },
+    },
+    {
       name: "--custom-check-dir",
-      description: "Explicitly the custom checks dir location",
+      description: "Explicitly set the custom checks dir location",
       args: {
         name: "custom-check-dir",
+      },
+    },
+    {
+      name: "--custom-check-url",
+      description:
+        "Download a custom check file from a remote location. Must be json or yaml",
+      args: {
+        name: "custom-check-url",
       },
     },
     {
@@ -49,6 +81,14 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: ["-E", "--exclude-ignores"],
+      description:
+        "Provide comma-separated list of ignored rule to exclude from run",
+      args: {
+        name: "excludeIgnores",
+      },
+    },
+    {
       name: "--exclude-downloaded-modules",
       description: "Remove results for downloaded modules in .terraform folder",
     },
@@ -56,6 +96,7 @@ const completionSpec: Fig.Spec = {
       name: "--exclude-path",
       description:
         "Folder path to exclude, can be used multiple times and evaluated in order of specification",
+      isRepeatable: true,
       args: {
         name: "excludePath",
         template: "filepaths",
@@ -77,10 +118,23 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-f", "--format"],
       description:
-        "Select output format: default, json, csv, checkstyle, junit, sarif. To use multiple formats, separate with a comma and specify a base output filename with --out. A file will be written for each type. The first format will additionally be written stdout",
+        "Select output format: lovely, json, csv, checkstyle, junit, sarif, text, markdown, html, gif. To use multiple formats, separate with a comma and specify a base output filename with --out. A file will be written for each type. The first format will additionally be written stdout",
       args: {
         name: "format",
-        suggestions: ["default", "json", "csv", "checkstyle", "junit", "sarif"],
+        default: "lovely",
+        suggestions: [
+          "lovely",
+          "default",
+          "json",
+          "csv",
+          "checkstyle",
+          "junit",
+          "sarif",
+          "text",
+          "markdown",
+          "html",
+          "gif",
+        ],
       },
     },
     {
@@ -90,7 +144,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--ignore-hcl-errors",
       description:
-        "Stop and report an error if an HCL parse error is encountered",
+        "Do not report an error if an HCL parse error is encountered",
     },
     {
       name: "--include-ignored",
@@ -112,6 +166,10 @@ const completionSpec: Fig.Spec = {
         name: "minimumSeverity",
         suggestions: ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
       },
+    },
+    {
+      name: "--no-code",
+      description: "Don't include the code snippets in the output",
     },
     {
       name: "--no-color",
@@ -153,6 +211,10 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--rego-only",
+      description: "Run rego policies exclusively",
+    },
+    {
       name: "--run-statistics",
       description: "View statistics table of current findings",
     },
@@ -168,6 +230,7 @@ const completionSpec: Fig.Spec = {
       name: "--tfvars-file",
       description:
         "Path to .tfvars file, can be used multiple times and evaluated in order of specification",
+      isRepeatable: true,
       args: {
         name: "tfvarsFilePath",
         template: "filepaths",
@@ -178,6 +241,16 @@ const completionSpec: Fig.Spec = {
       description: "Update to latest version",
     },
     {
+      name: "--var-file",
+      description:
+        "Path to .tfvars file, can be used multiple times and evaluated in order of specification (same functionality as --tfvars-file but consistent with Terraform)",
+      isRepeatable: true,
+      args: {
+        name: "tfvarsFilePath",
+        template: "filepaths",
+      },
+    },
+    {
       name: "--verbose",
       description: "Enable verbose logging (same as debug)",
     },
@@ -186,7 +259,7 @@ const completionSpec: Fig.Spec = {
       description: "Show version information and exit",
     },
     {
-      name: ["-W", "--workspace"],
+      name: ["-w", "--workspace"],
       description: 'Specify a workspace for ignore limits (default "default")',
       args: {
         name: "workspace",

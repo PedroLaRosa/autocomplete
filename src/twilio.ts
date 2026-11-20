@@ -1,3 +1,10 @@
+// Twilio CLI v7.3.0 (npm twilio-cli latest, tag twilio/twilio-cli 7.3.0, published
+// 2026-11-11; re-verified 2026-11-20). Source: src/commands and package.json oclif
+// plugins at tag 7.3.0 (plugin-autocomplete 1.4.6, plugin-plugins 2.4.7,
+// plugin-update 4.8.0, plugin-version 1.3.10 as locked), @twilio/cli-core 9.3.0 base
+// flags and its twilio_api_v2010.json (phone-numbers:buy flags). Read statically,
+// the CLI was not run. The generated `api` tree is left out on purpose.
+
 /** A version of Fig.Subcommand with a predictable name prop */
 interface TwilioSubcommand extends Fig.Subcommand {
   name: string;
@@ -93,7 +100,7 @@ function createSeparatedSubcommandTree(
 }
 
 const logOption: Fig.Option = {
-  name: "-l",
+  name: ["-l", "--cli-log-level"],
   args: {
     name: "level",
     description: "Level of logging messages",
@@ -109,7 +116,7 @@ const logOption: Fig.Option = {
 };
 
 const outputFormatOption: Fig.Option = {
-  name: "-o",
+  name: ["-o", "--cli-output-format"],
   description: "Format of command output",
   args: {
     name: "format",
@@ -132,6 +139,21 @@ const silentOption: Fig.Option = {
 // These options are on subcommands, not on the top level twilio CLI
 const persistentOptions = [logOption, outputFormatOption, silentOption];
 
+// TwilioClientCommand flags: the base options plus the profile selector
+const clientOptions: Fig.Option[] = [
+  ...persistentOptions,
+  {
+    name: ["-p", "--profile"],
+    description: "Shorthand identifier for your profile",
+    args: { name: "profile" },
+  },
+];
+
+const noHeaderOption: Fig.Option = {
+  name: "--no-header",
+  description: "Skip including of headers while listing the data",
+};
+
 const configSubcommand: TwilioSubcommand = {
   name: "config",
   description: "Manage Twilio CLI configurations",
@@ -149,13 +171,17 @@ const configSubcommand: TwilioSubcommand = {
         {
           name: ["-e", "--edge"],
           description: "Sets an Edge configuration",
+          args: { name: "edge" },
         },
         {
           name: "--require-profile-input",
+          description:
+            "Whether the profile flag for Twilio CLI commands is required or not",
           exclusiveOn: ["--no-require-profile-input"],
         },
         {
           name: "--no-require-profile-input",
+          description: "Don't require the profile flag for Twilio CLI commands",
           exclusiveOn: ["--require-profile-input"],
         },
       ],
@@ -174,6 +200,41 @@ const debuggerSubcommand: TwilioSubcommand = {
         {
           name: "list",
           description: "Show a list of log events generated for the account",
+          options: [
+            ...clientOptions,
+            noHeaderOption,
+            {
+              name: "--properties",
+              description:
+                "The event properties you would like to display (JSON output always shows all properties)",
+              args: {
+                name: "properties",
+                default: "dateCreated, logLevel, errorCode, alertText",
+              },
+            },
+            {
+              name: ["-s", "--streaming"],
+              description: "Continuously stream incoming log events",
+            },
+            {
+              name: "--log-level",
+              description: "Only show log events for this log level",
+              args: {
+                name: "level",
+                suggestions: ["error", "warning", "notice", "debug"],
+              },
+            },
+            {
+              name: "--start-date",
+              description: "Only show log events on or after this date",
+              args: { name: "date" },
+            },
+            {
+              name: "--end-date",
+              description: "Only show log events on or before this date",
+              args: { name: "date" },
+            },
+          ],
         },
       ],
     },
@@ -193,6 +254,7 @@ const emailSubcommand: TwilioSubcommand = {
         {
           name: "--attachment",
           description: "Path for the file that you want to attach",
+          exclusiveOn: ["--no-attachment"],
           args: {
             name: "attachment",
             template: "filepaths",
@@ -208,6 +270,7 @@ const emailSubcommand: TwilioSubcommand = {
         {
           name: "--no-attachment",
           description: "Do not include or prompt for an attachment",
+          exclusiveOn: ["--attachment"],
         },
         {
           name: "--subject",
@@ -236,17 +299,16 @@ const emailSubcommand: TwilioSubcommand = {
       name: "set",
       description: "Sets a default sending email address and subject line",
       options: [
-        ...persistentOptions,
         {
           name: "--from",
-          description: "Email address of the sender",
+          description: "Default email address of the sender",
           args: {
             name: "from",
           },
         },
         {
           name: "--subject",
-          description: "The subject line for an email",
+          description: "Default subject line for all emails",
           args: {
             name: "subject",
           },
@@ -261,8 +323,17 @@ const feedbackSubcommand: TwilioSubcommand = {
   description: "Provide feedback to the CLI team",
 };
 
+// The API schema only allows these two (case-sensitive) HTTP methods
+const httpMethodArg: Fig.Arg = {
+  name: "method",
+  suggestions: [
+    { name: "GET", icon: "fig://icon?type=string" },
+    { name: "POST", icon: "fig://icon?type=string" },
+  ],
+};
+
 const phoneNumbersBuyOptions: Fig.Option[] = [
-  ...persistentOptions,
+  ...clientOptions,
   {
     name: "--country-code",
     description:
@@ -686,7 +757,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
   {
     name: "--contains",
     description:
-      "The pattern on which to match phone numbers. Valid characters are `*`, `0-9`, `a-z`, and `A-Z`. The `*` character matches any single digit. For examples, see Example 2 and Example 3. If specified, this value must have at least two characters",
+      "Matching pattern to identify phone numbers. Between 2 and 16 characters long, allows digits (0-9) and latin letters (a-z, A-Z) plus the meta-characters `*`, `%`, `+` and `$`. With wildcards it must include at least two non-meta-characters",
     args: {
       name: "contains",
     },
@@ -714,8 +785,8 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     args: {
       name: "status",
       suggestions: [
-        { name: "active", icon: "fig://icon?type=string" },
-        { name: "inactive", icon: "fig://icon?type=string" },
+        { name: "Active", icon: "fig://icon?type=string" },
+        { name: "Inactive", icon: "fig://icon?type=string" },
       ],
     },
   },
@@ -873,6 +944,20 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     },
   },
   {
+    name: "--page",
+    description: "The page index. This value is simply for client state",
+    args: {
+      name: "page",
+    },
+  },
+  {
+    name: "--page-token",
+    description: "The page token. This is provided by the API",
+    args: {
+      name: "page-token",
+    },
+  },
+  {
     name: "--properties",
     description:
       "The properties you would like to display (JSON output always shows all properties)",
@@ -905,17 +990,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--sms-fallback-method",
     description:
       "The HTTP method that we should use to call `sms_fallback_url`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--sms-fallback-url",
@@ -929,17 +1004,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--sms-method",
     description:
       "The HTTP method that we should use to call `sms_url`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--sms-url",
@@ -961,17 +1026,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--status-callback-method",
     description:
       "The HTTP method we should use to call `status_callback`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--trunk-sid",
@@ -1017,17 +1072,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--voice-fallback-method",
     description:
       "The HTTP method that we should use to call `voice_fallback_url`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--voice-fallback-url",
@@ -1041,17 +1086,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--voice-method",
     description:
       "The HTTP method that we should use to call `voice_url`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--voice-receive-mode",
@@ -1124,17 +1159,14 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
       name: "list",
       description: "Show what Twilio phone numbers you have configured",
       options: [
-        ...persistentOptions,
+        ...clientOptions,
+        noHeaderOption,
         {
           name: "--account-sid",
           description: "Access resources for the specified account",
           args: {
             name: "account-sid",
           },
-        },
-        {
-          name: "--no-header",
-          description: "Skip including of headers while listing the data",
         },
         {
           name: "--properties",
@@ -1156,7 +1188,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
           "The SID or E.164 formatted phone number you wish to update",
       },
       options: [
-        ...persistentOptions,
+        ...clientOptions,
         {
           name: "--account-sid",
           args: { name: "account-sid" },
@@ -1170,13 +1202,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
         },
         {
           name: "--sms-fallback-method",
-          args: {
-            name: "method",
-            suggestions: [
-              { name: "GET", icon: "fig://icon?type=string" },
-              { name: "POST", icon: "fig://icon?type=string" },
-            ],
-          },
+          args: httpMethodArg,
           description:
             "The HTTP method that should be used to request the SmsFallbackUrl",
         },
@@ -1188,13 +1214,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
         },
         {
           name: "--sms-method",
-          args: {
-            name: "method",
-            suggestions: [
-              { name: "GET", icon: "fig://icon?type=string" },
-              { name: "POST", icon: "fig://icon?type=string" },
-            ],
-          },
+          args: httpMethodArg,
           description:
             "The HTTP method Twilio will use when making requests to the SmsUrl",
         },
@@ -1206,13 +1226,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
         },
         {
           name: "--voice-fallback-method",
-          args: {
-            name: "method",
-            suggestions: [
-              { name: "GET", icon: "fig://icon?type=string" },
-              { name: "POST", icon: "fig://icon?type=string" },
-            ],
-          },
+          args: httpMethodArg,
           description:
             "The HTTP method Twilio will use when requesting the VoiceFallbackUrl",
         },
@@ -1224,13 +1238,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
         },
         {
           name: "--voice-method",
-          args: {
-            name: "method",
-            suggestions: [
-              { name: "GET", icon: "fig://icon?type=string" },
-              { name: "POST", icon: "fig://icon?type=string" },
-            ],
-          },
+          args: httpMethodArg,
           description:
             "The HTTP method Twilio will use when making requests to the VoiceUrl",
         },
@@ -1263,6 +1271,10 @@ const pluginsSubcommand: TwilioSubcommand = {
       options: [
         {
           name: ["-v", "--verbose"],
+        },
+        {
+          name: "--json",
+          description: "Format output as json",
         },
       ],
     },
@@ -1326,17 +1338,23 @@ const loginSubcommand: (name: string) => TwilioSubcommand = (name) => ({
   name,
   description:
     "Create a new profile to store Twilio Account credentials and configuration",
+  args: {
+    name: "account-sid",
+    description: "The Account SID for your Twilio Account or Subaccount",
+    isOptional: true,
+  },
   options: [
-    ...persistentOptions,
+    ...clientOptions,
     {
       name: ["-f", "--force"],
       description: "Force overwriting existing profile credentials",
     },
     {
-      name: ["-p", "--profile"],
-      description: "Shorthand identifier for your profile",
+      name: "--edge",
+      description:
+        "Twilio edge location to use. Auto-detected from region if not specified",
       args: {
-        name: "profile",
+        name: "edge",
       },
     },
     {
@@ -1366,22 +1384,7 @@ const profilesSubcommand: TwilioSubcommand = {
     {
       name: "list",
       description: "Show what profiles you have configured",
-      options: [
-        ...persistentOptions,
-        {
-          name: "--no-header",
-          description: "Skip including of headers while listing the data",
-        },
-      ],
-    },
-    {
-      name: "port",
-      description:
-        "Port API keys from keytar to config file. This command ports ALL keys by default, although to only port a specific key append the profile-id as additional argument",
-      args: {
-        name: "profile",
-      },
-      options: persistentOptions,
+      options: [...persistentOptions, noHeaderOption],
     },
     {
       name: "remove",
@@ -1408,13 +1411,60 @@ const updateSubcommand: TwilioSubcommand = {
   args: {
     name: "channel",
     isOptional: true,
+    suggestions: ["stable"],
   },
   options: [
     {
-      name: "--from-local",
-      description: "Interactively choose an already installed version",
+      name: ["-a", "--available"],
+      description: "See available versions",
+      exclusiveOn: ["-v", "--version", "-i", "--interactive"],
+    },
+    {
+      name: "--force",
+      description: "Force a re-download of the requested version",
+      exclusiveOn: ["-i", "--interactive", "-a", "--available"],
+    },
+    {
+      name: ["-i", "--interactive"],
+      description:
+        "Interactively select version to install. This is ignored if a channel is provided",
+      exclusiveOn: ["-v", "--version"],
+    },
+    {
+      name: ["-b", "--verbose"],
+      description: "Show more details about the available versions",
+      dependsOn: ["--available"],
+    },
+    {
+      name: ["-v", "--version"],
+      description: "Install a specific version",
+      exclusiveOn: ["-i", "--interactive"],
+      args: { name: "version" },
     },
   ],
+};
+
+const versionSubcommand: TwilioSubcommand = {
+  name: "version",
+  description: "Show the CLI version",
+  options: [
+    {
+      name: "--verbose",
+      description:
+        "Show additional information about the CLI, such as architecture, node version, operating system, and plugin versions",
+    },
+    {
+      name: "--json",
+      description: "Format output as json",
+    },
+  ],
+};
+
+const zorkSubcommand: TwilioSubcommand = {
+  name: "zork",
+  description: "What could this be?",
+  hidden: true,
+  options: persistentOptions,
 };
 
 const autocompleteSubcommand: TwilioSubcommand = {
@@ -1423,6 +1473,7 @@ const autocompleteSubcommand: TwilioSubcommand = {
   args: {
     name: "shell",
     description: "Shell type",
+    isOptional: true,
     suggestions: [
       { name: "bash", icon: "fig://icon?type=string" },
       { name: "zsh", icon: "fig://icon?type=string" },
@@ -1448,6 +1499,8 @@ const subcommands: TwilioSubcommand[] = [
   pluginsSubcommand,
   profilesSubcommand,
   updateSubcommand,
+  versionSubcommand,
+  zorkSubcommand,
 ];
 
 const completionSpec: Fig.Spec = {
@@ -1458,6 +1511,10 @@ const completionSpec: Fig.Spec = {
       name: ["-h", "--help"],
       description: "Show a help message",
       isPersistent: true,
+    },
+    {
+      name: ["-v", "--version"],
+      description: "Show the CLI version",
     },
   ],
   ...createSeparatedSubcommandTree(":", subcommands, {

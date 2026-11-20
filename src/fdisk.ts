@@ -1,3 +1,12 @@
+// util-linux fdisk v2.42.4 (latest util-linux tag, 2026-11-19). Source: disk-utils/fdisk.c longopts/usage() and fdisk.8.adoc on master
+// ponytail: macOS /usr/sbin/fdisk is the unrelated BSD MBR tool; this spec tracks util-linux
+
+const wipeModes: Fig.Arg = {
+  name: "when",
+  description: "The argument when can be auto, never or always",
+  suggestions: ["auto", "never", "always"],
+};
+
 const completionSpec: Fig.Spec = {
   name: "fdisk",
   description: "Manipulate disk partition table",
@@ -8,13 +17,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--version", "-V"],
-      description: "Show version for lsblk",
+      description: "Show version for fdisk",
     },
     {
       name: ["--sector-size", "-b"],
       description: "Specify the sector size of the disk",
       args: {
-        name: "mode",
+        name: "size",
         description: "Valid values are 512, 1024, 2048, and 4096",
         suggestions: ["512", "1024", "2048", "4096"],
       },
@@ -69,10 +78,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--output", "-o"],
-      description: "Desc",
+      description:
+        "Specify which output columns to print; prefix the list with + to extend the default columns",
       args: {
         name: "list",
       },
+    },
+    {
+      name: "--bytes",
+      description: "Print SIZE in bytes rather than in human readable format",
     },
     {
       name: ["--getsz", "-s"],
@@ -88,6 +102,7 @@ const completionSpec: Fig.Spec = {
         "Enable support only for disklabels of the specified type, and disable support for all other types",
       args: {
         name: "type",
+        suggestions: ["dos", "gpt", "sun", "sgi", "bsd"],
       },
     },
     {
@@ -119,31 +134,28 @@ const completionSpec: Fig.Spec = {
       name: ["--sectors", "-S"],
       description:
         "Specify the number of sectors per track of the disk. (Not the physical number, of course, but the number used for partition tables.)",
+      args: {
+        name: "number",
+      },
     },
     {
       name: ["--wipe", "-w"],
       description:
         "Wipe filesystem, RAID and partition-table signatures from the device, in order to avoid possible collisions",
-      args: {
-        name: "when",
-        description: "The argument when can be auto, never or always",
-        suggestions: ["auto", "never", "always"],
-      },
+      args: wipeModes,
     },
     {
       name: ["--wipe-partitions", "-W"],
       description:
         "Wipe filesystem, RAID and partition-table signatures from a newly created partitions, in order to avoid possible collisions",
-      args: {
-        name: "when",
-        description: "The argument when can be auto, never or always",
-      },
+      args: wipeModes,
     },
   ],
   args: {
     name: "device",
-    description: "Device to list",
+    description: "Device to manipulate, or devices to list with --list",
     isOptional: true,
+    isVariadic: true,
     template: "filepaths",
   },
 };

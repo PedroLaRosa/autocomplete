@@ -1,43 +1,25 @@
-// Interface for the json output of packages
+// Mamba v2.10.0 (GitHub release mamba-org/mamba, 2026-10-23). Source: the CLI11
+// parser in micromamba/src/*.cpp at tag 2.10.0 (mamba is built from the same
+// sources minus `self-update`), option descriptions from
+// libmamba/src/api/configuration.cpp
+
+// Interface for the json output of `mamba list --json`
 interface Package {
-  baseURL: string;
-  buildNumber: number;
-  buildString: string;
-  channel: string;
-  distName: string;
   name: string;
-  platform: string; // might do more focused types here
+  platform: string;
   version: string;
 }
 
-// Interface for search results from `conda search`
+// Interface for a package in `mamba search --json` results
 interface SearchItem {
-  arch: null;
-  build: string;
-  build_number: number;
-  channel: string;
-  constrains: string[];
-  depends: string[];
-  fn: string;
-  license: string;
-  license_family?: string;
-  md5: string;
   name: string;
-  noarch?: string;
-  package_type?: string;
-  platform: null;
-  sha256: string;
-  size: number;
   subdir: string;
-  timestamp?: number;
-  url: string;
   version: string;
 }
-// using conda for all the generators as mamba just proxies over them
+
 const getMambaEnvs: Fig.Generator = {
-  // For some reason the json version of this command
-  // does not give out the names, so here we are
-  script: ["conda", "env", "list"],
+  // `env list --json` only gives paths, the table also has names
+  script: ["mamba", "env", "list"],
   scriptTimeout: 10000,
   cache: {
     strategy: "stale-while-revalidate",
@@ -45,9 +27,10 @@ const getMambaEnvs: Fig.Generator = {
   postProcess: function (out) {
     const lines = out.split("\n");
     const availableEnvs: Fig.Suggestion[] = [];
-    // Skip first 2 lines as they are just headers for the output
+    // Skip first 2 lines as they are the table header and its rule
     for (let i = 2; i < lines.length; i++) {
       const parts = lines[i].split(" ").filter((p) => p != "");
+      if (parts.length < 2) continue;
       const isActive = parts[1] == "*";
       availableEnvs.push({
         name: parts[0],
@@ -61,396 +44,734 @@ const getMambaEnvs: Fig.Generator = {
 };
 
 const getInstalledPackages: Fig.Generator = {
-  script: ["conda", "list", "--json"],
+  script: ["mamba", "list", "--json"],
   scriptTimeout: 10000,
   cache: {
     strategy: "stale-while-revalidate",
   },
   postProcess: function (out) {
-    let installedPackages: Array<Fig.Suggestion> = [];
     try {
-      const parsed: Array<Package> = JSON.parse(out);
-      installedPackages = parsed.map((conda_package) => {
-        return <Fig.Suggestion>{
-          name: conda_package.name,
-          description: `${conda_package.version} - ${conda_package.platform}`,
-          icon: "fig://icon?type=package",
-        };
-      });
-      return installedPackages;
+      const parsed: Package[] = JSON.parse(out);
+      return parsed.map((pkg) => ({
+        name: pkg.name,
+        description: `${pkg.version} - ${pkg.platform}`,
+        icon: "fig://icon?type=package",
+      }));
     } catch (e) {
-      return installedPackages;
+      return [];
     }
   },
 };
-// This is a generator that searches for a given query via conda search
-const condaSearchGenerator: Fig.Generator = {
+
+// Searches the channels for package names starting with the typed token
+const mambaSearchGenerator: Fig.Generator = {
   script: (context) => {
     const searchTerm = context[context.length - 1];
-    return ["conda", "search", searchTerm, "--json"];
+    return ["mamba", "search", `${searchTerm}*`, "--json"];
   },
   scriptTimeout: 10000,
   postProcess(out) {
-    let searchResults: Array<Fig.Suggestion> = [];
     try {
-      const parsed = JSON.parse(out);
-      // just get the names of the packages
-      searchResults = Object.entries(parsed).map(
-        ([key, value]: [string, SearchItem[]]) => {
-          return <Fig.Suggestion>{
-            name: key,
-            icon: "fig://icon?type=package",
-            description: `${value[value.length - 1].version} - ${
-              value[value.length - 1].subdir
-            }`,
-          };
-        }
-      );
-      return searchResults;
+      const pkgs: SearchItem[] = JSON.parse(out).result.pkgs;
+      // One suggestion per name; the result lists every build
+      const byName = new Map(pkgs.map((pkg) => [pkg.name, pkg]));
+      return [...byName.values()].map((pkg) => ({
+        name: pkg.name,
+        icon: "fig://icon?type=package",
+        description: `${pkg.version} - ${pkg.subdir}`,
+      }));
     } catch (e) {
-      return searchResults;
+      return [];
     }
   },
 };
 
-const name_options: Fig.Option[] = [
-  {
-    name: ["-n", "--name"],
-    description: "Name of environment",
-    args: {
-      name: "environment",
-    },
-    insertValue: "-n '{cursor}'",
-  },
-  {
-    name: ["-p", "--prefix"],
-    description: "Full path to environment location (i.e. prefix)",
-    args: {
-      name: "path",
-      template: "filepaths",
-    },
-  },
+// CLI11 `--x,!--no-x` pairs: a flag and its negation
+const toggle = (
+  on: string | string[],
+  off: string | string[],
+  description: string
+): Fig.Option[] => [
+  { name: on, description },
+  { name: off, description: `Negate ${typeof on === "string" ? on : on[0]}` },
 ];
 
-const update_options: Fig.Option[] = [
+const shells = [
+  "bash",
+  "posix",
+  "powershell",
+  "cmd.exe",
+  "xonsh",
+  "zsh",
+  "fish",
+  "tcsh",
+  "dash",
+  "nu",
+];
+
+const shellOption: Fig.Option = {
+  name: ["-s", "--shell"],
+  description: "A shell type",
+  args: { name: "shell", suggestions: shells },
+};
+
+const generalOptions: Fig.Option[] = [
   {
-    name: "--file",
-    description:
-      "Read package versions from the given file. Repeated file specifications can be passed (e.g. --file=file1 --file=file2)",
+    name: "--rc-file",
+    description: "Paths to the configuration files to use",
+    args: { name: "file", template: "filepaths", isVariadic: true },
+  },
+  { name: "--no-rc", description: "Disable the use of configuration files" },
+  {
+    name: "--no-env",
+    description: "Disable the use of environment variables",
+  },
+  {
+    name: ["-v", "--verbose"],
+    description: "Set verbosity (higher verbosity with multiple -v, e.g. -vvv)",
+    isRepeatable: true,
+  },
+  {
+    name: "--log-level",
+    description: "Set the log level",
     args: {
-      name: "file",
-      template: "filepaths",
+      name: "level",
+      suggestions: [
+        "critical",
+        "error",
+        "warning",
+        "info",
+        "debug",
+        "trace",
+        "off",
+      ],
     },
   },
-  ...name_options,
   {
-    name: ["-c", "--channel"],
+    name: ["-q", "--quiet"],
     description:
-      "They are given (including local directories using the 'file://' syntax or simply a path like '/home/conda/mychan' or '../mychan'). Then, the defaults or channels from .condarc are searched (unless --override-channels is given). You can use 'defaults' to get the default packages for conda. You can also use any name and the .condarc channel_alias value will be prepended. The default channel_alias is http://conda.anaconda.org/",
-    args: { name: "channel" },
+      "Set quiet mode (print less output). Implicitly bypasses prompts as if `--yes` was used",
   },
   {
-    name: "--use-local",
-    description: "Use locally built packages. Identical to '-c local'",
-  },
-  {
-    name: "--override-channels",
-    description:
-      "Do not search default or .condarc channels. Requires --channel",
-  },
-  {
-    name: "--repodata-fn",
-    description:
-      "Specify name of repodata on remote server. Conda will try whatever you specify, but will ultimately fall back to repodata.json if your specs are not satisfiable with what you specify here. This is used to employ repodata that is reduced in time scope. You may pass this flag more than once. Leftmost entries are tried first, and the fallback to repodata.json is added for you automatically",
-    args: {
-      name: "repodata",
-    },
-  },
-  {
-    name: "--strict-channel-priority",
-    description:
-      "Packages in lower priority channels are not considered if a package with the same name appears in a higher priority channel",
-  },
-  {
-    name: "--no-channel-priority",
-    description:
-      "Package version takes precedence over channel priority. Overrides the value given by conda config --show channel_priority",
-  },
-  {
-    name: "--no-deps",
-    description:
-      "Do not install, update, remove, or change dependencies. This WILL lead to broken environments and inconsistent behavior. Use at your own risk",
-  },
-  { name: "--only-deps", description: "Only install dependencies" },
-  { name: "--no-pin", description: "Ignore pinned file" },
-  {
-    name: "--force-reinstall",
-    description:
-      "Ensure that any user-requested package for the current operation is uninstalled and reinstalled, even if that package already exists in the environment",
-  },
-  {
-    name: ["--freeze-installed", "--no-update-deps"],
-    description: "Do not update or change already-installed dependencies",
-  },
-  { name: "--update-deps", description: "Update dependencies" },
-  {
-    name: ["-S", "--satisfied-skip-solve"],
-    description:
-      "Exit early and do not run the solver if the requested specs are satisfied. Also skips aggressive updates as configured by 'aggressive_update_packages'. Similar to the default behavior of 'pip install'",
-  },
-  {
-    name: ["--update-all", "--all"],
-    description: "Update all installed packages in the environment",
-  },
-  {
-    name: "--update-specs",
-    description: "Update based on provided specifications",
-  },
-  {
-    name: "--copy",
-    description:
-      "Install all packages using copies instead of hard- or soft-linking",
-  },
-  {
-    name: "--clobber",
-    description:
-      "Allow clobbering of overlapping file paths within packages, and suppress related warnings",
-  },
-  {
-    name: ["-C", "--use-index-cache"],
-    description: "Use cache of channel index files, even if it has expired",
-  },
-  {
-    name: ["-k", "--insecure"],
-    description:
-      "Allow conda to perform insecure SSL connections and transfers. Equivalent to setting 'ssl_verify' to 'false'",
-  },
-  {
-    name: "--offline",
-    description: "Offline mode. Don't connect to the Internet",
-  },
-  {
-    name: ["-d", "--dry-run"],
-    description: "Only display what would have been done",
+    name: ["-y", "--yes"],
+    description: "Automatically answer yes on prompted questions",
   },
   {
     name: "--json",
     description:
-      "Report all output as json. Suitable for using conda programmatically",
+      "Report all output as json. Implicitly bypasses prompts as if `--yes` was used",
   },
-  {
-    name: ["-q", "--quiet"],
-    description: "Do not display progress bar",
-  },
-  {
-    name: ["-v", "--verbose"],
-    description:
-      "Can be used multiple times. Once for INFO, twice for DEBUG, three times for TRACE",
-    isRepeatable: true,
-  },
-  { name: ["-y", "--yes"], description: "Do not ask for confirmation" },
+  { name: "--offline", description: "Force use cached repodata" },
+  { name: "--dry-run", description: "Only display what would have been done" },
   {
     name: "--download-only",
     description:
-      "Solve an environment and ensure package caches are populated, but exit prior to unlinking and linking packages into the prefix",
+      "Only download and extract packages, do not link them into environment",
   },
   {
-    name: "--show-channel-urls",
-    description:
-      "Show channel urls. Overrides the value given by conda config --show show_channel_urls",
+    name: "--use-uv",
+    description: "Use uv for installing pip dependencies",
+  },
+  { name: "--debug", description: "Debug mode", hidden: true },
+  { name: "--print-context-only", description: "Debug context", hidden: true },
+  { name: "--print-config-only", description: "Debug config", hidden: true },
+];
+
+const prefixOptions: Fig.Option[] = [
+  {
+    name: ["-r", "--root-prefix"],
+    description: "Path to the root prefix",
+    args: { name: "path", template: "folders" },
+  },
+  {
+    name: ["-p", "--prefix"],
+    description: "Path to the target prefix",
+    args: { name: "path", template: "folders" },
+  },
+  {
+    name: "--relocate-prefix",
+    description: "Path to the relocation prefix",
+    args: { name: "path", template: "folders" },
+  },
+  {
+    name: ["-n", "--name"],
+    description: "Name of the target prefix",
+    args: { name: "name", generators: getMambaEnvs },
   },
 ];
 
-const remove_options: Fig.Option[] = [
+const commonOptions = [...generalOptions, ...prefixOptions];
+
+const networkOptions: Fig.Option[] = [
   {
-    name: "--dev",
-    description:
-      "Use sys.executable -m conda in wrapper scripts instead of CONDA_EXE. This is mainly for use during tests where we test new conda source against old Python versions",
+    name: "--ssl-verify",
+    description: "Verify SSL certificates for HTTPS requests",
+    args: { name: "'<false>' or path" },
   },
-  ...name_options,
+  { name: "--ssl-no-revoke", description: "SSL certificate revocation checks" },
+  {
+    name: "--cacert-path",
+    description: "Path (file or directory) SSL certificate(s)",
+    args: { name: "path", template: ["filepaths", "folders"] },
+  },
+  {
+    name: "--repodata-ttl",
+    description: "Repodata time-to-live",
+    args: { name: "seconds" },
+  },
+  {
+    name: "--retry-clean-cache",
+    description: "If solve fails, try to fetch updated repodata",
+  },
+];
+
+const channelOptions: Fig.Option[] = [
   {
     name: ["-c", "--channel"],
-    description:
-      "They are given (including local directories using the 'file://' syntax or simply a path like '/home/conda/mychan' or '../mychan'). Then, the defaults or channels from .condarc are searched (unless --override-channels is given). You can use 'defaults' to get the default packages for conda. You can also use any name and the .condarc channel_alias value will be prepended. The default channel_alias is http://conda.anaconda.org/",
-    args: {
-      name: "channel",
-    },
-  },
-  {
-    name: "--use-local",
-    description: "Use locally built packages. Identical to '-c local'",
-  },
-  {
-    name: "--override-channels",
-    description:
-      "Do not search default or .condarc channels. Requires --channel",
-  },
-  {
-    name: "--repodata-fn",
-    description:
-      "Specify name of repodata on remote server. Conda will try whatever you specify, but will ultimately fall back to repodata.json if your specs are not satisfiable with what you specify here. This is used to employ repodata that is reduced in time scope. You may pass this flag more than once. Leftmost entries are tried first, and the fallback to repodata.json is added for you automatically",
-    args: {
-      name: "repodata",
-    },
-  },
-  {
-    name: "--all",
-    description: "Remove all packages, i.e., the entire environment",
-  },
-  {
-    name: "--features",
-    description: "Remove features (instead of packages)",
-  },
-  {
-    name: ["--force-remove", "--force"],
-    description:
-      "Forces removal of a package without removing packages that depend on it. Using this option will usually leave your environment in a broken and inconsistent state",
-  },
-  { name: "--no-pin", description: "Ignore pinned file" },
-  {
-    name: ["-C", "--use-index-cache"],
-    description: "Use cache of channel index files, even if it has expired",
-  },
-  {
-    name: ["-k", "--insecure"],
-    description:
-      "Allow conda to perform insecure SSL connections and transfers. Equivalent to setting 'ssl_verify' to 'false'",
-  },
-  {
-    name: "--offline",
-    description: "Offline mode. Don't connect to the Internet",
-  },
-  {
-    name: ["-d", "--dry-run"],
-    description: "Only display what would have been done",
-  },
-  {
-    name: "--json",
-    description:
-      "Report all output as json. Suitable for using conda programmatically",
-  },
-  {
-    name: ["-q", "--quiet"],
-    description: "Do not display progress bar",
-  },
-  {
-    name: ["-v", "--verbose"],
-    description:
-      "Can be used multiple times. Once for INFO, twice for DEBUG, three times for TRACE",
+    description: "Define the list of channels",
+    args: { name: "channel" },
     isRepeatable: true,
   },
-  { name: ["-y", "--yes"], description: "Do not ask for confirmation" },
+  { name: "--override-channels", description: "Override channels" },
+  {
+    name: "--channel-priority",
+    description: "Define the channel priority",
+    args: { name: "priority", suggestions: ["disabled", "flexible", "strict"] },
+  },
+  {
+    name: "--channel-alias",
+    description: "The prepended url location to associate with channel names",
+    args: { name: "url" },
+  },
+  {
+    name: "--strict-channel-priority",
+    description: "Enable strict channel priority",
+    exclusiveOn: ["--no-channel-priority"],
+  },
+  {
+    name: "--no-channel-priority",
+    description: "Disable channel priority",
+    exclusiveOn: ["--strict-channel-priority"],
+  },
 ];
 
-const repoquery_options: Fig.Option[] = [
+const linkOptions = toggle(
+  "--skip-run-link-scripts",
+  "--run-link-scripts",
+  "Skip pre/post-un/link scripts"
+);
+
+const platformOption: Fig.Option = {
+  name: "--platform",
+  description: "The platform description",
+  args: { name: "platform" },
+};
+
+const fileOption: Fig.Option = {
+  name: ["-f", "--file"],
+  description:
+    "File providing package specifications (yaml, explicit or plain, or json)",
+  args: { name: "file", template: "filepaths" },
+  isRepeatable: true,
+};
+
+const installOptions: Fig.Option[] = [
+  ...commonOptions,
+  ...networkOptions,
+  ...channelOptions,
+  ...linkOptions,
+  fileOption,
+  ...toggle("--no-pin", "--pin", "Ignore pinned packages"),
+  ...toggle("--no-py-pin", "--py-pin", "Do not automatically pin Python"),
+  ...toggle("--pyc", "--no-pyc", "Compile PYC files"),
+  ...toggle(
+    "--allow-uninstall",
+    "--no-allow-uninstall",
+    "Allow uninstall when installing or updating packages (default)"
+  ),
+  ...toggle(
+    "--allow-downgrade",
+    "--no-allow-downgrade",
+    "Allow downgrade when installing packages"
+  ),
   {
-    name: ["-c", "--channel"],
+    name: "--exclude-newer",
     description:
-      "They are given (including local directories using the 'file://' syntax or simply a path like '/home/conda/mychan' or '../mychan'). Then, the defaults or channels from .condarc are searched (unless --override-channels is given). You can use 'defaults' to get the default packages for conda. You can also use any name and the .condarc channel_alias value will be prepended. The default channel_alias is http://conda.anaconda.org/",
-    args: {
-      name: "channel",
-    },
+      "Exclude packages published more recently than the given duration or date",
+    args: { name: "duration or date" },
   },
   {
-    name: "--use-local",
-    description: "Use locally built packages. Identical to '-c local'",
+    name: "--exclude-newer-package",
+    description: "Per-package overrides for the exclude_newer policy",
+    args: { name: "overrides" },
   },
+  ...toggle(
+    "--allow-softlinks",
+    "--no-allow-softlinks",
+    "Allow to use soft-links when hard-links are not possible"
+  ),
+  ...toggle(
+    "--always-softlink",
+    "--no-always-softlink",
+    "Use soft-link instead of hard-link"
+  ),
+  ...toggle(
+    ["--always-copy", "--copy"],
+    "--no-always-copy",
+    "Use copy instead of hard-link"
+  ),
   {
-    name: "--override-channels",
+    name: "--lock-timeout",
+    description: "Lockfile timeout",
+    args: { name: "seconds" },
+  },
+  ...toggle(
+    "--shortcuts",
+    "--no-shortcuts",
+    "Install start-menu shortcuts on Windows"
+  ),
+  {
+    name: "--safety-checks",
+    description: "Safety checks policy",
+    args: { name: "policy", suggestions: ["enabled", "warn", "disabled"] },
+  },
+  ...toggle(
+    "--extra-safety-checks",
+    "--no-extra-safety-checks",
+    "Run extra verifications on packages"
+  ),
+  ...toggle(
+    "--mamba-repodata-parsing",
+    "--no-mamba-repodata-parsing",
+    "Parse repodata.json with simdjson instead of libsolv (default)"
+  ),
+  platformOption,
+  {
+    name: "--no-deps",
     description:
-      "Do not search default or .condarc channels. Requires --channel",
+      "Do not install dependencies. This WILL lead to broken environments and inconsistent behavior. Use at your own risk",
+    isDangerous: true,
   },
+  { name: "--only-deps", description: "Only install dependencies" },
   {
-    name: "--repodata-fn",
-    description:
-      "Specify name of repodata on remote server. Conda will try whatever you specify, but will ultimately fall back to repodata.json if your specs are not satisfiable with what you specify here. This is used to employ repodata that is reduced in time scope. You may pass this flag more than once. Leftmost entries are tried first, and the fallback to repodata.json is added for you automatically",
-    args: {
-      name: "repodata",
-    },
+    name: "--category",
+    description: "Categories of package to install from environment lockfile",
+    args: { name: "category", isVariadic: true },
   },
-  {
-    name: ["-C", "--use-index-cache"],
-    description: "Use cache of channel index files, even if it has expired",
-  },
-  {
-    name: ["-k", "--insecure"],
-    description:
-      "Allow conda to perform insecure SSL connections and transfers. Equivalent to setting 'ssl_verify' to 'false'",
-  },
-  {
-    name: "--offline",
-    description: "Offline mode. Don't connect to the Internet",
-  },
-  {
-    name: ["-C", "--use-index-cache"],
-    description: "Use cache of channel index files, even if it has expired",
-  },
-  {
-    name: ["-k", "--insecure"],
-    description:
-      "Allow conda to perform 'insecure SSL' connections and transfers. Equivalent to setting 'ssl_verify' to 'false'",
-  },
-  {
-    name: "--offline",
-    description: "Offline mode. Don't connect to the Internet",
-  },
-  {
-    name: "--json",
-    description:
-      "Report all output as json. Suitable for using conda programmatically",
-  },
-  {
-    name: ["-v", "--verbose"],
-    description:
-      "Can be used multiple times. Once for INFO, twice for DEBUG, three times for TRACE",
-    isRepeatable: 3,
-  },
-  { name: ["-q", "--quiet"], description: "Do not display progress bar" },
 ];
+
+const pruneDepsOptions = toggle(
+  "--prune-deps",
+  "--no-prune-deps",
+  "Prune dependencies (default)"
+);
+
+const searchSpecs: Fig.Arg = {
+  name: "specs",
+  description: "Specs to search",
+  isVariadic: true,
+  debounce: true,
+  generators: mambaSearchGenerator,
+};
+
+const repoqueryOptions: Fig.Option[] = [
+  ...commonOptions,
+  ...networkOptions,
+  ...channelOptions,
+  { name: ["-t", "--tree"], description: "Show result as a tree" },
+  {
+    name: "--recursive",
+    description:
+      "Show dependencies recursively, i.e. transitive dependencies (only for `depends`)",
+  },
+  { name: "--pretty", description: "Pretty print result (only for search)" },
+  platformOption,
+];
+
+const searchCommand = (name: string, description: string): Fig.Subcommand => ({
+  name,
+  description,
+  args: searchSpecs,
+  options: [
+    ...repoqueryOptions,
+    {
+      name: "--local",
+      description: "Use installed prefix instead of remote repositories",
+    },
+  ],
+});
+
+const remoteQueryCommand = (
+  name: string,
+  description: string
+): Fig.Subcommand => ({
+  name,
+  description,
+  args: { name: "specs", isVariadic: true, generators: getInstalledPackages },
+  options: [
+    ...repoqueryOptions,
+    { name: "--remote", description: "Use remote repositories" },
+  ],
+});
+
+// Shell-local prefix options: `-p` and `-n` exclude the positional env
+const shellPrefixOptions: Fig.Option[] = [
+  {
+    name: ["-p", "--prefix"],
+    description: "Path to the target prefix",
+    args: { name: "path", template: "folders" },
+    exclusiveOn: ["-n", "--name"],
+  },
+  {
+    name: ["-n", "--name"],
+    description: "Name of the target prefix",
+    args: { name: "name", generators: getMambaEnvs },
+    exclusiveOn: ["-p", "--prefix"],
+  },
+];
+
+const prefixOrName: Fig.Arg = {
+  name: "prefix_or_name",
+  description: "The prefix to activate, either by name or by path",
+  isOptional: true,
+  generators: getMambaEnvs,
+};
+
+const rootPrefixCommand = (
+  name: string,
+  description: string
+): Fig.Subcommand => ({
+  name,
+  description,
+  args: {
+    name: "root_prefix",
+    description: "Path to the root prefix",
+    isOptional: true,
+    template: "folders",
+  },
+  options: [
+    ...generalOptions,
+    shellOption,
+    {
+      name: ["-r", "--root-prefix"],
+      description: "Path to the root prefix",
+      args: { name: "path", template: "folders" },
+    },
+  ],
+});
+
+const configPathOptions: Fig.Option[] = [
+  {
+    name: "--system",
+    description: "Set configuration on system's rc file",
+    exclusiveOn: ["--env", "--file"],
+  },
+  {
+    name: "--env",
+    description: "Set configuration on env's rc file",
+    exclusiveOn: ["--system", "--file"],
+  },
+  {
+    name: "--file",
+    description: "Set configuration on specified file",
+    args: { name: "file", template: "filepaths" },
+    exclusiveOn: ["--system", "--env"],
+  },
+];
+
+const configDescribeOptions: Fig.Option[] = [
+  {
+    name: ["-l", "--long-descriptions"],
+    description: "Display configs long descriptions",
+  },
+  { name: ["-g", "--groups"], description: "Display configs groups" },
+];
+
+const configKeys: Fig.Arg = {
+  name: "configs",
+  description: "Configuration keys",
+  isOptional: true,
+  isVariadic: true,
+};
+
+const compressionOptions: Fig.Option[] = [
+  {
+    name: ["-c", "--compression-level"],
+    description:
+      "Compression level from 0-9 (tar.bz2, default is 9), and 1-22 (conda, default is 15)",
+    args: { name: "level" },
+  },
+  {
+    name: "--compression-threads",
+    description:
+      "Compression threads (only relevant for .conda packages, default is 1)",
+    args: { name: "threads" },
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "mamba",
   description:
     "Mamba is a reimplementation of the conda package manager in C++",
   subcommands: [
     {
-      name: "activate",
-      description: "Activate an environment",
-      args: {
-        name: "environment",
-        generators: getMambaEnvs,
-      },
-      options: [
+      name: "shell",
+      description:
+        "Generate shell init scripts, or launch a shell in an environment",
+      args: prefixOrName,
+      options: [...generalOptions, ...shellPrefixOptions],
+      subcommands: [
+        rootPrefixCommand("init", "Add initialization in script to rc files"),
+        rootPrefixCommand("deinit", "Remove activation script from rc files"),
         {
-          name: "--stack",
-          description:
-            "Stack the environment being activated on top of the previous active environment",
-          exclusiveOn: ["--no-stack"],
+          name: "reinit",
+          description: "Restore activation script from rc files",
+          options: generalOptions,
+        },
+        rootPrefixCommand("hook", "Mamba hook scripts"),
+        {
+          name: "activate",
+          description: "Output activation code for the given shell",
+          args: prefixOrName,
+          options: [
+            ...generalOptions,
+            shellOption,
+            ...shellPrefixOptions,
+            {
+              name: "--stack",
+              description: "Stack the environment being activated",
+            },
+          ],
         },
         {
-          name: "--no-stack",
-          description:
-            "Do not stack the environment. Overrides 'auto_stack' setting",
-          exclusiveOn: ["--stack"],
+          name: "reactivate",
+          description: "Output reactivation code for the given shell",
+          options: [...generalOptions, shellOption],
+        },
+        {
+          name: "deactivate",
+          description: "Output deactivation code for the given shell",
+          options: [...generalOptions, shellOption],
+        },
+        {
+          name: "enable_long_path_support",
+          description: "Enable long path support on Windows",
+          options: generalOptions,
         },
       ],
     },
     {
-      name: "deactivate",
-      description: "Deactivate an environment",
+      name: "create",
+      description: "Create new environment",
+      args: {
+        name: "specs",
+        description: "Specs to install into the environment",
+        isOptional: true,
+        isVariadic: true,
+        debounce: true,
+        generators: mambaSearchGenerator,
+      },
+      options: [
+        ...installOptions,
+        {
+          name: "--clone",
+          description: "Create new environment as clone of an existing one",
+          args: { name: "env", generators: getMambaEnvs },
+        },
+      ],
+    },
+    {
+      name: "install",
+      description: "Install packages in active environment",
+      args: {
+        name: "specs",
+        description: "Specs to install into the environment",
+        isVariadic: true,
+        debounce: true,
+        generators: mambaSearchGenerator,
+      },
+      options: [
+        ...installOptions,
+        {
+          name: "--freeze-installed",
+          description: "Freeze already installed dependencies",
+        },
+        {
+          name: "--force-reinstall",
+          description: "Force reinstall of package",
+        },
+        {
+          name: "--revision",
+          description: "Revert to the specified revision",
+          args: { name: "revision" },
+        },
+      ],
+    },
+    {
+      name: "update",
+      description: "Update packages in active environment",
+      args: {
+        name: "specs",
+        description: "Specs to update in the environment",
+        isVariadic: true,
+        suggestions: [
+          { name: "mamba", description: "Update mamba", icon: "⭐️" },
+        ],
+        generators: getInstalledPackages,
+      },
+      options: [
+        ...installOptions,
+        ...pruneDepsOptions,
+        {
+          name: ["-a", "--all"],
+          description: "Update all packages in the environment",
+        },
+      ],
+    },
+    {
+      name: "repoquery",
+      description:
+        "Find and analyze packages in active environment or channels",
+      subcommands: [
+        searchCommand("search", "Search for packages matching a given query"),
+        remoteQueryCommand(
+          "whoneeds",
+          "List packages that needs the given query as a dependency"
+        ),
+        remoteQueryCommand("depends", "List dependencies of a given query"),
+      ],
+    },
+    {
+      name: ["remove", "uninstall"],
+      description: "Remove packages from active environment",
+      args: {
+        name: "specs",
+        description: "Specs to remove from the environment",
+        isVariadic: true,
+        generators: getInstalledPackages,
+      },
+      options: [
+        ...commonOptions,
+        ...linkOptions,
+        {
+          name: ["-a", "--all"],
+          description: "Remove all packages in the environment",
+        },
+        {
+          name: ["-f", "--force"],
+          description:
+            "Force removal of package (note: consistency of environment is not guaranteed!)",
+          isDangerous: true,
+        },
+        ...pruneDepsOptions,
+      ],
+    },
+    {
+      name: "list",
+      description: "List packages in active environment",
+      args: {
+        name: "regex",
+        description: "List only packages matching a regular expression",
+        isOptional: true,
+      },
+      options: [
+        ...commonOptions,
+        {
+          name: ["-f", "--full-name"],
+          description: "Only search for full names, i.e., ^<regex>$",
+        },
+        {
+          name: "--no-pip",
+          description: "Do not include pip-only installed packages",
+        },
+        {
+          name: "--reverse",
+          description: "List installed packages in reverse order",
+        },
+        {
+          name: "--explicit",
+          description:
+            "List explicitly all installed packages with URL. Ignored if --revisions is also provided",
+        },
+        { name: "--md5", description: "Add MD5 hashsum when using --explicit" },
+        {
+          name: "--sha256",
+          description: "Add SHA256 hashsum when using --explicit",
+        },
+        {
+          name: ["-c", "--canonical"],
+          description:
+            "Output canonical names of packages only. Ignored if --revisions or --explicit is also provided",
+        },
+        {
+          name: ["-e", "--export"],
+          description:
+            "Output explicit, machine-readable requirement strings instead of human-readable lists of packages. Ignored if --revisions, --explicit or --canonical is also provided",
+        },
+        { name: "--revisions", description: "List the revision history" },
+      ],
+    },
+    {
+      name: "package",
+      description: "Extract a package or bundle files into an archive",
+      options: generalOptions,
+      subcommands: [
+        {
+          name: "extract",
+          description: "Extract a package archive",
+          args: [
+            {
+              name: "archive",
+              description: "Archive to extract",
+              template: "filepaths",
+            },
+            {
+              name: "dest",
+              description: "Destination folder",
+              template: "folders",
+            },
+          ],
+          options: generalOptions,
+        },
+        {
+          name: "compress",
+          description: "Compress a folder into a package",
+          args: [
+            {
+              name: "folder",
+              description: "Folder to compress",
+              template: "folders",
+            },
+            {
+              name: "dest",
+              description: "Destination (e.g. myfile-3.1-0.tar.bz2 or .conda)",
+            },
+          ],
+          options: [...generalOptions, ...compressionOptions],
+        },
+        {
+          name: "transmute",
+          description: "Convert a package between .tar.bz2 and .conda",
+          args: {
+            name: "infile",
+            description: "Package to convert",
+            template: "filepaths",
+          },
+          options: [...generalOptions, ...compressionOptions],
+        },
+      ],
     },
     {
       name: "clean",
-      description: "Remove unused packages and caches",
+      description: "Clean package cache",
       options: [
+        ...generalOptions,
         {
           name: ["-a", "--all"],
           description:
             "Remove index cache, lock files, unused cache packages, and tarballs",
         },
-        {
-          name: ["-i", "--index-cache"],
-          description: "Remove index cache",
-        },
+        { name: ["-i", "--index-cache"], description: "Remove index cache" },
         {
           name: ["-p", "--packages"],
           description: "Remove unused packages from writable package caches",
@@ -460,760 +781,375 @@ const completionSpec: Fig.Spec = {
           description: "Remove cached package tarballs",
         },
         {
+          name: ["-l", "--locks"],
+          description: "Remove lock files from caches",
+        },
+        {
+          name: "--trash",
+          description: "Remove *.mamba_trash files from all environments",
+        },
+        {
           name: ["-f", "--force-pkgs-dirs"],
-          description: "Remove all writable package caches",
-        },
-        {
-          name: ["-l", "--logfiles"],
-          description: "Remove log files",
-        },
-        {
-          name: "--locks",
-          description: "Remove lock files",
-        },
-        {
-          name: ["-c", "--tempfiles"],
           description:
-            "Remove temporary files that could not be deleted earlier due to being in-use. Argument is path(s) to prefix(es) where files should be found and removed",
-          args: {
-            name: "file",
-            template: "filepaths",
-            isVariadic: true,
-          },
-        },
-        {
-          name: ["-d", "--dry-run"],
-          description: "Only display what would have been done",
-        },
-        {
-          name: "--json",
-          description:
-            "Report all output as json. Suitable for using conda programmatically",
-        },
-        {
-          name: ["-q", "--quiet"],
-          description: "Do not display progress bar",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Can be used multiple times. Once for INFO, twice for DEBUG, three times for TRACE",
-          isRepeatable: true,
-        },
-        {
-          name: ["-y", "--yes"],
-          description: "Do not ask for confirmation",
-        },
-      ],
-    },
-    {
-      name: "compare",
-      description: "Compare packages between conda environments",
-      args: {
-        name: "file",
-        description:
-          "Path to the environment file that is to be compared against",
-        template: "filepaths",
-      },
-      options: [
-        ...name_options,
-        {
-          name: ["-h", "--help"],
-          description: "Show this help message and exit",
-        },
-        {
-          name: "--json",
-          description:
-            "Report all output as json. Suitable for using conda programmatically",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Use once for info, twice for debug, three times for trace",
-        },
-        {
-          name: ["-q", "--quiet"],
-          description: "Do not display progress bar",
-        },
-      ],
-    },
-    {
-      name: "create",
-      description:
-        "Create a new conda environment from a list of specified packages",
-      args: {
-        name: "package_spec",
-        description: "Packages to install or update in the conda environment",
-        isOptional: true,
-        isVariadic: true,
-      },
-      options: [
-        {
-          name: "--clone",
-          description: "Path to (or name of) existing local environment",
-          args: {
-            name: "env",
-            generators: getMambaEnvs,
-          },
-        },
-        {
-          name: "--file",
-          description:
-            "Read package versions from the given file. Repeated file specifications can be passed (e.g. --file=file1 --file=file2)",
-          args: {
-            name: "file",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--dev",
-          description:
-            "Use sys.executable -m conda in wrapper scripts instead of CONDA_EXE. This is mainly for use during tests where we test new conda source against old Python versions",
-        },
-        ...name_options,
-        {
-          name: ["-c", "--channel"],
-          description:
-            "They are given (including local directories using the 'file://' syntax or simply a path like '/home/conda/mychan' or '../mychan'). Then, the defaults or channels from .condarc are searched (unless --override-channels is given). You can use 'defaults' to get the default packages for conda. You can also use any name and the .condarc channel_alias value will be prepended. The default channel_alias is http://conda.anaconda.org/",
-          args: {
-            name: "channel",
-          },
-        },
-        {
-          name: "--use-local",
-          description: "Use locally built packages. Identical to '-c local'",
-        },
-        {
-          name: "--override-channels",
-          description:
-            "Do not search default or .condarc channels. Requires --channel",
-          dependsOn: ["--channel"],
-        },
-        {
-          name: "--repodata-fn",
-          description:
-            "Specify name of repodata on remote server. Conda will try whatever you specify, but will ultimately fall back to repodata.json if your specs are not satisfiable with what you specify here. This is used to employ repodata that is reduced in time scope. You may pass this flag more than once. Leftmost entries are tried first, and the fallback to repodata.json is added for you automatically",
-          args: {
-            name: "repodata",
-          },
-          isRepeatable: true,
-        },
-        {
-          name: "--strict-channel-priority",
-          description:
-            "Packages in lower priority channels are not considered if a package with the same name appears in a higher priority channel",
-        },
-        {
-          name: "--no-channel-priority",
-          description:
-            "Package version takes precedence over channel priority. Overrides the value given by conda config --show channel_priority",
-        },
-        {
-          name: "--no-deps",
-          description:
-            "Do not install, update, remove, or change dependencies. This WILL lead to broken environments and inconsistent behavior. Use at your own risk",
+            "Remove *all* writable package caches. This option is not included with the --all flags",
           isDangerous: true,
         },
-        { name: "--only-deps", description: "Only install dependencies" },
-        { name: "--no-pin", description: "Ignore pinned file" },
+      ],
+    },
+    {
+      name: "config",
+      description: "Configuration of mamba",
+      options: commonOptions,
+      subcommands: [
         {
-          name: "--no-default-packages",
-          description: "Ignore create_default_packages in the .condarc file",
+          name: "list",
+          description: "List configuration values",
+          args: configKeys,
+          options: [
+            ...commonOptions,
+            ...configDescribeOptions,
+            {
+              name: ["-s", "--sources"],
+              description: "Display all configs sources",
+            },
+            {
+              name: ["-a", "--all"],
+              description: "Display all rc configurable configs",
+            },
+            {
+              name: ["-d", "--descriptions"],
+              description: "Display configs descriptions",
+            },
+          ],
         },
         {
-          name: "--copy",
+          name: "sources",
+          description: "Show configuration sources",
+          options: commonOptions,
+        },
+        {
+          name: "describe",
+          description: "Describe given configuration parameters",
+          args: configKeys,
+          options: configDescribeOptions,
+        },
+        {
+          name: "prepend",
           description:
-            "Install all packages using copies instead of hard- or soft-linking",
+            "Add one configuration value to the beginning of a list key",
+          args: [{ name: "key" }, { name: "value" }],
+          options: configPathOptions,
         },
         {
-          name: ["-C", "--use-index-cache"],
+          name: "append",
+          description: "Add one configuration value to the end of a list key",
+          args: [{ name: "key" }, { name: "value" }],
+          options: configPathOptions,
+        },
+        {
+          name: "remove-key",
+          description: "Remove a configuration key and its values",
+          args: { name: "key" },
+          options: configPathOptions,
+        },
+        {
+          name: "remove",
           description:
-            "Use cache of channel index files, even if it has expired",
+            "Remove a configuration value from a list key. This removes all instances of the value",
+          args: [{ name: "key" }, { name: "value" }],
+          options: configPathOptions,
         },
         {
-          name: ["-k", "--insecure"],
-          description:
-            "Allow conda to perform insecure SSL connections and transfers. Equivalent to setting 'ssl_verify' to 'false'",
+          name: "set",
+          description: "Set a configuration value",
+          args: [{ name: "key" }, { name: "value" }],
+          options: configPathOptions,
         },
         {
-          name: "--offline",
-          description: "Offline mode. Don't connect to the Internet",
-        },
-        {
-          name: ["-d", "--dry-run"],
-          description: "Only display what would have been done",
-        },
-        {
-          name: "--json",
-          description:
-            "Report all output as json. Suitable for using conda programmatically",
-        },
-        { name: ["-q", "--quiet"], description: "Do not display progress bar" },
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Can be used multiple times. Once for INFO, twice for DEBUG, three times for TRACE",
-          isRepeatable: true,
-        },
-        { name: ["-y", "--yes"], description: "Do not ask for confirmation" },
-        {
-          name: "--download-only",
-          description:
-            "Solve an environment and ensure package caches are populated, but exit prior to unlinking and linking packages into the prefix",
-        },
-        {
-          name: "--show-channel-urls",
-          description:
-            "Show channel urls. Overrides the value given by conda config --show show_channel_urls",
+          name: "get",
+          description: "Get a configuration value",
+          args: { name: "key" },
+          options: configPathOptions,
         },
       ],
     },
     {
       name: "info",
-      description: "Display information about current conda install",
+      description: "Information about mamba",
       options: [
-        { name: ["-a", "--all"], description: "Show all information" },
+        ...commonOptions,
+        { name: "--licenses", description: "Print licenses" },
         { name: "--base", description: "Display base environment path" },
-        {
-          name: ["-e", "--envs"],
-          description: "List all known conda environments",
-        },
-        {
-          name: ["-s", "--system"],
-          description: "List environment variables",
-        },
-        {
-          name: "--unsafe-channels",
-          description: "Display list of channels with tokens exposed",
-        },
-        {
-          name: "--json",
-          description:
-            "Report all output as json. Suitable for using conda programmatically",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Use once for info, twice for debug, three times for trace",
-        },
-        {
-          name: ["-q", "--quiet"],
-          description: "Do not display progress bar",
-        },
+        { name: ["-e", "--envs"], description: "List known environments" },
       ],
     },
     {
-      name: "init",
-      description: "Initialize conda for shell interaction. [Experimental]",
-    },
-    {
-      name: "install",
-      description:
-        "Installs a list of packages into a specified conda environment",
-      args: {
-        name: "package spec",
-        description: "Packages to install or update in the conda environment",
-        debounce: true,
-        isVariadic: true,
-        generators: condaSearchGenerator,
-      },
+      name: "constructor",
+      description: "Commands to support using mamba in constructor",
       options: [
         {
-          name: "--revision",
-          description: "Revert to the specified REVISION",
-          args: {
-            name: "revision",
-          },
+          name: ["-p", "--prefix"],
+          description: "Extract the conda pkgs in <prefix>/pkgs",
+          args: { name: "path", template: "folders" },
         },
         {
-          name: "--file",
-          description:
-            "Read package versions from the given file. Repeated file specifications can be passed (e.g. --file=file1 --file=file2)",
-          args: {
-            name: "file",
-            template: "filepaths",
-          },
+          name: "--extract-conda-pkgs",
+          description: "Extract the conda pkgs in <prefix>/pkgs",
         },
         {
-          name: "--dev",
-          description:
-            "Use sys.executable -m conda in wrapper scripts instead of CONDA_EXE. This is mainly for use during tests where we test new conda source against old Python versions",
-        },
-        ...name_options,
-        {
-          name: ["-c", "--channel"],
-          description:
-            "They are given (including local directories using the 'file://' syntax or simply a path like '/home/conda/mychan' or '../mychan'). Then, the defaults or channels from .condarc are searched (unless --override-channels is given). You can use 'defaults' to get the default packages for conda. You can also use any name and the .condarc channel_alias value will be prepended. The default channel_alias is http://conda.anaconda.org/",
-          args: {
-            name: "channel",
-          },
-        },
-        {
-          name: "--use-local",
-          description: "Use locally built packages. Identical to '-c local'",
-        },
-        {
-          name: "--override-channels",
-          description:
-            "Do not search default or .condarc channels. Requires --channel",
-        },
-        {
-          name: "--repodata-fn",
-          description:
-            "Specify name of repodata on remote server. Conda will try whatever you specify, but will ultimately fall back to repodata.json if your specs are not satisfiable with what you specify here. This is used to employ repodata that is reduced in time scope. You may pass this flag more than once. Leftmost entries are tried first, and the fallback to repodata.json is added for you automatically",
-          args: {
-            name: "repodata",
-          },
-        },
-        {
-          name: "--strict-channel-priority",
-          description:
-            "Packages in lower priority channels are not considered if a package with the same name appears in a higher priority channel",
-        },
-        {
-          name: "--no-channel-priority",
-          description:
-            "Package version takes precedence over channel priority. Overrides the value given by conda config --show channel_priority",
-        },
-        {
-          name: "--no-deps",
-          description:
-            "Do not install, update, remove, or change dependencies. This WILL lead to broken environments and inconsistent behavior. Use at your own risk",
-        },
-        { name: "--only-deps", description: "Only install dependencies" },
-        { name: "--no-pin", description: "Ignore pinned file" },
-        {
-          name: "--force-reinstall",
-          description:
-            "Ensure that any user-requested package for the current operation is uninstalled and reinstalled, even if that package already exists in the environment",
-        },
-        {
-          name: ["--freeze-installed", "--no-update-deps"],
-          description: "Do not update or change already-installed dependencies",
-        },
-        { name: "--update-deps", description: "Update dependencies" },
-        {
-          name: ["-S", "--satisfied-skip-solve"],
-          description:
-            "Exit early and do not run the solver if the requested specs are satisfied. Also skips aggressive updates as configured by 'aggressive_update_packages'. Similar to the default behavior of 'pip install'",
-        },
-        {
-          name: ["--update-all", "--all"],
-          description: "Update all installed packages in the environment",
-        },
-        {
-          name: "--update-specs",
-          description: "Update based on provided specifications",
-        },
-        {
-          name: "--copy",
-          description:
-            "Install all packages using copies instead of hard- or soft-linking",
-        },
-        {
-          name: ["-m", "--mkdir"],
-          description: "Create the environment directory if necessary",
-        },
-        {
-          name: "--clobber",
-          description:
-            "Allow clobbering of overlapping file paths within packages, and suppress related warnings",
-        },
-        {
-          name: ["-C", "--use-index-cache"],
-          description:
-            "Use cache of channel index files, even if it has expired",
-        },
-        {
-          name: ["-k", "--insecure"],
-          description:
-            "Allow conda to perform insecure SSL connections and transfers. Equivalent to setting 'ssl_verify' to 'false'",
-        },
-        {
-          name: "--offline",
-          description: "Offline mode. Don't connect to the Internet",
-        },
-        {
-          name: ["-d", "--dry-run"],
-          description: "Only display what would have been done",
-        },
-        {
-          name: "--json",
-          description:
-            "Report all output as json. Suitable for using conda programmatically",
-        },
-        {
-          name: ["-q", "--quiet"],
-          description: "Do not display progress bar",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Can be used multiple times. Once for INFO, twice for DEBUG, three times for TRACE",
-          isRepeatable: true,
-        },
-        { name: ["-y", "--yes"], description: "Do not ask for confirmation" },
-        {
-          name: "--download-only",
-          description:
-            "Solve an environment and ensure package caches are populated, but exit prior to unlinking and linking packages into the prefix",
-        },
-        {
-          name: "--show-channel-urls",
-          description:
-            "Show channel urls. Overrides the value given by conda config --show show_channel_urls",
-        },
-      ],
-    },
-    {
-      name: "list",
-      description: "List linked packages in a conda environment",
-      args: {
-        name: "regex",
-        description: "List only packages matching this regular expression",
-        isOptional: true,
-      },
-      options: [
-        {
-          name: "--show-channel-urls",
-          description:
-            "Show channel urls. Overrides the value given by conda config --show show_channel_urls",
-        },
-        {
-          name: ["-c", "--canonical"],
-          description:
-            "Output canonical names of packages only. Implies --no-pip",
-        },
-        {
-          name: ["-f", "--full-name"],
-          description: "Only search for full names, i.e., ^<regex>$",
-        },
-        {
-          name: "--explicit",
-          description:
-            "List explicitly all installed conda packaged with URL (output may be used by conda create --file)",
-        },
-        {
-          name: "--md5",
-          description: "Add MD5 hashsum when using --explicit",
-        },
-        {
-          name: ["-e", "--export"],
-          description:
-            "Output requirement string only (output may be used by conda create --file)",
-        },
-        {
-          name: ["-r", "--revisions"],
-          description: "List the revision history and exit",
-        },
-        {
-          name: "--no-pip",
-          description: "Do not include pip-only installed packages",
-        },
-        ...name_options,
-        {
-          name: "--json",
-          description:
-            "Report all output as json. Suitable for using conda programmatically",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Use once for info, twice for debug, three times for trace",
-        },
-        {
-          name: ["-q", "--quiet"],
-          description: "Do not display progress bar",
-        },
-      ],
-    },
-    {
-      name: "package",
-      description: "Low-level conda package utility. (EXPERIMENTAL)",
-      options: [
-        {
-          name: ["-w", "--which"],
-          description:
-            "Given some PATH print which conda package the file came from",
-          args: {
-            name: "Path",
-            isVariadic: true,
-          },
-        },
-        {
-          name: ["-r", "--reset"],
-          description: "Remove all untracked files and exit",
-        },
-        {
-          name: ["-u", "--untracked"],
-          description: "Display all untracked files and exit",
-        },
-        {
-          name: "--pkg-name",
-          description: "Package name of the created package",
-          args: {
-            name: "package_name",
-          },
-        },
-        {
-          name: "--pkg-version",
-          description: "Package version of the created package",
-          args: {
-            name: "package_version",
-          },
-        },
-        {
-          name: "--pkg-build",
-          description: "Package build number of the created package",
-          args: {
-            name: "package_build",
-          },
-        },
-        ...name_options,
-      ],
-    },
-    {
-      name: "remove",
-      description:
-        "Remove a list of packages from a specified conda environment",
-      args: {
-        name: "package",
-        isVariadic: true,
-        generators: getInstalledPackages,
-      },
-      options: [...remove_options],
-    },
-    {
-      name: "uninstall",
-      description: "Alias for remove",
-      args: {
-        name: "package",
-        isVariadic: true,
-        generators: getInstalledPackages,
-      },
-      options: [...remove_options],
-    },
-    {
-      name: "run",
-      description: "Run an executable in a conda environment",
-      args: {
-        name: "executable",
-        template: "filepaths",
-      },
-      options: [
-        ...name_options,
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Use once for info, twice for debug, three times for trace",
-        },
-        {
-          name: "--dev",
-          description:
-            "Sets `CONDA_EXE` to `python -m conda`, assuming the CWD contains the root of conda development sources",
-        },
-        {
-          name: "--debug-wrapper-scripts",
-          description:
-            "When this is set, where implemented, the shell wrapper scripts will echo to stderr a lot of debugging information",
-        },
-        {
-          name: "--cwd",
-          description:
-            "Current working directory for command to run in. Defaults to cwd",
-          args: {
-            name: "directory",
-            template: "folders",
-          },
-        },
-        {
-          name: "--no-capture-output",
-          description: "Don't capture stdout/stderr",
-        },
-        {
-          name: "--live-stream",
-          description:
-            "Display the output for the subprocess stdout and stderr on real time",
-        },
-      ],
-    },
-    {
-      name: "search",
-      description:
-        "Search for packages and display associated information. The input is a MatchSpec, a query language for conda packages",
-      args: { name: "query" },
-      options: [
-        {
-          name: "--envs",
-          description:
-            "Search all of the current user's environments. If run as Administrator (on Windows) or UID 0 (on unix), search all known environments on the system",
-        },
-        {
-          name: ["-i", "--info"],
-          description: "Provide detailed information about each package",
-        },
-        {
-          name: ["--subdir", "--platform"],
-          description:
-            "Search the given subdir. Should be formatted like 'osx-64', 'linux-32', 'win-64', and so on. The default is to search the current platform",
-          args: {
-            name: "platform",
-          },
-        },
-        {
-          name: ["-c", "--channel"],
-          description:
-            "They are given (including local directories using the 'file://' syntax or simply a path like '/home/conda/mychan' or '../mychan'). Then, the defaults or channels from .condarc are searched (unless --override-channels is given). You can use 'defaults' to get the default packages for conda. You can also use any name and the .condarc channel_alias value will be prepended. The default channel_alias is http://conda.anaconda.org/",
-          args: {
-            name: "channel",
-          },
-        },
-        {
-          name: "--use-local",
-          description: "Use locally built packages. Identical to '-c local'",
-        },
-        {
-          name: "--override-channels",
-          description:
-            "Do not search default or .condarc channels. Requires --channel",
-          dependsOn: ["--channel"],
-        },
-        {
-          name: "--repodata-fn",
-          description:
-            "Specify name of repodata on remote server. Conda will try whatever you specify, but will ultimately fall back to repodata.json if your specs are not satisfiable with what you specify here. This is used to employ repodata that is reduced in time scope. You may pass this flag more than once. Leftmost entries are tried first, and the fallback to repodata.json is added for you automatically",
-          args: {
-            name: "repodata",
-          },
-        },
-        {
-          name: ["-C", "--use-index-cache"],
-          description:
-            "Use cache of channel index files, even if it has expired",
-        },
-        {
-          name: ["-k", "--insecure"],
-          description:
-            "Allow conda to perform insecure SSL connections and transfers. Equivalent to setting 'ssl_verify' to 'false'",
-        },
-        {
-          name: "--offline",
-          description: "Offline mode. Don't connect to the Internet",
-        },
-        {
-          name: "--json",
-          description:
-            "Report all output as json. Suitable for using conda programmatically",
-        },
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Use once for info, twice for debug, three times for trace",
-        },
-        {
-          name: ["-q", "--quiet"],
-          description: "Do not display progress bar",
-        },
-      ],
-    },
-    {
-      name: "update",
-      description: "Updates conda packages to the latest compatible version",
-      args: {
-        name: "package",
-        isVariadic: true,
-        suggestions: [
-          { name: "mamba", description: "Update mamba", icon: "⭐️" },
-        ],
-        generators: getInstalledPackages,
-      },
-      options: [...update_options],
-    },
-    {
-      name: "upgrade",
-      description: "Alias for update",
-      args: {
-        name: "package",
-        isVariadic: true,
-        suggestions: [
-          { name: "mamba", description: "Update mamba", icon: "⭐️" },
-        ],
-        generators: getInstalledPackages,
-      },
-      options: [...update_options],
-    },
-    {
-      name: "repoquery",
-      description: "Query repositories using mamba",
-      subcommands: [
-        {
-          name: "search",
-          description:
-            "Search for packages and display associated information. The input is a MatchSpec, a query language for conda packages",
-          options: [...repoquery_options],
-          args: {
-            name: "package",
-            suggestions: [
-              {
-                name: "xtensor>=0.18",
-                description:
-                  "Search for xtensor version which is more than 0.18",
-              },
-            ],
-            generators: getInstalledPackages,
-          },
-        },
-        {
-          name: "depends",
-          description: "List dependencies for a package",
-          options: [...repoquery_options],
-          args: {
-            name: "package",
-            suggestions: [
-              {
-                name: "xtensor",
-                description: "List dependencies for xtensor package",
-              },
-            ],
-            generators: getInstalledPackages,
-          },
-        },
-        {
-          name: "whoneeds",
-          description: "List packages that require a given package",
-          options: [...repoquery_options],
-          args: {
-            name: "package",
-            suggestions: [
-              {
-                name: "xtl",
-                description: "List packages that require xtl package",
-              },
-            ],
-          },
+          name: "--extract-tarball",
+          description: "Extract given tarball into prefix",
         },
       ],
     },
     {
       name: "env",
       description: "Manage environments",
+      options: commonOptions,
       subcommands: [
         {
           name: "list",
-          description: "List environments",
-          args: { name: "environment", generators: getMambaEnvs },
+          description: "List known environments",
+          options: commonOptions,
+        },
+        {
+          name: "create",
+          description:
+            "Create new environment (pre-commit.com compatibility alias for 'mamba create')",
+          args: {
+            name: "specs",
+            description: "Specs to install into the environment",
+            isOptional: true,
+            isVariadic: true,
+            debounce: true,
+            generators: mambaSearchGenerator,
+          },
+          options: installOptions,
+        },
+        {
+          name: "export",
+          description: "Export environment",
+          options: [
+            ...commonOptions,
+            { name: ["-e", "--explicit"], description: "Use explicit format" },
+            ...toggle("--no-md5", "--md5", "Disable md5"),
+            ...toggle(
+              ["--no-build", "--no-builds"],
+              "--build",
+              "Disable the build string in spec"
+            ),
+            {
+              name: "--channel-subdir",
+              description: "Enable channel/subdir in spec",
+            },
+            {
+              name: "--from-history",
+              description:
+                "Build environment spec from explicit specs in history",
+            },
+          ],
+        },
+        {
+          name: "remove",
+          description: "Remove an environment",
+          options: [...commonOptions, ...linkOptions],
+        },
+        {
+          name: "update",
+          description: "Update an environment",
+          options: [
+            ...commonOptions,
+            ...linkOptions,
+            platformOption,
+            fileOption,
+            {
+              name: "--prune",
+              description:
+                "Remove installed packages not specified in the command and in environment file",
+            },
+          ],
+        },
+        {
+          name: "config",
+          description: "Configure environment",
+          options: commonOptions,
+          subcommands: [
+            {
+              name: "vars",
+              description: "Manage environment variables",
+              subcommands: [
+                {
+                  name: "list",
+                  description: "List environment variables",
+                  options: commonOptions,
+                },
+                {
+                  name: "set",
+                  description: "Set environment variable",
+                  args: {
+                    name: "vars",
+                    description:
+                      "Environment variables to set (format: KEY=VALUE)",
+                    isVariadic: true,
+                  },
+                  options: commonOptions,
+                },
+                {
+                  name: "unset",
+                  description: "Unset environment variable",
+                  args: {
+                    name: "KEY",
+                    description: "Environment variable names to unset",
+                    isVariadic: true,
+                  },
+                  options: commonOptions,
+                },
+              ],
+            },
+          ],
         },
       ],
     },
-  ],
-  options: [
     {
-      name: ["--help", "-h"],
-      description: "Show help for mamba and exit",
+      name: "activate",
+      description: "Activate an environment",
+      args: {
+        name: "prefix",
+        description: "The prefix to activate",
+        isOptional: true,
+        generators: getMambaEnvs,
+      },
+      options: [
+        {
+          name: "--stack",
+          description:
+            "Activate the specified environment without first deactivating the current one",
+        },
+      ],
     },
     {
-      name: ["--version", "-V"],
-      description: "Show the conda version number and exit",
+      name: "deactivate",
+      description: "Deactivate the active environment",
+    },
+    {
+      name: "run",
+      description: "Run an executable in an environment",
+      args: { name: "command", isCommand: true },
+      options: [
+        ...prefixOptions,
+        {
+          name: ["-a", "--attach"],
+          description:
+            'Attach to stdin, stdout and/or stderr. -a "" for disabling stream redirection',
+          args: { name: "stream", suggestions: ["stdin", "stdout", "stderr"] },
+        },
+        {
+          name: "--cwd",
+          description:
+            "Current working directory for command to run in. Defaults to cwd",
+          args: { name: "dir", template: "folders" },
+        },
+        {
+          name: ["-d", "--detach"],
+          description: "Detach process from terminal",
+        },
+        { name: "--clean-env", description: "Start with a clean environment" },
+        {
+          name: ["-e", "--env"],
+          description: "Add env vars with -e ENVVAR or -e ENVVAR=VALUE",
+          args: { name: "envvar" },
+          isRepeatable: true,
+        },
+        {
+          name: "--label",
+          description:
+            "Specifies the name of the process. If not set, a unique name will be generated derived from the executable name if possible",
+          args: { name: "name" },
+        },
+      ],
+    },
+    {
+      name: "ps",
+      description: "Show, inspect or kill running processes",
+      subcommands: [
+        { name: "list", description: "List running processes" },
+        {
+          name: "stop",
+          description: "Stop a running process",
+          args: {
+            name: "pid_or_name",
+            description: "Process ID or process name (label)",
+          },
+        },
+      ],
+    },
+    {
+      name: "auth",
+      description: "Login or logout of a given host",
+      subcommands: [
+        {
+          name: "login",
+          description: "Store login information for a specific host",
+          args: {
+            name: "host",
+            description:
+              "Host for the account. The scheme (e.g. https://) is ignored but not the port (optional) nor the channel (optional)",
+          },
+          options: [
+            {
+              name: ["-p", "--password"],
+              description: "Password for account",
+              args: { name: "password" },
+            },
+            {
+              name: ["-u", "--username"],
+              description: "User name for the account",
+              args: { name: "username" },
+            },
+            {
+              name: ["-t", "--token"],
+              description: "Token for the account",
+              args: { name: "token" },
+            },
+            {
+              name: ["-b", "--bearer"],
+              description: "Bearer token for the account",
+              args: { name: "bearer" },
+            },
+            {
+              name: "--password-stdin",
+              description: "Read password from stdin",
+            },
+            { name: "--token-stdin", description: "Read token from stdin" },
+            {
+              name: "--bearer-stdin",
+              description: "Read bearer token from stdin",
+            },
+          ],
+        },
+        {
+          name: "logout",
+          description: "Erase login information for a specific host",
+          args: {
+            name: "host",
+            description: "Host for the account",
+            isOptional: true,
+          },
+          options: [{ name: "--all", description: "Log out from all hosts" }],
+        },
+      ],
+    },
+    searchCommand(
+      "search",
+      "Find packages in active environment or channels. This is equivalent to `repoquery search` command"
+    ),
+  ],
+  options: [
+    ...commonOptions,
+    { name: ["-h", "--help"], description: "Show help for mamba and exit" },
+    {
+      name: "--version",
+      description: "Show the mamba version number and exit",
     },
   ],
 };

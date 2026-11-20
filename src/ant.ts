@@ -1,11 +1,20 @@
+// Apache Ant v1.10.18 (latest release on Maven Central and Homebrew, 2026-11-19). Source: apache/ant tag rel/1.10.18
+// read statically (not run): Main.printUsage, Main arg parsing, launch/Launcher.java, src/script/ant and manual/running.html.
 const tasksGenerator: Fig.Generator = {
-  script: ["bash", "-c", "command ant -p | grep -i '^\\s' | tr -d ' '"],
+  // `ant -p` prints " <target>  <description>" lines (description only for main targets)
+  script: ["ant", "-p", "-q"],
   postProcess: (out) =>
-    out.split("\n").map((task) => ({
-      name: task,
-      description: `Execute ${task} task`,
-      type: "arg",
-    })),
+    out
+      .split("\n")
+      .filter((line) => /^ \S/.test(line))
+      .map((line) => {
+        const [name, ...description] = line.trim().split(/\s+/);
+        return {
+          name,
+          description: description.join(" ") || `Execute ${name} target`,
+          type: "arg",
+        };
+      }),
   cache: {
     cacheByDirectory: true,
     strategy: "stale-while-revalidate",
@@ -20,8 +29,8 @@ const completionSpec: Fig.Spec = {
   },
   options: [
     {
-      name: ["--help", "-help", "-h"],
-      description: "Show help for ant",
+      name: ["--help", "--h", "-help", "-h"],
+      description: "Print the launcher script help and the ant help, then exit",
     },
     {
       name: "--noconfig",
@@ -73,9 +82,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "-lib",
       description: "Specifies a path to search for jars and classes",
+      isRepeatable: true,
       args: {
         name: "path",
-        template: "folders",
+        template: ["filepaths", "folders"],
       },
     },
     {
@@ -96,6 +106,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-listener",
       description: "Add an instance of class as a project listener",
+      isRepeatable: true,
       args: {
         name: "classname",
       },
@@ -113,6 +124,11 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "-D",
+      description: "Use value for given property, -D<property>=<value>",
+      isRepeatable: true,
+    },
+    {
       name: ["-keep-going", "-k"],
       description: "Execute all targets that do not depend on failed target(s)",
     },
@@ -120,6 +136,7 @@ const completionSpec: Fig.Spec = {
       name: "-propertyfile",
       description:
         "Load all properties from file with -D properties taking precedence",
+      isRepeatable: true,
       args: {
         name: "name",
         template: "filepaths",
@@ -138,11 +155,14 @@ const completionSpec: Fig.Spec = {
         "Search for buildfile towards the root of the filesystem and use it",
       args: {
         name: "file",
+        description: "Build file name to search for (defaults to build.xml)",
+        isOptional: true,
       },
     },
     {
       name: "-nice",
-      description: "A niceness value for the main thread",
+      description:
+        "A niceness value for the main thread: 1 (lowest) to 10 (highest); 5 is the default",
       args: {
         name: "number",
       },
@@ -158,7 +178,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-autoproxy",
-      description: "Java1.5+: use the OS proxy settings",
+      description: "Java 5+: use the OS proxy settings",
     },
     {
       name: "-main",

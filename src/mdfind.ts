@@ -1,3 +1,7 @@
+// mdfind macOS man page (mdfind(1) dated June 10, 2004; text taken from the Xcode 27.3 beta 2 export, 2026-11-19).
+// Source: mdfind.1 HTML in the keith/xcode-man-pages mirror, read statically (no live run on macOS). -s is cross-checked
+// against a copy of `mdfind` usage output; -reprint is not in the man page and is kept as it was (unverified).
+// The usage output also has -attr (not confirmed from a primary source here, so not added)
 const smartFolderGenerator: Fig.Generator = {
   // `mdfind -s` only accepts smart folders in ~/Library/Saved\ Searches/
 
@@ -45,7 +49,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-live",
       description:
-        "Provide live-updates to the number of files matching the query",
+        "Provide live-updates to the number of files matching the query. The find can be cancelled by typing ctrl-C",
     },
     {
       name: "-count",
@@ -54,7 +58,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-onlyin",
-      description: "Limit the scope of the search to <dir>",
+      description: "Limit the scope of the search to the specified directory",
       args: {
         name: "dir",
         description: "Directory",
@@ -63,7 +67,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-name",
-      description: "Search for matching file names to <filename> only",
+      description: "Search for matching file names only",
       args: {
         name: "filename",
       },
@@ -78,7 +82,7 @@ const completionSpec: Fig.Spec = {
         "Show contents of smart folder ~/Library/Saved Searches/<folder>.savedSearch",
       args: {
         name: "folder",
-        description: "Smart folder in  ~/Library/Saved Searches",
+        description: "Smart folder in ~/Library/Saved Searches",
         generators: smartFolderGenerator,
       },
     },

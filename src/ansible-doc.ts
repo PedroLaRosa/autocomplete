@@ -1,3 +1,5 @@
+// ansible-doc v2.22.0 (ansible-core latest on PyPI, 2026-11-19). Source: `ansible-doc --help` of ansible-core 2.22.0 run from a venv, plus ansible/cli/doc.py (argument parser); generator checked against `ansible-doc --list --json`
+
 const allPluginsGenerator: Fig.Generator = {
   script: ["ansible-doc", "--list", "--json"],
   postProcess: function (output) {
@@ -9,6 +11,17 @@ const allPluginsGenerator: Fig.Generator = {
   },
 };
 
+// -e, -s, -F, -l and --metadata-dump are a mutually exclusive group
+const actionOptions = [
+  ["-e", "--entry-point"],
+  ["-s", "--snippet"],
+  ["-F", "--list_files"],
+  ["-l", "--list"],
+  ["--metadata-dump"],
+];
+const exclusiveWith = (own: string): string[] =>
+  actionOptions.filter((names) => !names.includes(own)).flat();
+
 const completionSpec: Fig.Spec = {
   name: "ansible-doc",
   description: "Displays information on modules installed in Ansible libraries",
@@ -16,47 +29,49 @@ const completionSpec: Fig.Spec = {
     {
       name: "--metadata-dump",
       description:
-        "For internal testing only Dump json metadata for all plugins",
-      args: {
-        isOptional: true,
-      },
+        "For internal use only: dump json metadata for all entries, ignores other options",
+      exclusiveOn: exclusiveWith("--metadata-dump"),
+    },
+    {
+      name: "--no-fail-on-errors",
+      description:
+        "For internal use only: only used for --metadata-dump, do not fail on errors and report the error message in the JSON instead",
+      dependsOn: ["--metadata-dump"],
     },
     {
       name: "--playbook-dir",
       description:
-        "Sets the relative path for many features including roles/ group_vars/ etc",
+        "Substitute playbook directory, sets the relative path for many features including roles/ group_vars/ etc",
       args: {
         name: "BASEDIR",
         description: "Base directory",
-        template: ["filepaths"],
+        template: ["folders"],
       },
     },
     {
       name: "--version",
       description:
-        "Shows version number, config file location, module search path, module location, executable location and exit",
-      args: {
-        isOptional: true,
-      },
+        "Show program's version number, config file location, configured module search path, module location, executable location",
     },
     {
       name: ["--list_files", "-F"],
       description:
-        "Show plugin names and their source files without summaries (implies --list)",
-      args: {
-        isOptional: true,
-      },
+        "Show plugin names and their source files without summaries (implies --list); a supplied argument is used for filtering by namespace or full collection name",
+      exclusiveOn: exclusiveWith("-F"),
     },
     {
       name: ["--module-path", "-M"],
       description: "Prepend colon-separated path(s) to module library",
+      isRepeatable: true,
       args: {
-        isOptional: true,
+        name: "MODULE_PATH",
+        template: ["folders"],
       },
     },
     {
-      name: ["--entry-point", "-E"],
+      name: ["--entry-point", "-e"],
       description: "Select the entry point for role(s)",
+      exclusiveOn: exclusiveWith("-e"),
       args: {
         name: "ENTRY_POINT",
       },
@@ -64,43 +79,31 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--help", "-h"],
       description: "Show help and exit",
-      args: {
-        isOptional: true,
-      },
     },
     {
       name: ["--json", "-j"],
       description: "Change output into json format",
-      args: {
-        isOptional: true,
-      },
     },
     {
       name: ["--list", "-l"],
       description:
-        "List available plugins; a supplied argument will be used for filtering (can be a namespace or full collection name)",
-      args: {
-        name: "NAMESPACE|COLLECTION",
-        isOptional: true,
-        isDangerous: true,
-      },
+        "List available plugins; a supplied argument is used for filtering by namespace or full collection name",
+      exclusiveOn: exclusiveWith("-l"),
     },
     {
       name: ["--roles-path", "-r"],
       description: "The path to the directory containing your roles",
+      isRepeatable: true,
       args: {
-        name: "PATH",
-        template: ["filepaths"],
+        name: "ROLES_PATH",
+        template: ["folders"],
       },
     },
     {
       name: ["--snippet", "-s"],
       description:
         "Show playbook snippet for these plugin types: inventory, lookup, module",
-      args: {
-        name: "PLUGIN_TYPE",
-        suggestions: ["inventory", "lookup", "module"],
-      },
+      exclusiveOn: exclusiveWith("-s"),
     },
     {
       name: ["--type", "-t"],
@@ -121,6 +124,8 @@ const completionSpec: Fig.Spec = {
           "vars",
           "module",
           "strategy",
+          "test",
+          "filter",
           "role",
           "keyword",
         ],
@@ -128,28 +133,15 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--verbose",
+      name: ["--verbose", "-v"],
       description:
-        "Verbose mode (-vvv for more, -vvvv to enable connection debugging)",
-      exclusiveOn: ["-v"],
-      args: {
-        isOptional: true,
-      },
-    },
-    {
-      name: "-v",
-      description:
-        "Verbose mode (-vvv for more, -vvvv to enable connection debugging)",
-      isRepeatable: 5,
-      exclusiveOn: ["--verbose"],
-      args: {
-        isOptional: true,
-      },
+        "Print more debug messages; -vvv is a reasonable level to start, connection debugging might require -vvvv",
+      isRepeatable: 6,
     },
   ],
   args: {
     name: "plugin",
-    isDangerous: true,
+    description: "Plugin",
     isVariadic: true,
     generators: allPluginsGenerator,
   },

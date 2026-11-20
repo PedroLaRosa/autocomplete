@@ -1,3 +1,4 @@
+// base64 (macOS 15 BSD, `man base64` = bintrans(1) dated 2024-01-23, 2026-11-19). Source: apple-oss-distributions/text_cmds tag text_cmds-195 (2025-04-30 drop; bintrans/bintrans.1 and bintrans.c option table); not a live run on macOS
 const completionSpec: Fig.Spec = {
   name: "base64",
   description: "Encode and decode using Base64 representation",
@@ -7,10 +8,11 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["--help", "-h"],
-      description: "Display this help and exit",
+      description: "Print usage summary and exit",
     },
     {
-      name: ["--break", "-b"],
+      // --wrap / -w are GNU-compatibility aliases that set the same value
+      name: ["--break", "--breaks", "--wrap", "-b", "-w"],
       description:
         "Insert line breaks every count characters.  Default is 0, which generates an unbroken stream",
       args: {
@@ -29,8 +31,8 @@ const completionSpec: Fig.Spec = {
         "Read input from input_file.  Default is stdin; passing - also represents stdin",
       args: {
         name: "input_file",
-        suggestions: ["stdin", "-"],
-        default: "stdin",
+        suggestions: ["-"],
+        default: "-",
         template: "filepaths",
       },
     },
@@ -40,10 +42,14 @@ const completionSpec: Fig.Spec = {
         "Write output to output_file.  Default is stdout; passing - also represents stdout",
       args: {
         name: "output_file",
-        suggestions: ["stdout", "-"],
-        default: "stdout",
+        suggestions: ["-"],
+        default: "-",
         template: "filepaths",
       },
+    },
+    {
+      name: "--version",
+      description: "Print version information and exit",
     },
   ],
 };

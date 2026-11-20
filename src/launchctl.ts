@@ -1,3 +1,4 @@
+// launchctl (launchd 7.0.0, macOS 15.5 `launchctl version`, 2026-11-19). Source: `launchctl help <subcommand>` and man launchctl
 const serviceOrDomain: Fig.Arg = {
   name: "service",
   description: "Service or domain target",
@@ -37,6 +38,7 @@ const loadUnloadOptions = [
     description: "Load files from specified domain",
     args: {
       name: "domain",
+      suggestions: ["system", "local", "network", "user"],
     },
   },
 ];
@@ -113,6 +115,10 @@ const completionSpec: Fig.Spec = {
           name: "-p",
           description: "Print PID",
         },
+        {
+          name: "-s",
+          description: "Start the service suspended so a debugger may attach",
+        },
       ],
       args: serviceTarget,
     },
@@ -147,6 +153,10 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--start-suspended",
+          description: "Start the process suspended",
+        },
+        {
           name: "--guard-malloc",
           description: "Turn on libgmalloc",
         },
@@ -179,6 +189,7 @@ const completionSpec: Fig.Spec = {
           description: "Sets the stdin path",
           args: {
             name: "stdin-path",
+            isOptional: true,
             template: "filepaths",
           },
         },
@@ -187,6 +198,7 @@ const completionSpec: Fig.Spec = {
           description: "Sets the stdout path",
           args: {
             name: "stdout-path",
+            isOptional: true,
             template: "filepaths",
           },
         },
@@ -195,6 +207,7 @@ const completionSpec: Fig.Spec = {
           description: "Sets the stderr path",
           args: {
             name: "stderr-path",
+            isOptional: true,
             template: "filepaths",
           },
         },
@@ -207,11 +220,15 @@ const completionSpec: Fig.Spec = {
           },
         },
       ],
-      args: {
-        name: "argv",
-        description: "Variable args: argv0 argv1",
-        isVariadic: true,
-      },
+      args: [
+        serviceTarget,
+        {
+          name: "argv",
+          description: "Variable args: argv0 argv1",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
     },
     {
       name: "kill",
@@ -227,7 +244,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "blame",
       description: "Prints the reason a service is running",
-      args: serviceTarget,
+      args: { name: "pid | service", description: "PID or service target" },
     },
     {
       name: "print",
@@ -243,6 +260,13 @@ const completionSpec: Fig.Spec = {
       description: "Prints which services are disabled",
       args: {
         name: "domain-target",
+      },
+    },
+    {
+      name: "print-token",
+      description: "Prints service identifier given an xpc event token",
+      args: {
+        name: "xpc-token",
       },
     },
     {
@@ -301,11 +325,6 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "runstats",
-      description: "Prints performance statistics for a service",
-      args: serviceTarget,
-    },
-    {
       name: "examine",
       description:
         "Runs the specified analysis tool against launchd in a non-re-entrant manner",
@@ -326,11 +345,12 @@ const completionSpec: Fig.Spec = {
       args: [
         {
           name: "[system | user]",
-          suggestions: ["system"],
+          suggestions: ["system", "user"],
         },
         {
           name: "param",
           description: "A key for a key/value pair",
+          suggestions: ["umask", "path"],
         },
         {
           name: "value",
@@ -350,12 +370,26 @@ const completionSpec: Fig.Spec = {
       name: "reboot",
       description: "Initiates a system reboot of the specified type",
       options: [
-        { name: "system" },
-        { name: "userspace" },
-        { name: "halt" },
-        { name: "logout" },
-        { name: "apps" },
+        {
+          name: "-s",
+          description: "Reboot into single-user mode",
+        },
       ],
+      args: {
+        name: "type",
+        isOptional: true,
+        suggestions: ["system", "halt", "userspace", "logout", "apps"],
+      },
+    },
+    {
+      name: "bootshell",
+      description:
+        "Brings the system up from single-user mode with a console shell",
+      args: {
+        name: "continue",
+        isOptional: true,
+        suggestions: ["continue"],
+      },
     },
     {
       name: "load",
@@ -372,7 +406,7 @@ const completionSpec: Fig.Spec = {
       name: "unload",
       description:
         "Recommended alternatives: bootout | disable. Unloads a service or directory of services",
-      options: loadUnloadOptions,
+      options: loadUnloadOptions.filter((option) => option.name !== "-F"),
       args: {
         isVariadic: true,
         name: "path",
@@ -467,6 +501,15 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "reload-atf",
+      description: "Reloads the active trial factors",
+      args: {
+        name: "config-path",
+        isOptional: true,
+        template: "filepaths",
+      },
+    },
+    {
       name: "submit",
       description: "Submit a basic job from the command line",
       options: [
@@ -534,6 +577,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "type",
           description: "Error domain type",
+          isOptional: true,
           suggestions: ["posix", "mach", "bootstrap"],
         },
         {

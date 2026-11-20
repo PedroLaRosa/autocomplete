@@ -1,4 +1,16 @@
+// kill (macOS BSD, man page dated 2016-10-03, 2026-11-19). Source: apple-oss-distributions/shell_cmds tag shell_cmds-329 kill/kill.1 + kill/kill.c (usage string and argument parsing); man page and source only, not run on macOS. Changes: added the documented `-signal_name` / `-signal_number` forms (commonly used signals from the man page), descriptions refreshed.
 // Compatibility: macOS
+
+// Commonly used signals listed in kill(1): number, name, description
+const commonSignals: [number, string, string][] = [
+  [1, "HUP", "hang up"],
+  [2, "INT", "interrupt"],
+  [3, "QUIT", "quit"],
+  [6, "ABRT", "abort"],
+  [9, "KILL", "non-catchable, non-ignorable kill"],
+  [14, "ALRM", "alarm clock"],
+  [15, "TERM", "software termination signal"],
+];
 
 function processIcon(path: string): string {
   const idx = path.indexOf(".app/");
@@ -33,7 +45,8 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: "-s",
-      description: "A symbolic signal name specifying the signal to be sent",
+      description:
+        "A symbolic signal name specifying the signal to be sent instead of the default TERM",
       args: {
         name: "signal_name",
         generators: {
@@ -57,6 +70,13 @@ const completionSpec: Fig.Spec = {
         isOptional: true,
       },
     },
+    ...commonSignals.map(([number, name, description]) => ({
+      name: [`-${name}`, `-${number}`],
+      description:
+        name === "TERM"
+          ? `Send TERM (${description}), the default`
+          : `Send ${name} (${description}) instead of TERM`,
+    })),
   ],
 };
 

@@ -1,3 +1,119 @@
+// tkn v0.47.0 (latest tag on tektoncd/cli and the Homebrew tektoncd-cli formula, 2026-11-20).
+// Source: command tree and flags from pkg/cmd (cobra definitions, shared pkg/flags and pkg/formatted)
+// and the generated docs/cmd reference at tag v0.47.0, read statically (binary not run).
+// Note: docs/cmd for the deprecated "hub" subcommands still shows an old "--type" default of tekton;
+// the pkg/cmd/hub source (default "artifact") is authoritative.
+
+const remoteOptions: Fig.Option[] = [
+  {
+    name: "--remote-bearer",
+    description: "A Bearer token to authenticate against the repository",
+    args: { name: "remote-bearer" },
+  },
+  {
+    name: "--remote-password",
+    description:
+      "A password to pass to the registry for basic auth. Must be used with --remote-username",
+    dependsOn: ["--remote-username"],
+    args: { name: "remote-password" },
+  },
+  {
+    name: "--remote-skip-tls",
+    description:
+      "Skip TLS certificate verification and allow plain-HTTP connections to the registry (opt-in insecure mode)",
+  },
+  {
+    name: "--remote-username",
+    description:
+      "A username to pass to the registry for basic auth. Must be used with --remote-password",
+    dependsOn: ["--remote-password"],
+    args: { name: "remote-username" },
+  },
+];
+
+const jsonYamlOutput: Fig.Option = {
+  name: ["--output", "-o"],
+  description: "Output format. One of: json|yaml",
+  args: { name: "output", suggestions: ["json", "yaml"] },
+};
+
+const deleteOutput: Fig.Option = {
+  ...jsonYamlOutput,
+  description:
+    "Output format. One of: json|yaml. Skips the confirmation prompt",
+};
+
+const printOutputFormats = [
+  "json",
+  "yaml",
+  "name",
+  "go-template",
+  "go-template-file",
+  "template",
+  "templatefile",
+  "jsonpath",
+  "jsonpath-as-json",
+  "jsonpath-file",
+];
+
+const printOptions: Fig.Option[] = [
+  {
+    name: "--allow-missing-template-keys",
+    description:
+      "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
+  },
+  {
+    name: ["--output", "-o"],
+    description:
+      "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
+    args: { name: "output", suggestions: printOutputFormats },
+  },
+  {
+    name: "--show-managed-fields",
+    description:
+      "If true, keep the managedFields when printing objects in JSON or YAML format",
+  },
+  {
+    name: "--template",
+    description:
+      "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
+    args: { name: "template", template: ["filepaths"] },
+  },
+];
+
+const kubeOptions: Fig.Option[] = [
+  {
+    name: ["--context", "-c"],
+    description:
+      "Name of the kubeconfig context to use (default: kubectl config current-context)",
+    isPersistent: true,
+    args: { name: "context" },
+  },
+  {
+    name: ["--kubeconfig", "-k"],
+    description: "Kubectl config file (default: $HOME/.kube/config)",
+    isPersistent: true,
+    args: { name: "kubeconfig" },
+  },
+  {
+    name: ["--namespace", "-n"],
+    description: "Namespace to use (default: from $KUBECONFIG)",
+    isPersistent: true,
+    args: { name: "namespace" },
+  },
+  {
+    name: ["--no-color", "-C"],
+    description: "Disable coloring (default: false)",
+    isPersistent: true,
+  },
+  {
+    name: "--nocolour",
+    description: "Disable colouring (default: false)",
+    isPersistent: true,
+    hidden: true,
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "tkn",
   description: "CLI for tekton pipelines",
@@ -17,8 +133,9 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--cache-dir",
-              description: "A directory to cache Tekton bundles in",
-              args: { name: "cache-dir", default: "~/.tekton/bundles" },
+              description:
+                "A directory to cache Tekton bundles in. The default follows XDG_CACHE_HOME unless ~/.tekton exists",
+              args: { name: "cache-dir", template: "folders" },
             },
             {
               name: "--no-cache",
@@ -29,31 +146,9 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
-            {
-              name: "--remote-bearer",
-              description:
-                "A Bearer token to authenticate against the repository",
-              args: { name: "remote-bearer" },
-            },
-            {
-              name: "--remote-password",
-              description:
-                "A password to pass to the registry for basic auth. Must be used with --remote-username",
-              args: { name: "remote-password" },
-            },
-            {
-              name: "--remote-skip-tls",
-              description:
-                "If set to true, skips TLS check when connecting to the registry",
-            },
-            {
-              name: "--remote-username",
-              description:
-                "A username to pass to the registry for basic auth. Must be used with --remote-password",
-              args: { name: "remote-username" },
-            },
+            ...remoteOptions,
             {
               name: "--show-managed-fields",
               description:
@@ -72,6 +167,19 @@ const completionSpec: Fig.Spec = {
           description: "Create or replace a Tekton bundle",
           options: [
             {
+              name: "--annotate",
+              description:
+                "OCI Manifest annotation in the form of key=value to be added to the OCI image. Can be provided multiple times to add multiple annotations",
+              isRepeatable: true,
+              args: { name: "annotate" },
+            },
+            {
+              name: "--ctime",
+              description:
+                "YYYY-MM-DD, YYYY-MM-DDTHH:MM:SS or RFC3339 formatted created time to set, defaults to current time. In non RFC3339 syntax dates are in UTC timezone",
+              args: { name: "ctime" },
+            },
+            {
               name: ["--filenames", "-f"],
               description:
                 "List of fully-qualified file paths containing YAML or JSON defined Tekton objects to include in this bundle",
@@ -79,28 +187,13 @@ const completionSpec: Fig.Spec = {
               args: { name: "filenames" },
             },
             {
-              name: "--remote-bearer",
+              name: "--label",
               description:
-                "A Bearer token to authenticate against the repository",
-              args: { name: "remote-bearer" },
+                "OCI Config labels in the form of key=value to be added to the OCI image. Can be provided multiple times to add multiple labels",
+              isRepeatable: true,
+              args: { name: "label" },
             },
-            {
-              name: "--remote-password",
-              description:
-                "A password to pass to the registry for basic auth. Must be used with --remote-username",
-              args: { name: "remote-password" },
-            },
-            {
-              name: "--remote-skip-tls",
-              description:
-                "If set to true, skips TLS check when connecting to the registry",
-            },
-            {
-              name: "--remote-username",
-              description:
-                "A username to pass to the registry for basic auth. Must be used with --remote-password",
-              args: { name: "remote-username" },
-            },
+            ...remoteOptions,
           ],
         },
       ],
@@ -118,356 +211,6 @@ const completionSpec: Fig.Spec = {
           description: "Kubectl config file (default: $HOME/.kube/config)",
           isPersistent: true,
           hidden: true,
-          args: { name: "kubeconfig" },
-        },
-        {
-          name: ["--namespace", "-n"],
-          description: "Namespace to use (default: from $KUBECONFIG)",
-          isPersistent: true,
-          hidden: true,
-          args: { name: "namespace" },
-        },
-        {
-          name: ["--no-color", "-C"],
-          description: "Disable coloring (default: false)",
-          isPersistent: true,
-        },
-        {
-          name: "--nocolour",
-          description: "Disable colouring (default: false)",
-          isPersistent: true,
-          hidden: true,
-        },
-      ],
-    },
-    {
-      name: ["chains", "chain"],
-      description: "Manage Chains",
-      subcommands: [
-        {
-          name: "payload",
-          description: "Print Tekton Chains' payload for a specific taskrun",
-          options: [
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: ["--skip-verify", "-S"],
-              description: "Skip verifying the payload'signature",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
-          ],
-        },
-        {
-          name: "signature",
-          description: "Print Tekton Chains' signature for a specific taskrun",
-        },
-      ],
-      options: [
-        {
-          name: "--chains-namespace",
-          description: "Namespace in which chains is installed",
-          isPersistent: true,
-          args: { name: "chains-namespace", default: "tekton-chains" },
-        },
-        {
-          name: ["--context", "-c"],
-          description:
-            "Name of the kubeconfig context to use (default: kubectl config current-context)",
-          isPersistent: true,
-          args: { name: "context" },
-        },
-        {
-          name: ["--kubeconfig", "-k"],
-          description: "Kubectl config file (default: $HOME/.kube/config)",
-          isPersistent: true,
-          args: { name: "kubeconfig" },
-        },
-        {
-          name: ["--namespace", "-n"],
-          description: "Namespace to use (default: from $KUBECONFIG)",
-          isPersistent: true,
-          args: { name: "namespace" },
-        },
-        {
-          name: ["--no-color", "-C"],
-          description: "Disable coloring (default: false)",
-          isPersistent: true,
-        },
-        {
-          name: "--nocolour",
-          description: "Disable colouring (default: false)",
-          isPersistent: true,
-          hidden: true,
-        },
-      ],
-    },
-    {
-      name: ["ct", "clustertasks", "clustertask"],
-      description: "Manage ClusterTasks",
-      subcommands: [
-        {
-          name: "create",
-          description: "Create a ClusterTask from Task",
-          options: [
-            {
-              name: "--from",
-              description:
-                "Create a ClusterTask from Task in a particular namespace",
-              args: { name: "from" },
-            },
-          ],
-        },
-        {
-          name: ["rm", "delete"],
-          description: "Delete ClusterTasks in a cluster",
-          options: [
-            {
-              name: "--all",
-              description: "Delete all ClusterTasks (default: false)",
-            },
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
-              name: ["--force", "-f"],
-              description: "Whether to force deletion (default: false)",
-            },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
-            {
-              name: "--trs",
-              description:
-                "Whether to delete ClusterTask(s) and related resources (TaskRuns) (default: false)",
-            },
-          ],
-        },
-        {
-          name: ["desc", "describe"],
-          description: "Describe a ClusterTask",
-          options: [
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
-          ],
-        },
-        {
-          name: ["ls", "list"],
-          description: "Lists ClusterTasks",
-          options: [
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
-              name: "--no-headers",
-              description:
-                "Do not print column headers with output (default print column headers with output)",
-            },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
-          ],
-        },
-        {
-          name: "logs",
-          description: "Show ClusterTask logs",
-          options: [
-            {
-              name: ["--all", "-a"],
-              description:
-                "Show all logs including init steps injected by tekton",
-            },
-            { name: ["--follow", "-f"], description: "Stream live logs" },
-            {
-              name: ["--last", "-L"],
-              description: "Show logs for last TaskRun",
-            },
-            {
-              name: "--limit",
-              description: "Lists number of TaskRuns",
-              args: { name: "limit", default: "5" },
-            },
-            {
-              name: ["--timestamps", "-t"],
-              description: "Show logs with timestamp",
-            },
-          ],
-        },
-        {
-          name: "start",
-          description: "Start ClusterTasks",
-          options: [
-            {
-              name: "--dry-run",
-              description: "Preview TaskRun without running it",
-            },
-            {
-              name: ["--inputresource", "-i"],
-              description: "Pass the input resource name and ref as name=ref",
-              isRepeatable: true,
-              args: { name: "inputresource" },
-            },
-            {
-              name: ["--labels", "-l"],
-              description: "Pass labels as label=value",
-              isRepeatable: true,
-              args: { name: "labels" },
-            },
-            {
-              name: ["--last", "-L"],
-              description: "Re-run the ClusterTask using last TaskRun values",
-            },
-            {
-              name: "--output",
-              description: "Format of TaskRun (yaml or json)",
-              args: { name: "output" },
-            },
-            {
-              name: ["--outputresource", "-o"],
-              description: "Pass the output resource name and ref as name=ref",
-              isRepeatable: true,
-              args: { name: "outputresource" },
-            },
-            {
-              name: ["--param", "-p"],
-              description:
-                "Pass the param as key=value for string type, or key=value1,value2,... for array type",
-              isRepeatable: true,
-              args: { name: "param" },
-            },
-            {
-              name: "--pod-template",
-              description:
-                "Local or remote file containing a PodTemplate definition",
-              args: { name: "pod-template" },
-            },
-            {
-              name: "--prefix-name",
-              description:
-                "Specify a prefix for the TaskRun name (must be lowercase alphanumeric characters)",
-              args: { name: "prefix-name" },
-            },
-            {
-              name: ["--serviceaccount", "-s"],
-              description: "Pass the serviceaccount name",
-              args: { name: "serviceaccount" },
-            },
-            {
-              name: "--showlog",
-              description: "Show logs right after starting the ClusterTask",
-            },
-            {
-              name: "--skip-optional-workspace",
-              description: "Skips the prompt for optional workspaces",
-            },
-            {
-              name: "--timeout",
-              description: "Timeout for TaskRun",
-              args: { name: "timeout" },
-            },
-            {
-              name: "--use-param-defaults",
-              description:
-                "Use default parameter values without prompting for input",
-            },
-            {
-              name: "--use-taskrun",
-              description:
-                "Specify a TaskRun name to use its values to re-run the TaskRun",
-              args: { name: "use-taskrun" },
-            },
-            {
-              name: ["--workspace", "-w"],
-              description:
-                "Pass one or more workspaces to map to the corresponding physical volumes",
-              isRepeatable: true,
-              args: { name: "workspace" },
-            },
-          ],
-        },
-      ],
-      options: [
-        {
-          name: ["--context", "-c"],
-          description:
-            "Name of the kubeconfig context to use (default: kubectl config current-context)",
-          isPersistent: true,
-          args: { name: "context" },
-        },
-        {
-          name: ["--kubeconfig", "-k"],
-          description: "Kubectl config file (default: $HOME/.kube/config)",
-          isPersistent: true,
           args: { name: "kubeconfig" },
         },
         {
@@ -503,31 +246,10 @@ const completionSpec: Fig.Spec = {
               description: "Delete all ClusterTriggerBindings (default: false)",
             },
             {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
               name: ["--force", "-f"],
               description: "Whether to force deletion (default: false)",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
+            deleteOutput,
           ],
         },
         {
@@ -543,7 +265,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -576,7 +298,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -626,7 +348,79 @@ const completionSpec: Fig.Spec = {
         },
       ],
     },
-    { name: "completion", description: "Prints shell completion scripts" },
+    {
+      name: "completion",
+      description: "Prints shell completion scripts",
+      args: {
+        name: "shell",
+        suggestions: ["bash", "zsh", "fish", "powershell"],
+      },
+    },
+    {
+      name: ["cr", "customruns", "customrun"],
+      description: "Manage CustomRuns",
+      subcommands: [
+        {
+          name: ["rm", "delete"],
+          description: "Delete CustomRuns in a namespace",
+          options: [jsonYamlOutput],
+        },
+        {
+          name: ["desc", "describe"],
+          description: "Describe a CustomRun in a namespace",
+          options: [
+            ...printOptions,
+            {
+              name: ["--fzf", "-F"],
+              description: "Use fzf to select a CustomRun to describe",
+            },
+            {
+              name: ["--last", "-L"],
+              description: "Show description for last CustomRun",
+            },
+            {
+              name: "--limit",
+              description:
+                "Lists number of CustomRuns when selecting a CustomRun to describe",
+              args: { name: "limit", default: "5" },
+            },
+          ],
+        },
+        {
+          name: ["ls", "list"],
+          description: "Lists CustomRuns in a namespace",
+          options: [
+            ...printOptions,
+            {
+              name: ["--all-namespaces", "-A"],
+              description: "List CustomRuns from all namespaces",
+            },
+            {
+              name: "--label",
+              description:
+                "A selector (label query) to filter on, supports '=', '==', and '!='",
+              args: { name: "label" },
+            },
+            {
+              name: "--limit",
+              description:
+                "Limits the number of CustomRuns. If the limit value is 0 returns all",
+              args: { name: "limit", default: "0" },
+            },
+            {
+              name: "--no-headers",
+              description:
+                "Do not print column headers with output (default print column headers with output)",
+            },
+            {
+              name: "--reverse",
+              description: "List CustomRuns in reverse order",
+            },
+          ],
+        },
+      ],
+      options: kubeOptions,
+    },
     {
       name: ["el", "eventlisteners", "eventlistener"],
       description: "Manage EventListeners",
@@ -641,31 +435,10 @@ const completionSpec: Fig.Spec = {
                 "Delete all EventListeners in a namespace (default: false)",
             },
             {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
               name: ["--force", "-f"],
               description: "Whether to force deletion (default: false)",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
+            deleteOutput,
           ],
         },
         {
@@ -681,7 +454,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -718,7 +491,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -781,7 +554,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "hub",
-      description: "Interact with tekton hub",
+      description: "Interact with artifacthub",
       subcommands: [
         {
           name: "check-upgrade",
@@ -864,12 +637,6 @@ const completionSpec: Fig.Spec = {
             {
               name: "task",
               description: "Get Task by name, catalog and version",
-              options: [
-                {
-                  name: "--as-clustertask",
-                  description: "Get the Task as ClusterTask",
-                },
-              ],
             },
           ],
           options: [
@@ -936,7 +703,7 @@ const completionSpec: Fig.Spec = {
               name: "--from",
               description: "Name of Catalog to which resource belongs",
               isPersistent: true,
-              args: { name: "from", default: "tekton" },
+              args: { name: "from" },
             },
             {
               name: ["--kubeconfig", "-k"],
@@ -1023,12 +790,20 @@ const completionSpec: Fig.Spec = {
             {
               name: "--match",
               description: "Accept type of search. 'exact' or 'contains'",
-              args: { name: "match", default: "contains" },
+              args: {
+                name: "match",
+                default: "contains",
+                suggestions: ["exact", "contains"],
+              },
             },
             {
               name: ["--output", "-o"],
               description: "Accepts output format: [table, json, wide]",
-              args: { name: "output", default: "table" },
+              args: {
+                name: "output",
+                default: "table",
+                suggestions: ["table", "json", "wide"],
+              },
             },
             {
               name: "--platforms",
@@ -1083,16 +858,20 @@ const completionSpec: Fig.Spec = {
         {
           name: "--api-server",
           description:
-            "Hub API Server URL (default 'https://api.hub.tekton.dev' for 'tekton' type; default 'https://artifacthub.io' for 'artifact' type). URL can also be defined in a file '$HOME/.tekton/hub-config' with a variable 'TEKTON_HUB_API_SERVER'/'ARTIFACT_HUB_API_SERVER'",
+            "Hub API Server URL. For artifact type: default 'https://artifacthub.io' (env: ARTIFACT_HUB_API_SERVER). For tekton type (DEPRECATED): default 'https://api.hub.tekton.dev' (env: TEKTON_HUB_API_SERVER). Can also be set in '$HOME/.tekton/hub-config'",
           isPersistent: true,
           args: { name: "api-server" },
         },
         {
           name: "--type",
           description:
-            "The type of Hub from where to pull the resource. Either 'artifact' or 'tekton' (default 'tekton')",
+            "The type of Hub from where to pull the resource. Either 'artifact' or 'tekton' (DEPRECATED: tekton type will be removed in a future release)",
           isPersistent: true,
-          args: { name: "type", default: "tekton" },
+          args: {
+            name: "type",
+            default: "artifact",
+            suggestions: ["artifact", "tekton"],
+          },
         },
       ],
     },
@@ -1110,35 +889,14 @@ const completionSpec: Fig.Spec = {
                 "Delete all Pipelines in a namespace (default: false)",
             },
             {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
               name: ["--force", "-f"],
               description: "Whether to force deletion (default: false)",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
+            deleteOutput,
             {
               name: "--prs",
               description:
                 "Whether to delete Pipeline(s) and related resources (PipelineRuns) (default: false)",
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
             },
           ],
         },
@@ -1155,7 +913,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1183,7 +941,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1220,7 +978,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1253,6 +1011,11 @@ const completionSpec: Fig.Spec = {
               name: "--limit",
               description: "Lists number of PipelineRuns",
               args: { name: "limit", default: "5" },
+            },
+            {
+              name: "--prefix",
+              description:
+                "Prefix each log line with the log source (task name and step name)",
             },
             {
               name: ["--timestamps", "-t"],
@@ -1289,7 +1052,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1313,6 +1076,11 @@ const completionSpec: Fig.Spec = {
               description: "Preview PipelineRun without running it",
             },
             {
+              name: ["--exit-with-pipelinerun-error", "-E"],
+              description:
+                "When using --showlog, exit with pipelinerun to the unix shell, 0 if success, 1 if error or unknown status",
+            },
+            {
               name: ["--filename", "-f"],
               description:
                 "Local or remote file name containing a Pipeline definition to start a PipelineRun",
@@ -1322,6 +1090,12 @@ const completionSpec: Fig.Spec = {
               name: "--finally-timeout",
               description: "Timeout for Finally TaskRuns",
               args: { name: "finally-timeout" },
+            },
+            {
+              name: "--json",
+              description:
+                "PipelineRun spec as JSON (inline, '-' for stdin, or '@path' for a file)",
+              args: { name: "json" },
             },
             {
               name: ["--labels", "-l"],
@@ -1336,12 +1110,12 @@ const completionSpec: Fig.Spec = {
             {
               name: ["--output", "-o"],
               description: "Format of PipelineRun (yaml, json or name)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: ["yaml", "json", "name"] },
             },
             {
               name: ["--param", "-p"],
               description:
-                "Pass the param as key=value for string type, or key=value1,value2,... for array type",
+                'Pass the param as key=value for string type, or key=value1,value2,... for array type, or key="key1:value1, key2:value2" for object type',
               isRepeatable: true,
               args: { name: "param" },
             },
@@ -1363,10 +1137,20 @@ const completionSpec: Fig.Spec = {
               args: { name: "prefix-name" },
             },
             {
-              name: ["--resource", "-r"],
-              description: "Pass the resource name and ref as name=ref",
-              isRepeatable: true,
-              args: { name: "resource" },
+              name: "--resolvertype",
+              description:
+                "Resolver type for remote pipelines (hub, git, http, cluster, bundle, remote)",
+              args: {
+                name: "resolvertype",
+                suggestions: [
+                  "hub",
+                  "git",
+                  "http",
+                  "cluster",
+                  "bundle",
+                  "remote",
+                ],
+              },
             },
             {
               name: ["--serviceaccount", "-s"],
@@ -1395,7 +1179,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--timeout",
               description: "Timeout for PipelineRun",
-              hidden: true,
+              deprecated: { description: "Use --pipeline-timeout instead" },
               args: { name: "timeout" },
             },
             {
@@ -1440,7 +1224,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1501,8 +1285,12 @@ const completionSpec: Fig.Spec = {
               name: "--grace",
               description:
                 "Gracefully cancel a PipelineRun To use this, you need to change the feature-flags configmap enable-api-fields to alpha instead of stable. Set to 'CancelledRunFinally' if you want to cancel the current running task and directly run the finally tasks. Set to 'StoppedRunFinally' if you want to cancel the remaining non-final task and directly run the finally tasks",
-              args: { name: "grace" },
+              args: {
+                name: "grace",
+                suggestions: ["CancelledRunFinally", "StoppedRunFinally"],
+              },
             },
+            jsonYamlOutput,
           ],
         },
         {
@@ -1513,11 +1301,6 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description:
                 "Delete all PipelineRuns in a namespace (default: false)",
-            },
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
             },
             {
               name: ["--force", "-f"],
@@ -1544,28 +1327,12 @@ const completionSpec: Fig.Spec = {
                 "A selector (label query) to filter on when running with --all, supports '=', '==', and '!='",
               args: { name: "label" },
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
+            deleteOutput,
             {
               name: ["--pipeline", "-p"],
               description:
                 "The name of a Pipeline whose PipelineRuns should be deleted (does not delete the Pipeline)",
               args: { name: "pipeline" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
             },
           ],
         },
@@ -1596,7 +1363,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1624,7 +1391,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1661,7 +1428,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--limit",
               description:
-                "Limit PipelineRuns listed (default: return all PipelineRuns)",
+                "Limits the number of PipelineRuns. If the limit value is 0 returns all",
               args: { name: "limit", default: "0" },
             },
             {
@@ -1673,7 +1440,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--reverse",
@@ -1707,6 +1474,11 @@ const completionSpec: Fig.Spec = {
               description: "Use fzf to select a PipelineRun",
             },
             {
+              name: ["--exit-with-pipelinerun-error", "-E"],
+              description:
+                "Exit with pipelinerun to the unix shell, 0 if success, 1 if error or unknown status",
+            },
+            {
               name: ["--last", "-L"],
               description: "Show logs for last PipelineRun",
             },
@@ -1714,6 +1486,15 @@ const completionSpec: Fig.Spec = {
               name: "--limit",
               description: "Lists number of PipelineRuns",
               args: { name: "limit", default: "5" },
+            },
+            {
+              name: "--log-failed",
+              description: "Show logs for failed tasks and steps only",
+            },
+            {
+              name: "--long",
+              description:
+                "Show logs with task display name (display name and step name)",
             },
             {
               name: "--prefix",
@@ -1764,194 +1545,9 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: ["res", "resources", "resource"],
-      description: "Manage pipeline resources",
-      subcommands: [
-        {
-          name: "create",
-          description: "Create a pipeline resource in a namespace",
-          options: [
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
-          ],
-        },
-        {
-          name: ["rm", "delete"],
-          description: "Delete pipeline resources in a namespace",
-          options: [
-            {
-              name: "--all",
-              description:
-                "Delete all PipelineResources in a namespace (default: false)",
-            },
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
-              name: ["--force", "-f"],
-              description: "Whether to force deletion (default: false)",
-            },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
-          ],
-        },
-        {
-          name: ["desc", "describe"],
-          description: "Describes a pipeline resource in a namespace",
-          options: [
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
-          ],
-        },
-        {
-          name: ["ls", "list"],
-          description: "Lists pipeline resources in a namespace",
-          options: [
-            {
-              name: ["--all-namespaces", "-A"],
-              description: "List pipeline resources from all namespaces",
-            },
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
-              name: "--no-headers",
-              description:
-                "Do not print column headers with output (default print column headers with output)",
-            },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
-            {
-              name: ["--type", "-t"],
-              description: "Pipeline resource type",
-              args: { name: "type" },
-            },
-          ],
-        },
-      ],
-      options: [
-        {
-          name: ["--context", "-c"],
-          description:
-            "Name of the kubeconfig context to use (default: kubectl config current-context)",
-          isPersistent: true,
-          args: { name: "context" },
-        },
-        {
-          name: ["--kubeconfig", "-k"],
-          description: "Kubectl config file (default: $HOME/.kube/config)",
-          isPersistent: true,
-          args: { name: "kubeconfig" },
-        },
-        {
-          name: ["--namespace", "-n"],
-          description: "Namespace to use (default: from $KUBECONFIG)",
-          isPersistent: true,
-          args: { name: "namespace" },
-        },
-        {
-          name: ["--no-color", "-C"],
-          description: "Disable coloring (default: false)",
-          isPersistent: true,
-        },
-        {
-          name: "--nocolour",
-          description: "Disable colouring (default: false)",
-          isPersistent: true,
-          hidden: true,
-        },
-      ],
-    },
-    {
       name: ["t", "tasks", "task"],
       description: "Manage Tasks",
       subcommands: [
-        {
-          name: "create",
-          description: "Create a Task from ClusterTask",
-          options: [
-            {
-              name: "--from",
-              description:
-                "Create a ClusterTask from Task in a particular namespace",
-              args: { name: "from" },
-            },
-          ],
-        },
         {
           name: ["rm", "delete"],
           description: "Delete Tasks in a namespace",
@@ -1961,31 +1557,10 @@ const completionSpec: Fig.Spec = {
               description: "Delete all Tasks in a namespace (default: false)",
             },
             {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
               name: ["--force", "-f"],
               description: "Whether to force deletion (default: false)",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
+            deleteOutput,
             {
               name: "--trs",
               description:
@@ -2006,7 +1581,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2043,7 +1618,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2112,7 +1687,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2142,10 +1717,15 @@ const completionSpec: Fig.Spec = {
               args: { name: "filename" },
             },
             {
-              name: ["--inputresource", "-i"],
-              description: "Pass the input resource name and ref as name=ref",
-              isRepeatable: true,
-              args: { name: "inputresource" },
+              name: ["--image", "-i"],
+              description: "Use an oci bundle",
+              args: { name: "image" },
+            },
+            {
+              name: "--json",
+              description:
+                "TaskRun spec as JSON (inline, '-' for stdin, or '@path' for a file)",
+              args: { name: "json" },
             },
             {
               name: ["--labels", "-l"],
@@ -2160,18 +1740,12 @@ const completionSpec: Fig.Spec = {
             {
               name: "--output",
               description: "Format of TaskRun (yaml or json)",
-              args: { name: "output" },
-            },
-            {
-              name: ["--outputresource", "-o"],
-              description: "Pass the output resource name and ref as name=ref",
-              isRepeatable: true,
-              args: { name: "outputresource" },
+              args: { name: "output", suggestions: ["yaml", "json"] },
             },
             {
               name: ["--param", "-p"],
               description:
-                "Pass the param as key=value for string type, or key=value1,value2,... for array type",
+                'Pass the param as key=value for string type, or key=value1,value2,... for array type, or key="key1:value1, key2:value2" for object type',
               isRepeatable: true,
               args: { name: "param" },
             },
@@ -2187,6 +1761,7 @@ const completionSpec: Fig.Spec = {
                 "Specify a prefix for the TaskRun name (must be lowercase alphanumeric characters)",
               args: { name: "prefix-name" },
             },
+            ...remoteOptions,
             {
               name: ["--serviceaccount", "-s"],
               description: "Pass the serviceaccount name",
@@ -2248,7 +1823,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2301,7 +1876,11 @@ const completionSpec: Fig.Spec = {
       name: ["tr", "taskruns", "taskrun"],
       description: "Manage TaskRuns",
       subcommands: [
-        { name: "cancel", description: "Cancel a TaskRun in a namespace" },
+        {
+          name: "cancel",
+          description: "Cancel a TaskRun in a namespace",
+          options: [jsonYamlOutput],
+        },
         {
           name: ["rm", "delete"],
           description: "Delete TaskRuns in a namespace",
@@ -2310,17 +1889,6 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description:
                 "Delete all TaskRuns in a namespace (default: false)",
-            },
-            {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
-              name: "--clustertask",
-              description:
-                "The name of a ClusterTask whose TaskRuns should be deleted (does not delete the ClusterTask)",
-              args: { name: "clustertask" },
             },
             {
               name: ["--force", "-f"],
@@ -2346,28 +1914,12 @@ const completionSpec: Fig.Spec = {
                 "When deleting all TaskRuns keep the ones that has been completed since n minutes",
               args: { name: "keep-since", default: "0" },
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
+            deleteOutput,
             {
               name: ["--task", "-t"],
               description:
                 "The name of a Task whose TaskRuns should be deleted (does not delete the task)",
               args: { name: "task" },
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
             },
           ],
         },
@@ -2398,7 +1950,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2426,7 +1978,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2463,7 +2015,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--limit",
               description:
-                "Limit TaskRuns listed (default: return all TaskRuns)",
+                "Limits the number of TaskRuns. If the limit value is 0 returns all",
               args: { name: "limit", default: "0" },
             },
             {
@@ -2475,7 +2027,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--reverse",
@@ -2582,31 +2134,10 @@ const completionSpec: Fig.Spec = {
                 "Delete all TriggerBindings in a namespace (default: false)",
             },
             {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
               name: ["--force", "-f"],
               description: "Whether to force deletion (default: false)",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
+            deleteOutput,
           ],
         },
         {
@@ -2622,7 +2153,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2659,7 +2190,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2722,31 +2253,10 @@ const completionSpec: Fig.Spec = {
                 "Delete all TriggerTemplates in a namespace (default: false)",
             },
             {
-              name: "--allow-missing-template-keys",
-              description:
-                "If true, ignore any errors in templates when a field or map key is missing in the template. Only applies to golang and jsonpath output formats",
-            },
-            {
               name: ["--force", "-f"],
               description: "Whether to force deletion (default: false)",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
-            },
-            {
-              name: "--show-managed-fields",
-              description:
-                "If true, keep the managedFields when printing objects in JSON or YAML format",
-            },
-            {
-              name: "--template",
-              description:
-                "Template string or path to template file to use when -o=go-template, -o=go-template-file. The template format is golang templates [http://golang.org/pkg/text/template/#pkg-overview]",
-              args: { name: "template", template: ["filepaths"] },
-            },
+            deleteOutput,
           ],
         },
         {
@@ -2762,7 +2272,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2799,7 +2309,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2860,7 +2370,16 @@ const completionSpec: Fig.Spec = {
           name: "--component",
           description:
             "Provide a particular component name for its version (client|chains|pipeline|triggers|dashboard)",
-          args: { name: "component" },
+          args: {
+            name: "component",
+            suggestions: [
+              "client",
+              "chains",
+              "pipeline",
+              "triggers",
+              "dashboard",
+            ],
+          },
         },
         {
           name: ["--context", "-c"],
@@ -2877,7 +2396,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["--namespace", "-n"],
-          description: "Namespace to use (default: from $KUBECONFIG)",
+          description: "Namespace to check installed controller version",
           isPersistent: true,
           args: { name: "namespace" },
         },
@@ -2886,6 +2405,7 @@ const completionSpec: Fig.Spec = {
           description: "Disable coloring (default: false)",
           isPersistent: true,
         },
+        jsonYamlOutput,
         {
           name: "--nocolour",
           description: "Disable colouring (default: false)",
@@ -2910,40 +2430,6 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
-          name: ["chains", "chain"],
-          description: "Manage Chains",
-          subcommands: [
-            {
-              name: "payload",
-              description:
-                "Print Tekton Chains' payload for a specific taskrun",
-            },
-            {
-              name: "signature",
-              description:
-                "Print Tekton Chains' signature for a specific taskrun",
-            },
-          ],
-        },
-        {
-          name: ["ct", "clustertasks", "clustertask"],
-          description: "Manage ClusterTasks",
-          subcommands: [
-            { name: "create", description: "Create a ClusterTask from Task" },
-            {
-              name: ["rm", "delete"],
-              description: "Delete ClusterTasks in a cluster",
-            },
-            {
-              name: ["desc", "describe"],
-              description: "Describe a ClusterTask",
-            },
-            { name: ["ls", "list"], description: "Lists ClusterTasks" },
-            { name: "logs", description: "Show ClusterTask logs" },
-            { name: "start", description: "Start ClusterTasks" },
-          ],
-        },
-        {
           name: ["ctb", "clustertriggerbindings", "clustertriggerbinding"],
           description: "Manage ClusterTriggerBindings",
           subcommands: [
@@ -2962,6 +2448,24 @@ const completionSpec: Fig.Spec = {
           ],
         },
         { name: "completion", description: "Prints shell completion scripts" },
+        {
+          name: ["cr", "customruns", "customrun"],
+          description: "Manage CustomRuns",
+          subcommands: [
+            {
+              name: ["rm", "delete"],
+              description: "Delete CustomRuns in a namespace",
+            },
+            {
+              name: ["desc", "describe"],
+              description: "Describe a CustomRun in a namespace",
+            },
+            {
+              name: ["ls", "list"],
+              description: "Lists CustomRuns in a namespace",
+            },
+          ],
+        },
         {
           name: ["el", "eventlisteners", "eventlistener"],
           description: "Manage EventListeners",
@@ -2983,7 +2487,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "hub",
-          description: "Interact with tekton hub",
+          description: "Interact with artifacthub",
           subcommands: [
             {
               name: "check-upgrade",
@@ -3114,32 +2618,9 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
-          name: ["res", "resources", "resource"],
-          description: "Manage pipeline resources",
-          subcommands: [
-            {
-              name: "create",
-              description: "Create a pipeline resource in a namespace",
-            },
-            {
-              name: ["rm", "delete"],
-              description: "Delete pipeline resources in a namespace",
-            },
-            {
-              name: ["desc", "describe"],
-              description: "Describes a pipeline resource in a namespace",
-            },
-            {
-              name: ["ls", "list"],
-              description: "Lists pipeline resources in a namespace",
-            },
-          ],
-        },
-        {
           name: ["t", "tasks", "task"],
           description: "Manage Tasks",
           subcommands: [
-            { name: "create", description: "Create a Task from ClusterTask" },
             {
               name: ["rm", "delete"],
               description: "Delete Tasks in a namespace",

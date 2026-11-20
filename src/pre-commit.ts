@@ -1,3 +1,5 @@
+// pre-commit v4.7.0 (GitHub release, 2026-10-13). Source: pre_commit/main.py,
+// commands/hazmat.py and clientlib.py at tag v4.7.0
 import YAML from "yaml";
 import { gitGenerators } from "./git";
 
@@ -49,27 +51,47 @@ const config: Fig.Option = {
   },
 };
 
-const globalOptions: Fig.Option[] = [help, color, config];
+const baseOptions: Fig.Option[] = [help, color];
+const globalOptions: Fig.Option[] = [...baseOptions, config];
 
-const hookStages = [
+const hookTypes = [
+  "commit-msg",
+  "post-checkout",
+  "post-commit",
+  "post-merge",
+  "post-rewrite",
   "pre-commit",
   "pre-merge-commit",
   "pre-push",
+  "pre-rebase",
   "prepare-commit-msg",
-  "commit-msg",
-  "post-commit",
-  "post-checkout",
-  "post-merge",
-  "post-rewrite",
 ];
 
 const hookType: Fig.Option = {
   name: ["-t", "--hook-type"],
   description: "Type of hook to install",
+  isRepeatable: true,
   args: {
     name: "HOOK_TYPE",
-    suggestions: hookStages,
+    suggestions: hookTypes,
   },
+};
+
+const validateCommand = (name: string, file: string): Fig.Subcommand => ({
+  name,
+  description: `Validate ${file} files`,
+  options: baseOptions,
+  args: {
+    name: "filenames",
+    isOptional: true,
+    isVariadic: true,
+    template: "filepaths",
+  },
+});
+
+const hazmatCmd: Fig.Arg = {
+  name: "cmd",
+  isCommand: true,
 };
 
 const commonRepoOptions: Fig.Option[] = [
@@ -78,11 +100,13 @@ const commonRepoOptions: Fig.Option[] = [
   },
   {
     name: ["--all-files", "-a"],
-    description: "Run all files in the repo",
+    description: "Run on all the files in the repo",
+    exclusiveOn: ["--files"],
   },
   {
     name: "--files",
     description: "Specific filenames to run hooks on",
+    exclusiveOn: ["--all-files", "-a"],
     args: {
       name: "FILES",
       isVariadic: true,
@@ -94,10 +118,16 @@ const commonRepoOptions: Fig.Option[] = [
     description: "When hooks fail, run `git diff` directly afterward",
   },
   {
+    name: "--fail-fast",
+    description: "Stop after the first failing hook",
+  },
+  {
     name: "--hook-stage",
     description: "The stage during which the hook is fired",
     args: {
-      suggestions: hookStages,
+      name: "HOOK_STAGE",
+      suggestions: [...hookTypes, "manual"],
+      default: "pre-commit",
     },
   },
   {
@@ -135,10 +165,44 @@ const commonRepoOptions: Fig.Option[] = [
     },
   },
   {
+    name: "--pre-rebase-upstream",
+    description: "The upstream from which the series was forked",
+    args: {
+      name: "PRE_REBASE_UPSTREAM",
+      generators: gitGenerators.revs,
+    },
+  },
+  {
+    name: "--pre-rebase-branch",
+    description:
+      "The branch being rebased, and is not set when rebasing the current branch",
+    args: {
+      name: "PRE_REBASE_BRANCH",
+      generators: gitGenerators.localBranches,
+    },
+  },
+  {
     name: "--commit-msg-filename",
     description: "Filename to check when running during `commit-msg`",
     args: {
       name: "COMMIT_MSG_FILENAME",
+      template: "filepaths",
+    },
+  },
+  {
+    name: "--prepare-commit-message-source",
+    description:
+      "Source of the commit message (typically the second argument to .git/hooks/prepare-commit-msg)",
+    args: {
+      name: "PREPARE_COMMIT_MESSAGE_SOURCE",
+    },
+  },
+  {
+    name: "--commit-object-name",
+    description:
+      "Commit object name (typically the third argument to .git/hooks/prepare-commit-msg)",
+    args: {
+      name: "COMMIT_OBJECT_NAME",
     },
   },
   {
@@ -203,7 +267,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--bleeding-edge",
           description:
-            "Update to the bleeding edge of `master` instead of the latest tagged version (the default behavior)",
+            "Update to the bleeding edge of `HEAD` instead of the latest tagged version (the default behavior)",
         },
         {
           name: "--freeze",
@@ -218,22 +282,57 @@ const completionSpec: Fig.Spec = {
           },
           isRepeatable: true,
         },
+        {
+          name: ["-j", "--jobs"],
+          description: "Number of threads to use",
+          args: {
+            name: "JOBS",
+            default: "1",
+          },
+        },
       ],
     },
     {
       name: "clean",
       description: "Clean out pre-commit files",
-      options: globalOptions,
+      options: baseOptions,
     },
     {
       name: "gc",
       description: "Clean unused cached repos",
-      options: globalOptions,
+      options: baseOptions,
+    },
+    {
+      name: "hazmat",
+      description: "Composable tools for rare use in hook `entry`",
+      options: baseOptions,
+      subcommands: [
+        {
+          name: "cd",
+          description: "Cd to a subdir and run the command",
+          args: [{ name: "subdir", template: "folders" }, hazmatCmd],
+        },
+        {
+          name: "ignore-exit-code",
+          description: "Run the command but ignore the exit code",
+          args: hazmatCmd,
+        },
+        {
+          name: "n1",
+          description: "Run the command once per filename",
+          args: hazmatCmd,
+        },
+      ],
     },
     {
       name: "init-templatedir",
       description:
         "Install hook script in a directory intended for use with `git config init.templateDir`",
+      args: {
+        name: "directory",
+        description: "The directory in which to write the hook script",
+        template: "folders",
+      },
       options: [
         ...globalOptions,
         hookType,
@@ -253,7 +352,7 @@ const completionSpec: Fig.Spec = {
           description: "Overwrite existing hooks / remove migration mode",
         },
         {
-          name: "install-hooks",
+          name: "--install-hooks",
           description:
             "Whether to install hook environments for all environments in the config file",
         },
@@ -264,6 +363,12 @@ const completionSpec: Fig.Spec = {
             "Whether to allow a missing `pre-commit` configuration file or exit with a failure code",
         },
       ],
+    },
+    {
+      name: "install-hooks",
+      description:
+        "Install hook environments for all environments in the config file",
+      options: globalOptions,
     },
     {
       name: "migrate-config",
@@ -284,7 +389,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "sample-config",
       description: "Produce a sample .pre-commit-config.yaml file",
-      options: globalOptions,
+      options: baseOptions,
     },
     {
       name: "try-repo",
@@ -320,10 +425,33 @@ const completionSpec: Fig.Spec = {
       description: "Uninstall the pre-commit script",
       options: [...globalOptions, hookType],
     },
+    validateCommand("validate-config", ".pre-commit-config.yaml"),
+    validateCommand("validate-manifest", ".pre-commit-hooks.yaml"),
     {
       name: "help",
       description: "Show help for a specific command",
-      options: globalOptions,
+      options: [help],
+      args: {
+        name: "help_cmd",
+        description: "Command to show help for",
+        isOptional: true,
+        template: "help",
+      },
+    },
+    {
+      name: "hook-impl",
+      description: "Internal entry point used by installed git hooks",
+      hidden: true,
+      options: [
+        ...globalOptions,
+        {
+          name: "--hook-type",
+          isRequired: true,
+          args: { name: "HOOK_TYPE", suggestions: hookTypes },
+        },
+        { name: "--hook-dir", args: { name: "HOOK_DIR", template: "folders" } },
+        { name: "--skip-on-missing-config" },
+      ],
     },
   ],
 };

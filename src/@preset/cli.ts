@@ -1,9 +1,11 @@
+// Preset v0.12.3 (npm "latest", 2026-02-17). Source: packages/cli/src/cli.ts at preset/preset@v0.12.3
 const applyOptions: Fig.Option[] = [
   {
     name: ["--path", "-p"],
     description: "Path to a sub-directory in which to look for a preset",
     args: {
       name: "path",
+      isOptional: true,
     },
   },
   {
@@ -11,15 +13,13 @@ const applyOptions: Fig.Option[] = [
     description: "Branch or tag to use if the preset is a repository",
     args: {
       name: "tag",
+      isOptional: true,
     },
   },
   {
-    name: "--no-ssh",
-    description: "Do not use SSH when cloning repositories",
-  },
-  {
-    name: "--no-cache",
-    description: "Do not use the cached repository if it exists",
+    name: "--ssh",
+    description:
+      "Clone the repository over SSH (defaults to the repository URL's scheme)",
   },
 ];
 
@@ -48,8 +48,18 @@ const completionSpec: Fig.Spec = {
       args: applyArguments,
     },
     {
-      name: "init",
+      name: ["init", "initialize"],
       description: "Create a new preset",
+      options: [
+        {
+          name: "--no-git",
+          description: "Do not initialize a Git repository",
+        },
+        {
+          name: "--no-install",
+          description: "Do not install the preset dependency",
+        },
+      ],
       args: {
         name: "target-directory",
         description: "Directory in which to apply the preset",
@@ -70,17 +80,22 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--no-interaction",
-      description: "Disable interactions",
+      description: "Disable interactions; prompts use their default answers",
+      isPersistent: true,
+    },
+    {
+      name: "--time",
+      description: "Display the duration of each action",
       isPersistent: true,
     },
     {
       name: "--debug",
-      description: "Display debug information instead of standard output",
+      description: "Use the debug reporter",
       isPersistent: true,
     },
     {
       name: "--silent",
-      description: "Do not print anything",
+      description: "Do not use a reporter",
       isPersistent: true,
     },
   ],

@@ -1,3 +1,31 @@
+// ping (macOS 15.5 BSD ping, network_cmds-705.100.5, man page dated 2013-03-29, 2026-11-19). Source: Apple OSS mirror
+// apple-oss-distributions/network_cmds ping.tproj/ping.8 and ping.c (getopt/longopts). Not run on macOS.
+const trafficClasses = [
+  "BK_SYS",
+  "BK",
+  "BE",
+  "RD",
+  "OAM",
+  "AV",
+  "RV",
+  "VI",
+  "VO",
+  "CTL",
+];
+
+const netServiceTypes = [
+  "BK_SYS",
+  "BK",
+  "BE",
+  "RV",
+  "AV",
+  "RD",
+  "OAM",
+  "VI",
+  "SIG",
+  "VO",
+];
+
 const completionSpec: Fig.Spec = {
   name: "ping",
   args: {
@@ -8,7 +36,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-A",
       description:
-        "Audible. Output a bell (ASCII 0x07) character when no packet is received before the next packet is transmitted. To cater for round-trip times that are longer than the interval between trans- missions, further missing packets cause a bell only if the maxi- mum number of unreceived packets has increased",
+        "Audible. Output a bell (ASCII 0x07) character when no packet is received before the next packet is transmitted. To cater for round-trip times that are longer than the interval between transmissions, further missing packets cause a bell only if the maximum number of unreceived packets has increased",
     },
     {
       name: "-a",
@@ -31,7 +59,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-c",
       description:
-        "Stop after sending (and receiving) count ECHO_RESPONSE packets. If this option is not specified, ping will operate until inter- rupted. If this option is specified in conjunction with ping sweeps, each sweep will consist of count packets",
+        "Stop after sending (and receiving) count ECHO_RESPONSE packets. If this option is not specified, ping will operate until interrupted. If this option is specified in conjunction with ping sweeps, each sweep will consist of count packets",
       args: {
         name: "count",
       },
@@ -44,14 +72,14 @@ const completionSpec: Fig.Spec = {
     {
       name: "-f",
       description:
-        "Flood ping. Outputs packets as fast as they come back or one hundred times per second, whichever is more. For every ECHO_REQUEST sent a period ``.'' is printed, while for every ECHO_REPLY received a backspace is printed. This provides a rapid display of how many packets are being dropped. Only the super-user may use this option. This can be very hard on a net- work and should be used with caution",
+        "Flood ping. Outputs packets as fast as they come back or one hundred times per second, whichever is more. For every ECHO_REQUEST sent a period is printed, while for every ECHO_REPLY received a backspace is printed. This provides a rapid display of how many packets are being dropped. Only the super-user may use this option. This can be very hard on a network and should be used with caution",
     },
     {
       name: "-G",
       description:
-        "Sweepmaxsize Specify the maximum size of ICMP payload when sending sweeping pings. This option is required for ping sweeps",
+        "Specify the maximum size of ICMP payload when sending sweeping pings. This option is required for ping sweeps",
       args: {
-        name: "count",
+        name: "sweepmaxsize",
       },
     },
     {
@@ -83,7 +111,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-i",
       description:
-        "Wait wait seconds between sending each packet. The default is to wait for one second between each packet. The wait time may be fractional, but only the super-user may specify values less than 0.1 second. This option is incompatible with the -f option",
+        "Wait wait seconds between sending each packet. The default is to wait for one second between each packet. The wait time may be fractional, but only the super-user may specify values less than 0.002 second. This option is incompatible with the -f option",
       args: {
         name: "wait",
       },
@@ -94,39 +122,17 @@ const completionSpec: Fig.Spec = {
         "Specifies the traffic class to use for sending ICMP packets. By default ping uses the control traffic class (CTL). This option is an Apple addition",
       args: {
         name: "trafficclass",
-        suggestions: [
-          "BK_SYS",
-          "BK",
-          "BE",
-          "RD",
-          "OAM",
-          "AV",
-          "RV",
-          "VI",
-          "VO",
-          "CTL",
-        ],
+        suggestions: trafficClasses,
         default: "CTL",
       },
     },
     {
       name: "-K",
       description:
-        "Specifies the network service type to use for sending ICMP pack- ets. Note this overrides the default traffic class (-k can still be specified after -K to use both). This option is an Apple addition",
+        "Specifies the network service type to use for sending ICMP packets. Note this overrides the default traffic class (-k can still be specified after -K to use both). This option is an Apple addition",
       args: {
         name: "netservicetype",
-        suggestions: [
-          "BK_SYS",
-          "BK",
-          "BE",
-          "RV",
-          "AV",
-          "RD",
-          "OAM",
-          "VI",
-          "SIG",
-          "VO",
-        ],
+        suggestions: netServiceTypes,
       },
     },
     {
@@ -145,9 +151,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "-M",
       description:
-        "Use ICMP_MASKREQ or ICMP_TSTAMP instead of ICMP_ECHO. For mask, print the netmask of the remote machine. Set the net.inet.icmp.maskrepl MIB variable to enable ICMP_MASKREPLY. For time, print the origination, reception and transmission time- stamps",
+        "Use ICMP_MASKREQ or ICMP_TSTAMP instead of ICMP_ECHO. For mask, print the netmask of the remote machine. Set the net.inet.icmp.maskrepl MIB variable to enable ICMP_MASKREPLY. For time, print the origination, reception and transmission timestamps",
       args: {
         name: "mask | time",
+        suggestions: ["mask", "time"],
       },
     },
     {
@@ -186,7 +193,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-Q",
       description:
-        "Somewhat quiet output. Don't display ICMP error messages that are in response to our query messages. Originally, the -v flag was required to display such errors, but -v displays all ICMP error messages. On a busy machine, this output can be overbear- ing. Without the -Q flag, ping prints out any ICMP error mes- sages caused by its own ECHO_REQUEST messages",
+        "Somewhat quiet output. Don't display ICMP error messages that are in response to our query messages. Originally, the -v flag was required to display such errors, but -v displays all ICMP error messages. On a busy machine, this output can be overbearing. Without the -Q flag, ping prints out any ICMP error messages caused by its own ECHO_REQUEST messages",
     },
     {
       name: "-q",
@@ -195,13 +202,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-R",
-      description:
-        "Record route. Includes the RECORD_ROUTE option in the ECHO_REQUEST packet and displays the route buffer on returned packets. Note that the IP header is only large enough for nine such routes; the traceroute(8) command is usually better at determining the route packets take to a particular destination. If more routes come back than should, such as due to an illegal spoofed packet, ping will print the route list and then truncate it at the correct spot. Many hosts ignore or discard the RECORD_ROUTE option",
+      description: "Record route. This option is deprecated and is now a no-op",
+      deprecated: true,
     },
     {
       name: "-r",
       description:
-        "Bypass the normal routing tables and send directly to a host on an attached network. If the host is not on a directly-attached network, an error is returned. This option can be used to ping a local host through an interface that has no route through it (e.g., after the interface was dropped by routed(8))",
+        "Bypass the normal routing tables and send directly to a host on an attached network. If the host is not on a directly-attached network, an error is returned. This option can be used to ping a local host through an interface that has no route through it",
     },
     {
       name: "-S",
@@ -258,12 +265,26 @@ const completionSpec: Fig.Spec = {
     // TODO(platform): apple only option
     {
       name: "--apple-connect",
-      description: "Connects the socket to the destination address",
+      description:
+        "Connects the socket to the destination address. This option is an Apple addition",
     },
     // TODO(platform): apple only option
     {
       name: "--apple-time",
-      description: "Prints the time a packet was received",
+      description:
+        "Prints the time a packet was received. This option is an Apple addition",
+    },
+    // TODO(platform): apple only option
+    {
+      name: "--apple-print-id",
+      description: "Prints the ICMP echo ID. This option is an Apple addition",
+    },
+    // TODO(platform): apple only option
+    {
+      // Documented as --apple-print-req; the longopts table spells it --apple-print-request
+      name: ["--apple-print-req", "--apple-print-request"],
+      description:
+        "Prints the ICMP echo request. This option is an Apple addition",
     },
   ],
 };

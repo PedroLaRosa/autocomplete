@@ -1,66 +1,65 @@
+// Bitwarden Secrets Manager CLI (bws) v2.1.0 (GitHub tag bws-v2.1.0 of bitwarden/sdk-sm, latest bws release, 2026-11-19). Source: clap definitions in crates/bws/src/cli.rs,
+// command/mod.rs and config.rs at that tag. Read from source, the release binary was not executed.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 const bwLogo32x32 = "https://bitwarden.com/images/icon_32x32.png";
 
 const completionSpec: Fig.Spec = {
   name: "bws",
+  description: "Bitwarden Secrets CLI",
   subcommands: [
     {
       name: "config",
-      description: "Specify server settings for the Secrets Manager CLI",
+      description: "Configure the CLI",
       icon: bwLogo32x32,
-      args: {
-        name: "Setting",
-        description: "Server setting to specify",
-        suggestions: [
-          {
-            name: "server-base",
-            description: "Base server URL",
-          },
-          {
-            name: "server-api",
-            description: "Server API endpoint URL",
-          },
-          {
-            name: "server-identity",
-            description: "Server Identity endpoint URL",
-          },
-          {
-            name: "state-file-dir",
-            description: "Server file storage location",
-          },
-        ],
-      },
+      args: [
+        {
+          name: "NAME",
+          description: "Profile setting to specify",
+          isOptional: true,
+          suggestions: [
+            {
+              name: "server-base",
+              description: "Base server URL",
+            },
+            {
+              name: "server-api",
+              description: "Server API endpoint URL",
+            },
+            {
+              name: "server-identity",
+              description: "Server Identity endpoint URL",
+            },
+            {
+              name: "state-dir",
+              description: "Directory used to store the state files",
+            },
+            {
+              name: "state-opt-out",
+              description: "Opt out of using state files (true or false)",
+            },
+          ],
+        },
+        {
+          name: "VALUE",
+          description: "Value to save for the setting",
+          isOptional: true,
+        },
+      ],
       options: [
         {
-          name: "--profile",
-          description: "Save specified value(s) to an alternate profile",
-          args: {
-            name: "profile",
-            description: "Profile name to save to",
-          },
-        },
-        {
-          name: "--config-file",
-          description: "Save specified value(s) to an alternative config file",
-          args: {
-            name: "Config file path",
-            template: "filepaths",
-          },
-        },
-        {
-          name: ["-h", "--help"],
-          description: "Display help for login command",
-          priority: 49,
+          name: ["-d", "--delete"],
+          description: "Delete the profile",
         },
       ],
     },
     {
       name: "completions",
-      description: "Generate shell completions",
+      description: "Generate shell completion files",
       icon: bwLogo32x32,
       args: {
         name: "SHELL",
         description: "Shell to generate completions for",
+        isOptional: true,
         suggestions: [
           { name: "bash", description: "Generate shell completions for bash" },
           {
@@ -75,17 +74,10 @@ const completionSpec: Fig.Spec = {
           { name: "zsh", description: "Generate shell completions for zsh" },
         ],
       },
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Display help for logout command",
-          priority: 49,
-        },
-      ],
     },
     {
       name: "project",
-      description: "Access, manipulate and create projects",
+      description: "Commands available on Projects",
       icon: bwLogo32x32,
       subcommands: [
         {
@@ -102,8 +94,9 @@ const completionSpec: Fig.Spec = {
           description: "Delete one or more existing projects",
           insertValue: "delete '{cursor}'",
           args: {
-            name: "PROJECT_ID(s)",
+            name: "PROJECT_IDS",
             description: "ID(s) of project(s) to delete",
+            isVariadic: true,
           },
           isDangerous: true,
         },
@@ -111,14 +104,19 @@ const completionSpec: Fig.Spec = {
           name: "edit",
           description: "Change the name of an existing project",
           insertValue: "edit --name '{cursor}'",
-          args: [
+          args: {
+            name: "PROJECT_ID",
+            description: "ID of project to edit",
+          },
+          options: [
             {
               name: "--name",
               description: "New project name",
-            },
-            {
-              name: "PROJECT_ID",
-              description: "ID of project to edit",
+              isRequired: true,
+              args: {
+                name: "NAME",
+                description: "New project name",
+              },
             },
           ],
         },
@@ -136,18 +134,18 @@ const completionSpec: Fig.Spec = {
           name: "list",
           description: "List projects accessible to this service account",
         },
-      ],
-      options: [
         {
-          name: ["-h", "--help"],
-          description: "Access, manipulate and create projects",
+          name: "help",
+          description:
+            "Print this message or the help of the given subcommand(s)",
           priority: 49,
+          args: { name: "SUBCOMMAND", isOptional: true },
         },
       ],
     },
     {
       name: "secret",
-      description: "Access, manipulate and create secrets",
+      description: "Commands available on Secrets",
       icon: bwLogo32x32,
       subcommands: [
         {
@@ -167,47 +165,53 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--note",
-              description: "Optional notes about this secret",
+              description: "An optional note to add to the secret",
               insertValue: "--note '{cursor}'",
+              args: { name: "NOTE" },
             },
           ],
         },
         {
           name: "delete",
-          description: "Delete an existing secret",
+          description: "Delete one or more existing secrets",
           args: {
             name: "SECRET_IDS",
-            description: "Delete one or more secrets designated by SECRET_IDS",
+            description: "ID(s) of secret(s) to delete",
+            isVariadic: true,
           },
           isDangerous: true,
         },
         {
           name: "edit",
-          description: "Edit an existing secret",
+          description:
+            "Edit an existing secret (at least one of the fields is required)",
           args: {
             name: "SECRET_ID",
             description: "ID of secret to be edited",
           },
           options: [
             {
-              name: "key",
+              name: "--key",
               description: "Edit the Secret Key",
               insertValue: "--key '{cursor}'",
+              args: { name: "KEY" },
             },
             {
-              name: "value",
+              name: "--value",
               description: "Edit the Secret Value",
               insertValue: "--value '{cursor}'",
+              args: { name: "VALUE" },
             },
             {
-              name: "project-id",
-              description: "Edit the ID of project this secret belongs to",
-              insertValue: "--project-id '{cursor}'",
-            },
-            {
-              name: "note",
-              description: "Edit the optional notes about this secret",
+              name: "--note",
+              description: "Edit the optional note about this secret",
               insertValue: "--note '{cursor}'",
+              args: { name: "NOTE" },
+            },
+            {
+              name: "--project-id",
+              description: "Edit the ID of project this secret belongs to",
+              args: { name: "PROJECT_ID" },
             },
           ],
         },
@@ -223,34 +227,73 @@ const completionSpec: Fig.Spec = {
           name: "list",
           description: "List the secrets this service account can access",
           args: {
-            name: "Project",
-            description: "Project Identifier",
+            name: "PROJECT_ID",
+            description: "Only list the secrets of this project",
             isOptional: true,
           },
         },
-      ],
-      options: [
         {
-          name: ["-h", "--help"],
-          description: "Display help for unlock command",
+          name: "help",
+          description:
+            "Print this message or the help of the given subcommand(s)",
           priority: 49,
+          args: { name: "SUBCOMMAND", isOptional: true },
         },
       ],
     },
     {
-      name: ["--help", "-h"],
-      description:
-        "Get help about using the Bitwarden Secrets Manager CLI tool",
+      name: "run",
+      description: "Run a command with secrets injected",
       icon: bwLogo32x32,
+      args: {
+        name: "COMMAND",
+        description: "The command to run",
+        isOptional: true,
+        isCommand: true,
+      },
+      options: [
+        {
+          name: "--shell",
+          description: "The shell to use",
+          args: { name: "SHELL" },
+        },
+        {
+          name: "--no-inherit-env",
+          description:
+            "Don't inherit environment variables from the current shell",
+        },
+        {
+          name: "--project-id",
+          description: "The ID of the project to use",
+          args: { name: "PROJECT_ID" },
+        },
+        {
+          name: "--uuids-as-keynames",
+          description:
+            "Use the secret UUID (in its POSIX form) instead of the key name for the environment variable [env: BWS_UUIDS_AS_KEYNAMES]",
+        },
+      ],
+    },
+    {
+      name: "help",
+      description: "Print this message or the help of the given subcommand(s)",
+      icon: bwLogo32x32,
+      priority: 49,
+      args: {
+        name: "SUBCOMMAND",
+        isOptional: true,
+        suggestions: ["config", "completions", "project", "secret", "run"],
+      },
     },
   ],
   options: [
     {
       name: ["-o", "--output"],
-      description: "Output format [default: json]",
+      description: "Output format",
       args: {
         name: "Format",
         description: "Select output format",
+        default: "json",
         suggestions: [
           { name: "json", description: "Produce json output" },
           { name: "yaml", description: "Produce yaml output" },
@@ -266,10 +309,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-c", "--color"],
-      description: "Use colors in the output [default: auto]",
+      description: "Use colors in the output",
       args: {
         name: "Color",
         description: "Select output coloration scheme",
+        default: "auto",
         suggestions: [
           { name: "no", description: "Do not color output" },
           { name: "yes", description: "Colorize output" },
@@ -294,7 +338,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-f", "--config-file"],
-      description: "Config file to use [default: ~/.bws.config]",
+      description:
+        "Config file to use [env: BWS_CONFIG_FILE] [default: ~/.config/bws/config]",
       args: {
         name: "Config File",
         template: "filepaths",
@@ -305,7 +350,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-p", "--profile"],
-      description: "Profile to use from the config file [env: BWS_PROFILE=]",
+      description: "Profile to use from the config file [env: BWS_PROFILE]",
       args: {
         name: "Profile",
         description: "User Profile to enable",
@@ -317,7 +362,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-u", "--server-url"],
       description:
-        "Override the server URL from the config file [env: BWS_SERVER_URL=]",
+        "Override the server URL from the config file [env: BWS_SERVER_URL]",
       args: {
         name: "Server URL",
         description: "URL of Bitwarden Secrets Manager server",

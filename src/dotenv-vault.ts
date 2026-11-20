@@ -1,3 +1,7 @@
+// dotenv-vault v1.27.0 (latest on npm and newest git tag, published 2025-06-25; verified 2026-11-20).
+// Source: oclif.manifest.json and dist/commands of the npm tarball plus src/commands/*.ts in
+// dotenv-org/dotenv-vault, plus the `help` and `update` commands (@oclif/plugin-help 5.2.20,
+// @oclif/plugin-update 3.2.4) and the root `--version` flag handled by @oclif/core 1.x.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 // Common Options
@@ -18,28 +22,30 @@ const dotenvMeOption: Fig.Option = {
 };
 
 // Common Arguments
-const dotenvVaultArg = {
+const dotenvVaultArg: Fig.Arg = {
   name: "DOTENV_VAULT",
   description: "Set .env.vault identifier. Defaults to generated value",
   isOptional: true,
 };
 
-const dotenvMeArg = {
+const dotenvMeArg: Fig.Arg = {
   name: "DOTENV_ME",
   description: "Set .env.me credential. Defaults to generated value",
   isOptional: true,
 };
 
-const environmentArg = {
+// ponytail: the default environments of a new dotenv-vault project; custom ones still type freely
+const environmentArg: Fig.Arg = {
   name: "ENVIRONMENT",
-  description: "Set environment to open to. Defaults to development",
+  description: "Set environment. Defaults to development",
   isOptional: true,
+  suggestions: ["development", "ci", "staging", "production"],
 };
 
-const filenameArg = {
+const filenameArg: Fig.Arg = {
   name: "FILENAME",
   description:
-    "Set input filename. Defaults to .env for development and .env.{environment} for other environments",
+    "Set filename. Defaults to .env for development and .env.{environment} for other environments",
   isOptional: true,
   generators: filepaths({ matches: /^\.env.*$/ }),
 };
@@ -53,6 +59,10 @@ const completionSpec: Fig.Spec = {
       description: "Get documentation for the command",
       isPersistent: true,
     },
+    {
+      name: "--version",
+      description: "Show the CLI version (only as the first argument)",
+    },
   ],
   subcommands: [
     {
@@ -63,18 +73,18 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "login",
-      description: "Log in to dotenv-vault",
+      description: "Log in",
       options: [yesOption],
       args: dotenvMeArg,
     },
     {
       name: "logout",
-      description: "Log out from dotenv-vault",
+      description: "Log out",
       options: [yesOption],
     },
     {
       name: "open",
-      description: "Opens project page in a browser",
+      description: "Open project page",
       options: [yesOption],
       args: environmentArg,
     },
@@ -94,7 +104,37 @@ const completionSpec: Fig.Spec = {
       name: "versions",
       description: "List version history",
       options: [yesOption, dotenvMeOption],
-      args: [environmentArg, filenameArg],
+      args: environmentArg,
+    },
+    {
+      name: "build",
+      description: "Build .env.vault",
+      options: [yesOption, dotenvMeOption],
+    },
+    {
+      name: "keys",
+      description: "List .env.vault decryption keys",
+      options: [yesOption, dotenvMeOption],
+      args: {
+        ...environmentArg,
+        description:
+          "Set environment to fetch key(s) from. Defaults to all environments",
+      },
+    },
+    {
+      name: "rotatekey",
+      description: "Rotate a DOTENV_KEY",
+      options: [yesOption, dotenvMeOption],
+      args: {
+        name: "ENVIRONMENT",
+        description: "Set environment to rotate",
+        suggestions: environmentArg.suggestions,
+      },
+    },
+    {
+      name: "decrypt",
+      description: "Decrypt .env.vault locally",
+      args: { name: "DOTENV_KEY", description: "Set decryption key" },
     },
     {
       name: "whoami",
@@ -103,17 +143,52 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "status",
-      description: "Check dotenv-operational status",
+      description: "Check dotenv.org status",
       options: [yesOption],
     },
     {
       name: "help",
       description: "Display help for dotenv-vault",
+      options: [
+        {
+          name: ["-n", "--nested-commands"],
+          description: "Include all nested commands in the output",
+        },
+      ],
+      args: {
+        name: "command",
+        description: "Command to show help for",
+        isOptional: true,
+        isVariadic: true,
+        template: "help",
+      },
     },
     {
       name: "update",
       description: "Update the dotenv-vault CLI",
-      options: [yesOption],
+      options: [
+        {
+          name: ["-a", "--available"],
+          description: "See available versions",
+        },
+        {
+          name: ["-v", "--version"],
+          description: "Install a specific version",
+          exclusiveOn: ["--interactive"],
+          args: { name: "version" },
+        },
+        {
+          name: ["-i", "--interactive"],
+          description:
+            "Interactively select version to install. This is ignored if a channel is provided",
+          exclusiveOn: ["--version"],
+        },
+        {
+          name: "--force",
+          description: "Force a re-download of the requested version",
+        },
+      ],
+      args: { name: "channel", isOptional: true },
     },
   ],
 };

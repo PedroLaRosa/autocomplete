@@ -1,3 +1,5 @@
+// Robot Framework v7.5.1 (PyPI robotframework 7.5.1, 2026-11-20). Source: USAGE text in src/robot/run.py
+// of the 7.5.1 sdist, read statically (the downloaded package was not executed).
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const tagsGenerator: Fig.Generator = {
@@ -115,16 +117,35 @@ const completionSpec: Fig.Spec = {
     {
       name: "--rpa",
       description:
-        'Turn on the generic automation mode. Mainly affects terminology so that "test" is replaced with "task" in logs and reports',
+        'Turn on the generic automation mode. Mainly affects terminology so that "test" is replaced with "task" in logs and reports. By default the mode is got from test/task header in data files',
+    },
+    {
+      name: "--language",
+      isRepeatable: true,
+      description:
+        "Activate localization. The value can be a name or a code of a built-in language, or a path or a module name of a custom language file",
+      args: {
+        name: "lang",
+      },
     },
     {
       name: ["-F", "--extension"],
       description:
-        "Parse only files with this extension when executing a directory",
+        "Parse only files with this extension when executing a directory. Has no effect when running individual files or when using resource files. Only `*.robot` files are parsed by default",
       args: {
         name: "extension",
         description: "File extensions divided by colon",
         suggestions: ["txt", "robot:txt"],
+      },
+    },
+    {
+      name: ["-I", "--parseinclude"],
+      isRepeatable: true,
+      description:
+        "Parse only files matching the pattern. It can be a file name or pattern, a file path, or a directory path to parse all files in that directory recursively",
+      args: {
+        name: "pattern",
+        template: ["filepaths", "folders"],
       },
     },
     {
@@ -137,10 +158,15 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-D", "--doc"],
       insertValue: "-D '{cursor}'",
-      description: "Set a documentation of the top level suite",
+      description:
+        "Set a documentation of the top level suite. Simple formatting is supported. If the value is a path to an existing file, the documentation is read from that file",
+      args: {
+        name: "documentation",
+      },
     },
     {
       name: ["-M", "--metadata"],
+      isRepeatable: true,
       insertValue: "-M {cursor}:",
       description: "Set metadata of the top level suite",
       args: {
@@ -149,6 +175,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-G", "--settag"],
+      isRepeatable: true,
       description: "Sets given tag to all executed tests",
       args: {
         name: "tag",
@@ -156,6 +183,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-t", "--test"],
+      isRepeatable: true,
       description:
         "Select tests by name or by long name containing also parent suite name like `Parent.Test`",
       args: {
@@ -165,6 +193,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--task",
+      isRepeatable: true,
       description: "Alias to --test. Especially applicable with --rpa",
       args: {
         name: "name",
@@ -173,6 +202,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-s", "--suite"],
+      isRepeatable: true,
       description: "Select suites by name",
       args: {
         name: "name",
@@ -180,6 +210,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-i", "--include"],
+      isRepeatable: true,
       description: "Select test cases by tag",
       args: {
         name: "tag",
@@ -188,6 +219,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-e", "--exclude"],
+      isRepeatable: true,
       description: "Select test cases not to run by tag",
       args: {
         name: "tag",
@@ -222,6 +254,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--skip",
+      isRepeatable: true,
       description: "Tests having given tag will be skipped",
       args: {
         name: "tag",
@@ -230,6 +263,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--skiponfailure",
+      isRepeatable: true,
       description: "Tests having given tag will be skipped if they fail",
       args: {
         name: "tag",
@@ -238,6 +272,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-v", "--variable"],
+      isRepeatable: true,
       description: "Set variables in the test data",
       args: {
         name: "variable",
@@ -246,6 +281,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-V", "--variablefile"],
+      isRepeatable: true,
       description: "Python or YAML file file to read variables from",
       args: {
         name: "file",
@@ -266,11 +302,16 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-o", "--output"],
       description:
-        "XML output file relative to --outputdir unless given as an absolute path. Default: output.xml",
+        "XML output file relative to --outputdir unless given as an absolute path. Can be disabled by giving a special value `NONE`. Default: output.xml",
       args: {
         name: "file",
-        suggestions: ["output.xml"],
+        suggestions: ["output.xml", "NONE"],
       },
+    },
+    {
+      name: "--legacyoutput",
+      description:
+        "Create XML output file in format compatible with Robot Framework 6.x and earlier",
     },
     {
       name: ["-l", "--log"],
@@ -388,7 +429,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-L", "--loglevel"],
-      description: "Threshold level for logging",
+      description:
+        "Threshold level for logging. Use syntax `LOGLEVEL:DEFAULT` to define the default visible log level in log files",
       args: {
         name: "level",
         suggestions: [
@@ -419,6 +461,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--tagstatinclude",
+      isRepeatable: true,
       description:
         "Include only matching tags in `Statistics by Tag` in log and report",
       args: {
@@ -428,6 +471,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--tagstatexclude",
+      isRepeatable: true,
       description: "Exclude matching tags from `Statistics by Tag`",
       args: {
         name: "tag",
@@ -436,6 +480,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--tagstatcombine",
+      isRepeatable: true,
       description:
         "Create combined statistics based on tags. These statistics are added into `Statistics by Tag`",
       args: {
@@ -445,6 +490,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--tagdoc",
+      isRepeatable: true,
       description: "Add documentation to tags matching the given pattern",
       args: {
         name: "pattern:doc",
@@ -453,6 +499,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--tagstatlink",
+      isRepeatable: true,
       description:
         "Add external links into `Statistics by Tag`. Pattern can use `*`, `?` and `[]` as wildcards",
       args: {
@@ -462,6 +509,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--expandkeywords",
+      isRepeatable: true,
       description:
         "Matching keywords will be automatically expanded in the log file",
       args: {
@@ -482,7 +530,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--removekeywords",
-      description: "Remove keyword data from the generated log file",
+      isRepeatable: true,
+      description:
+        "Remove keyword data from the generated log file. Keywords containing warnings are not removed except in the `all` mode",
       args: {
         name: "pattern",
         suggestions: [
@@ -528,6 +578,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--flattenkeywords",
+      isRepeatable: true,
       description: "Flattens matching keywords in the generated log file",
       args: {
         name: "pattern",
@@ -548,6 +599,12 @@ const completionSpec: Fig.Spec = {
             type: "option",
           },
           {
+            name: "foritem",
+            description: "Deprecated alias for `iteration`",
+            type: "option",
+            deprecated: true,
+          },
+          {
             name: "name:<pattern>",
             insertValue: "name:{cursor}",
             type: "option",
@@ -562,6 +619,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--listener",
+      isRepeatable: true,
       description:
         "A class for monitoring test execution. Gets notifications e.g. when tests start and end",
       args: {
@@ -576,7 +634,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--dryrun",
       description:
-        "Sets the return code to zero regardless of failures in test cases. Error codes are returned normally",
+        "Verifies test data and runs tests so that library keywords are not executed",
     },
     {
       name: ["-X", "--exitonfailure"],
@@ -594,7 +652,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--randomize",
-      description: "Randomizes the test execution order",
+      description:
+        "Randomizes the test execution order. Use syntax `VALUE:SEED` to give a custom random seed, which must be an integer",
       args: {
         name: "type",
         suggestions: [
@@ -617,6 +676,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--prerunmodifier",
+      isRepeatable: true,
       description:
         "Class to programmatically modify the suite structure before execution",
       args: {
@@ -625,6 +685,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--prerebotmodifier",
+      isRepeatable: true,
       description:
         "Class to programmatically modify the result model before creating reports and logs",
       args: {
@@ -632,8 +693,18 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--parser",
+      isRepeatable: true,
+      description:
+        "Custom parser class or module. Parser classes accept arguments the same way as with --listener",
+      args: {
+        name: "parser",
+      },
+    },
+    {
       name: "--console",
-      description: "How to report execution on the console",
+      description:
+        "How to report execution on the console. Values other than the built-in ones are interpreted as a custom console class or module",
       args: {
         name: "type",
         suggestions: [
@@ -717,6 +788,27 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--consolelinks",
+      description: "Control making paths to results files hyperlinks",
+      args: {
+        name: "option",
+        suggestions: [
+          {
+            name: "auto",
+            displayName: "auto (default)",
+            priority: 76,
+            description: "Use links when colors are enabled (default)",
+            type: "option",
+          },
+          {
+            name: "off",
+            description: "Disable links unconditionally",
+            type: "option",
+          },
+        ],
+      },
+    },
+    {
       name: ["-K", "--consolemarkers"],
       description:
         "Show markers on the console when top level keywords in a test case end",
@@ -740,6 +832,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-P", "--pythonpath"],
+      isRepeatable: true,
       description:
         "Additional locations (directories, ZIPs) where to search libraries and other extensions when they are imported",
       args: {
@@ -751,11 +844,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-A", "--argumentfile"],
+      isRepeatable: true,
       description:
         "Text file to read more arguments from. Use special path `STDIN` to read contents from the standard input stream",
       args: {
         name: "path",
         template: "filepaths",
+        suggestions: ["STDIN"],
       },
     },
     {

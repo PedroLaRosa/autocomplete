@@ -1,3 +1,7 @@
+// Docksal fin v1.118.0 / Docksal v1.19.0 (newest tag of github.com/docksal/docksal, released 2024-05-24, checked 2026-11-19). Source: bin/fin (show_help_* functions, command dispatcher, option parsing) and docs/content at tag v1.19.0 read statically from a shallow clone; fin was not run.
+// Notes: upstream has had no release since v1.19.0. "fin pull" is no longer part of the core script (it is the "pull" addon) and is not described here. "fin hosts list" is documented in the help but the script itself only handles a bare "fin hosts".
+// DB charset/collation defaults follow bin/fin (utf8mb4 / utf8mb4_unicode_ci), which differ from the help text (utf8 / utf8_general_ci).
+
 const databases: Fig.Generator = {
   script: ["fin", "db", "list"],
   postProcess: (output) => {
@@ -36,6 +40,148 @@ const serviceGenerator: Fig.Generator = {
   splitOn: "\n",
 };
 
+const dbName: Fig.Option = {
+  name: "--db",
+  description:
+    "Use another database (default is the one set with 'MYSQL_DATABASE')",
+  requiresEquals: true,
+  args: {
+    name: "database",
+  },
+};
+
+const dbUser: Fig.Option = {
+  name: "--db-user",
+  description: "Use another mysql username (default is 'root')",
+  requiresEquals: true,
+  args: {
+    name: "user",
+  },
+};
+
+const dbPassword: Fig.Option = {
+  name: "--db-password",
+  description:
+    "Use another database password (default is the one set with 'MYSQL_ROOT_PASSWORD', see fin config)",
+  requiresEquals: true,
+  args: {
+    name: "password",
+  },
+};
+
+const dbForce: Fig.Option = {
+  name: "--force",
+  description:
+    "Do not ask questions. The only time when question is asked is when truncation fails",
+};
+
+const dbProgress: Fig.Option = {
+  name: "--progress",
+  description: "Show import progess (requires pv)",
+};
+
+const dbNoTruncate: Fig.Option = {
+  name: "--no-truncate",
+  description: "Do no truncate database before import",
+};
+
+const dumpFileArg: Fig.Arg = {
+  name: "file",
+  template: "filepaths",
+  isOptional: true,
+};
+
+const serviceArg: Fig.Arg = {
+  name: "service",
+  generators: serviceGenerator,
+  isOptional: true,
+  isVariadic: true,
+};
+
+const envOption = (description: string): Fig.Option => ({
+  name: "--env",
+  description,
+  requiresEquals: true,
+  args: {
+    name: "name",
+  },
+});
+
+const allProjectsOption = (description: string): Fig.Option => ({
+  name: ["--all", "-a"],
+  description,
+});
+
+const allOption: Fig.Option = {
+  name: "--all",
+  description: "Print additional information that is hidden by default",
+};
+
+// Project lifecycle commands, available as "fin project <command>" and as top-level shortcuts ("fin <command>")
+const startCommand: Fig.Subcommand = {
+  name: "start",
+  description: "Start project services",
+  priority: 65,
+};
+
+const upCommand: Fig.Subcommand = {
+  name: "up",
+  description: "Configuration re-read and start project services",
+};
+
+const stopCommand: Fig.Subcommand = {
+  name: "stop",
+  description: "Stop all or specified project services",
+  priority: 60,
+  options: [allProjectsOption("Stop all services on all Docksal projects")],
+  args: serviceArg,
+};
+
+const restartCommand: Fig.Subcommand = {
+  name: "restart",
+  description: "Restart project services",
+  priority: 75,
+  args: serviceArg,
+};
+
+const resetCommand: Fig.Subcommand = {
+  name: "reset",
+  description:
+    "Recreate all or specified project services, their containers and volumes",
+  priority: 70,
+  options: [
+    {
+      name: ["--force", "-f"],
+      description:
+        "Do not ask for confirmation when deleting all project services",
+    },
+  ],
+  args: serviceArg,
+};
+
+const removeCommand: Fig.Subcommand = {
+  name: ["remove", "rm"],
+  description:
+    "Remove all project services, networks and all their volumes, or specified services only",
+  options: [
+    {
+      name: ["--force", "-f"],
+      description:
+        "Do not ask for confirmation when deleting all project services",
+    },
+  ],
+  args: serviceArg,
+};
+
+const buildCommand: Fig.Subcommand = {
+  name: "build",
+  description: "Build or rebuild services (alias for 'docker-compose build')",
+};
+
+const listOptions: Fig.Option[] = [
+  allProjectsOption("List all Docksal projects (stopped as well)"),
+];
+
 const completionSpec: Fig.Spec = {
   name: "fin",
   description: "Docksal command line utility",
@@ -43,15 +189,28 @@ const completionSpec: Fig.Spec = {
     {
       name: "help",
       description: "Shows help",
+      args: {
+        name: "command",
+        description: "Show help for a specific command",
+        isOptional: true,
+      },
     },
     // Management Commands:
     {
-      name: "addon",
+      name: ["addon", "a"],
       description:
         "Addons management commands: install, remove (fin help addon)",
+      options: [
+        {
+          name: ["--global", "-g"],
+          description:
+            "Install or remove the addon globally (in $HOME/.docksal/addons)",
+          isPersistent: true,
+        },
+      ],
       subcommands: [
         {
-          name: "install",
+          name: ["install", "in"],
           description: "Install addon",
           args: {
             name: "Name",
@@ -60,7 +219,7 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "remove",
+          name: ["remove", "rm"],
           description: "Remove addon",
           args: {
             name: "Name",
@@ -72,7 +231,7 @@ const completionSpec: Fig.Spec = {
       name: "alias",
       description:
         "Manage aliases that allow fin @alias execution (fin help alias). Create/update alias with <alias_name> that links to <path>",
-      args: [{ name: "path" }, { name: "alias_name" }],
+      args: [{ name: "path", template: "folders" }, { name: "alias_name" }],
       subcommands: [
         {
           name: "list",
@@ -91,33 +250,22 @@ const completionSpec: Fig.Spec = {
     {
       name: "db",
       description: "Manage databases (fin help db)",
+      options: [dbName, dbUser, dbPassword].map((option) => ({
+        ...option,
+        isPersistent: true,
+      })),
       subcommands: [
         {
           name: "import",
           description:
             "Truncate the database and import from SQL dump file or stdin",
-          args: {
-            name: "file",
-            template: "filepaths",
-          },
-          options: [
-            {
-              name: "--progress",
-              description: "Show import progess (requires pv)",
-            },
-            {
-              name: "--no-truncate",
-              description: "Do no truncate database before import",
-            },
-          ],
+          args: dumpFileArg,
+          options: [dbProgress, dbNoTruncate, dbForce],
         },
         {
           name: "dump",
           description: "Dump a database into an SQL dump file or stdout",
-          args: {
-            name: "file",
-            template: "filepaths",
-          },
+          args: dumpFileArg,
         },
         {
           name: ["list", "ls"],
@@ -135,6 +283,26 @@ const completionSpec: Fig.Spec = {
         {
           name: "create",
           description: "Create a database",
+          options: [
+            {
+              name: "--db-charset",
+              description:
+                "Override charset when creating a database (default is utf8mb4)",
+              requiresEquals: true,
+              args: {
+                name: "charset",
+              },
+            },
+            {
+              name: "--db-collation",
+              description:
+                "Override collation when creating a database (default is utf8mb4_unicode_ci)",
+              requiresEquals: true,
+              args: {
+                name: "collation",
+              },
+            },
+          ],
           args: {
             name: "name",
           },
@@ -152,53 +320,8 @@ const completionSpec: Fig.Spec = {
           description: "Truncate a database (defaults to the `default`)",
           args: {
             name: "name",
+            generators: databases,
             isOptional: true,
-          },
-        },
-      ],
-      options: [
-        {
-          name: "--db",
-          description:
-            "Use another database (default is the one set with 'MYSQL_DATABASE')",
-          requiresEquals: true,
-          args: {
-            name: "database",
-          },
-        },
-        {
-          name: "--db-user",
-          description: "Use another mysql username (default is 'root')",
-          requiresEquals: true,
-          args: {
-            name: "user",
-          },
-        },
-        {
-          name: "--db-password",
-          description:
-            "Use another database password (default is the one set with 'MYSQL_ROOT_PASSWORD', see fin config)",
-          requiresEquals: true,
-          args: {
-            name: "password",
-          },
-        },
-        {
-          name: "--db-charset",
-          description:
-            "Override charset when creating a database (default is utf8)",
-          requiresEquals: true,
-          args: {
-            name: "charset",
-          },
-        },
-        {
-          name: "--db-collation",
-          description:
-            "Override collation when creating a database (default is utf8_general_ci)",
-          requiresEquals: true,
-          args: {
-            name: "collation",
           },
         },
       ],
@@ -213,6 +336,7 @@ const completionSpec: Fig.Spec = {
             "Add hostname to hosts file. If none provided uses VIRTUAL_HOST",
           args: {
             name: "hostname",
+            isOptional: true,
           },
         },
         {
@@ -222,6 +346,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "hostname",
             generators: hosts,
+            isOptional: true,
           },
         },
         {
@@ -231,80 +356,23 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "project",
+      name: ["project", "p"],
       description: "Manage project(s) (fin help project)",
       subcommands: [
+        startCommand,
+        upCommand,
+        stopCommand,
         {
-          name: "start",
-          description: "Start project services (alias: fin start)",
-          priority: 65,
-        },
-        {
-          name: "up",
-          description:
-            "Configuration re-read and start project services (alias: fin up)",
-        },
-        {
-          name: "stop",
-          description:
-            "Stop all or specified project services (alias: fin stop)",
-          priority: 60,
-          options: [
-            {
-              name: ["--all", "-a"],
-              description: "Stop all services on all Docksal projects",
-            },
-          ],
-          args: {
-            name: "service",
-            generators: serviceGenerator,
-            isOptional: true,
-          },
-        },
-        {
-          name: "status",
+          name: ["status", "st"],
           description: "List project services (alias: fin ps)",
         },
+        restartCommand,
+        resetCommand,
+        removeCommand,
         {
-          name: "restart",
-          description: "Restart project services (alias: fin restart)",
-          priority: 75,
-        },
-        {
-          name: "reset",
-          description:
-            "Recreate all or specified project services, their containers and volumes",
-          priority: 70,
-          args: {
-            name: "service",
-            generators: serviceGenerator,
-          },
-        },
-        {
-          name: ["remove", "rm"],
-          description:
-            "Remove all project services, networks and all their volumes, or specified services only",
-          options: [
-            {
-              name: ["--force", "-f"],
-              description:
-                "Do not ask for confirmation when deleting all project services",
-            },
-          ],
-          args: {
-            name: "service",
-            generators: serviceGenerator,
-          },
-        },
-        {
-          name: "list",
+          name: ["list", "ls"],
           description: "List running Docksal projects (alias: fin pl)",
-          options: [
-            {
-              name: ["--all", "-a"],
-              description: "List all Docksal projects (stopped as well)",
-            },
-          ],
+          options: listOptions,
         },
         {
           name: "create",
@@ -325,6 +393,23 @@ const completionSpec: Fig.Spec = {
               requiresEquals: true,
               args: {
                 name: "#",
+                suggestions: [
+                  { name: "0", description: "Custom git repository" },
+                  { name: "1", description: "Drupal 10 (Composer Version)" },
+                  { name: "2", description: "Drupal 10 (BLT Version)" },
+                  { name: "3", description: "Drupal 7" },
+                  { name: "4", description: "Wordpress" },
+                  { name: "5", description: "Magento" },
+                  { name: "6", description: "Laravel" },
+                  { name: "7", description: "Symfony Skeleton" },
+                  { name: "8", description: "Symfony WebApp" },
+                  { name: "9", description: "Grav CMS" },
+                  { name: "10", description: "Backdrop CMS" },
+                  { name: "11", description: "Hugo" },
+                  { name: "12", description: "Gatsby JS" },
+                  { name: "13", description: "Angular" },
+                  { name: "14", description: "Static HTML site" },
+                ],
               },
             },
             {
@@ -354,10 +439,19 @@ const completionSpec: Fig.Spec = {
           name: "config",
           description: "Show project configuration",
         },
+        buildCommand,
         {
-          name: "build",
+          name: "erase",
           description:
-            "Build or rebuild services (alias for 'docker-compose build')",
+            "Remove project services and delete all files in the project root",
+          hidden: true,
+          options: [
+            {
+              name: ["--force", "-f"],
+              description: "Do not ask for confirmation",
+              isDangerous: true,
+            },
+          ],
         },
       ],
     },
@@ -401,17 +495,46 @@ const completionSpec: Fig.Spec = {
           description: "Generate a new SSH key pair",
           args: {
             name: "key-name",
+            isOptional: true,
           },
         },
       ],
     },
     {
-      name: "system",
+      name: ["system", "sys"],
       description: "Manage Docksal state (fin help system)",
       subcommands: [
         {
           name: "reset",
           description: "Reset Docksal",
+          args: {
+            name: "service",
+            description: "Reset only one system service or setting",
+            isOptional: true,
+            suggestions: [
+              {
+                name: "vhost-proxy",
+                description: "Reset Docksal HTTP/HTTPS reverse proxy service",
+              },
+              {
+                name: "ssh-agent",
+                description: "Reset Docksal ssh-agent service",
+              },
+              {
+                name: "dns",
+                description:
+                  "Reset Docksal DNS service and configure the resolver",
+              },
+              {
+                name: "network",
+                description: "Reset Docksal network settings",
+              },
+              {
+                name: "mounts",
+                description: "Reset Docksal volume mounts configuration",
+              },
+            ],
+          },
         },
         {
           name: "start",
@@ -422,7 +545,7 @@ const completionSpec: Fig.Spec = {
           description: "Stop Docksal",
         },
         {
-          name: "status",
+          name: ["status", "st"],
           description: "Check Docksal status",
         },
       ],
@@ -433,11 +556,14 @@ const completionSpec: Fig.Spec = {
       subcommands: [
         {
           name: "start",
-          description: "Start the machine (create if needed)",
+          description:
+            "Start the machine (create if needed). Deprecated, use fin system start",
+          deprecated: true,
         },
         {
           name: "stop",
-          description: "Stop the machine",
+          description: "Stop the machine. Deprecated, use fin system stop",
+          deprecated: true,
         },
         {
           name: "kill",
@@ -456,10 +582,12 @@ const completionSpec: Fig.Spec = {
           description: "Log into ssh or run a command via ssh",
           args: {
             name: "command",
+            isOptional: true,
+            isVariadic: true,
           },
         },
         {
-          name: "remove",
+          name: ["remove", "rm"],
           description: "Remove Docksal machine and cleanup after it",
         },
         {
@@ -467,7 +595,7 @@ const completionSpec: Fig.Spec = {
           description: "Show the machine IP address",
         },
         {
-          name: "ls",
+          name: ["ls", "list"],
           description: "List all docker machines",
         },
         {
@@ -511,6 +639,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "service",
         generators: serviceGenerator,
+        isOptional: true,
       },
     },
     {
@@ -532,7 +661,7 @@ const completionSpec: Fig.Spec = {
           description: "Display only environment variables section",
         },
         {
-          name: "yml",
+          name: ["yml", "yaml"],
           description:
             "Display static YML project config suitable for export (NOTE: SECRET_* values will not be hidden)",
         },
@@ -555,6 +684,7 @@ const completionSpec: Fig.Spec = {
               requiresEquals: true,
               args: {
                 name: "directory",
+                template: "folders",
               },
             },
           ],
@@ -567,15 +697,7 @@ const completionSpec: Fig.Spec = {
               name: "--global",
               description: "Set for global ENV file",
             },
-            {
-              name: "--env",
-              description: "Set in environment specific project ENV file",
-              requiresEquals: true,
-              args: {
-                name: "name",
-                template: "filepaths",
-              },
-            },
+            envOption("Set in environment specific project ENV file"),
           ],
           args: {
             name: "VAR=VAL",
@@ -590,14 +712,7 @@ const completionSpec: Fig.Spec = {
               name: "--global",
               description: "Remove from global ENV file",
             },
-            {
-              name: "--env",
-              description: "Remove from environment specific project ENV file",
-              requiresEquals: true,
-              args: {
-                name: "name",
-              },
-            },
+            envOption("Remove from environment specific project ENV file"),
           ],
           args: {
             name: "VAR",
@@ -613,16 +728,7 @@ const completionSpec: Fig.Spec = {
               name: "--global",
               description: "Get value from global ENV file",
             },
-            {
-              name: "--env",
-              description:
-                "Get value from environment specific project ENV file",
-              requiresEquals: true,
-              args: {
-                name: "name",
-                template: "filepaths",
-              },
-            },
+            envOption("Get value from environment specific project ENV file"),
           ],
           args: {
             name: "VAR",
@@ -631,8 +737,25 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "exec",
+      name: ["exec", "run"],
       description: "Execute a command or a script in cli",
+      options: [
+        {
+          name: "-T",
+          description:
+            "Disable pseudo-tty allocation (useful for non-interactive commands when the output is saved into a variable)",
+        },
+        {
+          name: "--in",
+          description:
+            "Name of the service or container to execute the command in",
+          requiresEquals: true,
+          args: {
+            name: "name",
+            generators: serviceGenerator,
+          },
+        },
+      ],
       args: {
         name: "command|file",
         isCommand: true,
@@ -706,6 +829,14 @@ const completionSpec: Fig.Spec = {
           description: "Follow log output",
         },
         {
+          name: "--index",
+          description:
+            "Index of the container if service has multiple replicas",
+          args: {
+            name: "index",
+          },
+        },
+        {
           name: "--no-color",
           description: "Produce monochrome output",
         },
@@ -722,9 +853,9 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--tail",
+          name: ["-n", "--tail"],
           description:
-            'Number of lines to show from the end of the logs for each container. (default "all")',
+            'Number of lines to show from the end of the logs for each container (default "all")',
           args: {
             name: "string",
           },
@@ -742,10 +873,7 @@ const completionSpec: Fig.Spec = {
           },
         },
       ],
-      args: {
-        name: "service",
-        generators: serviceGenerator,
-      },
+      args: serviceArg,
     },
     {
       name: ["run-cli", "rc"],
@@ -757,7 +885,7 @@ const completionSpec: Fig.Spec = {
           description: "Run command with a non-persistent $HOME directory",
         },
         {
-          name: "--clenup",
+          name: "--cleanup",
           description: "Clean the persistent $HOME directory and run command",
         },
         {
@@ -775,6 +903,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "-e",
           description: "Pass environment variable(s) to the container",
+          isRepeatable: true,
           args: {
             name: "VAR=VALUE",
           },
@@ -787,6 +916,8 @@ const completionSpec: Fig.Spec = {
       ],
       args: {
         name: "command",
+        isOptional: true,
+        isVariadic: true,
       },
     },
     {
@@ -802,6 +933,97 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "host",
           },
+        },
+        {
+          name: "--host-header",
+          description:
+            "Override the Host header passed to the web container (NGROK_HEADER)",
+          requiresEquals: true,
+          args: {
+            name: "host",
+          },
+        },
+        {
+          name: "--auth",
+          description:
+            "Authentication token for your ngrok account, needed for custom subdomains, domains and HTTP authentication (NGROK_AUTH)",
+          requiresEquals: true,
+          args: {
+            name: "token",
+          },
+        },
+        {
+          name: "--hostname",
+          description:
+            "Custom domain for the tunnel, takes priority over a subdomain (NGROK_HOSTNAME)",
+          requiresEquals: true,
+          args: {
+            name: "hostname",
+          },
+        },
+        {
+          name: "--subdomain",
+          description: "Custom subdomain for the tunnel (NGROK_SUBDOMAIN)",
+          requiresEquals: true,
+          args: {
+            name: "subdomain",
+          },
+        },
+        {
+          name: "--username",
+          description:
+            "Username for HTTP authentication on the tunnel (NGROK_USERNAME)",
+          requiresEquals: true,
+          args: {
+            name: "username",
+          },
+        },
+        {
+          name: "--password",
+          description:
+            "Password for HTTP authentication on the tunnel (NGROK_PASSWORD)",
+          requiresEquals: true,
+          args: {
+            name: "password",
+          },
+        },
+        {
+          name: "--protocol",
+          description:
+            "Tunnel protocol, defaults to HTTP if not specified (NGROK_PROTOCOL)",
+          requiresEquals: true,
+          args: {
+            name: "protocol",
+            suggestions: ["HTTP", "TCP"],
+          },
+        },
+        {
+          name: "--port",
+          description:
+            "Port to expose, defaults to 80 for HTTP protocol (NGROK_PORT)",
+          requiresEquals: true,
+          args: {
+            name: "port",
+          },
+        },
+        {
+          name: "--region",
+          description:
+            "Location of the ngrok tunnel server, defaults to us (NGROK_REGION)",
+          requiresEquals: true,
+          args: {
+            name: "region",
+            suggestions: [
+              { name: "us", description: "United States" },
+              { name: "eu", description: "Europe" },
+              { name: "ap", description: "Asia/Pacific" },
+              { name: "au", description: "Australia" },
+            ],
+          },
+        },
+        {
+          name: "--debug",
+          description: "Print a more detailed ngrok log (NGROK_DEBUG)",
         },
       ],
     },
@@ -836,6 +1058,58 @@ const completionSpec: Fig.Spec = {
       name: "vhosts",
       description:
         "List all virtual *.docksal hosts registered in Docksal proxy",
+    },
+    // Project command shortcuts (see "fin help project")
+    startCommand,
+    upCommand,
+    stopCommand,
+    restartCommand,
+    resetCommand,
+    removeCommand,
+    buildCommand,
+    {
+      name: ["status", "ps"],
+      description: "List project services",
+    },
+    {
+      name: "pl",
+      description: "List running Docksal projects",
+      options: listOptions,
+    },
+    // Deprecated database commands (use fin db ...)
+    {
+      name: ["mysql", "sqlc"],
+      description:
+        "Open MySql command line to the current db server. Deprecated, use fin db cli",
+      deprecated: true,
+      options: [dbName, dbUser, dbPassword],
+      args: {
+        name: "query",
+        isOptional: true,
+      },
+    },
+    {
+      name: ["mysql-list", "sqls"],
+      description:
+        "Show list of available databases. Deprecated, use fin db list",
+      deprecated: true,
+      options: [dbUser, dbPassword],
+    },
+    {
+      name: ["mysql-import", "sqli"],
+      description:
+        "Truncate database and import SQL dump from a file or stdin. Deprecated, use fin db import",
+      deprecated: true,
+      options: [dbForce, dbProgress, dbNoTruncate, dbName, dbUser, dbPassword],
+      args: dumpFileArg,
+    },
+    {
+      name: ["mysql-dump", "sqld"],
+      description:
+        "Export database from db container into file or stdout. Deprecated, use fin db dump",
+      deprecated: true,
+      options: [dbName, dbUser, dbPassword],
+      args: dumpFileArg,
     },
     // Docker command wrapper
     {
@@ -892,6 +1166,13 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "acli",
+      description: "Acquia CLI command (requires docksal/cli 2.13+)",
+      args: {
+        name: "command",
+      },
+    },
+    {
       name: "wp",
       description: "WordPress CLI command (requires WordPress)",
       args: {
@@ -919,22 +1200,40 @@ const completionSpec: Fig.Spec = {
       name: "diagnose",
       description:
         "Show diagnostic information for troubleshooting and bug reporting",
+      options: [allOption],
     },
     {
       name: "sysinfo",
       description: "Show system information",
+      options: [allOption],
     },
     {
       name: "update",
       description: "Update Docksal",
       options: [
         {
-          name: "DOCKSAL_VERSION",
-          description: "Update Docksal to the latest development version",
-          requiresEquals: true,
-          args: {
-            name: "develop",
-          },
+          name: "--system-images",
+          description: "Update system images",
+        },
+        {
+          name: "--project-images",
+          description: "Update project images",
+        },
+        {
+          name: "--self",
+          description: "Update fin executable",
+        },
+        {
+          name: "--tools",
+          description: "Update tools",
+        },
+        {
+          name: "--stack",
+          description: "Update config files",
+        },
+        {
+          name: "--bash-complete",
+          description: "Install bash completions",
         },
       ],
     },

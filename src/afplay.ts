@@ -1,9 +1,12 @@
+// afplay v2.0 (banner of `afplay -h`, 2026-11-19). Source: Xcode 27.3 beta 2 man page mirror (keith/xcode-man-pages; afplay.1 is dated 2007-02-13 and documents only -h)
+// plus the `afplay -h` help text as transcribed in public write-ups. Apple does not publish afplay source and it was not run on macOS, so the option set was not re-checked against the shipped binary.
 const completionSpec: Fig.Spec = {
   name: "afplay",
   description: "Audio File Play",
   args: {
     template: "filepaths",
-    name: "play the song in the path",
+    name: "audio_file",
+    description: "Audio file to play",
   },
   options: [
     {
@@ -47,7 +50,11 @@ practical limits are about 0.4 (slower) to 3.0 (faster)`,
       description: `Set the quality used for rate-scaled playback (default is 0 - low quality, 1 - high quality)`,
       args: {
         name: "QUALITY",
-        description: "0 (low) -1 (high)",
+        description: "0 (low) - 1 (high)",
+        suggestions: [
+          { name: "0", description: "Low quality (default)" },
+          { name: "1", description: "High quality" },
+        ],
       },
     },
     {

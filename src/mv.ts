@@ -1,3 +1,5 @@
+// mv (macOS BSD, mv.1 dated 2013-03-15, apple-oss-distributions/file_cmds-479, 2026-11-19). Source: mv.1 + mv.c from Apple's OSS mirror (not run on macOS)
+// BSD flags only (-f -h -i -n -v); GNU-only flags are not listed
 const completionSpec: Fig.Spec = {
   name: "mv",
   description: "Move & rename files and folders",
@@ -20,6 +22,11 @@ const completionSpec: Fig.Spec = {
       exclusiveOn: ["-i", "-n"],
     },
     {
+      name: "-h",
+      description:
+        "If the target is a symbolic link to a directory, do not follow it (rename source to target instead of moving it into the directory)",
+    },
+    {
       name: "-i",
       description:
         "Cause mv to write a prompt to standard error before moving a file that would overwrite an existing file",
@@ -27,7 +34,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-n",
-      description: "Do not overwrite existing file",
+      description: "Do not overwrite an existing file",
       exclusiveOn: ["-f", "-i"],
     },
     {

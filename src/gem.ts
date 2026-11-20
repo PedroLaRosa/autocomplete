@@ -1,3 +1,10 @@
+// RubyGems v4.1.0 (rubygems-update gem on rubygems.org, released 2026-11-16, 2026-11-19). Source: read statically, not executed:
+// lib/rubygems/command_manager.rb, commands/*_command.rb, the shared option modules (local_remote_options, version_option, install_update_options,
+// cooldown_option, security_option, query_utils, gemcutter_utilities), command.rb (common options) and CHANGELOG.md from the rubygems-update-4.1.0 gem;
+// generate_index options from the rubygems-generate_index 1.2.0 plugin gem (the command lives there now).
+// mirror and server are stubs for the rubygems-mirror / rubygems-server plugin gems and take no options in core.
+// Removed in 4.0: gem query, gem build -C. A short option defined by two groups is resolved by optparse in favour of the later one (-p is proxy, -h is help).
+
 const gems: Fig.Generator = {
   trigger: () => true,
   custom: async (tokens, executeShellCommand) => {
@@ -22,6 +29,124 @@ const gems: Fig.Generator = {
   },
 };
 
+const gemNameArg = (
+  description: string,
+  overrides: Partial<Fig.Arg> = {}
+): Fig.Arg => ({
+  name: "GEMNAME",
+  description,
+  generators: gems,
+  debounce: true,
+  ...overrides,
+});
+
+interface ToggleConfig {
+  name: string;
+  short?: string;
+  negatedShort?: string;
+  description: string;
+  negatedDescription: string;
+  deprecated?: boolean;
+}
+
+// Builds the pair of flags that RubyGems declares as "--[no-]name"
+const toggle = ({
+  name,
+  short,
+  negatedShort,
+  description,
+  negatedDescription,
+  deprecated,
+}: ToggleConfig): Fig.Option[] => {
+  const extra = deprecated ? { deprecated: true } : {};
+  return [
+    {
+      name: short ? [short, `--${name}`] : `--${name}`,
+      description,
+      exclusiveOn: [`--no-${name}`],
+      ...extra,
+    },
+    {
+      name: negatedShort ? [negatedShort, `--no-${name}`] : `--no-${name}`,
+      description: negatedDescription,
+      exclusiveOn: [`--${name}`],
+      ...extra,
+    },
+  ];
+};
+
+const versionOption = (task: string): Fig.Option => ({
+  name: ["-v", "--version"],
+  description: `Specify version of gem to ${task}`,
+  args: {
+    name: "VERSION",
+    description: "The version requirement of the gem",
+  },
+});
+
+const platformOption = (task: string): Fig.Option => ({
+  name: "--platform",
+  description: `Specify the platform of gem to ${task}`,
+  isRepeatable: true,
+  args: {
+    name: "PLATFORM",
+    description: "The platform of gem",
+  },
+});
+
+const rubyAbiOption = (task: string): Fig.Option => ({
+  name: "--ruby-abi",
+  description: `Specify the Ruby ABI of gem to ${task}`,
+  args: {
+    name: "RUBY_ABI",
+    description: "The Ruby ABI in X.Y format, e.g. 3.4",
+  },
+});
+
+const prereleaseOptions = (
+  description = "Allow prerelease versions of a gem",
+  negatedDescription = "Do not allow prerelease versions of a gem"
+): Fig.Option[] =>
+  toggle({ name: "prerelease", description, negatedDescription });
+
+const cooldownOption: Fig.Option = {
+  name: "--cooldown",
+  description:
+    "Do not use gem versions published within the last DAYS days (0 disables the cooldown, overriding the gemrc and Bundler settings)",
+  args: {
+    name: "DAYS",
+    description: "The number of days",
+  },
+};
+
+const hostOption = (description: string): Fig.Option => ({
+  name: "--host",
+  description: `${description} (e.g. https://rubygems.org)`,
+  args: {
+    name: "HOST",
+    description: "The host",
+  },
+});
+
+const keyOption: Fig.Option = {
+  name: ["-k", "--key"],
+  description: "Use the given API key from the credentials file",
+  args: {
+    name: "KEYNAME",
+    description: "The API key",
+  },
+};
+
+const otpOption: Fig.Option = {
+  name: "--otp",
+  description:
+    "Digit code for multifactor authentication You can also use the environment variable GEM_HOST_OTP_CODE",
+  args: {
+    name: "CODE",
+    description: "The GEM host otp code",
+  },
+};
+
 const httpProxyOptions: Fig.Option[] = [
   {
     name: ["-p", "--http-proxy"],
@@ -40,6 +165,30 @@ const httpProxyOptions: Fig.Option[] = [
   },
 ];
 
+const bulkThresholdOption: Fig.Option = {
+  name: ["-B", "--bulk-threshold"],
+  description: "Threshold for switching to bulk synchronization (default 1000)",
+  args: {
+    name: "COUNT",
+    description: "The threshold",
+  },
+};
+
+const clearSourcesOption: Fig.Option = {
+  name: "--clear-sources",
+  description: "Clear the gem sources",
+};
+
+const sourceOption: Fig.Option = {
+  name: ["-s", "--source"],
+  description: "Append URL to list of remote gem sources",
+  isRepeatable: true,
+  args: {
+    name: "URL",
+    description: "The URL",
+  },
+};
+
 const localRemoteOptions: Fig.Option[] = [
   {
     name: ["-l", "--local"],
@@ -56,112 +205,258 @@ const localRemoteOptions: Fig.Option[] = [
     description: "Allow LOCAL and REMOTE operations",
     exclusiveOn: ["--remote", "--local"],
   },
-  {
-    name: ["-B", "--bulk-threshold"],
-    description:
-      "Threshold for switching to bulk synchronization (default 1000)",
-    args: {
-      name: "COUNT",
-      description: "The threshold",
-    },
-  },
-  {
-    name: "--clear-sources",
-    description: "Clear the gem sources",
-  },
-  {
-    name: ["-s", "--source"],
-    description: "Append URL to list of remote gem sources",
-    args: {
-      name: "URL",
-      description: "The URL",
-    },
-  },
+  bulkThresholdOption,
+  clearSourcesOption,
+  sourceOption,
   ...httpProxyOptions,
+  ...toggle({
+    name: "update-sources",
+    short: "-u",
+    description: "Update local source cache",
+    negatedDescription: "Do not update local source cache",
+    deprecated: true,
+  }),
 ];
 
-const installedOptions: Fig.Option[] = [
-  {
-    name: ["-i", "--installed"],
+// Options shared by list, search and info (Gem::QueryUtils)
+const queryOptions = (command: string, withDetails = true): Fig.Option[] => [
+  ...toggle({
+    name: "installed",
+    short: "-i",
+    negatedShort: "-I",
     description: "Check for installed gem",
-    exclusiveOn: ["--no-installed"],
-  },
-  {
-    name: ["-I", "--no-installed"],
-    description: "Check for not installed gem",
-    exclusiveOn: ["--installed"],
-  },
-  {
-    name: ["-v", "--version"],
-    description: "Specify version of gem to list for use with --installed",
-    args: {
-      name: "VERSION",
-      description: "The version of gem",
-    },
-  },
-];
-
-const displayOptions: Fig.Option[] = [
+    negatedDescription: "Check for not installed gem",
+  }),
+  versionOption(`${command} for use with --installed`),
+  ...(withDetails
+    ? toggle({
+        name: "details",
+        short: "-d",
+        description: "Display detailed information of gem(s)",
+        negatedDescription: "Do not display detailed information of gem(s)",
+      })
+    : []),
+  ...toggle({
+    name: "versions",
+    description: "Display gem versions",
+    negatedDescription: "Display only gem names",
+  }),
   {
     name: ["-a", "--all"],
     description: "Display all gem versions",
   },
   {
     name: ["-e", "--exact"],
-    description: "Name of gem(s) to query on matches the provided STRING",
+    description: "Match the gem name exactly instead of as a REGEXP",
   },
-  {
-    name: "--prerelease",
-    description: "Allow prerelease versions of a gem",
-    exclusiveOn: ["--no-prerelease"],
-  },
-  {
-    name: "--no-prerelease",
-    description: "Do not allow prerelease versions of a gem",
-    exclusiveOn: ["--prerelease"],
-  },
+  ...prereleaseOptions(
+    "Display prerelease versions",
+    "Do not display prerelease versions"
+  ),
+  ...localRemoteOptions,
 ];
 
-const versionsOptions: Fig.Option[] = [
-  {
-    name: "--versions",
-    description: "Display only gem names",
-    exclusiveOn: ["--no-versions"],
-  },
-  {
-    name: "--no-versions",
-    description: "Display not only gem names",
-    exclusiveOn: ["--versions"],
-  },
+const trustPolicies = [
+  "NoSecurity",
+  "AlmostNoSecurity",
+  "LowSecurity",
+  "MediumSecurity",
+  "HighSecurity",
 ];
 
-const authenticationOptions: Fig.Option[] = [
+const trustPolicyOption: Fig.Option = {
+  name: ["-P", "--trust-policy"],
+  description: "Specify gem trust policy",
+  args: {
+    name: "POLICY",
+    description: "The trust policy",
+    suggestions: trustPolicies,
+  },
+};
+
+// Options shared by install and update (Gem::InstallUpdateOptions)
+const installUpdateOptions: Fig.Option[] = [
   {
-    name: "--host",
+    name: ["-i", "--install-dir"],
+    description: "Gem repository directory to get installed gems",
+    args: {
+      name: "DIR",
+      template: "folders",
+    },
+  },
+  {
+    name: ["-n", "--bindir"],
     description:
-      "Use another gemcutter-compatible host (e.g. https://rubygems.org)",
+      "Directory where executables will be placed when the gem is installed",
     args: {
-      name: "HOST",
-      description: "The host",
+      name: "DIR",
+      template: "folders",
     },
   },
   {
-    name: ["-k", "--key"],
-    description: "Use the given API key",
-    args: {
-      name: "KEYNAME",
-      description: "The API key",
-    },
-  },
-  {
-    name: "--otp",
+    name: ["-j", "--build-jobs"],
     description:
-      "Digit code for multifactor authentication You can also use the environment variable GEM_HOST_OTP_CODE",
+      "Number of jobs to pass to make when installing gems with native extensions (defaults to the number of processors, ignored on mswin or if MAKEFLAGS is set)",
     args: {
-      name: "CODE",
-      description: "The GEM host otp code",
+      name: "VALUE",
+      description: "The number of jobs",
     },
   },
+  {
+    name: "--document",
+    description:
+      "Generate documentation for installed gems (comma-separated types, defaults to ri)",
+    args: {
+      name: "TYPES",
+      suggestions: ["rdoc", "ri"],
+      isOptional: true,
+    },
+  },
+  {
+    name: "--build-root",
+    description:
+      "Temporary installation root. Useful for building packages. Do not use this when installing remote gems",
+    args: {
+      name: "DIR",
+      template: "folders",
+    },
+  },
+  {
+    name: "--vendor",
+    description:
+      "Install gem into the vendor directory. Only for use by gem repackagers",
+  },
+  {
+    name: ["-N", "--no-document"],
+    description: "Disable documentation generation",
+  },
+  ...toggle({
+    name: "env-shebang",
+    short: "-E",
+    description:
+      "Rewrite the shebang line on installed scripts to use /usr/bin/env",
+    negatedDescription:
+      "Do not rewrite the shebang line on installed scripts to use /usr/bin/env",
+  }),
+  ...toggle({
+    name: "force",
+    short: "-f",
+    description: "Force gem to install, bypassing dependency checks",
+    negatedDescription: "Do not force gem to install",
+  }),
+  ...toggle({
+    name: "wrappers",
+    short: "-w",
+    description:
+      "Use bin wrappers for executables. Not available on dosish platforms",
+    negatedDescription: "Do not use bin wrappers for executables",
+  }),
+  trustPolicyOption,
+  {
+    name: "--ignore-dependencies",
+    description: "Do not install any required dependent gems",
+  },
+  ...toggle({
+    name: "format-executable",
+    description: "Make installed executable names match Ruby",
+    negatedDescription: "Do not make installed executable names match Ruby",
+  }),
+  ...toggle({
+    name: "user-install",
+    description: "Install in user's home directory instead of GEM_HOME",
+    negatedDescription: "Install in GEM_HOME instead of user's home directory",
+  }),
+  {
+    name: "--development",
+    description: "Install additional development dependencies",
+  },
+  {
+    name: "--development-all",
+    description:
+      "Install development dependencies for all gems (including dev deps themselves)",
+  },
+  {
+    name: "--conservative",
+    description:
+      "Don't attempt to upgrade gems already meeting version requirement",
+  },
+  ...toggle({
+    name: "minimal-deps",
+    description:
+      "Don't upgrade any dependencies that already meet version requirements",
+    negatedDescription: "Upgrade dependencies even if they meet requirements",
+  }),
+  ...toggle({
+    name: "post-install-message",
+    description: "Print post install message",
+    negatedDescription: "Do not print post install message",
+  }),
+  {
+    name: ["-g", "--file"],
+    description:
+      "Read from a gem dependencies API file and install the listed gems",
+    args: {
+      name: "FILE",
+      template: "filepaths",
+      isOptional: true,
+    },
+  },
+  {
+    name: "--without",
+    description:
+      "Omit the named groups (comma separated) when installing from a gem dependencies file",
+    isRepeatable: true,
+    args: {
+      name: "GROUPS",
+    },
+  },
+  {
+    name: "--default",
+    description:
+      "Add the gem's full specification to specifications/default and extract only its bin",
+    deprecated: true,
+  },
+  {
+    name: "--explain",
+    description:
+      "Rather than install the gems, indicate which would be installed",
+  },
+  ...toggle({
+    name: "lock",
+    description: "Create a lock file (when used with -g/--file)",
+    negatedDescription: "Do not create a lock file",
+  }),
+  ...toggle({
+    name: "suggestions",
+    description: "Suggest alternates when gems are not found",
+    negatedDescription: "Do not suggest alternates when gems are not found",
+  }),
+  {
+    name: "--target-rbconfig",
+    description: "The rbconfig.rb for the deployment target platform",
+    args: {
+      name: "FILE",
+      template: "filepaths",
+      isOptional: true,
+    },
+  },
+  ...toggle({
+    name: "build-extension",
+    description: "Build native extensions during installation (default)",
+    negatedDescription: "Do not build native extensions during installation",
+  }),
+  ...toggle({
+    name: "install-plugin",
+    description: "Install plugins during installation (default)",
+    negatedDescription: "Do not install plugins during installation",
+  }),
+  cooldownOption,
+];
+
+const authenticationOptions = (hostDescription: string): Fig.Option[] => [
+  hostOption(hostDescription),
+  keyOption,
+  otpOption,
 ];
 
 const completionSpec: Fig.Spec = {
@@ -170,26 +465,47 @@ const completionSpec: Fig.Spec = {
   subcommands: [
     {
       name: "help",
-      description: "Help about any command",
-      args: { name: "command", isOptional: true, template: "help" },
+      description: "Provide help on the 'gem' command",
+      args: {
+        name: "command",
+        isOptional: true,
+        template: "help",
+        suggestions: [
+          {
+            name: "commands",
+            description: "List all 'gem' commands",
+          },
+          {
+            name: "options",
+            description: "Show the usage and global options",
+          },
+          {
+            name: "examples",
+            description: "Show some examples of usage",
+          },
+          {
+            name: "gem_dependencies",
+            description: "Gem dependencies file guide",
+          },
+          {
+            name: "platforms",
+            description: "Gem platforms guide",
+          },
+        ],
+      },
     },
     {
       name: ["install", "i"],
       description: "Install a gem into the local repository",
-      args: {
-        name: "GEMNAME",
-        generators: gems,
-        debounce: true,
-      },
+      args: gemNameArg("Name of gem to install", { isVariadic: true }),
       options: [
-        {
-          name: "--platform",
-          description: "Specify the platform of gem to install",
-          args: {
-            name: "PLATFORM",
-            description: "The platform of gem",
-          },
-        },
+        platformOption("install"),
+        versionOption("install"),
+        ...prereleaseOptions(
+          "Allow prerelease versions of a gem to be installed (only for listed gems)"
+        ),
+        ...localRemoteOptions,
+        ...installUpdateOptions,
       ],
     },
     {
@@ -199,6 +515,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-a", "--add"],
           description: "Add a trusted certificate",
+          isRepeatable: true,
           args: {
             name: "CERT",
             description: "The trusted certificate",
@@ -209,6 +526,7 @@ const completionSpec: Fig.Spec = {
           name: ["-l", "--list"],
           description:
             "List trusted certificates where the subject contains FILTER",
+          isRepeatable: true,
           args: {
             name: "FILTER",
             description: "The filter",
@@ -219,6 +537,7 @@ const completionSpec: Fig.Spec = {
           name: ["-r", "--remove"],
           description:
             "Remove trusted certificates where the subject contains FILTER",
+          isRepeatable: true,
           args: {
             name: "FILTER",
             description: "The filter",
@@ -228,6 +547,7 @@ const completionSpec: Fig.Spec = {
           name: ["-b", "--build"],
           description:
             "Build private key and self-signed certificate for EMAIL_ADDR",
+          isRepeatable: true,
           args: {
             name: "EMAIL_ADDR",
             description: "The email address",
@@ -253,16 +573,25 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-A", "--key-algorithm"],
-          description: "Select which key algorithm to use for --build",
+          description: "Select key algorithm for --build (defaults to RSA)",
           args: {
             name: "ALGORITHM",
             description: "The algorithm",
+            suggestions: [
+              "RSA",
+              "DSA",
+              "EC",
+              "ML-DSA-44",
+              "ML-DSA-65",
+              "ML-DSA-87",
+            ],
           },
         },
         {
           name: ["-s", "--sign"],
           description:
             "Signs CERT with the key from -K and the certificate from -C",
+          isRepeatable: true,
           args: {
             name: "CERT",
             description: "The certificate",
@@ -286,164 +615,108 @@ const completionSpec: Fig.Spec = {
     {
       name: "check",
       description: "Check a gem repository for added or missing files",
-      args: {
-        name: "GEMNAME",
-        generators: gems,
-        debounce: true,
+      args: gemNameArg("Name of gem to check", {
         isOptional: true,
-      },
+        isVariadic: true,
+      }),
       options: [
-        {
-          name: ["-a", "--alien"],
+        ...toggle({
+          name: "alien",
+          short: "-a",
           description:
             "Report 'unmanaged' or rogue files in the gem repository",
-          exclusiveOn: ["--no-alien"],
-        },
-        {
-          name: "--no-alien",
-          description: "Report 'managed' or rogue files in the gem repository",
-          exclusiveOn: ["--alien"],
-        },
-        {
-          name: "--doctor",
+          negatedDescription:
+            "Do not report 'unmanaged' or rogue files in the gem repository",
+        }),
+        ...toggle({
+          name: "doctor",
           description: "Clean up uninstalled gems and broken specifications",
-          exclusiveOn: ["--no-doctor"],
-        },
-        {
-          name: "--no-doctor",
-          description:
+          negatedDescription:
             "Do not clean up uninstalled gems and broken specifications",
-          exclusiveOn: ["--doctor"],
-        },
-        {
-          name: "--dry-run",
+        }),
+        ...toggle({
+          name: "dry-run",
           description: "Do not remove files, only report what would be removed",
-          exclusiveOn: ["--no-dry-run"],
-        },
-        {
-          name: "--no-dry-run",
-          description: "Remove files",
-          exclusiveOn: ["--dry-run"],
-        },
-        {
-          name: "--gems",
+          negatedDescription: "Remove files",
+        }),
+        ...toggle({
+          name: "gems",
           description: "Check installed gems for problems",
-          exclusiveOn: ["--no-gems"],
-        },
-        {
-          name: "--no-gems",
-          description: "Check not installed gems for problems",
-          exclusiveOn: ["--gems"],
-        },
-        {
-          name: ["-v", "--version"],
-          description: "Specify version of gem to check",
-          args: {
-            name: "VERSION",
-            description: "The version of the gem",
-          },
-        },
+          negatedDescription: "Do not check installed gems for problems",
+        }),
+        versionOption("check"),
       ],
     },
     {
       name: "cleanup",
       description: "Clean up old versions of installed gems",
-      args: {
-        name: "GEMNAME",
-        description: "Name of gem to cleanup",
-        generators: gems,
-        debounce: true,
+      args: gemNameArg("Name of gem to cleanup", {
         isOptional: true,
-      },
+        isVariadic: true,
+      }),
       options: [
         {
           name: ["-n", "-d", "--dry-run"],
           description: "Do not uninstall gems",
         },
         {
-          name: ["-D", "--check-development"],
+          name: "--dryrun",
+          description: "Do not uninstall gems. Use --dry-run instead",
+          deprecated: true,
+        },
+        ...toggle({
+          name: "check-development",
+          short: "-D",
           description:
             "Check development dependencies while uninstalling (default: true)",
-          exclusiveOn: ["--no-check-development"],
-        },
-        {
-          name: "--no-check-development",
-          description:
+          negatedDescription:
             "Do not check development dependencies while uninstalling",
-          exclusiveOn: ["--check-development"],
-        },
-        {
-          name: "--user-install",
-          description: "Cleanup in user’s home directory instead of GEM_HOME",
-          exclusiveOn: ["--no-user-install"],
-        },
-        {
-          name: "--no-user-install",
-          description: "Cleanup in GEM_HOME instead of user’s home directory",
-          exclusiveOn: ["--user-install"],
-        },
+        }),
+        ...toggle({
+          name: "user-install",
+          description: "Cleanup in user's home directory instead of GEM_HOME",
+          negatedDescription:
+            "Cleanup in GEM_HOME instead of user's home directory",
+        }),
       ],
     },
     {
       name: "contents",
       description: "Display the contents of the installed gems",
-      args: {
-        name: "GEMNAME",
-        description: "Name of gem to list contents for",
-        generators: gems,
-        debounce: true,
-      },
+      args: gemNameArg("Name of gem to list contents for", {
+        isVariadic: true,
+      }),
       options: [
-        {
-          name: ["-v", "--version"],
-          description: "Specify version of gem to contents",
-          args: {
-            name: "VERSION",
-            description: "The version of the gem",
-          },
-        },
+        versionOption("contents"),
         {
           name: "--all",
           description: "Contents for all gems",
         },
         {
           name: ["-s", "--spec-dir"],
-          description: "Search for gems under specific paths",
+          description:
+            "Search for gems under specific paths (comma-separated list)",
           args: {
             name: "DIR",
-            template: "filepaths",
+            template: "folders",
           },
         },
-        {
-          name: ["-l", "--lib-only"],
-          description: "Only return files in the Gem’s lib_dirs",
-          exclusiveOn: ["--no-lib-only"],
-        },
-        {
-          name: "--no-lib-only",
-          description: "Not only return files in the Gem’s lib_dirs",
-          exclusiveOn: ["--lib-only"],
-        },
-        {
-          name: "--prefix",
-          description: "Don’t include installed path prefix",
-          exclusiveOn: ["--no-prefix"],
-        },
-        {
-          name: "--no-prefix",
-          description: "Include installed path prefix",
-          exclusiveOn: ["--prefix"],
-        },
-        {
-          name: "--show-install-dir",
+        ...toggle({
+          name: "lib-only",
+          short: "-l",
+          description: "Only return files in the gem's lib_dirs",
+          negatedDescription: "Return all files, not only the gem's lib_dirs",
+        }),
+        ...toggle({
+          name: "prefix",
+          description: "Include installed path prefix (default)",
+          negatedDescription: "Don't include installed path prefix",
+        }),
+        ...toggle({
+          name: "show-install-dir",
           description: "Show only the gem install dir",
-          exclusiveOn: ["--no-show-install-dir"],
-        },
-        {
-          name: "--no-show-install-dir",
-          description: "Do not show only the gem install dir",
-          exclusiveOn: ["--show-install-dir"],
-        },
+          negatedDescription: "Do not show only the gem install dir",
+        }),
       ],
     },
     {
@@ -452,44 +725,19 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "REGEXP",
         description: "Show dependencies for gems whose names start with REGEXP",
+        isOptional: true,
       },
       options: [
-        {
-          name: ["-v", "--version"],
-          description: "Specify version of gem to dependency",
-          args: {
-            name: "VERSION",
-            description: "The version of gem",
-          },
-        },
-        {
-          name: "--platform",
-          description: "Specify the platform of gem to dependency",
-          args: {
-            name: "PLATFORM",
-            description: "The platform of gem",
-          },
-        },
-        {
-          name: "--prerelease",
-          description: "Allow prerelease versions of a gem",
-          exclusiveOn: ["--no-prerelease"],
-        },
-        {
-          name: "--no-prerelease",
-          description: "Do not allow prerelease versions of a gem",
-          exclusiveOn: ["--prerelease"],
-        },
-        {
-          name: ["-R", "--reverse-dependencies"],
+        versionOption("dependency"),
+        platformOption("dependency"),
+        ...prereleaseOptions(),
+        ...toggle({
+          name: "reverse-dependencies",
+          short: "-R",
           description: "Include reverse dependencies in the output",
-          exclusiveOn: ["--no-reverse-dependencies"],
-        },
-        {
-          name: "--no-reverse-dependencies",
-          description: "Do not include reverse dependencies in the output",
-          exclusiveOn: ["--reverse-dependencies"],
-        },
+          negatedDescription:
+            "Do not include reverse dependencies in the output",
+        }),
         {
           name: "--pipe",
           description: "Pipe Format (name --version ver)",
@@ -529,83 +777,80 @@ const completionSpec: Fig.Spec = {
             name: "platform",
             description: "Display the supported gem platforms",
           },
+          {
+            name: "credentials",
+            description: "Display the path where credentials are stored",
+          },
         ],
         isOptional: true,
       },
     },
     {
+      name: "exec",
+      description: "Run a command from a gem",
+      parserDirectives: {
+        optionsMustPrecedeArguments: true,
+      },
+      args: [
+        {
+          name: "COMMAND",
+          description: "The executable command to run",
+        },
+        {
+          name: "args",
+          description: "Arguments passed to the command",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
+      options: [
+        sourceOption,
+        versionOption("exec"),
+        ...prereleaseOptions(
+          "Allow prerelease versions of a gem to be installed",
+          "Do not allow prerelease versions of a gem to be installed"
+        ),
+        {
+          name: ["-g", "--gem"],
+          description: "Run the executable from the given gem",
+          args: {
+            name: "GEM",
+            description: "The gem providing the executable",
+            generators: gems,
+            debounce: true,
+          },
+        },
+        {
+          name: "--conservative",
+          description:
+            "Prefer the most recent installed version, rather than the latest version overall",
+        },
+      ],
+    },
+    {
       name: "fetch",
       description: "Download a gem and place it in the current directory",
-      args: {
-        name: "GEMNAME",
-        description: "Name of gem to download",
-        generators: gems,
-        debounce: true,
-      },
+      args: gemNameArg("Name of gem to download", { isVariadic: true }),
       options: [
-        {
-          name: ["-v", "--version"],
-          description: "Specify version of gem to fetch",
-          args: {
-            name: "VERSION",
-            description: "The version of the gem",
-          },
-        },
-        {
-          name: "--platform",
-          description: "Specify the platform of gem to fetch",
-          args: {
-            name: "PLATFORM",
-            description: "The platform of gem",
-          },
-        },
-        {
-          name: "--prerelease",
-          description: "Allow prerelease versions of a gem",
-          exclusiveOn: ["--no-prerelease"],
-        },
-        {
-          name: "--no-prerelease",
-          description: "Do not allow prerelease versions of a gem",
-          exclusiveOn: ["--prerelease"],
-        },
-        {
-          name: "--suggestions",
+        versionOption("fetch"),
+        platformOption("fetch"),
+        ...prereleaseOptions(),
+        ...toggle({
+          name: "suggestions",
           description: "Suggest alternates when gems are not found",
-          exclusiveOn: ["--no-suggestions"],
-        },
-        {
-          name: "--no-suggestions",
-          description: "Do not suggest alternates when gems are not found",
-          exclusiveOn: ["--suggestions"],
-        },
-        {
-          name: ["-B", "--bulk-threshold"],
-          description:
-            "Threshold for switching to bulk synchronization (default 1000)",
-          args: {
-            name: "COUNT",
-            description: "The threshold",
-          },
-        },
-        {
-          name: ["-s", "--source"],
-          description: "Append URL to list of remote gem sources",
-          args: {
-            name: "URL",
-            description: "The URL",
-          },
-        },
-        {
-          name: "--clear-sources",
-          description: "Clear the gem sources",
-        },
+          negatedDescription:
+            "Do not suggest alternates when gems are not found",
+        }),
+        bulkThresholdOption,
+        sourceOption,
+        clearSourcesOption,
         ...httpProxyOptions,
       ],
     },
     {
       name: "generate_index",
-      description: "Generates the index files for a gem server directory",
+      description:
+        "Generates the index files for a gem server directory (requires rubygems-generate_index)",
       options: [
         {
           name: ["-d", "--directory"],
@@ -615,44 +860,37 @@ const completionSpec: Fig.Spec = {
             template: "folders",
             filterStrategy: "fuzzy",
           },
-          requiresSeparator: true,
         },
         {
           name: "--modern",
           description: "Generate indexes for RubyGems (always true)",
           exclusiveOn: ["--no-modern"],
+          deprecated: true,
         },
         {
           name: "--no-modern",
-          description: "Do not generate indexes for RubyGems",
+          description:
+            "Do not generate indexes for RubyGems (ignored, modern indexes are always generated)",
           exclusiveOn: ["--modern"],
+          deprecated: true,
         },
+        ...toggle({
+          name: "compact",
+          description: "Generate compact index files",
+          negatedDescription: "Do not generate compact index files",
+        }),
         {
           name: "--update",
           description:
-            "Update modern indexes with gems added since the last update",
+            "Update modern and compact indices with gems added since the last update",
         },
       ],
     },
     {
       name: "info",
       description: "Show information for the given gem",
-      args: {
-        name: "GEMNAME",
-        description: "Name of the gem to print information about",
-        generators: gems,
-        debounce: true,
-      },
-      options: [
-        {
-          name: "-I",
-          description: "Equivalent to --no-installed",
-          exclusiveOn: ["--installed"],
-        },
-        ...displayOptions,
-        ...installedOptions,
-        ...versionsOptions,
-      ],
+      args: gemNameArg("Name of the gem to print information about"),
+      options: queryOptions("info", false),
     },
     {
       name: "lock",
@@ -660,19 +898,14 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "GEMNAME-VERSION",
         description: "Name and the version of gem to lock, ex: rails-1.0.0",
+        isVariadic: true,
       },
-      options: [
-        {
-          name: ["-s", "--strict"],
-          description: "Fail if unable to satisfy a dependency",
-          exclusiveOn: ["--no-strict"],
-        },
-        {
-          name: "--no-strict",
-          description: "Do not fail if unable to satisfy a dependency",
-          exclusiveOn: ["--strict"],
-        },
-      ],
+      options: toggle({
+        name: "strict",
+        short: "-s",
+        description: "Fail if unable to satisfy a dependency",
+        negatedDescription: "Do not fail if unable to satisfy a dependency",
+      }),
     },
     {
       name: "mirror",
@@ -681,12 +914,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "open",
       description: "Open gem sources in editor",
-      args: {
-        name: "GEMNAME",
-        description: "Name of the gem to print information about",
-        generators: gems,
-        debounce: true,
-      },
+      args: gemNameArg("Name of the gem to open in editor"),
       options: [
         {
           name: ["-e", "--editor"],
@@ -711,13 +939,10 @@ const completionSpec: Fig.Spec = {
       name: "pristine",
       description:
         "Restores installed gems to pristine condition from files located in the gem cache",
-      args: {
-        name: "GEMNAME",
-        description: "Name of the gem to print information about",
-        generators: gems,
-        debounce: true,
+      args: gemNameArg("Name of the gem to restore to pristine condition", {
         isOptional: true,
-      },
+        isVariadic: true,
+      }),
       options: [
         {
           name: "--all",
@@ -725,27 +950,21 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--skip",
-          description: "Restore all installed gems to pristine condition",
-          args: {
-            name: "GEMNAME",
-            description: "Name of the gem to print information about",
-            generators: gems,
-            debounce: true,
-          },
-          requiresSeparator: true,
+          description: "Skip the named gem when used with --all",
+          isRepeatable: true,
+          args: gemNameArg("Name of the gem to skip", { name: "GEMNAME" }),
           dependsOn: ["--all"],
         },
-        {
-          name: "--extensions",
+        ...toggle({
+          name: "extensions",
           description:
             "Restore gems with extensions in addition to regular gems",
-          exclusiveOn: ["--no-extensions"],
-        },
-        {
-          name: "--no-extensions",
-          description:
+          negatedDescription:
             "Do not restore gems with extensions in addition to regular gems",
-          exclusiveOn: ["--extensions"],
+        }),
+        {
+          name: "--only-missing-extensions",
+          description: "Only restore gems with missing extensions",
         },
         {
           name: "--only-executables",
@@ -755,20 +974,16 @@ const completionSpec: Fig.Spec = {
           name: "--only-plugins",
           description: "Only restore plugins",
         },
-        {
-          name: ["-E", "--env-shebang"],
+        ...toggle({
+          name: "env-shebang",
+          short: "-E",
           description: "Rewrite executables with a shebang of /usr/bin/env",
-          exclusiveOn: ["--no-env-shebang"],
-        },
-        {
-          name: "--no-env-shebang",
-          description:
+          negatedDescription:
             "Do not rewrite executables with a shebang of /usr/bin/env",
-          exclusiveOn: ["--env-shebang"],
-        },
+        }),
         {
           name: ["-i", "--install-dir"],
-          description: "Gem repository to get binstubs and plugins installed",
+          description: "Gem repository to get gems restored",
           args: {
             name: "DIR",
             template: "folders",
@@ -784,101 +999,102 @@ const completionSpec: Fig.Spec = {
             filterStrategy: "fuzzy",
           },
         },
-        {
-          name: ["-v", "--version"],
-          description:
-            "Specify version of gem to restore to pristine condition",
-          args: {
-            name: "VERSION",
-            description: "The specify version of gem",
-          },
-        },
-      ],
-    },
-    {
-      name: "query",
-      description: "Query gem information in local or remote repositories",
-      options: [
-        {
-          name: ["-n", "--name-matches"],
-          description: "Name of gem(s) to query on matches the provided REGEXP",
-          args: {
-            name: "REGEXP",
-            description: "The rule of the regexp",
-          },
-        },
-        {
-          name: "-I",
-          description: "Equivalent to --no-installed",
-          exclusiveOn: ["--installed"],
-        },
-        {
-          name: ["-d", "--details"],
-          description: "Display detailed information of gem(s)",
-          exclusiveOn: ["--no-details"],
-        },
-        {
-          name: "--no-details",
-          description: "Do not display detailed information of gem(s)",
-          exclusiveOn: ["--details"],
-        },
-        ...displayOptions,
-        ...installedOptions,
-        ...versionsOptions,
-        ...localRemoteOptions,
+        versionOption("restore to pristine condition"),
       ],
     },
     {
       name: "rdoc",
       description: "Generates RDoc for pre-installed gems",
-      args: {
-        name: "GEMNAME",
-        description: "Gem to generate documentation for (unless –all)",
-        generators: gems,
-        debounce: true,
+      args: gemNameArg("Gem to generate documentation for (unless --all)", {
         isOptional: true,
-      },
+      }),
       options: [
         {
           name: "--all",
           description: "Generate RDoc/RI documentation for all installed gems",
         },
-        {
-          name: "--rdoc",
+        ...toggle({
+          name: "rdoc",
           description: "Generate RDoc HTML",
-          exclusiveOn: ["--no-rdoc"],
-        },
-        {
-          name: "--no-rdoc",
-          description: "Do not generate RDoc HTML",
-          exclusiveOn: ["--rdoc"],
-        },
-        {
-          name: "--ri",
+          negatedDescription: "Do not generate RDoc HTML",
+        }),
+        ...toggle({
+          name: "ri",
           description: "Generate RI data",
-          exclusiveOn: ["--no-ri"],
-        },
-        {
-          name: "--no-ri",
-          description: "Do not generate RI data",
-          exclusiveOn: ["--ri"],
-        },
-        {
-          name: "--overwrite",
+          negatedDescription: "Do not generate RI data",
+        }),
+        ...toggle({
+          name: "overwrite",
           description: "Overwrite installed documents",
-          exclusiveOn: ["--no-overwrite"],
+          negatedDescription: "Do not overwrite installed documents",
+        }),
+        versionOption("rdoc"),
+      ],
+    },
+    {
+      name: "rebuild",
+      description: "Attempt to reproduce a build of a gem",
+      args: [
+        {
+          name: "GEM_NAME",
+          description: "Gem name on gem server",
+          generators: gems,
+          debounce: true,
         },
         {
-          name: "--no-overwrite",
-          description: "Do not overwrite installed documents",
-          exclusiveOn: ["--overwrite"],
+          name: "GEM_VERSION",
+          description: "Gem version you are attempting to rebuild",
+        },
+      ],
+      options: [
+        {
+          name: "--diff",
+          description:
+            "If the files don't match, compare them using diffoscope",
         },
         {
-          name: ["-v", "--version"],
-          description: "Specify version of gem to rdoc",
+          name: "--force",
+          description: "Skip validation of the spec",
+        },
+        {
+          name: "--strict",
+          description: "Consider warnings as errors when validating the spec",
+        },
+        {
+          name: "--source",
+          description: "Specify the source to download the gem from",
           args: {
-            name: "VERSION",
-            description: "The specify version of gem",
+            name: "GEM_SOURCE",
+            description: "The gem source",
+          },
+        },
+        {
+          name: "--original",
+          description:
+            "Specify a local file to compare against (instead of downloading it)",
+          args: {
+            name: "GEM_FILE",
+            description: "The gem file",
+            template: "filepaths",
+          },
+        },
+        {
+          name: "--gemspec",
+          description: "Specify the name of the gemspec file",
+          args: {
+            name: "GEMSPEC_FILE",
+            description: "The gemspec file",
+            template: "filepaths",
+          },
+        },
+        {
+          name: "-C",
+          description:
+            "Run as if gem build was started in PATH instead of the current working directory",
+          args: {
+            name: "PATH",
+            description: "The path",
+            template: "folders",
           },
         },
       ],
@@ -891,55 +1107,19 @@ const completionSpec: Fig.Spec = {
         description: "Regexp to look for in gem name",
         isOptional: true,
       },
-      options: [
-        {
-          name: "-I",
-          description: "Equivalent to --no-installed",
-          exclusiveOn: ["--installed"],
-        },
-        {
-          name: ["-d", "--details"],
-          description: "Display detailed information of gem(s)",
-          exclusiveOn: ["--no-details"],
-        },
-        {
-          name: "--no-details",
-          description: "Do not display detailed information of gem(s)",
-          exclusiveOn: ["--details"],
-        },
-        ...displayOptions,
-        ...installedOptions,
-        ...versionsOptions,
-        ...localRemoteOptions,
-      ],
+      options: queryOptions("search"),
     },
     {
-      name: "signin",
+      name: ["signin", "login"],
       description:
         "Sign in to any gemcutter-compatible host. It defaults to https://rubygems.org",
       options: [
-        {
-          name: "--host",
-          description:
-            "Use another gemcutter-compatible host (e.g. https://rubygems.org)",
-          args: {
-            name: "HOST",
-            description: "The host",
-          },
-        },
-        {
-          name: "--otp",
-          description:
-            "Digit code for multifactor authentication You can also use the environment variable GEM_HOST_OTP_CODE",
-          args: {
-            name: "CODE",
-            description: "The GEM host otp code",
-          },
-        },
+        hostOption("Push to another gemcutter-compatible host"),
+        otpOption,
       ],
     },
     {
-      name: "signout",
+      name: ["signout", "logout"],
       description: "Sign out from all the current sessions",
     },
     {
@@ -950,6 +1130,22 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-a", "--add"],
           description: "Add source",
+          args: {
+            name: "SOURCE_URI",
+            description: "The source URI",
+          },
+        },
+        {
+          name: "--append",
+          description: "Append source (can be used multiple times)",
+          args: {
+            name: "SOURCE_URI",
+            description: "The source URI",
+          },
+        },
+        {
+          name: "--prepend",
+          description: "Prepend source (can be used multiple times)",
           args: {
             name: "SOURCE_URI",
             description: "The source URI",
@@ -975,18 +1171,13 @@ const completionSpec: Fig.Spec = {
           name: ["-u", "--update"],
           description: "Update source cache",
         },
-        {
-          name: ["-f", "--force"],
+        ...toggle({
+          name: "force",
+          short: "-f",
           description:
             "Do not show any confirmation prompts and behave as if 'yes' was always answered",
-          exclusiveOn: ["--no-force"],
-        },
-        {
-          name: "--no-force",
-          description:
-            "Show any confirmation prompts and behave as if 'yes' was always answered",
-          exclusiveOn: ["--force"],
-        },
+          negatedDescription: "Show confirmation prompts",
+        }),
         ...httpProxyOptions,
       ],
     },
@@ -995,43 +1186,21 @@ const completionSpec: Fig.Spec = {
       description: "Display gem specification (in yaml)",
       args: [
         {
-          name: "GEMFILE",
-          description: "Name of gem to show the gemspec for",
+          name: "GEM_OR_FILE",
+          description: "Name of gem or a .gem file to show the gemspec for",
           generators: gems,
           debounce: true,
         },
         {
           name: "FIELD",
           description: "Name of gemspec field to show",
+          isOptional: true,
         },
       ],
       options: [
-        {
-          name: ["-v", "--version"],
-          description: "Specify version of gem to examine",
-          args: {
-            name: "VERSION",
-            description: "The version of gem",
-          },
-        },
-        {
-          name: "--platform",
-          description: "Specify the platform of gem to specification",
-          args: {
-            name: "PLATFORM",
-            description: "The platform of gem",
-          },
-        },
-        {
-          name: "--prerelease",
-          description: "Allow prerelease versions of a gem",
-          exclusiveOn: ["--no-prerelease"],
-        },
-        {
-          name: "--no-prerelease",
-          description: "Do not allow prerelease versions of a gem",
-          exclusiveOn: ["--prerelease"],
-        },
+        versionOption("examine"),
+        platformOption("specification"),
+        ...prereleaseOptions(),
         {
           name: "--all",
           description: "Output specifications for all versions of the gem",
@@ -1048,6 +1217,7 @@ const completionSpec: Fig.Spec = {
           name: "--marshal",
           description: "Output Marshal format",
         },
+        ...localRemoteOptions,
       ],
     },
     {
@@ -1057,12 +1227,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "unpack",
       description: "Unpack an installed gem to the current directory",
-      args: {
-        name: "GEMNAME",
-        description: "Name of gem to unpack",
-        generators: gems,
-        debounce: true,
-      },
+      args: gemNameArg("Name of gem to unpack"),
       options: [
         {
           name: "--target",
@@ -1072,77 +1237,58 @@ const completionSpec: Fig.Spec = {
             template: "folders",
             filterStrategy: "fuzzy",
           },
-          requiresSeparator: true,
         },
         {
           name: "--spec",
           description: "Unpack the gem specification",
         },
-        {
-          name: ["-v", "--version"],
-          description: "Specify version of gem to unpack",
-          args: {
-            name: "VERSION",
-            description: "The specify version of gem",
-          },
-        },
+        trustPolicyOption,
+        versionOption("unpack"),
       ],
     },
     {
       name: "yank",
       description: "Remove a pushed gem from the index",
-      args: {
-        name: "GEM",
-        description: "Name of gem",
-        generators: gems,
-        debounce: true,
-      },
+      args: gemNameArg("Name of gem", { name: "GEM" }),
       options: [
-        {
-          name: ["-v", "--version"],
-          description: "Specify version of gem to dependency",
-          args: {
-            name: "VERSION",
-            description: "The version of gem",
-          },
-        },
-        {
-          name: "--platform",
-          description: "Specify the platform of gem to dependency",
-          args: {
-            name: "PLATFORM",
-            description: "The platform of gem",
-          },
-        },
-        ...authenticationOptions,
+        versionOption("remove"),
+        platformOption("remove"),
+        rubyAbiOption("remove"),
+        ...authenticationOptions("Yank from another gemcutter-compatible host"),
       ],
     },
     {
       name: "uninstall",
       description: "Uninstall gems from the local repository",
-      args: {
-        name: "GEMNAME",
-        generators: gems,
-        debounce: true,
-      },
+      args: gemNameArg("Name of gem to uninstall", { isVariadic: true }),
       options: [
-        {
-          name: ["-a", "--all"],
+        ...toggle({
+          name: "all",
+          short: "-a",
           description: "Uninstall all matching versions",
-        },
-        {
-          name: ["-I", "--ignore-dependencies"],
+          negatedDescription: "Do not uninstall all matching versions",
+        }),
+        ...toggle({
+          name: "ignore-dependencies",
+          short: "-I",
           description: "Ignore dependency requirements while uninstalling",
-        },
-        {
-          name: ["-D", "--check-development"],
+          negatedDescription:
+            "Do not ignore dependency requirements while uninstalling",
+        }),
+        ...toggle({
+          name: "check-development",
+          short: "-D",
           description:
             "Check development dependencies while uninstalling (default: false)",
-        },
-        {
-          name: ["-x", "--executables"],
+          negatedDescription:
+            "Do not check development dependencies while uninstalling",
+        }),
+        ...toggle({
+          name: "executables",
+          short: "-x",
           description: "Uninstall applicable executables without confirmation",
-        },
+          negatedDescription: "Confirm before uninstalling executables",
+        }),
         {
           name: ["-i", "--install-dir"],
           description: "Directory to uninstall gem from",
@@ -1161,41 +1307,35 @@ const completionSpec: Fig.Spec = {
             filterStrategy: "fuzzy",
           },
         },
-        {
-          name: "--user-install",
+        ...toggle({
+          name: "user-install",
           description:
-            "Uninstall from user’s home directory in addition to GEM_HOME",
-        },
-        {
-          name: "--format-executable",
-          description: "Assume executable names match Ruby’s prefix and suffix",
-        },
-        {
-          name: "--force",
+            "Uninstall from user's home directory in addition to GEM_HOME",
+          negatedDescription:
+            "Do not uninstall from user's home directory in addition to GEM_HOME",
+        }),
+        ...toggle({
+          name: "format-executable",
+          description: "Assume executable names match Ruby's prefix and suffix",
+          negatedDescription:
+            "Do not assume executable names match Ruby's prefix and suffix",
+        }),
+        ...toggle({
+          name: "force",
           description:
             "Uninstall all versions of the named gems ignoring dependencies",
-        },
-        {
-          name: "--abort-on-dependent",
+          negatedDescription:
+            "Do not uninstall all versions of the named gems ignoring dependencies",
+        }),
+        ...toggle({
+          name: "abort-on-dependent",
           description:
             "Prevent uninstalling gems that are depended on by other gems",
-        },
-        {
-          name: ["-v", "--version"],
-          description: "Specify version of gem to uninstall",
-          args: {
-            name: "VERSION",
-            description: "The specify version of gem",
-          },
-        },
-        {
-          name: "--platform",
-          description: "Specify the platform of gem to uninstall",
-          args: {
-            name: "PLATFORM",
-            description: "The platform of gem",
-          },
-        },
+          negatedDescription:
+            "Allow uninstalling gems that are depended on by other gems",
+        }),
+        versionOption("uninstall"),
+        platformOption("uninstall"),
         {
           name: "--vendor",
           description:
@@ -1210,35 +1350,9 @@ const completionSpec: Fig.Spec = {
         name: "REGEXP",
         description: "Regexp to look for in gem name",
         isOptional: true,
+        isVariadic: true,
       },
-      options: [
-        {
-          name: ["-d", "--details"],
-          description: "Display detailed information of gem(s)",
-          exclusiveOn: ["--no-details"],
-        },
-        {
-          name: "--no-details",
-          description: "Do not display detailed information of gem(s)",
-          exclusiveOn: ["--details"],
-        },
-        {
-          name: ["-u", "--update-sources"],
-          description: "[Deprecated] Update local source cache",
-          deprecated: true,
-          exclusiveOn: ["--no-update-sources"],
-        },
-        {
-          name: "--no-update-sources",
-          description: "[Deprecated] Do not update local source cache",
-          deprecated: true,
-          exclusiveOn: ["--update-sources"],
-        },
-        ...displayOptions,
-        ...installedOptions,
-        ...versionsOptions,
-        ...localRemoteOptions,
-      ],
+      options: queryOptions("list"),
     },
     {
       name: "build",
@@ -1246,16 +1360,10 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "GEMSPEC_FILE",
         description: "Gemspec file name to build a gem for",
+        template: "filepaths",
       },
       options: [
-        {
-          name: "--platform",
-          description: "Specify the platform of gem to build",
-          args: {
-            name: "PLATFORM",
-            description: "The platform of gem",
-          },
-        },
+        platformOption("build"),
         {
           name: "--force",
           description: "Skip validation of the spec",
@@ -1272,15 +1380,10 @@ const completionSpec: Fig.Spec = {
             description: "The filename",
           },
         },
+        rubyAbiOption("build"),
         {
-          name: "-C",
-          description:
-            "Run as if gem build was started in <PATH> instead of the current working directory",
-          args: {
-            name: "PATH",
-            description: "The filename",
-            template: "folders",
-          },
+          name: "--content-addressable",
+          description: "Build a content-addressable gem",
         },
       ],
     },
@@ -1290,8 +1393,35 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "GEM",
         description: "Built gem to push up",
+        template: "filepaths",
       },
-      options: [...authenticationOptions, ...httpProxyOptions],
+      options: [
+        ...httpProxyOptions,
+        keyOption,
+        otpOption,
+        hostOption("Push to another gemcutter-compatible host"),
+        {
+          name: "--platform",
+          description:
+            "Push a gem for a specific platform (e.g. x86_64-darwin-20)",
+          args: {
+            name: "PLATFORM",
+            description: "The platform of gem",
+          },
+        },
+        rubyAbiOption("push"),
+        {
+          name: "--attestation",
+          description:
+            "Push with sigstore attestations (FILE must be a JSON sigstore bundle)",
+          isRepeatable: true,
+          args: {
+            name: "FILE",
+            description: "The sigstore bundle",
+            template: "filepaths",
+          },
+        },
+      ],
     },
     {
       name: "server",
@@ -1301,15 +1431,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "owner",
       description: "Manage gem owners of a gem on the push server",
-      args: {
-        name: "GEMNAME",
-        generators: gems,
-        debounce: true,
-      },
+      args: gemNameArg("Name of gem to manage owners for", { name: "GEM" }),
       options: [
         {
           name: ["-a", "--add"],
           description: "Add an owner by user identifier",
+          isRepeatable: true,
           args: {
             name: "NEW_OWNER",
             description: "The new owner",
@@ -1318,12 +1445,14 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-r", "--remove"],
           description: "Remove an owner by user identifier",
+          isRepeatable: true,
           args: {
             name: "OLD_OWNER",
             description: "The old owner",
           },
         },
-        ...authenticationOptions,
+        ...authenticationOptions("Use another gemcutter-compatible host"),
+        ...httpProxyOptions,
       ],
     },
     {
@@ -1332,30 +1461,30 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "FILE",
         template: "filepaths",
+        isVariadic: true,
       },
       options: [
-        {
-          name: ["-a", "--all"],
+        ...toggle({
+          name: "all",
+          short: "-a",
           description: "Show all matching files",
-        },
-        {
-          name: ["-g", "--gems-first"],
+          negatedDescription: "Show only the first matching file",
+        }),
+        ...toggle({
+          name: "gems-first",
+          short: "-g",
           description: "Search gems before non-gems",
-        },
+          negatedDescription: "Search non-gems before gems",
+        }),
       ],
     },
     {
       name: "outdated",
       description: "Display all gems that need updates",
       options: [
-        {
-          name: "--platform",
-          description: "Specify the platform of gem to outdated",
-          args: {
-            name: "PLATFORM",
-            isVariadic: true,
-          },
-        },
+        ...localRemoteOptions,
+        platformOption("outdated"),
+        cooldownOption,
       ],
     },
     {
@@ -1376,156 +1505,27 @@ const completionSpec: Fig.Spec = {
             isOptional: true,
           },
         },
-        {
-          name: "--platform",
-          description: "Update the RubyGems system software",
-          args: {
-            name: "PLATFORM",
-          },
-        },
-        {
-          name: "--prerelease",
-          description: "Allow prerelease versions of a gem as update targets",
-        },
-        {
-          name: ["--install-dir", "-i"],
-          description: "Gem repository directory to get installed gems",
-          args: {
-            name: "DIR",
-            template: "folders",
-          },
-        },
-        {
-          name: ["--bindir", "-n"],
-          description:
-            "Directory where executables will be placed when the gem is installed",
-          args: {
-            name: "DIR",
-            template: "folders",
-          },
-        },
-        {
-          name: "--document",
-          description: "Generate documentation for installed gems",
-          args: {
-            name: "TYPES",
-            suggestions: ["rdoc", "ri"],
-          },
-        },
-        {
-          name: "--build-root",
-          description:
-            "Temporary installation root. Useful for building packages. Do not use this when installing remote gems",
-          args: {
-            name: "DIR",
-            template: "folders",
-          },
-        },
-        {
-          name: "--vendor",
-          description:
-            "Install gem into the vendor directory. Only for use by gem repackagers",
-        },
-        {
-          name: ["--no-document", "-N"],
-          description: "Disable documentation generation",
-        },
-        {
-          name: ["--env-shebang", "-E"],
-          description:
-            "Rewrite the shebang line on installed scripts to use /usr/bin/env",
-        },
-        {
-          name: ["--force", "-f"],
-          description: "Force gem to install, bypassing dependency checks",
-        },
-        {
-          name: ["--wrappers", "-w"],
-          description:
-            "Use bin wrappers for executables. Not available on dosish platforms",
-        },
-        {
-          name: ["--trust-policy", "-P"],
-          description: "Specify gem trust policy",
-          args: {
-            name: "POLICY",
-          },
-        },
-        {
-          name: "--ignore-dependencies",
-          description: "Do not install any required dependent gems",
-        },
-        {
-          name: "--format-executable",
-          description: "Make installed executable names match Ruby",
-        },
-        {
-          name: "--user-install",
-          description: "Install in user's home directory instead of GEM_HOME",
-        },
-        {
-          name: "--development",
-          description: "Install additional development dependencies",
-        },
-        {
-          name: "--development-all",
-          description:
-            "Install development dependencies for all gems (including dev deps themselves)",
-        },
-        {
-          name: "--conservative",
-          description:
-            "Don't attempt to upgrade gems already meeting version requirement",
-        },
-        {
-          name: "--minimal-deps",
-          description:
-            "Don't upgrade any dependencies that already meet version requirements",
-        },
-        {
-          name: "--post-install-message",
-          description: "Print post install message",
-        },
-        {
-          name: ["--file", "-g"],
-          description:
-            "Read from a gem dependencies API file and install the listed gems",
-          args: {
-            name: "FILE",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--without",
-          description:
-            "Omit the named groups (comma separated) when installing from a gem dependencies file",
-          args: {
-            name: "GROUPS",
-          },
-        },
-        {
-          name: "--default",
-          description:
-            "Add the gem's full specification to specifications/default and extract only its bin",
-        },
-        {
-          name: "--explain",
-          description:
-            "Rather than install the gems, indicate which would be installed",
-        },
-        {
-          name: "--lock",
-          description: "Create a lock file (when used with -g/--file)",
-        },
-        {
-          name: "--suggestions",
-          description: "Suggest alternates when gems are not found",
-          exclusiveOn: ["--no-suggestions"],
-        },
+        ...localRemoteOptions,
+        platformOption("update"),
+        ...prereleaseOptions(
+          "Allow prerelease versions of a gem as update targets",
+          "Do not allow prerelease versions of a gem as update targets"
+        ),
+        ...installUpdateOptions,
       ],
     },
   ],
   options: [
+    {
+      name: "-C",
+      description:
+        "Run as if gem was started in PATH instead of the current working directory (must be the first argument)",
+      args: {
+        name: "PATH",
+        description: "The path",
+        template: "folders",
+      },
+    },
     {
       name: ["--help", "-h"],
       description: "Show help for gem",
@@ -1554,7 +1554,7 @@ const completionSpec: Fig.Spec = {
       isPersistent: true,
     },
     {
-      name: "-config-file",
+      name: "--config-file",
       description: "Use this config file instead of default",
       args: {
         name: "FILE",

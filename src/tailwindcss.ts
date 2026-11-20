@@ -1,3 +1,7 @@
+// Tailwind CSS CLI v4.3.5 (npm @tailwindcss/cli latest, tag v4.3.5 of tailwindlabs/tailwindcss, 2026-11-19).
+// Source: packages/@tailwindcss-cli/src/{index.ts,commands/build,commands/canonicalize,commands/help} read statically; the CLI was not executed.
+// Since v4 the `tailwindcss` binary ships in @tailwindcss/cli; the v3 commands/flags (init, --config, --postcss, --purge, --content, --no-autoprefixer) no longer exist.
+
 const commonOptions: Fig.Option[] = [
   {
     name: ["--help", "-h"],
@@ -8,48 +12,60 @@ const commonOptions: Fig.Option[] = [
 const buildOptions: Fig.Option[] = [
   {
     name: ["-i", "--input"],
-    description: "Specify input file",
+    description: "Input file",
     args: { name: "input file", template: "filepaths" },
   },
   {
     name: ["-o", "--output"],
-    description: "Specify output file",
+    description: "Output file (default: stdout)",
     args: { name: "output file", template: "filepaths" },
   },
   {
-    name: ["-c", "--config"],
-    description: "Specify config file to use",
-    args: { name: "config file", template: "filepaths" },
+    name: ["-w", "--watch"],
+    description:
+      "Watch for changes and rebuild as needed, and use `always` to keep watching when stdin is closed",
+    requiresSeparator: true,
+    args: {
+      name: "mode",
+      isOptional: true,
+      suggestions: ["always"],
+    },
   },
   {
-    name: "--postcss",
-    description: "Load custom PostCSS configuration",
+    name: "--poll",
+    description: "Use polling instead of filesystem events when watching",
+    requiresSeparator: true,
     args: {
-      name: "postcss config file",
-      template: "filepaths",
+      name: "ms",
       isOptional: true,
     },
   },
   {
-    name: "--purge",
-    description:
-      "Content paths to use for removing unused classes. [Deprecated]: use `--content` instead",
+    name: ["-m", "--minify"],
+    description: "Optimize and minify the output",
   },
   {
-    name: "--content",
-    description: "Content paths to use for removing unused classes",
+    name: "--optimize",
+    description: "Optimize the output without minifying",
   },
   {
-    name: ["--watch", "-w"],
-    description: "Watch for changes and rebuild as needed",
+    name: "--cwd",
+    description: "The current working directory (default: .)",
+    args: { name: "directory", template: "folders" },
   },
   {
-    name: ["--minify", "-m"],
-    description: "Minify the output",
+    name: "--map",
+    description: "Generate a source map",
+    requiresSeparator: true,
+    args: {
+      name: "file",
+      isOptional: true,
+      template: "filepaths",
+    },
   },
   {
-    name: "--no-autoprefixer",
-    description: "Disable autoprefixer",
+    name: "--silent",
+    description: "Suppress non-error output",
   },
   ...commonOptions,
 ];
@@ -61,28 +77,41 @@ const completionSpec: Fig.Spec = {
   options: buildOptions,
   subcommands: [
     {
-      name: "init",
-      description: "Creates Tailwind config file. Default: tailwind.config.js",
+      name: "build",
+      description: "Build your CSS",
+      options: buildOptions,
+    },
+    {
+      name: "canonicalize",
+      description: "Canonicalize candidate lists",
       args: {
-        name: "filename",
+        name: "classes",
+        description: "Candidate groups to canonicalize",
+        isVariadic: true,
         isOptional: true,
       },
       options: [
         {
-          name: ["-p", "--postcss"],
-          description: "Initialize a 'postcss.config.js' file",
+          name: "--css",
+          description:
+            'CSS entry file used to load the Tailwind design system (defaults to `@import "tailwindcss";`)',
+          args: { name: "input file", template: "filepaths" },
         },
         {
-          name: ["-f", "--full"],
-          description: "Initialize a full 'tailwind.config.js' file",
+          name: "--format",
+          description: "Output format (default: text)",
+          args: {
+            name: "format",
+            suggestions: ["text", "json", "jsonl"],
+          },
+        },
+        {
+          name: "--stream",
+          description:
+            "Read candidate groups from stdin line by line and write results to stdout",
         },
         ...commonOptions,
       ],
-    },
-    {
-      name: "build",
-      description: "Build CSS file",
-      options: buildOptions,
     },
   ],
 };

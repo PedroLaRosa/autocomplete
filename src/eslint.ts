@@ -1,85 +1,39 @@
+// ESLint v10.15.0 (npm latest dist-tag, 2026-11-19).
+// Source: `eslint --help` of eslint@10.15.0 installed from npm into a scratch dir, plus lib/options.js, lib/cli.js,
+// lib/shared/flags.js and lib/cli-engine/formatters of that package.
+// Removed the eslintrc-era options that no longer exist in v10 (--no-eslintrc, --env, --rulesdir, --ignore-path,
+// --resolve-plugins-relative-to) and the built-in formatters dropped in v9; added the options new since v8/v9.
 const completionSpec: Fig.Spec = {
   name: "eslint",
   description: "Pluggable JavaScript linter",
   options: [
     {
-      name: "--no-eslintrc",
-      description: "Disable use of configuration from .eslintrc.*",
+      name: "--no-config-lookup",
+      description: "Disable look up for eslint.config.*",
     },
     {
       name: ["-c", "--config"],
-      description:
-        "Use this configuration, overriding .eslintrc.* config options if present",
+      description: "Use this configuration instead of eslint.config.* look up",
       args: {
-        template: ["filepaths"],
+        template: "filepaths",
       },
     },
     {
-      name: "--env",
-      description: "Specify environments",
-      args: {
-        generators: {
-          /*
-           * Multiple envs can be set with a ',' separator.
-           * We want to filter over this static list of suggestions
-           * so we don't suggest envs that have already been entered.
-           * */
-          getQueryTerm: ",",
-          trigger: ",",
-          custom: async (ctx) => {
-            const suggestions = [
-              "browser",
-              "node",
-              "commonjs",
-              "shared-node-browser",
-              "es6",
-              "ecmaVersion",
-              "es2017",
-              "es2020",
-              "es2021",
-              "worker",
-              "amd",
-              "mocha",
-              "jasmine",
-              "jest",
-              "phantomjs",
-              "protractor",
-              "qunit",
-              "jquery",
-              "prototypejs",
-              "shelljs",
-              "meteor",
-              "mongo",
-              "applescript",
-              "nashorn",
-              "servicerworker",
-              "atomtest",
-              "embertest",
-              "webextensions",
-              "greasemonkey",
-            ];
-
-            const currentToken = [ctx[ctx.length - 1]][0];
-
-            // Return suggestions minus those that have already been entered
-            return suggestions
-              .filter((sugg) => !currentToken.split(",").includes(sugg))
-              .map((sugg) => ({ name: sugg }));
-          },
-        },
-      },
+      name: "--inspect-config",
+      description: "Open the config inspector with the current configuration",
     },
     {
       name: "--ext",
-      description: "Specify JavaScript file extensions",
+      description: "Specify additional file extensions to lint",
+      isRepeatable: true,
       args: {
         name: "Extension",
-        default: ".js",
       },
     },
     {
       name: "--global",
       description: "Define global variables",
+      isRepeatable: true,
       args: {
         name: "Variables",
       },
@@ -87,31 +41,21 @@ const completionSpec: Fig.Spec = {
     {
       name: "--parser",
       description: "Specify the parser to be used",
-      args: {},
+      args: {
+        name: "Parser",
+      },
     },
     {
       name: "--parser-options",
       description: "Specify parser options",
-      args: {},
-    },
-    {
-      name: "--resolve-plugins-relative-to",
-      description: "A folder where plugins should be resolved from",
       args: {
-        template: ["folders"],
-        default: "CWD",
-      },
-    },
-    {
-      name: "--rulesdir",
-      description: "Use additional rules from this directory",
-      args: {
-        template: ["folders"],
+        name: "Options",
       },
     },
     {
       name: "--plugin",
       description: "Specify plugins",
+      isRepeatable: true,
       args: {
         name: "Plugin",
         generators: {
@@ -131,7 +75,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "--rule",
       description: "Specify rules",
-      args: {},
+      isRepeatable: true,
+      args: {
+        name: "Rule",
+      },
     },
     {
       name: "--fix",
@@ -144,17 +91,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--fix-type",
-      description: "Specify the types of fixes to apply",
-      dependsOn: ["--fix", "--fix-dry-run"],
+      description:
+        "Specify the types of fixes to apply (requires --fix or --fix-dry-run)",
+      isRepeatable: true,
       args: {
-        suggestions: ["problem", "suggestion", "layout"],
-      },
-    },
-    {
-      name: "--ignore-path",
-      description: "Specify path of ignore file",
-      args: {
-        template: ["filepaths"],
+        suggestions: ["directive", "problem", "suggestion", "layout"],
       },
     },
     {
@@ -163,9 +104,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--ignore-pattern",
-      description:
-        "Pattern of files to ignore (in addition to those in .eslintignore)",
-      args: {},
+      description: "Patterns of files to ignore",
+      isRepeatable: true,
+      args: {
+        name: "Pattern",
+      },
     },
     {
       name: "--stdin",
@@ -175,7 +118,7 @@ const completionSpec: Fig.Spec = {
       name: "--stdin-filename",
       description: "Specify filename to process STDIN as",
       args: {
-        template: ["filepaths"],
+        template: "filepaths",
       },
     },
     {
@@ -193,7 +136,7 @@ const completionSpec: Fig.Spec = {
       name: ["-o", "--output-file"],
       description: "Specify file to write report to",
       args: {
-        template: ["filepaths"],
+        template: "filepaths",
       },
     },
     {
@@ -201,20 +144,7 @@ const completionSpec: Fig.Spec = {
       description: "Use a specific output format",
       args: {
         default: "stylish",
-        suggestions: [
-          "checkstyle",
-          "codeframe",
-          "compact",
-          "html",
-          "jslint-xml",
-          "json",
-          "junit",
-          "stylish",
-          "table",
-          "tap",
-          "unix",
-          "visualstudio",
-        ],
+        suggestions: ["stylish", "json", "json-with-metadata", "html"],
       },
     },
     {
@@ -233,11 +163,37 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--report-unused-disable-directives",
-      description: "Adds reported errors for unused eslint-disable-directives",
+      description:
+        "Adds reported errors for unused eslint-disable and eslint-enable directives",
+    },
+    {
+      name: "--report-unused-disable-directives-severity",
+      description:
+        "Chooses severity level for reporting unused eslint-disable and eslint-enable directives",
+      args: {
+        suggestions: ["off", "warn", "error", "0", "1", "2"],
+      },
+    },
+    {
+      name: "--report-unused-inline-configs",
+      description:
+        "Adds reported errors for unused eslint inline config comments",
+      args: {
+        suggestions: ["off", "warn", "error", "0", "1", "2"],
+      },
     },
     {
       name: "--cache",
       description: "Only check changed files",
+    },
+    {
+      name: "--cache-file",
+      description: "Path to the cache file (deprecated: use --cache-location)",
+      deprecated: true,
+      args: {
+        template: "filepaths",
+        default: ".eslintcache",
+      },
     },
     {
       name: "--cache-location",
@@ -248,11 +204,38 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--cache-strategy",
-      description: "Strategy to use for detecting changed files",
+      description: "Strategy to use for detecting changed files in the cache",
       args: {
         suggestions: ["metadata", "content"],
         default: "metadata",
       },
+    },
+    {
+      name: "--suppress-all",
+      description: "Suppress all violations",
+    },
+    {
+      name: "--suppress-rule",
+      description: "Suppress specific rules",
+      isRepeatable: true,
+      args: {
+        name: "Rule",
+      },
+    },
+    {
+      name: "--suppressions-location",
+      description: "Specify the location of the suppressions file",
+      args: {
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--prune-suppressions",
+      description: "Prune unused suppressions",
+    },
+    {
+      name: "--pass-on-unpruned-suppressions",
+      description: "Ignore unused suppressions",
     },
     {
       name: "--init",
@@ -265,6 +248,19 @@ const completionSpec: Fig.Spec = {
     {
       name: "--no-error-on-unmatched-pattern",
       description: "Prevent errors when pattern is unmatched",
+    },
+    {
+      name: "--exit-on-fatal-error",
+      description: "Exit with exit code 2 in case of fatal error",
+    },
+    {
+      name: "--no-warn-ignored",
+      description:
+        "Suppress warnings when the file list includes ignored files",
+    },
+    {
+      name: "--pass-on-no-patterns",
+      description: "Exit with exit code 0 in case no file patterns are passed",
     },
     {
       name: "--debug",
@@ -280,9 +276,41 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--print-config",
-      description: "Print the configuration for the give file",
+      description: "Print the configuration for the given file",
       args: {
-        template: ["filepaths"],
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--stats",
+      description: "Add statistics to the lint report",
+    },
+    {
+      name: "--flag",
+      description: "Enable a feature flag",
+      isRepeatable: true,
+      args: {
+        name: "Flag",
+        suggestions: [
+          {
+            name: "unstable_native_nodejs_ts_config",
+            description: "Use native Node.js to load TypeScript configuration",
+          },
+        ],
+      },
+    },
+    {
+      name: "--mcp",
+      description: "Start the ESLint MCP server",
+    },
+    {
+      name: "--concurrency",
+      description:
+        "Number of linting threads, auto to choose automatically, off for no multithreading",
+      args: {
+        name: "Threads",
+        default: "off",
+        suggestions: ["auto", "off"],
       },
     },
   ],

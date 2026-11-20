@@ -1,3 +1,8 @@
+// 1Password CLI (op) v2.42.0 (current stable per the Homebrew cask 1password-cli, 2026-11-19). Source: official CLI reference pages
+// (https://www.1password.dev/cli/reference, one page per command; they mirror `op <cmd> --help`) plus the item fields / SSH key guides, read statically via
+// doc snippets. op is closed source and the sandbox cannot run downloaded binaries, so the binary itself was not executed or inspected.
+// `op environment` is documented as beta-only (2.33.0-beta.02+) and may be absent from the stable build; `op run --environment` is documented as 2.41.0+.
+
 const icon =
   "data:image/png;base64,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";
 
@@ -20,6 +25,217 @@ const suggestAccounts: Fig.Generator = {
     }));
   },
 };
+
+const stdinSuggestion: Fig.Suggestion = {
+  name: "-",
+  description: "Read from stdin",
+  hidden: true,
+};
+
+// Item categories (case-insensitive, whitespace is ignored by the CLI)
+const itemCategoryNames: [string, string][] = [
+  ["apicredential", "API Credential"],
+  ["bankaccount", "Bank Account"],
+  ["creditcard", "Credit Card"],
+  ["cryptowallet", "Crypto Wallet"],
+  ["database", "Database"],
+  ["document", "Document"],
+  ["driverlicense", "Driver License"],
+  ["emailaccount", "Email Account"],
+  ["identity", "Identity"],
+  ["login", "Login"],
+  ["medicalrecord", "Medical Record"],
+  ["membership", "Membership"],
+  ["outdoorlicense", "Outdoor License"],
+  ["passport", "Passport"],
+  ["password", "Password"],
+  ["rewardprogram", "Reward Program"],
+  ["securenote", "Secure Note"],
+  ["server", "Server"],
+  ["socialsecuritynumber", "Social Security Number"],
+  ["softwarelicense", "Software License"],
+  ["ssh", "SSH Key"],
+  ["wirelessrouter", "Wireless Router"],
+];
+
+const itemCategories: Fig.Suggestion[] = itemCategoryNames.map(
+  ([name, displayName]) => ({ name, displayName })
+);
+
+const vaultIcons = [
+  "airplane",
+  "application",
+  "art-supplies",
+  "bankers-box",
+  "brown-briefcase",
+  "brown-gate",
+  "buildings",
+  "cabin",
+  "castle",
+  "circle-of-dots",
+  "coffee",
+  "color-wheel",
+  "curtained-window",
+  "document",
+  "doughnut",
+  "fence",
+  "galaxy",
+  "gears",
+  "globe",
+  "green-backpack",
+  "green-gem",
+  "handshake",
+  "heart-with-monitor",
+  "house",
+  "id-card",
+  "jet",
+  "large-ship",
+  "luggage",
+  "plant",
+  "porthole",
+  "puzzle",
+  "rainbow",
+  "record",
+  "round-door",
+  "sandals",
+  "scales",
+  "screwdriver",
+  "shop",
+  "tall-window",
+  "treasure-chest",
+  "vault-door",
+  "vehicle",
+  "wallet",
+  "wrench",
+];
+
+// Vault permissions: the three base ones, then the granular 1Password Business ones
+const vaultPermissions = [
+  "allow_viewing",
+  "allow_editing",
+  "allow_managing",
+  "view_items",
+  "view_and_copy_passwords",
+  "view_item_history",
+  "create_items",
+  "edit_items",
+  "archive_items",
+  "delete_items",
+  "import_items",
+  "export_items",
+  "copy_and_share_items",
+  "print_items",
+  "manage_vault",
+];
+
+const objectArg = (name: string): Fig.Arg => ({
+  name,
+  isOptional: true,
+  suggestions: [stdinSuggestion],
+});
+
+const userArg = objectArg("email | name | userID");
+
+const vaultOption = (description: string): Fig.Option => ({
+  name: "--vault",
+  description,
+  args: { name: "vault" },
+});
+
+const includeArchiveOption = (what: string): Fig.Option => ({
+  name: "--include-archive",
+  description: `Include ${what} in the Archive. Can also be set using OP_INCLUDE_ARCHIVE environment variable`,
+});
+
+const forceOption = (
+  description = "Do not prompt for confirmation"
+): Fig.Option => ({
+  name: ["-f", "--force"],
+  description,
+});
+
+const fileModeOption: Fig.Option = {
+  name: "--file-mode",
+  description:
+    "Set filemode for the output file. It is ignored without the --out-file flag (default 0600)",
+  args: { name: "filemode" },
+};
+
+const outFileOption = (description: string): Fig.Option => ({
+  name: ["-o", "--out-file"],
+  description,
+  args: { name: "path", template: "filepaths" },
+});
+
+const expiresInOption = (description: string): Fig.Option => ({
+  name: "--expires-in",
+  description,
+  args: { name: "duration" },
+});
+
+const revealOption: Fig.Option = {
+  name: "--reveal",
+  description: "Don't conceal sensitive fields",
+};
+
+const noInputOption: Fig.Option = {
+  name: "--no-input",
+  description: "Do not prompt for input on interactive terminal",
+};
+
+const generatePasswordOption = (description: string): Fig.Option => ({
+  name: "--generate-password",
+  description,
+  requiresSeparator: true,
+  args: { name: "recipe", isOptional: true },
+});
+
+const permissionsOption = (description: string): Fig.Option => ({
+  name: "--permissions",
+  description,
+  args: { name: "permissions", suggestions: vaultPermissions },
+});
+
+const travelModeOption = (what: string): Fig.Option => ({
+  name: "--travel-mode",
+  description: `Turn Travel Mode on or off for the ${what} (default off)`,
+  args: { name: "on|off", suggestions: ["on", "off"] },
+});
+
+const vaultAccessSubcommands = (
+  who: "group" | "user",
+  grantDescription: string,
+  grantVaultDescription: string
+): Fig.Subcommand[] => [
+  {
+    name: "grant",
+    description: grantDescription,
+    options: [
+      {
+        name: `--${who}`,
+        description: `The ${who} to receive access`,
+        args: { name: who },
+      },
+      noInputOption,
+      permissionsOption(`The permissions to grant to the ${who}`),
+      vaultOption(grantVaultDescription),
+    ],
+  },
+  {
+    name: "revoke",
+    description: `Revoke a portion or the entire access of a ${who} to a vault`,
+    options: [
+      {
+        name: `--${who}`,
+        description: `The ${who} to revoke access from`,
+        args: { name: who },
+      },
+      noInputOption,
+      permissionsOption(`The permissions to revoke from the ${who}`),
+      vaultOption("The vault to revoke access to"),
+    ],
+  },
+];
 
 const spec: Fig.Spec = {
   name: "op",
@@ -55,10 +271,14 @@ const spec: Fig.Spec = {
             },
             {
               name: "--shorthand",
-              description: "Set the short account name",
+              description: "Set a custom account shorthand for your account",
               args: {
                 name: "string",
               },
+            },
+            {
+              name: "--signin",
+              description: "Immediately sign in to the added account",
             },
           ],
         },
@@ -81,6 +301,8 @@ const spec: Fig.Spec = {
           ],
           args: {
             name: "account",
+            isOptional: true,
+            generators: suggestAccounts,
           },
         },
       ],
@@ -88,7 +310,7 @@ const spec: Fig.Spec = {
     {
       name: "connect",
       description:
-        "Manage Connect instances and Connect tokens in your 1Password account",
+        "Manage Connect server instances and tokens in your 1Password account",
       icon,
       subcommands: [
         {
@@ -96,8 +318,8 @@ const spec: Fig.Spec = {
           description: "Manage group access to Secrets Automation",
           subcommands: [
             {
-              description: "Grant a group access to manage Secrets Automation",
               name: "grant",
+              description: "Grant a group access to manage Secrets Automation",
               options: [
                 {
                   name: "--all-servers",
@@ -109,6 +331,13 @@ const spec: Fig.Spec = {
                   description: "The group to receive access",
                   args: {
                     name: "group",
+                  },
+                },
+                {
+                  name: "--server",
+                  description: "The server to grant access to",
+                  args: {
+                    name: "server",
                   },
                 },
               ],
@@ -130,6 +359,13 @@ const spec: Fig.Spec = {
                     name: "group",
                   },
                 },
+                {
+                  name: "--server",
+                  description: "The server to revoke access to",
+                  args: {
+                    name: "server",
+                  },
+                },
               ],
             },
           ],
@@ -141,37 +377,53 @@ const spec: Fig.Spec = {
             {
               name: "create",
               description: "Set up a Connect server",
+              options: [
+                forceOption(
+                  "Do not prompt for confirmation when overwriting credential files"
+                ),
+                {
+                  name: "--vaults",
+                  description:
+                    "Grant the Connect server access to these vaults",
+                  isRepeatable: true,
+                  args: {
+                    name: "strings",
+                  },
+                },
+              ],
+              args: {
+                name: "name",
+              },
             },
             {
               name: "get",
               description: "Get a Connect server",
-              args: {
-                name: "serverName | serverID",
-                suggestions: [
-                  { name: "-", description: "Read from stdin", hidden: true },
-                ],
-              },
+              args: objectArg("serverName | serverID"),
             },
             {
-              description: "Rename a Connect server",
               name: "edit",
+              description: "Rename a Connect server",
+              options: [
+                {
+                  name: "--name",
+                  description: "Change the server's name",
+                  args: {
+                    name: "name",
+                  },
+                },
+              ],
               args: {
                 name: "serverName | serverID",
               },
             },
             {
-              description: "Remove a Connect server",
               name: ["delete", "remove", "rm"],
-              args: {
-                name: "serverName | serverID",
-                suggestions: [
-                  { name: "-", description: "Read from stdin", hidden: true },
-                ],
-              },
+              description: "Remove a Connect server",
+              args: objectArg("serverName | serverID"),
             },
             {
-              description: "List Connect servers",
               name: ["list", "ls"],
+              description: "List Connect servers",
             },
           ],
         },
@@ -180,17 +432,12 @@ const spec: Fig.Spec = {
           description: "Manage Connect tokens",
           subcommands: [
             {
-              description: "Issue a token for a 1Password Connect server",
               name: "create",
+              description: "Issue a token for a 1Password Connect server",
               options: [
-                {
-                  name: "--expires-in",
-                  description:
-                    "Set how long the Connect token is valid for in (s)econds, (m)inutes, or (h)ours",
-                  args: {
-                    name: "duration",
-                  },
-                },
+                expiresInOption(
+                  "Set how long the Connect token is valid for in (s)econds, (m)inutes, (h)ours, (d)ays, and/or (w)eeks"
+                ),
                 {
                   name: "--server",
                   description: "Issue a token for this server",
@@ -198,11 +445,23 @@ const spec: Fig.Spec = {
                     name: "string",
                   },
                 },
+                {
+                  name: "--vault",
+                  description:
+                    "Issue a token on these vaults. By default grants the same permissions as the server. Add a comma and r or w after the vault to limit it to read-only or write-only",
+                  isRepeatable: true,
+                  args: {
+                    name: "stringArray",
+                  },
+                },
               ],
+              args: {
+                name: "tokenName",
+              },
             },
             {
-              description: "Rename a Connect token",
               name: "edit",
+              description: "Rename a Connect token",
               options: [
                 {
                   name: "--name",
@@ -211,28 +470,59 @@ const spec: Fig.Spec = {
                     name: "string",
                   },
                 },
+                {
+                  name: "--server",
+                  description:
+                    "Only look for tokens for this 1Password Connect server",
+                  args: {
+                    name: "string",
+                  },
+                },
               ],
-            },
-            {
-              description: "Revoke a token for a Connect server",
-              name: ["delete", "remove", "rm"],
               args: {
                 name: "token",
               },
             },
             {
-              description: "Get a list of tokens",
+              name: ["delete", "remove", "rm"],
+              description: "Revoke a token for a Connect server",
+              options: [
+                {
+                  name: "--server",
+                  description:
+                    "Only look for tokens for this 1Password Connect server",
+                  args: {
+                    name: "string",
+                  },
+                },
+              ],
+              args: {
+                name: "token",
+                isOptional: true,
+              },
+            },
+            {
               name: ["list", "ls"],
+              description: "Get a list of tokens",
+              options: [
+                {
+                  name: "--server",
+                  description: "Only list tokens for this Connect server",
+                  args: {
+                    name: "server",
+                  },
+                },
+              ],
             },
           ],
         },
         {
           name: "vault",
-          description: "Manage connect server vault access",
+          description: "Manage Connect server vault access",
           subcommands: [
             {
-              description: "Grant a Connect server access to a vault",
               name: "grant",
+              description: "Grant a Connect server access to a vault",
               options: [
                 {
                   name: "--server",
@@ -241,17 +531,31 @@ const spec: Fig.Spec = {
                     name: "string",
                   },
                 },
+                {
+                  name: "--vault",
+                  description: "The vault to grant access to",
+                  args: {
+                    name: "string",
+                  },
+                },
               ],
             },
             {
-              description: "Revoke a Connect server's access to a vault",
               name: "revoke",
+              description: "Revoke a Connect server's access to a vault",
               options: [
                 {
                   name: "--server",
                   description: "The server to revoke access from",
                   args: {
                     name: "server",
+                  },
+                },
+                {
+                  name: "--vault",
+                  description: "The vault to revoke a server's access to",
+                  args: {
+                    name: "vault",
                   },
                 },
               ],
@@ -291,31 +595,28 @@ const spec: Fig.Spec = {
                 name: "title",
               },
             },
+            vaultOption("Save the document in this vault. Default: Private"),
           ],
           args: {
             name: "file",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
+            isOptional: true,
+            template: "filepaths",
+            suggestions: [stdinSuggestion],
           },
         },
         {
           name: "get",
           description: "Download a document",
           options: [
-            {
-              name: "--include-archive",
-              description:
-                "Include document items in the Archive. Can also be set using OP_INCLUDE_ARCHIVE environment variable",
-            },
-            {
-              name: "--output",
-              description:
-                "Save the document to the file path instead of stdout",
-              args: {
-                name: "path",
-              },
-            },
+            fileModeOption,
+            forceOption(
+              "Forcibly print an unintelligible document to an interactive terminal. If --out-file is specified, save the document to a file without prompting for confirmation"
+            ),
+            includeArchiveOption("document items"),
+            outFileOption(
+              "Save the document to the file path instead of stdout"
+            ),
+            vaultOption("Look for the document in this vault"),
           ],
           args: {
             name: "itemName | itemID",
@@ -335,7 +636,7 @@ const spec: Fig.Spec = {
             {
               name: "--tags",
               description:
-                "Set the tags to the specified (comma-separated) values. An empty value will remove all tags",
+                "Set the tags to the specified (comma-separated) values. An empty value removes all tags",
               args: {
                 name: "tags",
               },
@@ -347,6 +648,7 @@ const spec: Fig.Spec = {
                 name: "title",
               },
             },
+            vaultOption("Look up document in this vault"),
           ],
           args: [
             {
@@ -354,9 +656,9 @@ const spec: Fig.Spec = {
             },
             {
               name: "file",
-              suggestions: [
-                { name: "-", description: "Read from stdin", hidden: true },
-              ],
+              isOptional: true,
+              template: "filepaths",
+              suggestions: [stdinSuggestion],
             },
           ],
         },
@@ -368,24 +670,33 @@ const spec: Fig.Spec = {
               name: "--archive",
               description: "Move the document to the Archive",
             },
+            vaultOption("Delete the document in this vault"),
           ],
-          args: {
-            name: "itemName | itemID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: objectArg("itemName | itemID"),
         },
         {
           name: ["list", "ls"],
           description: "Get a list of documents",
           options: [
-            {
-              name: "--include-archive",
-              description:
-                "Include document items in the Archive. Can also be set using OP_INCLUDE_ARCHIVE environment variable",
-            },
+            includeArchiveOption("document items"),
+            vaultOption("Only list documents in this vault"),
           ],
+        },
+      ],
+    },
+    {
+      name: "environment",
+      description:
+        "Manage your 1Password Environments and their variables (Beta)",
+      icon,
+      subcommands: [
+        {
+          name: "read",
+          description:
+            "Read environment variables from a 1Password Environment",
+          args: {
+            name: "environmentID",
+          },
         },
       ],
     },
@@ -397,13 +708,29 @@ const spec: Fig.Spec = {
         {
           name: "create",
           description: "Set up an integration with the Events API",
+          options: [
+            expiresInOption(
+              "Set how long the events-api token is valid for in (s)econds, (m)inutes, (h)ours, (d)ays, and/or (w)eeks"
+            ),
+            {
+              name: "--features",
+              description:
+                "Set the comma-separated list of features the integration token can be used for",
+              args: {
+                name: "features",
+                suggestions: ["signinattempts", "itemusages", "auditevents"],
+              },
+            },
+          ],
+          args: {
+            name: "name",
+          },
         },
       ],
     },
     {
       name: "group",
-      description:
-        "Perform CRUD operations on the groups of users in your 1Password account",
+      description: "Manage the groups in your 1Password account",
       icon,
       subcommands: [
         {
@@ -411,8 +738,8 @@ const spec: Fig.Spec = {
           description: "Manage users in groups",
           subcommands: [
             {
-              description: "Grant a user access to a group",
               name: "grant",
+              description: "Grant a user access to a group",
               options: [
                 {
                   name: "--group",
@@ -427,18 +754,12 @@ const spec: Fig.Spec = {
                     "Specify the user's role as a member or manager. Default: member",
                   args: {
                     name: "string",
+                    suggestions: ["member", "manager"],
                   },
                 },
-              ],
-            },
-            {
-              description: "Revoke a user's access to a vault or group",
-              name: "revoke",
-              options: [
                 {
-                  name: "--group",
-                  description:
-                    "Specify the group to revoke the user's access to",
+                  name: "--user",
+                  description: "Specify the user to grant group access to",
                   args: {
                     name: "string",
                   },
@@ -446,8 +767,31 @@ const spec: Fig.Spec = {
               ],
             },
             {
-              description: "Retrieve users that belong to a group",
+              name: "revoke",
+              description: "Revoke a user's access to a group",
+              options: [
+                {
+                  name: "--group",
+                  description: "Specify the group to remove the user from",
+                  args: {
+                    name: "string",
+                  },
+                },
+                {
+                  name: "--user",
+                  description: "Specify the user to remove from the group",
+                  args: {
+                    name: "string",
+                  },
+                },
+              ],
+            },
+            {
               name: ["list", "ls"],
+              description: "Retrieve users that belong to a group",
+              args: {
+                name: "group",
+              },
             },
           ],
         },
@@ -463,16 +807,14 @@ const spec: Fig.Spec = {
               },
             },
           ],
+          args: {
+            name: "name",
+          },
         },
         {
           name: "get",
           description: "Get details about a group",
-          args: {
-            name: "groupName | groupID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: objectArg("groupName | groupID"),
         },
         {
           name: "edit",
@@ -485,23 +827,20 @@ const spec: Fig.Spec = {
                 name: "description",
               },
             },
+            {
+              name: "--name",
+              description: "Change the group's name",
+              args: {
+                name: "name",
+              },
+            },
           ],
-          args: {
-            name: "groupName | groupID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: objectArg("groupName | groupID"),
         },
         {
           name: ["delete", "remove", "rm"],
           description: "Remove a group",
-          args: {
-            name: "groupName | groupID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: objectArg("groupName | groupID"),
         },
         {
           name: ["list", "ls"],
@@ -512,6 +851,13 @@ const spec: Fig.Spec = {
               description: "List groups that a user belongs to",
               args: {
                 name: "user",
+              },
+            },
+            {
+              name: "--vault",
+              description: "List groups that have direct access to a vault",
+              args: {
+                name: "vault",
               },
             },
           ],
@@ -525,24 +871,22 @@ const spec: Fig.Spec = {
       icon,
       subcommands: [
         {
-          description: "Manage templates",
           name: "template",
+          description: "Manage templates",
           icon: "📕",
           subcommands: [
             {
               name: "get",
-              description: "Get an item template",
+              description: "Return a template for an item type",
               options: [
-                {
-                  name: ["-f", "--force"],
-                  description: "Do not prompt for confirmation",
-                },
+                fileModeOption,
+                forceOption(),
+                outFileOption("Write the template to a file instead of stdout"),
               ],
               args: {
                 name: "category",
-                suggestions: [
-                  { name: "-", description: "Read from stdin", hidden: true },
-                ],
+                isOptional: true,
+                suggestions: [...itemCategories, stdinSuggestion],
               },
             },
             {
@@ -561,19 +905,35 @@ const spec: Fig.Spec = {
               description: "Set the item's category",
               args: {
                 name: "category",
+                suggestions: itemCategories,
               },
             },
             {
               name: "--dry-run",
               description:
-                "Perform a dry run of the command and output a preview of the resulting item",
+                "Test the command and output a preview of the resulting item",
             },
             {
-              name: "--generate-password",
-              description: "Give the item a randomly generated password",
-              requiresSeparator: true,
+              name: "--favorite",
+              description: "Add item to favorites",
+            },
+            generatePasswordOption(
+              "Add a randomly-generated password to a Login or Password item"
+            ),
+            revealOption,
+            {
+              name: "--ssh-generate-key",
+              description:
+                "The type of SSH key to create: Ed25519 or RSA. For RSA, specify 2048, 3072, or 4096 (default) bits (default Ed25519)",
               args: {
-                name: "recipe",
+                name: "type",
+                suggestions: [
+                  "ed25519",
+                  "rsa",
+                  "rsa2048",
+                  "rsa3072",
+                  "rsa4096",
+                ],
               },
             },
             {
@@ -589,6 +949,7 @@ const spec: Fig.Spec = {
               description: "Specify the filepath to read an item template from",
               args: {
                 name: "string",
+                template: "filepaths",
               },
             },
             {
@@ -600,14 +961,25 @@ const spec: Fig.Spec = {
             },
             {
               name: "--url",
-              description: "Set the URL associated with the item",
+              description:
+                "Set the website where 1Password suggests and fills a Login, Password, or API Credential item",
               args: {
                 name: "URL",
               },
             },
+            vaultOption("Save the item in this vault. Default: Private"),
           ],
           args: {
-            name: "assignment...",
+            name: "assignment",
+            isOptional: true,
+            isVariadic: true,
+            suggestions: [
+              {
+                name: "-",
+                description: "Read the item template from stdin",
+                hidden: true,
+              },
+            ],
           },
         },
         {
@@ -618,42 +990,92 @@ const spec: Fig.Spec = {
             {
               name: "--fields",
               description:
-                "Only return data from these fields. Use 'label=' to get the field by name or 'type=' to filter fields by type",
+                "Return data from specific fields. Use 'label=' to get the field by name or 'type=' to filter fields by type. Specify multiple in a comma-separated list",
+              isRepeatable: true,
               args: {
                 name: "fields",
               },
             },
-            {
-              name: "--include-archive",
-              description:
-                "Include items in the Archive. Can also be set using OP_INCLUDE_ARCHIVE environment variable",
-            },
+            includeArchiveOption("items"),
             {
               name: "--otp",
               description: "Output the primary one-time password for this item",
             },
+            revealOption,
             {
               name: "--share-link",
               description: "Get a shareable link for the item",
             },
+            vaultOption("Look for the item in this vault"),
           ],
-          args: {
-            name: "itemName | itemID | shareLink",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: objectArg("itemName | itemID | shareLink"),
         },
         {
           name: "edit",
           description: "Edit an item's details",
           icon: "🔏",
+          options: [
+            {
+              name: "--dry-run",
+              description:
+                "Perform a dry run of the command and output a preview of the resulting item",
+            },
+            {
+              name: "--favorite",
+              description:
+                "Whether this item is a favorite item. Options: true, false",
+              requiresSeparator: true,
+              args: {
+                name: "true|false",
+                isOptional: true,
+                suggestions: ["true", "false"],
+              },
+            },
+            generatePasswordOption(
+              "Give the item a randomly generated password"
+            ),
+            revealOption,
+            {
+              name: "--tags",
+              description:
+                "Set the tags to the specified (comma-separated) values. An empty value will remove all tags",
+              args: {
+                name: "tags",
+              },
+            },
+            {
+              name: "--template",
+              description: "Specify the filepath to read an item template from",
+              args: {
+                name: "string",
+                template: "filepaths",
+              },
+            },
+            {
+              name: "--title",
+              description: "Set the item's title",
+              args: {
+                name: "title",
+              },
+            },
+            {
+              name: "--url",
+              description:
+                "Set the website where 1Password suggests and fills a Login, Password, or API Credential item",
+              args: {
+                name: "URL",
+              },
+            },
+            vaultOption("Edit the item in this vault"),
+          ],
           args: [
             {
               name: "itemName | itemID | shareLink",
             },
             {
-              name: "assignment ...",
+              name: "assignment",
+              isOptional: true,
+              isVariadic: true,
             },
           ],
         },
@@ -666,13 +1088,9 @@ const spec: Fig.Spec = {
               name: "--archive",
               description: "Move the item to the Archive",
             },
+            vaultOption("Look for the item in this vault"),
           ],
-          args: {
-            name: "itemName | itemID | shareLink",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: objectArg("itemName | itemID | shareLink"),
         },
         {
           name: ["list", "ls"],
@@ -688,10 +1106,10 @@ const spec: Fig.Spec = {
               },
             },
             {
-              name: "--include-archive",
-              description:
-                "Include items in the Archive. Can also be set using OP_INCLUDE_ARCHIVE environment variable",
+              name: "--favorite",
+              description: "Only list favorite items",
             },
+            includeArchiveOption("items"),
             {
               name: "--long",
               description: "Output a more detailed item list",
@@ -703,7 +1121,30 @@ const spec: Fig.Spec = {
                 name: "tags",
               },
             },
+            vaultOption("Only list items in this vault"),
           ],
+        },
+        {
+          name: "move",
+          description: "Move an item between vaults",
+          options: [
+            {
+              name: "--current-vault",
+              description: "Vault where the item is currently saved",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--destination-vault",
+              description: "The vault you want to move the item to",
+              args: {
+                name: "string",
+              },
+            },
+            revealOption,
+          ],
+          args: objectArg("itemName | itemID | shareLink"),
         },
         {
           name: "share",
@@ -713,28 +1154,120 @@ const spec: Fig.Spec = {
             {
               name: "--emails",
               description: "Email addresses to share with",
+              isRepeatable: true,
               args: {
                 name: "strings",
               },
             },
+            expiresInOption(
+              "Expire link after the duration specified in (s)econds, (m)inutes, (h)ours, (d)ays, and/or (w)eeks (default 7d)"
+            ),
+            vaultOption("Look for the item in this vault"),
             {
-              name: "--expiry",
-              description:
-                "Link expiring after the specified duration in (s)econds, (m)inutes, or (h)ours (default 7h)",
-              args: {
-                name: "duration",
-              },
-            },
-            {
-              name: "--vault",
-              description: "Look for the item in this vault",
-              args: {
-                name: "string",
-              },
+              name: "--view-once",
+              description: "Expire link after a single view",
             },
           ],
           args: {
             name: "itemName | itemID",
+          },
+        },
+      ],
+    },
+    {
+      name: "plugin",
+      description:
+        "Manage the shell plugins you use to authenticate third-party CLIs",
+      icon,
+      subcommands: [
+        {
+          name: "clear",
+          description: "Clear an existing shell plugin configuration",
+          options: [
+            {
+              name: "--all",
+              description:
+                "Clear all configurations for this plugin that apply to this directory and/or terminal session, including the global default",
+            },
+            forceOption("Apply immediately without asking for confirmation"),
+          ],
+          args: {
+            name: "plugin-executable",
+          },
+        },
+        {
+          name: "init",
+          description:
+            "Choose a shell plugin to install and configure your default credentials",
+          args: {
+            name: "plugin-executable",
+            isOptional: true,
+          },
+        },
+        {
+          name: "inspect",
+          description: "Inspect your existing shell plugin configurations",
+          args: {
+            name: "plugin-executable",
+            isOptional: true,
+          },
+        },
+        {
+          name: "list",
+          description: "List all available shell plugins",
+        },
+        {
+          name: "run",
+          description: "Provision credentials from 1Password and run a command",
+          args: {
+            name: "command",
+            isCommand: true,
+          },
+        },
+      ],
+    },
+    {
+      name: "service-account",
+      description: "Manage service accounts",
+      icon,
+      subcommands: [
+        {
+          name: "create",
+          description:
+            "Create a service account to gain programmatic access to your secrets",
+          options: [
+            {
+              name: "--can-create-vaults",
+              description: "Allow the service account to create new vaults",
+            },
+            expiresInOption(
+              "Set how long the service account is valid for in (s)econds, (m)inutes, (h)ours, (d)ays, or (w)eeks"
+            ),
+            {
+              name: "--raw",
+              description: "Only return the service account token",
+            },
+            {
+              name: "--vault",
+              description:
+                "Give access to this vault with a set of permissions. Has syntax <vault-name>:<permission>[,<permission>] where a permission is read_items, write_items or share_items",
+              isRepeatable: true,
+              args: {
+                name: "stringArray",
+              },
+            },
+          ],
+          args: {
+            name: "serviceAccountName",
+          },
+        },
+        {
+          name: "ratelimit",
+          description:
+            "Retrieve hourly and daily rate limit usage for a service account",
+          args: {
+            name: "serviceAccountName | serviceAccountID",
+            isOptional: true,
           },
         },
       ],
@@ -757,8 +1290,14 @@ const spec: Fig.Spec = {
             },
             {
               name: "--language",
-              description:
-                'Provide the user\'s account language. (default "en")',
+              description: "Provide the user's account language (default en)",
+              args: {
+                name: "string",
+              },
+            },
+            {
+              name: "--name",
+              description: "Provide the user's name",
               args: {
                 name: "string",
               },
@@ -774,12 +1313,7 @@ const spec: Fig.Spec = {
               description: "Confirm all unconfirmed users",
             },
           ],
-          args: {
-            name: "email | name | userID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: userArg,
         },
         {
           name: "get",
@@ -789,18 +1323,16 @@ const spec: Fig.Spec = {
               name: "--fingerprint",
               description: "Get the user's public key fingerprint",
             },
+            {
+              name: "--me",
+              description: "Get the authenticated user's details",
+            },
+            {
+              name: "--public-key",
+              description: "Get the user's public key",
+            },
           ],
-          args: {
-            name: "email | name | userID | --me",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-              {
-                name: "--me",
-                description: "Get the authenticated user's details",
-                type: "option",
-              },
-            ],
-          },
+          args: userArg,
         },
         {
           name: "edit",
@@ -813,13 +1345,9 @@ const spec: Fig.Spec = {
                 name: "string",
               },
             },
+            travelModeOption("user"),
           ],
-          args: {
-            name: "email | name | userID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: userArg,
         },
         {
           name: "suspend",
@@ -834,32 +1362,17 @@ const spec: Fig.Spec = {
               },
             },
           ],
-          args: {
-            name: "email | name | userID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: userArg,
         },
         {
           name: "reactivate",
           description: "Reactivate a suspended user",
-          args: {
-            name: "email | name | userID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: userArg,
         },
         {
           name: ["delete", "remove", "rm"],
           description: "Remove a user and all their data from the account",
-          args: {
-            name: "email | name | userID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: userArg,
         },
         {
           name: ["list", "ls"],
@@ -870,6 +1383,13 @@ const spec: Fig.Spec = {
               description: "List users who belong to a group",
               args: {
                 name: "group",
+              },
+            },
+            {
+              name: "--vault",
+              description: "List users who have direct access to vault",
+              args: {
+                name: "vault",
               },
             },
           ],
@@ -887,73 +1407,16 @@ const spec: Fig.Spec = {
           description: "Manage group vault access",
           icon: "👥",
           subcommands: [
-            {
-              name: "grant",
-              description: "Grant a group permissions to a vault",
-              options: [
-                {
-                  name: "--group",
-                  description: "The group to receive access",
-                  args: {
-                    name: "group",
-                  },
-                },
-                {
-                  name: "--no-input",
-                  description:
-                    "Do not prompt for input on interactive terminal",
-                  args: {
-                    name: "input",
-                  },
-                },
-                {
-                  name: "--permissions",
-                  description: "The permissions to grant to the group",
-                  args: {
-                    name: "permissions",
-                  },
-                },
-              ],
-            },
-            {
-              name: "revoke",
-              description:
-                "Revoke a portion or the entire access of a group to a vault",
-              options: [
-                {
-                  name: "--group",
-                  description: "The group to revoke access from",
-                  args: {
-                    name: "group",
-                  },
-                },
-                {
-                  name: "--no-input",
-                  description:
-                    "Do not prompt for input on interactive terminal",
-                  args: {
-                    name: "input",
-                  },
-                },
-                {
-                  name: "--permissions",
-                  description: "The permissions to revoke from the group",
-                  args: {
-                    name: "permissions",
-                  },
-                },
-              ],
-            },
+            ...vaultAccessSubcommands(
+              "group",
+              "Grant a group permissions to a vault",
+              "The vault to grant group permissions to"
+            ),
             {
               name: ["list", "ls"],
               description:
                 "List all the groups that have access to the given vault",
-              args: {
-                name: "vault",
-                suggestions: [
-                  { name: "-", description: "Read from stdin", hidden: true },
-                ],
-              },
+              args: objectArg("vault"),
             },
           ],
         },
@@ -962,67 +1425,18 @@ const spec: Fig.Spec = {
           description: "Manage user vault access",
           icon: "📈",
           subcommands: [
+            ...vaultAccessSubcommands(
+              "user",
+              "Grant a user access to a vault",
+              "The vault to grant access to"
+            ),
             {
-              description: "Grant a user access to a vault",
-              name: "grant",
-              options: [
-                {
-                  name: "--no-input",
-                  description:
-                    "Do not prompt for input on interactive terminal",
-                  args: {
-                    name: "input",
-                  },
-                },
-                {
-                  name: "--permissions",
-                  description: "The permissions to grant to the user",
-                  args: {
-                    name: "permissions",
-                  },
-                },
-                {
-                  name: "--user",
-                  description: "The user to receive access",
-                  args: {
-                    name: "user",
-                  },
-                },
-              ],
-            },
-            {
-              description:
-                "Revoke a portion or the entire access of a user to a vault",
-              name: "revoke",
-              options: [
-                {
-                  name: "--no-input",
-                  description:
-                    "Do not prompt for input on interactive terminal",
-                  args: {
-                    name: "input",
-                  },
-                },
-                {
-                  name: "--permissions",
-                  description: "The permissions to revoke from the user",
-                  args: {
-                    name: "permissions",
-                  },
-                },
-                {
-                  name: "--user",
-                  description: "The user to revoke access from",
-                  args: {
-                    name: "user",
-                  },
-                },
-              ],
-            },
-            {
+              name: ["list", "ls"],
               description:
                 "List all users with access to the vault and their permissions",
-              name: ["list", "ls"],
+              args: {
+                name: "vault",
+              },
             },
           ],
         },
@@ -1034,30 +1448,37 @@ const spec: Fig.Spec = {
             {
               name: "--allow-admins-to-manage",
               description:
-                "Set whether admins can manage the vault. Default: false",
+                "Set whether administrators can manage the vault. If not provided, the default policy for the account applies",
               args: {
                 name: "true|false",
+                suggestions: ["true", "false"],
               },
             },
             {
               name: "--description",
-              description: "Set the group's description",
+              description: "Set the vault's description",
               args: {
                 name: "description",
               },
             },
+            {
+              name: "--icon",
+              description: "Set the vault icon",
+              args: {
+                name: "string",
+                suggestions: vaultIcons,
+              },
+            },
           ],
+          args: {
+            name: "name",
+          },
         },
         {
           name: "get",
           description: "Get details about a vault",
           icon: "📑",
-          args: {
-            name: "vaultName | vaultID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: objectArg("vaultName | vaultID"),
         },
         {
           name: "edit",
@@ -1077,6 +1498,7 @@ const spec: Fig.Spec = {
               description: "Change the vault's icon",
               args: {
                 name: "icon",
+                suggestions: vaultIcons,
               },
             },
             {
@@ -1086,32 +1508,15 @@ const spec: Fig.Spec = {
                 name: "name",
               },
             },
-            {
-              name: "--travel-mode",
-              description:
-                "Turn Travel Mode on or off for the vault. Only vaults with Travel Mode enabled will be accessible while a user has Travel Mode turned on. (default off)",
-              args: {
-                name: "on|off",
-              },
-            },
+            travelModeOption("vault"),
           ],
-          args: {
-            name: "vaultName | vaultID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: objectArg("vaultName | vaultID"),
         },
         {
           name: ["delete", "remove", "rm"],
           description: "Remove a vault",
           icon: "🗑️",
-          args: {
-            name: "vaultName | vaultID",
-            suggestions: [
-              { name: "-", description: "Read from stdin", hidden: true },
-            ],
-          },
+          args: objectArg("vaultName | vaultID"),
         },
         {
           name: ["list", "ls"],
@@ -1125,6 +1530,22 @@ const spec: Fig.Spec = {
                 name: "string",
               },
             },
+            {
+              name: "--permission",
+              description:
+                "List only vaults that the specified user/group has this permission for",
+              args: {
+                name: "permissions",
+                suggestions: vaultPermissions,
+              },
+            },
+            {
+              name: "--user",
+              description: "List vaults that a given user has access to",
+              args: {
+                name: "string",
+              },
+            },
           ],
         },
       ],
@@ -1133,34 +1554,47 @@ const spec: Fig.Spec = {
       name: "completion",
       description: "Generate shell completion information",
       icon,
+      args: {
+        name: "shell",
+        suggestions: ["bash", "zsh", "fish", "powershell"],
+      },
     },
     {
       name: "inject",
       description: "Inject secrets into a config file",
       icon,
+      options: [
+        fileModeOption,
+        forceOption(),
+        {
+          name: ["-i", "--in-file"],
+          description: "The filename of a template file to inject",
+          args: {
+            name: "string",
+            template: "filepaths",
+          },
+        },
+        outFileOption(
+          "Write the injected template to a file instead of stdout"
+        ),
+      ],
     },
     {
       name: "read",
-      description: "Read a secret using the secrets reference syntax",
+      description: "Read a secret reference",
       icon,
       options: [
-        {
-          name: "--file-mode",
-          description:
-            "Set filemode for the output file if it does not yet exist. It is ignored without the --out-file flag. (default 0600)",
-          args: {
-            name: "filemode",
-          },
-        },
-        {
-          name: ["-f", "--force"],
-          description: "Do not prompt for confirmation",
-        },
+        fileModeOption,
+        forceOption(),
         {
           name: ["-n", "--no-newline"],
           description: "Do not print a new line after the secret",
         },
+        outFileOption("Write the secret to a file instead of stdout"),
       ],
+      args: {
+        name: "reference",
+      },
     },
     {
       name: "run",
@@ -1177,8 +1611,19 @@ const spec: Fig.Spec = {
           description:
             "Enable Dotenv integration with specific Dotenv files to parse. For example: --env-file=.env",
           requiresSeparator: true,
+          isRepeatable: true,
           args: {
             name: "stringArray",
+            template: "filepaths",
+          },
+        },
+        {
+          name: "--environment",
+          description:
+            "Load environment variables from one or more 1Password Environments by ID. If the same variable exists in multiple Environments, the last one takes precedence",
+          isRepeatable: true,
+          args: {
+            name: "strings",
           },
         },
         {
@@ -1192,9 +1637,10 @@ const spec: Fig.Spec = {
       description: "Sign in to a 1Password account",
       icon,
       options: [
+        forceOption("Ignore warnings and print raw output from this command"),
         {
-          name: ["-f", "--force"],
-          description: "Ignore warnings and print raw output from this command",
+          name: "--raw",
+          description: "Only return the session token",
         },
       ],
     },
@@ -1220,10 +1666,18 @@ const spec: Fig.Spec = {
       icon,
       options: [
         {
-          name: "--directory",
-          description: "Download the update to this ''path''",
+          name: "--channel",
+          description: "Look for updates from a specific channel",
           args: {
             name: "string",
+            suggestions: ["stable", "beta"],
+          },
+        },
+        {
+          name: "--directory",
+          description: "Download the update to this path",
+          args: {
+            name: "path",
             template: "folders",
           },
         },
@@ -1248,8 +1702,15 @@ const spec: Fig.Spec = {
     },
     {
       name: "--cache",
-      description: "Store and use cached information",
+      description:
+        "Store and use cached information. Caching is enabled by default on UNIX-like systems and not available on Windows. Options: true, false. Can also be set with the OP_CACHE environment variable",
       isPersistent: true,
+      requiresSeparator: true,
+      args: {
+        name: "true|false",
+        isOptional: true,
+        suggestions: ["true", "false"],
+      },
     },
     {
       name: "--config",
@@ -1263,7 +1724,7 @@ const spec: Fig.Spec = {
     {
       name: "--debug",
       description:
-        "Output debug logs. Can also be set using $OP_DEBUG environment variable",
+        "Enable debug mode. Can also be enabled by setting the OP_DEBUG environment variable to true",
       isPersistent: true,
     },
     {
@@ -1305,7 +1766,7 @@ const spec: Fig.Spec = {
     {
       name: "--session",
       description:
-        "Authenticate with this session token. 1Password CLI outputs session tokens for successful 'op signin' commands when biometric unlock is disabled",
+        "Authenticate with this session token. 1Password CLI outputs session tokens for successful 'op signin' commands when 1Password app integration is not enabled",
       isPersistent: true,
       args: {
         name: "token",

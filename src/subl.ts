@@ -1,3 +1,7 @@
+// Sublime Text build 4215 (Homebrew cask stable, 2026-11-19). Source: official CLI docs
+// (sublimetext.com/docs/command_line.html, `subl --help` output of build 4131 on Linux, read via Context7).
+// Not run: download.sublimetext.com and sublimetext.com are blocked here, so the 4215 binary's help was not checked.
+// -s/--stay is absent from the 4131 help (it was documented for Sublime Text 3) and is marked deprecated; unverified whether 4215 still accepts it.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const generateProjects: Fig.Generator = filepaths({
@@ -11,6 +15,8 @@ const completionSpec: Fig.Spec = {
   description: "Sublime Text",
   args: {
     name: "files|directories",
+    description:
+      "Files (optionally suffixed with :line or :line:column) or directories to open",
     isVariadic: true,
     isOptional: true,
     template: ["folders", "filepaths"],
@@ -55,19 +61,21 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-s", "--stay"],
-      description: "Keep the application activated after closing the file",
+      description:
+        "Keep the application activated after closing the file (not in the Sublime Text 4 help output)",
+      deprecated: true,
     },
     {
       name: "--safe-mode",
-      description: "Launch using a clean environment",
+      description: "Launch using a sandboxed (clean) environment",
     },
     {
       name: ["-h", "--help"],
-      description: "Show a help message and exit",
+      description: "Show help and exit",
     },
     {
       name: ["-v", "--version"],
-      description: "Show the version and exit",
+      description: "Show version and exit",
     },
   ],
 };

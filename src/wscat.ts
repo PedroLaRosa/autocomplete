@@ -1,3 +1,4 @@
+// wscat v6.1.0 (npm "latest", 2026-11-19). Source: bin/wscat (commander options) at websockets/wscat tag 6.1.0
 const completionSpec: Fig.Spec = {
   name: "wscat",
   description: "Communicate over websocket",
@@ -13,7 +14,7 @@ const completionSpec: Fig.Spec = {
     { name: ["-V", "--version"], description: "Output the version number" },
     {
       name: "--auth",
-      description: "Add basic HTTP authentication header (--connect only)",
+      description: "Add basic HTTP authentication header",
       args: { name: "username:password" },
       dependsOn: ["-c", "--connect"],
     },
@@ -52,9 +53,9 @@ const completionSpec: Fig.Spec = {
       name: "--max-redirects",
       args: {
         name: "num",
+        isOptional: true,
       },
-      description:
-        "Maximum number of redirects allowed (--connect only) (default: 10)",
+      description: "Maximum number of redirects allowed (default: 10)",
       dependsOn: ["-c", "--connect"],
     },
     { name: "--no-color", description: "Run without color" },
@@ -62,6 +63,7 @@ const completionSpec: Fig.Spec = {
       name: "--passphrase",
       args: {
         name: "passphrase",
+        isOptional: true,
       },
       description:
         "Specify a Client SSL Certificate Key's passphrase (--connect only). If you don't provide a value, it will be prompted for",
@@ -77,21 +79,22 @@ const completionSpec: Fig.Spec = {
     {
       name: "--slash",
       description:
-        "Enable slash commands for control frames (/ping, /pong, /close [code [, reason]])",
+        "Enable slash commands for control frames (/ping [data], /pong [data], /close [code [, reason]]) (--connect only)",
+      dependsOn: ["-c", "--connect"],
     },
-
     {
       name: ["-H", "--header"],
       args: {
         name: "header:value",
       },
       description:
-        "Set an HTTP header. Repeat to set multiple (--connect only) (default: [])",
+        "Set an HTTP header. Repeat to set multiple (--connect only)",
+      isRepeatable: true,
       dependsOn: ["-c", "--connect"],
     },
     {
       name: ["-L", "--location"],
-      description: "Follow redirects (--connect only)",
+      description: "Follow redirects",
       dependsOn: ["-c", "--connect"],
     },
     {
@@ -103,7 +106,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-n", "--no-check"],
-      description: "Do not check for unauthorized certificates",
+      description:
+        "Do not check for unauthorized certificates (--connect only)",
+      dependsOn: ["-c", "--connect"],
     },
     {
       name: ["-o", "--origin"],
@@ -115,13 +120,15 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-p", "--protocol"],
       args: {
-        name: "protocol",
+        name: "version",
       },
       description: "Optional protocol version",
     },
     {
       name: ["-P", "--show-ping-pong"],
-      description: "Print a notification when a ping or pong is received",
+      description:
+        "Print a notification when a ping or pong is received (--connect only)",
+      dependsOn: ["-c", "--connect"],
     },
     {
       name: ["-s", "--subprotocol"],
@@ -144,7 +151,7 @@ const completionSpec: Fig.Spec = {
           "sip",
           "notificationchannel-netapi-rest.openmobilealliance.org",
           "wpcp",
-          "amqp	",
+          "amqp",
           "mqtt",
           "jsflow",
           "rwpcp",
@@ -188,21 +195,26 @@ const completionSpec: Fig.Spec = {
           "v3.penguin-stats.live+proto",
         ],
       },
-      description: "Optional subprotocol (default: [])",
+      description: "Optional subprotocol. Repeat to specify more than one",
+      isRepeatable: true,
     },
     {
       name: ["-w", "--wait"],
       args: {
         name: "seconds",
       },
-      description: "Wait given seconds after executing command",
+      description:
+        "Wait given seconds after executing command (-1 to hold open)",
     },
     {
       name: ["-x", "--execute"],
       args: {
         name: "command",
       },
-      description: "Execute command after connecting",
+      description:
+        "Execute command after connecting. Repeat to execute more than one (--connect only)",
+      isRepeatable: true,
+      dependsOn: ["-c", "--connect"],
     },
     { name: ["-h", "--help"], description: "Display help for command" },
   ],

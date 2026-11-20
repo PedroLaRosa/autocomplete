@@ -1,3 +1,11 @@
+// m-cli v2.0.9 (GitHub tag rgcr/m-cli v2.0.9 = Homebrew m-cli stable, 2026-11-19). Source: shallow clone at tag v2.0.9 read statically
+// (macOS-only bash/python plugin scripts, not run here): the `--help` heredoc and option dispatch of every plugins/* script, Readme.md,
+// CHANGELOG.md and completions/{zsh,bash,fish}. v2 replaced the v1 `m <plugin> <subcommand>` syntax with `m <plugin> --option [args]`,
+// so the plugin trees below were rewritten. Unreleased main (02e3f8f, 2026-06-02) only changes trash --clean/--status internals.
+// Upstream quirks mirrored as documented: `hosts` and `service --load/--unload` are listed in --help but the v2.0.9 dispatcher
+// only accepts bare `ls|add|remove` for hosts and does not handle --load/--unload. The timezone list is carried over from the previous
+// spec (macOS `systemsetup -listtimezones`, not re-verified on a Mac).
+
 const generateDisks: Fig.Generator = {
   script: ["ls", "/dev"],
   postProcess: (out) =>
@@ -27,7 +35,7 @@ const generateVolumes: Fig.Generator = {
 };
 
 const generateUsers: Fig.Generator = {
-  script: ["bash", "-c", "m user list | awk '{ print $1 }'"],
+  script: ["bash", "-c", "m user --list | awk '{ print $1 }'"],
   postProcess: (out) =>
     out
       .trim()
@@ -40,7 +48,7 @@ const generateUsers: Fig.Generator = {
 };
 
 const generateGroups: Fig.Generator = {
-  script: ["bash", "-c", "m group list | awk '{ print $1 }'"],
+  script: ["bash", "-c", "m group --list | awk '{ print $1 }'"],
   postProcess: (out) =>
     out
       .trim()
@@ -53,12 +61,12 @@ const generateGroups: Fig.Generator = {
 };
 
 const generateNetworkLocations: Fig.Generator = {
-  script: ["bash", "-c", "m network location list | tail -n +2"],
+  script: ["bash", "-c", "m network --location list | tail -n +2"],
   splitOn: "\n",
 };
 
 const generateServices: Fig.Generator = {
-  script: ["bash", "-c", "launchctl list | awk '{ print $3 }'"],
+  script: ["bash", "-c", "launchctl list | awk 'NR > 1 { print $3 }'"],
   splitOn: "\n",
 };
 
@@ -69,19 +77,30 @@ function getPidIcon(path: string): string {
   }
   return "fig://" + path.slice(0, idx + 4);
 }
+
+// Only the argument right after the literal `pid` of `m nosleep --until pid PID` is a process id
 const generatePids: Fig.Generator = {
-  script: ["bash", "-c", "ps axo pid,comm | sed 1d"],
-  postProcess: (result) => {
-    return result.split("\n").map((line) => {
-      const [pid, path] = line.trim().split(/\s+/);
-      const name = path.slice(path.lastIndexOf("/") + 1);
-      return {
-        name: pid,
-        description: path,
-        displayName: `${pid} (${name})`,
-        icon: getPidIcon(path),
-      };
+  custom: async (tokens, executeShellCommand) => {
+    if (tokens[tokens.length - 2] !== "pid") {
+      return [];
+    }
+    const { stdout } = await executeShellCommand({
+      command: "bash",
+      args: ["-c", "ps axo pid,comm | sed 1d"],
     });
+    return stdout
+      .split("\n")
+      .filter((line) => line.trim() !== "")
+      .map((line) => {
+        const [pid, path] = line.trim().split(/\s+/);
+        const name = path.slice(path.lastIndexOf("/") + 1);
+        return {
+          name: pid,
+          description: path,
+          displayName: `${pid} (${name})`,
+          icon: getPidIcon(path),
+        };
+      });
   },
 };
 
@@ -545,1429 +564,1182 @@ const timezones: string[] = [
   "Pacific/Wallis",
 ];
 
+const highlightColors: string[] = [
+  "graphite",
+  "cayenne",
+  "asparagus",
+  "clover",
+  "teal",
+  "midnight",
+  "plum",
+  "tin",
+  "nickel",
+  "mocha",
+  "fern",
+  "moss",
+  "ocean",
+  "eggplant",
+  "maroon",
+  "steel",
+  "aluminum",
+  "maraschino",
+  "lemon",
+  "spring",
+  "turquoise",
+  "blueberry",
+  "magenta",
+  "iron",
+  "magnesium",
+  "tangerine",
+  "lime",
+  "seafoam",
+  "aqua",
+  "grape",
+  "strawberry",
+  "tungsten",
+  "silver",
+  "salmon",
+  "banana",
+  "flora",
+  "ice",
+  "orchid",
+  "bubblegum",
+  "lead",
+  "mercery",
+  "cantaloupe",
+  "honeydew",
+  "spindrift",
+  "sky",
+  "lavender",
+  "carnation",
+  "licorice",
+  "snow",
+];
+
+const privacyServices: Fig.Suggestion[] = [
+  { name: "camera", description: "Camera access" },
+  { name: "microphone", description: "Microphone access" },
+  { name: "location", description: "Location services" },
+  { name: "contacts", description: "Address book access" },
+  { name: "calendar", description: "Calendar access" },
+  { name: "reminders", description: "Reminders access" },
+  { name: "photos", description: "Photos library access" },
+  { name: "accessibility", description: "Accessibility access" },
+  { name: "screen-recording", description: "Screen recording access" },
+  { name: "system-events", description: "System Events (automation)" },
+  { name: "full-disk-access", description: "Full Disk Access" },
+  { name: "developer-tools", description: "Developer Tools access" },
+];
+
+const helpOption: Fig.Option = {
+  name: "--help",
+  description: "Show this help message",
+};
+
+const statusOption = (description: string): Fig.Option => ({
+  name: "--status",
+  description,
+});
+
+const enableOption = (description: string): Fig.Option => ({
+  name: "--enable",
+  description,
+});
+
+const disableOption = (description: string): Fig.Option => ({
+  name: "--disable",
+  description,
+});
+
+// Option taking an enable/disable value (plus `status` where the plugin supports it)
+const toggleOption = (
+  name: string,
+  description: string,
+  { status = false, isOptional = false } = {}
+): Fig.Option => ({
+  name,
+  description,
+  args: {
+    name: "state",
+    suggestions: status
+      ? ["status", "enable", "disable"]
+      : ["enable", "disable"],
+    ...(isOptional && { isOptional: true }),
+  },
+});
+
 const completionSpec: Fig.Spec = {
   name: "m",
   description: "Swiss Army Knife for macOS",
   subcommands: [
     {
       name: "airdrop",
-      description: "Manage AirDrop",
-      subcommands: [
-        {
-          name: "status",
-          description: "Show AirDrop status",
-        },
-        {
-          name: "on",
-          description: "Enable AirDrop",
-        },
-        {
-          name: "enable",
-          description: "Enable AirDrop",
-        },
-        {
-          name: "off",
-          description: "Disable AirDrop",
-        },
-        {
-          name: "disable",
-          description: "Disable AirDrop",
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+      description: "Manage AirDrop settings",
+      options: [
+        helpOption,
+        statusOption("Show AirDrop status"),
+        enableOption("Enable AirDrop"),
+        disableOption("Disable AirDrop"),
       ],
     },
     {
       name: "appearance",
-      description: "Manage appearance",
-
-      subcommands: [
+      description: "Manage appearance settings",
+      options: [
+        helpOption,
         {
-          name: "darkmode",
-          description: "Manage dark mode",
+          name: "--antialiasthreshold",
+          description:
+            "Set the antialiasing threshold (1 disables antialiasing, no value shows the current one)",
           args: {
-            name: "status",
-            description: "Whether to use dark versions of interface elements",
-            suggestions: ["YES", "NO"],
+            name: "value",
+            description: "Threshold, e.g. 0, 2 or 6",
+            isOptional: true,
           },
         },
+        toggleOption(
+          "--darkmode",
+          "Enable or disable dark mode (no value shows the current mode)",
+          { isOptional: true }
+        ),
+        toggleOption(
+          "--transparency",
+          "Enable or disable transparency (no value shows the current setting)",
+          { isOptional: true }
+        ),
         {
-          name: "transparency",
-          description: "Manage transparency",
-          args: {
-            name: "status",
-            description:
-              "Whether to allow the OS to make certain elements semi-transparent",
-            suggestions: ["YES", "NO"],
-          },
-        },
-        {
-          name: "antialiasthreshold",
-          description: "Manage antialiasing threshold",
-          args: {
-            name: "threshold",
-            description: "The threshold above which antialiasing is turned on",
-          },
-        },
-        {
-          name: "sidebariconsize",
-          description: "Manage sidebar icon size",
+          name: "--iconsize",
+          description:
+            "Set the size of the icons in window sidebars, dock and finder",
           args: {
             name: "size",
-            description: "The size of the icons in various window sidebars",
             suggestions: ["small", "medium", "large"],
           },
         },
         {
-          name: "maincolor",
-          description: "Manage main color",
+          name: "--maincolor",
+          description: "Set the main color of the interface",
           args: {
             name: "color",
-            description:
-              "The color used for the majority of the interface elements",
             suggestions: ["blue", "graphite"],
           },
         },
         {
-          name: "highlightcolor",
-          description: "Manage highlight color",
+          name: "--highlightcolor",
+          description: "Set the highlight color of the text selection",
           args: {
             name: "color",
-            description: "The color used for highlights",
-            suggestions: [
-              "graphite",
-              "cayenne",
-              "asparagus",
-              "clover",
-              "teal",
-              "midnight",
-              "plum",
-              "tin",
-              "nickel",
-              "mocha",
-              "fern",
-              "moss",
-              "ocean",
-              "eggplant",
-              "maroon",
-              "steel",
-              "aluminum",
-              "maraschino",
-              "lemon",
-              "spring",
-              "turquoise",
-              "blueberry",
-              "magenta",
-              "iron",
-              "magnesium",
-              "tangerine",
-              "lime",
-              "seafoam",
-              "aqua",
-              "grape",
-              "strawberry",
-              "tungsten",
-              "silver",
-              "salmon",
-              "banana",
-              "flora",
-              "ice",
-              "orchid",
-              "bubblegum",
-              "lead",
-              "mercery",
-              "cantaloupe",
-              "honeydew",
-              "spindrift",
-              "sky",
-              "lavender",
-              "carnation",
-              "licorice",
-              "snow",
-            ],
+            suggestions: highlightColors,
           },
         },
+      ],
+    },
+    {
+      name: "audio",
+      description: "Manage audio settings",
+      options: [
+        helpOption,
         {
-          name: "help",
-          description: `Show help`,
+          name: "--reset",
+          description:
+            "Reset audio settings (pass 'hard' to restart the coreaudiod service)",
+          args: {
+            name: "mode",
+            isOptional: true,
+            suggestions: [
+              {
+                name: "hard",
+                description: "Restart the coreaudiod service",
+              },
+            ],
+          },
         },
       ],
     },
     {
       name: "battery",
-      description: "Manage battery",
-      subcommands: [
-        {
-          name: "status",
-          description: "Show battery status",
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
-      ],
+      description: "Battery management commands",
+      options: [helpOption, statusOption("Show the current battery status")],
     },
     {
       name: "bluetooth",
-      description: "Manage Bluetooth",
-      subcommands: [
-        {
-          name: "status",
-          description: "Show bluetooth status",
-        },
-        {
-          name: "on",
-          description: "Enable bluetooth",
-        },
-        {
-          name: "enable",
-          description: "Enable bluetooth",
-        },
-        {
-          name: "off",
-          description: "Disable bluetooth",
-        },
-        {
-          name: "disable",
-          description: "Disable bluetooth",
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+      description: "Manage Bluetooth settings",
+      options: [
+        helpOption,
+        statusOption("Show the current Bluetooth status"),
+        enableOption("Turn on Bluetooth"),
+        disableOption("Turn off Bluetooth"),
       ],
     },
     {
       name: "dir",
-      description: "Manage directories",
-      subcommands: [
+      description: "Manage directories and files in the current or given path",
+      options: [
+        helpOption,
         {
-          name: "tree",
-          description: "Show tree view of folders in the current path",
+          name: "--delete",
+          description:
+            "Delete .DS_Store files or empty folders recursively in the current path or a given path",
+          args: [
+            {
+              name: "type",
+              suggestions: [
+                { name: "empty", description: "Delete empty folders" },
+                { name: "dsfiles", description: "Delete .DS_Store files" },
+              ],
+            },
+            {
+              name: "path",
+              isOptional: true,
+              template: "folders",
+            },
+          ],
+        },
+        toggleOption(
+          "--dsfiles",
+          "Enable or disable the generation of .DS_Store files"
+        ),
+        {
+          name: "--size",
+          description:
+            "Calculate the size of the current folder or a given path",
           args: {
             name: "path",
-            description: "Path to show tree view of folders",
             isOptional: true,
             template: "folders",
           },
         },
         {
-          name: "delete",
-          description: "Delete folders",
-          subcommands: [
-            {
-              name: "empty",
-              description:
-                "Delete empty folders recursively in the current path",
-              args: {
-                name: "path",
-                description: "Path to delete empty folders",
-                isOptional: true,
-                template: "folders",
-              },
-            },
-            {
-              name: "dsfiles",
-              description:
-                "Delete .DS_Store files recursively in the current path",
-              args: {
-                name: "path",
-                description:
-                  "Delete .DS_Store files recursively in a specific path",
-                isOptional: true,
-                template: "folders",
-              },
-            },
-          ],
-        },
-        {
-          name: "dsfiles",
-          description: "Manage .DS_Store files",
-          subcommands: [
-            {
-              name: "on",
-              description: "Restore generation of .DS_Store",
-            },
-            {
-              name: "off",
-              description: "Prohibit generation of .DS_Store",
-            },
-          ],
-        },
-        {
-          name: "size",
-          description: "Calculate current folder size",
+          name: "--tree",
+          description:
+            "Display a tree view of folders in the current path or a given path",
           args: {
             name: "path",
-            description: "Path to calculate folder size",
             isOptional: true,
             template: "folders",
           },
-        },
-        {
-          name: "help",
-          description: `Show help`,
         },
       ],
     },
     {
       name: "disk",
-      description: "Manage disks",
-      subcommands: [
+      description: "Manage disks and volumes using diskutil",
+      options: [
+        helpOption,
         {
-          name: ["ls", "list"],
-          description: "List disk partitions",
+          name: "--info",
+          description: "Display disk information",
           args: {
-            name: "path",
-            description: "Path to the disk file",
+            name: "disk_name",
+            generators: [{ template: "filepaths" }, generateDisks],
+          },
+        },
+        {
+          name: "--list",
+          description:
+            "List all disks or a specific disk if a disk name is given",
+          args: {
+            name: "disk_name",
             isOptional: true,
             generators: [{ template: "filepaths" }, generateDisks],
           },
         },
         {
-          name: "info",
-          description: "Show disk information",
-          args: {
-            name: "path",
-            description: "Path to show disk information",
-            generators: [{ template: "filepaths" }, generateDisks],
-          },
+          name: "--filesystems",
+          description: "List available filesystems for formatting",
         },
         {
-          name: "ejectall",
+          name: "--ejectall",
           description: "Eject all mountable volumes",
         },
         {
-          name: "verify",
-          description: "Verify disk",
-          subcommands: [
+          name: "--verify",
+          description: "Verify a volume or disk",
+          args: [
+            { name: "type", suggestions: ["disk", "volume"] },
             {
-              name: "volume",
-              description: "Verify volume",
-              args: {
-                name: "path",
-                description: "Path to verify volume",
-                generators: [{ template: "filepaths" }, generateVolumes],
-              },
-            },
-            {
-              name: "disk",
-              description: "Verify disk",
-              args: {
-                name: "path",
-                description: "Path to verify disk",
-                generators: [{ template: "filepaths" }, generateDisks],
-              },
-            },
-          ],
-        },
-        {
-          name: "repair",
-          description: "Repair disk",
-          subcommands: [
-            {
-              name: "volume",
-              description: "Repair volume",
-              args: {
-                name: "path",
-                description: "Path to repair volume",
-                generators: [{ template: "filepaths" }, generateVolumes],
-              },
-            },
-            {
-              name: "disk",
-              description: "Repair disk",
-              args: {
-                name: "path",
-                description: "Path to repair disk",
-                generators: [{ template: "filepaths" }, generateDisks],
-              },
-            },
-          ],
-        },
-        {
-          name: "format",
-          description: "Format disk",
-          subcommands: [
-            {
-              name: "MS-DOS",
-              description:
-                "Format the entire disk with a windows format (MS-DOS)",
-              args: [
-                {
-                  name: "name",
-                  description: "Name of the volume",
-                },
-                {
-                  name: "path",
-                  description: "Path to format the entire disk",
-                  generators: [{ template: "filepaths" }, generateDisks],
-                },
-              ],
-            },
-            {
-              name: "volume",
-              description: "Format the volume with a windows format (MS-DOS)",
-              args: [
-                {
-                  name: "name",
-                  description: "Name of the volume",
-                },
-                {
-                  name: "path",
-                  description: "Path to format the volume",
-                  generators: [{ template: "filepaths" }, generateVolumes],
-                },
+              name: "name",
+              description: "Disk or volume name",
+              generators: [
+                { template: "filepaths" },
+                generateDisks,
+                generateVolumes,
               ],
             },
           ],
         },
         {
-          name: "reformat",
+          name: "--repair",
+          description: "Repair a volume or disk",
+          args: [
+            { name: "type", suggestions: ["disk", "volume"] },
+            {
+              name: "name",
+              description: "Disk or volume name",
+              generators: [
+                { template: "filepaths" },
+                generateDisks,
+                generateVolumes,
+              ],
+            },
+          ],
+        },
+        {
+          name: "--reformat",
           description: "Reformat a volume",
           args: {
-            name: "path",
-            description: "Path to reformat a volume",
+            name: "volume",
             generators: [{ template: "filepaths" }, generateVolumes],
           },
         },
         {
-          name: "rename",
+          name: "--rename",
           description: "Rename a volume",
           args: [
             {
-              name: "currentName",
-              description: "Current name of the volume",
+              name: "current_name",
               generators: [{ template: "filepaths" }, generateVolumes],
             },
-            {
-              name: "newName",
-              description: "New name of the volume",
-            },
+            { name: "new_name" },
           ],
         },
         {
-          name: "help",
-          description: `Show help`,
+          name: "--format",
+          description:
+            "Format a disk or volume with a specified filesystem type and name",
+          args: [
+            { name: "type", suggestions: ["disk", "volume"] },
+            {
+              name: "fs_type",
+              description: "Filesystem type (see --filesystems)",
+            },
+            { name: "new_name", description: "New volume name" },
+            {
+              name: "name",
+              description: "Disk or volume name",
+              generators: [
+                { template: "filepaths" },
+                generateDisks,
+                generateVolumes,
+              ],
+            },
+          ],
         },
       ],
     },
     {
       name: "display",
-      description: "Manage displays",
-      subcommands: [
+      description: "Manage display settings",
+      options: [
+        helpOption,
+        statusOption("Show the current display status"),
         {
-          name: "status",
-          description: "Show display status",
+          name: "--up",
+          description: "Increase the display brightness",
+          args: {
+            name: "count",
+            description: "Number of steps (default 1)",
+            isOptional: true,
+          },
         },
         {
-          name: "help",
-          description: "Show usage",
-        },
-        {
-          name: "up",
-          description: "Turn up the brightness",
-        },
-        {
-          name: "down",
-          description: "Turn down the brightness",
+          name: "--down",
+          description: "Decrease the display brightness",
+          args: {
+            name: "count",
+            description: "Number of steps (default 1)",
+            isOptional: true,
+          },
         },
       ],
     },
     {
       name: "dns",
-      description: "Manage dns",
-      subcommands: [
+      description: "Manage DNS settings",
+      options: [
+        helpOption,
+        { name: "--list", description: "List current DNS servers" },
+        { name: "--flush", description: "Flush the local DNS cache" },
         {
-          name: "flush",
-          description: "Flush local DNS cache",
-        },
-        {
-          name: "help",
-          description: `Show help`,
+          name: "--add",
+          description: "Add a DNS server by IP or hostname",
+          args: { name: "ip_or_hostname" },
         },
       ],
     },
     {
       name: "dock",
-      description: "Manage dock",
-      subcommands: [
+      description: "Manage the Dock settings and items",
+      options: [
+        helpOption,
+        toggleOption(
+          "--autohide",
+          "Enable or disable the Dock's auto-hide feature (no value shows the current setting)",
+          { isOptional: true }
+        ),
         {
-          name: "showdelay",
+          name: "--autohidedelay",
           description:
-            "Changes how long the Dock takes to show up when auto-hide is enabled",
-          args: {
-            name: "seconds",
-            description: "Seconds to show delay",
-          },
+            "Change how long it takes to detect that you want to show the Dock (no value shows the current delay)",
+          args: { name: "seconds", isOptional: true },
         },
         {
-          name: "autohide",
-          description: "Enable or disable Dock's auto hide feature",
-          args: {
-            name: "YES/NO",
-            description: "YES/NO to enable/disable Dock's auto hide feature",
-            suggestions: ["YES", "NO"],
-          },
+          name: "--additem",
+          description: "Add an item to the Dock, e.g. /Applications/Safari.app",
+          args: { name: "path", template: "filepaths" },
         },
         {
-          name: "autohidedelay",
-          description:
-            "Changes how long it takes to detect you want to show up the dock",
-          args: {
-            name: "seconds",
-            description: "Seconds to auto hide delay",
-          },
-        },
-        {
-          name: "magnification",
-          description: "Turn magnification on or off",
-          args: {
-            name: "YES/NO",
-            description: "YES/NO to turn magnification on or off",
-            suggestions: ["YES", "NO"],
-          },
-        },
-        {
-          name: "position",
-          description: "Change Dock's position",
-          args: {
-            name: "position",
-            description: "Position to change Dock's position",
-            suggestions: ["BOTTOM", "LEFT", "RIGHT"],
-          },
-        },
-        {
-          name: "addblankspace",
+          name: "--addblankspace",
           description: "Add a blank space (separator) to the Dock",
         },
         {
-          name: "addrecentitems",
-          description: "Add a stack containg your recent items to the Dock",
+          name: "--addrecentitems",
+          description: "Add a stack containing your recent items to the Dock",
+        },
+        toggleOption(
+          "--magnification",
+          "Enable or disable magnification of Dock icons (no value shows the current setting)",
+          { isOptional: true }
+        ),
+        {
+          name: "--position",
+          description:
+            "Change the Dock's position on the screen (no value shows the current position)",
+          args: {
+            name: "position",
+            isOptional: true,
+            suggestions: ["bottom", "left", "right"],
+          },
         },
         {
-          name: "prune",
-          description: "Remove all items from dock",
+          name: "--prune",
+          description: "Remove all items from the Dock",
         },
         {
-          name: "help",
-          description: `Show help`,
+          name: "--showdelay",
+          description:
+            "Change how long the Dock takes to show up when auto-hide is enabled (no value shows the current delay)",
+          args: { name: "seconds", isOptional: true },
+        },
+      ],
+    },
+    {
+      name: "fan",
+      description: "Manage fan speed",
+      options: [
+        helpOption,
+        { name: "--speed", description: "Show the current fan speed" },
+        {
+          name: "--monitor",
+          description: "Monitor the fan speed in real-time",
         },
       ],
     },
     {
       name: "finder",
-      description: "Manage finder",
-      subcommands: [
-        {
-          name: "showhiddenfiles",
-          description: "Show hidden files Status",
-          args: {
-            name: "YES/NO",
-            description: "YES/NO to show hidden files",
-            suggestions: ["YES", "NO"],
-          },
-        },
-        {
-          name: "showextensions",
-          description: "Show all file extensions Status",
-          args: {
-            name: "YES/NO",
-            description: "YES/NO to show all file extensions",
-            suggestions: ["YES", "NO"],
-          },
-        },
-        {
-          name: "showdesktop",
-          description: "Show the desktop Status",
-          args: {
-            name: "YES/NO",
-            description: "YES/NO to show the desktop",
-            suggestions: ["YES", "NO"],
-          },
-        },
-        {
-          name: "showpath",
-          description:
-            "Show the current opened folder path on the top bar of the Finder window",
-          args: {
-            name: "YES/NO",
-            description:
-              "YES/NO to show the current opened folder path on the top bar of the Finder window",
-            suggestions: ["YES", "NO"],
-          },
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+      description: "Manage Finder settings",
+      options: [
+        helpOption,
+        toggleOption(
+          "--showhiddenfiles",
+          "Show or hide hidden files in Finder",
+          { status: true }
+        ),
+        toggleOption(
+          "--showextensions",
+          "Show or hide file extensions in Finder",
+          { status: true }
+        ),
+        toggleOption(
+          "--showdesktop",
+          "Enable or disable the desktop in Finder",
+          { status: true }
+        ),
+        toggleOption(
+          "--showpath",
+          "Show or hide the current folder path in Finder's title bar",
+          { status: true }
+        ),
       ],
     },
     {
       name: "firewall",
-      description: "Manage firewall",
-      subcommands: [
+      description: "Manage the macOS Application Firewall",
+      options: [
+        helpOption,
+        statusOption("Show the current status of the firewall"),
+        enableOption("Enable the firewall"),
+        disableOption("Disable the firewall"),
         {
-          name: "status",
-          description: "Show status",
+          name: "--list",
+          description: "List applications handled by the firewall",
         },
         {
-          name: "enable",
-          description: "Enable firewall",
+          name: "--add",
+          description: "Add an application to the firewall",
+          args: { name: "path_to_app", template: "filepaths" },
         },
         {
-          name: "disable",
-          description: "Disable firewall",
+          name: "--remove",
+          description: "Remove an application from the firewall",
+          args: { name: "path_to_app", template: "filepaths" },
         },
-        {
-          name: "list",
-          description: "List applications handled by firewall",
-        },
-        {
-          name: "add",
-          description: "Add app to firewall",
-          args: {
-            name: "path",
-            description: "Path of the app to add to firewall",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "remove",
-          description: "Remove app from firewall",
-          args: {
-            name: "path",
-            description: "Path of the app to remove from firewall",
-          },
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+        toggleOption("--blockall", "Block all connections (state 2)"),
       ],
     },
     {
       name: "flightmode",
-      description: "Manage flight mode",
-      subcommands: [
-        {
-          name: "off",
-          description: "Turn flight mode off",
-        },
-        {
-          name: "on",
-          description: "Turn flight mode on",
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+      description: "Turn flight mode on or off (affects Wi-Fi and Bluetooth)",
+      options: [
+        helpOption,
+        enableOption("Enable flight mode"),
+        disableOption("Disable flight mode"),
       ],
     },
     {
       name: "gatekeeper",
-      description: "Manage gatekeeper",
-      subcommands: [
+      description: "Manage Gatekeeper rules",
+      options: [
+        helpOption,
+        statusOption("Show the current status of Gatekeeper"),
         {
-          name: "status",
-          description: "Show status",
-        },
-        {
-          name: "enable",
-          description: "Enable gatekeeper",
+          name: "--list",
+          description: "List all Gatekeeper rules",
           args: {
-            name: "rule",
-            description: "Rule to enable",
+            name: "label",
+            description: "Only list the rules with this label",
             isOptional: true,
           },
         },
+        enableOption("Enable Gatekeeper"),
+        disableOption("Disable Gatekeeper"),
         {
-          name: "disable",
-          description: "Disable gatekeeper",
-          args: {
-            name: "rule",
-            description: "Rule to disable",
-            isOptional: true,
-          },
+          name: "--enable-rule",
+          description: "Enable a specific Gatekeeper rule",
+          args: { name: "rule_name" },
         },
         {
-          name: "list",
-          description: "List rules",
+          name: "--disable-rule",
+          description: "Disable a specific Gatekeeper rule",
+          args: { name: "rule_name" },
         },
         {
-          name: "create",
-          description: "Create a rule for the application",
+          name: "--create-rule",
+          description:
+            "Create a new Gatekeeper rule for the specified application",
           args: [
-            {
-              name: "RULENAME",
-              description: "Name of the rule",
-            },
-            {
-              name: "/path/to/program",
-              description: "Path to the program",
-            },
+            { name: "rule_name" },
+            { name: "program", template: "filepaths" },
           ],
-        },
-        {
-          name: "help",
-          description: `Show help`,
         },
       ],
     },
     {
       name: "group",
       description: "Manage groups",
-      subcommands: [
+      options: [
+        helpOption,
+        { name: "--list", description: "List all groups" },
         {
-          name: "list",
-          description: "List groups",
+          name: "--info",
+          description: "Show information about a specific group",
+          args: { name: "group", generators: generateGroups },
         },
         {
-          name: "info",
-          description: "Get group information",
-          args: {
-            name: "group",
-            description: "Group to get information",
-          },
-        },
-        {
-          name: "adduser",
-          description: "Add user to group",
+          name: "--adduser",
+          description: "Add a user to a specific group",
           args: [
-            {
-              name: "user",
-              description: "User to add to group",
-              generators: generateUsers,
-            },
-            {
-              name: "group",
-              description: "Group to add user to",
-              generators: generateGroups,
-            },
+            { name: "user", generators: generateUsers },
+            { name: "group", generators: generateGroups },
           ],
         },
         {
-          name: "removeuser",
-          description: "Remove user from group",
+          name: "--removeuser",
+          description: "Remove a user from a specific group",
           args: [
-            {
-              name: "user",
-              description: "User to remove from group",
-              generators: generateUsers,
-            },
-            {
-              name: "group",
-              description: "Group to remove user from",
-              generators: generateGroups,
-            },
+            { name: "user", generators: generateUsers },
+            { name: "group", generators: generateGroups },
           ],
         },
         {
-          name: "ismember",
-          description: "Check if user is a member of group",
+          name: "--ismember",
+          description: "Check if a user is a member of a specific group",
           args: [
-            {
-              name: "user",
-              description: "User to check membership",
-              generators: generateUsers,
-            },
-            {
-              name: "group",
-              description: "Group to check membership",
-              generators: generateGroups,
-            },
+            { name: "user", generators: generateUsers },
+            { name: "group", generators: generateGroups },
           ],
-        },
-        {
-          name: "help",
-          description: `Show help`,
         },
       ],
     },
     {
       name: "hostname",
-      description: "Manage hostname",
+      description:
+        "Manage the hostname (ComputerName, HostName, LocalHostName and NetBIOSName)",
+      options: [helpOption],
+      args: {
+        name: "newhostname",
+        description: "Set a new hostname (no value shows the current one)",
+        isOptional: true,
+      },
+    },
+    {
+      name: "hosts",
+      description: "Manage the /etc/hosts file",
       subcommands: [
         {
-          name: "newhostname",
-          description: "Set new hostname",
+          name: "ls",
+          description: "List current records in the /etc/hosts file",
         },
         {
-          name: "help",
-          description: `Show help`,
+          name: "add",
+          description: "Add a new host to the /etc/hosts file",
+          args: [{ name: "ip" }, { name: "host" }],
+        },
+        {
+          name: "remove",
+          description: "Remove a host from the /etc/hosts file",
+          args: { name: "host" },
+        },
+      ],
+      options: [
+        helpOption,
+        {
+          name: "--ls",
+          description: "List current records in the /etc/hosts file",
+        },
+        {
+          name: "--add",
+          description: "Add a new host to the /etc/hosts file",
+          args: [{ name: "ip" }, { name: "host" }],
+        },
+        {
+          name: "--remove",
+          description: "Remove a host from the /etc/hosts file",
+          args: { name: "host" },
         },
       ],
     },
     {
       name: "info",
-      description: "Show system information",
+      description: "Print macOS operating system version information",
+      options: [helpOption],
     },
     {
-      name: "help",
-      description: `Show help`,
-    },
-    {
-      name: "itunes",
-      description: "Manage iTunes",
-      subcommands: [
+      name: ["itunes", "music"],
+      description: "Control iTunes or Music via the command line",
+      options: [
+        helpOption,
+        statusOption("Show the current status"),
+        { name: "--play", description: "Play the current track" },
+        { name: "--playpause", description: "Play or pause the current track" },
+        { name: "--stop", description: "Stop the current track" },
+        { name: "--pause", description: "Pause the current track" },
+        { name: "--next", description: "Play the next track" },
+        { name: "--prev", description: "Play the previous track" },
+        { name: "--mute", description: "Mute the application" },
+        { name: "--unmute", description: "Unmute the application" },
         {
-          name: "status",
-          description: "Show status",
+          name: "--vol",
+          description: "Set the application volume",
+          args: { name: "level", description: "Volume level (0-100)" },
         },
-        {
-          name: "play",
-          description: "Play track",
-        },
-        {
-          name: "pause",
-          description: "Pause track",
-        },
-        {
-          name: "next",
-          description: "Play next track",
-        },
-        {
-          name: "prev",
-          description: "Play previous track",
-        },
-        {
-          name: "mute",
-          description: "Mute iTunes",
-        },
-        {
-          name: "unmute",
-          description: "Unmute iTunes",
-        },
-        {
-          name: "vol",
-          description: "Volume",
-          args: {
-            name: "up/down/#",
-            description: "Up/Down/Number",
-            suggestions: ["up", "down" /*, "#",*/],
-            isOptional: true,
-          },
-        },
-        {
-          name: "stop",
-          description: "Stop track",
-        },
-        {
-          name: "quit",
-          description: "Quit iTunes",
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
-      ],
-    },
-    {
-      name: "localhost",
-      description: "Manage localhost",
-      subcommands: [
-        {
-          name: ["ls", "list"],
-          description: "List current records in localhost",
-        },
-        {
-          name: "add",
-          description: "Add a new host to the localhost file",
-          args: [
-            {
-              name: "IP",
-              description: "IP of the host",
-            },
-            {
-              name: "HOSTNAME",
-              description: "Hostname of the host",
-            },
-          ],
-        },
-        {
-          name: "remove",
-          description: "Remove a host from the localhost file",
-          args: {
-            name: "HOSTNAME",
-            description: "Hostname of the host",
-          },
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+        { name: "--quit", description: "Quit the application" },
       ],
     },
     {
       name: "lock",
-      description: "Lock session",
+      description: "Lock the screen",
+      options: [helpOption],
     },
     {
       name: "network",
-      description: "Manage network",
-      subcommands: [
+      description: "Manage network interfaces and locations",
+      options: [
+        helpOption,
         {
-          name: ["ls", "list"],
-          description: "List network interfaces",
+          name: "--list",
+          description: "List all network interfaces and their IP addresses",
         },
         {
-          name: "location",
-          description: "Manage location",
-          subcommands: [
+          name: "--location",
+          description:
+            "Manage network locations (info and list do not require a name)",
+          args: [
             {
-              name: ["ls", "list"],
-              description: "List locations",
+              name: "action",
+              suggestions: [
+                { name: "info", description: "Show the current location" },
+                { name: "list", description: "List all locations" },
+                { name: "create", description: "Create a location" },
+                { name: "delete", description: "Delete a location" },
+                { name: "switch", description: "Switch to a location" },
+              ],
             },
             {
-              name: "create",
-              description: "Create a location",
-              args: {
-                name: "name",
-                description: "Name of the location",
-              },
-            },
-            {
-              name: "delete",
-              description: "Delete a location",
-              args: {
-                name: "name",
-                description: "Name of the location",
-                generators: generateNetworkLocations,
-              },
-            },
-            {
-              name: "switch",
-              description: "Switch location",
-              args: {
-                name: "name",
-                description: "Name of the location",
-              },
+              name: "name",
+              description: "Name of the location",
+              isOptional: true,
+              generators: generateNetworkLocations,
             },
           ],
-        },
-        {
-          name: "help",
-          description: `Show help`,
         },
       ],
     },
     {
       name: "nosleep",
-      description: "Manage no sleep",
-      subcommands: [
+      description: "Prevent the system from sleeping",
+      options: [
+        helpOption,
         {
-          name: "until",
-          description: "No sleep until",
-          subcommands: [
-            {
-              name: "pid",
-              description: "No sleep until process id ends",
-              args: {
-                name: "pid",
-                description: "Process id",
-                generators: generatePids,
-              },
-            },
-          ],
+          name: "--until",
+          description:
+            "Prevent sleep for the given seconds, until a script finishes or until the process with the given PID ends",
           args: {
-            name: "time or script",
-            template: "filepaths",
+            name: "seconds | script | pid PID",
+            isVariadic: true,
+            suggestions: [
+              {
+                name: "pid",
+                description: "Wait until the process with the given PID ends",
+              },
+            ],
+            generators: [{ template: "filepaths" }, generatePids],
           },
-        },
-        {
-          name: "help",
-          description: `Show help`,
         },
       ],
     },
     {
-      name: "notification",
-      description: "Manage notification",
-      subcommands: [
-        {
-          name: "showcenter",
-          description: "Show notification center",
-          args: {
-            name: "YES/NO",
-            description: "Enable/Disable notification center",
-            suggestions: ["YES", "NO"],
-            isOptional: true,
-          },
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+      name: "notificationcenter",
+      description: "Manage the macOS Notification Center",
+      options: [
+        helpOption,
+        statusOption("Show the current status of the Notification Center"),
+        enableOption("Enable the Notification Center"),
+        disableOption("Disable the Notification Center"),
       ],
     },
     {
       name: "ntp",
-      description: "Manage ntp",
-      subcommands: [
+      description: "Manage the network time service",
+      options: [
+        helpOption,
+        statusOption("Show the current status of the network time service"),
+        enableOption("Enable the clock to use network time"),
+        disableOption("Disable the clock from using network time"),
         {
-          name: "status",
-          description: "Status of the network time service",
+          name: "--set",
+          description: "Set the network time server",
+          args: { name: "host" },
+        },
+      ],
+    },
+    {
+      name: "permissions",
+      description: "Manage app permissions and privacy settings",
+      options: [
+        helpOption,
+        {
+          name: "--info",
+          description: "Show apps with access to a service",
+          args: { name: "service", suggestions: privacyServices },
         },
         {
-          name: "enable",
-          description: "Enable clock to use network time",
+          name: "--grant",
+          description: "Grant an app access to a service",
+          args: [
+            {
+              name: "app",
+              description: "Bundle ID, application name or path to the app",
+              template: "filepaths",
+            },
+            { name: "service", suggestions: privacyServices },
+          ],
         },
         {
-          name: "disable",
-          description: "Disable clock to use network time",
+          name: "--reset",
+          description: "Reset an app's permission for a service",
+          args: [
+            {
+              name: "app",
+              description: "Bundle ID, application name or path to the app",
+              template: "filepaths",
+            },
+            { name: "service", suggestions: privacyServices },
+          ],
         },
         {
-          name: "set",
-          description: "Set network time server",
+          name: "--reset-all",
+          description: "Reset all permissions for a service",
+          args: { name: "service", suggestions: privacyServices },
+        },
+        {
+          name: "--apps",
+          description: "List all installed applications (bundle IDs)",
+        },
+        {
+          name: "--services",
+          description: "List all available privacy services",
+        },
+      ],
+    },
+    {
+      name: "powermode",
+      description: "Manage the power mode of your Mac",
+      options: [
+        helpOption,
+        {
+          name: "--status",
+          description: "Get the current power mode for a power source",
           args: {
-            name: "hostname",
-            description: "Network time server",
+            name: "source",
+            suggestions: ["ac", "battery", "all"],
           },
         },
         {
-          name: "help",
-          description: `Show help`,
+          name: "--set-battery",
+          description: "Set the power mode used on battery power",
+          args: { name: "mode", suggestions: ["auto", "low", "high"] },
+        },
+        {
+          name: "--set-ac",
+          description: "Set the power mode used on AC power",
+          args: { name: "mode", suggestions: ["auto", "low", "high"] },
+        },
+        {
+          name: "--set-all",
+          description: "Set the power mode for both AC and battery power",
+          args: { name: "mode", suggestions: ["auto", "low", "high"] },
         },
       ],
     },
     {
       name: "printer",
-      description: "Manage printer",
-      subcommands: [
+      description: "Manage printers on the system",
+      options: [
+        helpOption,
+        { name: "--settings", description: "Show printer settings" },
         {
-          name: "settings",
-          description: "Printer settings",
+          name: ["--names", "--name"],
+          description: "Show printer names on the system",
+        },
+        { name: "--queue", description: "Show items in the printer queue" },
+        { name: "--drivers", description: "Show all printer drivers" },
+        {
+          name: "--open-web",
+          description: "Enable and show the web interface for printers",
+        },
+      ],
+    },
+    {
+      name: "remotelogin",
+      description: "Manage Remote Login (SSH)",
+      options: [
+        helpOption,
+        statusOption("Show the current Remote Login status"),
+        enableOption("Enable Remote Login for all users"),
+        disableOption("Disable Remote Login"),
+        {
+          name: "--list-users",
+          description: "List users explicitly allowed to use Remote Login",
         },
         {
-          name: "name",
-          description: "Display printer names on system",
+          name: "--allow",
+          description: "Add a user to the Remote Login allow list",
+          args: { name: "username", generators: generateUsers },
         },
         {
-          name: "queue",
-          description: "Display items in printer queue on system",
+          name: "--remove",
+          description: "Remove a user from the Remote Login allow list",
+          args: { name: "username", generators: generateUsers },
         },
         {
-          name: "drivers",
-          description: "Display all printer drivers",
-        },
-        {
-          name: "web",
-          description: "Enable and show web interface",
-        },
-        {
-          name: "help",
-          description: `Show help`,
+          name: "--allow-all",
+          description: "Allow all users to connect by clearing the allow list",
         },
       ],
     },
     {
       name: "restart",
-      description: "Restart computer (needs confirmation)",
-      subcommands: [
+      description: "Restart the computer",
+      options: [
+        helpOption,
         {
-          name: ["-f", "--force"],
-          description: "Restart computer (without confirmation)",
+          name: ["--force", "-f"],
+          description: "Force restart without confirmation",
         },
         {
-          name: "help",
-          description: `Show help`,
+          name: ["--auth", "-a"],
+          description:
+            "Authenticated restart, keeps the FileVault unlock active across the reboot",
         },
       ],
     },
     {
       name: "safeboot",
-      description: "Manage safe boot",
-      subcommands: [
-        {
-          name: "status",
-          description: "Get the boot args",
-        },
-        {
-          name: "enable",
-          description: "Enable safe boot",
-        },
-        {
-          name: "disable",
-          description: "Disable safeboot",
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+      description: "Enable or disable safe boot",
+      options: [
+        helpOption,
+        statusOption("Get the current boot arguments"),
+        enableOption("Enable safe boot-args"),
+        disableOption("Disable safe boot-args"),
       ],
     },
     {
       name: "screensaver",
-      description: "Manage screensaver",
-      subcommands: [
-        {
-          name: "status",
-          description: "Get the current status",
-        },
-        {
-          name: "askforpassword",
-          description: "Get password requirement to unlock",
-          args: {
-            name: "YES/NO",
-            description: "Enable/Disable password requirement to unlock",
-            suggestions: ["YES", "NO"],
-            isOptional: true,
-          },
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+      description:
+        "Launch the screensaver or manage the password requirement to unlock it",
+      options: [
+        helpOption,
+        toggleOption(
+          "--askforpassword",
+          "Get or set the password requirement to unlock the screensaver (no value shows the current setting)",
+          { isOptional: true }
+        ),
       ],
     },
     {
       name: "service",
-      description: "Manage service",
-      subcommands: [
+      description: "Manage services using launchctl",
+      options: [
+        helpOption,
+        { name: "--list", description: "List all services" },
         {
-          name: "--status-all",
-          description: "List all services",
+          name: "--info",
+          description: "Show information about a specific service",
+          args: { name: "service", generators: generateServices },
         },
         {
-          name: ["--ls", "--list"],
-          description: "List all services",
-          args: {
-            name: "service",
-            description: "Service name",
-            isOptional: true,
-          },
-        },
-        {
-          name: "start",
+          name: "--start",
           description: "Start a service",
-          args: {
-            name: "service",
-            description: "Service name",
-            generators: generateServices,
-          },
+          args: { name: "service", generators: generateServices },
         },
         {
-          name: "stop",
+          name: "--stop",
           description: "Stop a service",
-          args: {
-            name: "service",
-            description: "Service name",
-            generators: generateServices,
-          },
+          args: { name: "service", generators: generateServices },
         },
         {
-          name: "load",
-          description: "Load a service",
-          args: {
-            name: "service",
-            description: "Service name",
-            generators: generateServices,
-          },
+          name: "--status",
+          description: "Show the status of a service",
+          args: { name: "service", generators: generateServices },
         },
         {
-          name: "unload",
-          description: "Unload a service",
-          args: {
-            name: "service",
-            description: "Service name",
-            generators: generateServices,
-          },
+          name: "--enable",
+          description: "Enable a service",
+          args: { name: "service", generators: generateServices },
         },
         {
-          name: "help",
-          description: `Show help`,
+          name: "--disable",
+          description: "Disable a service",
+          args: { name: "service", generators: generateServices },
+        },
+        {
+          name: "--load",
+          description: "Load a plist file as a service",
+          args: { name: "plistpath", template: "filepaths" },
+        },
+        {
+          name: "--unload",
+          description: "Unload a plist file as a service",
+          args: { name: "plistpath", template: "filepaths" },
         },
       ],
     },
     {
       name: "shutdown",
-      description: "Shutdown computer (needs confirmation)",
-      subcommands: [
+      description: "Shut down the computer",
+      options: [
+        helpOption,
         {
-          name: "-f",
-          description: "Shutdown computer (without confirmation)",
-        },
-        {
-          name: "help",
-          description: `Show help`,
+          name: "--force",
+          description: "Shut down without confirmation",
         },
       ],
     },
     {
       name: "sleep",
-      description: "Put computer to sleep",
-      subcommands: [{ name: "help", description: "Show help" }],
+      description: "Put the Mac to sleep immediately",
+      options: [helpOption],
     },
     {
       name: "timezone",
-      description: "Get current timezone",
-      subcommands: [
+      description:
+        "Manage the system timezone (no option shows the current timezone)",
+      options: [
+        helpOption,
+        { name: "--list", description: "List available timezones" },
         {
-          name: ["ls", "list"],
-          description: "List available timezones",
-        },
-        {
-          name: "set",
-          description: "Set timezone",
+          name: "--set",
+          description: "Set the system timezone",
           args: {
             name: "timezone",
-            description: "Timezone",
             suggestions: timezones.map((name) => ({ name, icon: "🕑" })),
           },
-        },
-        {
-          name: "help",
-          description: `Show help`,
         },
       ],
     },
     {
       name: "touchbar",
-      description: "Manage touchbar",
-      subcommands: [
-        {
-          name: "reset",
-          description: "Reset touchbar",
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+      description: "Manage the Touch Bar",
+      options: [
+        helpOption,
+        { name: "--reset", description: "Reset the Touch Bar" },
       ],
     },
     {
       name: "trash",
-      description: "Manage trash",
-      subcommands: [
+      description:
+        "Manage the trash (requires Full Disk Access for the terminal)",
+      options: [
+        helpOption,
+        statusOption("Show the status of the trash"),
+        { name: "--clean", description: "Clean the trash" },
+      ],
+    },
+    {
+      name: "update",
+      description: "Manage software updates",
+      options: [
+        helpOption,
+        { name: "--list", description: "List available updates" },
         {
-          name: "status",
-          description: "Get trash info",
+          name: "--install",
+          description: "Install a specific update by name",
+          args: { name: "name" },
         },
         {
-          name: "clean",
-          description: "Clean trash",
-        },
-        {
-          name: "help",
-          description: `Show help`,
+          name: "--install-all",
+          description: "Install all available updates",
         },
       ],
     },
     {
+      name: "usb",
+      description: "List USB devices connected to the system",
+      options: [helpOption],
+    },
+    {
       name: "user",
-      description: "Manage user",
-      subcommands: [
+      description: "Manage users",
+      options: [
+        helpOption,
+        { name: "--list", description: "List all users" },
         {
-          name: ["ls", "list"],
-          description: "List all users",
+          name: "--info",
+          description: "Display information about a user",
+          args: { name: "username", generators: generateUsers },
         },
         {
-          name: "info",
-          description: "Get user info",
-          args: {
-            name: "username",
-            description: "Username",
-            generators: generateUsers,
-          },
-        },
-        {
-          name: "create",
-          description: "Create a new user",
-        },
-        {
-          name: "delete",
+          name: "--delete",
           description: "Delete a user",
-          args: {
-            name: "username",
-            description: "Username",
-            generators: generateUsers,
-          },
+          args: { name: "username", generators: generateUsers },
         },
         {
-          name: "help",
-          description: `Show help`,
+          name: "--create",
+          description:
+            "Create a new user, asking for username, full name, shell and password",
         },
       ],
     },
     {
       name: "volume",
-      description: "Manage volume level",
-      subcommands: [
+      description:
+        "Manage the system volume (no option shows the volume level and mute state)",
+      options: [
+        helpOption,
         {
-          name: "mute",
-          description: "Set mute",
+          name: "--set",
+          description: "Set the volume",
+          args: { name: "level", description: "Volume level (0-100)" },
         },
-        {
-          name: "unmute",
-          description: "Unset mute",
-        },
-        {
-          name: "ismute",
-          description: "Check the volume status",
-        },
-        {
-          name: "up",
-          description: "Increase the volume by 6.25",
-        },
-        {
-          name: "down",
-          description: "Decrease the volume by 6.25",
-        },
-        {
-          name: "help",
-          description: `Show help`,
-        },
+        { name: "--mute", description: "Mute the system volume" },
+        { name: "--unmute", description: "Unmute the system volume" },
       ],
-      args: {
-        name: "volume",
-        description: "Volume level up/down/(+/-)number",
-      },
     },
     {
       name: "vpn",
       description: "Manage VPN connections",
-      subcommands: [
+      options: [
+        helpOption,
+        { name: "--list", description: "List available VPN connections" },
         {
-          name: ["ls", "list"],
-          description: "List VPN connections",
-        },
-        {
-          name: "start",
-          description: "Start a VPN connection",
+          name: "--start",
+          description:
+            "Start a VPN connection (interactive when no arguments are provided)",
           args: [
             {
-              name: "VPN",
-              description: "VPN connection name",
+              name: "vpn",
+              description: "Name of the VPN connection",
               isOptional: true,
             },
-            {
-              name: "USER",
-              description: "VPN connection user",
-              isOptional: true,
-            },
-            {
-              name: "PASS",
-              description: "VPN connection password",
-              isOptional: true,
-            },
-            {
-              name: "SECRET",
-              description: "VPN connection secret",
-              isOptional: true,
-            },
+            { name: "user", isOptional: true },
+            { name: "password", isOptional: true },
+            { name: "secret", isOptional: true },
           ],
         },
         {
-          name: "stop",
+          name: "--stop",
           description: "Stop a VPN connection",
-          args: {
-            name: "VPN",
-            description: "VPN connection name",
-            isOptional: true,
-          },
+          args: { name: "vpn", description: "Name of the VPN connection" },
         },
         {
-          name: "status",
-          description: "Get the status of a VPN connection",
-          args: {
-            name: "VPN",
-            description: "VPN connection name",
-            isOptional: true,
-          },
-        },
-        {
-          name: "help",
-          description: `Show help`,
+          name: "--status",
+          description: "Show the status of a VPN connection",
+          args: { name: "vpn", description: "Name of the VPN connection" },
         },
       ],
     },
     {
       name: "wallpaper",
-      description: "Change wallpaper",
-      args: {
-        name: "image",
-        description: "Path to the wallpaper",
-        template: "filepaths",
-      },
-      subcommands: [
+      description: "Set the desktop wallpaper to the specified image file",
+      options: [
+        helpOption,
         {
-          name: "help",
-          description: `Show help`,
+          name: "--set",
+          description: "Set the wallpaper to the specified image file",
+          args: { name: "image_path", template: "filepaths" },
         },
       ],
     },
     {
       name: "wifi",
-      description: "Manage wifi",
-      subcommands: [
+      description: "Manage your Wi-Fi connections",
+      options: [
+        helpOption,
+        statusOption("Show the current Wi-Fi status"),
+        { name: "--scan", description: "Scan for available Wi-Fi networks" },
         {
-          name: "status",
-          description: "Get wifi status",
-        },
-        {
-          name: "scan",
-          description: "Scan wifi",
-        },
-        {
-          name: "showpassword",
-          description: "Show wifi network password",
+          name: "--showpassword",
+          description: "Show the password for a Wi-Fi network",
           args: {
-            name: "ESSID",
-            description: "ESSID",
+            name: "essid",
             isOptional: true,
             generators: generateWifiNetworks,
           },
         },
+        { name: "--list", description: "List known Wi-Fi networks" },
         {
-          name: ["ls", "list"],
-          description: "List known wifi networks",
+          name: "--forget",
+          description: "Forget a Wi-Fi network",
+          args: { name: "essid", generators: generateWifiNetworks },
         },
+        { name: "--history", description: "Show Wi-Fi connection history" },
+        disableOption("Turn off Wi-Fi"),
+        enableOption("Turn on Wi-Fi"),
         {
-          name: "forget",
-          description: "Forget a wifi network",
-          args: {
-            name: "ESSID",
-            description: "ESSID",
-            generators: generateWifiNetworks,
-          },
-        },
-        {
-          name: "history",
-          description: "Wifi connection history",
-        },
-        {
-          name: "off",
-          description: "Turn off your wifi",
-        },
-        {
-          name: "on",
-          description: "Turn on your wifi",
-        },
-        {
-          name: "connect",
-          description: "Join a wifi network",
+          name: "--connect",
+          description:
+            "Connect to a Wi-Fi network (prompts for the password if not provided)",
           args: [
-            {
-              name: "ESSID",
-              description: "ESSID",
-            },
-            {
-              name: "PASSWORD",
-              description: "Password",
-              isOptional: true,
-            },
+            { name: "essid", generators: generateWifiNetworks },
+            { name: "password", isOptional: true },
           ],
-        },
-        {
-          name: "help",
-          description: `Show help`,
         },
       ],
     },
   ],
   options: [
+    helpOption,
     {
       name: "--update",
       description: "Update m-cli to the latest version",
@@ -1975,6 +1747,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "--uninstall",
       description: "Uninstall m-cli",
+    },
+    {
+      name: "--version",
+      description: "Show the version of m-cli",
     },
   ],
 };

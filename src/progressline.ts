@@ -1,3 +1,4 @@
+// ProgressLine v0.2.4 (GitHub tag kattouf/ProgressLine 0.2.4, Homebrew formula progressline, 2026-11-19). Source: Sources/ProgressLine.swift (Swift ArgumentParser definition) and README.md at tag 0.2.4, read statically (binary not run)
 const completionSpec: Fig.Spec = {
   name: "progressline",
   description: "⏳Track commands progress in a compact one-line format",
@@ -5,16 +6,21 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["--help", "-h"],
-      description: "Show help for progressline",
+      description: "Show help information",
+    },
+    {
+      name: "--version",
+      description: "Show the version",
     },
     {
       name: ["--log-all", "-a"],
       description: "Log all lines above the progress line",
+      exclusiveOn: ["--log-matches", "-m"],
     },
     {
       name: ["--static-text", "-t"],
       description:
-        "Set static text to display instead of the latest stdin data",
+        "The static text to display instead of the latest stdin data",
       args: {
         name: "text",
       },
@@ -24,9 +30,9 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "style",
         default: "dots",
-        suggestions: ["dots", "kitt", "snake"],
+        suggestions: ["dots", "kitt", "snake", "spinner"],
       },
-      description: "Set style of the activity indicator",
+      description: "The style of the activity indicator",
     },
     {
       name: ["--original-log-path", "-l"],
@@ -40,6 +46,8 @@ const completionSpec: Fig.Spec = {
       name: ["--log-matches", "-m"],
       description:
         "Log above progress line lines matching the given regular expressions",
+      isRepeatable: true,
+      exclusiveOn: ["--log-all", "-a"],
       args: {
         name: "regex",
       },

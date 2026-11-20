@@ -1,3 +1,8 @@
+// CodeWhisperer CLI `cw` (no current upstream release: renamed to `q` in 2024-04, 2026-11-19). Source: upstream
+// aws/amazon-q-developer-cli v1.19.7 (last open-source tag, 2025-11-15; binaries are `q`/`qchat`, no `cw`) and the
+// Kiro CLI 3.5.0 package (desktop-release manifest / Homebrew cask kiro-cli; ships only `kiro-cli`).
+// No `cw` binary or source exists in any current release, so this command tree is the legacy 2023-11 CodeWhisperer
+// snapshot kept as-is and was NOT re-verified; use the `q` spec (src/q.ts) for the current CLI.
 export const themesGenerator: Fig.Generator = {
   script: ["cw", "theme", "--list"],
   postProcess: (output) => {

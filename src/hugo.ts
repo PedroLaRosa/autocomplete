@@ -1,178 +1,36 @@
+// Hugo v0.170.1 (Go module proxy / git tag v0.170.1, 2026-11-20). Source: gohugoio/hugo @ v0.170.1 read statically (commands/*.go cobra definitions, docs/content/en/commands/*.md generated CLI reference, resources/kinds, chroma v2.27.0 style registry); `mod get` pass-through flags checked against the local Go 1.24 toolchain; the binary was not run.
+// Not covered: hidden maintainer-only commands (`hugo gen docshelper`, `hugo release`). `hugo deploy` only works in release builds that have "withdeploy" in the archive name.
+
 const help = (name: string): Fig.Option => ({
   name: ["-h", "--help"],
-  description: `help for ${name}`,
+  description: `Help for ${name}`,
 });
 
+// Persistent flags of the root command. They are inherited by every
+// subcommand except `hugo mod get`, which hands all flags to `go get`.
 const globalOptions: Fig.Option[] = [
   {
+    name: "--clock",
+    description:
+      "Set the clock used by Hugo, e.g. --clock 2021-11-06T22:30:00.00+09:00",
+    args: {
+      name: "time",
+    },
+  },
+  {
     name: "--config",
-    description: "Config file (default is path/config.yaml|json|toml)",
-    priority: 50,
+    description: "Config file (default is hugo.yaml|json|toml)",
     args: {
       name: "file",
-      description: "Default is path/config.yaml|json|toml",
       template: "filepaths",
     },
   },
   {
     name: "--configDir",
     description: "Config dir (default 'config')",
-    priority: 50,
     args: {
       name: "directory path",
-      description: "Default is 'config'",
-      template: "folders",
-    },
-  },
-  {
-    name: "--debug",
-    description: "Debug output (default false)",
-    priority: 50,
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: ["-e", "--environment"],
-    description: "Build environment",
-    priority: 50,
-    args: {
-      name: "environment",
-    },
-  },
-  {
-    name: "--ignoreVendor",
-    description: "Ignores any _vendor directory (default false)",
-    priority: 50,
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: "--ignoreVendorPaths",
-    description:
-      "Ignores any _vendor for module paths matching the given Glob pattern",
-    priority: 50,
-    args: {
-      name: "glob pattern",
-    },
-  },
-  {
-    name: "--log",
-    description: "Enable Logging (default false)",
-    priority: 50,
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: "--logFile",
-    description: "Log File path (if set, logging enabled automatically)",
-    priority: 50,
-    args: {
-      name: "file",
-      template: "filepaths",
-    },
-  },
-  {
-    name: "--quiet",
-    description: "Build in quiet mode (default false)",
-    priority: 50,
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: ["-s", "--source"],
-    description: "Filesystem path to read files relative from",
-    priority: 50,
-    args: {
-      name: "file",
-      template: "filepaths",
-    },
-  },
-  {
-    name: "--themesDir",
-    description: "Filesystem path to themes directory",
-    priority: 50,
-    args: {
-      name: "file",
-      description: "Default is path/config.yaml|json|toml",
-      template: "filepaths",
-    },
-  },
-  {
-    name: ["-v", "--verbose"],
-    description: "Verbose output (default false)",
-    priority: 50,
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: "--verboseLog",
-    description: "Verbose logging (default false)",
-    priority: 50,
-    args: {
-      name: "boolean",
-    },
-  },
-];
-
-// options common to 'hugo', 'hugo mod', 'hugo new', and 'hugo server' commands
-
-const commonOptions: Fig.Option[] = [
-  {
-    name: ["-b", "--baseURL"],
-    description: "Hostname (and path) to the root, e.g. http://spf13.com/",
-    args: {
-      name: "hostname and path",
-    },
-  },
-  {
-    name: ["-D", "--buildDrafts"],
-    description: "Include content marked as draft (default false)",
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: ["-E", "--buildExpired"],
-    description: "Include expired content (default false)",
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: ["-F", "--buildFuture"],
-    description:
-      "Include content with publishdate in the future (default false)",
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: "--cacheDir",
-    description:
-      "Filesystem path to cache directory. Defaults: $TMPDIR/hugo_cache/",
-    args: {
-      name: "path",
-      template: "folders",
-    },
-  },
-  {
-    name: "--cleanDestinationDir",
-    description:
-      "Remove files from destination not found in static directories (default false)",
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: ["-c", "--contentDir"],
-    description: "Filesystem path to content directory",
-    args: {
-      name: "path",
+      default: "config",
       template: "folders",
     },
   },
@@ -185,8 +43,127 @@ const commonOptions: Fig.Option[] = [
     },
   },
   {
+    name: ["-e", "--environment"],
+    description: "Build environment",
+    args: {
+      name: "environment",
+      suggestions: ["development", "production"],
+    },
+  },
+  {
+    name: "--ignoreVendorPaths",
+    description:
+      "Ignores any _vendor for module paths matching the given Glob pattern",
+    args: {
+      name: "glob pattern",
+    },
+  },
+  {
+    name: "--logLevel",
+    description: "Log level (debug|info|warn|error)",
+    args: {
+      name: "level",
+      suggestions: ["debug", "info", "warn", "error"],
+    },
+  },
+  {
+    name: "--noBuildLock",
+    description: "Don't create .hugo_build.lock file",
+  },
+  {
+    name: "--quiet",
+    description: "Build in quiet mode",
+  },
+  {
+    name: ["-M", "--renderToMemory"],
+    description: "Render to memory (mostly useful when running the server)",
+  },
+  {
+    name: ["-s", "--source"],
+    description: "Filesystem path to read files relative from",
+    args: {
+      name: "path",
+      template: "folders",
+    },
+  },
+  {
+    name: "--themesDir",
+    description: "Filesystem path to themes directory",
+    args: {
+      name: "path",
+      template: "folders",
+    },
+  },
+];
+
+// Config-related build flags, used by 'hugo', 'hugo build', 'hugo server',
+// 'hugo config', 'hugo mod' (except 'get') and 'hugo new content'
+
+const buildConfigOptions: Fig.Option[] = [
+  {
+    name: ["-b", "--baseURL"],
+    description: "Hostname (and path) to the root, e.g. https://spf13.com/",
+    args: {
+      name: "hostname and path",
+    },
+  },
+  {
+    name: "--cacheDir",
+    description: "Filesystem path to cache directory",
+    args: {
+      name: "path",
+      template: "folders",
+    },
+  },
+  {
+    name: ["-c", "--contentDir"],
+    description: "Filesystem path to content directory",
+    args: {
+      name: "path",
+      template: "folders",
+    },
+  },
+  {
+    name: "--renderSegments",
+    description: "Named segments to render (configured in the segments config)",
+    isRepeatable: true,
+    args: {
+      name: "segment",
+    },
+  },
+  {
+    name: ["-t", "--theme"],
+    description: "Themes to use (located in /themes/THEMENAME/)",
+    isRepeatable: true,
+    args: {
+      name: "theme name",
+    },
+  },
+];
+
+// Build flags common to 'hugo', 'hugo build' and 'hugo server' (on top of buildConfigOptions)
+
+const buildOptions: Fig.Option[] = [
+  {
+    name: ["-D", "--buildDrafts"],
+    description: "Include content marked as draft",
+  },
+  {
+    name: ["-E", "--buildExpired"],
+    description: "Include expired content",
+  },
+  {
+    name: ["-F", "--buildFuture"],
+    description: "Include content with publishdate in the future",
+  },
+  {
+    name: "--cleanDestinationDir",
+    description: "Remove stale files from destination",
+  },
+  {
     name: "--disableKinds",
     description: "Disable different kind of pages (home, RSS etc.)",
+    isRepeatable: true,
     args: {
       name: "kind,kind",
       suggestions: [
@@ -195,9 +172,9 @@ const commonOptions: Fig.Option[] = [
         "section",
         "taxonomy",
         "term",
-        "RSS",
+        "rss",
         "sitemap",
-        "robotsTXT",
+        "robotstxt",
         "404",
       ],
     },
@@ -205,39 +182,20 @@ const commonOptions: Fig.Option[] = [
   {
     name: "--enableGitInfo",
     description:
-      "Add Git revision, date and author info to the pages (default false)",
-    args: {
-      name: "boolean",
-    },
+      "Add Git revision, date, author, and CODEOWNERS info to the pages",
   },
   {
     name: "--forceSyncStatic",
-    description: "Copy all files when static is changed (default false)",
-    args: {
-      name: "boolean",
-    },
+    description: "Copy all files when static is changed",
   },
   {
     name: "--gc",
     description:
-      "Enable to run some cleanup tasks (remove unused cache files) after the build (default false)",
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: "--i18n-warnings",
-    description: "Print missing translations (default false)",
-    args: {
-      name: "boolean",
-    },
+      "Enable to run some cleanup tasks (remove unused cache files) after the build",
   },
   {
     name: "--ignoreCache",
-    description: "Ignores the cache directory (default false)",
-    args: {
-      name: "boolean",
-    },
+    description: "Ignore the configured file caches",
   },
   {
     name: ["-l", "--layoutDir"],
@@ -249,67 +207,79 @@ const commonOptions: Fig.Option[] = [
   },
   {
     name: "--minify",
-    description:
-      "Minify any supported output format (HTML, XML etc.) (default false)",
-    args: {
-      name: "boolean",
-    },
+    description: "Minify any supported output format (HTML, XML etc.)",
   },
   {
     name: "--noChmod",
-    description: "Don't sync permission mode of files (default false)",
-    args: {
-      name: "boolean",
-    },
+    description: "Don't sync permission mode of files",
   },
   {
     name: "--noTimes",
-    description: "Don't sync modification time of files (default false)",
-    args: {
-      name: "boolean",
-    },
+    description: "Don't sync modification time of files",
   },
   {
-    name: "--path-warnings",
-    description: "Print warnings on duplicate target paths etc (default false)",
-    args: {
-      name: "boolean",
-    },
+    name: "--panicOnWarning",
+    description: "Panic on first WARNING log",
   },
   {
     name: "--poll",
     description:
       "Set this to a poll interval, e.g --poll 700ms, to use a poll based approach to watch for file system changes",
     args: {
-      name: "milliseconds",
+      name: "interval",
     },
   },
   {
-    name: "--print-mem",
-    description: "Print memory usage to screen at intervals (default false)",
+    name: "--printI18nWarnings",
+    description: "Print missing translations",
+  },
+  {
+    name: "--printMemoryUsage",
+    description: "Print memory usage to screen at intervals",
+  },
+  {
+    name: "--printPathWarnings",
+    description: "Print warnings on duplicate target paths etc",
+  },
+  {
+    name: "--printUnusedTemplates",
+    description: "Print warnings on unused templates",
+  },
+  {
+    name: "--profile-cpu",
+    description: "Write cpu profile to file",
+    hidden: true,
     args: {
-      name: "boolean",
+      name: "file",
+      template: "filepaths",
+    },
+  },
+  {
+    name: "--profile-mem",
+    description: "Write memory profile to file",
+    hidden: true,
+    args: {
+      name: "file",
+      template: "filepaths",
+    },
+  },
+  {
+    name: "--profile-mutex",
+    description: "Write Mutex profile to file",
+    hidden: true,
+    args: {
+      name: "file",
+      template: "filepaths",
     },
   },
   {
     name: "--templateMetrics",
-    description: "Display metrics about template executions (default false)",
-    args: {
-      name: "boolean",
-    },
+    description: "Display metrics about template executions",
   },
   {
     name: "--templateMetricsHints",
     description:
-      "Calculate some improvement hints when combined with --templateMetrics (default false)",
-    args: {
-      name: "boolean",
-    },
-  },
-  {
-    name: ["-t", "--theme"],
-    description: "Themes to use (located in /themes/THEMENAME/)",
-    args: { name: "theme name" },
+      "Calculate some improvement hints when combined with --templateMetrics",
   },
   {
     name: "--trace",
@@ -321,23 +291,164 @@ const commonOptions: Fig.Option[] = [
   },
 ];
 
-// options common to 'hugo' and 'hugo server' commands
+// Options of 'hugo' and 'hugo build'. Only these take --watch with a default of false;
+// 'hugo server' defines its own --watch (default true).
 
-const watch = {
-  name: ["-w", "--watch"],
+const rootBuildOptions = (name: string): Fig.Option[] => [
+  help(name),
+  ...buildConfigOptions,
+  ...buildOptions,
+  ...globalOptions,
+  {
+    name: ["-w", "--watch"],
+    description: "Watch filesystem for changes and recreate as needed",
+  },
+];
+
+// Options of 'hugo new content'. Also accepted by 'hugo new', which inserts
+// "content" itself when it is called as `hugo new <path>` (legacy form).
+
+const archetypeGenerator: Fig.Generator = {
+  script: ["ls", "./archetypes/"],
+  postProcess: (output) =>
+    output
+      .split("\n")
+      .filter(Boolean)
+      .map((fileName) => {
+        const dot = fileName.lastIndexOf(".");
+        return {
+          name: dot > 0 ? fileName.slice(0, dot) : fileName,
+          icon: "fig://icon?type=string",
+        };
+      }),
+};
+
+const newContentOptions: Fig.Option[] = [
+  ...buildConfigOptions,
+  ...globalOptions,
+  {
+    name: "--editor",
+    description: "Edit new content with this editor, if provided",
+    args: {
+      name: "editor",
+    },
+  },
+  {
+    name: ["-f", "--force"],
+    description: "Overwrite file if it already exists",
+    isDangerous: true,
+  },
+  {
+    name: ["-k", "--kind"],
+    description: "Content type to create",
+    args: {
+      name: "archetype",
+      generators: archetypeGenerator,
+    },
+  },
+];
+
+const contentPathArg: Fig.Arg = {
+  name: "path",
   description:
-    "Watch filesystem for changes and recreate as needed (default true)",
+    "Content path relative to the content dir, e.g. posts/my-post.md",
+  template: "folders",
+};
+
+const formatOption: Fig.Option = {
+  name: "--format",
+  description: "Preferred file format (toml, yaml or json) (default 'toml')",
   args: {
-    name: "boolean",
+    name: "format",
+    default: "toml",
+    suggestions: ["toml", "yaml", "json"],
   },
 };
 
-// options common to 'toJSON', 'toTOML', 'toYAML' commands
+const highlighterStyles = [
+  "abap",
+  "algol",
+  "algol_nu",
+  "arduino",
+  "ashen",
+  "aura-theme-dark",
+  "aura-theme-dark-soft",
+  "autumn",
+  "average",
+  "base16-snazzy",
+  "borland",
+  "bw",
+  "catppuccin-frappe",
+  "catppuccin-latte",
+  "catppuccin-macchiato",
+  "catppuccin-mocha",
+  "colorful",
+  "darcula",
+  "doom-one",
+  "doom-one2",
+  "dracula",
+  "emacs",
+  "evergarden",
+  "friendly",
+  "fruity",
+  "github",
+  "github-dark",
+  "gruvbox",
+  "gruvbox-light",
+  "hr_high_contrast",
+  "hrdark",
+  "igor",
+  "kanagawa-dragon",
+  "kanagawa-lotus",
+  "kanagawa-wave",
+  "lovelace",
+  "manni",
+  "modus-operandi",
+  "modus-vivendi",
+  "monokai",
+  "monokailight",
+  "murphy",
+  "native",
+  "nord",
+  "nordic",
+  "onedark",
+  "onesenterprise",
+  "paraiso-dark",
+  "paraiso-light",
+  "pastie",
+  "perldoc",
+  "pygments",
+  "rainbow_dash",
+  "rose-pine",
+  "rose-pine-dawn",
+  "rose-pine-moon",
+  "rpgle",
+  "rrt",
+  "solarized-dark",
+  "solarized-dark256",
+  "solarized-light",
+  "swapoff",
+  "tango",
+  "tokyonight-day",
+  "tokyonight-moon",
+  "tokyonight-night",
+  "tokyonight-storm",
+  "trac",
+  "vim",
+  "vs",
+  "vulcan",
+  "witchhazel",
+  "xcode",
+  "xcode-dark",
+];
+
+// Options common to 'toJSON', 'toTOML' and 'toYAML' (persistent flags of 'hugo convert')
 
 const convertOptions: Fig.Option[] = [
   {
     name: ["-o", "--output"],
     description: "Filesystem path to write files to",
+    isPersistent: true,
     args: {
       name: "path",
       template: "folders",
@@ -347,71 +458,100 @@ const convertOptions: Fig.Option[] = [
     name: "--unsafe",
     description: "Enable less safe operations, please backup first",
     isDangerous: true,
+    isPersistent: true,
   },
 ];
 
+const completionShell = (shell: string): Fig.Subcommand => ({
+  name: shell,
+  description: `Generate the autocompletion script for ${shell}`,
+  options: [
+    help(shell),
+    {
+      name: "--no-descriptions",
+      description: "Disable completion descriptions",
+    },
+  ],
+});
+
 const completionSpec: Fig.Spec = {
   name: "hugo",
-  description: "Hugo builds your site",
+  description: "Build your project",
   subcommands: [
     {
-      name: "check",
-      description: "Contains some verification checks",
-      args: {
-        name: "command",
-      },
+      name: "build",
+      description: "Build your project",
+      options: rootBuildOptions("build"),
+    },
+    {
+      name: "completion",
+      description: "Generate the autocompletion script for the specified shell",
       subcommands: [
-        {
-          name: "ulimit",
-          description: "Check system ulimit settings",
-          options: [help("ulimit")],
-        },
+        completionShell("bash"),
+        completionShell("fish"),
+        completionShell("powershell"),
+        completionShell("zsh"),
       ],
-      options: [help("check"), ...globalOptions],
+      options: [help("completion")],
     },
     {
       name: "config",
-      description: "Print the site configuration",
+      description: "Display project configuration",
       subcommands: [
         {
           name: "mounts",
           description: "Print the configured file mounts",
-          options: [help("mounts")],
+          options: [help("mounts"), ...buildConfigOptions, ...globalOptions],
         },
       ],
-      options: [help("config"), ...globalOptions],
+      options: [
+        help("config"),
+        ...buildConfigOptions,
+        ...globalOptions,
+        formatOption,
+        {
+          name: "--lang",
+          description:
+            "The language to display config for (default is the default content language)",
+          args: {
+            name: "language",
+          },
+        },
+        {
+          name: "--printZero",
+          description:
+            'Include config options with zero values (e.g. false, 0, "") in the output',
+        },
+      ],
     },
     {
       name: "convert",
-      description: "Convert your content to different formats",
-      args: {
-        name: "command",
-      },
+      description: "Convert front matter to another format",
       subcommands: [
         {
           name: "toJSON",
           description: "Convert front matter to JSON",
           isDangerous: true,
-          options: [help("toJSON"), ...convertOptions],
+          options: [help("toJSON"), ...globalOptions],
         },
         {
           name: "toTOML",
           description: "Convert front matter to TOML",
           isDangerous: true,
-          options: [help("toTOML"), ...convertOptions],
+          options: [help("toTOML"), ...globalOptions],
         },
         {
           name: "toYAML",
           description: "Convert front matter to YAML",
           isDangerous: true,
-          options: [help("toYAML"), ...convertOptions],
+          options: [help("toYAML"), ...globalOptions],
         },
       ],
-      options: [help("convert"), ...globalOptions],
+      options: [help("convert"), ...globalOptions, ...convertOptions],
     },
     {
       name: "deploy",
-      description: "Deploy your site to a Cloud provider",
+      description: "Deploy your project to a cloud provider",
       options: [
         help("deploy"),
         ...globalOptions,
@@ -432,6 +572,12 @@ const completionSpec: Fig.Spec = {
           name: "--invalidateCDN",
           description:
             "Invalidate the CDN cache listed in the deployment target (default true)",
+          requiresSeparator: true,
+          args: {
+            name: "boolean",
+            isOptional: true,
+            suggestions: ["true", "false"],
+          },
         },
         {
           name: "--maxDeletes",
@@ -449,147 +595,119 @@ const completionSpec: Fig.Spec = {
             name: "target",
           },
         },
+        {
+          name: "--workers",
+          description: "Number of workers to transfer files (default 10)",
+          args: {
+            name: "int",
+          },
+        },
       ],
     },
     {
       name: "env",
-      description: "Print Hugo version and environment info",
-      options: [
-        help("env"),
-        ...globalOptions,
-        {
-          name: "-v",
-          description: "Get a full dependency list",
-        },
-      ],
+      description: "Display version and environment info",
+      options: [help("env"), ...globalOptions],
     },
     {
       name: "gen",
-      description: "A collection of several useful generators",
-      args: {
-        name: "command",
-      },
+      description: "Generate documentation and syntax highlighting styles",
       subcommands: [
-        {
-          name: "autocomplete",
-          description:
-            "Generate shell autocompletion script for Hugo (default outputs to stdout)",
-          options: [
-            help("autocomplete"),
-            {
-              name: ["-f", "--completionfile"],
-              description: "Autocompletion file, defaults to stdout",
-              args: {
-                name: "file",
-                template: "filepaths",
-              },
-            },
-            {
-              name: ["-t", "--type"],
-              description:
-                "Autocompletion type (bash, zsh, fish, or powershell) (default 'bash')",
-              args: {
-                name: "type",
-                default: "bash",
-                suggestions: [
-                  { name: "bash", description: "Default" },
-                  { name: "zsh" },
-                  { name: "fish" },
-                  { name: "powershell" },
-                ],
-              },
-            },
-          ],
-        },
         {
           name: "chromastyles",
           description:
-            "Generate CSS stylesheet for the Chroma code highlighter (default outputs to stdout)",
+            "Generate CSS stylesheet for the Chroma code highlighter",
           options: [
             help("chromastyles"),
+            ...globalOptions,
             {
-              name: "--highlightStyle",
+              name: "--classDark",
               description:
-                "Style used for highlighting lines (see https://github.com/alecthomas/chroma) (default 'bg:#ffffcc')",
+                "Class name used by --modeSelector for dark styles (default 'dark')",
               args: {
-                name: "hex triplet",
+                name: "class",
+                default: "dark",
               },
             },
             {
-              name: "--linesStyle",
+              name: "--classLight",
               description:
-                "Style used for line numbers (see https://github.com/alecthomas/chroma)",
+                "Class name used by --modeSelector for light styles (default 'light')",
               args: {
-                name: "hex triplet",
+                name: "class",
+                default: "light",
               },
+            },
+            {
+              name: "--highlightStyle",
+              description:
+                'Foreground and background colors for highlighted lines, e.g. --highlightStyle "#fff000 bg:#000fff"',
+              args: {
+                name: "style",
+              },
+            },
+            {
+              name: "--lineNumbersInlineStyle",
+              description:
+                'Foreground and background colors for inline line numbers, e.g. --lineNumbersInlineStyle "#fff000 bg:#000fff"',
+              args: {
+                name: "style",
+              },
+            },
+            {
+              name: "--lineNumbersTableStyle",
+              description:
+                'Foreground and background colors for table line numbers, e.g. --lineNumbersTableStyle "#fff000 bg:#000fff"',
+              args: {
+                name: "style",
+              },
+            },
+            {
+              name: "--mode",
+              description: "Style mode (light or dark)",
+              args: {
+                name: "mode",
+                suggestions: ["light", "dark"],
+              },
+            },
+            {
+              name: "--modeSelector",
+              description:
+                'Scope selectors under a top level mode class, e.g. ".dark .chroma"',
+            },
+            {
+              name: "--omitClassComments",
+              description:
+                "Omit CSS class comment prefixes in the generated CSS",
+            },
+            {
+              name: "--omitEmpty",
+              description:
+                "Omit empty CSS rules (no longer needed, empty classes are always omitted)",
+              deprecated: true,
             },
             {
               name: "--style",
               description:
-                "Highlighter style (see https://help.farbox.com/pygments.html) (default 'friendly')",
+                "Highlighter style, see https://gohugo.io/quick-reference/syntax-highlighting-styles/ (default 'friendly')",
               args: {
                 name: "style name",
-                suggestions: [
-                  { name: "friendly", description: "Default" },
-                  { name: "abap" },
-                  { name: "algol" },
-                  { name: "algol_nu" },
-                  { name: "api" },
-                  { name: "arduino" },
-                  { name: "autumn" },
-                  { name: "base16-snazzy" },
-                  { name: "borland" },
-                  { name: "bw" },
-                  { name: "colorful" },
-                  { name: "doom-one" },
-                  { name: "doom-one2" },
-                  { name: "dracula" },
-                  { name: "emacs" },
-                  { name: "fruity" },
-                  { name: "github" },
-                  { name: "hr_dark" },
-                  { name: "hr_high_contrast" },
-                  { name: "igor" },
-                  { name: "lovelace" },
-                  { name: "manni" },
-                  { name: "monokai" },
-                  { name: "monokailight" },
-                  { name: "murphy" },
-                  { name: "native" },
-                  { name: "nord" },
-                  { name: "paraiso-dark" },
-                  { name: "paraiso-light" },
-                  { name: "pastie" },
-                  { name: "perldoc" },
-                  { name: "pygments" },
-                  { name: "rainbow_dash" },
-                  { name: "rrt" },
-                  { name: "solarized-dark" },
-                  { name: "solarized-dark256" },
-                  { name: "solarized-light" },
-                  { name: "swapoff" },
-                  { name: "tango" },
-                  { name: "trac" },
-                  { name: "vim" },
-                  { name: "vs" },
-                  { name: "vulcan" },
-                  { name: "xcode-dark" },
-                  { name: "xcode" },
-                ],
+                default: "friendly",
+                suggestions: highlighterStyles,
               },
             },
           ],
         },
         {
           name: "doc",
-          description:
-            "Generate Markdown documentation for the Hugo CLI (default '/tmp/hugodoc/')",
+          description: "Generate Markdown documentation for the Hugo CLI",
           options: [
             help("doc"),
+            ...globalOptions,
             {
               name: "--dir",
               description:
-                "The directory to write the doc. (default '/tmp/hugodoc/')",
+                "The directory to write the doc (default '/tmp/hugodoc/')",
               args: {
                 name: "path",
                 template: "folders",
@@ -599,13 +717,14 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "man",
-          description: "Generate man pages for the Hugo CLI (default 'man/')",
+          description: "Generate man pages for the Hugo CLI",
           options: [
             help("man"),
+            ...globalOptions,
             {
               name: "--dir",
               description:
-                "The directory to write the man pages. (default 'man/')",
+                "The directory to write the man pages (default 'man/')",
               args: {
                 name: "path",
                 template: "folders",
@@ -621,8 +740,10 @@ const completionSpec: Fig.Spec = {
       description: "Help about any command",
       args: {
         name: "command",
+        isOptional: true,
         suggestions: [
-          { name: "check" },
+          { name: "build" },
+          { name: "completion" },
           { name: "config" },
           { name: "convert" },
           { name: "deploy" },
@@ -640,16 +761,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "import",
-      description: "Import your site from others",
-      args: {
-        name: "command",
-      },
+      description: "Import a project from another system",
       subcommands: [
         {
           name: "jekyll",
-          displayName: "jekyll",
           description:
-            "Import from Jekyll requires two paths, e.g. ` + `hugo import jekyll jekyll_root_path target_path`",
+            "Import from Jekyll (requires the Jekyll root path and the target path)",
           args: [
             {
               name: "jekyll_root_path",
@@ -662,6 +779,7 @@ const completionSpec: Fig.Spec = {
           ],
           options: [
             help("jekyll"),
+            ...globalOptions,
             {
               name: "--force",
               description: "Allow import into non-empty target directory",
@@ -674,46 +792,47 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "list",
-      description: "Listing out various types of content",
-      args: {
-        name: "command",
-      },
+      description: "List content",
       subcommands: [
         {
-          name: "drafts",
-          description: "List all drafts",
-          options: [help("drafts")],
+          name: "all",
+          description: "List all content including draft, future, and expired",
+          options: [help("all"), ...globalOptions],
         },
         {
-          name: "future",
-          description: "List all posts dated in the future",
-          options: [help("future")],
+          name: "drafts",
+          description: "List draft content",
+          options: [help("drafts"), ...globalOptions],
         },
         {
           name: "expired",
-          description: "List all posts already expired",
-          options: [help("expired")],
+          description: "List content with a past expiration date",
+          options: [help("expired"), ...globalOptions],
         },
         {
-          name: "all",
-          description: "List all posts",
-          options: [help("all")],
+          name: "future",
+          description: "List content with a future publication date",
+          options: [help("future"), ...globalOptions],
+        },
+        {
+          name: "published",
+          description: "List content that is not draft, future, or expired",
+          options: [help("published"), ...globalOptions],
         },
       ],
       options: [help("list"), ...globalOptions],
     },
     {
       name: "mod",
-      description: "Various Hugo Modules helpers",
-      args: {
-        name: "command",
-      },
+      description: "Manage modules",
       subcommands: [
         {
           name: "clean",
           description: "Delete the Hugo Module cache for the current project",
           options: [
             help("clean"),
+            ...buildConfigOptions,
+            ...globalOptions,
             {
               name: "--all",
               description: "Clean entire module cache",
@@ -721,64 +840,90 @@ const completionSpec: Fig.Spec = {
             {
               name: "--pattern",
               description:
-                'Pattern matching module paths to clean (all if not set)", "e.g. "**hugo*"',
+                'Pattern matching module paths to clean (all if not set), e.g. "**hugo*"',
               args: {
-                name: "path",
+                name: "pattern",
               },
             },
           ],
         },
         {
           name: "get",
-          description: "Resolves dependencies in your current Hugo Project",
-          // Run `go help get` for more information. All flags available for `go get` are also relevant here.
+          description: "Resolves dependencies in your current Hugo project",
+          args: {
+            name: "module",
+            description:
+              "Module path, optionally with a version (e.g. github.com/gohugoio/testshortcodes@v0.3.0), or ./... for a recursive update",
+            isOptional: true,
+            isVariadic: true,
+          },
+          // All flags are passed on to `go get` (flag parsing is disabled in Hugo),
+          // so the global Hugo flags do not apply here.
           options: [
             help("get"),
             {
               name: "-d",
-              description: "Download packages only and do not install",
+              description: "Deprecated, a no-op in current Go versions",
+              deprecated: true,
             },
             {
               name: "-f",
-              description:
-                "Valid only when -u is set, forces get -u not to verify that each package has been checked out from the source control repository implied by its import path. This can be useful if the source is a local fork of the original",
+              description: "Deprecated, a no-op in current Go versions",
+              deprecated: true,
             },
             {
               name: "-fix",
-              description:
-                "Run the fix tool on downloaded packages before resolving dependencies or building the code",
-            },
-            {
-              name: "-insecure",
-              description:
-                "Permits fetching from repositories and resolving custom domains using insecure schemes such as HTTP. Use with caution",
+              description: "Deprecated, a no-op in current Go versions",
+              deprecated: true,
             },
             {
               name: "-t",
               description:
-                "Also download the packages required to build the tests for the specified packages",
+                "Also consider modules needed to build tests of the specified packages",
+            },
+            {
+              name: "-tool",
+              description:
+                "Add a tool line to go.mod for each listed package (removed when used with @none)",
             },
             {
               name: "-u",
               description:
-                "Recursively update modules. Use network to update the named packages and their dependencies. By default, get uses the network to check out missing packages but does not use it to look for updates to existing packages",
+                "Update modules providing dependencies of the named packages to newer minor or patch releases (-u=patch selects patch releases by default)",
             },
             {
               name: "-v",
               description: "Enables verbose progress and debug output",
             },
+            {
+              name: "-x",
+              description: "Print commands as they are executed",
+            },
           ],
         },
         {
           name: "graph",
-          description:
-            "Use `hugo mod graph` from the relevant module directory and it will print the dependency graph, including vendoring, module replacement or disabled status",
-          options: [help("graph")],
+          description: "Print a module dependency graph",
+          options: [
+            help("graph"),
+            ...buildConfigOptions,
+            ...globalOptions,
+            {
+              name: "--clean",
+              description:
+                "Delete module cache for dependencies that fail verification",
+            },
+          ],
         },
         {
           name: "init",
           description: "Initialize this project as a Hugo Module",
-          options: [help("init")],
+          args: {
+            name: "module path",
+            description: "Module path, e.g. github.com/gohugoio/testshortcodes",
+            isOptional: true,
+          },
+          options: [help("init"), ...buildConfigOptions, ...globalOptions],
         },
         {
           name: "npm",
@@ -787,28 +932,30 @@ const completionSpec: Fig.Spec = {
             {
               name: "pack",
               description:
-                "Experimental: Prepares and writes a composite package.json file for your project",
-              options: [help("pack")],
+                "Merges module Node.js dependencies into an npm workspace",
+              options: [help("pack"), ...buildConfigOptions, ...globalOptions],
             },
           ],
-          options: [help("npm")],
+          options: [help("npm"), ...globalOptions],
         },
         {
           name: "tidy",
           description: "Remove unused entries in go.mod and go.sum",
-          options: [help("tidy")],
+          options: [help("tidy"), ...buildConfigOptions, ...globalOptions],
         },
         {
           name: "vendor",
           description:
             "Vendor all module dependencies into the _vendor directory",
-          options: [help("vendor")],
+          options: [help("vendor"), ...buildConfigOptions, ...globalOptions],
         },
         {
           name: "verify",
           description: "Verify dependencies",
           options: [
             help("verify"),
+            ...buildConfigOptions,
+            ...globalOptions,
             {
               name: "--clean",
               description:
@@ -817,41 +964,36 @@ const completionSpec: Fig.Spec = {
           ],
         },
       ],
-      options: [help("mod"), ...commonOptions, ...globalOptions],
+      options: [help("mod"), ...globalOptions],
     },
     {
       name: "new",
-      description: "Create new content for your site",
-      args: {
-        name: "content-section/file-name.md",
-      },
+      description: "Create new content",
+      // `hugo new <path>` is mapped to `hugo new content <path>`
+      args: contentPathArg,
       subcommands: [
         {
-          name: "site",
-          description: "Create a new site (skeleton)",
+          name: "content",
+          description: "Create new content",
+          args: contentPathArg,
+          options: [help("content"), ...newContentOptions],
+        },
+        {
+          name: ["project", "site"],
+          description: "Create a new project",
           args: {
             name: "path",
             template: "folders",
           },
           options: [
-            help("site"),
+            help("project"),
+            ...globalOptions,
             {
-              name: "--force",
+              name: ["-f", "--force"],
               description: "Init inside non-empty directory",
               isDangerous: true,
             },
-            {
-              name: ["-f", "--format"],
-              description: 'Config & frontmatter format (default "toml")',
-              args: {
-                name: "format",
-                suggestions: [
-                  { name: "toml", description: "Default" },
-                  { name: "yaml" },
-                  { name: "json" },
-                ],
-              },
-            },
+            formatOption,
           ],
         },
         {
@@ -860,55 +1002,41 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "name",
           },
-          options: [help("theme")],
+          options: [help("theme"), ...globalOptions, formatOption],
         },
       ],
-      options: [
-        help("new"),
-        ...commonOptions,
-        ...globalOptions,
+      options: [help("new"), ...newContentOptions],
+    },
+    {
+      name: ["server", "serve"],
+      description: "Start the embedded web server",
+      subcommands: [
         {
-          name: ["-k", "--kind"],
-          description: "Content type to create",
-          args: [
+          name: "trust",
+          description: "Install the local CA in the system trust store",
+          options: [
+            help("trust"),
+            ...globalOptions,
             {
-              name: "archetype|default",
-              generators: {
-                script: ["ls", "./archetypes/"],
-                postProcess: (output) =>
-                  output.split("\n").map((fileName) => ({
-                    name: fileName.slice(0, fileName.lastIndexOf(".")),
-                    icon: "fig://icon?type=string",
-                  })),
-              },
-            },
-            {
-              name: "content-section/file-name.md",
+              name: "--uninstall",
+              description: "Uninstall the local CA (but do not delete it)",
             },
           ],
         },
-        {
-          name: "--editor",
-          description: "Edit new content with this editor, if provided",
-          args: {
-            name: "editor",
-          },
-        },
       ],
-    },
-    {
-      name: "server",
-      description: "A high performance webserver",
       options: [
         help("server"),
-        ...commonOptions,
+        ...buildConfigOptions,
+        ...buildOptions,
         ...globalOptions,
-        watch,
         {
           name: "--appendPort",
           description: "Append port to baseURL (default true)",
+          requiresSeparator: true,
           args: {
             name: "boolean",
+            isOptional: true,
+            suggestions: ["true", "false"],
           },
         },
         {
@@ -917,30 +1045,20 @@ const completionSpec: Fig.Spec = {
             "Interface to which the server will bind (default '127.0.0.1')",
           args: {
             name: "ip address",
+            default: "127.0.0.1",
           },
         },
         {
           name: "--disableBrowserError",
-          description:
-            "Do not show build errors in the browser (default false)",
-          args: {
-            name: "boolean",
-          },
+          description: "Do not show build errors in the browser",
         },
         {
           name: "--disableFastRender",
-          description: "Enables full re-renders on changes (default false)",
-          args: {
-            name: "boolean",
-          },
+          description: "Enables full re-renders on changes",
         },
         {
           name: "--disableLiveReload",
-          description:
-            "Watch without enabling live browser reload on rebuild (default false)",
-          args: {
-            name: "boolean",
-          },
+          description: "Watch without enabling live browser reload on rebuild",
         },
         {
           name: "--liveReloadPort",
@@ -951,69 +1069,76 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--meminterval",
+          name: ["-N", "--navigateToChanged"],
           description:
-            "Interval to poll memory usage (requires --memstats), valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'. (default '100ms')",
-          args: {
-            name: "time unit",
-          },
-        },
-        {
-          name: "--memstats",
-          description: "Log memory usage to this file",
-          args: {
-            name: "file",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--navigateToChanged",
-          description:
-            "Navigate to changed content file on live browser reload (default false)",
-          args: {
-            name: "boolean",
-          },
+            "Navigate to changed content file on live browser reload",
         },
         {
           name: "--noHTTPCache",
-          description: "Prevent HTTP caching (default false)",
-          args: {
-            name: "boolean",
-          },
+          description:
+            "Disable browser caching of pages served by the embedded web server",
+        },
+        {
+          name: ["-O", "--openBrowser"],
+          description: "Open the project in a browser after server startup",
         },
         {
           name: ["-p", "--port"],
           description: "Port on which the server will listen (default 1313)",
           args: {
             name: "port",
+            default: "1313",
           },
         },
         {
-          name: "--renderToDisk",
+          name: "--pprof",
+          description: "Enable the pprof server (port 8080)",
+        },
+        {
+          name: "--renderStaticToDisk",
           description:
-            "Render to Destination path (default is false: render to memory & serve from there)",
+            "Serve static files from disk and dynamic files from memory",
+        },
+        {
+          name: "--tlsAuto",
+          description: "Generate and use locally-trusted certificates",
+        },
+        {
+          name: "--tlsCertFile",
+          description: "Path to TLS certificate file",
+          args: {
+            name: "file",
+            template: "filepaths",
+          },
+        },
+        {
+          name: "--tlsKeyFile",
+          description: "Path to TLS key file",
+          args: {
+            name: "file",
+            template: "filepaths",
+          },
+        },
+        {
+          name: ["-w", "--watch"],
+          description:
+            "Watch filesystem for changes and recreate as needed (default true)",
+          requiresSeparator: true,
           args: {
             name: "boolean",
+            isOptional: true,
+            suggestions: ["true", "false"],
           },
         },
       ],
     },
     {
       name: "version",
-      description: "Print the version number of Hugo",
+      description: "Display version",
       options: [help("version"), ...globalOptions],
     },
   ],
-  options: [
-    help("hugo"),
-    ...commonOptions,
-    ...globalOptions,
-    watch,
-    {
-      name: "--renderToMemory",
-      description: "Render to memory (only useful for benchmark testing)",
-    },
-  ],
+  options: rootBuildOptions("hugo"),
 };
 
 export default completionSpec;

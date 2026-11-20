@@ -1,3 +1,6 @@
+// Oxlint v1.94.0 (npm latest / GitHub tag oxlint_v1.94.0, 2026-11-20). Source: static read of oxc-project/oxc at that tag
+// (apps/oxlint/src/command/{lint,mod,ignore}.rs bpaf definitions, output_formatter/mod.rs, crates/oxc_linter/src/table.rs for
+// the `--rules` markdown table, apps/oxlint/CHANGELOG.md). The binary was not run (sandbox forbids executing downloads).
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const CATEGORY_EMOJI = "📦";
@@ -136,6 +139,9 @@ const ESLINTRC_JSON: Set<string> = new Set([".eslintrc", ".eslintrc.json"]);
 const OXLINTRC: Set<string> = new Set([
   ".oxlintrc",
   ".oxlintrc.json",
+  ".oxlintrc.jsonc",
+  "oxlint.config.ts",
+  "oxlint.config.mts",
   "oxlint.json",
   "oxlintrc.json",
 ]);
@@ -144,7 +150,14 @@ const configGenerator: Fig.Generator = {
   template: ["filepaths", "history"],
   filterTemplateSuggestions: (param) =>
     param
-      .filter(({ name }) => name?.endsWith(".json") || name?.endsWith("rc"))
+      .filter(
+        ({ name }) =>
+          name?.endsWith(".json") ||
+          name?.endsWith(".jsonc") ||
+          name?.endsWith(".ts") ||
+          name?.endsWith(".mts") ||
+          name?.endsWith("rc")
+      )
       .map((param) => {
         if (ESLINTRC_JSON.has(param.name)) {
           param.description = "Oxlint is compatible with ESLint configs";
@@ -159,7 +172,7 @@ const configGenerator: Fig.Generator = {
 };
 
 /** Matches, for example, `tsconfig.build.json` */
-const TSCONFIG_JSON = /tsconfig\.w+\.json$/;
+const TSCONFIG_JSON = /tsconfig\.\w+\.json$/;
 const tsconfigGenerator: Fig.Generator = {
   template: ["filepaths", "history"],
   script: ["ls"],
@@ -183,7 +196,8 @@ const completionSpec: Fig.Spec = {
     // ================================ CONFIGS ================================
     {
       name: ["-c", "--config"],
-      description: "Path to Oxlint JSON configuration file",
+      description:
+        "Oxlint configuration file (.json, .jsonc, or experimental .ts/.mts)",
       args: {
         name: "file",
         generators: configGenerator,
@@ -192,11 +206,20 @@ const completionSpec: Fig.Spec = {
     {
       name: "--tsconfig",
       description:
-        "Path to tsconfig.json path for reading path aliases and project references for import plugin",
+        "Override the tsconfig.json used for import resolution (discovered automatically per file by default)",
       args: {
         name: "file",
         generators: tsconfigGenerator,
       },
+    },
+    {
+      name: "--init",
+      description: "Initialize oxlint configuration with default values",
+    },
+    {
+      name: "--disable-nested-config",
+      description:
+        "Disable the automatic loading of nested configuration files",
     },
     {
       name: "--ignore-path",
@@ -216,38 +239,44 @@ const completionSpec: Fig.Spec = {
       name: "--ignore-pattern",
       description:
         "Specify file patterns to ignore (in addition to those in .eslintignore)",
+      isRepeatable: true,
       args: {
         name: "pattern",
-        description: "Glob pattern",
+        description: "Glob pattern, quote it to avoid shell expansion",
       },
     },
     {
       name: "--no-ignore",
       description:
-        "Disable exluding of files from .eslintignore files, --ignore-path, and --ignore-pattern",
+        "Disable excluding of files from .eslintignore files, --ignore-path, and --ignore-pattern",
     },
     {
-      name: "--symlinks",
-      description: "Follow symlinks when linting, which are ignored by default",
+      name: "--no-error-on-unmatched-pattern",
+      description:
+        "Do not exit with an error when no files are selected for linting",
     },
     // ================================ PLUGINS ================================
+    enablePlugin("Import"),
+    enablePlugin("React"),
     enablePlugin("JSDoc"),
     enablePlugin("Jest"),
     enablePlugin("Vitest"),
+    enablePlugin("jsx-a11y", "JSX-a11y"),
     enablePlugin("nextjs", "Next.js"),
     enablePlugin("react-perf", "React Performance"),
     enablePlugin("Promise"),
-    disablePlugin("React"),
+    enablePlugin("Node"),
+    enablePlugin("Vue"),
     disablePlugin("Unicorn"),
     disablePlugin("Oxc"),
     disablePlugin("TypeScript"),
-    disablePlugin("Import"),
 
     // ================================= LINTS =================================
     {
       name: ["-D", "--deny"],
       description: "Deny a lint rule or category (enable a lint as an error)",
       args: lintArg,
+      isRepeatable: true,
       priority: 75,
     },
     {
@@ -255,12 +284,14 @@ const completionSpec: Fig.Spec = {
       description:
         "Warn about a lint rule or category (enable a lint as a warning)",
       args: lintArg,
+      isRepeatable: true,
       priority: 75,
     },
     {
       name: ["-A", "--allow"],
       description: "Allow a lint rule or category (suppress a lint)",
       args: lintArg,
+      isRepeatable: true,
       priority: 75,
     },
     {
@@ -268,21 +299,77 @@ const completionSpec: Fig.Spec = {
       description:
         "Fix as many issues as possible. Only unfixed issues are reported in the output",
     },
+    {
+      name: "--fix-suggestions",
+      description:
+        "Apply auto-fixable suggestions. May change program behavior",
+    },
+    {
+      name: "--fix-dangerously",
+      description: "Apply dangerous fixes and suggestions",
+    },
+    {
+      name: "--report-unused-disable-directives",
+      description:
+        "Report directive comments like `// oxlint-disable-line` when no errors would have been reported on that line anyway",
+      exclusiveOn: ["--report-unused-disable-directives-severity"],
+    },
+    {
+      name: "--report-unused-disable-directives-severity",
+      description:
+        "Same as --report-unused-disable-directives, but with a specific severity level for the reports",
+      exclusiveOn: ["--report-unused-disable-directives"],
+      args: {
+        name: "severity",
+        suggestions: ["allow", "warn", "deny", "off", "error"],
+      },
+    },
+    // ============================== TYPE-AWARE ===============================
+    {
+      name: "--type-aware",
+      description: "Enable rules that require type information",
+    },
+    {
+      name: "--type-check",
+      description:
+        "Enable type checking (includes TypeScript compiler diagnostics). Requires type-aware linting",
+    },
+    {
+      name: "--type-check-only",
+      description:
+        "Run only TypeScript type checking diagnostics without regular lint diagnostics",
+      hidden: true,
+    },
+    // ============================== SUPPRESSIONS =============================
+    {
+      name: "--suppress-all",
+      description: "Generate suppressions for all current violations",
+      hidden: true,
+    },
+    {
+      name: "--prune-suppressions",
+      description: "Remove entries for violations that no longer exist",
+      hidden: true,
+    },
     // ================================ OUTPUT =================================
     {
       name: "--silent",
       description: "Do not display any diagnostics",
     },
     {
+      name: "--quiet",
+      description: "Disable reporting on warnings, only errors are reported",
+    },
+    {
       name: "--deny-warnings",
-      description: "Exit with a non-zero code if there are any warnings",
+      description: "Ensure warnings produce a non-zero exit code",
     },
     {
       name: "--max-warnings",
       description:
         "Exit with a non-zero code if there are more than `max` warnings",
       args: {
-        name: "max",
+        name: "int",
         description: "The maximum number of warnings",
       },
     },
@@ -296,7 +383,35 @@ const completionSpec: Fig.Spec = {
           "json",
           "unix",
           "checkstyle",
-          { name: "github", description: "GitHub Actions Annotations" },
+          { name: "github", description: "GitHub Actions annotations" },
+          { name: "gitlab", description: "GitLab Code Quality report" },
+          "junit",
+          "sarif",
+          "stylish",
+          {
+            name: "agent",
+            description: "One line per diagnostic, for AI coding agents",
+          },
+        ],
+      },
+    },
+    {
+      name: "--debug",
+      description: "Enable debug output options",
+      args: {
+        name: "options",
+        description:
+          "Comma-separated debug options (`files` cannot be combined with others)",
+        suggestions: [
+          {
+            name: "files",
+            description:
+              "Print the list of files that will be linted, then exit",
+          },
+          {
+            name: "timings",
+            description: "Enable per-rule timing information",
+          },
         ],
       },
     },
@@ -312,7 +427,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--rules",
-      description: "List all available rules",
+      description: "List all the rules that are currently registered",
+    },
+    {
+      name: "--print-config",
+      description:
+        "Output the configuration to be used, without performing any linting",
+    },
+    {
+      name: "--lsp",
+      description: "Start the language server",
     },
     {
       name: ["-h", "--help"],

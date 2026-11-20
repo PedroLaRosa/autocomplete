@@ -1,3 +1,11 @@
+// xxd 2026-06-16 (bundled with Vim v9.2.1373, latest tag as of 2026-11-19). Source: src/xxd/xxd.c (option parser and usage) and runtime/doc/xxd.1 (man page dated Mar 2026) from github.com/vim/vim at v9.2.1373.
+const bitsFlags = ["-bits", "-b"];
+const ebcdicFlags = ["-EBCDIC", "-E"];
+const littleEndianFlags = ["-e"];
+const includeFlags = ["-include", "-i"];
+const postscriptFlags = ["-postscript", "-plain", "-ps", "-p"];
+const revertFlags = ["-revert", "-r"];
+
 const completionSpec: Fig.Spec = {
   name: "xxd",
   description: "Make a hexdump or do the reverse",
@@ -7,7 +15,7 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["-help", "-h"],
-      description: "Show help for xxd",
+      description: "Print a summary of available options and exit",
     },
     {
       name: ["-autoskip", "-a"],
@@ -15,13 +23,14 @@ const completionSpec: Fig.Spec = {
         "Toggle autoskip: A single '*' replaces nul-lines.  Default off",
     },
     {
-      name: ["-bits", "-b"],
+      name: bitsFlags,
       description: "Switch to bits (binary digits) dump, rather than hexdump",
-      exclusiveOn: ["-postscript", "-plain", "-ps", "-p", "-r", "-i"],
+      exclusiveOn: [...postscriptFlags, ...littleEndianFlags],
     },
     {
       name: ["-cols", "-c"],
-      description: "Format <cols> octets per line. Default 16",
+      description:
+        "Format <cols> octets per line. Default 16 (-i: 12, -ps: 30, -b: 6). Max 256",
       args: {
         name: "cols",
       },
@@ -32,26 +41,37 @@ const completionSpec: Fig.Spec = {
         "Capitalize variable names in C include file style, when using -i",
     },
     {
-      name: ["-EBCDIC", "-E"],
-      description:
-        "Change the character encoding in the righthand column from ASCII to EBCDIC",
-      exclusiveOn: ["-postscript", "-plain", "-ps", "-p", "-r", "-i"],
+      name: "-d",
+      description: "Show offset in decimal instead of hex",
     },
     {
-      name: "-e",
+      name: ebcdicFlags,
+      description:
+        "Change the character encoding in the righthand column from ASCII to EBCDIC",
+      exclusiveOn: [...postscriptFlags, ...revertFlags, ...includeFlags],
+    },
+    {
+      name: littleEndianFlags,
       description: "Switch to little-endian hexdump",
+      exclusiveOn: [
+        ...bitsFlags,
+        ...postscriptFlags,
+        ...includeFlags,
+        ...revertFlags,
+      ],
     },
     {
       name: ["-groupsize", "-g"],
-      description: "Separate the output of every <bytes> bytes",
+      description:
+        "Separate the output of every <bytes> bytes by a whitespace (0 to suppress grouping)",
       args: {
         name: "bytes",
       },
     },
     {
-      name: ["-include", "-i"],
+      name: includeFlags,
       description: "Output in C include file style",
-      exclusiveOn: ["-EBCDIC", "-E", "-bits", "-b"],
+      exclusiveOn: [...ebcdicFlags, ...littleEndianFlags, ...postscriptFlags],
     },
     {
       name: ["-len", "-l"],
@@ -75,14 +95,29 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: ["-postscript", "-plain", "-ps", "-p"],
+      name: postscriptFlags,
       description: "Output in postscript continuous hexdump style",
-      exclusiveOn: ["-EBCDIC", "-E", "-bits", "-b"],
+      exclusiveOn: [
+        ...ebcdicFlags,
+        ...bitsFlags,
+        ...littleEndianFlags,
+        ...includeFlags,
+      ],
     },
     {
-      name: ["-revert", "-r"],
+      name: revertFlags,
       description: "Reverse operation: convert (or patch) hexdump into binary",
-      exclusiveOn: ["-EBCDIC", "-E", "-bits", "-b"],
+      exclusiveOn: [...ebcdicFlags, ...littleEndianFlags],
+    },
+    {
+      name: "-R",
+      description:
+        "Colorize the output depending on the byte value (disabled when NO_COLOR is set)",
+      args: {
+        name: "when",
+        default: "auto",
+        suggestions: ["always", "auto", "never"],
+      },
     },
     {
       name: "-seek",
@@ -91,6 +126,21 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "offset",
       },
+    },
+    {
+      name: "-s",
+      description:
+        "Start at <seek> bytes absolute (or relative to the current stdin position with +, from the end with -) infile offset",
+      args: {
+        name: "seek",
+        description:
+          "Offset, optionally prefixed with + (relative) and/or - (from the end)",
+      },
+    },
+    {
+      name: "-t",
+      description:
+        "Include the terminating zero when outputting in C include file style (-i)",
     },
     {
       name: "-u",
@@ -105,10 +155,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "infile",
       template: "filepaths",
+      isOptional: true,
     },
     {
       name: "outfile",
       template: "filepaths",
+      isOptional: true,
     },
   ],
 };

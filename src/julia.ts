@@ -1,4 +1,30 @@
+// Julia v1.13.4 (latest stable: git tag v1.13.4 + Homebrew formula, checked 2026-11-20). Source: static read of JuliaLang/julia at v1.13.4:
+// src/jloptions.c (usage text, opts_hidden, longopts + parser cases), doc/src/manual/command-line-interface.md, doc/man/julia.1,
+// doc/src/manual/distributed-computing.md; binary not run. Added --trace-dispatch plus the undocumented hidden flags
+// --worker, --bind-to, --rr-detach, --lisp.
 import { filepaths } from "@tabsmith/autocomplete-generators";
+
+const yesNo: Fig.Suggestion[] = [{ name: "yes" }, { name: "no" }];
+
+const sizeArg: Fig.Arg = {
+  name: "size",
+  description: "Bytes, optionally with a unit: B, K, M, G or T",
+};
+
+const coverageArg: Fig.Arg = {
+  isOptional: true,
+  suggestions: [
+    { name: "none" },
+    { name: "user" },
+    { name: "all" },
+    {
+      name: "@",
+      insertValue: "@{cursor}",
+      description:
+        "Only track files under the given path (current dir if empty)",
+    },
+  ],
+};
 
 const completionSpec: Fig.Spec = {
   name: "julia",
@@ -10,16 +36,17 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-h", "--help"],
-      description: "Print help message for julia (--help-hidden for more)",
+      description: "Print command-line options",
     },
     {
       name: "--help-hidden",
-      description: "Uncommon options not shown by `-h`",
+      description: "Print uncommon options not shown by `-h`",
     },
     // startup options
     {
       name: "--project",
-      description: "Set given directory as the home project/environment",
+      description: "Set given directory as the active project/environment",
+      requiresSeparator: true,
       args: {
         name: "project folder",
         description: "Julia project/environment",
@@ -30,6 +57,17 @@ const completionSpec: Fig.Spec = {
             priority: 75,
             description:
               "Search through parent directories until a Project.toml or JuliaProject.toml file is found",
+          },
+          {
+            name: "@temp",
+            priority: 75,
+            description: "Create a temporary environment",
+          },
+          {
+            name: "@script",
+            priority: 75,
+            description:
+              "Search up from the programfile or a path relative to it",
           },
         ],
         generators: {
@@ -57,30 +95,57 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--startup-file",
-      description: "Load `~/.julia/config/startup.jl`",
+      description:
+        "Load `JULIA_DEPOT_PATH/config/startup.jl` (default `~/.julia/config/startup.jl`)",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: yesNo,
       },
     },
     {
       name: "--handle-signals",
       description: "Enable or disable Julia's default signal handlers",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: yesNo,
       },
     },
     {
       name: "--sysimage-native-code",
       description: "Use native code from system image if available",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: yesNo,
       },
     },
     {
       name: "--compiled-modules",
       description: "Enable or disable incremental precompilation of modules",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: [
+          ...yesNo,
+          {
+            name: "existing",
+            description:
+              "Use existing precompiled modules but create no new ones",
+          },
+          {
+            name: "strict",
+            description:
+              "Like existing, but error if no precompile file is found",
+          },
+        ],
+      },
+    },
+    {
+      name: "--pkgimages",
+      description:
+        "Enable or disable usage of native code caching in the form of pkgimages",
+      args: {
+        suggestions: [
+          ...yesNo,
+          {
+            name: "existing",
+            description: "Use existing pkgimages but create no new ones",
+          },
+        ],
       },
     },
     // actions
@@ -101,6 +166,15 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: ["-m", "--module"],
+      description:
+        "Run entry point of `Package` (`@main` function) with `args`",
+      args: [
+        { name: "Package" },
+        { name: "args", isOptional: true, isVariadic: true },
+      ],
+    },
+    {
       name: ["-L", "--load"],
       description: "Load given file immediately on all processors",
       args: {
@@ -115,11 +189,18 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-t", "--threads"],
       description:
-        'Enable N threads; "auto" sets N to the number of local CPU threads',
+        "Enable N[+M] threads; N in the `default` threadpool, M in the `interactive` threadpool",
       args: {
+        name: "N[,M]",
         description: "Number of threads",
-        suggestions: [{ name: "auto" }],
+        suggestions: [{ name: "auto" }, { name: "auto,auto" }],
       },
+    },
+    {
+      name: "--gcthreads",
+      description:
+        "Use N threads for the GC mark phase and M (0 or 1) for concurrent sweeping",
+      args: { name: "N[,M]" },
     },
     {
       name: ["-p", "--procs"],
@@ -139,7 +220,7 @@ const completionSpec: Fig.Spec = {
     },
     // interactive options
     {
-      name: "-i",
+      name: ["-i", "--interactive"],
       description: "Interactive mode; REPL runs and isinteractive() is true",
     },
     {
@@ -150,21 +231,21 @@ const completionSpec: Fig.Spec = {
       name: "--banner",
       description: "Enable or disable startup banner",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }, { name: "auto" }],
+        suggestions: [...yesNo, { name: "short" }, { name: "auto" }],
       },
     },
     {
       name: "--color",
       description: "Enable or disable color text",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }, { name: "auto" }],
+        suggestions: [...yesNo, { name: "auto" }],
       },
     },
     {
       name: "--history-file",
       description: "Load or save history",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: yesNo,
       },
     },
     // error and warning options
@@ -173,21 +254,21 @@ const completionSpec: Fig.Spec = {
       description:
         'Enable or disable syntax and method deprecation warnings ("error" turns warnings into errors)',
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }, { name: "error" }],
+        suggestions: [...yesNo, { name: "error" }],
       },
     },
     {
       name: "--warn-overwrite",
       description: "Enable or disable method overwrite warnings",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: yesNo,
       },
     },
     {
       name: "--warn-scope",
       description: "Enable or disable warning for ambiguous top-level scope",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: yesNo,
       },
     },
     // code generation options
@@ -195,7 +276,7 @@ const completionSpec: Fig.Spec = {
       name: ["-C", "--cpu-target"],
       description:
         'Limit usage of CPU features up to <target>; set to "help" to see the available options',
-      args: {},
+      args: { name: "target", suggestions: [{ name: "help" }] },
     },
     {
       name: ["-O", "--optimize"],
@@ -205,15 +286,27 @@ const completionSpec: Fig.Spec = {
         name: "level",
         description: "Level of optimization",
         isOptional: true,
+        suggestions: ["0", "1", "2", "3"],
       },
     },
     {
-      name: "-g",
-      description: "Enable / Set the level of debug info generation",
+      name: "--min-optlevel",
+      description: "Set a lower bound on the optimization level",
+      requiresSeparator: true,
+      args: {
+        name: "level",
+        suggestions: ["0", "1", "2", "3"],
+      },
+    },
+    {
+      name: ["-g", "--debug-info"],
+      description:
+        "Set the level of debug info generation (level 2 if used without a level)",
       args: {
         name: "level",
         description: "Level of debug info generation",
         isOptional: true,
+        suggestions: ["0", "1", "2"],
       },
     },
     {
@@ -221,7 +314,7 @@ const completionSpec: Fig.Spec = {
       description:
         "Control whether inlining is permitted, including overriding @inline declarations",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: yesNo,
       },
     },
     {
@@ -229,7 +322,7 @@ const completionSpec: Fig.Spec = {
       description:
         "Emit bounds checks always, never, or respect @inbounds declarations",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }, { name: "auto" }],
+        suggestions: [...yesNo, { name: "auto" }],
       },
     },
     {
@@ -237,54 +330,55 @@ const completionSpec: Fig.Spec = {
       description:
         "Enable or disable the polyhedral optimizer Polly (overrides @polly declaration)",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: yesNo,
       },
     },
     {
       name: "--math-mode",
       description:
-        "Disallow or enable unsafe floating point optimizations (overrides @fastmath declaration)",
+        "Always follow `ieee` floating point semantics or respect `@fastmath` declarations",
       args: {
-        suggestions: [{ name: "ieee" }, { name: "fast" }],
+        suggestions: [
+          { name: "ieee" },
+          { name: "user" },
+          { name: "fast", description: "Same as user", deprecated: true },
+        ],
       },
     },
     // instrumentation options
     {
       name: "--code-coverage",
       description:
-        'Count executions of source lines (omitting setting is equivalent to "user")',
-      args: {
-        isOptional: true,
-        suggestions: [{ name: "none" }, { name: "user" }, { name: "all" }],
-      },
+        'Count executions of source lines (omitting setting is equivalent to "user"); also accepts an LCOV tracefile',
+      requiresSeparator: true,
+      args: coverageArg,
     },
     {
       name: "--track-allocation",
       description:
         'Count bytes allocated by each source line (omitting setting is equivalent to "user")',
-      args: {
-        isOptional: true,
-        suggestions: [{ name: "none" }, { name: "user" }, { name: "all" }],
-      },
+      requiresSeparator: true,
+      args: coverageArg,
     },
     {
       name: "--bug-report",
       description:
-        "Launch a bug report session. It can be used to start a REPL, run a script, or evaluate  expressions. It first tries to use BugReporting.jl installed in current environment and fallbacks to the latest compatible BugReporting.jl if not. For more information, see --bug-report=help",
-      args: { name: "KIND" },
+        "Launch a bug report session using BugReporting.jl; see --bug-report=help",
+      args: { name: "KIND", suggestions: [{ name: "help" }] },
     },
-    // code generation options
+    {
+      name: "--heap-size-hint",
+      description:
+        "Force garbage collection if memory usage is higher than the given value (also accepts % of physical memory)",
+      args: sizeArg,
+    },
+    // hidden options (--help-hidden): code generation
     {
       name: "--compile",
       description:
         "Enable or disable JIT compiler, or request exhaustive or minimal compilation",
       args: {
-        suggestions: [
-          { name: "yes" },
-          { name: "no" },
-          { name: "all" },
-          { name: "min" },
-        ],
+        suggestions: [...yesNo, { name: "all" }, { name: "min" }],
       },
     },
     // compiler output options
@@ -298,16 +392,30 @@ const completionSpec: Fig.Spec = {
       description: "Generate a system image data file (.ji)",
       args: { name: "name", template: "filepaths" },
     },
-    // compiler debugging
+    {
+      name: "--strip-metadata",
+      description:
+        "Remove docstrings and source location info from system image",
+    },
+    {
+      name: "--strip-ir",
+      description:
+        "Remove IR (intermediate representation) of compiled functions",
+    },
+    {
+      name: "--compress-sysimage",
+      description:
+        "Compress the sys/pkgimage heap at the expense of slightly increased load time",
+      args: { suggestions: yesNo },
+    },
+    // compiler debugging and experimental
+    {
+      name: "--experimental",
+      description: "Enable the use of experimental (alpha) features",
+    },
     {
       name: "--output-unopt-bc",
       description: "Generate unoptimized LLVM bitcode (.bc)",
-      args: { name: "name", template: "filepaths" },
-    },
-    {
-      name: "--output-jit-bc",
-      description:
-        "Dump all IR generated by the frontend (not including system image)",
       args: { name: "name", template: "filepaths" },
     },
     {
@@ -324,12 +432,119 @@ const completionSpec: Fig.Spec = {
       name: "--output-incremental",
       description: "Generate an incremental output file (rather than complete)",
       args: {
-        suggestions: [{ name: "yes" }, { name: "no" }],
+        suggestions: yesNo,
       },
+    },
+    {
+      name: "--timeout-for-safepoint-straggler",
+      description:
+        "Dump the backtrace of a thread that fails to reach a safepoint within the given time",
+      args: { name: "seconds" },
+    },
+    {
+      name: "--trace-compile",
+      description:
+        "Print precompile statements for methods compiled during execution to stderr or a file",
+      args: {
+        name: "stderr|name",
+        suggestions: [{ name: "stderr" }],
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--trace-compile-timing",
+      description:
+        "If --trace-compile is enabled show how long each took to compile in ms",
+      dependsOn: ["--trace-compile"],
+    },
+    {
+      name: "--trace-dispatch",
+      description:
+        "Print precompile statements for methods dispatched during execution or save to stderr or a path",
+      args: {
+        name: "stderr|name",
+        suggestions: [{ name: "stderr" }],
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--task-metrics",
+      description: "Enable collection of per-task timing data",
+      args: { suggestions: yesNo },
     },
     {
       name: "--image-codegen",
       description: "Force generate code in imaging mode",
+    },
+    {
+      name: "--permalloc-pkgimg",
+      description: "Copy the data section of package images into memory",
+      args: { suggestions: yesNo },
+    },
+    {
+      name: "--trim",
+      description:
+        "Build a sysimage including only code provably reachable from methods marked by calling `entrypoint`",
+      requiresSeparator: true,
+      args: {
+        isOptional: true,
+        suggestions: [
+          { name: "no" },
+          { name: "safe" },
+          { name: "unsafe" },
+          { name: "unsafe-warn" },
+        ],
+      },
+    },
+    {
+      name: "--trace-eval",
+      description: "Show the expression being evaluated before eval",
+      requiresSeparator: true,
+      args: {
+        isOptional: true,
+        suggestions: [{ name: "loc" }, { name: "full" }, { name: "no" }],
+      },
+    },
+    {
+      name: "--hard-heap-limit",
+      description: "Abort if the heap ever grows above the given size",
+      args: sizeArg,
+    },
+    {
+      name: "--heap-target-increment",
+      description:
+        "Set an upper bound on how much the heap target can increase between collections",
+      args: sizeArg,
+    },
+    {
+      name: "--gc-sweep-always-full",
+      description: "Make the GC always do a full sweep of the heap",
+    },
+    // internal flags that are in longopts but not in the help output
+    {
+      name: "--worker",
+      description:
+        "Start as a Distributed worker, optionally with the cluster cookie (read from stdin if omitted)",
+      hidden: true,
+      requiresSeparator: true,
+      args: { name: "cookie", isOptional: true },
+    },
+    {
+      name: "--bind-to",
+      description:
+        "Address (and optional port) a Distributed worker listens on",
+      hidden: true,
+      args: { name: "bind_addr[:port]" },
+    },
+    {
+      name: "--rr-detach",
+      description: "Detach from the rr recorder if running under rr",
+      hidden: true,
+    },
+    {
+      name: "--lisp",
+      description: "Start the femtolisp REPL (must be the first argument)",
+      hidden: true,
     },
   ],
   args: {

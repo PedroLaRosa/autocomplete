@@ -1,3 +1,6 @@
+// tree v2.3.2 (upstream Old-Man-Programmer/tree tag 2.3.2, 2026-03-16, also Homebrew stable; verified 2026-11-20).
+// Source: usage()/option parser in tree.c and doc/tree.1 at tag 2.3.2, read statically (not run);
+// --acl and --selinux exist on Linux builds only
 const completionSpec: Fig.Spec = {
   name: "tree",
   description: "Display directories as trees (with optional color/HTML output)",
@@ -39,6 +42,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-P",
       description: "List only those files that match the pattern given",
+      isRepeatable: true,
       args: {
         name: "pattern",
       },
@@ -46,8 +50,21 @@ const completionSpec: Fig.Spec = {
     {
       name: "-I",
       description: "Do not list files that match the given pattern",
+      isRepeatable: true,
       args: {
         name: "pattern",
+      },
+    },
+    {
+      name: "--gitignore",
+      description: "Filter by using .gitignore files",
+    },
+    {
+      name: "--gitfile",
+      description: "Explicitly read a gitignore file",
+      args: {
+        name: "file",
+        template: "filepaths",
       },
     },
     {
@@ -57,6 +74,26 @@ const completionSpec: Fig.Spec = {
     {
       name: "--matchdirs",
       description: "Include directory names in -P pattern matching",
+    },
+    {
+      name: "--metafirst",
+      description: "Print meta-data at the beginning of each line",
+    },
+    {
+      name: "--prune",
+      description: "Prune empty directories from the output",
+    },
+    {
+      name: "--info",
+      description: "Print information about files found in .info files",
+    },
+    {
+      name: "--infofile",
+      description: "Explicitly read info file",
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
     },
     {
       name: "--noreport",
@@ -77,6 +114,10 @@ const completionSpec: Fig.Spec = {
         name: "number",
         description: "Number of files",
       },
+    },
+    {
+      name: "--condense",
+      description: "Condense directory singletons to a single line of output",
     },
     {
       name: "--timefmt",
@@ -152,6 +193,15 @@ const completionSpec: Fig.Spec = {
       description: "Print device ID number to which each file belongs",
     },
     {
+      name: "--acl",
+      description:
+        "Print permissions with a + if an ACL is present (Linux only, implies -p)",
+    },
+    {
+      name: "--selinux",
+      description: "Print the SELinux security label if present (Linux only)",
+    },
+    {
       name: "-v",
       description: "Sort files alphanumerically by version",
     },
@@ -176,12 +226,15 @@ const completionSpec: Fig.Spec = {
       description: "List directories before files (-U disables)",
     },
     {
+      name: "--filesfirst",
+      description: "List files before directories (-U disables)",
+    },
+    {
       name: "--sort",
       description: "Select sort",
-      requiresSeparator: true,
       args: {
         name: "type",
-        suggestions: ["name", "version", "size", "mtime", "ctime"],
+        suggestions: ["name", "version", "size", "mtime", "ctime", "none"],
       },
     },
     {
@@ -203,6 +256,14 @@ const completionSpec: Fig.Spec = {
     {
       name: "-C",
       description: "Turn colorization on always",
+    },
+    {
+      name: "--compress",
+      description: "Compress indentation lines",
+      args: {
+        name: "level",
+        suggestions: ["1", "2", "3", "-1", "-2", "-3"],
+      },
     },
     {
       name: "-X",
@@ -231,8 +292,54 @@ const completionSpec: Fig.Spec = {
       description: "Turn off hyperlinks in HTML output",
     },
     {
+      name: "--hintro",
+      description: "Use file as the HTML intro",
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--houtro",
+      description: "Use file as the HTML outro",
+      args: {
+        name: "file",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--hyperlink",
+      description: "Turn on OSC 8 terminal hyperlinks",
+    },
+    {
+      name: "--scheme",
+      description: "Set OSC 8 hyperlink scheme, default file://",
+      args: {
+        name: "scheme",
+      },
+    },
+    {
+      name: "--authority",
+      description: "Set OSC 8 hyperlink authority/hostname",
+      args: {
+        name: "host",
+      },
+    },
+    {
       name: "--fromfile",
-      description: "Reads paths from files",
+      description: "Reads paths from files (. = stdin)",
+    },
+    {
+      name: "--fromtabfile",
+      description: "Reads trees from tab indented files (. = stdin)",
+    },
+    {
+      name: "--fflinks",
+      description: "Process link information when using --fromfile",
+    },
+    {
+      name: "--opt-toggle",
+      description: "Enable option toggling",
     },
     {
       name: "--version",

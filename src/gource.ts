@@ -1,3 +1,7 @@
+// Gource v0.56 (latest upstream tag gource-0.56, 2025-08; checked 2026-11-20). Source: read statically, not run
+// (the sandbox does not execute downloaded or built code): data/gource.1 (man page), ChangeLog and
+// src/gource_settings.cpp (help text, option tables and value validation) from the gource-0.56 tag of acaudwell/Gource,
+// plus the display options in acaudwell/Core (settings.cpp) at the commit pinned by that tag.
 export interface SPDisplaysDataTypeOutputRoot {
   SPDisplaysDataType: SpdisplaysDataType[];
 }
@@ -117,8 +121,19 @@ const completionSpec: Fig.Spec = {
   name: "gource",
   description:
     "Gource is an OpenGL-based 3D visualisation tool for source control repositories",
+  args: {
+    name: "path",
+    description:
+      "Version control directory, log file, Gource config file or '-' to read STDIN (default: current directory)",
+    template: "filepaths",
+    isOptional: true,
+  },
   options: [
     { name: ["-h", "--help"], description: "Help ('-H' for extended help)" },
+    {
+      name: ["-H", "--extended-help"],
+      description: "Show the extended help with all command line options",
+    },
     {
       name: "--viewport",
       description:
@@ -136,8 +151,13 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "-f",
+      name: ["-f", "--fullscreen"],
       description: "Fullscreen",
+    },
+    {
+      name: ["-w", "--windowed"],
+      description: "Windowed mode (overrides fullscreen)",
+      hidden: true,
     },
     {
       name: "--screen",
@@ -198,7 +218,6 @@ const completionSpec: Fig.Spec = {
         description: "The start position in the log",
         suggestions: [
           "random",
-          "0.0",
           "0.1",
           "0.2",
           "0.3",
@@ -208,7 +227,6 @@ const completionSpec: Fig.Spec = {
           "0.7",
           "0.8",
           "0.9",
-          "1.0",
         ],
       },
     },
@@ -220,8 +238,6 @@ const completionSpec: Fig.Spec = {
         name: "position",
         description: "The stop position in the log",
         suggestions: [
-          "random",
-          "0.0",
           "0.1",
           "0.2",
           "0.3",
@@ -248,6 +264,16 @@ const completionSpec: Fig.Spec = {
       description: "Stop (exit) at the end of the log / stream",
     },
     {
+      name: "--dont-stop",
+      description: "Keep running after the end of the log",
+    },
+    {
+      name: "--stop-on-idle",
+      description: "No longer has any effect",
+      deprecated: true,
+      hidden: true,
+    },
+    {
       name: "--loop",
       description: "Loop back to the start of the log when the end is reached",
     },
@@ -261,10 +287,14 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-a", "--auto-skip-seconds"],
       description:
-        "Automatically skip to next entry if nothing happens for a specified number of seconds",
+        "Automatically skip to next entry if nothing happens for a specified number of seconds (default: 3)",
       args: {
         name: "seconds",
       },
+    },
+    {
+      name: "--disable-auto-skip",
+      description: "Disable auto skip",
     },
     {
       name: ["-s", "--seconds-per-day"],
@@ -280,13 +310,26 @@ const completionSpec: Fig.Spec = {
         "Use the time of the last commit if the time of a commit is in the past",
     },
     {
+      name: "--author-time",
+      description:
+        "Use the timestamp of the author instead of the timestamp of the committer",
+    },
+    {
       name: ["-c", "--time-scale"],
-      description: "Change simulation time scale",
+      description:
+        "Change simulation time scale. This affects the movement speed of user avatars (e.g. 0.5 for half speed, 2 for double speed)",
+      args: {
+        name: "scale",
+        description: "The simulation time scale (default: 1.0)",
+      },
     },
     {
       name: ["-i", "--file-idle-time"],
       description:
         "Time in seconds files remain idle before they are removed or 0 for no limit",
+      args: {
+        name: "seconds",
+      },
     },
     {
       name: "--file-idle-time-at-end",
@@ -415,7 +458,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "command",
         description: "Log command",
-        suggestions: ["git", "svn", "hg", "bzr", "cvs2cl"],
+        suggestions: ["git", "svn", "hg", "bzr", "cvs2cl", "cvs-exp"],
       },
     },
     {
@@ -425,7 +468,16 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "format",
         description: "Log format",
-        suggestions: ["git", "svn", "hg", "bzr", "cvs2cl", "custom"],
+        suggestions: [
+          "git",
+          "svn",
+          "hg",
+          "bzr",
+          "cvs2cl",
+          "cvs-exp",
+          "custom",
+          "apache",
+        ],
       },
     },
     {
@@ -597,6 +649,7 @@ const completionSpec: Fig.Spec = {
       description: "Crop view on an axis (vertical,horizontal)",
       args: {
         name: "axis",
+        suggestions: ["vertical", "horizontal"],
       },
     },
     {
@@ -732,7 +785,7 @@ const completionSpec: Fig.Spec = {
       description: "Caption colour in hex",
       args: {
         name: "colour",
-        description: "Colour in hex (eg #ff0000)",
+        description: "Colour in hex (eg FF0000)",
       },
     },
     {
@@ -764,7 +817,7 @@ const completionSpec: Fig.Spec = {
         "Framerate of output (25,30,60). Used with --output-ppm-stream",
       args: {
         name: "fps",
-        suggestions: ["25", "30", "60", "120"],
+        suggestions: ["25", "30", "60"],
       },
     },
     {
@@ -790,6 +843,20 @@ const completionSpec: Fig.Spec = {
         name: "config file",
         template: "filepaths",
       },
+    },
+    {
+      name: "--log-level",
+      description: "Set the log level of diagnostic output",
+      args: {
+        name: "level",
+        suggestions: ["error", "warn", "info", "debug", "pedantic"],
+      },
+      hidden: true,
+    },
+    {
+      name: "--ffp",
+      description: "Use the fixed function pipeline instead of shaders",
+      hidden: true,
     },
     {
       name: "--path",

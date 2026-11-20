@@ -1,3 +1,5 @@
+// fnm v1.39.0 (GitHub release Schniz/fnm tag v1.39.0, 2026-11-20). Source: static read of src/cli.rs, src/config.rs, src/commands/*.rs, src/arch.rs, src/shell/shell.rs and docs/commands.md (clap definitions) at tag v1.39.0; the binary was not run
+// Unreleased changes on the main branch (for example the x64-glibc217 --arch value) are deliberately not included. Hidden/deprecated flags (--multi, --using-file) are omitted
 interface NodejsVersion {
   major: number;
   minor: number;
@@ -12,12 +14,31 @@ const versionGenerator: Fig.Generator = {
   postProcess: function (out) {
     return out
       .split("\n")
+      .filter(Boolean)
       .reverse()
       .map((line) => ({
         name: line.slice(2).split(" ")[0],
         displayName: line.slice(2),
         description: `Node.js ${line.slice(2)}`,
       }));
+  },
+};
+
+// `fnm list` prints "* <version> <alias>, <alias>" for every installed version
+const aliasGenerator: Fig.Generator = {
+  script: ["fnm", "list"],
+  postProcess: function (out) {
+    const aliases = new Set<string>();
+    for (const line of out.split("\n")) {
+      const [, ...rest] = line.slice(2).split(" ");
+      for (const alias of rest.join(" ").split(",")) {
+        if (alias.trim()) aliases.add(alias.trim());
+      }
+    }
+    return [...aliases].map((name) => ({
+      name,
+      description: "Alias",
+    }));
   },
 };
 
@@ -120,6 +141,7 @@ const version: Fig.Arg = {
 
 const command: Fig.Arg = {
   name: "command",
+  description: "The command to run",
   isCommand: true,
   isVariadic: true,
 };
@@ -128,6 +150,28 @@ const command: Fig.Arg = {
 const lts: Fig.Option = {
   name: "--lts",
   description: "Install latest LTS",
+  exclusiveOn: ["--latest"],
+};
+
+const latest: Fig.Option = {
+  name: "--latest",
+  description: "Install latest version",
+  exclusiveOn: ["--lts"],
+};
+
+const progress: Fig.Option = {
+  name: "--progress",
+  description: "Show an interactive progress bar for the download status",
+  args: {
+    name: "progress",
+    default: "auto",
+    suggestions: ["auto", "never", "always"],
+  },
+};
+
+const use: Fig.Option = {
+  name: "--use",
+  description: "Use the installed version immediately after installation",
 };
 
 const installIfMissing: Fig.Option = {
@@ -135,39 +179,47 @@ const installIfMissing: Fig.Option = {
   description: "Install the version if it isn't installed yet",
 };
 
+const silentIfUnchanged: Fig.Option = {
+  name: "--silent-if-unchanged",
+  description:
+    "Don't output a message identifying the version being used if it will not change due to execution of this command",
+};
+
 const shell: Fig.Option = {
-  name: "shell",
+  name: "--shell",
   description: "The shell syntax to use. Infers when missing",
   args: {
     name: "shell",
-    suggestions: ["zsh", "bash", "fish", "powershell", "elvish"],
+    suggestions: ["bash", "zsh", "fish", "powershell"],
   },
 };
 
 const help: Fig.Option = {
   name: ["--help", "-h"],
-  description: "Prints help information",
+  description: "Print help",
+  isPersistent: true,
 };
 
 const fnmVersion: Fig.Option = {
   name: ["--version", "-V"],
-  description: "Prints version information",
+  description: "Print version",
 };
 
-const arch: Fig.Option = {
-  name: "--arch",
-  description:
-    "Override the architecture of the installed Node binary. Defaults to arch of fnm binary",
+// These options are global: they are available in every single sub-command
+const nodeDistMirror: Fig.Option = {
+  name: "--node-dist-mirror",
+  description: "Mirror of https://nodejs.org/dist",
+  isPersistent: true,
   args: {
-    name: "arch",
-    default: "x64",
-    suggestions: ["x86", "x64", "arm64", "armv7l", "ppc64le", "ppc64", "s390x"],
+    name: "nodeDistMirror",
+    default: "https://nodejs.org/dist",
   },
 };
 
 const fnmDir: Fig.Option = {
   name: "--fnm-dir",
   description: "The root directory of fnm installations",
+  isPersistent: true,
   args: {
     name: "dir",
     template: "folders",
@@ -177,66 +229,108 @@ const fnmDir: Fig.Option = {
 const logLevel: Fig.Option = {
   name: "--log-level",
   description: "The log level of fnm commands",
+  isPersistent: true,
   args: {
     name: "logLevel",
     default: "info",
-    suggestions: ["quiet", "info", "error"],
+    suggestions: ["quiet", "error", "info"],
   },
 };
 
-const nodeDistMirror: Fig.Option = {
-  name: "--node-dist-mirror",
-  description: "Mirror of https://nodejs.org/dist",
+const arch: Fig.Option = {
+  name: "--arch",
+  description:
+    "Override the architecture of the installed Node binary. Defaults to arch of fnm binary",
+  isPersistent: true,
   args: {
-    name: "nodeDistMirror",
-    default: "https://nodejs.org/dist",
+    name: "arch",
+    suggestions: [
+      "x86",
+      "x64",
+      "x64-musl",
+      "arm64",
+      "armv7l",
+      "ppc64le",
+      "ppc64",
+      "s390x",
+    ],
   },
 };
 
 const versionFileStrategy: Fig.Option = {
   name: "--version-file-strategy",
-  description: "Strategy for how to resolve the Node version",
+  description:
+    "A strategy for how to resolve the Node version. Used whenever 'fnm use' or 'fnm install' is called without a version, or when --use-on-cd is configured on evaluation",
+  isPersistent: true,
   args: {
     name: "strategy",
     default: "local",
-    suggestions: ["local", "recursive"],
+    suggestions: [
+      {
+        name: "local",
+        description:
+          "Use the local version of Node defined within the current directory",
+      },
+      {
+        name: "recursive",
+        description:
+          "Use the version of Node defined within the current directory and all parent directories",
+      },
+    ],
   },
 };
 
-// Theses options are available in every single sub-command
-const baseOptions = [
-  help,
-  fnmVersion,
-  arch,
-  fnmDir,
-  logLevel,
-  nodeDistMirror,
-  versionFileStrategy,
-];
+const corepackEnabled: Fig.Option = {
+  name: "--corepack-enabled",
+  description:
+    "Enable corepack support for each new installation. This will make fnm call 'corepack enable' on every Node.js installation",
+  isPersistent: true,
+};
+
+const resolveEngines: Fig.Option = {
+  name: "--resolve-engines",
+  description:
+    "Resolve the engines.node field in package.json whenever a .node-version or .nvmrc file is not present. Enabled by default, use --resolve-engines=false to disable",
+  isPersistent: true,
+  args: {
+    name: "resolveEngines",
+    isOptional: true,
+    suggestions: ["true", "false"],
+  },
+};
 
 const completionSpec: Fig.Spec = {
   name: "fnm",
-  description: "Fast Node Manager",
-  options: baseOptions,
+  description: "A fast and simple Node.js manager",
+  options: [
+    help,
+    fnmVersion,
+    nodeDistMirror,
+    fnmDir,
+    logLevel,
+    arch,
+    versionFileStrategy,
+    corepackEnabled,
+    resolveEngines,
+  ],
   subcommands: [
     {
-      name: "install",
+      name: ["install", "i"],
       description: "Install a new Node.js version",
       args: { ...version, generators: remoteVersionGenerator },
-      options: [lts, ...baseOptions],
+      options: [lts, latest, progress, use],
       priority: 61,
     },
     {
-      name: "uninstall",
+      name: ["uninstall", "uni"],
       description: "Uninstall a Node.js version",
       args: { ...version, generators: versionGenerator },
-      options: [lts, ...baseOptions],
     },
     {
       name: "use",
       description: "Change Node.js version",
       args: { ...version, generators: versionGenerator },
-      options: [installIfMissing, lts, ...baseOptions],
+      options: [installIfMissing, silentIfUnchanged],
       priority: 62,
     },
     {
@@ -248,34 +342,76 @@ const completionSpec: Fig.Spec = {
           name: "--using",
           description:
             "Either an explicit version, or a filename with the version written in it",
-          args: { ...version },
+          args: {
+            name: "version",
+            generators: versionGenerator,
+            template: "filepaths",
+          },
         },
-        lts,
-        ...baseOptions,
       ],
     },
     {
       name: "current",
       description: "Print the current Node.js version",
-      options: baseOptions,
       priority: 60,
     },
     {
       name: ["list", "ls"],
       description: "List all locally installed Node.js versions",
-      options: baseOptions,
     },
     {
       name: ["list-remote", "ls-remote"],
       description: "List all remote Node.js versions",
-      options: baseOptions,
+      options: [
+        {
+          name: "--filter",
+          description:
+            "Filter versions by a user-defined version or a semver range",
+          args: { name: "filter" },
+        },
+        {
+          name: "--lts",
+          description:
+            "Show only LTS versions (optionally filter by LTS codename)",
+          args: {
+            name: "codename",
+            description: "LTS codename to filter by",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--sort",
+          description: "Version sorting order",
+          args: {
+            name: "sort",
+            default: "asc",
+            suggestions: [
+              {
+                name: "desc",
+                description:
+                  "Sort versions in descending order (latest to earliest)",
+              },
+              {
+                name: "asc",
+                description:
+                  "Sort versions in ascending order (earliest to latest)",
+              },
+            ],
+          },
+        },
+        {
+          name: "--latest",
+          description: "Only show the latest matching version",
+        },
+      ],
     },
     {
       name: "alias",
       description: "Alias a version to a common name",
       args: [
         {
-          ...version,
+          name: "version",
+          description: "The version to alias",
           generators: versionGenerator,
         },
         {
@@ -283,28 +419,26 @@ const completionSpec: Fig.Spec = {
           description: "Alias name",
         },
       ],
-      options: baseOptions,
     },
     {
       name: "unalias",
-      description: "Deletes the alias named <name>",
+      description: "Remove an alias definition",
       args: {
         name: "requested-alias",
         description: "Alias name",
+        generators: aliasGenerator,
       },
-      options: baseOptions,
     },
     {
       name: "completions",
       description: "Print shell completions to stdout",
-      options: [shell, ...baseOptions],
+      options: [shell],
     },
     {
       name: "default",
       description:
-        "Set a version as the default version. This is a shorthand for 'fnm alias VERSION default'",
+        "Set a version as the default version or get the current default version. This is a shorthand for 'fnm alias VERSION default'",
       args: { ...version, generators: versionGenerator },
-      options: baseOptions,
     },
     {
       name: "env",
@@ -315,20 +449,22 @@ const completionSpec: Fig.Spec = {
           description:
             "Print the script to change Node versions every directory change",
         },
-        shell,
-        ...baseOptions,
+        { ...shell, exclusiveOn: ["--json"] },
+        {
+          name: "--json",
+          description: "Print JSON instead of shell commands",
+          exclusiveOn: ["--shell"],
+        },
       ],
     },
     {
       name: "help",
-      description:
-        "Prints the help page or the help of the given subcommand(s)",
+      description: "Print this message or the help of the given subcommand(s)",
       args: {
         name: "command",
         isOptional: true,
         template: "help",
       },
-      options: baseOptions,
     },
   ],
 };

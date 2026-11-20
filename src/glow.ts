@@ -1,4 +1,18 @@
+// glow v3.0.0 (GitHub release tag, 2026-11-19). Source: charmbracelet/glow main.go,
+// config_cmd.go, man_cmd.go and glamour v2.0.1 styles at tag v3.0.0 (read statically, binary not run).
+// The `stash` subcommand and `--local` flag are gone since v2.0.0.
 import { filepaths } from "@tabsmith/autocomplete-generators";
+
+const shellCompletion = (shell: string): Fig.Subcommand => ({
+  name: shell,
+  description: `Generate the autocompletion script for ${shell}`,
+  options: [
+    {
+      name: "--no-descriptions",
+      description: "Disable completion descriptions",
+    },
+  ],
+});
 
 const completionSpec: Fig.Spec = {
   name: "glow",
@@ -6,7 +20,6 @@ const completionSpec: Fig.Spec = {
   args: {
     name: "source|dir",
     isOptional: true,
-    isVariadic: true,
     generators: filepaths({
       extensions: ["md"],
       editFileSuggestions: { priority: 52 },
@@ -30,21 +43,45 @@ const completionSpec: Fig.Spec = {
       isPersistent: true,
     },
     {
-      name: ["-l", "--local"],
-      description: "Show local files only; no network (TUI-mode only)",
+      name: ["-l", "--line-numbers"],
+      description: "Show line numbers (TUI-mode only)",
+    },
+    {
+      name: ["-m", "--mouse"],
+      description: "Enable mouse wheel (TUI-mode only)",
+      hidden: true,
+    },
+    {
+      name: ["-n", "--preserve-new-lines"],
+      description: "Preserve newlines in the output",
     },
     {
       name: ["-p", "--pager"],
       description: "Display with pager",
+      exclusiveOn: ["-t", "--tui"],
     },
     {
       name: ["-s", "--style"],
       description: "Style name or JSON path (default 'auto')",
       args: {
         name: "name",
-        suggestions: ["auto", "light", "dark", "notty"],
+        suggestions: [
+          "auto",
+          "ascii",
+          "dark",
+          "dracula",
+          "light",
+          "notty",
+          "pink",
+          "tokyo-night",
+        ],
         template: "filepaths",
       },
+    },
+    {
+      name: ["-t", "--tui"],
+      description: "Display with tui",
+      exclusiveOn: ["-p", "--pager"],
     },
     {
       name: ["-v", "--version"],
@@ -53,10 +90,15 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-w", "--width"],
       args: { name: "column" },
-      description: "Word-wrap at width",
+      description: "Word-wrap at width (set to 0 to disable)",
     },
   ],
   subcommands: [
+    {
+      name: "completion",
+      description: "Generate the autocompletion script for the specified shell",
+      subcommands: ["bash", "fish", "powershell", "zsh"].map(shellCompletion),
+    },
     {
       name: "config",
       description: "Edit the glow config file",
@@ -71,23 +113,9 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "stash",
-      description: "Manage your stash of markdown files",
-      args: {
-        name: "path",
-        isOptional: true,
-        generators: filepaths({
-          extensions: ["md"],
-        }),
-      },
-      options: [
-        {
-          name: ["-m", "--memo"],
-          description: "Memo/note for stashing",
-          args: { name: "note" },
-          insertValue: "--memo '{cursor}'",
-        },
-      ],
+      name: "man",
+      description: "Generates manpages",
+      hidden: true,
     },
   ],
 };

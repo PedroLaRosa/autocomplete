@@ -9,41 +9,17 @@ const completionSpec: Fig.Spec = {
         "Runs one or more SQL statements, which can be data manipulation language (DML) or data definition language (DDL). Depending on the authorization method, use one of the following combinations of request parameters:    Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name.   Temporary credentials - when connecting to your data warehouse, choose one of the following options:   When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required.   When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required.   When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required.     For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide",
       options: [
         {
-          name: "--client-token",
+          name: "--sqls",
           description:
-            "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request",
+            "One or more SQL statements to run. The SQL statements run serially in the order of the array. Subsequent SQL statements don't start until the previous statement in the array completes. By default, the SQL statements are run as a single transaction. If any SQL statement fails, all work is rolled back. To change this behavior, see the ExecutionMode parameter",
           args: {
-            name: "string",
+            name: "list",
           },
         },
         {
           name: "--cluster-identifier",
           description:
             "The cluster identifier. This parameter is required when connecting to a cluster and authenticating using either Secrets Manager or temporary credentials",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--database",
-          description:
-            "The name of the database. This parameter is required when authenticating using either Secrets Manager or temporary credentials",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--db-user",
-          description:
-            "The database user name. This parameter is required when connecting to a cluster as a database user and authenticating using temporary credentials",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--result-format",
-          description:
-            "The data format of the result of the SQL statement. If no format is specified, the default is JSON",
           args: {
             name: "string",
           },
@@ -57,32 +33,17 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--session-id",
-          description: "The session identifier of the query",
+          name: "--db-user",
+          description:
+            "The database user name. This parameter is required when connecting to a cluster as a database user and authenticating using temporary credentials",
           args: {
             name: "string",
           },
         },
         {
-          name: "--session-keep-alive-seconds",
+          name: "--database",
           description:
-            "The number of seconds to keep the session alive after the query finishes. The maximum time a session can keep alive is 24 hours. After 24 hours, the session is forced closed and the query is terminated",
-          args: {
-            name: "integer",
-          },
-        },
-        {
-          name: "--sqls",
-          description:
-            "One or more SQL statements to run.  The SQL statements are run as a single transaction. They run serially in the order of the array. Subsequent SQL statements don't start until the previous statement in the array completes. If any SQL statement fails, then because they are run as one transaction, all work is rolled back.</p>",
-          args: {
-            name: "list",
-          },
-        },
-        {
-          name: "--statement-name",
-          description:
-            "The name of the SQL statements. You can name the SQL statements when you create them to identify the query",
+            "The name of the database. This parameter is required when authenticating using either Secrets Manager or temporary credentials",
           args: {
             name: "string",
           },
@@ -98,6 +59,22 @@ const completionSpec: Fig.Spec = {
             "A value that indicates whether to send an event to the Amazon EventBridge event bus after the SQL statements run",
         },
         {
+          name: "--statement-name",
+          description:
+            "The name of the SQL statements. You can name the SQL statements when you create them to identify the query",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--parameters",
+          description:
+            "The parameters for the SQL statements. The parameters are available to all SQL statements in the batch. Each statement can reference any subset of the provided parameters. Each provided parameter must be referenced by at least one SQL statement in the batch",
+          args: {
+            name: "list",
+          },
+        },
+        {
           name: "--workgroup-name",
           description:
             "The serverless workgroup name or Amazon Resource Name (ARN). This parameter is required when connecting to a serverless workgroup and authenticating using either Secrets Manager or temporary credentials",
@@ -106,9 +83,66 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--client-token",
+          description:
+            "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--result-format",
+          description:
+            "The data format of the result of the SQL statement. If no format is specified, the default is JSON",
+          args: {
+            name: "string",
+            suggestions: ["JSON", "CSV"],
+          },
+        },
+        {
+          name: "--session-keep-alive-seconds",
+          description:
+            "The number of seconds to keep the session alive after the query finishes. The maximum time a session can keep alive is 24 hours. After 24 hours, the session is forced closed and the query is terminated",
+          args: {
+            name: "integer",
+          },
+        },
+        {
+          name: "--session-id",
+          description: "The session identifier of the query",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--execution-mode",
+          description:
+            "Determines how the SQL statements in the batch are run. If set to TRANSACTION (the default), all SQL statements are run as a single transaction and they are committed or rolled back together. If set to AUTO_COMMIT, each SQL statement is committed individually, and a failure of one statement does not affect the others",
+          args: {
+            name: "string",
+            suggestions: ["TRANSACTION", "AUTO_COMMIT"],
+          },
+        },
+        {
+          name: "--wait-time-seconds",
+          description:
+            "The number of seconds to wait for all SQL statements in the batch to complete execution before returning the response. If the SQL statements do not complete within the specified time, the response returns the current status. The maximum value is 30 seconds",
+          args: {
+            name: "integer",
+          },
+        },
+        {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -116,10 +150,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -140,7 +174,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -148,10 +190,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -170,9 +212,25 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--wait-time-seconds",
+          description:
+            "The number of seconds to wait for the SQL statement to complete execution before returning the description. The maximum value is 30 seconds",
+          args: {
+            name: "integer",
+          },
+        },
+        {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -180,10 +238,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -202,17 +260,9 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--connected-database",
+          name: "--secret-arn",
           description:
-            "A database name. The connected database is specified when you connect with your authentication credentials",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--database",
-          description:
-            "The name of the database that contains the tables to be described. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials",
+            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
           args: {
             name: "string",
           },
@@ -226,17 +276,17 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--max-results",
+          name: "--database",
           description:
-            "The maximum number of tables to return in the response. If more tables exist than fit in one response, then NextToken is returned to page through the results",
+            "The name of the database that contains the tables to be described. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials",
           args: {
-            name: "integer",
+            name: "string",
           },
         },
         {
-          name: "--next-token",
+          name: "--connected-database",
           description:
-            "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request",
+            "A database name. The connected database is specified when you connect with your authentication credentials",
           args: {
             name: "string",
           },
@@ -250,19 +300,27 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--secret-arn",
-          description:
-            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
-          args: {
-            name: "string",
-          },
-        },
-        {
           name: "--table",
           description:
             "The table name. If no table is specified, then all tables for all matching schemas are returned. If no table and no schema is specified, then all tables for all schemas in the database are returned",
           args: {
             name: "string",
+          },
+        },
+        {
+          name: "--next-token",
+          description:
+            "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--max-results",
+          description:
+            "The maximum number of tables to return in the response. If more tables exist than fit in one response, then NextToken is returned to page through the results",
+          args: {
+            name: "integer",
           },
         },
         {
@@ -276,7 +334,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -308,10 +374,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -322,9 +388,8 @@ const completionSpec: Fig.Spec = {
         "Runs an SQL statement, which can be data manipulation language (DML) or data definition language (DDL). This statement must be a single SQL statement. Depending on the authorization method, use one of the following combinations of request parameters:    Secrets Manager - when connecting to a cluster, provide the secret-arn of a secret stored in Secrets Manager which has username and password. The specified secret contains credentials to connect to the database you specify. When you are connecting to a cluster, you also supply the database name, If you provide a cluster identifier (dbClusterIdentifier), it must match the cluster identifier stored in the secret. When you are connecting to a serverless workgroup, you also supply the database name.   Temporary credentials - when connecting to your data warehouse, choose one of the following options:   When connecting to a serverless workgroup, specify the workgroup name and database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift-serverless:GetCredentials operation is required.   When connecting to a cluster as an IAM identity, specify the cluster identifier and the database name. The database user name is derived from the IAM identity. For example, arn:iam::123456789012:user:foo has the database user name IAM:foo. Also, permission to call the redshift:GetClusterCredentialsWithIAM operation is required.   When connecting to a cluster as a database user, specify the cluster identifier, the database name, and the database user name. Also, permission to call the redshift:GetClusterCredentials operation is required.     For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide",
       options: [
         {
-          name: "--client-token",
-          description:
-            "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request",
+          name: "--sql",
+          description: "The SQL statement text to run",
           args: {
             name: "string",
           },
@@ -338,9 +403,9 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--database",
+          name: "--secret-arn",
           description:
-            "The name of the database. This parameter is required when authenticating using either Secrets Manager or temporary credentials",
+            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
           args: {
             name: "string",
           },
@@ -354,54 +419,9 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--parameters",
-          description: "The parameters for the SQL statement",
-          args: {
-            name: "list",
-          },
-        },
-        {
-          name: "--result-format",
+          name: "--database",
           description:
-            "The data format of the result of the SQL statement. If no format is specified, the default is JSON",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--secret-arn",
-          description:
-            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--session-id",
-          description: "The session identifier of the query",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--session-keep-alive-seconds",
-          description:
-            "The number of seconds to keep the session alive after the query finishes. The maximum time a session can keep alive is 24 hours. After 24 hours, the session is forced closed and the query is terminated",
-          args: {
-            name: "integer",
-          },
-        },
-        {
-          name: "--sql",
-          description: "The SQL statement text to run",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--statement-name",
-          description:
-            "The name of the SQL statement. You can name the SQL statement when you create it to identify the query",
+            "The name of the database. This parameter is required when authenticating using either Secrets Manager or temporary credentials",
           args: {
             name: "string",
           },
@@ -417,6 +437,21 @@ const completionSpec: Fig.Spec = {
             "A value that indicates whether to send an event to the Amazon EventBridge event bus after the SQL statement runs",
         },
         {
+          name: "--statement-name",
+          description:
+            "The name of the SQL statement. You can name the SQL statement when you create it to identify the query",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--parameters",
+          description: "The parameters for the SQL statement",
+          args: {
+            name: "list",
+          },
+        },
+        {
           name: "--workgroup-name",
           description:
             "The serverless workgroup name or Amazon Resource Name (ARN). This parameter is required when connecting to a serverless workgroup and authenticating using either Secrets Manager or temporary credentials",
@@ -425,9 +460,57 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--client-token",
+          description:
+            "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--result-format",
+          description:
+            "The data format of the result of the SQL statement. If no format is specified, the default is JSON",
+          args: {
+            name: "string",
+            suggestions: ["JSON", "CSV"],
+          },
+        },
+        {
+          name: "--session-keep-alive-seconds",
+          description:
+            "The number of seconds to keep the session alive after the query finishes. The maximum time a session can keep alive is 24 hours. After 24 hours, the session is forced closed and the query is terminated",
+          args: {
+            name: "integer",
+          },
+        },
+        {
+          name: "--session-id",
+          description: "The session identifier of the query",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--wait-time-seconds",
+          description:
+            "The number of seconds to wait for the SQL statement to complete execution before returning the response. If the SQL statement does not complete within the specified time, the response returns the current status. The maximum value is 30 seconds",
+          args: {
+            name: "integer",
+          },
+        },
+        {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -435,10 +518,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -465,9 +548,25 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--wait-time-seconds",
+          description:
+            "The number of seconds to wait for the SQL statement to complete execution before returning the result. The maximum value is 30 seconds",
+          args: {
+            name: "integer",
+          },
+        },
+        {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -491,10 +590,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -521,9 +620,25 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--wait-time-seconds",
+          description:
+            "The number of seconds to wait for the SQL statement to complete execution before returning the result. The maximum value is 30 seconds",
+          args: {
+            name: "integer",
+          },
+        },
+        {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -547,10 +662,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -577,9 +692,25 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--secret-arn",
+          description:
+            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
+          args: {
+            name: "string",
+          },
+        },
+        {
           name: "--db-user",
           description:
             "The database user name. This parameter is required when connecting to a cluster as a database user and authenticating using temporary credentials",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--next-token",
+          description:
+            "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request",
           args: {
             name: "string",
           },
@@ -593,22 +724,6 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--next-token",
-          description:
-            "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--secret-arn",
-          description:
-            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
-          args: {
-            name: "string",
-          },
-        },
-        {
           name: "--workgroup-name",
           description:
             "The serverless workgroup name or Amazon Resource Name (ARN). This parameter is required when connecting to a serverless workgroup and authenticating using either Secrets Manager or temporary credentials",
@@ -619,7 +734,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -651,10 +774,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -673,17 +796,9 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--connected-database",
+          name: "--secret-arn",
           description:
-            "A database name. The connected database is specified when you connect with your authentication credentials",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--database",
-          description:
-            "The name of the database that contains the schemas to list. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials",
+            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
           args: {
             name: "string",
           },
@@ -697,17 +812,17 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--max-results",
+          name: "--database",
           description:
-            "The maximum number of schemas to return in the response. If more schemas exist than fit in one response, then NextToken is returned to page through the results",
+            "The name of the database that contains the schemas to list. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials",
           args: {
-            name: "integer",
+            name: "string",
           },
         },
         {
-          name: "--next-token",
+          name: "--connected-database",
           description:
-            "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request",
+            "A database name. The connected database is specified when you connect with your authentication credentials",
           args: {
             name: "string",
           },
@@ -721,11 +836,19 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--secret-arn",
+          name: "--next-token",
           description:
-            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
+            "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request",
           args: {
             name: "string",
+          },
+        },
+        {
+          name: "--max-results",
+          description:
+            "The maximum number of schemas to return in the response. If more schemas exist than fit in one response, then NextToken is returned to page through the results",
+          args: {
+            name: "integer",
           },
         },
         {
@@ -739,7 +862,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -771,27 +902,19 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
     },
     {
-      name: "list-statements",
+      name: "list-sessions",
       description:
-        "List of SQL statements. By default, only finished statements are shown. A token is returned to page through the statement list.  For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide",
+        "Lists the sessions that the caller created in the last 24 hours. By default, only sessions with a status of AVAILABLE or BUSY are returned. You can filter the results by session status, compute target (cluster or serverless workgroup), or database. To retrieve the metadata for a single session, provide the SessionId parameter. Use NextToken to page through the session list. Returns only the sessions that the caller created. When identity-enhanced role sessions are used, you must provide either the ClusterIdentifier or WorkgroupName parameter to ensure that the IAM Identity Center user can only access the Amazon Redshift IAM Identity Center applications they are assigned. For more information, see  Trusted identity propagation overview",
       options: [
-        {
-          name: "--max-results",
-          description:
-            "The maximum number of SQL statements to return in the response. If more SQL statements exist than fit in one response, then NextToken is returned to page through the results",
-          args: {
-            name: "integer",
-          },
-        },
         {
           name: "--next-token",
           description:
@@ -801,14 +924,135 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--max-results",
+          description:
+            "The maximum number of sessions to return in the response. If more sessions exist than fit in one response, the operation returns NextToken to paginate the results",
+          args: {
+            name: "integer",
+          },
+        },
+        {
+          name: "--session-id",
+          description:
+            "The identifier of a specific session to return metadata for. This value is a universally unique identifier (UUID) generated by Amazon Redshift Data API. When you provide SessionId, you can't specify Status, ClusterIdentifier, WorkgroupName, or Database",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--status",
+          description:
+            "The status of the sessions to list. If no status is specified, sessions with a status of AVAILABLE or BUSY are returned. Status values are defined as follows:   AVAILABLE – The session is open and ready to run a SQL statement.   BUSY – The session is currently running a SQL statement.   CLOSED – The session is closed and can no longer run SQL statements",
+          args: {
+            name: "string",
+            suggestions: ["AVAILABLE", "BUSY", "CLOSED"],
+          },
+        },
+        {
           name: "--role-level",
           description:
-            "A value that filters which statements to return in the response. If true, all statements run by the caller's IAM role are returned. If false, only statements run by the caller's IAM role in the current IAM session are returned. The default is true",
+            "Specifies whether to return all sessions created by the caller's IAM role, including sessions from previous IAM sessions. If false, only sessions created in the current IAM session are returned. The default is true",
         },
         {
           name: "--no-role-level",
           description:
-            "A value that filters which statements to return in the response. If true, all statements run by the caller's IAM role are returned. If false, only statements run by the caller's IAM role in the current IAM session are returned. The default is true",
+            "Specifies whether to return all sessions created by the caller's IAM role, including sessions from previous IAM sessions. If false, only sessions created in the current IAM session are returned. The default is true",
+        },
+        {
+          name: "--cluster-identifier",
+          description:
+            "The cluster identifier. Only sessions on this cluster are returned. When providing ClusterIdentifier, then WorkgroupName can't be specified",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--workgroup-name",
+          description:
+            "The serverless workgroup name or Amazon Resource Name (ARN). Only sessions on this workgroup are returned. When providing WorkgroupName, then ClusterIdentifier can't be specified",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--database",
+          description:
+            "The name of the database. Only sessions connected to this database are returned",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-json",
+          description:
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--starting-token",
+          description:
+            "A token to specify where to start paginating.  This is the\nNextToken from a previously truncated response.\nFor usage examples, see Pagination in the AWS Command Line Interface User\nGuide",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--page-size",
+          description:
+            "The size of each page to get in the AWS service call.  This\ndoes not affect the number of items returned in the command's\noutput.  Setting a smaller page size results in more calls to\nthe AWS service, retrieving fewer items in each call.  This can\nhelp prevent the AWS service calls from timing out.\nFor usage examples, see Pagination in the AWS Command Line Interface User\nGuide",
+          args: {
+            name: "integer",
+          },
+        },
+        {
+          name: "--max-items",
+          description:
+            "The total number of items to return in the command's output.\nIf the total number of items available is more than the value\nspecified, a NextToken is provided in the command's\noutput.  To resume pagination, provide the\nNextToken value in the starting-token\nargument of a subsequent command.  Do not use the\nNextToken response element directly outside of the\nAWS CLI.\nFor usage examples, see Pagination in the AWS Command Line Interface User\nGuide",
+          args: {
+            name: "integer",
+          },
+        },
+        {
+          name: "--generate-cli-skeleton",
+          description:
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
+          args: {
+            name: "string",
+            suggestions: ["input", "output", "yaml-input"],
+          },
+        },
+      ],
+    },
+    {
+      name: "list-statements",
+      description:
+        "List of SQL statements. By default, only finished statements are shown. A token is returned to page through the statement list.  When you use identity-enhanced role sessions to list statements, you must provide either the cluster-identifier or workgroup-name parameter. This ensures that the IdC user can only access the Amazon Redshift IdC applications they are assigned. For more information, see  Trusted identity propagation overview. For more information about the Amazon Redshift Data API and CLI usage examples, see Using the Amazon Redshift Data API in the Amazon Redshift Management Guide",
+      options: [
+        {
+          name: "--next-token",
+          description:
+            "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--max-results",
+          description:
+            "The maximum number of SQL statements to return in the response. If more SQL statements exist than fit in one response, then NextToken is returned to page through the results",
+          args: {
+            name: "integer",
+          },
         },
         {
           name: "--statement-name",
@@ -824,12 +1068,63 @@ const completionSpec: Fig.Spec = {
             "The status of the SQL statement to list. Status values are defined as follows:    ABORTED - The query run was stopped by the user.    ALL - A status value that includes all query statuses. This value can be used to filter results.    FAILED - The query run failed.    FINISHED - The query has finished running.    PICKED - The query has been chosen to be run.    STARTED - The query run has started.    SUBMITTED - The query was submitted, but not yet processed",
           args: {
             name: "string",
+            suggestions: [
+              "SUBMITTED",
+              "PICKED",
+              "STARTED",
+              "FINISHED",
+              "ABORTED",
+              "FAILED",
+              "ALL",
+            ],
+          },
+        },
+        {
+          name: "--role-level",
+          description:
+            "A value that filters which statements to return in the response. If true, all statements run by the caller's IAM role are returned. If false, only statements run by the caller's IAM role in the current IAM session are returned. The default is true",
+        },
+        {
+          name: "--no-role-level",
+          description:
+            "A value that filters which statements to return in the response. If true, all statements run by the caller's IAM role are returned. If false, only statements run by the caller's IAM role in the current IAM session are returned. The default is true",
+        },
+        {
+          name: "--database",
+          description:
+            "The name of the database when listing statements run against a ClusterIdentifier or WorkgroupName",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cluster-identifier",
+          description:
+            "The cluster identifier. Only statements that ran on this cluster are returned. When providing ClusterIdentifier, then WorkgroupName can't be specified",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--workgroup-name",
+          description:
+            "The serverless workgroup name or Amazon Resource Name (ARN). Only statements that ran on this workgroup are returned. When providing WorkgroupName, then ClusterIdentifier can't be specified",
+          args: {
+            name: "string",
           },
         },
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -861,10 +1156,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
@@ -883,17 +1178,9 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--connected-database",
+          name: "--secret-arn",
           description:
-            "A database name. The connected database is specified when you connect with your authentication credentials",
-          args: {
-            name: "string",
-          },
-        },
-        {
-          name: "--database",
-          description:
-            "The name of the database that contains the tables to list. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials",
+            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
           args: {
             name: "string",
           },
@@ -907,17 +1194,17 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--max-results",
+          name: "--database",
           description:
-            "The maximum number of tables to return in the response. If more tables exist than fit in one response, then NextToken is returned to page through the results",
+            "The name of the database that contains the tables to list. If ConnectedDatabase is not specified, this is also the database to connect to with your authentication credentials",
           args: {
-            name: "integer",
+            name: "string",
           },
         },
         {
-          name: "--next-token",
+          name: "--connected-database",
           description:
-            "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request",
+            "A database name. The connected database is specified when you connect with your authentication credentials",
           args: {
             name: "string",
           },
@@ -931,19 +1218,27 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--secret-arn",
-          description:
-            "The name or ARN of the secret that enables access to the database. This parameter is required when authenticating using Secrets Manager",
-          args: {
-            name: "string",
-          },
-        },
-        {
           name: "--table-pattern",
           description:
             'A pattern to filter results by table name. Within a table pattern, "%" means match any substring of 0 or more characters and "_" means match any one character. Only table name entries matching the search pattern are returned. If TablePattern is not specified, then all tables that match SchemaPatternare returned. If neither SchemaPattern or TablePattern are specified, then all tables are returned',
           args: {
             name: "string",
+          },
+        },
+        {
+          name: "--next-token",
+          description:
+            "A value that indicates the starting point for the next set of response records in a subsequent request. If a value is returned in a response, you can retrieve the next set of records by providing this returned NextToken value in the next NextToken parameter and retrying the command. If the NextToken field is empty, all response records have been retrieved for the request",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--max-results",
+          description:
+            "The maximum number of tables to return in the response. If more tables exist than fit in one response, then NextToken is returned to page through the results",
+          args: {
+            name: "integer",
           },
         },
         {
@@ -957,7 +1252,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--cli-input-json",
           description:
-            "Performs service operation based on the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, the CLI values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally",
+            "Reads arguments from the JSON string provided. The JSON string follows the format provided by ``--generate-cli-skeleton``. If other arguments are provided on the command line, those values will override the JSON-provided values. It is not possible to pass arbitrary binary values using a JSON-provided value as the string will be taken literally. This may not be specified along with ``--cli-input-yaml``",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--cli-input-yaml",
+          description:
+            "Reads arguments from the YAML string provided. The YAML string follows the format provided by ``--generate-cli-skeleton yaml-input``. If other arguments are provided on the command line, those values will override the YAML-provided values. This may not be specified along with ``--cli-input-json``",
           args: {
             name: "string",
           },
@@ -989,14 +1292,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "--generate-cli-skeleton",
           description:
-            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command",
+            "Prints a JSON skeleton to standard output without sending an API request. If provided with no value or the value ``input``, prints a sample input JSON that can be used as an argument for ``--cli-input-json``. Similarly, if provided ``yaml-input`` it will print a sample input YAML that can be used with ``--cli-input-yaml``. If provided with the value ``output``, it validates the command inputs and returns a sample output JSON for that command. The generated JSON skeleton is not stable between versions of the AWS CLI and there are no backwards compatibility guarantees in the JSON skeleton generated",
           args: {
             name: "string",
-            suggestions: ["input", "output"],
+            suggestions: ["input", "output", "yaml-input"],
           },
         },
       ],
     },
   ],
 };
+
 export default completionSpec;

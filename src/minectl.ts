@@ -1,3 +1,4 @@
+// minectl v0.62.0 (latest git tag of dirien/minectl, 2026-11-19). Source: cobra command definitions in cmd/minectl/*.go at v0.62.0 and provider ids from minectl-sdk v0.21.0 model.go; built binary not run.
 const completionSpec: Fig.Spec = {
   name: "minectl",
   description: "Create Minecraft Server on different cloud provider",
@@ -90,7 +91,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--provider", "-p"],
           description:
-            "The cloud provider - civo|scaleway|do|hetzner|akamai|ovh|equinix|gce|vultr|azure|oci|ionos|aws|vexxhost|multipass|exoscale",
+            "The cloud provider - civo|scaleway|do|hetzner|akamai|ovh|gce|vultr|azure|oci|aws|vexxhost|fuga|multipass|exoscale",
           args: {
             name: "provider",
             suggestions: [
@@ -98,16 +99,15 @@ const completionSpec: Fig.Spec = {
               "scaleway",
               "do",
               "hetzner",
-              "linode",
+              "akamai",
               "ovh",
-              "equinix",
               "gce",
               "vultr",
               "azure",
               "oci",
-              "ionos",
               "aws",
               "vexxhost",
+              "fuga",
               "multipass",
               "exoscale",
             ],
@@ -193,12 +193,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "wizard",
       description:
-        "Calls the minectl wizard to create interactively a minectl 🗺 config",
+        "Calls the minectl wizard to create interactively a minectl config",
       options: [
         {
           name: ["--output", "-o"],
           description:
-            "Output folder for the configuration file for minectl 🗺 (default: ~/.minectl)",
+            "Output folder for the configuration file for minectl (default: ~/.minectl)",
           args: {
             name: "output",
             template: ["folders"],
@@ -250,7 +250,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "wizard",
           description:
-            "Calls the minectl wizard to create interactively a minectl 🗺 config",
+            "Calls the minectl wizard to create interactively a minectl config",
         },
       ],
     },

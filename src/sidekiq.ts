@@ -1,3 +1,5 @@
+// Sidekiq v8.1.7 (RubyGems latest, 2026-11-19). Source: lib/sidekiq/cli.rb (OptionParser definitions)
+// and bin/sidekiq from the sidekiq-8.1.7 gem, read statically (not run). The separate sidekiqmon binary is not covered here.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const completionSpec: Fig.Spec = {
@@ -7,7 +9,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--concurrency", "-c"],
       description: "Processor threads to use",
-      args: { name: "INT" },
+      args: { name: "INT", default: "5" },
     },
     {
       name: ["--environment", "-e"],
@@ -22,17 +24,22 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--queue", "-q"],
       description: "Queues to process with optional weights",
-      args: [{ name: "QUEUE" }, { name: "WEIGHT", isOptional: true }],
+      isRepeatable: true,
+      args: { name: "QUEUE[,WEIGHT]" },
     },
     {
       name: ["--require", "-r"],
       description: "Location of Rails application with jobs or file to require",
-      args: { name: "PATH|DIR", template: ["folders", "filepaths"] },
+      args: {
+        name: "PATH|DIR",
+        isOptional: true,
+        template: ["folders", "filepaths"],
+      },
     },
     {
       name: ["--timeout", "-t"],
-      description: "Shutdown timeout",
-      args: { name: "NUM" },
+      description: "Shutdown timeout in seconds",
+      args: { name: "NUM", default: "25" },
     },
     {
       name: ["--verbose", "-v"],
@@ -41,11 +48,14 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--config", "-C"],
       description: "Path to YAML config file",
-      args: { name: "PATH", generators: filepaths({ extensions: ["yaml"] }) },
+      args: {
+        name: "PATH",
+        generators: filepaths({ extensions: ["yml", "yaml", "erb"] }),
+      },
     },
     {
       name: ["--help", "-h"],
-      description: "Show help for sidekiq run",
+      description: "Show help",
     },
     {
       name: ["--version", "-V"],

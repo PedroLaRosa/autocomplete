@@ -1,3 +1,35 @@
+// Ruff v0.17.6 (PyPI, Homebrew formula and GitHub tag 0.17.6, released 2026-11-19; re-verified 2026-11-20).
+// Source: crates/ruff/src/args.rs, crates/ruff_linter/src/codes.rs, registry.rs, settings/types.rs and
+// the generated help in docs/configuration.md at tag 0.17.6. 0.17.5 -> 0.17.6 changed no CLI flags or rule codes.
+// Checked all subcommands, every check/format/server/analyze graph option, enums and the 973 rule codes.
+
+const pythonVersions = [
+  "py37",
+  "py38",
+  "py39",
+  "py310",
+  "py311",
+  "py312",
+  "py313",
+  "py314",
+  "py315",
+];
+
+const outputFormats = [
+  "concise",
+  "full",
+  "json",
+  "json-lines",
+  "junit",
+  "grouped",
+  "github",
+  "gitlab",
+  "pylint",
+  "rdjson",
+  "azure",
+  "sarif",
+];
+
 const GlobalOptions: Fig.Option[] = [
   {
     name: ["-v", "--verbose"],
@@ -15,16 +47,24 @@ const GlobalOptions: Fig.Option[] = [
   {
     name: "--config",
     description:
-      "Path to the `pyproject.toml` or `ruff.toml` file to use for configuration",
+      "Path to a `pyproject.toml` or `ruff.toml` file, or a TOML `<KEY> = <VALUE>` override (e.g. `line-length = 100`)",
+    isRepeatable: true,
     args: {
-      name: "config",
-      isOptional: true,
+      name: "CONFIG_OPTION",
       template: "filepaths",
     },
   },
   {
     name: "--isolated",
     description: "Ignore all configuration files",
+  },
+  {
+    name: "--color",
+    description: "Control when colored output is used",
+    args: {
+      name: "WHEN",
+      suggestions: ["auto", "always", "never"],
+    },
   },
   {
     name: "--help",
@@ -37,15 +77,18 @@ const checkOptions: Fig.Option[] = [
     name: "--fix",
     description: "Apply fixes to resolve lint violations",
   },
+  { name: "--no-fix", description: "Disable --fix" },
   {
     name: "--unsafe-fixes",
     description:
       "Include fixes that may not retain the original intent of the code",
   },
+  { name: "--no-unsafe-fixes", description: "Disable --unsafe-fixes" },
   {
     name: "--show-fixes",
     description: "Show an enumeration of all fixed lint violations",
   },
+  { name: "--no-show-fixes", description: "Disable --show-fixes" },
   {
     name: "--diff",
     description:
@@ -60,6 +103,7 @@ const checkOptions: Fig.Option[] = [
     description:
       "Apply fixes to resolve lint violations, but don't report on, or exit non-zero for, leftover violations. Implies `--fix`",
   },
+  { name: "--no-fix-only", description: "Disable --fix-only" },
   {
     name: "--ignore-noqa",
     description: "Ignore any `# noqa` comments",
@@ -71,20 +115,7 @@ const checkOptions: Fig.Option[] = [
     args: {
       name: "output_format",
       isOptional: true,
-      suggestions: [
-        "concise",
-        "full",
-        "json",
-        "json-lines",
-        "junit",
-        "grouped",
-        "github",
-        "gitlab",
-        "pylint",
-        "rdjson",
-        "azure",
-        "sarif",
-      ],
+      suggestions: outputFormats,
     },
   },
   {
@@ -102,7 +133,7 @@ const checkOptions: Fig.Option[] = [
     args: {
       name: "target_version",
       isOptional: true,
-      suggestions: ["py37", "py38", "py39", "py310", "py311", "py312", "py313"],
+      suggestions: pythonVersions,
     },
   },
   {
@@ -110,6 +141,7 @@ const checkOptions: Fig.Option[] = [
     description:
       "Enable preview mode; checks will include unstable rules and fixes",
   },
+  { name: "--no-preview", description: "Disable preview mode" },
   {
     name: "--extension",
     description:
@@ -126,7 +158,18 @@ const checkOptions: Fig.Option[] = [
   {
     name: "--add-noqa",
     description:
-      "Enable automatic additions of `noqa` directives to failing lines",
+      "Enable automatic additions of `noqa` directives to failing lines. Optionally provide a reason to append after the codes",
+    requiresSeparator: "=",
+    exclusiveOn: ["--add-ignore"],
+    args: { name: "REASON", isOptional: true },
+  },
+  {
+    name: "--add-ignore",
+    description:
+      "Enable automatic additions of `ruff: ignore` comments to failing lines. Optionally provide a reason to append after the codes",
+    requiresSeparator: "=",
+    exclusiveOn: ["--add-noqa"],
+    args: { name: "REASON", isOptional: true },
   },
   {
     name: "--show-files",
@@ -161,11 +204,17 @@ const checkOptions: Fig.Option[] = [
   {
     name: "--extend-select",
     description:
-      "Like --select, but adds additional rule codes on top of the selected ones",
+      "Like --select, but adds additional rule codes on top of those already specified",
     args: {
       name: "extend_select",
       isOptional: true,
     },
+  },
+  {
+    name: "--extend-ignore",
+    description: "Like --ignore; use --ignore instead",
+    deprecated: true,
+    args: { name: "RULE_CODE" },
   },
   {
     name: "--per-file-ignores",
@@ -212,6 +261,25 @@ const checkOptions: Fig.Option[] = [
     },
   },
   {
+    name: "--extend-unfixable",
+    description: "Like --unfixable; use --unfixable instead",
+    deprecated: true,
+    args: { name: "RULE_CODE" },
+  },
+  {
+    name: "--line-length",
+    description:
+      "Set the line-length for length-associated rules and automatic formatting",
+    hidden: true,
+    args: { name: "LINE_LENGTH" },
+  },
+  {
+    name: "--dummy-variable-rgx",
+    description: "Regular expression matching the name of dummy variables",
+    hidden: true,
+    args: { name: "DUMMY_VARIABLE_RGX" },
+  },
+  {
     name: "--exclude",
     description:
       "List of paths, used to omit files and/or directories from analysis",
@@ -235,10 +303,15 @@ const checkOptions: Fig.Option[] = [
       "Respect file exclusions via `.gitignore` and other standard ignore files",
   },
   {
+    name: "--no-respect-gitignore",
+    description: "Disable --respect-gitignore",
+  },
+  {
     name: "--force-exclude",
     description:
       "Enforce exclusions, even for paths passed to Ruff directly on the command-line",
   },
+  { name: "--no-force-exclude", description: "Disable --force-exclude" },
   {
     name: ["-n", "--no-cache"],
     description: "Disable cache reads",
@@ -299,13 +372,24 @@ const formatOptions: Fig.Option[] = [
     args: {
       name: "target_version",
       isOptional: true,
-      suggestions: ["py37", "py38", "py39", "py310", "py311", "py312", "py313"],
+      suggestions: pythonVersions,
     },
   },
   {
     name: "--preview",
     description:
       "Enable preview mode; enables unstable formatting. Use `--no-preview` to disable",
+  },
+  { name: "--no-preview", description: "Disable preview mode" },
+  {
+    name: "--output-format",
+    description:
+      "Output serialization format for violations, when used with `--check`. The default serialization format is 'full'",
+    args: { name: "OUTPUT_FORMAT", suggestions: outputFormats },
+  },
+  {
+    name: ["-h", "--help"],
+    description: "Print help",
   },
   {
     name: ["-n", "--no-cache"],
@@ -328,9 +412,18 @@ const formatOptions: Fig.Option[] = [
     },
   },
   {
+    name: ["--exit-non-zero-on-format", "--exit-non-zero-on-fix"],
+    description:
+      "Exit with a non-zero status code if any files were modified via format, even if all files were formatted successfully",
+  },
+  {
     name: "--respect-gitignore",
     description:
       "Respect file exclusions via `.gitignore` and other standard ignore files",
+  },
+  {
+    name: "--no-respect-gitignore",
+    description: "Disable --respect-gitignore",
   },
   {
     name: "--exclude",
@@ -342,10 +435,17 @@ const formatOptions: Fig.Option[] = [
     },
   },
   {
+    name: "--extend-exclude",
+    description:
+      "Like --exclude, but adds additional files and directories on top of those already excluded",
+    args: { name: "FILE_PATTERN" },
+  },
+  {
     name: "--force-exclude",
     description:
       "Enforce exclusions, even for paths passed to Ruff directly on the command-line",
   },
+  { name: "--no-force-exclude", description: "Disable --force-exclude" },
   {
     name: "--line-length",
     description: "Set the line-length",
@@ -357,7 +457,7 @@ const formatOptions: Fig.Option[] = [
   {
     name: "--range",
     description:
-      "When specified, Ruff will try to only format the code in the given range",
+      "When specified, Ruff will try to only format the code in the given range, as `<start_line>:<start_column>-<end_line>:<end_column>`",
     args: {
       name: "range",
       isOptional: true,
@@ -504,6 +604,7 @@ const rules: Fig.Suggestion[] = [
   { name: "E742", description: "Ambiguous-class-name" },
   { name: "E743", description: "Ambiguous-function-name" },
   { name: "E902", description: "Io-error" },
+  { name: "E999", description: "Syntax-error" },
   { name: "W191", description: "Tab-indentation" },
   { name: "W291", description: "Trailing-whitespace" },
   { name: "W292", description: "Missing-newline-at-end-of-file" },
@@ -539,13 +640,13 @@ const rules: Fig.Suggestion[] = [
   { name: "D105", description: "Undocumented-magic-method" },
   { name: "D106", description: "Undocumented-public-nested-class" },
   { name: "D107", description: "Undocumented-public-init" },
-  { name: "D200", description: "Fits-on-one-line" },
-  { name: "D201", description: "No-blank-line-before-function" },
-  { name: "D202", description: "No-blank-line-after-function" },
-  { name: "D203", description: "One-blank-line-before-class" },
-  { name: "D204", description: "One-blank-line-after-class" },
-  { name: "D205", description: "Blank-line-after-summary" },
-  { name: "D206", description: "Indent-with-spaces" },
+  { name: "D200", description: "Unnecessary-multiline-docstring" },
+  { name: "D201", description: "Blank-line-before-function" },
+  { name: "D202", description: "Blank-line-after-function" },
+  { name: "D203", description: "Incorrect-blank-line-before-class" },
+  { name: "D204", description: "Incorrect-blank-line-after-class" },
+  { name: "D205", description: "Missing-blank-line-after-summary" },
+  { name: "D206", description: "Docstring-tab-indentation" },
   { name: "D207", description: "Under-indentation" },
   { name: "D208", description: "Over-indentation" },
   { name: "D209", description: "New-line-after-last-paragraph" },
@@ -553,30 +654,32 @@ const rules: Fig.Suggestion[] = [
   { name: "D211", description: "Blank-line-before-class" },
   { name: "D212", description: "Multi-line-summary-first-line" },
   { name: "D213", description: "Multi-line-summary-second-line" },
-  { name: "D214", description: "Section-not-over-indented" },
-  { name: "D215", description: "Section-underline-not-over-indented" },
+  { name: "D214", description: "Overindented-section" },
+  { name: "D215", description: "Overindented-section-underline" },
   { name: "D300", description: "Triple-single-quotes" },
   { name: "D301", description: "Escape-sequence-in-docstring" },
-  { name: "D400", description: "Ends-in-period" },
+  { name: "D400", description: "Missing-trailing-period" },
   { name: "D401", description: "Non-imperative-mood" },
-  { name: "D402", description: "No-signature" },
-  { name: "D403", description: "First-line-capitalized" },
+  { name: "D402", description: "Signature-in-docstring" },
+  { name: "D403", description: "First-word-uncapitalized" },
   { name: "D404", description: "Docstring-starts-with-this" },
-  { name: "D405", description: "Capitalize-section-name" },
-  { name: "D406", description: "New-line-after-section-name" },
-  { name: "D407", description: "Dashed-underline-after-section" },
-  { name: "D408", description: "Section-underline-after-name" },
-  { name: "D409", description: "Section-underline-matches-section-length" },
+  { name: "D405", description: "Non-capitalized-section-name" },
+  { name: "D406", description: "Missing-new-line-after-section-name" },
+  { name: "D407", description: "Missing-dashed-underline-after-section" },
+  { name: "D408", description: "Missing-section-underline-after-name" },
+  { name: "D409", description: "Mismatched-section-underline-length" },
   { name: "D410", description: "No-blank-line-after-section" },
   { name: "D411", description: "No-blank-line-before-section" },
   { name: "D412", description: "Blank-lines-between-header-and-content" },
-  { name: "D413", description: "Blank-line-after-last-section" },
+  { name: "D413", description: "Missing-blank-line-after-last-section" },
   { name: "D414", description: "Empty-docstring-section" },
-  { name: "D415", description: "Ends-in-punctuation" },
-  { name: "D416", description: "Section-name-ends-in-colon" },
+  { name: "D415", description: "Missing-terminal-punctuation" },
+  { name: "D416", description: "Missing-section-name-colon" },
   { name: "D417", description: "Undocumented-param" },
   { name: "D418", description: "Overload-with-docstring" },
   { name: "D419", description: "Empty-docstring" },
+  { name: "D420", description: "Incorrect-section-order" },
+  { name: "D421", description: "Property-docstring-starts-with-verb" },
   { name: "I001", description: "Unsorted-imports" },
   { name: "I002", description: "Missing-required-import" },
   { name: "UP001", description: "Useless-metaclass-type" },
@@ -584,7 +687,7 @@ const rules: Fig.Suggestion[] = [
   { name: "UP004", description: "Useless-object-inheritance" },
   { name: "UP005", description: "Deprecated-unittest-alias" },
   { name: "UP006", description: "Non-pep585-annotation" },
-  { name: "UP007", description: "Non-pep604-annotation" },
+  { name: "UP007", description: "Non-pep604-annotation-union" },
   { name: "UP008", description: "Super-call-with-parameters" },
   { name: "UP009", description: "Utf8-encoding-declaration" },
   { name: "UP010", description: "Unnecessary-future-import" },
@@ -621,6 +724,14 @@ const rules: Fig.Suggestion[] = [
   { name: "UP042", description: "Replace-str-enum" },
   { name: "UP043", description: "Unnecessary-default-type-args" },
   { name: "UP044", description: "Non-pep646-unpack" },
+  { name: "UP045", description: "Non-pep604-annotation-optional" },
+  { name: "UP046", description: "Non-pep695-generic-class" },
+  { name: "UP047", description: "Non-pep695-generic-function" },
+  { name: "UP048", description: "While-one" },
+  { name: "UP049", description: "Private-type-parameter" },
+  { name: "UP050", description: "Useless-class-metaclass-type" },
+  { name: "UP051", description: "Deprecated-abc-decorator" },
+  { name: "UP052", description: "Context-manager-iterator" },
   { name: "YTT101", description: "Sys-version-slice3" },
   { name: "YTT102", description: "Sys-version2" },
   { name: "YTT103", description: "Sys-version-cmp-str3" },
@@ -634,10 +745,9 @@ const rules: Fig.Suggestion[] = [
   { name: "ANN001", description: "Missing-type-function-argument" },
   { name: "ANN002", description: "Missing-type-args" },
   { name: "ANN003", description: "Missing-type-kwargs" },
-  {
-    name: "ANN201",
-    description: "Missing-return-type-undocumented-public-function",
-  },
+  { name: "ANN101", description: "Missing-type-self" },
+  { name: "ANN102", description: "Missing-type-cls" },
+  { name: "ANN201", description: "Missing-return-type-public-function" },
   { name: "ANN202", description: "Missing-return-type-private-function" },
   { name: "ANN204", description: "Missing-return-type-special-method" },
   { name: "ANN205", description: "Missing-return-type-static-method" },
@@ -649,12 +759,23 @@ const rules: Fig.Suggestion[] = [
   { name: "ASYNC110", description: "Async-busy-wait" },
   { name: "ASYNC115", description: "Async-zero-sleep" },
   { name: "ASYNC116", description: "Long-sleep-not-forever" },
+  {
+    name: "ASYNC119",
+    description: "Yield-in-context-manager-in-async-generator",
+  },
   { name: "ASYNC210", description: "Blocking-http-call-in-async-function" },
+  {
+    name: "ASYNC212",
+    description: "Blocking-http-call-httpx-in-async-function",
+  },
   { name: "ASYNC220", description: "Create-subprocess-in-async-function" },
   { name: "ASYNC221", description: "Run-process-in-async-function" },
   { name: "ASYNC222", description: "Wait-for-process-in-async-function" },
   { name: "ASYNC230", description: "Blocking-open-call-in-async-function" },
+  { name: "ASYNC240", description: "Blocking-path-method-in-async-function" },
+  { name: "ASYNC250", description: "Blocking-input-in-async-function" },
   { name: "ASYNC251", description: "Blocking-sleep-in-async-function" },
+  { name: "ASYNC401", description: "Pytest-raises-exception-group" },
   { name: "S101", description: "Assert" },
   { name: "S102", description: "Exec-builtin" },
   { name: "S103", description: "Bad-file-permissions" },
@@ -730,7 +851,8 @@ const rules: Fig.Suggestion[] = [
   { name: "S612", description: "Logging-config-insecure-listen" },
   { name: "S701", description: "Jinja2-autoescape-false" },
   { name: "S702", description: "Mako-templates" },
-  { name: "BLE001", description: "Do not catch blind exception" },
+  { name: "S704", description: "Unsafe-markup-use" },
+  { name: "BLE001", description: "Blind-except" },
   { name: "B002", description: "Unary-prefix-increment-decrement" },
   { name: "B003", description: "Assignment-to-os-environ" },
   { name: "B004", description: "Unreliable-callable-check" },
@@ -769,22 +891,17 @@ const rules: Fig.Suggestion[] = [
   { name: "B034", description: "Re-sub-positional-args" },
   { name: "B035", description: "Static-key-dict-comprehension" },
   { name: "B039", description: "Mutable-contextvar-default" },
+  { name: "B043", description: "Del-attr-with-constant" },
   { name: "B901", description: "Return-in-generator" },
+  { name: "B903", description: "Class-as-data-structure" },
   { name: "B904", description: "Raise-without-from-inside-except" },
   { name: "B905", description: "Zip-without-explicit-strict" },
   { name: "B909", description: "Loop-iterator-mutation" },
-  {
-    name: "FBT001",
-    description: "Boolean-typed positional argument in function definition",
-  },
-  {
-    name: "FBT002",
-    description: "Boolean default positional argument in function definition",
-  },
-  {
-    name: "FBT003",
-    description: "Boolean positional value in function call",
-  },
+  { name: "B911", description: "Batched-without-explicit-strict" },
+  { name: "B912", description: "Map-without-explicit-strict" },
+  { name: "FBT001", description: "Boolean-type-hint-positional-argument" },
+  { name: "FBT002", description: "Boolean-default-value-positional-argument" },
+  { name: "FBT003", description: "Boolean-positional-value-in-call" },
   {
     name: "A001",
     description: "Builtin-variable-shadowing",
@@ -801,10 +918,7 @@ const rules: Fig.Suggestion[] = [
     name: "A004",
     description: "Builtin-import-shadowing",
   },
-  {
-    name: "A005",
-    description: "Builtin-module-shadowing",
-  },
+  { name: "A005", description: "Stdlib-module-shadowing" },
   {
     name: "A006",
     description: "Builtin-lambda-argument-shadowing",
@@ -1022,6 +1136,10 @@ const rules: Fig.Suggestion[] = [
     description: "Explicit-string-concatenation",
   },
   {
+    name: "ISC004",
+    description: "Implicit-string-concatenation-in-collection-literal",
+  },
+  {
     name: "ICN001",
     description: "Unconventional-import-alias",
   },
@@ -1041,6 +1159,7 @@ const rules: Fig.Suggestion[] = [
     name: "LOG002",
     description: "Invalid-get-logger-argument",
   },
+  { name: "LOG004", description: "Log-exception-outside-except-handler" },
   {
     name: "LOG007",
     description: "Exception-without-exc-info",
@@ -1049,6 +1168,7 @@ const rules: Fig.Suggestion[] = [
     name: "LOG009",
     description: "Undocumented-warn",
   },
+  { name: "LOG014", description: "Exc-info-outside-except-handler" },
   {
     name: "LOG015",
     description: "Root-logger-call",
@@ -1201,10 +1321,7 @@ const rules: Fig.Suggestion[] = [
     name: "PYI018",
     description: "Unused-private-type-var",
   },
-  {
-    name: "PYI019",
-    description: "Custom-type-var-return-type",
-  },
+  { name: "PYI019", description: "Custom-type-var-for-self" },
   {
     name: "PYI020",
     description: "Quoted-annotation-in-stub",
@@ -1237,10 +1354,7 @@ const rules: Fig.Suggestion[] = [
     name: "PYI032",
     description: "Any-eq-ne-annotation",
   },
-  {
-    name: "PYI033",
-    description: "Type-comment-in-stub",
-  },
+  { name: "PYI033", description: "Legacy-type-comment" },
   {
     name: "PYI034",
     description: "Non-self-return-type",
@@ -1302,12 +1416,12 @@ const rules: Fig.Suggestion[] = [
     description: "Unannotated-assignment-in-stub",
   },
   {
-    name: "PYI053",
-    description: "String-or-bytes-too-long",
-  },
-  {
     name: "PYI054",
     description: "Numeric-literal-too-long",
+  },
+  {
+    name: "PYI053",
+    description: "String-or-bytes-too-long",
   },
   {
     name: "PYI055",
@@ -1318,12 +1432,12 @@ const rules: Fig.Suggestion[] = [
     description: "Unsupported-method-call-on-all",
   },
   {
-    name: "PYI057",
-    description: "Byte-string-usage",
-  },
-  {
     name: "PYI058",
     description: "Generator-return-from-iter-method",
+  },
+  {
+    name: "PYI057",
+    description: "Byte-string-usage",
   },
   {
     name: "PYI059",
@@ -1457,6 +1571,10 @@ const rules: Fig.Suggestion[] = [
     name: "PT027",
     description: "Pytest-unittest-raises-assertion",
   },
+  { name: "PT028", description: "Pytest-parameter-with-default-argument" },
+  { name: "PT029", description: "Pytest-warns-without-warning" },
+  { name: "PT030", description: "Pytest-warns-too-broad" },
+  { name: "PT031", description: "Pytest-warns-with-multiple-statements" },
   {
     name: "Q000",
     description: "Bad-quotes-inline-string",
@@ -1661,6 +1779,8 @@ const rules: Fig.Suggestion[] = [
     name: "TID253",
     description: "Banned-module-level-imports",
   },
+  { name: "TID254", description: "Lazy-import-mismatch" },
+  { name: "TID255", description: "Lazy-import-immediately-resolved" },
   {
     name: "TC001",
     description: "Typing-only-first-party-import",
@@ -1861,6 +1981,8 @@ const rules: Fig.Suggestion[] = [
     name: "PTH208",
     description: "Os-listdir",
   },
+  { name: "PTH210", description: "Invalid-pathlib-with-suffix" },
+  { name: "PTH211", description: "Os-symlink" },
   {
     name: "TD001",
     description: "Invalid-todo-tag",
@@ -2001,6 +2123,7 @@ const rules: Fig.Suggestion[] = [
     name: "PLC0206",
     description: "Dict-index-missing-items",
   },
+  { name: "PLC0207", description: "Missing-maxsplit-arg" },
   {
     name: "PLC0208",
     description: "Iteration-over-set",
@@ -2065,6 +2188,7 @@ const rules: Fig.Suggestion[] = [
     name: "PLE0118",
     description: "Load-before-global-declaration",
   },
+  { name: "PLE0211", description: "No-method-argument" },
   {
     name: "PLE0237",
     description: "Non-slot-assignment",
@@ -2265,17 +2389,15 @@ const rules: Fig.Suggestion[] = [
     name: "PLR1706",
     description: "And-or-ternary",
   },
+  { name: "PLR1708", description: "Stop-iteration-return" },
   {
     name: "PLR1711",
     description: "Useless-return",
   },
+  { name: "PLR1712", description: "Swap-with-temporary-variable" },
   {
     name: "PLR1714",
     description: "Repeated-equality-comparison",
-  },
-  {
-    name: "PLR1716",
-    description: "Boolean-chained-comparison",
   },
   {
     name: "PLR1722",
@@ -2284,6 +2406,10 @@ const rules: Fig.Suggestion[] = [
   {
     name: "PLR1730",
     description: "If-stmt-min-max",
+  },
+  {
+    name: "PLR1716",
+    description: "Boolean-chained-comparison",
   },
   {
     name: "PLR1733",
@@ -2322,6 +2448,10 @@ const rules: Fig.Suggestion[] = [
     description: "Unnecessary-lambda",
   },
   {
+    name: "PLW0177",
+    description: "Nan-comparison",
+  },
+  {
     name: "PLW0120",
     description: "Useless-else-on-loop",
   },
@@ -2346,13 +2476,10 @@ const rules: Fig.Suggestion[] = [
     description: "Useless-exception-statement",
   },
   {
-    name: "PLW0177",
-    description: "Nan-comparison",
-  },
-  {
     name: "PLW0211",
     description: "Bad-staticmethod-argument",
   },
+  { name: "PLW0244", description: "Redefined-slots-in-subclass" },
   {
     name: "PLW0245",
     description: "Super-without-brackets",
@@ -2381,6 +2508,7 @@ const rules: Fig.Suggestion[] = [
     name: "PLW0711",
     description: "Binary-op-exception",
   },
+  { name: "PLW0717", description: "Too-many-statements-in-try-clause" },
   {
     name: "PLW1501",
     description: "Bad-open-mode",
@@ -2501,14 +2629,18 @@ const rules: Fig.Suggestion[] = [
     name: "AIR001",
     description: "Airflow-variable-name-task-id-mismatch",
   },
-  {
-    name: "AIR301",
-    description: "Airflow-dag-no-schedule-argument",
-  },
-  {
-    name: "AIR302",
-    description: "Airflow3-removal",
-  },
+  { name: "AIR002", description: "Airflow-dag-no-schedule-argument" },
+  { name: "AIR003", description: "Airflow-variable-get-outside-task" },
+  { name: "AIR004", description: "Airflow-task-branch-as-short-circuit" },
+  { name: "AIR201", description: "Airflow-xcom-pull-in-template-string" },
+  { name: "AIR202", description: "Airflow-task-implicit-multiple-outputs" },
+  { name: "AIR301", description: "Airflow3-removal" },
+  { name: "AIR302", description: "Airflow3-moved-to-provider" },
+  { name: "AIR303", description: "Airflow3-incompatible-function-signature" },
+  { name: "AIR304", description: "Airflow3-dag-dynamic-value" },
+  { name: "AIR311", description: "Airflow3-suggested-update" },
+  { name: "AIR312", description: "Airflow3-suggested-to-move-to-provider" },
+  { name: "AIR321", description: "Airflow31-moved" },
   {
     name: "PERF101",
     description: "Unnecessary-list-cast",
@@ -2561,6 +2693,7 @@ const rules: Fig.Suggestion[] = [
     name: "FURB118",
     description: "Reimplemented-operator",
   },
+  { name: "FURB122", description: "For-loop-writes" },
   {
     name: "FURB129",
     description: "Readlines-in-for",
@@ -2613,6 +2746,7 @@ const rules: Fig.Suggestion[] = [
     name: "FURB161",
     description: "Bit-count",
   },
+  { name: "FURB162", description: "Fromisoformat-replace-z" },
   {
     name: "FURB163",
     description: "Redundant-log-base",
@@ -2669,6 +2803,7 @@ const rules: Fig.Suggestion[] = [
     name: "FURB192",
     description: "Sorted-min-max",
   },
+  { name: "DOC102", description: "Docstring-extraneous-parameter" },
   {
     name: "DOC201",
     description: "Docstring-missing-returns",
@@ -2693,6 +2828,7 @@ const rules: Fig.Suggestion[] = [
     name: "DOC502",
     description: "Docstring-extraneous-exception",
   },
+  { name: "T100", description: "Debugger" },
   {
     name: "RUF001",
     description: "Ambiguous-unicode-character-string",
@@ -2817,13 +2953,14 @@ const rules: Fig.Suggestion[] = [
     name: "RUF034",
     description: "Useless-if-else",
   },
-  {
-    name: "RUF035",
-    description: "Unsafe-markup-use",
-  },
+  { name: "RUF035", description: "Ruff-unsafe-markup-use" },
   {
     name: "RUF036",
     description: "None-not-at-end-of-union",
+  },
+  {
+    name: "RUF037",
+    description: "Unnecessary-empty-iterable-within-deque-call",
   },
   {
     name: "RUF038",
@@ -2841,22 +2978,50 @@ const rules: Fig.Suggestion[] = [
     name: "RUF041",
     description: "Unnecessary-nested-literal",
   },
+  { name: "RUF043", description: "Pytest-raises-ambiguous-pattern" },
+  { name: "RUF045", description: "Implicit-class-var-in-dataclass" },
   {
     name: "RUF046",
     description: "Unnecessary-cast-to-int",
   },
+  { name: "RUF047", description: "Needless-else" },
   {
     name: "RUF048",
     description: "Map-int-version-parsing",
   },
+  { name: "RUF049", description: "Dataclass-enum" },
+  { name: "RUF050", description: "Unnecessary-if" },
+  { name: "RUF051", description: "If-key-in-dict-del" },
   {
     name: "RUF052",
     description: "Used-dummy-variable",
   },
+  { name: "RUF053", description: "Class-with-mixed-type-vars" },
+  { name: "RUF054", description: "Indented-form-feed" },
   {
     name: "RUF055",
     description: "Unnecessary-regular-expression",
   },
+  { name: "RUF056", description: "Falsy-dict-get-fallback" },
+  { name: "RUF057", description: "Unnecessary-round" },
+  { name: "RUF058", description: "Starmap-zip" },
+  { name: "RUF059", description: "Unused-unpacked-variable" },
+  { name: "RUF060", description: "In-empty-collection" },
+  { name: "RUF061", description: "Legacy-form-pytest-raises" },
+  { name: "RUF063", description: "Access-annotations-from-class-dict" },
+  { name: "RUF064", description: "Non-octal-permissions" },
+  { name: "RUF065", description: "Logging-eager-conversion" },
+  { name: "RUF066", description: "Property-without-return" },
+  { name: "RUF067", description: "Non-empty-init-module" },
+  { name: "RUF068", description: "Duplicate-entry-in-dunder-all" },
+  { name: "RUF069", description: "Float-equality-comparison" },
+  { name: "RUF070", description: "Unnecessary-assign-before-yield" },
+  { name: "RUF071", description: "Os-path-commonprefix" },
+  { name: "RUF072", description: "Useless-finally" },
+  { name: "RUF073", description: "F-string-percent-format" },
+  { name: "RUF074", description: "Incorrect-decorator-order" },
+  { name: "RUF075", description: "Fallible-context-manager" },
+  { name: "RUF077", description: "Method-receiver-default" },
   {
     name: "RUF100",
     description: "Unused-noqa",
@@ -2865,9 +3030,32 @@ const rules: Fig.Suggestion[] = [
     name: "RUF101",
     description: "Redirected-noqa",
   },
+  { name: "RUF102", description: "Invalid-rule-code" },
+  { name: "RUF103", description: "Invalid-suppression-comment" },
+  { name: "RUF104", description: "Unmatched-suppression-comment" },
+  { name: "RUF105", description: "Noqa-comments" },
+  { name: "RUF106", description: "Rule-codes-in-suppression-comments" },
   {
     name: "RUF200",
     description: "Invalid-pyproject-toml",
+  },
+  { name: "RUF201", description: "Rule-codes-in-selectors" },
+  { name: "RUF202", description: "Renamed-rule" },
+  {
+    name: "pytest-fixture-autouse",
+    description: "Rule without a code; select it by name",
+  },
+  {
+    name: "shared-clock-mock",
+    description: "Rule without a code; select it by name",
+  },
+  {
+    name: "tarfile-ignore-zeros-true",
+    description: "Rule without a code; select it by name",
+  },
+  {
+    name: "unnecessary-regular-expression-compile",
+    description: "Rule without a code; select it by name",
   },
 ];
 
@@ -2879,7 +3067,8 @@ const subCommands: Fig.Subcommand[] = [
     args: {
       name: "Path",
       template: "filepaths",
-      description: "The path to use for the project/script",
+      description:
+        "List of files or directories to check, or `-` to read from stdin",
       default: ".",
       isVariadic: true,
     },
@@ -2913,6 +3102,11 @@ const subCommands: Fig.Subcommand[] = [
   {
     name: "config",
     description: "List or describe the available configuration options",
+    args: {
+      name: "option",
+      description: "Config key to show",
+      isOptional: true,
+    },
     options: [
       {
         name: "--output-format",
@@ -2941,13 +3135,24 @@ const subCommands: Fig.Subcommand[] = [
       "Clear any caches in the current directory and any subdirectories",
   },
   {
+    name: "generate-shell-completion",
+    description: "Generate shell completion",
+    hidden: true,
+    args: {
+      name: "shell",
+      // Ruff builds clap_complete_command with only the nushell feature, so there is no fig (the docs are stale)
+      suggestions: ["bash", "elvish", "fish", "nushell", "powershell", "zsh"],
+    },
+  },
+  {
     name: "format",
     description: "Run the Ruff formatter on the given files or directories",
     options: formatOptions,
     args: {
       name: "Path",
       template: "filepaths",
-      description: "List of files or directories to format [default: .]",
+      description:
+        "List of files or directories to format, or `-` to read from stdin",
       default: ".",
       isVariadic: true,
     },
@@ -2957,8 +3162,14 @@ const subCommands: Fig.Subcommand[] = [
     description: "Run the language server",
     options: [
       {
+        name: "--untrusted-workspace",
+        description:
+          "Treat all workspaces as untrusted, disabling the uv formatter backend",
+      },
+      {
         name: "--preview",
-        description: "Enable preview mode. Use `--no-preview` to disable",
+        description:
+          "Enable preview mode (unstable server features, linter and formatter preview). Use `--no-preview` to disable",
       },
       {
         name: "--no-preview",
@@ -2988,6 +3199,12 @@ const subCommands: Fig.Subcommand[] = [
             description: "Attempt to detect imports from string literals",
           },
           {
+            name: "--min-dots",
+            description:
+              "The minimum number of dots in a string import to consider it a valid import",
+            args: { name: "MIN_DOTS" },
+          },
+          {
             name: "--preview",
             description: "Enable preview mode. Use `--no-preview` to disable",
           },
@@ -3000,22 +3217,29 @@ const subCommands: Fig.Subcommand[] = [
             description: "The minimum Python version that should be supported",
             args: {
               name: "TARGET_VERSION",
-              suggestions: [
-                "py37",
-                "py38",
-                "py39",
-                "py310",
-                "py311",
-                "py312",
-                "py313",
-              ],
+              suggestions: pythonVersions,
             },
+          },
+          {
+            name: "--python",
+            description:
+              "Path to a virtual environment to use for resolving additional dependencies",
+            args: { name: "PYTHON", template: "folders" },
+          },
+          {
+            name: "--type-checking-imports",
+            description:
+              "Include imports that are only used for type checking (i.e., imports within `if TYPE_CHECKING:` blocks)",
+          },
+          {
+            name: "--no-type-checking-imports",
+            description: "Exclude imports that are only used for type checking",
           },
         ],
         args: {
           name: "Path",
           template: "filepaths",
-          description: "The path to use for the project/script",
+          description: "List of files or directories to include",
           default: ".",
           isVariadic: true,
         },
@@ -3041,9 +3265,12 @@ const subCommands: Fig.Subcommand[] = [
 
 const completion: Fig.Spec = {
   name: "ruff",
-  description: "Ruff: An extremely fast Python linter",
+  description: "Ruff: An extremely fast Python linter and code formatter",
   subcommands: subCommands,
-  options: GlobalOptions.map((option) => ({ ...option, isPersistent: true })),
+  options: [
+    ...GlobalOptions.map((option) => ({ ...option, isPersistent: true })),
+    { name: ["-V", "--version"], description: "Print version" },
+  ],
 };
 
 export default completion;

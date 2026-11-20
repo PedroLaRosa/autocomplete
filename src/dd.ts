@@ -1,3 +1,4 @@
+// dd (macOS 15.5 BSD, `man dd` dated 2021-05-19, 2026-11-19). Source: apple-oss-distributions file_cmds-457.120.3 dd.1 + args.c operand/conv tables, matches the Xcode 16.4 man page; not run on macOS
 const convValues: Fig.Suggestion[] = [
   {
     name: "ascii",
@@ -9,7 +10,7 @@ const convValues: Fig.Suggestion[] = [
     name: "oldascii",
     icon: "fig://icon?type=string",
     description:
-      "The same as 'unblock' except characters are translated from EBCDIC to ASCII",
+      "Like 'ascii' but use the conversion map of historic AT&T and pre-4.3reno systems",
   },
   {
     name: "block",
@@ -27,19 +28,24 @@ const convValues: Fig.Suggestion[] = [
     name: "ibm",
     icon: "fig://icon?type=string",
     description:
-      "The same as the 'block' value except that characters are translated from ASCII to EBCDIC after the records are converted",
+      "Like 'ebcdic' but use a slightly different mapping, compatible with the AT&T System V 'ibm' value",
   },
   {
     name: "oldebcdic",
     icon: "fig://icon?type=string",
     description:
-      "The same as the 'block' value except that characters are translated from ASCII to EBCDIC after the records are converted",
+      "Like 'ebcdic' but use the conversion map of historic AT&T and pre-4.3reno systems",
   },
   {
     name: "oldibm",
     icon: "fig://icon?type=string",
     description:
-      "The same as the 'block' value except that characters are translated from ASCII to EBCDIC after the records are converted",
+      "Like 'ibm' but use the conversion map of historic AT&T and pre-4.3reno systems",
+  },
+  {
+    name: "fsync",
+    icon: "fig://icon?type=string",
+    description: "Perform an fsync on the output file before closing it",
   },
   {
     name: "lcase",
@@ -61,6 +67,26 @@ const convValues: Fig.Suggestion[] = [
     name: "osync",
     icon: "fig://icon?type=string",
     description: "Pad the final output block to the full output block size",
+  },
+  {
+    name: "pareven",
+    icon: "fig://icon?type=string",
+    description: "Output data with even parity",
+  },
+  {
+    name: "parnone",
+    icon: "fig://icon?type=string",
+    description: "Output data with no parity",
+  },
+  {
+    name: "parodd",
+    icon: "fig://icon?type=string",
+    description: "Output data with odd parity",
+  },
+  {
+    name: "parset",
+    icon: "fig://icon?type=string",
+    description: "Output data with the parity bit set",
   },
   {
     name: "sparse",
@@ -90,6 +116,38 @@ const convValues: Fig.Suggestion[] = [
       "Treats the input as a sequence of fixed length records independent of input and output block boundaries",
   },
 ];
+
+const flagValues = (
+  values: [name: string, description: string][]
+): Fig.Suggestion[] =>
+  values.map(([name, description]) => ({
+    name,
+    icon: "fig://icon?type=string",
+    description,
+  }));
+
+const iflagValues = flagValues([
+  [
+    "fullblock",
+    "When a read returns short, continue reading to fill the block (cannot be combined with conv=sync)",
+  ],
+  [
+    "direct",
+    "Set F_NOCACHE on the input file to make reads bypass any local caching",
+  ],
+]);
+
+const oflagValues = flagValues([
+  [
+    "fsync",
+    "Set the O_FSYNC flag on the output file to make writes synchronous",
+  ],
+  ["sync", "Same as fsync"],
+  [
+    "direct",
+    "Set F_NOCACHE on the output file to make writes bypass any local caching",
+  ],
+]);
 
 const completionSpec: Fig.Spec = {
   name: "dd",
@@ -130,10 +188,21 @@ const completionSpec: Fig.Spec = {
     {
       name: "files",
       icon: "fig://icon?type=asterisk",
-      description: "Copy this many files before terminating",
+      description:
+        "Copy this many input files before terminating (only applicable when the input is a tape)",
       requiresSeparator: true,
       args: {
         name: "number",
+      },
+    },
+    {
+      name: "fillchar",
+      icon: "fig://icon?type=asterisk",
+      description:
+        "Fill with this ASCII character when padding a block in conversion mode or due to noerror and sync, instead of a space or NUL",
+      requiresSeparator: true,
+      args: {
+        name: "character",
       },
     },
     {
@@ -158,9 +227,22 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "iflag",
+      icon: "fig://icon?type=asterisk",
+      description: "Set input flags (comma-separated list)",
+      requiresSeparator: true,
+      args: {
+        name: "value",
+        generators: {
+          getQueryTerm: ",",
+          custom: async () => iflagValues,
+        },
+      },
+    },
+    {
       name: "iseek",
       icon: "fig://icon?type=asterisk",
-      description: "Seek this many blocks on the input file",
+      description: "Seek this many blocks on the input file (same as skip)",
       requiresSeparator: true,
       args: {
         name: "blocks",
@@ -189,9 +271,22 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "oflag",
+      icon: "fig://icon?type=asterisk",
+      description: "Set output flags (comma-separated list)",
+      requiresSeparator: true,
+      args: {
+        name: "value",
+        generators: {
+          getQueryTerm: ",",
+          custom: async () => oflagValues,
+        },
+      },
+    },
+    {
       name: "oseek",
       icon: "fig://icon?type=asterisk",
-      description: "Seek this many blocks on the output file",
+      description: "Seek this many blocks on the output file (same as seek)",
       requiresSeparator: true,
       args: {
         name: "blocks",
@@ -215,6 +310,40 @@ const completionSpec: Fig.Spec = {
       requiresSeparator: true,
       args: {
         name: "blocks",
+      },
+    },
+    {
+      name: "speed",
+      icon: "fig://icon?type=asterisk",
+      description: "Limit the copying speed to this many bytes per second",
+      requiresSeparator: true,
+      args: {
+        name: "bytes",
+      },
+    },
+    {
+      name: "status",
+      icon: "fig://icon?type=asterisk",
+      description: "Control the status output",
+      requiresSeparator: true,
+      args: {
+        name: "value",
+        suggestions: [
+          {
+            name: "noxfer",
+            description:
+              "Do not print the transfer statistics as the last line of status output",
+          },
+          {
+            name: "none",
+            description:
+              "Do not print the status output (error messages are still shown)",
+          },
+          {
+            name: "progress",
+            description: "Print basic transfer statistics once per second",
+          },
+        ],
       },
     },
     {

@@ -1,3 +1,202 @@
+// CMake v4.5.1 (latest stable tag of Kitware/CMake via git ls-remote, 2026-11-20). Source: Help/manual/cmake.1.rst, Help/manual/include/{OPTIONS_BUILD,OPTIONS_HELP}.rst,
+// Help/manual/cmake-diagnostics.7.rst and the argument parsers Source/cmake.cxx, Source/cmakemain.cxx and Source/cmcmd.cxx
+// read statically from a shallow clone of the v4.5.1 tag (the cmake binary was not run).
+// Internal/undocumented options (--vs-solution-file, --check-build-system, ...), the Windows "/" option forms and the ambiguous -H are intentionally left out.
+
+const diagnosticCategories: Fig.Suggestion[] = [
+  {
+    name: "author",
+    description: "Incorrect use of CMake by the build system's author",
+  },
+  {
+    name: "deprecated",
+    description: "Use of a deprecated function or package",
+  },
+  {
+    name: "experimental",
+    description: "Use of an experimental feature",
+  },
+  {
+    name: "install-absolute-destination",
+    description: "An install command specifies an absolute DESTINATION",
+  },
+  {
+    name: "non-target-directive",
+    description:
+      "Use of non-target directives which alter the build environment",
+  },
+  {
+    name: "policy",
+    description: "Potential dependency on the OLD behavior of a policy",
+  },
+  {
+    name: "strict",
+    description: "Allowed but disrecommended usage",
+  },
+  {
+    name: "uninitialized",
+    description: "Dereference of an uninitialized variable",
+  },
+  {
+    name: "unused-cli",
+    description: "Variables declared on the command line but not used",
+  },
+];
+
+// -W<category> and -Wno-<category> for every diagnostic category
+const diagnosticOptions: Fig.Option[] = diagnosticCategories.flatMap(
+  ({ name, description }) => [
+    {
+      name: `-W${name}`,
+      description: `Enable warnings: ${String(description).toLowerCase()}`,
+    },
+    {
+      name: `-Wno-${name}`,
+      description: `Disable warnings: ${String(description).toLowerCase()}`,
+    },
+  ]
+);
+
+const presetsFileOption: Fig.Option = {
+  name: "--presets-file",
+  description:
+    "Read presets from the given file instead of CMakePresets.json and CMakeUserPresets.json",
+  args: {
+    name: "file",
+    template: "filepaths",
+  },
+};
+
+const listDefinedPresetsOption = (what: string): Fig.Option => ({
+  name: "--list-presets",
+  description: `Lists the available ${what} presets. With 'defined', all non-hidden defined presets are listed, including unavailable ones`,
+  args: {
+    name: "type",
+    isOptional: true,
+    suggestions: ["defined"],
+  },
+});
+
+const listPresetTypes = [
+  "configure",
+  "build",
+  "test",
+  "package",
+  "workflow",
+  "all",
+];
+
+const parallelOption = (
+  description: string,
+  jobsOptional: boolean
+): Fig.Option => ({
+  name: ["--parallel", "-j"],
+  description,
+  args: jobsOptional ? { name: "jobs", isOptional: true } : { name: "jobs" },
+});
+
+const verboseOption = (description: string): Fig.Option => ({
+  name: ["--verbose", "-v"],
+  description,
+});
+
+const configOption = (description: string): Fig.Option => ({
+  name: "--config",
+  description,
+  args: {
+    name: "cfg",
+  },
+});
+
+const checksumCommand = (bits: string): Fig.Subcommand => ({
+  name: `${bits}sum`,
+  description: `Create ${bits.toUpperCase()} checksum of files in ${bits}sum compatible format. Passing - reads from standard input`,
+  args: {
+    name: "file",
+    template: "filepaths",
+    isVariadic: true,
+  },
+});
+
+// Destination given first (copy -t <destination> <file>...)
+const targetDirectoryOption: Fig.Option = {
+  name: "-t",
+  description: "Copy to the given destination directory",
+  args: {
+    name: "destination",
+    template: "folders",
+  },
+};
+
+const copyFilesCommand = (
+  name: string,
+  description: string
+): Fig.Subcommand => ({
+  name,
+  description,
+  options: [targetDirectoryOption],
+  args: [
+    {
+      name: "file",
+      template: "filepaths",
+      isVariadic: true,
+    },
+    {
+      name: "destination",
+      template: "folders",
+    },
+  ],
+});
+
+const copyDirectoriesCommand = (
+  name: string,
+  description: string
+): Fig.Subcommand => ({
+  name,
+  description,
+  options: [targetDirectoryOption],
+  args: [
+    {
+      name: "dir",
+      template: "folders",
+      isVariadic: true,
+    },
+    {
+      name: "destination",
+      template: "folders",
+    },
+  ],
+});
+
+const helpOption = (
+  topic: string,
+  argName: string,
+  description: string
+): Fig.Option => ({
+  name: `--help-${topic}`,
+  description,
+  args: [
+    {
+      name: argName,
+    },
+    {
+      name: "file",
+      template: "filepaths",
+      isOptional: true,
+    },
+  ],
+});
+
+const helpListOption = (topic: string, description: string): Fig.Option => ({
+  name: `--help-${topic}`,
+  description,
+  args: {
+    name: "file",
+    template: "filepaths",
+    isOptional: true,
+  },
+});
+
 const completion: Fig.Spec = {
   name: "cmake",
   description:
@@ -20,20 +219,12 @@ const completion: Fig.Spec = {
             name: "preset",
           },
         },
-        {
-          name: "--list-presets",
-          description:
-            "Lists the available presets. If no option is specified only configure presets will be listed. The current working directory must contain CMake preset files",
-        },
-        {
-          name: ["--parallel", "-j"],
-          description:
-            "The maximum number of concurrent processes to use when building. If <jobs> is omitted the native build tool's default number is used",
-          args: {
-            name: "jobs",
-            isOptional: true,
-          },
-        },
+        presetsFileOption,
+        listDefinedPresetsOption("build"),
+        parallelOption(
+          "The maximum number of concurrent processes to use when building. If <jobs> is omitted the native build tool's default number is used",
+          true
+        ),
         {
           name: ["--target", "-t"],
           description:
@@ -43,27 +234,42 @@ const completion: Fig.Spec = {
             isVariadic: true,
           },
         },
-        {
-          name: "--config",
-          description:
-            "For multi-configuration tools, choose configuration <cfg>",
-          args: {
-            name: "cfg",
-          },
-        },
+        configOption(
+          "For multi-configuration tools, choose configuration <cfg>"
+        ),
         {
           name: "--clean-first",
           description: "Build target clean first, then build",
         },
         {
+          name: "--resolve-package-references",
+          description:
+            "Resolve remote package references from external package managers (e.g. NuGet) before build",
+          args: {
+            name: "value",
+            suggestions: [
+              {
+                name: "on",
+                description: "Restore packages before building (default)",
+              },
+              {
+                name: "only",
+                description: "Restore packages but do not build",
+              },
+              {
+                name: "off",
+                description: "Do not restore packages",
+              },
+            ],
+          },
+        },
+        {
           name: "--use-stderr",
           description: "Ignored. Behavior is default in CMake >= 3.0",
         },
-        {
-          name: ["--verbose", "-v"],
-          description:
-            "Enable verbose output - if supported - including the build commands to be executed",
-        },
+        verboseOption(
+          "Enable verbose output - if supported - including the build commands to be executed"
+        ),
         {
           name: "--",
           description: "Pass remaining options to the native tool",
@@ -79,19 +285,17 @@ const completion: Fig.Spec = {
         template: "folders",
       },
       options: [
-        {
-          name: "--config",
-          description: "For multi-configuration generators",
-          args: {
-            name: "cfg",
-          },
-        },
+        configOption(
+          "For multi-configuration generators, choose configuration <cfg>"
+        ),
         {
           name: "--component",
           description:
-            "Component-based install. Only install component specified",
+            "Component-based install. Only install the specified components",
+          isRepeatable: true,
           args: {
-            name: "cfg",
+            name: "comp",
+            isVariadic: true,
           },
         },
         {
@@ -107,16 +311,18 @@ const completion: Fig.Spec = {
           description: "Override the installation prefix",
           args: {
             name: "prefix",
+            template: "folders",
           },
         },
         {
           name: "--strip",
           description: "Strip before installing",
         },
-        {
-          name: ["--verbose", "-v"],
-          description: "Enable verbose output",
-        },
+        verboseOption("Enable verbose output"),
+        parallelOption(
+          "Install in parallel using the given number of jobs. Only available if INSTALL_PARALLEL is enabled",
+          false
+        ),
       ],
     },
     {
@@ -127,6 +333,32 @@ const completion: Fig.Spec = {
         name: "dir",
         template: "folders",
       },
+    },
+    {
+      name: "--workflow",
+      description:
+        "Run a workflow preset, executing multiple build steps in order",
+      args: {
+        name: "preset",
+        description: "Workflow preset name (same as --preset <preset>)",
+        isOptional: true,
+      },
+      options: [
+        {
+          name: "--preset",
+          description: "Use a workflow preset to specify a workflow",
+          args: {
+            name: "preset",
+          },
+        },
+        presetsFileOption,
+        listDefinedPresetsOption("workflow"),
+        {
+          name: "--fresh",
+          description:
+            "Perform a fresh configuration of the build tree, as with cmake --fresh",
+        },
+      ],
     },
     {
       name: "-P",
@@ -140,8 +372,71 @@ const completion: Fig.Spec = {
     {
       name: "-E",
       description:
-        "CMake provides builtin command-line tools through the signature",
+        "Run a builtin command-line tool. Run cmake -E for a summary of commands",
       subcommands: [
+        {
+          name: "bin2c",
+          description:
+            "Convert a binary file to a C array. If input file is unspecified or '-', read from standard input. If output file is unspecified or '-', write to standard output",
+          options: [
+            {
+              name: "--signed",
+              description:
+                "Print the bytes as signed integers rather than unsigned",
+            },
+            {
+              name: "--decimal",
+              description: "Print the bytes as decimal rather than hexadecimal",
+            },
+            {
+              name: "--trailing-comma",
+              description:
+                "Append a trailing comma after the last byte (not included by default)",
+            },
+            {
+              name: "--template-file",
+              description:
+                "Format from a template file containing @array@ and optionally @length@ placeholders",
+              args: {
+                name: "template-file",
+                template: "filepaths",
+              },
+            },
+            {
+              name: "--template-array-placeholder",
+              description:
+                "Specify a name for the array placeholder in the template file (default: array)",
+              args: {
+                name: "placeholder-name",
+              },
+            },
+            {
+              name: "--template-length-placeholder",
+              description:
+                "Specify a name for the length placeholder in the template file (default: length)",
+              args: {
+                name: "placeholder-name",
+              },
+            },
+            {
+              name: "--",
+              description:
+                "Stop interpreting options and treat the rest as file names",
+            },
+          ],
+          args: [
+            {
+              name: "input-file",
+              template: "filepaths",
+              isOptional: true,
+            },
+            {
+              name: "output-file",
+              template: "filepaths",
+              isOptional: true,
+            },
+          ],
+        },
         {
           name: "capabilities",
           description:
@@ -150,10 +445,18 @@ const completion: Fig.Spec = {
         {
           name: "cat",
           description: "Concatenate files and print on the standard output",
+          options: [
+            {
+              name: "--",
+              description:
+                "Stop interpreting options, in case a file name starts with -",
+            },
+          ],
           args: {
             name: "files",
             template: "filepaths",
             isVariadic: true,
+            isOptional: true,
           },
         },
         {
@@ -172,7 +475,7 @@ const completion: Fig.Spec = {
         {
           name: "compare_files",
           description:
-            "Check if file1 is the same as file2. If fails are the same, then returns 0, if not returns 1. In case of invalid arguments, it returns 2",
+            "Check if file1 is the same as file2. If files are the same, then returns 0, if not returns 1. In case of invalid arguments, it returns 2",
           args: [
             {
               name: "file1",
@@ -191,54 +494,30 @@ const completion: Fig.Spec = {
             },
           ],
         },
-        {
-          name: "copy",
-          description:
-            "Copy files to <destination> (either file or directory). If multiple files are specified, the <destination> must be directory and it must exist. Wildcards are not supported. copy does follow symlinks. That means it does not copy symlinks, but the files or directories it point to",
-          args: [
-            {
-              name: "file",
-              template: "filepaths",
-              isVariadic: true,
-            },
-            {
-              name: "destination",
-              template: "folders",
-            },
-          ],
-        },
-        {
-          name: "copy_directory",
-          description:
-            "Copy content of <dir>... directories to <destination> directory. If <destination> directory does not exist it will be created. copy_directory does follow symlinks",
-          args: [
-            {
-              name: "dir",
-              template: "folders",
-              isVariadic: true,
-            },
-            {
-              name: "destination",
-              template: "folders",
-            },
-          ],
-        },
-        {
-          name: "copy_if_different",
-          description:
-            "Copy files to <destination> (either file or directory) if they have changed. If multiple files are specified, the <destination> must be directory and it must exist. copy_if_different does follow symlinks",
-          args: [
-            {
-              name: "file",
-              template: "filepaths",
-              isVariadic: true,
-            },
-            {
-              name: "destination",
-              template: "folders",
-            },
-          ],
-        },
+        copyFilesCommand(
+          "copy",
+          "Copy files to <destination> (either file or directory). If multiple files are specified, or if -t is specified, the <destination> must be directory and it must exist. Wildcards are not supported. copy does follow symlinks. That means it does not copy symlinks, but the files or directories it point to"
+        ),
+        copyDirectoriesCommand(
+          "copy_directory",
+          "Copy content of <dir>... directories to <destination> directory. If <destination> directory does not exist it will be created. copy_directory does follow symlinks"
+        ),
+        copyDirectoriesCommand(
+          "copy_directory_if_different",
+          "Copy changed content of <dir>... directories to <destination> directory. If <destination> directory does not exist it will be created. The command fails when the source directory does not exist"
+        ),
+        copyDirectoriesCommand(
+          "copy_directory_if_newer",
+          "Copy content of <dir>... directories to <destination> directory if source files are newer than destination files (based on file timestamps). Faster than copy_directory_if_different"
+        ),
+        copyFilesCommand(
+          "copy_if_different",
+          "Copy files to <destination> (either file or directory) if they have changed. If multiple files are specified, or if -t is specified, the <destination> must be directory and it must exist. copy_if_different does follow symlinks"
+        ),
+        copyFilesCommand(
+          "copy_if_newer",
+          "Copy files to <destination> (either file or directory) if source files are newer than destination files (based on file timestamps). Faster than copy_if_different"
+        ),
         {
           name: "create_symlink",
           description: "Create a symbolic link <new> naming <old>",
@@ -269,6 +548,7 @@ const completion: Fig.Spec = {
           args: {
             name: "string",
             isOptional: true,
+            isVariadic: true,
           },
         },
         {
@@ -277,6 +557,7 @@ const completion: Fig.Spec = {
           args: {
             name: "string",
             isOptional: true,
+            isVariadic: true,
           },
         },
         {
@@ -296,9 +577,27 @@ const completion: Fig.Spec = {
           options: [
             {
               name: "--unset",
+              description: "Unset the current value of NAME",
+              requiresSeparator: true,
+              isRepeatable: true,
               args: {
                 name: "name",
               },
+            },
+            {
+              name: "--modify",
+              description:
+                "Apply a single ENVIRONMENT_MODIFICATION operation to the modified environment",
+              isRepeatable: true,
+              args: {
+                name: "ENVIRONMENT_MODIFICATION",
+                description: "Format: NAME=operation:value",
+              },
+            },
+            {
+              name: "--",
+              description:
+                "Stop interpreting options and treat the next argument as the command",
             },
           ],
         },
@@ -320,70 +619,17 @@ const completion: Fig.Spec = {
             isVariadic: true,
           },
         },
-        {
-          name: "md5sum",
-          description:
-            "Create MD5 checksum of files in md5sum compatible format",
-          args: {
-            name: "file",
-            template: "filepaths",
-            isVariadic: true,
-          },
-        },
-        {
-          name: "sha1sum",
-          description:
-            "Create SHA1 checksum of files in sha1sum compatible format",
-          args: {
-            name: "file",
-            template: "filepaths",
-            isVariadic: true,
-          },
-        },
-        {
-          name: "sha224sum",
-          description:
-            "Create SHA224 checksum of files in sha224sum compatible format",
-          args: {
-            name: "file",
-            template: "filepaths",
-            isVariadic: true,
-          },
-        },
-        {
-          name: "sha226sum",
-          description:
-            "Create SHA226 checksum of files in sha226sum compatible format",
-          args: {
-            name: "file",
-            template: "filepaths",
-            isVariadic: true,
-          },
-        },
-        {
-          name: "sha384sum",
-          description:
-            "Create SHA384 checksum of files in sha384sum compatible format",
-          args: {
-            name: "file",
-            template: "filepaths",
-            isVariadic: true,
-          },
-        },
-        {
-          name: "sha512sum",
-          description:
-            "Create SHA512 checksum of files in sha512sum compatible format",
-          args: {
-            name: "file",
-            template: "filepaths",
-            isVariadic: true,
-          },
-        },
+        checksumCommand("md5"),
+        checksumCommand("sha1"),
+        checksumCommand("sha224"),
+        checksumCommand("sha256"),
+        checksumCommand("sha384"),
+        checksumCommand("sha512"),
         {
           name: "remove",
           description:
-            "Remove the file(s). The planned behavior was that if any of the listed files already do not exist, the command returns a non-zero exit code, but no message is logged",
+            "Remove the file(s). Deprecated since 3.17, use rm instead. The planned behavior was that if any of the listed files already do not exist, the command returns a non-zero exit code, but no message is logged",
+          deprecated: true,
           args: {
             name: "file",
             template: "filepaths",
@@ -400,7 +646,8 @@ const completion: Fig.Spec = {
         {
           name: "remove_directory",
           description:
-            "Remove <dir> directories and their contents. If a directory does not exist it will be silently ignored. If <dir> is a symlink to a directory, just the symlink will be removed. Use rm instead",
+            "Remove <dir> directories and their contents. Deprecated since 3.17, use rm instead. If a directory does not exist it will be silently ignored. If <dir> is a symlink to a directory, just the symlink will be removed",
+          deprecated: true,
           args: {
             name: "dir",
             template: "folders",
@@ -408,40 +655,50 @@ const completion: Fig.Spec = {
           },
         },
         {
-          name: "rm",
-          description: "Remove the files <file> or directories dir",
+          name: "rename",
+          description:
+            "Rename a file or directory (on one volume). If file with the <newname> name already exists, then it will be silently replaced",
           args: [
             {
-              name: "file",
-              template: "filepaths",
-              isVariadic: true,
+              name: "oldname",
+              template: ["filepaths", "folders"],
             },
             {
-              name: "dir",
-              template: "folders",
-              isVariadic: true,
+              name: "newname",
+              template: ["filepaths", "folders"],
             },
           ],
+        },
+        {
+          name: "rm",
+          description: "Remove the files <file> or directories dir",
+          args: {
+            name: "file or dir",
+            template: ["filepaths", "folders"],
+            isVariadic: true,
+          },
           options: [
             {
               name: ["-r", "-R"],
               description:
-                "Use -r or -R to remove directories and their contents recursively. If any of the listed files/directories do not exist, the command returns a non-zero exit code, but no message is logged",
+                "Remove directories and their contents recursively. If any of the listed files/directories do not exist, the command returns a non-zero exit code, but no message is logged",
             },
             {
               name: "-f",
               description:
-                "The -f option changes the behavior to return a zero exit code (i.e. success) in such situations instead",
+                "Return a zero exit code (i.e. success) if any of the listed files/directories do not exist",
+            },
+            {
+              name: "--",
+              description:
+                "Stop interpreting options and treat all remaining arguments as paths, even if they start with -",
             },
           ],
         },
         {
-          name: "server",
-          description: "Launch cmake-server(7) mode",
-        },
-        {
           name: "sleep",
-          description: "Sleep for given number of seconds",
+          description:
+            "Sleep for given number of seconds. The number may be a floating point number",
           args: {
             name: "number",
             isVariadic: true,
@@ -472,7 +729,7 @@ const completion: Fig.Spec = {
             },
             {
               name: "z",
-              description: "Compress the resulting archive with gzip",
+              description: "Compress the resulting archive with gzip (Deflate)",
             },
             {
               name: "j",
@@ -480,16 +737,21 @@ const completion: Fig.Spec = {
             },
             {
               name: "J",
-              description: "Compress the resulting archive with XZ",
+              description: "Compress the resulting archive with XZ (LZMA2)",
             },
             {
               name: "--zstd",
               description: "Compress the resulting archive with Zstandard",
             },
             {
+              name: "--lzma",
+              description: "Compress the resulting archive with LZMA algorithm",
+            },
+            {
               name: "--files-from",
               description:
                 "Read file names from the given file, one per line. Blank lines are ignored. Lines may not start in - except for --add-file=<name> to add files whose names start in -",
+              requiresSeparator: true,
               args: {
                 name: "file",
                 template: "filepaths",
@@ -497,19 +759,91 @@ const completion: Fig.Spec = {
             },
             {
               name: "--format",
-              description: "Specify the format of the archive to be created",
+              description:
+                "Specify the format of the archive to be created (default: paxr)",
+              requiresSeparator: true,
               args: {
                 name: "format",
-                suggestions: ["7zip", "gnutar", "pax", "paxr", "zip"],
+                suggestions: [
+                  "7zip",
+                  "gnutar",
+                  "pax",
+                  {
+                    name: "paxr",
+                    description: "Restricted pax (default)",
+                  },
+                  {
+                    name: "raw",
+                    description: "Compress only one file, without an archive",
+                  },
+                  "zip",
+                ],
               },
             },
             {
               name: "--mtime",
               description:
                 "Specify modification time recorded in tarball entries",
+              requiresSeparator: true,
               args: {
                 name: "date",
               },
+            },
+            {
+              name: "--cmake-tar-compression-method",
+              description: "Select the compression method of the archive",
+              requiresSeparator: true,
+              args: {
+                name: "compression-method",
+                suggestions: [
+                  "none",
+                  "store",
+                  "deflate",
+                  "gzip",
+                  "bzip2",
+                  "lzma",
+                  "lzma2",
+                  "xz",
+                  {
+                    name: "ppmd",
+                    description: "Only supported by the 7zip format",
+                  },
+                  "zstd",
+                ],
+              },
+            },
+            {
+              name: "--cmake-tar-compression-level",
+              description:
+                "Set the compression level, between 0 (default) and 9 (0 to 19 for Zstandard, except for the zip format)",
+              requiresSeparator: true,
+              args: {
+                name: "compression-level",
+              },
+            },
+            {
+              name: "--cmake-tar-encoding",
+              description:
+                "Specify the pathname character encoding used in the archive (default: UTF-8)",
+              requiresSeparator: true,
+              args: {
+                name: "encoding",
+                suggestions: ["UTF-8", "OEM", "UTF-16LE", "UTF-16BE"],
+              },
+            },
+            {
+              name: "--cmake-tar-threads",
+              description:
+                "Use the given number of threads to operate on the archive. 0 uses the number of available cores",
+              requiresSeparator: true,
+              args: {
+                name: "number",
+              },
+            },
+            {
+              name: "--touch",
+              description:
+                "Use current local timestamp instead of extracting file timestamps from the archive",
             },
             {
               name: "--",
@@ -554,6 +888,41 @@ const completion: Fig.Spec = {
           name: "true",
           description: "Do nothing, with an exit code of 0",
         },
+        {
+          name: "delete_regv",
+          description: "Delete Windows registry value (Windows only)",
+          args: {
+            name: "key",
+          },
+        },
+        {
+          name: "env_vs8_wince",
+          description:
+            "Displays a batch file which sets the environment for the provided Windows CE SDK installed in VS2005 (Windows only)",
+          args: {
+            name: "sdkname",
+          },
+        },
+        {
+          name: "env_vs9_wince",
+          description:
+            "Displays a batch file which sets the environment for the provided Windows CE SDK installed in VS2008 (Windows only)",
+          args: {
+            name: "sdkname",
+          },
+        },
+        {
+          name: "write_regv",
+          description: "Write Windows registry value (Windows only)",
+          args: [
+            {
+              name: "key",
+            },
+            {
+              name: "value",
+            },
+          ],
+        },
       ],
     },
   ],
@@ -567,20 +936,78 @@ const completion: Fig.Spec = {
       },
     },
     {
-      name: "--help",
+      name: ["--help", "-h", "-help", "-usage"],
+      description:
+        "Print usage information and exit. With a keyword (property, variable, command, policy, generator or module) print the help for it",
+      args: [
+        {
+          name: "keyword",
+          isOptional: true,
+        },
+        {
+          name: "file",
+          template: "filepaths",
+          isOptional: true,
+        },
+      ],
     },
+    {
+      name: ["--version", "-version"],
+      description:
+        "Show program name/version banner and exit. With =json-v1, print extended version information in JSON format",
+      requiresSeparator: true,
+      args: {
+        name: "format",
+        isOptional: true,
+        suggestions: ["json-v1"],
+      },
+    },
+    helpListOption("full", "Print all help manuals and exit"),
+    helpOption("manual", "man", "Print one help manual and exit"),
+    helpListOption("manual-list", "List help manuals available and exit"),
+    helpOption("command", "cmd", "Print help for one command and exit"),
+    helpListOption(
+      "command-list",
+      "List commands with help available and exit"
+    ),
+    helpListOption("commands", "Print cmake-commands manual and exit"),
+    helpOption("diagnostic", "diag", "Print help for one diagnostic and exit"),
+    helpListOption(
+      "diagnostic-list",
+      "List diagnostics with help available and exit"
+    ),
+    helpListOption("diagnostics", "Print cmake-diagnostics manual and exit"),
+    helpOption("module", "mod", "Print help for one module and exit"),
+    helpListOption("module-list", "List modules with help available and exit"),
+    helpListOption("modules", "Print cmake-modules manual and exit"),
+    helpOption("policy", "cmp", "Print help for one policy and exit"),
+    helpListOption("policy-list", "List policies with help available and exit"),
+    helpListOption("policies", "Print cmake-policies manual and exit"),
+    helpOption("property", "prop", "Print help for one property and exit"),
+    helpListOption(
+      "property-list",
+      "List properties with help available and exit"
+    ),
+    helpListOption("properties", "Print cmake-properties manual and exit"),
+    helpOption("variable", "var", "Print help for one variable and exit"),
+    helpListOption(
+      "variable-list",
+      "List variables with help available and exit"
+    ),
+    helpListOption("variables", "Print cmake-variables manual and exit"),
     {
       name: "-B",
       description:
         "Path to directory which CMake will use as the root of build directory. If the directory doesn't already exist CMake will make it",
       args: {
-        name: "path-to-source",
+        name: "path-to-build",
         template: "folders",
       },
     },
     {
       name: "-C",
       description: "Pre-load a script to populate the cache",
+      isRepeatable: true,
       args: {
         name: "initial-cache",
         template: "filepaths",
@@ -589,6 +1016,7 @@ const completion: Fig.Spec = {
     {
       name: "-D",
       description: "Create or update a CMake CACHE entry",
+      isRepeatable: true,
       args: {
         name: "key value pair",
         description: "<var>:<type>=<value> or <var>=<value>",
@@ -597,6 +1025,7 @@ const completion: Fig.Spec = {
     {
       name: "-U",
       description: "Remove matching entries from CMake CACHE",
+      isRepeatable: true,
       args: {
         name: "globbing_expr",
       },
@@ -623,7 +1052,7 @@ const completion: Fig.Spec = {
       },
     },
     {
-      name: "toolchain",
+      name: "--toolchain",
       description:
         "Specify the cross compiling toolchain file, equivalent to setting CMAKE_TOOLCHAIN_FILE variable",
       args: {
@@ -641,61 +1070,112 @@ const completion: Fig.Spec = {
       },
     },
     {
-      name: "-Wno-dev",
-      description: "Suppress developer warnings",
+      name: "--project-file",
+      description:
+        "Specify an alternate project file name to be processed instead of CMakeLists.txt",
+      args: {
+        name: "project-file-name",
+        template: "filepaths",
+      },
     },
     {
       name: "-Wdev",
-      description: "Enable developer warnings",
+      description: "Enable developer warnings. Use -Wauthor instead",
+      deprecated: true,
     },
     {
+      name: "-Wno-dev",
+      description: "Suppress developer warnings. Use -Wno-author instead",
+      deprecated: true,
+    },
+    ...diagnosticOptions,
+    {
       name: "-Werror",
-      description: "Enable the type of warnings",
+      description:
+        "Promote the diagnostic category (and any children) to at least SEND_ERROR severity",
       requiresSeparator: true,
       args: {
-        name: "type",
+        name: "category",
         suggestions: [
+          ...diagnosticCategories,
           {
             name: "dev",
-            description: "Make developer warnings errors",
-          },
-          {
-            name: "deprecated",
-            description: "Make deprecated macro and function warnings errors",
+            description: "Make developer warnings errors (use author instead)",
+            deprecated: true,
           },
         ],
       },
     },
     {
       name: "-Wno-error",
-      description: "Disable the type of warnings",
+      description:
+        "Demote the diagnostic category (and any children) to at most WARN severity",
       requiresSeparator: true,
       args: {
-        name: "type",
+        name: "category",
         suggestions: [
+          ...diagnosticCategories,
           {
             name: "dev",
-            description: "Make developer warnings not errors",
-          },
-          {
-            name: "deprecated",
             description:
-              "Make deprecated macro and function warnings not errors",
+              "Make developer warnings not errors (use author instead)",
+            deprecated: true,
           },
         ],
       },
     },
     {
-      name: "-Wdeprecated",
-      description: "Enable deprecated functionality warnings",
-    },
-    {
-      name: "-Wno-deprecated",
-      description: "Suppress deprecated functionality warnings",
+      name: "--fresh",
+      description:
+        "Perform a fresh configuration of the build tree, removing any existing CMakeCache.txt file and CMakeFiles/ directory",
     },
     {
       name: "-L",
-      description: "List non-advanced cached-variables",
+      description: "List non-advanced cached variables",
+    },
+    {
+      name: "-LA",
+      description: "List all cached variables, including advanced ones",
+    },
+    {
+      name: "-LH",
+      description: "List non-advanced cached variables with help for each",
+    },
+    {
+      name: "-LAH",
+      description:
+        "List all cached variables, including advanced ones, with help for each",
+    },
+    {
+      name: "-LR",
+      description:
+        "Show non-advanced cached variables that match the given regex",
+      args: {
+        name: "regex",
+      },
+    },
+    {
+      name: "-LRA",
+      description: "Show all cached variables that match the given regex",
+      args: {
+        name: "regex",
+      },
+    },
+    {
+      name: "-LRH",
+      description:
+        "Show non-advanced cached variables that match the given regex, with help for each",
+      args: {
+        name: "regex",
+      },
+    },
+    {
+      name: "-LRAH",
+      description:
+        "Show all cached variables that match the given regex, with help for each",
+      args: {
+        name: "regex",
+      },
     },
     {
       name: "-N",
@@ -707,7 +1187,6 @@ const completion: Fig.Spec = {
       args: {
         name: "file",
         template: "filepaths",
-        isOptional: true,
       },
     },
     {
@@ -720,7 +1199,12 @@ const completion: Fig.Spec = {
       },
     },
     {
-      name: "--log-level",
+      name: "--print-config-dir",
+      description:
+        "Print CMake config directory for user-wide File API queries",
+    },
+    {
+      name: ["--log-level", "--loglevel"],
       description: "Set log-level",
       args: {
         name: "log-level",
@@ -741,8 +1225,18 @@ const completion: Fig.Spec = {
         "Enable the message() command outputting context attached to each message",
     },
     {
+      name: "--sarif-output",
+      description:
+        "Enable logging of diagnostic messages produced by CMake in the SARIF format at the given path",
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
       name: "--debug-trycompile",
-      description: "Do not delete the try_compile() build tree",
+      description:
+        "Do not delete the files and directories created for try_compile() / try_run() calls",
     },
     {
       name: "--debug-output",
@@ -751,6 +1245,26 @@ const completion: Fig.Spec = {
     {
       name: "--debug-find",
       description: "Put cmake find commands in a debug mode",
+    },
+    {
+      name: "--debug-find-pkg",
+      description:
+        "Put cmake find commands in a debug mode when running under calls to find_package() for the given packages",
+      requiresSeparator: true,
+      args: {
+        name: "pkg",
+        description: "Comma-separated list of case-sensitive package names",
+      },
+    },
+    {
+      name: "--debug-find-var",
+      description:
+        "Put cmake find commands in a debug mode when called with the given result variables",
+      requiresSeparator: true,
+      args: {
+        name: "var",
+        description: "Comma-separated list of variable names",
+      },
     },
     {
       name: "--trace",
@@ -772,6 +1286,7 @@ const completion: Fig.Spec = {
       name: "--trace-source",
       description:
         "Put cmake in trace mode, but output only lines of a specified file",
+      isRepeatable: true,
       args: {
         name: "file",
         template: "filepaths",
@@ -788,38 +1303,104 @@ const completion: Fig.Spec = {
     },
     {
       name: "--warn-uninitialized",
-      description: "Warn about uninitialized values",
+      description: "Compatibility synonym for -Wuninitialized",
+      deprecated: true,
     },
     {
       name: "--warn-unused-vars",
       description:
         "Does nothing. In CMake versions 3.2 and below this enabled warnings about unused variables. In CMake versions 3.3 through 3.18 the option was broken. In CMake 3.19 and above the option has been removed",
+      deprecated: true,
     },
     {
       name: "--no-warn-unused-cli",
-      description:
-        "Don't warn about command line options. Don't find variables that are declared on the command line, but not used",
+      description: "Compatibility synonym for -Wno-unused-cli",
+      deprecated: true,
     },
     {
       name: "--check-system-vars",
       description: "Find problems with variable usage in system files",
     },
     {
+      name: "--compile-no-warning-as-error",
+      description:
+        "Ignore target property COMPILE_WARNING_AS_ERROR and variable CMAKE_COMPILE_WARNING_AS_ERROR, preventing warnings from being treated as errors on compile",
+    },
+    {
+      name: "--link-no-warning-as-error",
+      description:
+        "Ignore target property LINK_WARNING_AS_ERROR and variable CMAKE_LINK_WARNING_AS_ERROR, preventing warnings from being treated as errors on link",
+    },
+    {
+      name: "--profiling-output",
+      description:
+        "Used in conjunction with --profiling-format to output to a given path",
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--profiling-format",
+      description:
+        "Enable the output of profiling data of CMake script in the given format",
+      args: {
+        name: "format",
+        suggestions: [
+          {
+            name: "google-trace",
+            description: "Google Trace Format",
+          },
+        ],
+      },
+    },
+    {
       name: "--preset",
       description:
-        "Reads a preset from <path-to-source>/CMakePresets.json and <path-to-source>/CMakeUserPresets.json. The preset may specify the generator and the build directory, and a list of variables and other arguments to pass to CMake. The current working directory must contain CMake preset files. The CMake GUI can also recognize CMakePresets.json and CMakeUserPresets.json files",
+        "Reads a preset from CMakePresets.json and CMakeUserPresets.json (or the file given by --presets-file) in the top level source directory. The preset may specify the generator, the build directory, a list of variables, and other arguments to pass to CMake",
       args: {
         name: "preset",
       },
     },
+    presetsFileOption,
     {
       name: "--list-presets",
-      description: "Lists the available presets",
+      description:
+        "Lists the available presets of the given type. Defaults to configure. A '-defined' suffix lists all non-hidden defined presets, including unavailable ones",
       args: {
         name: "type",
         isOptional: true,
-        suggestions: ["configure", "build", "test", "all"],
+        suggestions: [
+          ...listPresetTypes,
+          "defined",
+          ...listPresetTypes.map((type) => `${type}-defined`),
+        ],
       },
+    },
+    {
+      name: "--debugger",
+      description:
+        "Enables interactive debugging of the CMake language through a Debug Adapter Protocol interface on the pipe named by --debugger-pipe",
+    },
+    {
+      name: "--debugger-pipe",
+      description:
+        "Name of the pipe (on Windows) or domain socket (on Unix) to use for debugger communication",
+      args: {
+        name: "pipe name",
+      },
+    },
+    {
+      name: "--debugger-dap-log",
+      description: "Logs all debugger communication to the specified file",
+      args: {
+        name: "log path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--find-package",
+      description: "Legacy pkg-config like mode. Do not use in new projects",
     },
   ],
   args: {

@@ -1,14 +1,20 @@
+// man (macOS 26 FreeBSD-derived man.sh, apple-oss-distributions/man tag man-62 which is the latest tag, 2026-11-19). Source: man/man.1, man/man.sh (getopts string and incompatible option checks) and man/man.conf (default MANSECT); not run on macOS.
+// Verified against man_usage() and getopts 'C:M:P:S:adfhkm:op:tw' in man.sh.
+// Section suggestions for -S are the nine sections named in man.1.
+// Removed options that the old BSD man had but the current macOS man (man.sh) rejects: -B, -H, -D, -F/--preformat, -c.
+// Kept -K, -W and --path (accepted by GNU man-db 2.13.3, which was checked via its src/man.c option table). The page-name generator (`man -k .`) is unchanged and was not run on macOS.
 import { valueList } from "@tabsmith/autocomplete-generators";
 
 const sections = {
-  "1": "General commands",
-  "2": "System calls",
-  "3": "C library functions",
-  "4": "Devices and special files",
-  "5": "File formats and conventions",
-  "6": "Games, etc",
-  "7": "Miscellanea",
-  "8": "System admin and daemons",
+  "1": "General Commands",
+  "2": "System Calls",
+  "3": "Library Functions",
+  "4": "Kernel Interfaces",
+  "5": "File Formats",
+  "6": "Games",
+  "7": "Miscellaneous Information",
+  "8": "System Manager's",
+  "9": "Kernel Developer's",
 };
 
 /** Cache of page suggestions. The key is the first letter of the `name` */
@@ -113,14 +119,15 @@ const completionSpec: Fig.Spec = {
       description: "Specify the configuration file to use",
       args: {
         name: "config_file",
+        template: "filepaths",
       },
     },
     {
       name: "-M",
       description:
-        "Specify the list of directories to search (colon separated)",
+        "Force a specific colon separated manual path instead of the default search path",
       args: {
-        name: "path",
+        name: "manpath",
         generators: {
           template: "folders",
           getQueryTerm: ":",
@@ -129,33 +136,17 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-P",
-      description: "Specify the pager program",
+      description: "Use the specified pager",
       args: {
         name: "pager",
       },
     },
     {
-      name: "-B",
-      description: "Specify which browser to use for HTML files",
-      args: {
-        name: "browser",
-        default: "/usr/bin/less -is",
-      },
-    },
-    {
-      name: "-H",
-      description: "Specify a command that renders HTML files as text",
-      args: {
-        name: "command",
-        default: "/bin/cat",
-      },
-    },
-    {
       name: "-S",
       description:
-        "Specify a colon-separated list of manual sections to search",
+        "Restrict manual sections searched to the specified colon delimited list",
       args: {
-        name: "sections",
+        name: "mansect",
         generators: valueList({
           delimiter: ":",
           insertDelimiter: true,
@@ -169,68 +160,69 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-a",
-      description: "Open every matching page instead of just the first",
-    },
-    {
-      name: "-c",
       description:
-        "Reformat the source page, even when an up-to-date cat-page exists",
+        "Display all manual pages instead of just the first found for each page argument",
     },
     {
       name: "-d",
-      description: "Don't actually display the pages (dry run)",
-    },
-    {
-      name: "-D",
-      description: "Both display and print debugging info",
+      description:
+        "Print extra debugging information (repeat for more verbosity) and do not display the manual page",
+      isRepeatable: true,
     },
     {
       name: "-f",
-      description: "Equivalent to `whatis`",
-    },
-    {
-      name: ["-F", "--preformat"],
-      description: "Format only, do not display",
+      description: "Emulate whatis",
+      exclusiveOn: ["-k", "-t", "-w"],
     },
     {
       name: "-h",
-      description: "Print a help message and exit",
+      description: "Display short help message and exit",
     },
     {
       name: "-k",
-      description: "Equivalent to apropos",
+      description: "Emulate apropos",
+      exclusiveOn: ["-f", "-t", "-w"],
     },
     {
       name: "-K",
-      description: "Search for a given string in all pages",
+      description: "Search for a given string in all pages (GNU man-db only)",
     },
     {
       name: "-m",
       description:
-        "Specify an alternate set of pages to search based on the system name given",
+        "Override the default architecture and machine settings (accepted but not implemented on macOS)",
       args: {
-        name: "system",
+        name: "arch[:machine]",
       },
+    },
+    {
+      name: "-o",
+      description: "Force use of non-localized manual pages",
     },
     {
       name: "-p",
       description:
-        "Specify the sequence of preprocessors to run before nroff or troff",
+        "Use the given list of preprocessors before running nroff or troff: e (eqn), p (pic), r (refer), t (tbl), v (vgrind)",
       args: {
         name: "preprocessors",
       },
     },
     {
       name: "-t",
-      description: "Use `/usr/bin/groff -Tps -mandoc -c` to format the page",
+      description:
+        "Send manual page source through troff, allowing transformation of the manual pages to other formats",
+      exclusiveOn: ["-f", "-k", "-w"],
     },
     {
       name: ["-w", "--path"],
-      description: "Print the location of files that would be displayed",
+      description:
+        "Display the location of the manual page instead of the contents",
+      exclusiveOn: ["-f", "-k", "-t"],
     },
     {
       name: "-W",
-      description: "Print file locations, one per line",
+      description:
+        "Print the location of the cat file(s) instead (GNU man-db only)",
     },
   ],
 };

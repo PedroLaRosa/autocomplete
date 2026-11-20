@@ -1,4 +1,6 @@
-// https://github.com/hnarayanan/shpotify
+// shpotify v2.1 (Homebrew formula "shpotify" / github.com/hnarayanan/shpotify, 2026-11-19), https://github.com/hnarayanan/shpotify
+// Source: the `spotify` bash script (showHelp text and command dispatch) at tag 2.1 and main f764f54, which have the same commands.
+// Not run: it drives the macOS Spotify app through osascript. It has no --help/-h flag, `help` (or any unknown command) prints the usage.
 const completionSpec: Fig.Spec = {
   name: "spotify",
   description: "CLI to use Spotify from the terminal",
@@ -8,8 +10,9 @@ const completionSpec: Fig.Spec = {
       description: "Resume playback where Spotify last left off",
       args: {
         name: "song name",
-        description: "The name of the song to start playing",
+        description: "The name of the song to find and start playing",
         isOptional: true,
+        isVariadic: true,
       },
       subcommands: [
         {
@@ -18,6 +21,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "album name",
             description: "The album name you want to play",
+            isVariadic: true,
           },
         },
         {
@@ -26,14 +30,25 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "artist name",
             description: "The artist name you want to play",
+            isVariadic: true,
           },
         },
         {
           name: "list",
-          description: "Find a playlist by name and plays it",
+          description: "Find a playlist by name and play it",
           args: {
             name: "playlist name",
             description: "The playlist name you want to play",
+            isVariadic: true,
+          },
+        },
+        {
+          name: "track",
+          description: "Find a track by name and play it",
+          args: {
+            name: "track name",
+            description: "The track name you want to play",
+            isVariadic: true,
           },
         },
         {
@@ -88,6 +103,7 @@ const completionSpec: Fig.Spec = {
         suggestions: [
           { name: "up", description: "Increase the volume by 10%" },
           { name: "down", description: "Decrease the volume by 10%" },
+          { name: "show", description: "Show the current Spotify volume" },
         ],
       },
     },
@@ -99,6 +115,10 @@ const completionSpec: Fig.Spec = {
         { name: "album", description: "Show the currently playing album" },
         { name: "track", description: "Show the currently playing track" },
       ],
+    },
+    {
+      name: "info",
+      description: "Show detailed information about the current track",
     },
     {
       name: "share",
@@ -118,15 +138,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "toggle",
+      description: "Toggle a playback mode",
       subcommands: [
         { name: "shuffle", description: "Toggle shuffle playback mode" },
         { name: "repeat", description: "Toggle repeat playback mode" },
       ],
     },
-  ],
-  options: [
     {
-      name: ["--help", "-h"],
+      name: "help",
       description: "Show help for spotify",
     },
   ],

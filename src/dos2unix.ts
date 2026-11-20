@@ -1,3 +1,33 @@
+// dos2unix v7.5.7 (upstream release 2026-08-27 per NEWS.txt, same as Homebrew, 2026-11-19). Source: dos2unix-7.5.7 source tarball (man/man1/dos2unix.pod, PrintUsage and the option parser in common.c); read only, the binary was not built or run.
+// Windows-only options (-D/--display-enc, -gb/--gb18030) are left out because the source only builds them on Windows.
+const infoFlags: Fig.Suggestion[] = [
+  {
+    name: "0",
+    description:
+      "Print the file information lines followed by a null character instead of a newline",
+  },
+  { name: "d", description: "Print number of DOS line breaks" },
+  { name: "u", description: "Print number of Unix line breaks" },
+  { name: "m", description: "Print number of Mac line breaks" },
+  { name: "b", description: "Print the byte order mark" },
+  { name: "t", description: "Print if file is text or binary" },
+  {
+    name: "e",
+    description:
+      "Print the type of the line break of the last line, or noeol if there is none",
+  },
+  { name: "c", description: "Print only the files that would be converted" },
+  { name: "h", description: "Print a header" },
+  { name: "p", description: "Show file names without path" },
+];
+
+const infoArg: Fig.Arg = {
+  name: "FLAGS",
+  description: "One or more flags that change the output",
+  isOptional: true,
+  suggestions: infoFlags,
+};
+
 const completionSpec: Fig.Spec = {
   name: "dos2unix",
   description: "DOS to Unix file format converter",
@@ -70,43 +100,35 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: ["-D", "--display-enc"],
-      description: "Set encoding of displayed text",
-      args: {
-        name: "ENCODING",
-        suggestions: ["ansi", "unicode", "unicodebom", "utf8", "utf8bom"],
-      },
+      name: ["-e", "--add-eol"],
+      description:
+        "Add a line break to the last line if there isn't one. This works for every conversion",
+    },
+    {
+      name: "--error-binary",
+      description: "Return an error if a binary file is skipped",
     },
     {
       name: ["-f", "--force"],
       description: "Force conversion of binary files",
     },
     {
-      name: ["-gb", "--gb18030"],
-      description:
-        "On Windows UTF-16 files are by default converted to UTF-8, regardless of the locale setting",
-    },
-    {
       name: "-i",
       description: "Display file information. No conversion is done",
       insertValue: "-i{cursor}",
       exclusiveOn: ["--info"],
-      args: {
-        name: "value",
-      },
+      args: infoArg,
     },
     {
       name: "--info",
       description: "Display file information. No conversion is done",
       requiresSeparator: true,
       exclusiveOn: ["-i"],
-      args: {
-        name: "value",
-      },
+      args: infoArg,
     },
     {
       name: ["-k", "--keepdate"],
-      description: "",
+      description: "Keep the date stamp of output file same as input file",
     },
     {
       name: ["-L", "--license"],
@@ -122,7 +144,7 @@ const completionSpec: Fig.Spec = {
         "Write a Byte Order Mark (BOM) in the output file. By default an UTF-8 BOM is written",
     },
     {
-      name: "--newfile",
+      name: ["-n", "--newfile"],
       description:
         "New file mode. Convert file INFILE and write output to file OUTFILE. File names must be given in pairs and wildcard names should not be used or you will lose your files",
       args: [
@@ -138,14 +160,29 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "--no-add-eol",
+      description:
+        "Do not add a line break to the last line if there isn't one (default)",
+    },
+    {
       name: "--no-allow-chown",
       description:
         "Don't allow file ownership change in old file mode (default)",
     },
     {
+      name: "--no-error-binary",
+      description:
+        "Do not return an error if a binary file is skipped (default)",
+    },
+    {
+      name: ["-O", "--to-stdout"],
+      description:
+        "Write to standard output, like a Unix filter. Use option -o to go back to old file (in-place) mode",
+    },
+    {
       name: ["-o", "--oldfile"],
       description:
-        "Old file mode. Convert file FILE and overwrite output to it",
+        "Old file mode. Convert file FILE and overwrite output to it. The program defaults to run in this mode",
       args: {
         name: "FILE",
         template: "filepaths",

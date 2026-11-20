@@ -1,14 +1,27 @@
+// tccutil (Xcode 27.2 (27B52) bundled man page, 2026-11-19). Source: tccutil(1) HTML export from keith/xcode-man-pages
+// at the Xcode 27.2 commit (page last changed in 2021 regeneration; text dated 2012), read statically; not run on macOS.
+// The man page documents only "reset", the special service "All" and the AddressBook example; service names beyond those
+// come from the previous spec plus the PPPC payload list in apple/device-management (SystemPolicyAppBundles, SystemPolicyAppData).
 import { generateBundleIds } from "./open";
 
 const commands: Fig.Suggestion[] = [
   {
     name: "reset",
-    description: "Reset permissions",
+    description:
+      "Reset all decisions for the service so apps prompt again on next access (for one app if a bundle id is given)",
     type: "subcommand",
   },
 ];
 
 const services: Fig.Suggestion[] = [
+  {
+    name: "All",
+    description: "Every service",
+  },
+  {
+    name: "AddressBook",
+    description: "Access your contacts",
+  },
   {
     name: "AppleEvents",
   },
@@ -90,6 +103,14 @@ const services: Fig.Suggestion[] = [
     description: "Access Speech Recognition",
   },
   {
+    name: "SystemPolicyAppBundles",
+    description: "Update or delete other apps",
+  },
+  {
+    name: "SystemPolicyAppData",
+    description: "Access the data of other apps",
+  },
+  {
     name: "SystemPolicyDesktopFolder",
     description: "Access files in your Desktop folder",
   },
@@ -123,15 +144,15 @@ const services: Fig.Suggestion[] = [
   },
   {
     name: "SystemPolicyAllFiles",
-    description: "Full Disk Acces",
+    description: "Full Disk Access",
   },
   {
     name: "Accessibility",
-    description: "Allows app to control your compute",
+    description: "Allows app to control your computer",
   },
   {
     name: "PostEvent",
-    description: "Allows to send keystroke",
+    description: "Allows sending keystrokes",
   },
   {
     name: "ListenEvent",

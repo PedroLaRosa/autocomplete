@@ -1,3 +1,38 @@
+// tmutil (Xcode 27.2 (27B52) bundled man page, 2026-11-19). Source: tmutil(8) HTML export from keith/xcode-man-pages
+// at the Xcode 27.2 commit (page last changed in Xcode 15.0 beta 5, when setquota was added), read statically; not run on macOS.
+// Not in the man page but kept from the previous spec: the "version" verb and the compare flags -h/-l (now hidden).
+const rootPrivileges = "requires root and Full Disk Access";
+
+const backupListOptions: Fig.Option[] = [
+  {
+    name: "-d",
+    description: "Specify a destination volume to list backups from",
+    args: { name: "backup mount point", template: "folders" },
+  },
+  {
+    name: "-m",
+    dependsOn: ["-d"],
+    description: "Attempt to mount the backups and list their mounted paths",
+  },
+  {
+    name: "-t",
+    dependsOn: ["-m"],
+    description:
+      "Only show the backup timestamp rather than the full name or path",
+  },
+];
+
+const exclusionOptions: Fig.Option[] = [
+  {
+    name: "-p",
+    description: `Configure fixed-path exclusions (${rootPrivileges})`,
+  },
+  {
+    name: "-v",
+    description: `Configure volume exclusions (${rootPrivileges})`,
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "tmutil",
   description: "Time Machine utility",
@@ -5,13 +40,11 @@ const completionSpec: Fig.Spec = {
     { name: "version", description: "Print the current version" },
     {
       name: "enable",
-      description:
-        "Turn on automatic backups (required root + full disk access)",
+      description: `Turn on automatic backups (${rootPrivileges})`,
     },
     {
       name: "disable",
-      description:
-        "Turn off automatic backups (required root + full disk access)",
+      description: `Turn off automatic backups (${rootPrivileges})`,
     },
     {
       name: "startbackup",
@@ -45,8 +78,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "delete",
-      description:
-        "Deletes backups with the specified timestamp from the backup volume mounted at the given mountpoint",
+      description: `Delete backups with the specified timestamp from the backup volume mounted at the given mount point (${rootPrivileges})`,
       options: [
         {
           name: "-d",
@@ -68,8 +100,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "deleteinprogress",
-      description: "Delete all in-progress backups for a machine directory",
-      args: { name: "machine directory" },
+      description: `Delete all in-progress backups for a machine directory (${rootPrivileges})`,
+      args: { name: "machine directory", template: "folders" },
     },
     {
       name: "restore",
@@ -85,10 +117,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "compare",
-      description: "Perform a backup diff",
+      description:
+        "Perform a backup diff (compares the computer to the latest backup when no path is given; default properties are -@gmstu)",
       args: [
-        { name: "backup or path" },
-        { name: "path (if not backup)", isOptional: true },
+        {
+          name: "backup path or path",
+          isOptional: true,
+          template: "filepaths",
+        },
+        { name: "path", isOptional: true, template: "filepaths" },
       ],
       options: [
         { name: "-@", description: "Compare extended attributes" },
@@ -98,8 +135,8 @@ const completionSpec: Fig.Spec = {
         { name: "-e", description: "Compare ACLs" },
         { name: "-f", description: "Compare file flags" },
         { name: "-g", description: "Compare GIDs" },
-        { name: "-h", description: "Unknown" },
-        { name: "-l", description: "Unknown" },
+        { name: "-h", description: "Undocumented property flag", hidden: true },
+        { name: "-l", description: "Undocumented property flag", hidden: true },
         { name: "-m", description: "Compare file modes" },
         { name: "-n", description: "No metadata comparison" },
         { name: "-s", description: "Compare sizes" },
@@ -133,8 +170,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "setdestination",
-      description:
-        "Configure a local HFS+ or APFS volume, AFP share, or SMB share as a backup destination (requires root + Full Disk Access)",
+      description: `Configure a local HFS+ or APFS volume, AFP share, or SMB share as a backup destination (${rootPrivileges})`,
       args: { name: "destination" },
       options: [
         {
@@ -149,9 +185,13 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "setquota",
+      description: `Set the quota for the destination with the specified unique identifier, in gigabytes (${rootPrivileges})`,
+      args: [{ name: "destination id" }, { name: "quota in gb" }],
+    },
+    {
       name: "removedestination",
-      description:
-        "Remove the destination with the specified unique identifier from the Time Machine configuration (requires root + Full Disk Access)",
+      description: `Remove the destination with the specified unique identifier from the Time Machine configuration (${rootPrivileges})`,
       args: { name: "destination id" },
     },
     {
@@ -165,40 +205,41 @@ const completionSpec: Fig.Spec = {
     {
       name: "addexclusion",
       description:
-        "Configure an exclusion that tells Time Machine not to backup a file, directory, or volume during future backups",
-      args: { name: "item", isVariadic: true },
-      options: [
-        { name: "-p", description: "Configure fixed-path exclusions" },
-        { name: "-v", description: "Configure volume exclusions" },
-      ],
+        "Configure an exclusion that tells Time Machine not to back up a file, directory, or volume during future backups",
+      args: { name: "item", isVariadic: true, template: "filepaths" },
+      options: exclusionOptions,
     },
     {
       name: "removeexclusion",
       description:
-        "Configure  Time Machine to backup a file, directory, or volume during future backups",
-      args: { name: "item", isVariadic: true },
-      options: [
-        { name: "-p", description: "Configure fixed-path exclusions" },
-        { name: "-v", description: "Configure volume exclusions" },
-      ],
+        "Configure Time Machine to back up a file, directory, or volume during future backups",
+      args: { name: "item", isVariadic: true, template: "filepaths" },
+      options: exclusionOptions,
     },
     {
       name: "isexcluded",
       description:
         "Determine if a file, directory, or volume are excluded from Time Machine backups",
-      args: { name: "item", isVariadic: true },
+      args: { name: "item", isVariadic: true, template: "filepaths" },
+      options: [
+        { name: "-X", description: "Print output in XML property list format" },
+      ],
     },
     {
       name: "inheritbackup",
-      description:
-        "Claim a machine directory or sparsebundle for use by the current machine",
-      args: { name: "machine directory or sparsebundle" },
+      description: `Claim a machine directory or sparsebundle for use by the current machine (${rootPrivileges})`,
+      args: {
+        name: "machine directory or sparsebundle",
+        template: "filepaths",
+      },
     },
     {
       name: "associatedisk",
-      description:
-        "Bind a volume store directory to the specified local disk, thereby reconfiguring the backup history (requires root + Full Disk Access)",
-      args: [{ name: "mount point" }, { name: "volume backup directory" }],
+      description: `Bind a volume store directory to the specified local disk, thereby reconfiguring the backup history (${rootPrivileges})`,
+      args: [
+        { name: "mount point", template: "folders" },
+        { name: "volume backup directory", template: "folders" },
+      ],
       options: [
         {
           name: "-a",
@@ -209,47 +250,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "latestbackup",
-      description: "List this computer's latest completed backup",
-      options: [
-        {
-          name: "-d",
-          description: "Specify a destination volume to list backups from",
-        },
-        {
-          name: "-m",
-          dependsOn: ["-d"],
-          description:
-            "Attempt to mount the backups and list their mounted paths",
-        },
-        {
-          name: "-t",
-          dependsOn: ["-m"],
-          description:
-            "Only show the backup timestampt rather than the full name or path",
-        },
-      ],
+      description: `List this computer's latest completed backup (${rootPrivileges})`,
+      options: backupListOptions,
     },
     {
       name: "listbackups",
-      description: "List all of this computer's completed backups",
-      options: [
-        {
-          name: "-d",
-          description: "Specify a destination volume to list backups from",
-        },
-        {
-          name: "-m",
-          dependsOn: ["-d"],
-          description:
-            "Attempt to mount the backups and list their mounted paths",
-        },
-        {
-          name: "-t",
-          dependsOn: ["-m"],
-          description:
-            "Only show the backup timestampt rather than the full name or path",
-        },
-      ],
+      description: `List all of this computer's completed backups (${rootPrivileges})`,
+      options: backupListOptions,
     },
     {
       name: "machinedirectory",
@@ -260,7 +267,7 @@ const completionSpec: Fig.Spec = {
       name: "calculatedrift",
       description:
         "Analyze the backups in an HFS machine directory and determine the amount of change between each",
-      args: { name: "machine directory" },
+      args: { name: "machine directory", template: "folders" },
     },
     {
       name: "uniquesize",
@@ -294,12 +301,11 @@ const completionSpec: Fig.Spec = {
       name: "deletelocalsnapshots",
       description:
         "Delete all local Time Machine snapshots on all mounted disks for the specified date or on the given disk",
-      args: { name: "mount point or snapshot date", isOptional: true },
+      args: { name: "mount point or snapshot date (YYYY-MM-DD-HHMMSS)" },
     },
     {
       name: "thinlocalsnapshots",
-      description:
-        "Think local Time Machine snapshots for the specified volume",
+      description: "Thin local Time Machine snapshots for the specified volume",
       args: [
         { name: "mount point" },
         { name: "purge amount (bytes)", isOptional: true },

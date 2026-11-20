@@ -1,14 +1,10 @@
-const shortFormatArg: Fig.Arg = {
-  name: "-f",
-  suggestions: ["rich", "plain", "md"],
-  default: "rich",
-};
+// ansible-lint v26.11.0 (PyPI latest, 2026-11-19). Source: `ansible-lint --help` and src/ansiblelint/cli.py of ansible-lint 26.11.0 run from a venv (with ansible-core 2.22.0); deprecated --write and -p/--parseable are translated to --fix and --format=pep8 by get_config()
 
-const fullFormatArg: Fig.Arg = {
-  name: "-f",
+const formatArg: Fig.Arg = {
+  name: "FORMAT",
   suggestions: [
-    "rich",
-    "plain",
+    "brief",
+    "full",
     "md",
     "json",
     "codeclimate",
@@ -16,7 +12,6 @@ const fullFormatArg: Fig.Arg = {
     "pep8",
     "sarif",
   ],
-  default: "rich",
 };
 
 const completionSpec: Fig.Spec = {
@@ -28,21 +23,34 @@ const completionSpec: Fig.Spec = {
       description: "Show help for ansible-lint",
     },
     {
+      name: ["--list-profiles", "-P"],
+      description: "List all profiles",
+      exclusiveOn: ["-L", "--list-rules", "-T", "--list-tags"],
+    },
+    {
       name: ["--list-rules", "-L"],
       description: "List all the rules",
-      exclusiveOn: ["-T"],
+      exclusiveOn: ["-P", "--list-profiles", "-T", "--list-tags"],
     },
     {
       name: ["--list-tags", "-T"],
       description: "List all the tags and the rules they cover",
-      exclusiveOn: ["-L"],
+      exclusiveOn: ["-P", "--list-profiles", "-L", "--list-rules"],
     },
     {
       name: ["--format", "-f"],
       displayName: "Format",
-      description: "Stdout formatting",
-      args: fullFormatArg,
+      description: "Stdout formatting, json being an alias for codeclimate",
+      args: formatArg,
       icon: "fig://icon?type=characters",
+    },
+    {
+      name: "--sarif-file",
+      description: "SARIF output file",
+      args: {
+        name: "SARIF_FILE",
+        template: "filepaths",
+      },
     },
     {
       name: "-q",
@@ -50,13 +58,25 @@ const completionSpec: Fig.Spec = {
       isRepeatable: 2,
     },
     {
-      name: "-p",
-      description: "Parseable output, same as '-f pep8'",
+      name: ["--parseable", "-p"],
+      description:
+        "Parseable output, deprecated alias of '--format=pep8'; use -f pep8 instead",
+      deprecated: true,
     },
     {
-      name: "--progressive",
-      description:
-        "Return success if it detects a reduction in number of violations compared with previous git commit. This feature works only in git repositories",
+      name: "--profile",
+      description: "Specify which rules profile to be used",
+      args: {
+        name: "PROFILE",
+        suggestions: [
+          "min",
+          "basic",
+          "moderate",
+          "safety",
+          "shared",
+          "production",
+        ],
+      },
     },
     {
       name: "--project-dir",
@@ -80,13 +100,34 @@ const completionSpec: Fig.Spec = {
       description: "Keep using embedded rules when using '-r'",
     },
     {
-      name: "--write",
+      name: ["--strict", "-s"],
+      description: "Return non-zero exit code on warnings as well as errors",
+    },
+    {
+      name: "--fix",
       description:
-        "Allow ansible-lint to reformat YAML files and run rule transforms",
+        "Allow ansible-lint to perform auto-fixes, including YAML reformatting; '--fix' and '--fix=all' are equivalent",
+      requiresSeparator: true,
       args: {
         name: "WRITE_LIST",
         description:
           "Limit the effective rule transforms by passing a keywords 'all' or 'none' or a comma separated list of rule ids or rule tags",
+        isOptional: true,
+        suggestions: ["all", "none", "rule1,rule2,..."],
+        default: "all",
+      },
+    },
+    {
+      name: "--write",
+      description:
+        "Deprecated alias of '--fix' (accepted with a warning); use --fix instead",
+      deprecated: true,
+      requiresSeparator: true,
+      args: {
+        name: "WRITE_LIST",
+        description:
+          "Limit the effective rule transforms by passing a keywords 'all' or 'none' or a comma separated list of rule ids or rule tags",
+        isOptional: true,
         suggestions: ["all", "none", "rule1,rule2,..."],
         default: "all",
       },
@@ -98,6 +139,9 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--tags", "-t"],
       description: "Only check rules whose id/tags match these values",
+      args: {
+        name: "TAGS",
+      },
     },
     {
       name: "-v",
@@ -112,9 +156,14 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--generate-ignore",
+      description:
+        "Generate a text file '.ansible-lint-ignore' that ignores all found violations, each line contains filename and rule id separated by a space",
+    },
+    {
       name: ["--warn-list", "-w"],
       description:
-        "Only warn about these rules, unless overridden in config file defaults to 'experimental'",
+        "Only warn about these rules, unless overridden in config file",
       args: {
         name: "WARN_LIST",
       },
@@ -135,7 +184,7 @@ const completionSpec: Fig.Spec = {
       description: "Force colored output, same as FORCE_COLOR=1",
     },
     {
-      name: "--exclude-paths",
+      name: "--exclude",
       description:
         "Path to directories or files to skip. This option is repeatable",
       args: {
@@ -145,17 +194,43 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--config-file",
+      name: ["--config-file", "-c"],
       description:
-        "Specify configuration file to use. By default it will look for '.ansible-lint' or '.config/ansible-lint.yml'",
+        "Specify configuration file to use. By default it will look for '.ansible-lint', '.ansible-lint.yml', '.ansible-lint.yaml', '.config/ansible-lint.yml' or '.config/ansible-lint.yaml'",
       args: {
         name: "CONFIG_FILE",
         template: "filepaths",
       },
     },
     {
+      name: ["--ignore-file", "-i"],
+      description:
+        "Specify ignore file to use. By default it will look for '.ansible-lint-ignore' or '.config/ansible-lint-ignore.txt'",
+      args: {
+        name: "IGNORE_FILE",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--yamllint-file",
+      description:
+        "Specify yamllint config file to use. By default it will look for '.yamllint', '.yamllint.yaml', '.yamllint.yml', '~/.config/yamllint/config' or the XDG_CONFIG_HOME and YAMLLINT_CONFIG_FILE environment variables",
+      args: {
+        name: "YAMLLINT_FILE",
+        template: "filepaths",
+      },
+    },
+    {
       name: "--offline",
-      description: "Disable installation of requirements.yml",
+      description:
+        "Disable installation of requirements.yml and schema refreshing",
+      exclusiveOn: ["--no-offline"],
+    },
+    {
+      name: "--no-offline",
+      description:
+        "Enable installation of requirements.yml and schema refreshing",
+      exclusiveOn: ["--offline"],
     },
     {
       name: "--version",

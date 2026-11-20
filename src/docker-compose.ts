@@ -1,3 +1,4 @@
+// Docker Compose v5.8.0 (gh release view -R docker/compose, 2026-11-19). Source: docs/reference/*.yaml and cmd/compose at v5.8.0
 const getComposeCommand = (tokens: string[]) =>
   tokens[0] === "docker" ? ["docker", "compose"] : ["docker-compose"];
 
@@ -30,10 +31,214 @@ const profilesGenerator: Fig.Generator = {
   splitOn: "\n",
 };
 
+const servicesArg: Fig.Arg = {
+  name: "service",
+  isVariadic: true,
+  isOptional: true,
+  generators: servicesGenerator,
+};
+
+const indexOption: Fig.Option = {
+  name: "--index",
+  description: "Index of the container if service has multiple replicas",
+  args: { name: "index" },
+};
+
+const removeOrphansOption: Fig.Option = {
+  name: "--remove-orphans",
+  description: "Remove containers for services not defined in the Compose file",
+};
+
+const quietPullOption: Fig.Option = {
+  name: "--quiet-pull",
+  description: "Pull without printing progress information",
+};
+
+const yesOption: Fig.Option = {
+  name: ["--yes", "-y"],
+  description:
+    'Assume "yes" as answer to all prompts and run non-interactively',
+};
+
+const pullPolicyOption = (policies: string[]): Fig.Option => ({
+  name: "--pull",
+  description: "Pull image before running",
+  args: { name: "policy", suggestions: policies },
+});
+
+const scaleOption: Fig.Option = {
+  name: "--scale",
+  description:
+    "Scale SERVICE to NUM instances. Overrides the `scale` setting in the Compose file if present",
+  isRepeatable: true,
+  args: { name: "service=num", generators: servicesGenerator },
+};
+
+const waitTimeoutOption: Fig.Option = {
+  name: "--wait-timeout",
+  description:
+    "Maximum duration in seconds to wait for the project to be running|healthy",
+  args: { name: "seconds" },
+};
+
+const formatOption = (description: string): Fig.Option => ({
+  name: "--format",
+  description,
+  args: { name: "format", default: "table", suggestions: ["table", "json"] },
+});
+
 const completionSpec: Fig.Spec = {
   name: "docker-compose",
   description: "Define and run multi-container applications with Docker",
   subcommands: [
+    {
+      name: "alpha",
+      description: "Experimental commands",
+      hidden: true,
+      subcommands: [
+        {
+          name: "generate",
+          description:
+            "EXPERIMENTAL - Generate a Compose file from existing containers",
+          args: { name: "containers", isVariadic: true, isOptional: true },
+          options: [
+            {
+              name: "--format",
+              description: "Format the output",
+              args: {
+                name: "format",
+                default: "yaml",
+                suggestions: ["yaml", "json"],
+              },
+            },
+            {
+              name: "--name",
+              description: "Project name to set in the Compose file",
+              args: { name: "name" },
+            },
+            {
+              name: "--project-dir",
+              description: "Directory to use for the project",
+              args: { name: "dir", template: "folders" },
+            },
+          ],
+        },
+        {
+          name: "viz",
+          description:
+            "EXPERIMENTAL - Generate a graphviz graph from your compose file",
+          options: [
+            {
+              name: "--image",
+              description: "Include service's image name in output graph",
+            },
+            {
+              name: "--indentation-size",
+              description: "Number of tabs or spaces to use for indentation",
+              args: { name: "size", default: "1" },
+            },
+            {
+              name: "--networks",
+              description:
+                "Include service's attached networks in output graph",
+            },
+            {
+              name: "--ports",
+              description: "Include service's exposed ports in output graph",
+            },
+            {
+              name: "--spaces",
+              description: "Indent with spaces instead of tabs",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "attach",
+      description:
+        "Attach local standard input, output, and error streams to a service's running container",
+      args: { name: "service", generators: servicesGenerator },
+      options: [
+        {
+          name: "--detach-keys",
+          description:
+            "Override the key sequence for detaching from a container",
+          args: { name: "keys" },
+        },
+        indexOption,
+        { name: "--no-stdin", description: "Do not attach STDIN" },
+        {
+          name: "--sig-proxy",
+          description: "Proxy all received signals to the process",
+        },
+      ],
+    },
+    {
+      name: "bridge",
+      description: "Convert compose files into another model",
+      subcommands: [
+        {
+          name: "convert",
+          description:
+            "Convert compose files to Kubernetes manifests, Helm charts, or another model",
+          options: [
+            {
+              name: ["--output", "-o"],
+              description: "The output directory for the Kubernetes resources",
+              args: { name: "dir", default: "out", template: "folders" },
+            },
+            {
+              name: "--templates",
+              description: "Directory containing transformation templates",
+              args: { name: "dir", template: "folders" },
+            },
+            {
+              name: ["--transformation", "-t"],
+              description:
+                "Transformation to apply to compose model (default: docker/compose-bridge-kubernetes)",
+              isRepeatable: true,
+              args: { name: "transformation" },
+            },
+            {
+              name: ["--yes", "-y"],
+              description:
+                'Assume "yes" to the output directory overwrite prompt',
+            },
+          ],
+        },
+        {
+          name: "transformations",
+          description: "Manage transformation images",
+          subcommands: [
+            {
+              name: "create",
+              description: "Create a new transformation",
+              args: { name: "path", template: "folders" },
+              options: [
+                {
+                  name: ["--from", "-f"],
+                  description:
+                    "Existing transformation to copy (default: docker/compose-bridge-kubernetes)",
+                  args: { name: "transformation" },
+                },
+              ],
+            },
+            {
+              name: ["list", "ls"],
+              description: "List available transformations",
+              options: [
+                formatOption("Format the output"),
+                {
+                  name: ["--quiet", "-q"],
+                  description: "Only display transformer names",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     {
       name: "build",
       description: "Build or rebuild services",
@@ -50,8 +255,16 @@ const completionSpec: Fig.Spec = {
           isRepeatable: true,
           args: {
             name: "key=value",
-            generators: servicesGenerator,
           },
+        },
+        {
+          name: "--builder",
+          description: "Set builder to use",
+          args: { name: "builder" },
+        },
+        {
+          name: "--check",
+          description: "Check build configuration",
         },
         {
           name: "--compress",
@@ -68,8 +281,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--memory", "-m"],
           description:
-            "Set memory limit for the build container. Not supported on buildkit yet",
-          hidden: true,
+            "Set memory limit for the build container. Not supported by BuildKit",
           args: {
             name: "memory",
           },
@@ -92,21 +304,41 @@ const completionSpec: Fig.Spec = {
           hidden: true,
         },
         {
+          name: "--print",
+          description: "Print equivalent bake file",
+        },
+        {
           name: "--progress",
-          description: "Set type of progress output (auto, tty, plain, quiet)",
+          description:
+            "Set type of ui output. DEPRECATED: use the global --progress",
+          hidden: true,
+          deprecated: true,
           args: {
             name: "progress",
-            default: "auto",
-            suggestions: ["auto", "tty", "plain", "quiet"],
+            suggestions: ["auto", "tty", "plain", "json", "quiet"],
           },
+        },
+        {
+          name: "--provenance",
+          description: "Add a provenance attestation",
+          args: { name: "provenance" },
         },
         {
           name: "--pull",
           description: "Always attempt to pull a newer version of the image",
         },
         {
+          name: "--push",
+          description: "Push service images",
+        },
+        {
           name: ["--quiet", "-q"],
-          description: "Don't print anything to STDOUT",
+          description: "Suppress the build output",
+        },
+        {
+          name: "--sbom",
+          description: "Add a SBOM attestation",
+          args: { name: "sbom" },
         },
         {
           name: "--ssh",
@@ -116,23 +348,63 @@ const completionSpec: Fig.Spec = {
             name: "ssh",
           },
         },
+        {
+          name: "--with-dependencies",
+          description: "Also build dependencies (transitively)",
+        },
       ],
     },
     {
-      name: ["config", "convert"],
-      description: "Converts the compose file to platform's canonical format",
+      name: "commit",
+      description: "Create a new image from a service container's changes",
+      args: [
+        { name: "service", generators: servicesGenerator },
+        { name: "repository[:tag]", isOptional: true },
+      ],
+      options: [
+        {
+          name: ["--author", "-a"],
+          description:
+            'Author (e.g., "John Hannibal Smith <hannibal@a-team.com>")',
+          args: { name: "author" },
+        },
+        {
+          name: ["--change", "-c"],
+          description: "Apply Dockerfile instruction to the created image",
+          isRepeatable: true,
+          args: { name: "instruction" },
+        },
+        indexOption,
+        {
+          name: ["--message", "-m"],
+          description: "Commit message",
+          args: { name: "message" },
+        },
+        {
+          name: ["--pause", "-p"],
+          description: "Pause container during commit (default true)",
+        },
+      ],
+    },
+    {
+      name: "config",
+      description: "Parse, resolve and render compose file in canonical format",
       args: {
         name: "services",
         isVariadic: true,
+        isOptional: true,
         generators: servicesGenerator,
       },
       options: [
         {
+          name: "--environment",
+          description: "Print environment used for interpolation",
+        },
+        {
           name: "--format",
-          description: "Format the output. Values: [yaml | json]",
+          description: "Format the output",
           args: {
             name: "format",
-            default: "yaml",
             suggestions: ["yaml", "json"],
           },
         },
@@ -148,12 +420,37 @@ const completionSpec: Fig.Spec = {
           description: "Print the image names, one per line",
         },
         {
+          name: "--lock-image-digests",
+          description: "Produces an override file with image digests",
+        },
+        {
+          name: "--models",
+          description: "Print the model names, one per line",
+        },
+        {
+          name: "--networks",
+          description: "Print the network names, one per line",
+        },
+        {
+          name: "--no-consistency",
+          description:
+            "Don't check model consistency - warning: may produce invalid Compose output",
+        },
+        {
+          name: "--no-env-resolution",
+          description: "Don't resolve service env files",
+        },
+        {
           name: "--no-interpolate",
           description: "Don't interpolate environment variables",
         },
         {
           name: "--no-normalize",
           description: "Don't normalize compose model",
+        },
+        {
+          name: "--no-path-resolution",
+          description: "Don't resolve file paths",
         },
         {
           name: ["--output", "-o"],
@@ -181,6 +478,10 @@ const completionSpec: Fig.Spec = {
           description: "Print the service names, one per line",
         },
         {
+          name: "--variables",
+          description: "Print model variables and default values",
+        },
+        {
           name: "--volumes",
           description: "Print the volume names, one per line",
         },
@@ -194,8 +495,7 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: "--all",
-          description: "Copy to all the containers of the service",
-          hidden: true,
+          description: "Include containers created by the run command",
         },
         {
           name: ["--archive", "-a"],
@@ -205,15 +505,7 @@ const completionSpec: Fig.Spec = {
           name: ["--follow-link", "-L"],
           description: "Always follow symbol link in SRC_PATH",
         },
-        {
-          name: "--index",
-          description:
-            "Index of the container if there are multiple instances of a service",
-          args: {
-            name: "index",
-            default: "0",
-          },
-        },
+        indexOption,
       ],
     },
     {
@@ -244,23 +536,26 @@ const completionSpec: Fig.Spec = {
           description:
             "If containers already exist, don't recreate them. Incompatible with --force-recreate",
         },
+        pullPolicyOption(["always", "missing", "never", "build"]),
+        quietPullOption,
+        removeOrphansOption,
+        scaleOption,
+        yesOption,
       ],
     },
     {
       name: "down",
       description: "Stop and remove containers, networks",
+      args: servicesArg,
       options: [
-        {
-          name: "--remove-orphans",
-          description:
-            "Remove containers for services not defined in the Compose file",
-        },
+        removeOrphansOption,
         {
           name: "--rmi",
           description:
-            'Remove images used by services. "local" remove only images that don\'t have a custom tag ("local"|"all")',
+            'Remove images used by services. "local" remove only images that don\'t have a custom tag',
           args: {
             name: "rmi",
+            suggestions: ["local", "all"],
           },
         },
         {
@@ -292,6 +587,16 @@ const completionSpec: Fig.Spec = {
           name: "--json",
           description: "Output events as a stream of json objects",
         },
+        {
+          name: "--since",
+          description: "Show all events created since timestamp",
+          args: { name: "timestamp" },
+        },
+        {
+          name: "--until",
+          description: "Stream events until this timestamp",
+          args: { name: "timestamp" },
+        },
       ],
     },
     {
@@ -314,22 +619,14 @@ const completionSpec: Fig.Spec = {
             name: "key=value",
           },
         },
-        {
-          name: "--index",
-          description:
-            "Index of the container if there are multiple instances of a service [default: 1]",
-          args: {
-            name: "index",
-            default: "1",
-          },
-        },
+        indexOption,
         {
           name: ["--interactive", "-i"],
           description: "Keep STDIN open even if not attached",
           hidden: true,
         },
         {
-          name: ["--no-TTY", "-T"],
+          name: ["--no-tty", "-T"],
           description:
             "Disable pseudo-TTY allocation. By default `docker compose exec` allocates a TTY",
         },
@@ -360,6 +657,19 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "export",
+      description: "Export a service container's filesystem as a tar archive",
+      args: { name: "service", generators: servicesGenerator },
+      options: [
+        indexOption,
+        {
+          name: ["--output", "-o"],
+          description: "Write to a file, instead of STDOUT",
+          args: { name: "file", template: "filepaths" },
+        },
+      ],
+    },
+    {
       name: "images",
       description: "List images used by the created containers",
       args: {
@@ -369,6 +679,7 @@ const completionSpec: Fig.Spec = {
         generators: servicesGenerator,
       },
       options: [
+        formatOption("Format the output"),
         {
           name: ["--quiet", "-q"],
           description: "Only display IDs",
@@ -385,6 +696,7 @@ const completionSpec: Fig.Spec = {
         generators: servicesGenerator,
       },
       options: [
+        removeOrphansOption,
         {
           name: ["--signal", "-s"],
           description: "SIGNAL to send to the container",
@@ -409,6 +721,7 @@ const completionSpec: Fig.Spec = {
           name: ["--follow", "-f"],
           description: "Follow log output",
         },
+        indexOption,
         {
           name: "--no-color",
           description: "Produce monochrome output",
@@ -426,7 +739,7 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: "--tail",
+          name: ["--tail", "-n"],
           description:
             "Number of lines to show from the end of the logs for each container",
           args: {
@@ -464,18 +777,10 @@ const completionSpec: Fig.Spec = {
             name: "filter",
           },
         },
-        {
-          name: "--format",
-          description: "Format the output. Values: [pretty | json]",
-          args: {
-            name: "format",
-            default: "pretty",
-            suggestions: ["pretty", "json"],
-          },
-        },
+        formatOption("Format the output"),
         {
           name: ["--quiet", "-q"],
-          description: "Only display IDs",
+          description: "Only display project names",
         },
       ],
     },
@@ -491,21 +796,14 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "port",
-      description: "Print the public port for a port binding",
+      description:
+        "List port mappings or print the public port for a specific mapping for the service",
       args: [
         { name: "service", generators: servicesGenerator },
-        { name: "private_port" },
+        { name: "private_port", isOptional: true },
       ],
       options: [
-        {
-          name: "--index",
-          description:
-            "Index of the container if service has multiple replicas",
-          args: {
-            name: "index",
-            default: "1",
-          },
-        },
+        indexOption,
         {
           name: "--protocol",
           description: "Tcp or udp",
@@ -540,14 +838,15 @@ const completionSpec: Fig.Spec = {
             name: "filter",
           },
         },
+        formatOption("Format output: table, json or a Go template"),
         {
-          name: "--format",
-          description: "Format the output. Values: [pretty | json]",
-          args: {
-            name: "format",
-            default: "pretty",
-            suggestions: ["pretty", "json"],
-          },
+          name: "--no-trunc",
+          description: "Don't truncate output",
+        },
+        {
+          name: "--orphans",
+          description:
+            "Include orphaned services (not declared by project) (default true)",
         },
         {
           name: ["--quiet", "-q"],
@@ -578,6 +877,39 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "publish",
+      description: "Publish compose application",
+      args: { name: "repository[:tag]" },
+      options: [
+        {
+          name: "--app",
+          description:
+            "Published compose application (includes referenced images)",
+        },
+        {
+          name: "--insecure-registry",
+          description: "Use insecure registry",
+          hidden: true,
+        },
+        {
+          name: "--oci-version",
+          description:
+            "OCI image/artifact specification version (automatically determined by default)",
+          args: { name: "version", suggestions: ["1.0", "1.1"] },
+        },
+        {
+          name: "--resolve-image-digests",
+          description: "Pin image tags to digests",
+        },
+        {
+          name: "--with-env",
+          description:
+            "Include environment variables in the published OCI artifact",
+        },
+        yesOption,
+      ],
+    },
+    {
       name: "pull",
       description: "Pull service images",
       args: {
@@ -587,6 +919,10 @@ const completionSpec: Fig.Spec = {
         generators: servicesGenerator,
       },
       options: [
+        {
+          name: "--ignore-buildable",
+          description: "Ignore images that can be built",
+        },
         {
           name: "--ignore-pull-failures",
           description: "Pull what it can and ignores images with pull failures",
@@ -608,6 +944,11 @@ const completionSpec: Fig.Spec = {
           hidden: true,
         },
         {
+          name: "--policy",
+          description: "Apply pull policy",
+          args: { name: "policy", suggestions: ["missing", "always"] },
+        },
+        {
           name: ["--quiet", "-q"],
           description: "Pull without printing progress information",
         },
@@ -624,15 +965,35 @@ const completionSpec: Fig.Spec = {
       },
       options: [
         {
+          name: "--ignore-missing",
+          description:
+            "Skip images that are not available locally instead of failing to push them",
+        },
+        {
           name: "--ignore-push-failures",
-          description: "Push what it can and ignores images with push failures",
+          description:
+            "Push what it can and ignores images with push failures. DEPRECATED: use --ignore-missing",
+          deprecated: true,
+          hidden: true,
+        },
+        {
+          name: "--include-deps",
+          description: "Also push images of services declared as dependencies",
+        },
+        {
+          name: ["--quiet", "-q"],
+          description: "Push without printing progress information",
         },
       ],
     },
     {
       name: "restart",
-      description: "Restart containers",
+      description: "Restart service containers",
       options: [
+        {
+          name: "--no-deps",
+          description: "Don't restart dependent services",
+        },
         {
           name: ["--timeout", "-t"],
           description: "Specify a shutdown timeout in seconds",
@@ -683,9 +1044,25 @@ const completionSpec: Fig.Spec = {
       description: "Run a one-off command on a service",
       args: [
         { name: "service", generators: servicesGenerator },
-        { name: "command", isCommand: true },
+        { name: "command", isCommand: true, isOptional: true },
       ],
       options: [
+        {
+          name: "--build",
+          description: "Build image before starting container",
+        },
+        {
+          name: "--cap-add",
+          description: "Add Linux capabilities",
+          isRepeatable: true,
+          args: { name: "capability" },
+        },
+        {
+          name: "--cap-drop",
+          description: "Drop Linux capabilities",
+          isRepeatable: true,
+          args: { name: "capability" },
+        },
         {
           name: ["--detach", "-d"],
           description: "Run container in background and print container ID",
@@ -704,6 +1081,12 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "env",
           },
+        },
+        {
+          name: "--env-from-file",
+          description: "Set environment variables from file",
+          isRepeatable: true,
+          args: { name: "file", template: "filepaths" },
         },
         {
           name: ["--interactive", "-i"],
@@ -725,12 +1108,17 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
-          name: ["--no-TTY", "-T"],
-          description: "Disable pseudo-TTY allocation (default: auto-detected)",
-        },
-        {
           name: "--no-deps",
           description: "Don't start linked services",
+        },
+        {
+          name: "--no-recreate",
+          description:
+            "If dependent containers already exist, don't recreate them, even if their configuration diverged",
+        },
+        {
+          name: ["--no-tty", "-T"],
+          description: "Disable pseudo-TTY allocation (default: auto-detected)",
         },
         {
           name: ["--publish", "-p"],
@@ -740,18 +1128,25 @@ const completionSpec: Fig.Spec = {
             name: "publish",
           },
         },
+        pullPolicyOption(["always", "missing", "never"]),
         {
-          name: "--quiet-pull",
-          description: "Pull without printing progress information",
+          name: ["--quiet", "-q"],
+          description: "Don't print anything to STDOUT",
         },
+        {
+          name: "--quiet-build",
+          description: "Suppress progress output from the build process",
+        },
+        quietPullOption,
+        removeOrphansOption,
         {
           name: "--rm",
           description: "Automatically remove the container when it exits",
         },
         {
-          name: "--service-ports",
+          name: ["--service-ports", "-P"],
           description:
-            "Run command with the service's ports enabled and mapped to the host",
+            "Run command with all service's ports enabled and mapped to the host",
         },
         {
           name: ["--tty", "-t"],
@@ -789,6 +1184,22 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "scale",
+      description: "Scale services",
+      args: {
+        name: "service=replicas",
+        isVariadic: true,
+        isOptional: true,
+        generators: servicesGenerator,
+      },
+      options: [
+        {
+          name: "--no-deps",
+          description: "Don't start linked services",
+        },
+      ],
+    },
+    {
       name: "start",
       description: "Start services",
       args: {
@@ -797,6 +1208,49 @@ const completionSpec: Fig.Spec = {
         isOptional: true,
         generators: servicesGenerator,
       },
+      options: [
+        {
+          name: "--wait",
+          description:
+            "Wait for services to be running|healthy. Implies detached mode",
+        },
+        waitTimeoutOption,
+      ],
+    },
+    {
+      name: "stats",
+      description:
+        "Display a live stream of container(s) resource usage statistics",
+      args: {
+        name: "service",
+        isOptional: true,
+        generators: servicesGenerator,
+      },
+      options: [
+        {
+          name: "--aggregate",
+          description:
+            "Show one line per project, summing the resource usage of its containers (only 'table' and 'json' formats)",
+        },
+        {
+          name: ["--all", "-a"],
+          description: "Show all containers (default shows just running)",
+        },
+        {
+          name: "--all-projects",
+          description:
+            "Show the containers of all projects instead of the current one (only 'table' and 'json' formats)",
+        },
+        formatOption("Format output: table, json or a Go template"),
+        {
+          name: "--no-stream",
+          description: "Disable streaming stats and only pull the first result",
+        },
+        {
+          name: "--no-trunc",
+          description: "Do not truncate output",
+        },
+      ],
     },
     {
       name: "stop",
@@ -854,21 +1308,29 @@ const completionSpec: Fig.Spec = {
             "Stops all containers if any container was stopped. Incompatible with -d",
         },
         {
+          name: "--abort-on-container-failure",
+          description:
+            "Stops all containers if any container exited with failure. Incompatible with -d",
+        },
+        {
           name: "--always-recreate-deps",
           description:
             "Recreate dependent containers. Incompatible with --no-recreate",
         },
         {
           name: "--attach",
-          description: "Attach to service output",
+          description:
+            "Restrict attaching to the specified services. Incompatible with --attach-dependencies",
           isRepeatable: true,
           args: {
-            name: "attach",
+            name: "service",
+            generators: servicesGenerator,
           },
         },
         {
           name: "--attach-dependencies",
-          description: "Attach to dependent containers",
+          description:
+            "Automatically attach to log output of dependent services",
         },
         {
           name: "--build",
@@ -883,13 +1345,28 @@ const completionSpec: Fig.Spec = {
           description:
             "Return the exit code of the selected service container. Implies --abort-on-container-exit",
           args: {
-            name: "exit-code-from",
+            name: "service",
+            generators: servicesGenerator,
           },
         },
         {
           name: "--force-recreate",
           description:
             "Recreate containers even if their configuration and image haven't changed",
+        },
+        {
+          name: "--menu",
+          description:
+            "Enable interactive shortcuts when running attached. Incompatible with --detach",
+        },
+        {
+          name: "--no-attach",
+          description: "Do not attach (stream logs) to the specified services",
+          isRepeatable: true,
+          args: {
+            name: "service",
+            generators: servicesGenerator,
+          },
         },
         {
           name: "--no-build",
@@ -916,29 +1393,19 @@ const completionSpec: Fig.Spec = {
           name: "--no-start",
           description: "Don't start the services after creating them",
         },
+        pullPolicyOption(["always", "missing", "never"]),
         {
-          name: "--quiet-pull",
-          description: "Pull without printing progress information",
+          name: "--quiet-build",
+          description: "Suppress the build output",
         },
-        {
-          name: "--remove-orphans",
-          description:
-            "Remove containers for services not defined in the Compose file",
-        },
+        quietPullOption,
+        removeOrphansOption,
         {
           name: ["--renew-anon-volumes", "-V"],
           description:
             "Recreate anonymous volumes instead of retrieving data from the previous containers",
         },
-        {
-          name: "--scale",
-          description:
-            "Scale SERVICE to NUM instances. Overrides the `scale` setting in the Compose file if present",
-          isRepeatable: true,
-          args: {
-            name: "scale",
-          },
-        },
+        scaleOption,
         {
           name: ["--timeout", "-t"],
           description:
@@ -949,10 +1416,21 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--timestamps",
+          description: "Show timestamps",
+        },
+        {
           name: "--wait",
           description:
-            "Wait for services to be running|healthy. Implies detached mode",
+            "Wait for services to be running|healthy, streaming their logs unless --detach is set",
         },
+        waitTimeoutOption,
+        {
+          name: ["--watch", "-w"],
+          description:
+            "Watch source code and rebuild/refresh containers when files are updated",
+        },
+        yesOption,
       ],
     },
     {
@@ -974,8 +1452,59 @@ const completionSpec: Fig.Spec = {
         },
       ],
     },
+    {
+      name: "volumes",
+      description: "List volumes",
+      args: servicesArg,
+      options: [
+        formatOption("Format output: table, json or a Go template"),
+        {
+          name: ["--quiet", "-q"],
+          description: "Only display volume names",
+        },
+      ],
+    },
+    {
+      name: "wait",
+      description: "Block until containers of all (or specified) services stop",
+      args: {
+        name: "service",
+        isVariadic: true,
+        generators: servicesGenerator,
+      },
+      options: [
+        {
+          name: "--down-project",
+          description: "Drops project when the first container stops",
+        },
+      ],
+    },
+    {
+      name: "watch",
+      description:
+        "Watch build context for service and rebuild/refresh containers when files are updated",
+      args: servicesArg,
+      options: [
+        {
+          name: "--no-up",
+          description: "Do not build & start services before watching",
+        },
+        {
+          name: "--prune",
+          description: "Prune dangling images on rebuild (default true)",
+        },
+        {
+          name: "--quiet",
+          description: "Hide build output",
+        },
+      ],
+    },
   ],
   options: [
+    {
+      name: "--all-resources",
+      description: "Include all resources, even those not used by services",
+    },
     {
       name: "--ansi",
       description:
@@ -991,8 +1520,14 @@ const completionSpec: Fig.Spec = {
       description: "Run compose in backward compatibility mode",
     },
     {
+      name: "--dry-run",
+      description: "Execute command in dry run mode",
+      isPersistent: true,
+    },
+    {
       name: "--env-file",
       description: "Specify an alternate environment file",
+      isRepeatable: true,
       args: {
         name: "env-file",
         template: "filepaths",
@@ -1008,10 +1543,23 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--insecure-registry",
+      description:
+        "Use insecure registry to pull Compose OCI artifacts. Doesn't apply to images",
+      hidden: true,
+      isRepeatable: true,
+      args: { name: "registry" },
+    },
+    {
       name: "--no-ansi",
       description: "Do not print ANSI control characters (DEPRECATED)",
       deprecated: true,
       hidden: true,
+    },
+    {
+      name: "--parallel",
+      description: "Control max parallelism, -1 for unlimited",
+      args: { name: "max", default: "-1" },
     },
     {
       name: "--profile",
@@ -1020,6 +1568,14 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "profile",
         generators: profilesGenerator,
+      },
+    },
+    {
+      name: "--progress",
+      description: "Set type of progress output",
+      args: {
+        name: "progress",
+        suggestions: ["auto", "tty", "plain", "json", "quiet"],
       },
     },
     {
@@ -1041,6 +1597,11 @@ const completionSpec: Fig.Spec = {
     {
       name: "--verbose",
       description: "Show more output",
+      hidden: true,
+    },
+    {
+      name: ["--version", "-v"],
+      description: "Show the Docker Compose version information",
       hidden: true,
     },
     {

@@ -1,3 +1,6 @@
+// just v1.59.0 (GitHub release casey/just, 2026-10-15). Source: src/arguments.rs
+// at tag 1.59.0, cross-checked with `just --help` from installed v1.58.0
+
 /**
  * The structure of the JSON data returned from dumping a justfile.
  *
@@ -10,6 +13,9 @@ interface Justfile {
   aliases: Record<string, Alias>;
   assignments: Record<string, Binding>;
   recipes: Record<string, Recipe>;
+  // Missing from dumps of older `just` versions
+  groups?: string[];
+  modules?: Record<string, Justfile>;
 }
 
 interface Alias {
@@ -228,26 +234,78 @@ function processJustfileDump(out: string): Justfile | null {
   }
 }
 
+const recipeGenerator: Fig.Generator = {
+  script: dumpJustfile,
+  postProcess: (out) => {
+    const justfile = processJustfileDump(out);
+    return justfile === null ? [] : getRecipeSuggestions(justfile);
+  },
+};
+
+const moduleGenerator: Fig.Generator = {
+  script: dumpJustfile,
+  postProcess: (out) =>
+    Object.keys(processJustfileDump(out)?.modules ?? {}).map((name) => ({
+      name,
+      description: "Module",
+      icon: "fig://icon?type=folder",
+    })),
+};
+
+const groupGenerator: Fig.Generator = {
+  script: dumpJustfile,
+  postProcess: (out) =>
+    (processJustfileDump(out)?.groups ?? []).map((name) => ({
+      name,
+      description: "Group",
+    })),
+};
+
 const completionSpec: Fig.Spec = {
   name: "just",
   description: "Just a command runner",
   options: [
     {
       name: ["--help", "-h"],
-      description: "Print help information",
+      description: "Print help",
+    },
+    {
+      name: "--alias-style",
+      description: "Set list command alias display style",
+      exclusiveOn: ["--no-aliases"],
+      args: {
+        name: "style",
+        default: "right",
+        suggestions: ["left", "right", "separate"],
+      },
+    },
+    {
+      name: "--allow-missing",
+      description: "Ignore missing recipe and module errors",
+    },
+    {
+      name: "--ceiling",
+      description:
+        "Do not ascend above this directory when searching for a justfile",
+      args: {
+        name: "ceiling",
+        template: "folders",
+      },
     },
     {
       name: "--changelog",
-      description: "Print the changelog",
+      description: "Print changelog",
     },
     {
       name: "--check",
-      description: "Run --fmt in 'check' mode",
-      dependsOn: ["--unstable", "--fmt"],
+      description:
+        "Run --fmt in 'check' mode, exiting with 1 and printing a diff if formatting is required",
+      dependsOn: ["--fmt"],
     },
     {
       name: "--choose",
-      description: "Select one or more recipes to run using another program",
+      description:
+        "Select one or more recipes to run using a binary chooser, defaulting to $JUST_CHOOSER or fzf",
     },
     {
       name: "--chooser",
@@ -257,9 +315,26 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--clean",
+      description:
+        "Clear recipe cache, optionally restricted to recipes whose path begins with the given paths",
+      args: {
+        name: "recipe_path",
+        isOptional: true,
+        isVariadic: true,
+        generators: [recipeGenerator, moduleGenerator],
+      },
+    },
+    {
+      name: "--clear-shell-args",
+      description: "Clear shell arguments",
+    },
+    {
       name: "--color",
       description: "Print colorful output",
       args: {
+        name: "color",
+        default: "auto",
         suggestions: [
           { name: "auto", icon: "fig://icon?type=string" },
           { name: "always", icon: "fig://icon?type=string" },
@@ -270,49 +345,99 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-c", "--command"],
       description:
-        "Run an arbitrary command with the working directory, .env, overrides, and exports",
+        "Run an arbitrary command with the working directory, .env, overrides, and exports set",
       args: {
         name: "command",
         isCommand: true,
       },
     },
     {
+      name: "--command-color",
+      description: "Echo recipe lines in this color",
+      args: {
+        name: "color",
+        suggestions: [
+          "black",
+          "blue",
+          "cyan",
+          "green",
+          "purple",
+          "red",
+          "yellow",
+        ],
+      },
+    },
+    {
+      name: "--complete-aliases",
+      description: "Auto-complete recipe aliases",
+    },
+    {
       name: "--completions",
-      description: "Print shell completions",
+      description: "Print shell completion script for this shell",
       args: {
         name: "shell",
         suggestions: [
           { name: "zsh", icon: "fig://icon?type=string" },
           { name: "bash", icon: "fig://icon?type=string" },
           { name: "fish", icon: "fig://icon?type=string" },
+          { name: "nushell", icon: "fig://icon?type=string" },
           { name: "powershell", icon: "fig://icon?type=string" },
           { name: "elvish", icon: "fig://icon?type=string" },
         ],
       },
     },
     {
-      name: "--clear-shell-args",
-      description: "Clear shell arguments",
+      name: "--cygpath",
+      description:
+        "Use the binary at this path to convert between unix and Windows paths",
+      args: {
+        name: "cygpath",
+        default: "cygpath",
+        template: "filepaths",
+      },
     },
     {
-      name: "--dry-run",
-      description: "Print what just would do, without doing it",
+      name: "--default-list",
+      description: "List recipes when no arguments are provided",
     },
     {
-      name: "--dump",
-      description: "Print justfile",
+      name: "--dotenv-command",
+      description:
+        "Run this command and load its output as an environment file",
+      isRepeatable: true,
+      exclusiveOn: ["--dotenv-filename", "--dotenv-path", "--no-dotenv"],
+      args: {
+        name: "command",
+      },
     },
     {
-      name: "--dotenv-filename",
-      description: "Use a file with this name instead of .env",
+      name: ["-F", "--dotenv-filename"],
+      description:
+        "Search for an environment file with this name instead of .env",
+      isRepeatable: true,
+      exclusiveOn: ["--dotenv-path"],
       args: {
         name: "name",
       },
     },
     {
-      name: "--dotenv-path",
+      name: ["-E", "--dotenv-path"],
       description:
         "Load the environment file from a path instead of searching for one",
+      isRepeatable: true,
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: ["-n", "--dry-run"],
+      description: "Print what just would do without doing it",
+      exclusiveOn: ["--quiet"],
+    },
+    {
+      name: "--dump",
+      description: "Print justfile",
     },
     {
       name: "--dump-format",
@@ -320,16 +445,10 @@ const completionSpec: Fig.Spec = {
       dependsOn: ["--dump"],
       args: {
         name: "format",
+        default: "just",
         suggestions: [
-          {
-            name: "just",
-            icon: "fig://icon?type=string",
-          },
-          {
-            name: "json",
-            icon: "fig://icon?type=string",
-            description: "This value requires --unstable",
-          },
+          { name: "just", icon: "fig://icon?type=string" },
+          { name: "json", icon: "fig://icon?type=string" },
         ],
       },
     },
@@ -340,12 +459,44 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--evaluate",
-      description: "Evaluate and print all variables",
+      description:
+        "Evaluate and print all variables, or only the value of a variable given as an argument",
+    },
+    {
+      name: "--evaluate-format",
+      description: "Print evaluated variables in this format",
+      args: {
+        name: "format",
+        default: "just",
+        suggestions: ["just", "shell"],
+      },
+    },
+    {
+      name: "--explain",
+      description: "Print recipe doc comment before running it",
     },
     {
       name: "--fmt",
       description: "Format and overwrite the justfile",
-      dependsOn: ["--unstable"],
+    },
+    {
+      name: ["-g", "--global-justfile"],
+      description: "Use global justfile",
+      exclusiveOn: ["--justfile", "--working-directory"],
+    },
+    {
+      name: "--group",
+      description: "Only list recipes in this group",
+      isRepeatable: true,
+      dependsOn: ["--list"],
+      args: {
+        name: "group",
+        generators: groupGenerator,
+      },
+    },
+    {
+      name: "--groups",
+      description: "List recipe groups",
     },
     {
       name: "--highlight",
@@ -353,20 +504,55 @@ const completionSpec: Fig.Spec = {
       exclusiveOn: ["--no-highlight"],
     },
     {
+      name: "--indentation",
+      description: "Indent recipe bodies with this string",
+      args: {
+        name: "indentation",
+      },
+    },
+    {
       name: "--init",
-      description: "Initialize a new justfile",
+      description: "Initialize a new justfile in the project root",
+    },
+    {
+      name: "--jobs",
+      description:
+        "Run at most this many recipes simultaneously with the [parallel] attribute",
+      args: {
+        name: "n",
+      },
+    },
+    {
+      name: "--json",
+      description: "Print justfile as JSON",
+      exclusiveOn: ["--dump-format"],
     },
     {
       name: ["-f", "--justfile"],
-      description: "Use a specific justfile",
+      description: "Use a specific justfile, or - to read from standard input",
       args: {
         name: "file",
         template: "filepaths",
       },
     },
     {
+      name: "--justfile-name",
+      description:
+        "Search for a justfile with this name, accepts multiple comma-separated values",
+      isRepeatable: true,
+      args: {
+        name: "name",
+      },
+    },
+    {
       name: ["-l", "--list"],
-      description: "List available recipes and their arguments",
+      description: "List available recipes in a module, or the root if omitted",
+      args: {
+        name: "module",
+        isOptional: true,
+        isVariadic: true,
+        generators: moduleGenerator,
+      },
     },
     {
       name: "--list-heading",
@@ -383,6 +569,28 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--list-submodules",
+      description: "List recipes in submodules",
+      dependsOn: ["--list"],
+    },
+    {
+      name: "--man",
+      description: "Print man page",
+    },
+    {
+      name: "--no-aliases",
+      description: "Don't show aliases in list",
+      exclusiveOn: ["--alias-style"],
+    },
+    {
+      name: "--no-cache",
+      description: "Bypass recipe cache",
+    },
+    {
+      name: "--no-deps",
+      description: "Don't run recipe dependencies",
+    },
+    {
       name: "--no-dotenv",
       description: "Don't load the environment file",
     },
@@ -392,12 +600,27 @@ const completionSpec: Fig.Spec = {
       exclusiveOn: ["--highlight"],
     },
     {
+      name: "--one",
+      description:
+        "Forbid multiple recipes from being invoked on the command line",
+    },
+    {
       name: ["-q", "--quiet"],
       description: "Suppress all output",
+      exclusiveOn: ["--dry-run"],
+    },
+    {
+      name: "--request",
+      description: "Execute a request, for internal testing only",
+      hidden: true,
+      args: {
+        name: "request",
+      },
     },
     {
       name: "--set",
       description: "Override a variable with a value",
+      isRepeatable: true,
       args: [
         {
           name: "variable",
@@ -432,6 +655,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--shell-arg",
       description: "Invoke the shell with this as an argument",
+      isRepeatable: true,
       args: {
         name: "argument",
         default: "-cu",
@@ -441,27 +665,44 @@ const completionSpec: Fig.Spec = {
       name: "--shell-command",
       description:
         "Invoke --command with the shell used to run recipe lines and backticks",
+      dependsOn: ["--command"],
     },
     {
       name: ["-s", "--show"],
       description: "Show information about a recipe",
       args: {
         name: "recipe",
-        generators: {
-          script: dumpJustfile,
-          postProcess: (out) => {
-            const justfile = processJustfileDump(out);
-            if (justfile === null) {
-              return [];
-            }
-            return getRecipeSuggestions(justfile);
-          },
-        },
+        isVariadic: true,
+        generators: recipeGenerator,
       },
     },
     {
       name: "--summary",
       description: "List names of available recipes",
+    },
+    {
+      name: "--tempdir",
+      description: "Save temporary files to this directory",
+      args: {
+        name: "tempdir",
+        template: "folders",
+      },
+    },
+    {
+      name: "--time",
+      description: "Print recipe execution time",
+    },
+    {
+      name: "--timestamp",
+      description: "Print recipe command timestamps",
+    },
+    {
+      name: "--timestamp-format",
+      description: "Timestamp format string",
+      args: {
+        name: "format",
+        default: "%H:%M:%S",
+      },
     },
     {
       name: ["-u", "--unsorted"],
@@ -472,24 +713,40 @@ const completionSpec: Fig.Spec = {
       description: "Enable unstable features",
     },
     {
+      name: "--usage",
+      description:
+        "Print usage information for a recipe or all recipes in a module, defaulting to the root justfile",
+      args: {
+        name: "path",
+        isOptional: true,
+        isVariadic: true,
+        generators: [recipeGenerator, moduleGenerator],
+      },
+    },
+    {
       name: "--variables",
       description: "List names of variables",
     },
     {
       name: ["-v", "--verbose"],
       description: "Use verbose output",
+      isRepeatable: true,
     },
     {
       name: ["-V", "--version"],
-      description: "Print version information",
+      description: "Print version",
     },
     {
       name: ["-d", "--working-directory"],
       description: "Use this as the working directory",
-      dependsOn: ["--justfile"],
       args: {
+        name: "directory",
         template: "folders",
       },
+    },
+    {
+      name: "--yes",
+      description: "Automatically confirm all recipes",
     },
   ],
   args: {

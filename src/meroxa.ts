@@ -1,3 +1,8 @@
+// Meroxa CLI v2.23.0 (latest stable git tag of meroxa/cli, 2026-11-20). Source: static read of the v2.23.0 cobra
+// command tree under cmd/meroxa/root, the generated docs/cmd/md pages and the builder flag tags (binary not run).
+// Upstream has been dormant since 2024-09 (dependency bumps only; master cmd/ matches v2.23.0 apart from one turbine file), and the
+// committed spec/meroxa.ts in that repo is stale, so it was not used. Hidden and deprecated command groups
+// (connectors, connect, pipelines, functions, flink) are deliberately not listed.
 const completionSpec: Fig.Spec = {
   name: "meroxa",
   description: "The Meroxa CLI",
@@ -16,10 +21,22 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
-        { name: "set", description: "Set active account" },
+        {
+          name: "set",
+          description: "Set active account",
+          args: { name: "account", description: "Account UUID or name" },
+        },
       ],
     },
-    { name: "api", description: "Invoke Meroxa API" },
+    {
+      name: "api",
+      description: "Invoke Meroxa API",
+      args: [
+        { name: "method", description: "HTTP method (e.g. GET, POST)" },
+        { name: "path", description: "API path (e.g. /v1/resources)" },
+        { name: "body", description: "Request body", isOptional: true },
+      ],
+    },
     {
       name: ["app", "apps"],
       description: "Manage Turbine Data Applications",
@@ -28,20 +45,6 @@ const completionSpec: Fig.Spec = {
           name: "deploy",
           description: "Deploy a Turbine Data Application",
           options: [
-            {
-              name: "--docker-hub-access-token",
-              description:
-                "DockerHub access token to use to build and deploy the app",
-              hidden: true,
-              args: { name: "docker-hub-access-token" },
-            },
-            {
-              name: "--docker-hub-username",
-              description:
-                "DockerHub username to use to build and deploy the app",
-              hidden: true,
-              args: { name: "docker-hub-username" },
-            },
             {
               name: "--env",
               description:
@@ -76,6 +79,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "describe",
           description: "Describe a Turbine Data Application",
+          args: { name: "NameOrUUID", isOptional: true },
           options: [
             {
               name: "--path",
@@ -88,6 +92,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "init",
           description: "Initialize a Turbine Data Application",
+          args: { name: "APP_NAME" },
           options: [
             {
               name: ["--lang", "-l"],
@@ -127,6 +132,7 @@ const completionSpec: Fig.Spec = {
           name: ["log", "logs"],
           description:
             "View relevant logs to the state of the given Turbine Data Application",
+          args: { name: "NameOrUUID", isOptional: true },
           options: [
             {
               name: "--path",
@@ -140,6 +146,7 @@ const completionSpec: Fig.Spec = {
           name: "open",
           description:
             "Open the link to a Turbine Data Application in the Dashboard",
+          args: { name: "NameOrUUID", isOptional: true },
           options: [
             {
               name: "--path",
@@ -152,6 +159,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["rm", "delete", "remove"],
           description: "Remove a Turbine Data Application",
+          args: { name: "NameOrUUID", isOptional: true },
           options: [
             { name: ["--force", "-f"], description: "Skip confirmation" },
             {
@@ -207,14 +215,26 @@ const completionSpec: Fig.Spec = {
       name: ["build", "builds"],
       description: "Inspect Process Builds on Meroxa",
       subcommands: [
-        { name: "describe", description: "Describe a Meroxa Process Build" },
+        {
+          name: "describe",
+          description: "Describe a Meroxa Process Build",
+          args: { name: "UUID" },
+        },
         {
           name: ["log", "logs"],
           description: "List a Meroxa Process Build's Logs",
+          args: { name: "UUID" },
         },
       ],
     },
-    { name: "completion", description: "Generate completion script" },
+    {
+      name: "completion",
+      description: "Generate completion script",
+      args: {
+        name: "shell",
+        suggestions: ["bash", "zsh", "fish", "powershell"],
+      },
+    },
     {
       name: ["cfg", "config"],
       description: "Manage your Meroxa CLI configuration",
@@ -227,6 +247,7 @@ const completionSpec: Fig.Spec = {
           name: "set",
           description:
             "Update your Meroxa CLI configuration file with a specific key=value",
+          args: { name: "KEY=VALUE", isVariadic: true },
         },
       ],
     },
@@ -237,6 +258,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "create",
           description: "Create an environment",
+          args: { name: "NAME" },
           options: [
             {
               name: ["--config", "-c"],
@@ -263,7 +285,11 @@ const completionSpec: Fig.Spec = {
             { name: ["--yes", "-y"], description: "Skip confirmation prompt" },
           ],
         },
-        { name: "describe", description: "Describe environment" },
+        {
+          name: "describe",
+          description: "Describe environment",
+          args: { name: "NAMEorUUID" },
+        },
         {
           name: ["ls", "list"],
           description: "List environments",
@@ -277,15 +303,21 @@ const completionSpec: Fig.Spec = {
         {
           name: ["rm", "delete", "remove"],
           description: "Remove environment",
+          args: { name: "NAMEorUUID" },
           options: [
             { name: ["--force", "-f"], description: "Skip confirmation" },
             { name: "--yolo", description: "Skip confirmation", hidden: true },
           ],
         },
-        { name: "repair", description: "Repair environment" },
+        {
+          name: "repair",
+          description: "Repair environment",
+          args: { name: "NAMEorUUID" },
+        },
         {
           name: "update",
           description: "Update an environment",
+          args: { name: "NAMEorUUID" },
           options: [
             {
               name: ["--config", "-c"],
@@ -326,6 +358,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["add", "create"],
           description: "Add a resource to your Meroxa resource catalog",
+          args: { name: "NAME", isOptional: true },
           options: [
             {
               name: "--ca-cert",
@@ -399,7 +432,11 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
-        { name: "describe", description: "Describe resource" },
+        {
+          name: "describe",
+          description: "Describe resource",
+          args: { name: "NAME" },
+        },
         {
           name: ["ls", "list"],
           description: "List resources and resource types",
@@ -415,6 +452,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["rm", "delete", "remove"],
           description: "Remove resource",
+          args: { name: "NAME" },
           options: [
             { name: ["--force", "-f"], description: "Skip confirmation" },
             { name: "--yolo", description: "Skip confirmation", hidden: true },
@@ -423,6 +461,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "rotate-tunnel-key",
           description: "Rotate the tunnel key for a resource",
+          args: { name: "NAME" },
           options: [
             { name: ["--force", "-f"], description: "Skip confirmation" },
             { name: "--yolo", description: "Skip confirmation", hidden: true },
@@ -431,6 +470,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "update",
           description: "Update a resource",
+          args: { name: "NAME" },
           options: [
             {
               name: "--ca-cert",
@@ -471,6 +511,11 @@ const completionSpec: Fig.Spec = {
             },
             { name: "--ssl", description: "Use SSL" },
             {
+              name: "--token",
+              description: "API Token",
+              args: { name: "token" },
+            },
+            {
               name: ["--url", "-u"],
               description: "New resource url",
               args: { name: "url" },
@@ -482,7 +527,11 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
-        { name: "validate", description: "Validate a resource" },
+        {
+          name: "validate",
+          description: "Validate a resource",
+          args: { name: "NAME" },
+        },
       ],
     },
     {

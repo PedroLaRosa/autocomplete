@@ -1,6 +1,7 @@
+// WP-CLI v2.12.0 (latest stable: wp-cli/wp-cli tag v2.12.0 and Homebrew wp-cli 2.12.0, 2026-11-20). Source: command docblocks and generated READMEs of every package pinned in wp-cli-bundle v2.12.0 composer.lock, plus wp-cli v2.12.0 php/commands and config-spec
+// Also checked: non-bundled find-command v2.0.6, dist-archive-command v3.2.3, profile-command v2.1.6/v2.1.7 and admin-command. Subcommand aliases (e.g. db dump, option set, theme upgrade) are listed as name arrays
+// Nightly-only commands from the handbook (ability, ai, block, connectors, font, icon, site-health, ...) are left out because they are not in a stable release yet
 // https://wp-cli.org/
-// wp-cli version 2.5.0
-// 19 June 2021
 
 // To learn more about Fig's autocomplete standard visit: https://fig.io/docs/concepts/cli-skeleton
 const global_parameter_path: Fig.Option = {
@@ -27,7 +28,7 @@ const global_parameter_ssh: Fig.Option = {
   name: "--ssh",
   requiresSeparator: true,
   description:
-    "Perform operation against a remote server over SSH (or a container using scheme of “docker”, “docker-compose”, “vagrant”)",
+    "Perform operation against a remote server over SSH (or a container using scheme of “docker”, “docker-compose”, “docker-compose-run”, “vagrant”)",
   args: {
     name: "options",
     suggestions: [
@@ -168,19 +169,132 @@ const global_parameter_quiet: Fig.Option = {
   description: "Suppress informational messages",
 };
 
+const global_parameter_context: Fig.Option = {
+  name: "--context",
+  requiresSeparator: true,
+  description: "Load WordPress in a given context",
+  args: {
+    name: "context",
+    suggestions: ["cli", "admin", "auto", "frontend"],
+    default: "cli",
+  },
+};
+
+const formatOption = (
+  formats: string[],
+  defaultFormat?: string
+): Fig.Option => ({
+  name: "--format",
+  requiresSeparator: true,
+  description: "Render output in a particular format",
+  args: { name: "format", suggestions: formats, default: defaultFormat },
+});
+
+const cacheGroupOption: Fig.Option = {
+  name: "--group",
+  requiresSeparator: true,
+  description:
+    "Method for grouping data within the cache which allows the same key to be used across groups",
+  args: { name: "group", default: "default" },
+};
+
+const configFileOption: Fig.Option = {
+  name: "--config-file",
+  requiresSeparator: true,
+  description:
+    "Specify the file path to the config file. Defaults to wp-config.php in the root of the WordPress installation",
+  args: { name: "path", template: "filepaths" },
+};
+
+const singleOption: Fig.Option = {
+  name: "--single",
+  description: "Whether to return a single value",
+};
+
+const dbDefaultsOption: Fig.Option = {
+  name: "--defaults",
+  description:
+    "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
+};
+
+const excludeOption = (what: string): Fig.Option => ({
+  name: "--exclude",
+  requiresSeparator: true,
+  description: `Comma separated list of ${what} to exclude`,
+  args: { name: "names" },
+});
+
+const transientNetworkOption: Fig.Option = {
+  name: "--network",
+  description:
+    "Get the value of a network|site transient. On single site, this is a specially-named cache key. On multisite, this is a global cache (instead of local to the site)",
+};
+
+const appPasswordUserArg: Fig.Arg = {
+  name: "user",
+  description: "The user login, user email, or user ID",
+};
+
+const appPasswordUuidArg: Fig.Arg = {
+  name: "uuid",
+  description: "The universally unique ID of the application password",
+};
+
+const signupArg: Fig.Arg = {
+  name: "signup",
+  description:
+    "The signup ID, user login, user email, or activation key of the signup",
+};
+
+const siteSlugOption: Fig.Option = {
+  name: "--slug",
+  requiresSeparator: true,
+  description:
+    "Path of the site. Subdomain on subdomain installs, directory on subdirectory installs",
+  args: { name: "slug" },
+};
+
 // The below is a dummy example for git. Make sure to change the file name!
 const completionSpec: Fig.Spec = {
   name: "wp",
   description: "WP-CLI is the command-line interface for WordPress",
+  options: [
+    {
+      name: "--info",
+      description: "Print information about the WP-CLI environment",
+    },
+    {
+      name: "--version",
+      description: "Print the installed WP-CLI version",
+    },
+  ],
   subcommands: [
-    // {
-    //   name: "admin",
-    //   description: "Open /wp-admin/ in a browser.",
-    //   // If a subcommand or option takes an argument, you must include the args prop, even if it"s an empty object (like below)
-    //   // If you want to build custom suggestions for arguments check out: https://fig.io/docs/concepts/dynamic-suggestions
-    //   args: [{}],
-    //   options: global_parameters,
-    // },
+    {
+      name: "admin",
+      description: "Open /wp-admin/ in a browser",
+      options: [
+        global_parameter_path,
+        global_parameter_url,
+        global_parameter_ssh,
+        global_parameter_http,
+        global_parameter_user,
+        global_parameter_skip_plugins1,
+        global_parameter_skip_plugins2,
+        global_parameter_skip_themes1,
+        global_parameter_skip_themes2,
+        global_parameter_skip_packages,
+        global_parameter_require,
+        global_parameter_exec,
+        global_parameter_color,
+        global_parameter_no_color,
+        global_parameter_debug1,
+        global_parameter_debug2,
+        global_parameter_prompt1,
+        global_parameter_prompt2,
+        global_parameter_quiet,
+        global_parameter_context,
+      ],
+    },
     {
       name: "cache",
       description:
@@ -205,6 +319,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -221,11 +336,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "group",
+              isOptional: true,
               description:
                 "Method for grouping data within the cache which allows the same key to be used across groups",
             },
             {
               name: "expiration",
+              isOptional: true,
               description:
                 "Define how long to keep the value, in seconds. 0 means as long as possible",
             },
@@ -241,10 +358,12 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "offset",
+              isOptional: true,
               description: "The amount by which to decrement the item’s value",
             },
             {
               name: "group",
+              isOptional: true,
               description:
                 "Method for grouping data within the cache which allows the same key to be used across groups",
             },
@@ -260,6 +379,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "group",
+              isOptional: true,
               description:
                 "Method for grouping data within the cache which allows the same key to be used across groups",
             },
@@ -268,6 +388,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "flush",
           description: "Flushes the object cache",
+        },
+        {
+          name: "flush-group",
+          description:
+            "Removes all cache items in a group, if the object cache implementation supports it",
+          args: {
+            name: "group",
+            description: "Cache group key",
+          },
         },
         {
           name: "get",
@@ -279,6 +408,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "group",
+              isOptional: true,
               description:
                 "Method for grouping data within the cache which allows the same key to be used across groups",
             },
@@ -294,13 +424,73 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "offset",
+              isOptional: true,
               description: "The amount by which to increment the item’s value",
             },
             {
               name: "group",
+              isOptional: true,
               description:
                 "Method for grouping data within the cache which allows the same key to be used across groups",
             },
+          ],
+        },
+        {
+          name: "patch",
+          description: "Updates a nested value from the cache",
+          args: [
+            {
+              name: "action",
+              description: "Patch action to perform",
+              suggestions: ["insert", "update", "delete"],
+            },
+            {
+              name: "key",
+              description: "Cache key",
+            },
+            {
+              name: "key-path",
+              description:
+                "The name(s) of the keys within the value to locate the value to patch",
+              isVariadic: true,
+            },
+            {
+              name: "value",
+              description:
+                "The new value. If omitted, the value is read from STDIN",
+              isOptional: true,
+            },
+          ],
+          options: [
+            cacheGroupOption,
+            {
+              name: "--expiration",
+              requiresSeparator: true,
+              description:
+                "Define how long to keep the value, in seconds. 0 means as long as possible",
+              args: { name: "expiration", default: "0" },
+            },
+            formatOption(["plaintext", "json"], "plaintext"),
+          ],
+        },
+        {
+          name: "pluck",
+          description: "Gets a nested value from the cache",
+          args: [
+            {
+              name: "key",
+              description: "Cache key",
+            },
+            {
+              name: "key-path",
+              description:
+                "The name(s) of the keys within the value to locate the value to pluck",
+              isVariadic: true,
+            },
+          ],
+          options: [
+            cacheGroupOption,
+            formatOption(["plaintext", "json", "yaml"], "plaintext"),
           ],
         },
         {
@@ -318,11 +508,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "group",
+              isOptional: true,
               description:
                 "Method for grouping data within the cache which allows the same key to be used across groups",
             },
             {
               name: "expiration",
+              isOptional: true,
               description:
                 "Define how long to keep the value, in seconds. 0 means as long as possible",
             },
@@ -343,15 +535,26 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "group",
+              isOptional: true,
               description:
                 "Method for grouping data within the cache which allows the same key to be used across groups",
             },
             {
               name: "expiration",
+              isOptional: true,
               description:
                 "Define how long to keep the value, in seconds. 0 means as long as possible",
             },
           ],
+        },
+        {
+          name: "supports",
+          description:
+            "Determines whether the object cache implementation supports a particular feature",
+          args: {
+            name: "feature",
+            description: "Name of the feature to check for",
+          },
         },
         {
           name: "type",
@@ -382,6 +585,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -394,16 +598,19 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "cap",
+              isVariadic: true,
               description: "One or more capabilities to add",
             },
           ],
           options: [
             {
               name: "--grant",
+              requiresSeparator: true,
               description:
                 "Adds the capability as an explicit boolean value, instead of implicitly defaulting to true",
               args: {
-                name: "options",
+                name: "grant",
+                isOptional: true,
                 suggestions: [{ name: "true" }, { name: "false" }],
               },
             },
@@ -450,6 +657,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "cap",
+              isVariadic: true,
               description: "One or more capabilities to remove",
             },
           ],
@@ -480,6 +688,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -567,6 +776,14 @@ const completionSpec: Fig.Spec = {
             {
               name: "get",
               description: "Gets the value for an alias",
+              args: {
+                name: "key",
+                description: "Key for the alias",
+              },
+            },
+            {
+              name: "is-group",
+              description: "Check whether an alias is a group",
               args: {
                 name: "key",
                 description: "Key for the alias",
@@ -722,12 +939,14 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--line",
+              isRequired: true,
               requiresSeparator: true,
               description: "The current command line to be executed",
               args: { name: "line" },
             },
             {
               name: "--point",
+              isRequired: true,
               requiresSeparator: true,
               description:
                 "The index to the current cursor position relative to the beginning of the command",
@@ -740,6 +959,7 @@ const completionSpec: Fig.Spec = {
           description: "Detects if a command exists",
           args: {
             name: "command_name",
+            isVariadic: true,
             description: "The command",
           },
         },
@@ -844,6 +1064,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -851,6 +1072,7 @@ const completionSpec: Fig.Spec = {
           description: "Approves a comment",
           args: {
             name: "id",
+            isVariadic: true,
             description: "The IDs of the comments to approve",
           },
         },
@@ -859,6 +1081,7 @@ const completionSpec: Fig.Spec = {
           description: "Counts comments, on whole blog or on a given post",
           args: {
             name: "post-id",
+            isOptional: true,
             description: "The ID of the post to count comments in",
           },
         },
@@ -884,6 +1107,7 @@ const completionSpec: Fig.Spec = {
           description: "Deletes a comment",
           args: {
             name: "id",
+            isVariadic: true,
             description: "One or more IDs of comments to delete",
           },
           options: [
@@ -1038,6 +1262,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value of the meta field. If omitted, the value is read from STDIN",
                 },
@@ -1064,10 +1289,12 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key",
+                  isOptional: true,
                   description: "The name of the meta field to delete",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value to delete. If omitted, all rows with key will deleted",
                 },
@@ -1093,6 +1320,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -1199,11 +1427,13 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to patch",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -1234,6 +1464,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to pluck",
                 },
@@ -1255,7 +1486,7 @@ const completionSpec: Fig.Spec = {
               ],
             },
             {
-              name: "update",
+              name: ["update", "set"],
               description: "Update a meta field",
               args: [
                 {
@@ -1268,6 +1499,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -1292,6 +1524,7 @@ const completionSpec: Fig.Spec = {
             "Recalculates the comment_count value for one or more posts",
           args: {
             name: "id",
+            isVariadic: true,
             description: "IDs for one or more posts to update",
           },
         },
@@ -1300,6 +1533,7 @@ const completionSpec: Fig.Spec = {
           description: "Marks a comment as spam",
           args: {
             name: "id",
+            isVariadic: true,
             description: "The IDs of the comments to mark as spam",
           },
         },
@@ -1316,6 +1550,7 @@ const completionSpec: Fig.Spec = {
           description: "Trashes a comment",
           args: {
             name: "id",
+            isVariadic: true,
             description: "The IDs of the comments to trash",
           },
         },
@@ -1324,6 +1559,7 @@ const completionSpec: Fig.Spec = {
           description: "Unapproves a comment",
           args: {
             name: "id",
+            isVariadic: true,
             description: "The IDs of the comments to unapprove",
           },
         },
@@ -1332,6 +1568,7 @@ const completionSpec: Fig.Spec = {
           description: "Unmarks a comment as spam",
           args: {
             name: "id",
+            isVariadic: true,
             description: "The IDs of the comments to unmark as spam",
           },
         },
@@ -1340,6 +1577,7 @@ const completionSpec: Fig.Spec = {
           description: "Untrashes a comment",
           args: {
             name: "id",
+            isVariadic: true,
             description: "The IDs of the comments to untrash",
           },
         },
@@ -1348,6 +1586,7 @@ const completionSpec: Fig.Spec = {
           description: "Updates one or more comments",
           args: {
             name: "id",
+            isVariadic: true,
             description: "One or more IDs of comments to update",
           },
           options: [
@@ -1384,6 +1623,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -1392,12 +1632,14 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--dbname",
+              isRequired: true,
               requiresSeparator: true,
               description: "Set the database name",
               args: { name: "dbname" },
             },
             {
               name: "--dbuser",
+              isRequired: true,
               requiresSeparator: true,
               description: "Set the database user",
               args: { name: "dbuser" },
@@ -1406,10 +1648,7 @@ const completionSpec: Fig.Spec = {
               name: "--dbpass",
               requiresSeparator: true,
               description: "Set the database password",
-              args: {
-                name: "options",
-                suggestions: [{ name: "plaintext" }, { name: "json" }],
-              },
+              args: { name: "dbpass" },
             },
             {
               name: "--dbhost",
@@ -1469,6 +1708,7 @@ const completionSpec: Fig.Spec = {
               name: "--force",
               description: "Overwrites existing files, if present",
             },
+            configFileOption,
             {
               name: "--insecure",
               description:
@@ -1499,11 +1739,13 @@ const completionSpec: Fig.Spec = {
                 ],
               },
             },
+            configFileOption,
           ],
         },
         {
           name: "edit",
           description: "Launches system editor to edit the wp-config.php file",
+          options: [configFileOption],
         },
         {
           name: "get",
@@ -1538,9 +1780,11 @@ const completionSpec: Fig.Spec = {
                   { name: "var_export" },
                   { name: "json" },
                   { name: "yaml" },
+                  { name: "dotenv" },
                 ],
               },
             },
+            configFileOption,
           ],
         },
         {
@@ -1566,6 +1810,30 @@ const completionSpec: Fig.Spec = {
                 ],
               },
             },
+            configFileOption,
+          ],
+        },
+        {
+          name: "is-true",
+          description:
+            "Determines whether value of a specific defined constant or variable is truthy",
+          args: {
+            name: "name",
+            description: "Name of the wp-config.php constant or variable",
+          },
+          options: [
+            {
+              name: "--type",
+              requiresSeparator: true,
+              description:
+                "Type of config value to retrieve. Defaults to ‘all’",
+              args: {
+                name: "type",
+                suggestions: ["constant", "variable", "all"],
+                default: "all",
+              },
+            },
+            configFileOption,
           ],
         },
         {
@@ -1574,6 +1842,8 @@ const completionSpec: Fig.Spec = {
             "Lists variables, constants, and file includes defined in wp-config.php file",
           args: {
             name: "filter",
+            isOptional: true,
+            isVariadic: true,
             description: "Name or partial name to filter the list by",
           },
           options: [
@@ -1595,6 +1865,7 @@ const completionSpec: Fig.Spec = {
                   { name: "csv" },
                   { name: "json" },
                   { name: "yaml" },
+                  { name: "dotenv" },
                 ],
               },
             },
@@ -1602,6 +1873,7 @@ const completionSpec: Fig.Spec = {
               name: "--strict",
               description: "Enforce strict matching when a filter is provided",
             },
+            configFileOption,
           ],
         },
         {
@@ -1627,12 +1899,12 @@ const completionSpec: Fig.Spec = {
             {
               name: "--add",
               description:
-                "Add the value if it doesn’t exist yet. This is the default behavior, override with –no-add",
+                "Add the value if it doesn’t exist yet. This is the default behavior, override with --no-add",
             },
             {
               name: "--no-add",
               description:
-                "Add the value if it doesn’t exist yet. This is the default behavior, override with –no-add",
+                "Add the value if it doesn’t exist yet. This is the default behavior, override with --no-add",
             },
             {
               name: "--raw",
@@ -1676,6 +1948,7 @@ const completionSpec: Fig.Spec = {
                 ],
               },
             },
+            configFileOption,
           ],
         },
         {
@@ -1683,6 +1956,8 @@ const completionSpec: Fig.Spec = {
           description: "Refreshes the salts defined in the wp-config.php file",
           args: {
             name: "keys",
+            isOptional: true,
+            isVariadic: true,
             description:
               "One ore more keys to shuffle. If none are provided, this falls back to the default WordPress Core salt keys",
           },
@@ -1692,6 +1967,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "If an unknown key is requested to be shuffled, add it instead of throwing a warning",
             },
+            configFileOption,
             {
               name: "--insecure",
               description:
@@ -1725,6 +2001,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -1739,6 +2016,11 @@ const completionSpec: Fig.Spec = {
             {
               name: "--major",
               description: "Compare only the first part of the version number",
+            },
+            {
+              name: "--force-check",
+              description:
+                "Bypass the transient cache and force a fresh update check",
             },
             {
               name: "--field",
@@ -1775,6 +2057,7 @@ const completionSpec: Fig.Spec = {
           description: "Downloads core WordPress files",
           args: {
             name: "download-url",
+            isOptional: true,
             description:
               "Download directly from a provided URL instead of fetching the URL from the wordpress.org servers",
           },
@@ -1819,6 +2102,15 @@ const completionSpec: Fig.Spec = {
               description:
                 "Retry download without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack",
             },
+            {
+              name: "--extract",
+              description:
+                "Whether to extract the downloaded file. Defaults to true",
+            },
+            {
+              name: "--no-extract",
+              description: "Keep the downloaded archive without extracting it",
+            },
           ],
         },
         {
@@ -1827,18 +2119,21 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--url",
+              isRequired: true,
               requiresSeparator: true,
               description: "The address of the new site",
               args: { name: "url" },
             },
             {
               name: "--title",
+              isRequired: true,
               requiresSeparator: true,
               description: "The title of the new site",
               args: { name: "site-title" },
             },
             {
               name: "--admin_user",
+              isRequired: true,
               requiresSeparator: true,
               description: "The name of the admin user",
               args: { name: "username" },
@@ -1852,9 +2147,17 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--admin_email",
+              isRequired: true,
               requiresSeparator: true,
               description: "The email address for the admin user",
               args: { name: "email" },
+            },
+            {
+              name: "--locale",
+              requiresSeparator: true,
+              description:
+                "The locale/language for the installation (e.g. `de_DE`). Default is `en_US`",
+              args: { name: "locale" },
             },
             {
               name: "--skip-email",
@@ -1899,10 +2202,14 @@ const completionSpec: Fig.Spec = {
               description:
                 "If passed, the network will use subdomains, instead of subdirectories. Doesn’t work with ‘localhost’",
             },
+            {
+              name: "--skip-config",
+              description: "Don’t add multisite constants to wp-config.php",
+            },
           ],
         },
         {
-          name: "multisite-install",
+          name: ["multisite-install", "install-network"],
           description: "Installs WordPress multisite from scratch",
           options: [
             {
@@ -1928,12 +2235,14 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--title",
+              isRequired: true,
               requiresSeparator: true,
               description: "The title of the new site",
               args: { name: "site-title" },
             },
             {
               name: "--admin_user",
+              isRequired: true,
               requiresSeparator: true,
               description: "The name of the admin user",
               args: {
@@ -1950,6 +2259,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--admin_email",
+              isRequired: true,
               requiresSeparator: true,
               description: "The email address for the admin user",
               args: { name: "email" },
@@ -1966,10 +2276,11 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
-          name: "update",
+          name: ["update", "upgrade"],
           description: "Updates WordPress to a newer version",
           args: {
             name: "zip",
+            isOptional: true,
             template: "filepaths",
             description:
               "Path to zip file to use, instead of downloading from wordpress.org",
@@ -2042,7 +2353,19 @@ const completionSpec: Fig.Spec = {
             {
               name: "--insecure",
               description:
-                "Verify checksums against a specific locale of WordPress",
+                "Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack",
+            },
+            {
+              name: "--include-root",
+              description:
+                "Verify all files and folders in the root directory, and warn if any non-WordPress items are found",
+            },
+            {
+              name: "--exclude",
+              requiresSeparator: true,
+              description:
+                "Exclude specific files from the checksum verification. Provide a comma-separated list of file paths",
+              args: { name: "files" },
             },
           ],
         },
@@ -2082,6 +2405,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -2094,8 +2418,21 @@ const completionSpec: Fig.Spec = {
                 "Deletes all scheduled cron events for the given hook",
               args: {
                 name: "hook",
-                description: "The hook name",
+                description: "One or more hooks to delete",
+                isOptional: true,
+                isVariadic: true,
               },
+              options: [
+                {
+                  name: "--due-now",
+                  description: "Delete all hooks due right now",
+                },
+                excludeOption("hooks"),
+                {
+                  name: "--all",
+                  description: "Delete all hooks",
+                },
+              ],
             },
             {
               name: "list",
@@ -2143,6 +2480,8 @@ const completionSpec: Fig.Spec = {
                 "Runs the next scheduled cron event for the given hook",
               args: {
                 name: "hook",
+                isOptional: true,
+                isVariadic: true,
                 description: "The hook name",
               },
               options: [
@@ -2150,6 +2489,7 @@ const completionSpec: Fig.Spec = {
                   name: "--due-now",
                   description: "Run all hooks due right now",
                 },
+                excludeOption("hooks"),
                 {
                   name: "--all",
                   description: "Run all hooks",
@@ -2166,11 +2506,13 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "next-run",
+                  isOptional: true,
                   description:
                     "A Unix timestamp or an English textual datetime description compatible with strtotime(). Defaults to now",
                 },
                 {
                   name: "recurrence",
+                  isOptional: true,
                   description:
                     "How often the event should recur. See wp cron schedule list for available schedule names. Defaults to no recurrence",
                 },
@@ -2266,6 +2608,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -2292,11 +2635,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysqlcheck. Refer to mysqlcheck docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2322,10 +2661,11 @@ const completionSpec: Fig.Spec = {
               name: "--yes",
               description: "Answer yes to the confirmation message",
             },
+            dbDefaultsOption,
           ],
         },
         {
-          name: "cli",
+          name: ["cli", "connect"],
           description:
             "Opens a MySQL console using credentials from wp-config.php",
           options: [
@@ -2360,11 +2700,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysql. Refer to mysql docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2407,6 +2743,7 @@ const completionSpec: Fig.Spec = {
               description: "Password to pass to mysql. Defaults to DB_PASSWORD",
               args: { name: "value" },
             },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2429,13 +2766,15 @@ const completionSpec: Fig.Spec = {
               name: "--yes",
               description: "Answer yes to the confirmation message",
             },
+            dbDefaultsOption,
           ],
         },
         {
-          name: "export",
+          name: ["export", "dump"],
           description: "Exports the database to a file or to STDOUT",
           args: {
             name: "file",
+            isOptional: true,
             description:
               "The name of the SQL file to export. If ‘-‘, then outputs to STDOUT. If omitted, it will be ‘{dbname}-{Y-m-d}-{random-hash}.sql’",
           },
@@ -2476,17 +2815,18 @@ const completionSpec: Fig.Spec = {
             {
               name: "--include-tablespaces",
               description:
-                "Skips adding the default –no-tablespaces option to mysqldump",
+                "Skips adding the default --no-tablespaces option to mysqldump",
             },
             {
               name: "--porcelain",
               description: "Output filename for the exported database",
             },
             {
-              name: "--defaults",
+              name: "--add-drop-table",
               description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
+                "Include a `DROP TABLE IF EXISTS` statement before each `CREATE TABLE` statement",
             },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2494,6 +2834,7 @@ const completionSpec: Fig.Spec = {
           description: "Imports a database from a file or from STDIN",
           args: {
             name: "file",
+            isOptional: true,
             description:
               "The name of the SQL file to import. If ‘-‘, then reads from STDIN. If omitted, it will look for ‘{dbname}.sql’",
           },
@@ -2527,11 +2868,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "When using an SQL file, do not include speed optimization such as disabling auto-commit and key checks",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2564,11 +2901,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysqldump. Refer to mysqldump docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2580,6 +2913,7 @@ const completionSpec: Fig.Spec = {
           description: "Executes a SQL query against the database",
           args: {
             name: "sql",
+            isOptional: true,
             description:
               "A SQL query. If not passed, will try to read from STDIN",
           },
@@ -2608,11 +2942,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysql. Refer to mysql docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2645,11 +2975,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Extra arguments to pass to mysqlcheck. Refer to mysqlcheck docs",
             },
-            {
-              name: "--defaults",
-              description:
-                "Loads the environment’s MySQL option files. Default behavior is to skip loading them to avoid failures due to misconfiguration",
-            },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2678,6 +3004,7 @@ const completionSpec: Fig.Spec = {
               name: "--yes",
               description: "Answer yes to the confirmation message",
             },
+            dbDefaultsOption,
           ],
         },
         {
@@ -2691,6 +3018,8 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "tables",
+              isOptional: true,
+              isVariadic: true,
               description:
                 "One or more tables to search through for the string",
             },
@@ -2704,12 +3033,12 @@ const completionSpec: Fig.Spec = {
             {
               name: "--all-tables-with-prefix",
               description:
-                "Search through all tables that match the registered table prefix, even if not registered on $wpdb. On one hand, sometimes plugins use tables without registering them to $wpdb. On another hand, this could return tables you don’t expect. Overrides –network",
+                "Search through all tables that match the registered table prefix, even if not registered on $wpdb. On one hand, sometimes plugins use tables without registering them to $wpdb. On another hand, this could return tables you don’t expect. Overrides --network",
             },
             {
               name: "--all-tables",
               description:
-                "Search through ALL tables in the database, regardless of the prefix, and even if not registered on $wpdb. Overrides –network and –all-tables-with-prefix",
+                "Search through ALL tables in the database, regardless of the prefix, and even if not registered on $wpdb. Overrides --network and --all-tables-with-prefix",
             },
             {
               name: "--before_context",
@@ -2756,7 +3085,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--one_line",
               description:
-                "Place the ‘table:column’ output on the same line as the row id and match (‘table:column:id:match’). Overrides –table_column_once",
+                "Place the ‘table:column’ output on the same line as the row id and match (‘table:column:id:match’). Overrides --table_column_once",
             },
             {
               name: "--matches_only",
@@ -2789,6 +3118,13 @@ const completionSpec: Fig.Spec = {
                 "Percent color code to use for the match (unless both before and after context are 0, when no color code is used). For a list of available percent color codes, see below. Default ‘%3%k’ (black on a mustard background)",
               args: { name: "match_color" },
             },
+            {
+              name: "--fields",
+              requiresSeparator: true,
+              description: "Get a specific subset of the fields",
+              args: { name: "fields" },
+            },
+            formatOption(["table", "csv", "json", "yaml", "ids", "count"]),
           ],
         },
         {
@@ -2856,12 +3192,31 @@ const completionSpec: Fig.Spec = {
             {
               name: "--all-tables-with-prefix",
               description:
-                "List all tables that match the table prefix even if not registered on $wpdb. Overrides –network",
+                "List all tables that match the table prefix even if not registered on $wpdb. Overrides --network",
             },
             {
               name: "--all-tables",
               description:
-                "List all tables in the database, regardless of the prefix, and even if not registered on $wpdb. Overrides –all-tables-with-prefix",
+                "List all tables in the database, regardless of the prefix, and even if not registered on $wpdb. Overrides --all-tables-with-prefix",
+            },
+            {
+              name: "--decimals",
+              requiresSeparator: true,
+              description:
+                "Number of digits after decimal point. Defaults to 0",
+              args: { name: "decimals" },
+            },
+            {
+              name: "--order",
+              requiresSeparator: true,
+              description: "Ascending or Descending order",
+              args: { name: "order", suggestions: ["asc", "desc"] },
+            },
+            {
+              name: "--orderby",
+              requiresSeparator: true,
+              description: "Order by fields",
+              args: { name: "orderby", suggestions: ["name", "size"] },
             },
           ],
         },
@@ -2870,6 +3225,8 @@ const completionSpec: Fig.Spec = {
           description: "Lists the database tables",
           args: {
             name: "table",
+            isOptional: true,
+            isVariadic: true,
             description:
               "List tables based on wildcard search, e.g. ‘wp_*_options’ or ‘wp_post?’",
           },
@@ -2888,12 +3245,12 @@ const completionSpec: Fig.Spec = {
             {
               name: "--all-tables-with-prefix",
               description:
-                "List all tables that match the table prefix even if not registered on $wpdb. Overrides –network",
+                "List all tables that match the table prefix even if not registered on $wpdb. Overrides --network",
             },
             {
               name: "--all-tables",
               description:
-                "List all tables in the database, regardless of the prefix, and even if not registered on $wpdb. Overrides –all-tables-with-prefix",
+                "List all tables in the database, regardless of the prefix, and even if not registered on $wpdb. Overrides --all-tables-with-prefix",
             },
             {
               name: "--format",
@@ -2920,6 +3277,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "target",
+          isOptional: true,
           template: "filepaths",
           description:
             "Path and file name for the distribution archive. Defaults to project directory name plus version, if discoverable",
@@ -2938,6 +3296,25 @@ const completionSpec: Fig.Spec = {
             name: "options",
             suggestions: [{ name: "zip" }, { name: "targz" }],
           },
+        },
+        {
+          name: "--force",
+          description:
+            "Forces overwriting of the archive file if it already exists",
+        },
+        {
+          name: "--plugin-dirname",
+          requiresSeparator: true,
+          description:
+            "Set the archive extract directory name. Defaults to project directory name",
+          args: { name: "plugin-slug" },
+        },
+        {
+          name: "--filename-format",
+          requiresSeparator: true,
+          description:
+            "Use a custom format for archive filename. Available substitutions: {name}, {version}. Ignored if <target> is provided or the version cannot be determined",
+          args: { name: "filename-format", default: "{name}.{version}" },
         },
         global_parameter_path,
         global_parameter_url,
@@ -2958,6 +3335,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -2983,6 +3361,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -3151,6 +3530,11 @@ const completionSpec: Fig.Spec = {
               description: "Lists all available oEmbed providers",
               options: [
                 {
+                  name: "--force-regex",
+                  description:
+                    "Turn the asterisk-type provider URLs into regexes",
+                },
+                {
                   name: "--field",
                   requiresSeparator: true,
                   description: "Display the value of a single field",
@@ -3244,6 +3628,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3257,6 +3642,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "arg",
+          isOptional: true,
+          isVariadic: true,
           description:
             "One or more arguments to pass to the file. They are placed in the $args variable",
         },
@@ -3265,6 +3652,11 @@ const completionSpec: Fig.Spec = {
         {
           name: "--skip-wordpress",
           description: "Load and execute file without loading WordPress",
+        },
+        {
+          name: "--use-include",
+          description:
+            "Process the provided file via include instead of evaluating its contents",
         },
         global_parameter_path,
         global_parameter_url,
@@ -3285,6 +3677,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3301,11 +3694,31 @@ const completionSpec: Fig.Spec = {
         {
           name: "--stdout",
           description:
-            "Output the whole XML using standard output (incompatible with –dir=)",
+            "Output the whole XML using standard output (incompatible with --dir=)",
         },
         {
           name: "--skip_comments",
           description: "Don’t include comments in the WXR export file",
+        },
+        {
+          name: "--include_once",
+          requiresSeparator: true,
+          description:
+            "Include specified export section only in the first export file. Separate multiple sections with a comma",
+          args: {
+            name: "before_posts",
+            suggestions: [
+              "categories",
+              "tags",
+              "nav_menu_items",
+              "custom_taxonomies_terms",
+            ],
+          },
+        },
+        {
+          name: "--allow_orphan_terms",
+          description:
+            "Export orphaned terms with `parent=0`, instead of throwing an exception",
         },
         {
           name: "--max_file_size",
@@ -3349,16 +3762,16 @@ const completionSpec: Fig.Spec = {
           args: { name: "post-type" },
         },
         {
-          name: "--post_in",
+          name: "--post__in",
           requiresSeparator: true,
           description:
-            "Export all posts specified as a comma- or space-separated list of IDs. Post’s attachments won’t be exported unless –with_attachments is specified",
+            "Export all posts specified as a comma- or space-separated list of IDs. Post’s attachments won’t be exported unless --with_attachments is specified",
           args: { name: "pid" },
         },
         {
           name: "--with_attachments",
           description:
-            "Force including attachments in case –post__in has been specified",
+            "Force including attachments in case --post__in has been specified",
         },
         {
           name: "--start_id",
@@ -3455,6 +3868,10 @@ const completionSpec: Fig.Spec = {
             ],
           },
         },
+        {
+          name: "--verbose",
+          description: "Log useful information to STDOUT",
+        },
         global_parameter_path,
         global_parameter_url,
         global_parameter_ssh,
@@ -3474,6 +3891,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3481,6 +3899,8 @@ const completionSpec: Fig.Spec = {
       description: "Gets help on WP-CLI, or on a specific command",
       args: {
         name: "command",
+        isOptional: true,
+        isVariadic: true,
         description: "Get help on a specific command",
       },
       options: [
@@ -3503,6 +3923,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3528,6 +3949,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -3543,6 +3965,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "destination",
+              isOptional: true,
               template: "folders",
               description:
                 "Path to the destination directory for the resulting JSON files. Defaults to the source directory",
@@ -3550,13 +3973,39 @@ const completionSpec: Fig.Spec = {
           ],
           options: [
             {
+              name: "--domain",
+              requiresSeparator: true,
+              description:
+                "Text domain to use for the JSON file name. Overrides the default one extracted from the PO file",
+              args: { name: "domain" },
+            },
+            {
+              name: "--extensions",
+              requiresSeparator: true,
+              description:
+                "Additional custom JS extensions, comma separated list. By default searches for .min.js and .js extensions",
+              args: { name: "extensions" },
+            },
+            {
               name: "--purge",
               description:
                 "Whether to purge the strings that were extracted from the original source file. Defaults to true, use --no-purge to skip the removal",
             },
             {
+              name: "--update-mo-files",
+              description:
+                "Whether MO files should be updated as well after updating PO files. Only has an effect when used with --purge",
+            },
+            {
               name: "--pretty-print",
               description: "Pretty-print resulting JSON files",
+            },
+            {
+              name: "--use-map",
+              requiresSeparator: true,
+              description:
+                "Whether to use a mapping file for the strings, as a JSON value, array to specify multiple",
+              args: { name: "paths_or_maps", template: "filepaths" },
             },
           ],
         },
@@ -3572,9 +4021,29 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "destination",
+              isOptional: true,
               template: "folders",
               description:
                 "Path to the destination directory for the resulting JSON files. Defaults to the source directory",
+            },
+          ],
+        },
+        {
+          name: "make-php",
+          description: "Create PHP files from PO files",
+          args: [
+            {
+              name: "source",
+              template: "filepaths",
+              description:
+                "Path to an existing PO file or a directory containing multiple PO files",
+            },
+            {
+              name: "destination",
+              template: "folders",
+              description:
+                "Path to the destination directory for the resulting PHP files. Defaults to the source directory",
+              isOptional: true,
             },
           ],
         },
@@ -3588,6 +4057,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "destination",
+              isOptional: true,
               description: "Name of the resulting POT file",
             },
           ],
@@ -3626,6 +4096,11 @@ const completionSpec: Fig.Spec = {
               args: { name: "paths" },
             },
             {
+              name: "--subtract-and-merge",
+              description:
+                "Add source code references and comments from the generated POT file to the POT file used for subtraction instead. Warning: this modifies the files passed to --subtract",
+            },
+            {
               name: "--include",
               requiresSeparator: true,
               description:
@@ -3647,6 +4122,15 @@ const completionSpec: Fig.Spec = {
               args: { name: "headers" },
             },
             {
+              name: "--location",
+              description:
+                "Whether to write `#: filename:line` lines. Defaults to true",
+            },
+            {
+              name: "--no-location",
+              description: "Skip writing `#: filename:line` lines",
+            },
+            {
               name: "--skip-js",
               description:
                 "Skips JavaScript string extraction. Useful when this is done in another build step, e.g. through Babel",
@@ -3656,8 +4140,16 @@ const completionSpec: Fig.Spec = {
               description: "Skips PHP string extraction",
             },
             {
+              name: "--skip-blade",
+              description: "Skips Blade-PHP string extraction",
+            },
+            {
               name: "--skip-block-json",
               description: "Skips string extraction from block.json files",
+            },
+            {
+              name: "--skip-theme-json",
+              description: "Skips string extraction from theme.json files",
             },
             {
               name: "--skip-audit",
@@ -3680,6 +4172,24 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
+        {
+          name: "update-po",
+          description: "Update PO files from a POT file",
+          args: [
+            {
+              name: "source",
+              template: "filepaths",
+              description: "Path to an existing POT file to use for updating",
+            },
+            {
+              name: "destination",
+              template: "filepaths",
+              description:
+                "PO file to update or a directory containing multiple PO files. Defaults to all PO files in the source directory",
+              isOptional: true,
+            },
+          ],
+        },
       ],
     },
     {
@@ -3687,6 +4197,7 @@ const completionSpec: Fig.Spec = {
       description: "Imports content from a given WXR file",
       args: {
         name: "file",
+        isVariadic: true,
         template: "filepaths",
         description:
           "Path to one or more valid WXR files for importing. Directories are also accepted",
@@ -3694,6 +4205,7 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: "--authors",
+          isRequired: true,
           requiresSeparator: true,
           description:
             "How the author mapping should be handled. Options are ‘create’, ‘mapping.csv’, or ‘skip’. The first will create any non-existent users from the WXR file. The second will read author mapping associations from a CSV, or create a CSV for editing if the file path doesn’t exist. The CSV requires two columns, and a header row like “old_user_login,new_user_login”. The last option will skip any author mapping",
@@ -3725,6 +4237,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -3750,6 +4263,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -3769,6 +4283,7 @@ const completionSpec: Fig.Spec = {
               description: "Installs a given language",
               args: {
                 name: "language",
+                isVariadic: true,
                 description: "Language code to install",
               },
               options: [
@@ -3818,6 +4333,7 @@ const completionSpec: Fig.Spec = {
                       { name: "table" },
                       { name: "csv" },
                       { name: "json" },
+                      { name: "count" },
                     ],
                   },
                 },
@@ -3828,6 +4344,7 @@ const completionSpec: Fig.Spec = {
               description: "Uninstalls a given language",
               args: {
                 name: "language",
+                isVariadic: true,
                 description: "Language code to uninstall",
               },
             },
@@ -3853,10 +4370,12 @@ const completionSpec: Fig.Spec = {
               args: [
                 {
                   name: "plugin",
+                  isOptional: true,
                   description: "Plugin to install language for",
                 },
                 {
                   name: "language",
+                  isVariadic: true,
                   description: "Language code to install",
                 },
               ],
@@ -3893,6 +4412,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "language",
+                  isVariadic: true,
                   description: "Language code to check",
                 },
               ],
@@ -3903,6 +4423,8 @@ const completionSpec: Fig.Spec = {
                 "Lists all available languages for one or more plugins",
               args: {
                 name: "plugin",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more plugins to list languages for",
               },
               options: [
@@ -3938,6 +4460,7 @@ const completionSpec: Fig.Spec = {
                       { name: "table" },
                       { name: "csv" },
                       { name: "json" },
+                      { name: "count" },
                     ],
                   },
                 },
@@ -3950,11 +4473,21 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "plugin",
                   description: "Plugin to uninstall language for",
+                  isOptional: true,
                 },
                 {
                   name: "language",
                   description: "Language code to uninstall",
+                  isVariadic: true,
                 },
+              ],
+              options: [
+                {
+                  name: "--all",
+                  description:
+                    "If set, languages for all plugins will be uninstalled",
+                },
+                formatOption(["table", "csv", "json", "summary"]),
               ],
             },
             {
@@ -3963,6 +4496,8 @@ const completionSpec: Fig.Spec = {
                 "Updates installed languages for one or more plugins",
               args: {
                 name: "plugin",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more plugins to update languages for",
               },
               options: [
@@ -3989,10 +4524,12 @@ const completionSpec: Fig.Spec = {
               args: [
                 {
                   name: "theme",
+                  isOptional: true,
                   description: "Theme to install language for",
                 },
                 {
                   name: "language",
+                  isVariadic: true,
                   description: "Language code to install",
                 },
               ],
@@ -4029,6 +4566,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "language",
+                  isVariadic: true,
                   description: "Language code to install",
                 },
               ],
@@ -4039,6 +4577,8 @@ const completionSpec: Fig.Spec = {
                 "Lists all available languages for one or more themes",
               args: {
                 name: "theme",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more themes to list languages for",
               },
               options: [
@@ -4074,6 +4614,7 @@ const completionSpec: Fig.Spec = {
                       { name: "table" },
                       { name: "csv" },
                       { name: "json" },
+                      { name: "count" },
                     ],
                   },
                 },
@@ -4086,11 +4627,21 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "theme",
                   description: "Theme to uninstall language for",
+                  isOptional: true,
                 },
                 {
                   name: "language",
                   description: "Language code to uninstall",
+                  isVariadic: true,
                 },
+              ],
+              options: [
+                {
+                  name: "--all",
+                  description:
+                    "If set, languages for all themes will be uninstalled",
+                },
+                formatOption(["table", "csv", "json", "summary"]),
               ],
             },
             {
@@ -4098,6 +4649,8 @@ const completionSpec: Fig.Spec = {
               description: "Updates installed languages for one or more themes",
               args: {
                 name: "theme",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more themes to update languages for",
               },
               options: [
@@ -4140,6 +4693,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -4190,6 +4744,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -4197,6 +4752,8 @@ const completionSpec: Fig.Spec = {
           description: "Fix image orientation for one or more attachments",
           args: {
             name: "attachment-id",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more IDs of the attachments to regenerate",
           },
           options: [
@@ -4240,6 +4797,7 @@ const completionSpec: Fig.Spec = {
           description: "Creates attachments from local files or URLs",
           args: {
             name: "file",
+            isVariadic: true,
             template: "filepaths",
             description:
               "Path to file or files to be imported. Supports the glob(3) capabilities of the current shell. If file is recognized as a URL (for example, with a scheme of http or ftp), the file will be downloaded to a temp file before being sideloaded",
@@ -4250,6 +4808,18 @@ const completionSpec: Fig.Spec = {
               requiresSeparator: true,
               description: "ID of the post to attach the imported files to",
               args: { name: "post_id" },
+            },
+            {
+              name: "--post_name",
+              requiresSeparator: true,
+              description: "Name of the post to attach the imported files to",
+              args: { name: "post_name" },
+            },
+            {
+              name: "--file_name",
+              requiresSeparator: true,
+              description: "Attachment name (post_name field)",
+              args: { name: "name" },
             },
             {
               name: "--title",
@@ -4293,7 +4863,9 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--porcelain",
-              description: "Output just the new attachment ID",
+              description:
+                "Output a single field for each imported image. Defaults to attachment ID when used as flag",
+              args: { name: "field", isOptional: true, suggestions: ["url"] },
             },
           ],
         },
@@ -4302,6 +4874,8 @@ const completionSpec: Fig.Spec = {
           description: "Regenerates thumbnails for one or more attachments",
           args: {
             name: "attachment-id",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more IDs of the attachments to regenerate",
           },
           options: [
@@ -4321,6 +4895,11 @@ const completionSpec: Fig.Spec = {
               name: "--only-missing",
               description:
                 "Only generate thumbnails for images missing image sizes",
+            },
+            {
+              name: "--delete-unknown",
+              description:
+                "Only delete thumbnails for old unregistered image sizes",
             },
             {
               name: "--yes",
@@ -4355,6 +4934,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -4376,6 +4956,7 @@ const completionSpec: Fig.Spec = {
           description: "Deletes one or more menus",
           args: {
             name: "menu",
+            isVariadic: true,
             description: "The name, slug, or term ID for the menu(s)",
           },
         },
@@ -4591,6 +5172,7 @@ const completionSpec: Fig.Spec = {
               description: "Deletes one or more items from a menu",
               args: {
                 name: "db-id",
+                isVariadic: true,
                 description: "Database ID for the menu item(s)",
               },
             },
@@ -4796,6 +5378,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -4817,6 +5400,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value of the meta field. If omitted, the value is read from STDIN",
                 },
@@ -4843,10 +5427,12 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key",
+                  isOptional: true,
                   description: "The name of the meta field to delete",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value to delete. If omitted, all rows with key will deleted",
                 },
@@ -4872,6 +5458,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -4974,11 +5561,13 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to patch",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -5009,6 +5598,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to pluck",
                 },
@@ -5030,7 +5620,7 @@ const completionSpec: Fig.Spec = {
               ],
             },
             {
-              name: "update",
+              name: ["update", "set"],
               description: "Update a meta field",
               args: [
                 {
@@ -5043,6 +5633,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -5087,6 +5678,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -5099,6 +5691,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "value",
+              isOptional: true,
               description:
                 "The value of the option to add. If omitted, the value is read from STDIN",
             },
@@ -5119,7 +5712,7 @@ const completionSpec: Fig.Spec = {
               description: "Should this option be automatically loaded",
               args: {
                 name: "autoload",
-                suggestions: [{ name: "'yes'" }, { name: "'no'" }],
+                suggestions: ["on", "off", "yes", "no"],
               },
             },
           ],
@@ -5129,6 +5722,7 @@ const completionSpec: Fig.Spec = {
           description: "Deletes an option",
           args: {
             name: "key",
+            isVariadic: true,
             description: "Key for the option",
           },
         },
@@ -5154,6 +5748,14 @@ const completionSpec: Fig.Spec = {
               },
             },
           ],
+        },
+        {
+          name: "get-autoload",
+          description: "Gets the 'autoload' value for an option",
+          args: {
+            name: "key",
+            description: "The name of the option to get 'autoload' of",
+          },
         },
         {
           name: "list",
@@ -5265,11 +5867,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "key-path",
+              isVariadic: true,
               description:
                 "The name(s) of the keys within the value to locate the value to patch",
             },
             {
               name: "value",
+              isOptional: true,
               description:
                 "The new value. If omitted, the value is read from STDIN",
             },
@@ -5296,6 +5900,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "key-path",
+              isVariadic: true,
               description:
                 "The name(s) of the keys within the value to locate the value to pluck",
             },
@@ -5317,7 +5922,22 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
-          name: "update",
+          name: "set-autoload",
+          description: "Sets the 'autoload' value for an option",
+          args: [
+            {
+              name: "key",
+              description: "The name of the option to set 'autoload' for",
+            },
+            {
+              name: "autoload",
+              description: "Should this option be automatically loaded",
+              suggestions: ["on", "off", "yes", "no"],
+            },
+          ],
+        },
+        {
+          name: ["update", "set"],
           description: "Updates an option value",
           args: [
             {
@@ -5326,6 +5946,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "value",
+              isOptional: true,
               description:
                 "The new value. If omitted, the value is read from STDIN",
             },
@@ -5338,7 +5959,7 @@ const completionSpec: Fig.Spec = {
                 "Requires WP 4.2. Should this option be automatically loaded",
               args: {
                 name: "autoload",
-                suggestions: [{ name: "'yes'" }, { name: "'no" }],
+                suggestions: ["on", "off", "yes", "no"],
               },
             },
             {
@@ -5377,6 +5998,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -5457,6 +6079,7 @@ const completionSpec: Fig.Spec = {
             "Gets the path to an installed WP-CLI package, or the package directory",
           args: {
             name: "name",
+            isOptional: true,
             template: "folders",
             description: "Name of the package to get the directory for",
           },
@@ -5468,6 +6091,13 @@ const completionSpec: Fig.Spec = {
             name: "name",
             description: "Name of the package to uninstall",
           },
+          options: [
+            {
+              name: "--insecure",
+              description:
+                "Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack",
+            },
+          ],
         },
         {
           name: "update",
@@ -5500,6 +6130,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -5507,6 +6138,8 @@ const completionSpec: Fig.Spec = {
           description: "Activates one or more plugins",
           args: {
             name: "plugin",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more plugins to activate",
           },
           options: [
@@ -5514,6 +6147,7 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description: "If set, all plugins will be activated",
             },
+            excludeOption("plugin slugs"),
             {
               name: "--network",
               description:
@@ -5530,6 +6164,8 @@ const completionSpec: Fig.Spec = {
               description: "Disables the auto-updates for a plugin",
               args: {
                 name: "plugin",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more plugins to disable auto-updates for",
               },
               options: [
@@ -5550,6 +6186,8 @@ const completionSpec: Fig.Spec = {
               description: "Enables the auto-updates for a plugin",
               args: {
                 name: "plugin",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more plugins to enable auto-updates for",
               },
               options: [
@@ -5570,6 +6208,8 @@ const completionSpec: Fig.Spec = {
               description: "Shows the status of auto-updates for a plugin",
               args: {
                 name: "plugin",
+                isOptional: true,
+                isVariadic: true,
                 description:
                   "One or more plugins to show the status of the auto-updates of",
               },
@@ -5595,6 +6235,10 @@ const completionSpec: Fig.Spec = {
                   description: "Only show the provided field",
                   args: { name: "field" },
                 },
+                formatOption(
+                  ["table", "csv", "json", "yaml", "count"],
+                  "table"
+                ),
               ],
             },
           ],
@@ -5604,6 +6248,8 @@ const completionSpec: Fig.Spec = {
           description: "Deactivates one or more plugins",
           args: {
             name: "plugin",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more plugins to deactivate",
           },
           options: [
@@ -5615,6 +6261,7 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description: "If set, all plugins will be deactivated",
             },
+            excludeOption("plugin slugs"),
             {
               name: "--network",
               description:
@@ -5628,6 +6275,8 @@ const completionSpec: Fig.Spec = {
             "Deletes plugin files without deactivating or uninstalling",
           args: {
             name: "plugin",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more plugins to delete",
           },
           options: [
@@ -5635,6 +6284,7 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description: "If set, all plugins will be deleted",
             },
+            excludeOption("plugin slugs"),
           ],
         },
         {
@@ -5680,6 +6330,7 @@ const completionSpec: Fig.Spec = {
           description: "Installs one or more plugins",
           args: {
             name: "plugin|zip|url",
+            isVariadic: true,
             description:
               "One or more plugins to install. Accepts a plugin slug, the path to a local zip file, or a URL to a remote zip file",
           },
@@ -5695,6 +6346,11 @@ const completionSpec: Fig.Spec = {
               name: "--force",
               description:
                 "If set, the command will overwrite any installed version of the plugin, without prompting for confirmation",
+            },
+            {
+              name: "--ignore-requirements",
+              description:
+                "If set, the command will install the plugin while ignoring any WordPress or PHP version requirements specified by the plugin authors",
             },
             {
               name: "--activate",
@@ -5786,6 +6442,15 @@ const completionSpec: Fig.Spec = {
                 ],
               },
             },
+            {
+              name: "--skip-update-check",
+              description: "If set, the plugin update check will be skipped",
+            },
+            {
+              name: "--recently-active",
+              description:
+                "If set, only recently active plugins will be shown and the status filter will be ignored",
+            },
           ],
         },
         {
@@ -5793,6 +6458,7 @@ const completionSpec: Fig.Spec = {
           description: "Gets the path to a plugin or to the plugin directory",
           args: {
             name: "plugin",
+            isOptional: true,
             description:
               "The plugin to get the path to. If not set, will return the path to the plugins directory",
           },
@@ -5881,7 +6547,6 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "format",
                 suggestions: [
-                  { name: "plaintext" },
                   { name: "table" },
                   { name: "csv" },
                   { name: "count" },
@@ -5897,6 +6562,7 @@ const completionSpec: Fig.Spec = {
           description: "Reveals the status of one or all plugins",
           args: {
             name: "plugin",
+            isOptional: true,
             description: "A particular plugin to show the status for",
           },
         },
@@ -5905,6 +6571,7 @@ const completionSpec: Fig.Spec = {
           description: "Toggles a plugin’s activation state",
           args: {
             name: "plugin",
+            isVariadic: true,
             description: "One or more plugins to toggle",
           },
           options: [
@@ -5920,6 +6587,8 @@ const completionSpec: Fig.Spec = {
           description: "Uninstalls one or more plugins",
           args: {
             name: "plugin",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more plugins to uninstall",
           },
           options: [
@@ -5937,13 +6606,16 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description: "If set, all plugins will be uninstalled",
             },
+            excludeOption("plugin slugs"),
           ],
         },
         {
-          name: "update",
+          name: ["update", "upgrade"],
           description: "Updates one or more plugins",
           args: {
             name: "plugin",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more plugins to update",
           },
           options: [
@@ -5988,6 +6660,7 @@ const completionSpec: Fig.Spec = {
               requiresSeparator: true,
               description:
                 "If set, the plugin will be updated to the specified version",
+              args: { name: "version" },
             },
             {
               name: "--dry-run",
@@ -6006,6 +6679,8 @@ const completionSpec: Fig.Spec = {
             "Verifies plugin files against WordPress.org’s checksums",
           args: {
             name: "plugin",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more plugins to verify",
           },
           options: [
@@ -6017,6 +6692,12 @@ const completionSpec: Fig.Spec = {
               name: "--strict",
               description:
                 "If set, even “soft changes” like readme.txt changes will trigger checksum errors",
+            },
+            {
+              name: "--version",
+              requiresSeparator: true,
+              description: "Verify checksums against a specific plugin version",
+              args: { name: "version" },
             },
             {
               name: "--format",
@@ -6038,6 +6719,7 @@ const completionSpec: Fig.Spec = {
               description:
                 "Retry downloads without certificate validation if TLS handshake fails. Note: This makes the request vulnerable to a MITM attack",
             },
+            excludeOption("plugin names"),
           ],
         },
       ],
@@ -6065,6 +6747,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -6072,6 +6755,7 @@ const completionSpec: Fig.Spec = {
           description: "Creates a new post",
           args: {
             name: "file",
+            isOptional: true,
             description:
               "Read post content from <file>. If this value is present, the --post_content argument will be ignored. Passing - as the filename will cause post content to be read from STDIN",
           },
@@ -6139,7 +6823,7 @@ const completionSpec: Fig.Spec = {
                 "Whether the post can accept comments. Accepts ‘open’ or ‘closed’. Default is the value of ‘default_comment_status’ option",
               args: {
                 name: "comment_status",
-                suggestions: [{ name: "'open'" }, { name: "'closed" }],
+                suggestions: [{ name: "open" }, { name: "closed" }],
               },
             },
             {
@@ -6149,7 +6833,7 @@ const completionSpec: Fig.Spec = {
                 "Whether the post can accept pings. Accepts ‘open’ or ‘closed’. Default is the value of ‘default_ping_status’ option",
               args: {
                 name: "ping_status",
-                suggestions: [{ name: "'open'" }, { name: "'closed" }],
+                suggestions: [{ name: "open" }, { name: "closed" }],
               },
             },
             {
@@ -6281,6 +6965,7 @@ const completionSpec: Fig.Spec = {
           description: "Deletes an existing post",
           args: {
             name: "id",
+            isVariadic: true,
             description: "One or more IDs of posts to delete",
           },
           options: [
@@ -6534,6 +7219,20 @@ const completionSpec: Fig.Spec = {
           description: "Adds, updates, deletes, and lists post custom fields",
           subcommands: [
             {
+              name: "clean-duplicates",
+              description: "Cleans up duplicate post meta values on a post",
+              args: [
+                {
+                  name: "id",
+                  description: "ID of the post to clean",
+                },
+                {
+                  name: "key",
+                  description: "Meta key to clean up",
+                },
+              ],
+            },
+            {
               name: "add",
               description: "Add a meta field",
               args: [
@@ -6547,6 +7246,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value of the meta field. If omitted, the value is read from STDIN",
                 },
@@ -6573,10 +7273,12 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key",
+                  isOptional: true,
                   description: "The name of the meta field to delete",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value to delete. If omitted, all rows with key will deleted",
                 },
@@ -6602,6 +7304,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -6704,11 +7407,13 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to patch",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -6739,6 +7444,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to pluck",
                 },
@@ -6760,7 +7466,7 @@ const completionSpec: Fig.Spec = {
               ],
             },
             {
-              name: "update",
+              name: ["update", "set"],
               description: "Update a meta field",
               args: [
                 {
@@ -6773,6 +7479,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -6809,6 +7516,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "term",
+                  isVariadic: true,
                   description: "The slug of the term or terms to be added",
                 },
               ],
@@ -6835,6 +7543,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "taxonomy",
+                  isVariadic: true,
                   description: "One or more taxonomies to list",
                 },
               ],
@@ -6910,6 +7619,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "term",
+                  isOptional: true,
+                  isVariadic: true,
                   description:
                     "The name of the term or terms to be removed from the object",
                 },
@@ -6945,6 +7656,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "term",
+                  isVariadic: true,
                   description: "The slug of the term or terms to be updated",
                 },
               ],
@@ -6969,10 +7681,12 @@ const completionSpec: Fig.Spec = {
           args: [
             {
               name: "id",
+              isVariadic: true,
               description: "One or more IDs of posts to update",
             },
             {
               name: "file",
+              isOptional: true,
               description: "One or more fields to update. See wp_insert_post()",
             },
           ],
@@ -7040,7 +7754,7 @@ const completionSpec: Fig.Spec = {
                 "Whether the post can accept comments. Accepts ‘open’ or ‘closed’. Default is the value of ‘default_comment_status’ option",
               args: {
                 name: "comment_status",
-                suggestions: [{ name: "'open'" }, { name: "'closed" }],
+                suggestions: [{ name: "open" }, { name: "closed" }],
               },
             },
             {
@@ -7050,7 +7764,7 @@ const completionSpec: Fig.Spec = {
                 "Whether the post can accept pings. Accepts ‘open’ or ‘closed’. Default is the value of ‘default_ping_status’ option",
               args: {
                 name: "ping_status",
-                suggestions: [{ name: "'open'" }, { name: "'closed" }],
+                suggestions: [{ name: "open" }, { name: "closed" }],
               },
             },
             {
@@ -7166,6 +7880,14 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
+        {
+          name: "url-to-id",
+          description: "Gets the post ID for a given URL",
+          args: {
+            name: "url",
+            description: "The URL of the post to get",
+          },
+        },
       ],
     },
     {
@@ -7191,6 +7913,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7296,6 +8019,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7409,6 +8133,7 @@ const completionSpec: Fig.Spec = {
             "Profile key metrics for WordPress hooks (actions and filters)",
           args: {
             name: "hook",
+            isOptional: true,
             description:
               "Drill into key metrics of callbacks on a specific WordPress hook",
           },
@@ -7463,6 +8188,13 @@ const completionSpec: Fig.Spec = {
               description: "Order by fields",
               args: { name: "orderby" },
             },
+            {
+              name: "--search",
+              requiresSeparator: true,
+              description:
+                "Filter callbacks to those matching the given search pattern (case-insensitive)",
+              args: { name: "pattern" },
+            },
           ],
         },
         {
@@ -7471,6 +8203,7 @@ const completionSpec: Fig.Spec = {
             "Profile each stage of the WordPress load process (bootstrap, main_query, template)",
           args: {
             name: "stage",
+            isOptional: true,
             description: "Drill down into a specific stage",
           },
           options: [
@@ -7516,7 +8249,7 @@ const completionSpec: Fig.Spec = {
               description: "Ascending or descending order",
               args: {
                 name: "order",
-                suggestions: [{ name: "asc" }, { name: "desc" }],
+                suggestions: [{ name: "ASC" }, { name: "DESC" }],
               },
             },
             {
@@ -7553,6 +8286,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7660,6 +8394,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7738,6 +8473,8 @@ const completionSpec: Fig.Spec = {
           description: "Resets any default role to default capabilities",
           args: {
             name: "role-key",
+            isOptional: true,
+            isVariadic: true,
             description: "The internal name of one or more roles to reset",
           },
           options: [
@@ -7773,6 +8510,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -7840,6 +8578,7 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--parent_theme",
+              isRequired: true,
               requiresSeparator: true,
               description:
                 "What to put in the ‘Template:’ header in ‘style.css’",
@@ -7944,9 +8683,10 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "provider",
                 suggestions: [
-                  { name: "travis" },
                   { name: "circle" },
                   { name: "gitlab", icon: "fig://icon?type=gitlab" },
+                  { name: "bitbucket" },
+                  { name: "github", icon: "fig://icon?type=github" },
                 ],
               },
             },
@@ -7955,7 +8695,7 @@ const completionSpec: Fig.Spec = {
               description: "Activate the newly created plugin",
             },
             {
-              name: "--enable-network",
+              name: "--activate-network",
               description: "Network activate the newly generated plugin",
             },
             {
@@ -7970,6 +8710,7 @@ const completionSpec: Fig.Spec = {
             "Generates files needed for running PHPUnit tests in a plugin",
           args: {
             name: "plugin",
+            isOptional: true,
             description: "The name of the plugin to generate test files for",
           },
           options: [
@@ -7988,10 +8729,10 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "provider",
                 suggestions: [
-                  { name: "travis" },
                   { name: "circle" },
                   { name: "gitlab", icon: "fig://icon?type=gitlab" },
                   { name: "bitbucket" },
+                  { name: "github", icon: "fig://icon?type=github" },
                 ],
               },
             },
@@ -8002,7 +8743,7 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
-          name: "post-type",
+          name: ["post-type", "cpt"],
           description: "Generates PHP code for registering a custom post type",
           args: {
             name: "slug",
@@ -8051,7 +8792,7 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
-          name: "taxonomy",
+          name: ["taxonomy", "tax"],
           description: "Generates PHP code for registering a custom taxonomy",
           args: {
             name: "slug",
@@ -8105,6 +8846,7 @@ const completionSpec: Fig.Spec = {
             "Generates files needed for running PHPUnit tests in a theme",
           args: {
             name: "theme",
+            isOptional: true,
             description: "The name of the theme to generate test files for",
           },
           options: [
@@ -8123,10 +8865,10 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "provider",
                 suggestions: [
-                  { name: "travis" },
                   { name: "circle" },
                   { name: "gitlab", icon: "fig://icon?type=gitlab" },
                   { name: "bitbucket" },
+                  { name: "github", icon: "fig://icon?type=github" },
                 ],
               },
             },
@@ -8137,59 +8879,7 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
-          name: "underscores",
-          description: "Generates starter code for a theme based on _s",
-          args: {
-            name: "slug",
-            description:
-              "The slug for the new theme, used for prefixing functions",
-          },
-          options: [
-            {
-              name: "--activate",
-              description: "Activate the newly downloaded theme",
-            },
-            {
-              name: "--enable-network",
-              description:
-                "Enable the newly downloaded theme for the entire network",
-            },
-            {
-              name: "--theme_name",
-              requiresSeparator: true,
-              description:
-                "What to put in the ‘Theme Name:’ header in ‘style.css’",
-              args: { name: "title" },
-            },
-            {
-              name: "--author",
-              requiresSeparator: true,
-              description: "What to put in the ‘Author:’ header in ‘style.css’",
-              args: { name: "full-name" },
-            },
-            {
-              name: "--author_uri",
-              requiresSeparator: true,
-              description:
-                "What to put in the ‘Author URI:’ header in ‘style.css’",
-              args: { name: "uri" },
-            },
-            {
-              name: "--sassify",
-              description: "Include stylesheets as SASS",
-            },
-            {
-              name: "--woocommerce",
-              description: "Include WooCommerce boilerplate files",
-            },
-            {
-              name: "--force",
-              description: "Overwrite files that already exist",
-            },
-          ],
-        },
-        {
-          name: "_s",
+          name: ["underscores", "_s"],
           description: "Generates starter code for a theme based on _s",
           args: {
             name: "slug",
@@ -8257,6 +8947,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "table",
+          isOptional: true,
+          isVariadic: true,
           description:
             "List of database tables to restrict the replacement to. Wildcards are supported, e.g. 'wp_*options' or 'wp_post*'",
         },
@@ -8280,7 +8972,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--all-tables",
           description:
-            "Enable replacement on ALL tables in the database, regardless of the prefix, and even if not registered on $wpdb. Overrides –network and –all-tables-with-prefix",
+            "Enable replacement on ALL tables in the database, regardless of the prefix, and even if not registered on $wpdb. Overrides --network and --all-tables-with-prefix",
         },
         {
           name: "--export",
@@ -8328,12 +9020,12 @@ const completionSpec: Fig.Spec = {
         {
           name: "--recurse-objects",
           description:
-            "Enable recursing into objects to replace strings. Defaults to true; pass –no-recurse-objects to disable",
+            "Enable recursing into objects to replace strings. Defaults to true; pass --no-recurse-objects to disable",
         },
         {
           name: "--no-recurse-objects",
           description:
-            "Enable recursing into objects to replace strings. Defaults to true; pass –no-recurse-objects to disable",
+            "Enable recursing into objects to replace strings. Defaults to true; pass --no-recurse-objects to disable",
         },
         {
           name: "--verbose",
@@ -8342,7 +9034,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--regex",
           description:
-            "Runs the search using a regular expression (without delimiters). Warning: search-replace will take about 15-20x longer when using –regex",
+            "Runs the search using a regular expression (without delimiters). Warning: search-replace will take about 15-20x longer when using --regex",
         },
         {
           name: "--regex-flags",
@@ -8389,7 +9081,7 @@ const completionSpec: Fig.Spec = {
           requiresSeparator: true,
 
           description:
-            "Log the items changed. If <file> is not supplied or is “-“, will output to STDOUT. Warning: causes a significant slow down, similar or worse to enabling –precise or –regex",
+            "Log the items changed. If <file> is not supplied or is “-“, will output to STDOUT. Warning: causes a significant slow down, similar or worse to enabling --precise or --regex",
           args: { name: "file", isOptional: true },
         },
         {
@@ -8425,6 +9117,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -8482,6 +9175,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -8513,6 +9207,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
     },
     {
@@ -8538,6 +9233,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -8594,6 +9290,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -8602,7 +9299,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to activate",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "archive",
@@ -8610,7 +9310,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to archive",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "create",
@@ -8618,6 +9321,7 @@ const completionSpec: Fig.Spec = {
           options: [
             {
               name: "--slug",
+              isRequired: true,
               requiresSeparator: true,
               description:
                 "Path for the new site. Subdomain on subdomain installs, directory on subdirectory installs",
@@ -8660,15 +9364,19 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to deactivate",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "delete",
           description: "Deletes a site in a multisite installation",
           args: {
             name: "site-id",
+            isOptional: true,
             description:
-              "The id of the site to delete. If not provided, you must set the –slug parameter",
+              "The id of the site to delete. If not provided, you must set the --slug parameter",
           },
           options: [
             {
@@ -8707,6 +9415,45 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
+          name: "generate",
+          description: "Generate some sites",
+          options: [
+            {
+              name: "--count",
+              requiresSeparator: true,
+              description: "How many sites to generate",
+              args: { name: "number", default: "100" },
+            },
+            {
+              name: "--slug",
+              requiresSeparator: true,
+              description:
+                "Path for the new site. Subdomain on subdomain installs, directory on subdirectory installs",
+              args: { name: "slug" },
+            },
+            {
+              name: "--email",
+              requiresSeparator: true,
+              description:
+                "Email for admin user. User will be created if none exists. Assignment to super admin if not included",
+              args: { name: "email" },
+            },
+            {
+              name: "--network_id",
+              requiresSeparator: true,
+              description:
+                "Network to associate new site with. Defaults to current network (typically 1)",
+              args: { name: "network-id" },
+            },
+            {
+              name: "--private",
+              description:
+                "If set, the new site will be non-public (not indexed)",
+            },
+            formatOption(["progress", "ids"], "progress"),
+          ],
+        },
+        {
           name: "list",
           description: "Lists all sites in a multisite installation",
           options: [
@@ -8722,10 +9469,16 @@ const completionSpec: Fig.Spec = {
               description: "The serialization format for the value",
             },
             {
-              name: "--site_in",
+              name: "--site__in",
               requiresSeparator: true,
               description:
                 "Only list the sites with these blog_id values (comma-separated)",
+              args: { name: "value" },
+            },
+            {
+              name: "--site_user",
+              requiresSeparator: true,
+              description: "Only list the sites with this user",
               args: { name: "value" },
             },
             {
@@ -8764,7 +9517,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as mature",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "meta",
@@ -8784,6 +9540,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value of the meta field. If omitted, the value is read from STDIN",
                 },
@@ -8810,10 +9567,12 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key",
+                  isOptional: true,
                   description: "The name of the meta field to delete",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value to delete. If omitted, all rows with key will deleted",
                 },
@@ -8839,6 +9598,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -8944,11 +9704,13 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to patch",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -8979,6 +9741,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to pluck",
                 },
@@ -9000,7 +9763,7 @@ const completionSpec: Fig.Spec = {
               ],
             },
             {
-              name: "update",
+              name: ["update", "set"],
               description: "Update a meta field",
               args: [
                 {
@@ -9013,6 +9776,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -9046,6 +9810,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value of the site option to add. If omitted, the value is read from STDIN",
                 },
@@ -9159,11 +9924,13 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to patch",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -9190,6 +9957,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to pluck",
                 },
@@ -9211,7 +9979,7 @@ const completionSpec: Fig.Spec = {
               ],
             },
             {
-              name: "update",
+              name: ["update", "set"],
               description: "Updates a site option",
               args: [
                 {
@@ -9220,6 +9988,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -9244,7 +10013,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as private",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "public",
@@ -9252,7 +10024,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as public",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "spam",
@@ -9260,7 +10035,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as spam",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "switch-language",
@@ -9276,7 +10054,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to unarchive",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "unmature",
@@ -9284,7 +10065,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to set as unmature",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
         {
           name: "unspam",
@@ -9292,7 +10076,10 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "id",
             description: "One or more IDs of sites to remove from spam",
+            isOptional: true,
+            isVariadic: true,
           },
+          options: [siteSlugOption],
         },
       ],
     },
@@ -9320,6 +10107,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -9327,6 +10115,7 @@ const completionSpec: Fig.Spec = {
           description: "Grants super admin privileges to one or more users",
           args: {
             name: "user",
+            isVariadic: true,
             description: "One or more user IDs, user emails, or user logins",
           },
         },
@@ -9346,6 +10135,7 @@ const completionSpec: Fig.Spec = {
                   { name: "csv" },
                   { name: "json" },
                   { name: "count" },
+                  { name: "ids" },
                   { name: "yaml" },
                 ],
               },
@@ -9357,6 +10147,7 @@ const completionSpec: Fig.Spec = {
           description: "Removes super admin privileges from one or more users",
           args: {
             name: "user",
+            isVariadic: true,
             description: "One or more user IDs, user emails, or user logins",
           },
         },
@@ -9385,6 +10176,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -9491,6 +10283,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -9542,6 +10335,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "term",
+              isVariadic: true,
               description: "One or more IDs or slugs of terms to delete",
             },
           ],
@@ -9652,6 +10446,7 @@ const completionSpec: Fig.Spec = {
           description: "Lists terms in a taxonomy",
           args: {
             name: "taxonomy",
+            isVariadic: true,
             description: "List terms of one or more taxonomies",
           },
           options: [
@@ -9709,6 +10504,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value of the meta field. If omitted, the value is read from STDIN",
                 },
@@ -9735,10 +10531,12 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key",
+                  isOptional: true,
                   description: "The name of the meta field to delete",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value to delete. If omitted, all rows with key will deleted",
                 },
@@ -9764,6 +10562,7 @@ const completionSpec: Fig.Spec = {
                 },
               ],
               options: [
+                singleOption,
                 {
                   name: "--format",
                   requiresSeparator: true,
@@ -9869,11 +10668,13 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to patch",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -9904,6 +10705,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to pluck",
                 },
@@ -9925,7 +10727,7 @@ const completionSpec: Fig.Spec = {
               ],
             },
             {
-              name: "update",
+              name: ["update", "set"],
               description: "Update a meta field",
               args: [
                 {
@@ -9938,6 +10740,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -9992,6 +10795,7 @@ const completionSpec: Fig.Spec = {
           description: "Recalculates number of posts assigned to each term",
           args: {
             name: "taxonomy",
+            isVariadic: true,
             description: "One or more taxonomies to recalculate",
           },
         },
@@ -10070,6 +10874,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -10089,6 +10894,8 @@ const completionSpec: Fig.Spec = {
               description: "Disables the auto-updates for a theme",
               args: {
                 name: "theme",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more themes to disable auto-updates for",
               },
               options: [
@@ -10109,6 +10916,8 @@ const completionSpec: Fig.Spec = {
               description: "Enables the auto-updates for a theme",
               args: {
                 name: "theme",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more themes to enable auto-updates for",
               },
               options: [
@@ -10118,7 +10927,7 @@ const completionSpec: Fig.Spec = {
                     "If set, auto-updates will be enabled for all themes",
                 },
                 {
-                  name: "--enabled-only",
+                  name: "--disabled-only",
                   description:
                     "If set, filters list of themes to only include the ones that have auto-updates disabled",
                 },
@@ -10129,6 +10938,8 @@ const completionSpec: Fig.Spec = {
               description: "Shows the status of auto-updates for a theme",
               args: {
                 name: "theme",
+                isOptional: true,
+                isVariadic: true,
                 description:
                   "One or more themes to show the status of the auto-updates of",
               },
@@ -10154,15 +10965,21 @@ const completionSpec: Fig.Spec = {
                   description: "Only show the provided field",
                   args: { name: "field" },
                 },
+                formatOption(
+                  ["table", "csv", "json", "yaml", "count"],
+                  "table"
+                ),
               ],
             },
           ],
         },
         {
-          name: "delete",
+          name: ["delete", "uninstall"],
           description: "Deletes one or more themes",
           args: {
             name: "theme",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more themes to delete",
           },
           options: [
@@ -10255,6 +11072,7 @@ const completionSpec: Fig.Spec = {
           description: "Installs one or more themes",
           args: {
             name: "theme|zip|url",
+            isVariadic: true,
             description:
               "One or more themes to install. Accepts a theme slug, the path to a local zip file, or a URL to a remote zip file",
           },
@@ -10270,6 +11088,11 @@ const completionSpec: Fig.Spec = {
               name: "--force",
               description:
                 "If set, the command will overwrite any installed version of the theme, without prompting for confirmation",
+            },
+            {
+              name: "--ignore-requirements",
+              description:
+                "If set, the command will install the theme while ignoring any WordPress or PHP version requirements specified by the theme authors",
             },
             {
               name: "--activate",
@@ -10348,6 +11171,10 @@ const completionSpec: Fig.Spec = {
                 ],
               },
             },
+            {
+              name: "--skip-update-check",
+              description: "If set, the theme update check will be skipped",
+            },
           ],
         },
         {
@@ -10359,6 +11186,8 @@ const completionSpec: Fig.Spec = {
               description: "Gets one or more theme mods",
               args: {
                 name: "mod",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more mods to get",
               },
               options: [
@@ -10366,6 +11195,7 @@ const completionSpec: Fig.Spec = {
                   name: "--field",
                   requiresSeparator: true,
                   description: "Returns the value of a single field",
+                  args: { name: "field" },
                 },
                 {
                   name: "--all",
@@ -10418,6 +11248,8 @@ const completionSpec: Fig.Spec = {
               description: "Removes one or more theme mods",
               args: {
                 name: "mod",
+                isOptional: true,
+                isVariadic: true,
                 description: "One or more mods to remove",
               },
               options: [
@@ -10448,6 +11280,7 @@ const completionSpec: Fig.Spec = {
           description: "Gets the path to a theme or to the theme directory",
           args: {
             name: "theme",
+            isOptional: true,
             description:
               "The theme to get the path to. Path includes “style.css” file. If not set, will return the path to the themes directory",
           },
@@ -10558,14 +11391,17 @@ const completionSpec: Fig.Spec = {
           description: "Reveals the status of one or all themes",
           args: {
             name: "theme",
+            isOptional: true,
             description: "A particular theme to show the status for",
           },
         },
         {
-          name: "update",
+          name: ["update", "upgrade"],
           description: "Updates one or more themes",
           args: {
             name: "theme",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more themes to update",
           },
           options: [
@@ -10573,6 +11409,16 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description:
                 "If set, all themes that have updates will be updated",
+            },
+            {
+              name: "--minor",
+              description:
+                "Only perform updates for minor releases (e.g. from 1.3 to 1.4 instead of 2.0)",
+            },
+            {
+              name: "--patch",
+              description:
+                "Only perform updates for patch releases (e.g. from 1.3 to 1.3.3 instead of 1.4)",
             },
             {
               name: "--exclude",
@@ -10639,6 +11485,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -10646,6 +11493,7 @@ const completionSpec: Fig.Spec = {
           description: "Deletes a transient value",
           args: {
             name: "key",
+            isOptional: true,
             description: "Key for the transient",
           },
           options: [
@@ -10747,6 +11595,63 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
+          name: "patch",
+          description: "Updates a nested value from a transient",
+          args: [
+            {
+              name: "action",
+              description: "Patch action to perform",
+              suggestions: ["insert", "update", "delete"],
+            },
+            {
+              name: "key",
+              description: "Key for the transient",
+            },
+            {
+              name: "key-path",
+              description:
+                "The name(s) of the keys within the value to locate the value to patch",
+              isVariadic: true,
+            },
+            {
+              name: "value",
+              description:
+                "The new value. If omitted, the value is read from STDIN",
+              isOptional: true,
+            },
+          ],
+          options: [
+            formatOption(["plaintext", "json"], "plaintext"),
+            {
+              name: "--expiration",
+              requiresSeparator: true,
+              description: "Time until expiration, in seconds",
+              args: { name: "expiration" },
+            },
+            transientNetworkOption,
+          ],
+        },
+        {
+          name: "pluck",
+          description: "Gets a nested value from a transient",
+          args: [
+            {
+              name: "key",
+              description: "Key for the transient",
+            },
+            {
+              name: "key-path",
+              description:
+                "The name(s) of the keys within the value to locate the value to pluck",
+              isVariadic: true,
+            },
+          ],
+          options: [
+            formatOption(["plaintext", "json", "yaml"], "plaintext"),
+            transientNetworkOption,
+          ],
+        },
+        {
           name: "set",
           description: "Sets a transient value",
           args: [
@@ -10760,6 +11665,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "expiration",
+              isOptional: true,
               description: "Time until expiration, in seconds",
             },
           ],
@@ -10801,6 +11707,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -10827,7 +11734,165 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "role",
-              description: "Add the specified role to the user",
+              description: "Add the specified role(s) to the user",
+              isOptional: true,
+              isVariadic: true,
+            },
+          ],
+        },
+        {
+          name: "application-password",
+          description:
+            "Creates, updates, deletes, lists and retrieves application passwords",
+          subcommands: [
+            {
+              name: "create",
+              description: "Creates a new application password",
+              args: [
+                appPasswordUserArg,
+                {
+                  name: "app-name",
+                  description:
+                    "Unique name of the application to create an application password for",
+                },
+              ],
+              options: [
+                {
+                  name: "--app-id",
+                  requiresSeparator: true,
+                  description:
+                    "Application ID to attribute to the application password",
+                  args: { name: "app-id" },
+                },
+                {
+                  name: "--porcelain",
+                  description: "Output just the new password",
+                },
+              ],
+            },
+            {
+              name: "delete",
+              description: "Delete an existing application password",
+              args: [
+                appPasswordUserArg,
+                {
+                  name: "uuid",
+                  description: "UUIDs of the application passwords to delete",
+                  isOptional: true,
+                  isVariadic: true,
+                },
+              ],
+              options: [
+                {
+                  name: "--all",
+                  description: "Delete all of the user's application passwords",
+                },
+              ],
+            },
+            {
+              name: "exists",
+              description:
+                "Checks whether an application password for a given application exists",
+              args: [
+                appPasswordUserArg,
+                {
+                  name: "app-name",
+                  description:
+                    "Name of the application to check the existence of an application password for",
+                },
+              ],
+            },
+            {
+              name: "get",
+              description: "Gets a specific application password",
+              args: [appPasswordUserArg, appPasswordUuidArg],
+              options: [
+                {
+                  name: "--field",
+                  requiresSeparator: true,
+                  description:
+                    "Prints the value of a single field for the application password",
+                  args: { name: "field" },
+                },
+                {
+                  name: "--fields",
+                  requiresSeparator: true,
+                  description: "Limit the output to specific fields",
+                  args: { name: "fields" },
+                },
+                formatOption(["table", "csv", "json", "yaml"], "table"),
+              ],
+            },
+            {
+              name: "list",
+              description:
+                "Lists all application passwords associated with a user",
+              args: appPasswordUserArg,
+              options: [
+                {
+                  name: "--field",
+                  requiresSeparator: true,
+                  description:
+                    "Prints the value of a single field for each application password",
+                  args: { name: "field" },
+                },
+                {
+                  name: "--fields",
+                  requiresSeparator: true,
+                  description: "Limit the output to specific fields",
+                  args: { name: "fields" },
+                },
+                formatOption(
+                  ["table", "csv", "json", "count", "yaml", "ids"],
+                  "table"
+                ),
+                {
+                  name: "--orderby",
+                  requiresSeparator: true,
+                  description: "Set orderby which field",
+                  args: {
+                    name: "fields",
+                    suggestions: [
+                      "uuid",
+                      "app_id",
+                      "name",
+                      "password",
+                      "created",
+                      "last_used",
+                      "last_ip",
+                    ],
+                    default: "created",
+                  },
+                },
+                {
+                  name: "--order",
+                  requiresSeparator: true,
+                  description: "Set ascending or descending order",
+                  args: {
+                    name: "order",
+                    suggestions: ["asc", "desc"],
+                    default: "desc",
+                  },
+                },
+              ],
+            },
+            {
+              name: "record-usage",
+              description: "Record usage of an application password",
+              args: [appPasswordUserArg, appPasswordUuidArg],
+            },
+            {
+              name: "update",
+              description: "Updates an existing application password",
+              args: [appPasswordUserArg, appPasswordUuidArg],
+              options: [
+                {
+                  name: "--name",
+                  requiresSeparator: true,
+                  description: "New name of the application password",
+                  args: { name: "name" },
+                },
+              ],
             },
           ],
         },
@@ -10965,6 +12030,7 @@ const completionSpec: Fig.Spec = {
           description: "Deletes one or more users from the current site",
           args: {
             name: "user",
+            isVariadic: true,
             description:
               "The user login, user email, or user ID of the user(s) to delete",
           },
@@ -10985,6 +12051,14 @@ const completionSpec: Fig.Spec = {
               description: "Answer yes to any confirmation prompts",
             },
           ],
+        },
+        {
+          name: "exists",
+          description: "Verifies whether a user exists",
+          args: {
+            name: "id",
+            description: "The ID of the user to check",
+          },
         },
         {
           name: "generate",
@@ -11148,6 +12222,21 @@ const completionSpec: Fig.Spec = {
                 ],
               },
             },
+            {
+              name: "--origin",
+              requiresSeparator: true,
+              description: "Origin of the capabilities to list",
+              args: {
+                name: "origin",
+                suggestions: ["all", "user", "role"],
+                default: "all",
+              },
+            },
+            {
+              name: "--exclude-role-names",
+              description:
+                "Exclude capabilities that match role names from output",
+            },
           ],
         },
         {
@@ -11199,6 +12288,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The value to delete. If omitted, all rows with key will deleted",
                 },
@@ -11326,11 +12416,13 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to patch",
                 },
                 {
                   name: "value",
+                  isOptional: true,
                   description:
                     "The new value. If omitted, the value is read from STDIN",
                 },
@@ -11361,6 +12453,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "key-path",
+                  isVariadic: true,
                   description:
                     "The name(s) of the keys within the value to locate the value to pluck",
                 },
@@ -11382,7 +12475,7 @@ const completionSpec: Fig.Spec = {
               ],
             },
             {
-              name: "update",
+              name: ["update", "set"],
               description: "Updates a meta field",
               args: [
                 {
@@ -11426,6 +12519,12 @@ const completionSpec: Fig.Spec = {
               description: "The capability to be removed",
             },
           ],
+          options: [
+            {
+              name: "--force",
+              description: "Forcefully remove a capability",
+            },
+          ],
         },
         {
           name: "remove-role",
@@ -11438,6 +12537,8 @@ const completionSpec: Fig.Spec = {
             {
               name: "role",
               description: "A specific role to remove",
+              isOptional: true,
+              isVariadic: true,
             },
           ],
         },
@@ -11446,6 +12547,7 @@ const completionSpec: Fig.Spec = {
           description: "Resets the password for one or more users",
           args: {
             name: "user",
+            isVariadic: true,
             description: "One or more user logins or IDs",
           },
           options: [
@@ -11453,6 +12555,14 @@ const completionSpec: Fig.Spec = {
               name: "--skip-email",
               description:
                 "Don’t send an email notification to the affected user(s)",
+            },
+            {
+              name: "--show-password",
+              description: "Show the new password(s)",
+            },
+            {
+              name: "--porcelain",
+              description: "Output only the new password(s)",
             },
           ],
         },
@@ -11470,6 +12580,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "token",
+                  isOptional: true,
                   description:
                     "The token of the session to destroy. Defaults to the most recently created session",
                 },
@@ -11525,8 +12636,83 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "role",
+              isOptional: true,
               description:
                 "Make the user have the specified role. If not passed, the default role is used",
+            },
+          ],
+        },
+        {
+          name: "signup",
+          description: "Manages signups on a multisite installation",
+          subcommands: [
+            {
+              name: "activate",
+              description: "Activates one or more signups",
+              args: { ...signupArg, isVariadic: true },
+            },
+            {
+              name: "delete",
+              description: "Deletes one or more signups",
+              args: { ...signupArg, isOptional: true, isVariadic: true },
+              options: [
+                {
+                  name: "--all",
+                  description: "If set, all signups will be deleted",
+                },
+              ],
+            },
+            {
+              name: "get",
+              description: "Gets details about a signup",
+              args: signupArg,
+              options: [
+                {
+                  name: "--field",
+                  requiresSeparator: true,
+                  description:
+                    "Instead of returning the whole signup, returns the value of a single field",
+                  args: { name: "field" },
+                },
+                {
+                  name: "--fields",
+                  requiresSeparator: true,
+                  description:
+                    "Limit the output to specific fields. Defaults to all fields",
+                  args: { name: "fields" },
+                },
+                formatOption(["table", "csv", "json", "yaml"], "table"),
+              ],
+            },
+            {
+              name: "list",
+              description: "Lists signups",
+              options: [
+                {
+                  name: "--field",
+                  requiresSeparator: true,
+                  description:
+                    "Prints the value of a single field for each signup",
+                  args: { name: "field" },
+                },
+                {
+                  name: "--fields",
+                  requiresSeparator: true,
+                  description: "Limit the output to specific object fields",
+                  args: { name: "fields" },
+                },
+                formatOption(
+                  ["table", "csv", "ids", "json", "count", "yaml"],
+                  "table"
+                ),
+                {
+                  name: "--per_page",
+                  requiresSeparator: true,
+                  description:
+                    "Limits the signups to the given number. Defaults to none",
+                  args: { name: "per_page" },
+                },
+              ],
             },
           ],
         },
@@ -11534,8 +12720,10 @@ const completionSpec: Fig.Spec = {
           name: "spam",
           description: "Marks one or more users as spam",
           args: {
-            name: "id",
-            description: "One or more IDs of users to mark as spam",
+            name: "user",
+            description:
+              "One or more user IDs, user emails, or user logins to mark as spam",
+            isVariadic: true,
           },
         },
         {
@@ -11556,6 +12744,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "term",
+                  isVariadic: true,
                   description: "The slug of the term or terms to be added",
                 },
               ],
@@ -11582,6 +12771,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "taxonomy",
+                  isVariadic: true,
                   description: "One or more taxonomies to list",
                 },
               ],
@@ -11631,6 +12821,8 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "term",
+                  isOptional: true,
+                  isVariadic: true,
                   description:
                     "The name of the term or terms to be removed from the object",
                 },
@@ -11666,6 +12858,7 @@ const completionSpec: Fig.Spec = {
                 },
                 {
                   name: "term",
+                  isVariadic: true,
                   description: "The slug of the term or terms to be updated",
                 },
               ],
@@ -11688,8 +12881,10 @@ const completionSpec: Fig.Spec = {
           name: "unspam",
           description: "Removes one or more users from spam",
           args: {
-            name: "id",
-            description: "One or more IDs of users to remove from spam",
+            name: "user",
+            description:
+              "One or more user IDs, user emails, or user logins to remove from spam",
+            isVariadic: true,
           },
         },
         {
@@ -11697,6 +12892,7 @@ const completionSpec: Fig.Spec = {
           description: "Updates an existing user",
           args: {
             name: "user",
+            isVariadic: true,
             description:
               "The user login, user email or user ID of the user(s) to update",
           },
@@ -11818,6 +13014,7 @@ const completionSpec: Fig.Spec = {
         global_parameter_prompt1,
         global_parameter_prompt2,
         global_parameter_quiet,
+        global_parameter_context,
       ],
       subcommands: [
         {
@@ -11834,6 +13031,7 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "position",
+              isOptional: true,
               description:
                 "Widget’s current position within the sidebar. Defaults to last",
             },
@@ -11851,6 +13049,7 @@ const completionSpec: Fig.Spec = {
           description: "Deactivates one or more widgets from an active sidebar",
           args: {
             name: "widget-id",
+            isVariadic: true,
             description: "Unique ID for the widget(s)",
           },
         },
@@ -11859,6 +13058,7 @@ const completionSpec: Fig.Spec = {
           description: "Deletes one or more widgets from a sidebar",
           args: {
             name: "widget-id",
+            isVariadic: true,
             description: "Unique ID for the widget(s)",
           },
         },
@@ -11921,6 +13121,8 @@ const completionSpec: Fig.Spec = {
           description: "Resets sidebar",
           args: {
             name: "sidebar-id",
+            isOptional: true,
+            isVariadic: true,
             description: "One or more sidebars to reset",
           },
           options: [

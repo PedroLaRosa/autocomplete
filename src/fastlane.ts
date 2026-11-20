@@ -1,3 +1,6 @@
+// fastlane v2.242.0 (RubyGems latest, 2026-11-19).
+// Source: gem fastlane-2.242.0 unpacked and read statically (fastlane/lib/fastlane/commands_generator.rb) plus
+// commander 4.6.0 (global -h/-v options, `help` command). The fastlane binary was not run. Per-action flags are not covered.
 const completionSpec: Fig.Spec = {
   name: "fastlane",
   description:
@@ -16,11 +19,32 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: ["-u", "--user"],
-          description: "Only iOS projects Your Apple ID",
+          description: "Only for iOS projects: Your Apple ID",
           args: {
             name: "appleID",
             description: "Your Apple ID",
           },
+        },
+      ],
+    },
+    {
+      name: "swift",
+      description: "Alias namespace for `fastlane swift init`",
+      subcommands: [
+        {
+          name: "init",
+          description:
+            "Fastlane configuration written in Swift (same as `fastlane init swift`)",
+          options: [
+            {
+              name: ["-u", "--user"],
+              description: "Only for iOS projects: Your Apple ID",
+              args: {
+                name: "appleID",
+                description: "Your Apple ID",
+              },
+            },
+          ],
         },
       ],
     },
@@ -34,6 +58,22 @@ const completionSpec: Fig.Spec = {
     {
       name: "actions",
       description: "Lists all available fastlane actions",
+      options: [
+        {
+          name: "--platform",
+          description: "Only show actions available on the given platform",
+          args: {
+            name: "platform",
+            description: "One of android, ios or mac",
+            suggestions: ["ios", "android", "mac"],
+          },
+        },
+      ],
+      args: {
+        name: "filter",
+        description: "Only show actions matching this name",
+        isOptional: true,
+      },
     },
     {
       name: "add_plugin",
@@ -41,6 +81,10 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "plugin_name",
       },
+    },
+    {
+      name: "console",
+      description: "Opens an interactive developer console",
     },
     {
       name: "docs",
@@ -63,7 +107,8 @@ const completionSpec: Fig.Spec = {
           description:
             "Add custom command(s) for which tab auto complete should be enabled too",
           args: {
-            name: "<command1>...<commandN>",
+            name: "commands",
+            description: "Comma-separated list of commands",
           },
         },
       ],
@@ -72,6 +117,11 @@ const completionSpec: Fig.Spec = {
       name: "env",
       description:
         "Print your fastlane environment, use this when you submit an issue on GitHub",
+    },
+    {
+      name: "generate_swift",
+      description:
+        "Generates additional Swift APIs for plugins and local actions (Swift fastlane projects only)",
     },
     {
       name: "help",
@@ -101,8 +151,7 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: "--name",
-          description: "Name of your new action",
-          isRequired: true,
+          description: "Name of your new action (prompted for if omitted)",
           args: {
             name: "action_name",
           },
@@ -152,6 +201,15 @@ const completionSpec: Fig.Spec = {
           },
         },
         {
+          name: "--token_file",
+          description:
+            "File holding the token every command must carry (default: FASTLANE_SOCKET_SERVER_TOKEN_FILE)",
+          args: {
+            name: "path",
+            template: "filepaths",
+          },
+        },
+        {
           name: ["-p", "--port"],
           description: "Sets the port on localhost for the socket connection",
           args: {
@@ -174,7 +232,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--swift_server_port",
           description:
-            "Prevents fastlane from attempting to update FastlaneRunner swift project",
+            "Set specific port to communicate between fastlane and FastlaneRunner",
           args: {
             name: "port",
             description:
@@ -199,17 +257,6 @@ const completionSpec: Fig.Spec = {
   ],
   options: [
     {
-      name: "--platform",
-      description: "Only show actions available on the given platform",
-      isPersistent: true,
-      priority: 49,
-      args: {
-        name: "platform",
-        description: "One of android, ios or mac",
-        suggestions: ["ios", "android", "mac"],
-      },
-    },
-    {
       name: ["-h", "--help"],
       description: "Show help for fastlane",
       isPersistent: true,
@@ -218,10 +265,11 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-v", "--version"],
       description: "Show version information for fastlane",
+      isPersistent: true,
     },
     {
       name: "--verbose",
-      description: "Show version information for fastlane",
+      description: "Show verbose output",
       isPersistent: true,
       priority: 48,
     },
@@ -229,15 +277,22 @@ const completionSpec: Fig.Spec = {
       name: "--capture_output",
       description:
         "Captures the output of the current run, and generates a markdown issue template",
+      isPersistent: true,
     },
     {
       name: "--troubleshoot",
       description:
         "Enables extended verbose mode. Use with caution, as this even includes ALL sensitive data. Cannot be used on CI",
+      isPersistent: true,
     },
     {
       name: "--env",
       description: "Add environment(s) to use with `dotenv`",
+      isPersistent: true,
+      args: {
+        name: "environments",
+        description: "Comma-separated list of environment names",
+      },
     },
   ],
   // Only uncomment if fastlane takes an argument

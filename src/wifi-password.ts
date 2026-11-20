@@ -1,8 +1,14 @@
+// wifi-password v0.1.0 (latest tag of rauchg/wifi-password, the Homebrew `wifi-password` formula; last upstream commit 2016-07-17, 2026-11-19).
+// Source: option parser and usage text of wifi-password.sh read statically (macOS-only shell script, not run). The project looks unmaintained.
+// Without an SSID the script reads the current network from the `airport` utility, which this spec cannot verify on current macOS.
+// The SSID generator lists preferred networks with `networksetup`; that command was not run here.
 const completionSpec: Fig.Spec = {
   name: "wifi-password",
   args: {
     name: "SSID",
-    description: "The name for a Wi-Fi network",
+    description:
+      "The name for a Wi-Fi network. Defaults to the network you are connected to",
+    isOptional: true,
     generators: {
       script: [
         "bash",
@@ -13,6 +19,7 @@ const completionSpec: Fig.Spec = {
         out
           .split("\n")
           .slice(1)
+          .filter((line) => line.trim())
           .map((line) => ({ name: line.trim() })),
     },
   },
@@ -30,6 +37,10 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--version", "-V"],
       description: "Output version",
+    },
+    {
+      name: "--",
+      description: "End of options",
     },
   ],
 };

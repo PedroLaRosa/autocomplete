@@ -1,4 +1,20 @@
+// Bitwarden Directory Connector CLI (bwdc) v2026.10.0 (GitHub tag v2026.10.0 of bitwarden/directory-connector, latest release, 2026-11-19). Source: commander definitions in src-cli/program.ts
+// and src-cli/commands/config.command.ts at that tag. Read from source, the CLI binary was not executed.
 const bwLogo32x32 = "https://bitwarden.com/images/icon_32x32.png";
+
+const helpOption: Fig.Option = {
+  name: ["-h", "--help"],
+  description: "Display help for command",
+  priority: 49,
+};
+
+// Secrets can be given as the value or read from an environment variable / file
+const secretArg = (name: string, description: string): Fig.Arg => ({
+  name,
+  description,
+  isOptional: true,
+});
+
 const completionSpec: Fig.Spec = {
   name: "bwdc",
   description: "Bitwarden Directory Connector",
@@ -6,98 +22,61 @@ const completionSpec: Fig.Spec = {
     {
       name: "login",
       icon: bwLogo32x32,
-      description: "Log in to Directory Connector",
+      description: "Log into an organization account",
       args: [
         {
           name: "client_id",
-          description: "Organisation API client_id",
+          description: "Client_id part of your organization's API key",
           isOptional: true,
         },
         {
           name: "client_secret",
-          description: "Organisation API client_secret",
+          description: "Client_secret part of your organization's API key",
           isOptional: true,
         },
       ],
-      options: [
-        {
-          name: "--help",
-        },
-      ],
+      options: [helpOption],
     },
     {
       name: "logout",
       icon: bwLogo32x32,
-      description: "Log out of Directory Connector",
-
-      options: [
-        {
-          name: "--help",
-        },
-      ],
+      description: "Log out of the current user account",
+      options: [helpOption],
     },
     {
       name: "test",
       icon: bwLogo32x32,
-      description:
-        "Prints a JSON formatted array of groups and users that would be synced to your Bitwarden organization",
-
+      description: "Test a simulated sync",
       options: [
         {
-          name: "--last",
-          description: "Test only the changes since the last successful sync",
+          name: ["-l", "--last"],
+          description: "Since the last successful sync",
         },
-        {
-          name: "--help",
-        },
+        helpOption,
       ],
     },
     {
       name: "sync",
       icon: bwLogo32x32,
-      description:
-        "Run a live sync operation and push data to your Bitwarden organization",
-
-      options: [
-        {
-          name: "--help",
-        },
-      ],
+      description: "Sync the directory",
+      options: [helpOption],
     },
     {
       name: "last-sync",
       icon: bwLogo32x32,
-      description:
-        "The last-sync command returns an ISO 8601 timestamp for the last sync operation that was performed for users or groups. You must specify either users or groups as an <object> to run the command against- Returns an empty response if no sync has been performed for the given object",
+      description: "Get the last successful sync date",
       args: {
-        name: "Object",
+        name: "object",
         description:
-          "You must specify either users or groups as an <object> to run the command against",
+          "Object to get the last sync date for. Returns an empty response if no sync has been performed for it",
+        suggestions: ["groups", "users"],
       },
-
-      options: [
-        {
-          name: "--help",
-        },
-      ],
+      options: [helpOption],
     },
-
     {
       name: "config",
       icon: bwLogo32x32,
-      description:
-        "The config command allows you to specify your directory settings",
-      args: [
-        {
-          name: "setting",
-          description: "Specify the setting to configure",
-        },
-        {
-          name: "value",
-          description: "Specify the value assigned to the setting",
-        },
-      ],
-
+      description: "Configure settings",
       subcommands: [
         {
           name: "server",
@@ -114,13 +93,13 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "directory-type",
             description: `Active Directory/LDAP : 0
-Azure Active Directory : 1
+Entra ID (Azure Active Directory) : 1
 Google Workspace/GSuite : 2
 Okta : 3
 OneLogin : 4`,
             suggestions: [
               { name: "0", description: "Active Directory/LDAP" },
-              { name: "1", description: "Azure Active Directory" },
+              { name: "1", description: "Entra ID (Azure Active Directory)" },
               { name: "2", description: "Google Workspace/GSuite" },
               { name: "3", description: "Okta" },
               { name: "4", description: "OneLogin" },
@@ -130,86 +109,150 @@ OneLogin : 4`,
         {
           name: "ldap.password",
           description: "Password for connection to the LDAP server",
-          args: {
-            name: "password",
-            description: "Specify the password",
-          },
+          args: secretArg("password", "Specify the password"),
+        },
+        {
+          name: "entra.key",
+          description: "Entra ID secret key",
+          args: secretArg("key", "Specify the Entra ID secret key"),
         },
         {
           name: "azure.key",
-          description: "Azure AD secret key",
-          args: {
-            name: "key",
-            description: "Specify the AD secret key",
-          },
+          description:
+            "Entra ID secret key (legacy name of entra.key, kept for backwards compatibility)",
+          deprecated: true,
+          args: secretArg("key", "Specify the Entra ID secret key"),
         },
         {
           name: "gsuite.key",
           description: "Google Workspace/GSuite private key",
-          args: {
-            name: "key",
-            description: "Specify the Google Workspace/GSuite private key",
-          },
+          args: secretArg(
+            "key",
+            "Specify the Google Workspace/GSuite private key"
+          ),
         },
         {
           name: "okta.token",
           description: "Okta token",
-          args: {
-            name: "token",
-            description: "Specify the Okta token",
-          },
+          args: secretArg("token", "Specify the Okta token"),
         },
         {
           name: "onelogin.secret",
           description: "OneLogin client secret",
+          args: secretArg("secret", "Specify the OneLogin client secret"),
+        },
+        {
+          name: "sync.inviteUsersAfterProvisioning",
+          description: "Send invitation emails to synced users",
           args: {
-            name: "secret",
-            description: "Specify the OneLogin client secret",
+            name: "value",
+            description: "Whether to send invitation emails",
+            suggestions: ["true", "false"],
           },
         },
       ],
       options: [
         {
-          name: "--help",
+          name: "--secretenv",
+          description: "Read secret from the named environment variable",
+          isPersistent: true,
+          exclusiveOn: ["--secretfile"],
+          args: {
+            name: "variable-name",
+            description: "Name of the environment variable holding the secret",
+          },
         },
+        {
+          name: "--secretfile",
+          description: "Read secret from first line of the named file",
+          isPersistent: true,
+          exclusiveOn: ["--secretenv"],
+          args: {
+            name: "filename",
+            description: "File containing the secret on its first line",
+            template: "filepaths",
+          },
+        },
+        helpOption,
       ],
     },
     {
       name: "data-file",
       icon: bwLogo32x32,
       description: "Path to data.json database file",
-
-      options: [
-        {
-          name: "--help",
-        },
-      ],
+      options: [helpOption],
     },
     {
       name: "clear-cache",
       icon: bwLogo32x32,
-      description:
-        "The clear-cache command allows you to clear cached data that the application stores while performing sync operations",
-      options: [
-        {
-          name: "--help",
-        },
-      ],
+      description: "Clear the sync cache",
+      options: [helpOption],
     },
     {
       name: "update",
       icon: bwLogo32x32,
-      description:
-        "The update command allows you to check if your Directory Connector CLI is up-to-date",
+      description: "Check for updates",
+      options: [helpOption],
+    },
+    {
+      name: "help",
+      icon: bwLogo32x32,
+      description: "Display help for command",
+      priority: 49,
+      args: {
+        name: "command",
+        isOptional: true,
+        suggestions: [
+          "login",
+          "logout",
+          "test",
+          "sync",
+          "last-sync",
+          "config",
+          "data-file",
+          "clear-cache",
+          "update",
+        ],
+      },
     },
   ],
   options: [
     {
-      name: "--help",
-      description: "Show help for bwdc",
+      name: "--pretty",
+      description: "Format output. JSON is tabbed with two spaces",
+      isPersistent: true,
     },
+    {
+      name: "--raw",
+      description: "Return raw output instead of a descriptive message",
+      isPersistent: true,
+    },
+    {
+      name: "--response",
+      description: "Return a JSON formatted version of response output",
+      isPersistent: true,
+    },
+    {
+      name: "--cleanexit",
+      description:
+        "Exit with a success exit code (0) unless an error is thrown",
+      isPersistent: true,
+    },
+    {
+      name: "--quiet",
+      description: "Don't return anything to stdout",
+      isPersistent: true,
+    },
+    {
+      name: "--nointeraction",
+      description: "Do not prompt for interactive user input",
+      isPersistent: true,
+    },
+    {
+      name: ["-v", "--version"],
+      description: "Output the version number",
+    },
+    helpOption,
   ],
-  // Only uncomment if bwdc takes an argument
-  // args: {}
 };
 export default completionSpec;

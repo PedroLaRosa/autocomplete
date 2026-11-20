@@ -1,32 +1,426 @@
+// cloudflared 2026.11.1 (newest git tag of cloudflare/cloudflared, same as the Homebrew formula, 2026-11-20).
+// Source: urfave/cli definitions in cmd/cloudflared and cfapi at tag 2026.11.1, walked statically with a go/ast
+// extractor (binary not installed). Hidden legacy flags (ssh server, quic tuning, ...) are left out on purpose.
 import { filepaths } from "@tabsmith/autocomplete-generators";
+
+// ponytail: upstream appends this note to every legacy origin flag
+const legacyNote =
+  "This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress";
+
+const logLevelArg: Fig.Arg = {
+  name: "value",
+  description: "Logging level",
+  suggestions: ["debug", "info", "warn", "error", "fatal"],
+};
+
+const outputFormatOption: Fig.Option = {
+  name: ["--output", "-o"],
+  description:
+    "Render output using given FORMAT. Valid options are 'json' or 'yaml'",
+  args: {
+    name: "FORMAT",
+    description: "Format",
+    suggestions: ["json", "yaml"],
+  },
+};
+
+const logOutputOption: Fig.Option = {
+  name: "--output",
+  description:
+    'Output format for the logs (default, json) (default: "default") [$TUNNEL_MANAGEMENT_OUTPUT, $TUNNEL_LOG_OUTPUT]',
+  args: { name: "value", suggestions: ["default", "json"] },
+};
+
+const credentialsFileOption: Fig.Option = {
+  name: ["--credentials-file", "--cred-file"],
+  description:
+    "Filepath at which to read/write the tunnel credentials [$TUNNEL_CRED_FILE]",
+  args: {
+    name: "value",
+    description: "Filepath",
+    template: "filepaths",
+  },
+};
+
+const originCertOption: Fig.Option = {
+  name: "--origincert",
+  description:
+    "Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]",
+  args: {
+    name: "value",
+    description: "Certificate path",
+    template: "filepaths",
+  },
+};
+
+const tunnelLogLevelOption: Fig.Option = {
+  name: "--loglevel",
+  description:
+    'Application logging level {debug, info, warn, error, fatal} (default: "info") [$TUNNEL_LOGLEVEL]',
+  args: logLevelArg,
+};
+
+const overwriteDnsOption: Fig.Option = {
+  name: ["--overwrite-dns", "-f"],
+  description:
+    "Overwrites existing DNS records with this hostname (default: false) [$TUNNEL_FORCE_PROVISIONING_DNS]",
+};
+
+const postQuantumOption: Fig.Option = {
+  name: ["--post-quantum", "--pq"],
+  description:
+    "When given creates an experimental post-quantum secure tunnel [$TUNNEL_POST_QUANTUM]",
+};
+
+const protocolOption: Fig.Option = {
+  name: ["--protocol", "-p"],
+  description:
+    'Protocol implementation to connect with Cloudflare\'s edge network (default: "auto") [$TUNNEL_TRANSPORT_PROTOCOL]',
+  args: {
+    name: "value",
+    suggestions: [
+      {
+        name: "auto",
+        description: "Starts with QUIC and falls back to HTTP/2 (recommended)",
+      },
+      { name: "quic", description: "Relies on UDP egress to Cloudflare edge" },
+      { name: "http2", description: "Relies on TCP egress to Cloudflare edge" },
+    ],
+  },
+};
+
+const vnetOption: Fig.Option = {
+  name: ["--vnet", "--vn"],
+  description:
+    "The ID or name of the virtual network to which the route is associated to",
+  args: {
+    name: "value",
+    description: "Id or name",
+  },
+};
+
+const showRecentlyDisconnectedOption: Fig.Option = {
+  name: ["--show-recently-disconnected", "--rd"],
+  description:
+    "Include connections that have recently disconnected in the list (default: false)",
+};
+
+const makeDefaultVnetOption: Fig.Option = {
+  name: ["--default", "-d"],
+  description:
+    "The virtual network becomes the default one for the account. This means that all operations that omit a virtual network will now implicitly be using this virtual network (i.e., the default one) such as new IP routes that are created. When this flag is not set, the virtual network will not become the default one in the account. (default: false)",
+};
+
+// Visible on both `cloudflared` and `cloudflared tunnel`
+const edgeOptions: Fig.Option[] = [
+  credentialsFileOption,
+  {
+    name: "--region",
+    description:
+      "Cloudflare Edge region to connect to. Omit or set to empty to connect to the global region. [$TUNNEL_REGION]",
+    args: { name: "value", description: "Region", suggestions: ["us"] },
+  },
+  {
+    name: "--edge-ip-version",
+    description:
+      'Cloudflare Edge IP address version to connect with. {4, 6, auto} (default: "auto") [$TUNNEL_EDGE_IP_VERSION]',
+    args: { name: "value", suggestions: ["4", "6", "auto"] },
+  },
+  {
+    name: "--edge-bind-address",
+    description:
+      "Bind to IP address for outgoing connections to Cloudflare Edge. [$TUNNEL_EDGE_BIND_ADDRESS]",
+    args: { name: "value", description: "IP address" },
+  },
+  {
+    name: "--label",
+    description:
+      "Use this option to give a meaningful label to a specific connector. Defaults to the hostname of the machine the tunnel is running on",
+    args: { name: "value", description: "Label" },
+  },
+  postQuantumOption,
+  {
+    name: "--management-diagnostics",
+    description:
+      "Enables the in-depth diagnostic routes to be made available over the management service (/debug/pprof, /metrics, etc.) (default: true) [$TUNNEL_MANAGEMENT_DIAGNOSTICS]",
+  },
+  overwriteDnsOption,
+];
+
+// configureCloudflaredFlags upstream: options of `tunnel` relevant to `run`
+const cloudflaredOptions: Fig.Option[] = [
+  {
+    name: "--config",
+    description:
+      "Specifies a config file in YAML format (default: first config.yml/config.yaml found in ~/.cloudflared, ~/.cloudflare-warp, ~/cloudflare-warp, /etc/cloudflared, /usr/local/etc/cloudflared)",
+    args: {
+      name: "value",
+      description: "Config file",
+      generators: filepaths({ extensions: ["yml", "yaml"] }),
+    },
+  },
+  originCertOption,
+  {
+    name: "--autoupdate-freq",
+    description: "Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)",
+    args: { name: "value", description: "Frequency" },
+  },
+  {
+    name: "--no-autoupdate",
+    description:
+      "Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]",
+  },
+  {
+    name: "--no-prechecks",
+    description:
+      "Skip connectivity pre-checks at startup. (default: false) [$TUNNEL_NO_PRECHECKS]",
+  },
+  {
+    name: "--metrics",
+    description:
+      "Listen address for metrics reporting. If no address is passed cloudflared will try to bind to localhost:20241-20245, then a random port [$TUNNEL_METRICS]",
+    args: { name: "value", description: "Address" },
+  },
+  {
+    name: "--pidfile",
+    description:
+      "Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]",
+    args: { name: "value", description: "PID file", template: "filepaths" },
+  },
+];
+
+const loggingOptions: Fig.Option[] = [
+  tunnelLogLevelOption,
+  {
+    name: ["--transport-loglevel", "--proto-loglevel"],
+    description: "DEPRECATED. No longer has any effect",
+    args: logLevelArg,
+    deprecated: true,
+  },
+  {
+    name: "--logfile",
+    description:
+      "Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]",
+    args: { name: "value", description: "File", template: "filepaths" },
+  },
+  {
+    name: "--log-directory",
+    description:
+      "Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]",
+    args: { name: "value", description: "Folder", template: "folders" },
+  },
+  {
+    name: "--trace-output",
+    description:
+      "Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]",
+    args: { name: "value", description: "Name" },
+  },
+  logOutputOption,
+];
+
+// ConfigureProxyDNSFlags upstream: the proxy-dns feature was removed in 2026.2.0, the flags are only accepted so that
+// existing scripts do not break. They are visible in upstream help with an empty usage
+const proxyDnsNote =
+  "Removed proxy-dns feature, only accepted for compatibility";
+const proxyDnsOptions: Fig.Option[] = [
+  { name: "--proxy-dns", description: proxyDnsNote, deprecated: true },
+  {
+    name: "--proxy-dns-port",
+    description: proxyDnsNote,
+    deprecated: true,
+    args: { name: "value", description: "Port" },
+  },
+  {
+    name: "--proxy-dns-address",
+    description: proxyDnsNote,
+    deprecated: true,
+    args: { name: "value", description: "Address" },
+  },
+  {
+    name: "--proxy-dns-upstream",
+    description: proxyDnsNote,
+    deprecated: true,
+    isRepeatable: true,
+    args: { name: "value", description: "Upstream" },
+  },
+  {
+    name: "--proxy-dns-max-upstream-conns",
+    description: proxyDnsNote,
+    deprecated: true,
+    args: { name: "value", description: "Max connections" },
+  },
+  {
+    name: "--proxy-dns-bootstrap",
+    description: proxyDnsNote,
+    deprecated: true,
+    isRepeatable: true,
+    args: { name: "value", description: "Bootstrap" },
+  },
+];
+
+// configureProxyFlags upstream: shared by `tunnel` and `tunnel run`
+const proxyOptions: Fig.Option[] = [
+  {
+    name: "--url",
+    description:
+      'Connect to the local webserver at URL. (default: "http://localhost:8080") [$TUNNEL_URL]',
+    args: { name: "URL", description: "Url" },
+  },
+  {
+    name: "--hello-world",
+    description:
+      "Run Hello World Server (default: false) [$TUNNEL_HELLO_WORLD]",
+  },
+  {
+    name: "--socks5",
+    description: `Specify if this tunnel is running as a SOCK5 Server ${legacyNote} (default: false) [$TUNNEL_SOCKS]`,
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--disable-path-normalization",
+    description:
+      "Disable URL path normalization before matching ingress rules. Use this setting at your own risk. An unnormalized request path could bypass Cloudflare Access rules and reach a protected origin (default: true) [$TUNNEL_DISABLE_PATH_NORMALIZATION]",
+  },
+  {
+    name: "--proxy-connect-timeout",
+    description: `HTTP proxy timeout for establishing a new connection ${legacyNote} (default: 30s)`,
+    args: { name: "value", description: "Duration" },
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--proxy-tls-timeout",
+    description: `HTTP proxy timeout for completing a TLS handshake ${legacyNote} (default: 10s)`,
+    args: { name: "value", description: "Duration" },
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--proxy-tcp-keepalive",
+    description: `HTTP proxy TCP keepalive duration ${legacyNote} (default: 30s)`,
+    args: { name: "value", description: "Duration" },
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--proxy-no-happy-eyeballs",
+    description: `HTTP proxy should disable "happy eyeballs" for IPv4/v6 fallback ${legacyNote} (default: false)`,
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--proxy-keepalive-connections",
+    description: `HTTP proxy maximum keepalive connection pool size ${legacyNote} (default: 100)`,
+    args: { name: "value", description: "Pool size" },
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--proxy-keepalive-timeout",
+    description: `HTTP proxy timeout for closing an idle connection ${legacyNote} (default: 1m30s)`,
+    args: { name: "value", description: "Duration" },
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--proxy-connection-timeout",
+    description: "DEPRECATED. No longer has any effect. (default: 1m30s)",
+    args: { name: "value" },
+    deprecated: true,
+  },
+  {
+    name: "--proxy-expect-continue-timeout",
+    description: "DEPRECATED. No longer has any effect. (default: 1m30s)",
+    args: { name: "value" },
+    deprecated: true,
+  },
+  {
+    name: "--http-host-header",
+    description: `Sets the HTTP Host header for the local webserver. ${legacyNote} [$TUNNEL_HTTP_HOST_HEADER]`,
+    args: { name: "value", description: "Host header" },
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--origin-server-name",
+    description: `Hostname on the origin server certificate. ${legacyNote} [$TUNNEL_ORIGIN_SERVER_NAME]`,
+    args: { name: "value", description: "Hostname" },
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--unix-socket",
+    description:
+      "Path to unix socket to use instead of --url [$TUNNEL_UNIX_SOCKET]",
+    args: {
+      name: "value",
+      description: "Unix socket path",
+      template: "filepaths",
+    },
+  },
+  {
+    name: "--origin-ca-pool",
+    description: `Path to the CA for the certificate of your origin. This option should be used only if your certificate is not signed by Cloudflare. ${legacyNote} [$TUNNEL_ORIGIN_CA_POOL]`,
+    args: { name: "value", description: "CA path", template: "filepaths" },
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--no-tls-verify",
+    description: `Disables TLS verification of the certificate presented by your origin. Will allow any certificate from the origin to be accepted. Note: The connection from your machine to Cloudflare's Edge is still encrypted. ${legacyNote} (default: false) [$NO_TLS_VERIFY]`,
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--no-chunked-encoding",
+    description: `Disables chunked transfer encoding; useful if you are running a WSGI server. ${legacyNote} (default: false) [$TUNNEL_NO_CHUNKED_ENCODING]`,
+    dependsOn: ["--url"],
+  },
+  {
+    name: "--http2-origin",
+    description:
+      "Enables HTTP/2 origin servers. (default: false) [$TUNNEL_ORIGIN_ENABLE_HTTP2]",
+  },
+  {
+    name: "--bastion",
+    description: "Runs as jump host (default: false) [$TUNNEL_BASTION]",
+  },
+  {
+    name: "--proxy-address",
+    description:
+      'Listen address for the proxy. (default: "127.0.0.1") [$TUNNEL_PROXY_ADDRESS]',
+    args: { name: "value", description: "Address" },
+  },
+  {
+    name: "--proxy-port",
+    description: "Listen port for the proxy. (default: 0) [$TUNNEL_PROXY_PORT]",
+    args: { name: "value", description: "Port" },
+  },
+];
 
 const tcp_rdp_ssh_smb_options: Fig.Option[] = [
   {
     name: ["--hostname", "--tunnel-host", "-T"],
-    description: "Specify the hostname of your application",
+    description:
+      "Specify the hostname of your application. [$TUNNEL_SERVICE_HOSTNAME]",
     args: {
       name: "value",
       description: "Hostname",
     },
-    isRequired: true,
   },
   {
     name: "--destination",
-    description: "Specify the destination address of your SSH server",
+    description:
+      "Specify the destination address of your SSH server. [$TUNNEL_SERVICE_DESTINATION]",
     args: {
       name: "value",
       description: "Address of SSH server",
     },
-    isRequired: true,
   },
   {
     name: ["--url", "--listener", "-L"],
-    description: "Specify the host:port to forward data to Cloudflare edge",
+    description:
+      "Specify the host:port to forward data to Cloudflare edge. [$TUNNEL_SERVICE_URL]",
     args: {
       name: "value",
       description: "Host:port to forward data to Cloudflare edge",
     },
-    isRequired: true,
+  },
+  {
+    name: ["--header", "-H"],
+    description: "Specify additional headers you wish to send",
+    args: { name: "value", description: "Header" },
+    isRepeatable: true,
   },
   {
     name: ["--service-token-id", "--id"],
@@ -36,7 +430,6 @@ const tcp_rdp_ssh_smb_options: Fig.Option[] = [
       name: "value",
       description: "Access service token ID",
     },
-    isRequired: true,
   },
   {
     name: ["--service-token-secret", "--secret"],
@@ -46,43 +439,21 @@ const tcp_rdp_ssh_smb_options: Fig.Option[] = [
       name: "value",
       description: "Access service token secret",
     },
-    isRequired: true,
   },
   {
-    name: ["--log-directory", "--logfile"],
+    name: "--logfile",
+    description: "Save application log to this file for reporting issues",
+    args: { name: "value", description: "File", template: "filepaths" },
+  },
+  {
+    name: "--log-directory",
     description: "Save application log to this directory for reporting issues",
-    args: {
-      name: "value",
-      description: "Directory",
-      template: ["folders"],
-    },
-    isRequired: true,
+    args: { name: "value", description: "Directory", template: "folders" },
   },
   {
     name: ["--log-level", "--loglevel"],
     description: "Application logging level {debug, info, warn, error, fatal}",
-    args: {
-      name: "value",
-      description: "Directory",
-      suggestions: [
-        {
-          name: "debug",
-        },
-        {
-          name: "info",
-        },
-        {
-          name: "warn",
-        },
-        {
-          name: "error",
-        },
-        {
-          name: "fatal",
-        },
-      ],
-    },
-    isRequired: true,
+    args: logLevelArg,
   },
 ];
 
@@ -113,75 +484,19 @@ const update: Fig.Subcommand = {
 const version: Fig.Subcommand = {
   name: "version",
   description: "Print the version",
-  args: {
-    name: "arguments",
-    isVariadic: true,
-    isOptional: true,
-  },
+  options: [
+    {
+      name: ["--short", "-s"],
+      description: "Print just the version number (default: false)",
+    },
+  ],
 };
 
 const proxyDns: Fig.Subcommand = {
   name: "proxy-dns",
-  description: "Run a DNS over HTTPS proxy server",
-  options: [
-    {
-      name: "--metrics",
-      description:
-        'Listen address for metrics reporting. (default: "localhost:") [$TUNNEL_METRICS]',
-      args: {
-        name: "value",
-      },
-    },
-    {
-      name: "--address",
-      description:
-        'Listen address for the DNS over HTTPS proxy server. (default: "localhost") [$TUNNEL_DNS_ADDRESS]',
-      args: {
-        name: "value",
-        default: "localhost",
-      },
-    },
-    {
-      name: "--port",
-      description:
-        "Listen on given port for the DNS over HTTPS proxy server. (default: 53) [$TUNNEL_DNS_PORT]",
-      args: {
-        name: "value",
-        default: "53",
-      },
-    },
-    {
-      name: "--upstream",
-      description:
-        'Upstream endpoint URL, you can specify multiple endpoints for redundancy. (default: "https://1.1.1.1/dns-query", "https://1.0.0.1/dns-query") (accepts multiple inputs) [$TUNNEL_DNS_UPSTREAM]',
-      args: {
-        name: "value",
-        isVariadic: true,
-      },
-    },
-    {
-      name: "--bootstrap",
-      description:
-        'Bootstrap endpoint URL, you can specify multiple endpoints for redundancy. (default: "https://162.159.36.1/dns-query", "https://162.159.46.1/dns-query", "https://[2606:4700:4700::1111]/dns-query", "https://[2606:4700:4700::1001]/dns-query")  (accepts multiple inputs) [$TUNNEL_DNS_BOOTSTRAP]',
-      args: {
-        name: "value",
-        isVariadic: true,
-      },
-    },
-    {
-      name: "--max-upstream-conns",
-      description:
-        "Maximum concurrent connections to upstream. Setting to 0 means unlimited. (default: 5) [$TUNNEL_DNS_MAX_UPSTREAM_CONNS]",
-      args: {
-        name: "value",
-        isVariadic: true,
-      },
-    },
-  ],
-  args: {
-    name: "command options",
-    isOptional: true,
-  },
+  description:
+    "DNS over HTTPS proxy, removed in 2026.2.0 (now only prints an error); use a DNS over HTTPS client instead",
+  deprecated: true,
 };
 
 const service: Fig.Subcommand = {
@@ -191,6 +506,18 @@ const service: Fig.Subcommand = {
     {
       name: "install",
       description: "Install cloudflared as an user launch agent",
+      options: [
+        {
+          name: "--no-update-service",
+          description:
+            "Linux only: disable auto-update of the cloudflared linux service, which restarts the server to upgrade for new versions (default: false)",
+        },
+      ],
+      args: {
+        name: "TOKEN",
+        description: "Tunnel token to write to the service configuration",
+        isOptional: true,
+      },
     },
     {
       name: "uninstall",
@@ -201,18 +528,6 @@ const service: Fig.Subcommand = {
       description: "Shows a list of commands or help for one command",
     },
   ],
-
-  args: [
-    {
-      name: "command options",
-      isOptional: true,
-    },
-    {
-      name: "arguments",
-      isVariadic: true,
-      isOptional: true,
-    },
-  ],
 };
 
 const help: Fig.Subcommand = {
@@ -221,32 +536,62 @@ const help: Fig.Subcommand = {
 };
 
 const access: Fig.Subcommand = {
-  name: "access",
+  name: ["access", "forward"],
   description:
     "Cloudflare Access protects internal resources by securing, authenticating and monitoring access per-user and by application. With Cloudflare Access, only authenticated users with the required permissions are able to reach sensitive resources. The commands provided here allow you to interact with Access protected applications from the command line",
+  options: [
+    {
+      name: "--fedramp",
+      description:
+        "Force the FedRAMP token transfer relay for Access authentication. Not usually needed: cloudflared selects it automatically when the application's verified auth domain is a FedRAMP domain (default: false)",
+    },
+  ],
   subcommands: [
     {
       name: "login",
       description:
         "The login subcommand initiates an authentication flow with your identity provider. The subcommand will launch a browser. For headless systems, a url is provided. Once authenticated with your identity provider, the login command will generate a JSON Web Token (JWT) scoped to your identity, the application you intend to reach, and valid for a session duration set by your administrator. cloudflared stores the token in local storage",
       displayName: "login <url of access application>",
+      options: [
+        {
+          name: ["--quiet", "-q"],
+          description: "Do not print the jwt to the command line",
+        },
+        {
+          name: "--no-verbose",
+          description: "Print only the jwt to stdout",
+        },
+        {
+          name: "--auto-close",
+          description: "Automatically close the auth interstitial after action",
+        },
+        {
+          name: "--app",
+          description: "Url of access application",
+          args: { name: "value" },
+        },
+      ],
       args: {
         name: "url",
+        isOptional: true,
       },
     },
     {
       name: "curl",
-      description: "Uninstall the cloudflared launch agent",
+      description:
+        "The curl subcommand wraps curl and automatically injects the JWT into a cf-access-token header when using curl to reach an application behind Access",
       options: [
         {
-          name: ["--allow-request", "--ar"],
+          name: ["--allow-request", "-ar"],
+          description:
+            "Allow the curl request to continue even if the jwt is not present",
         },
       ],
       args: [
         {
           name: "url",
         },
-        { name: "curl args", isVariadic: true },
+        { name: "curl args", isVariadic: true, isOptional: true },
       ],
     },
     {
@@ -262,9 +607,12 @@ const access: Fig.Subcommand = {
             name: "value",
             description: "Url of access application",
           },
-          isRequired: true,
         },
       ],
+      args: {
+        name: "url",
+        isOptional: true,
+      },
     },
     {
       name: "tcp",
@@ -309,17 +657,6 @@ const access: Fig.Subcommand = {
             "Specify if you wish to generate short lived certs. (default: false)",
         },
       ],
-      args: [
-        {
-          name: "command options",
-          isOptional: true,
-        },
-        {
-          name: "arguments",
-          isVariadic: true,
-          isOptional: true,
-        },
-      ],
     },
     {
       name: "ssh-gen",
@@ -335,35 +672,44 @@ const access: Fig.Subcommand = {
           isRequired: true,
         },
       ],
-      args: [
-        {
-          name: "command options",
-          isOptional: true,
-        },
-        {
-          name: "arguments",
-          isVariadic: true,
-          isOptional: true,
-        },
-      ],
     },
     {
       name: ["help", "h"],
       description: "Shows a list of commands or help for one command",
     },
   ],
+};
 
-  args: [
+// Also registered (hidden) as a top-level command upstream, for compatibility
+const tunnelLogin: Fig.Subcommand = {
+  name: "login",
+  description: "Generate a configuration file with your login details",
+  options: [
     {
-      name: "command options",
-      isOptional: true,
+      name: "--loginURL",
+      description:
+        "The URL used to login (default is https://dash.cloudflare.com/argotunnel)",
+      args: { name: "value" },
     },
     {
-      name: "arguments",
-      isVariadic: true,
-      isOptional: true,
+      name: "--callbackURL",
+      description:
+        "The URL used for the callback (default is https://login.cloudflareaccess.org/)",
+      args: { name: "value" },
+    },
+    {
+      name: ["--fedramp", "-f"],
+      description: "Login with FedRAMP High environment (default: false)",
     },
   ],
+};
+
+// Hidden stub upstream, exits with "command is no longer supported"
+const dbConnect: Fig.Subcommand = {
+  name: "db-connect",
+  description: "Removed command, no longer supported by cloudflared",
+  deprecated: true,
+  hidden: true,
 };
 
 const tunnel: Fig.Subcommand = {
@@ -371,180 +717,14 @@ const tunnel: Fig.Subcommand = {
   description:
     "Use Cloudflare Tunnel to expose private services to the Internet or to Cloudflare connected private users",
   subcommands: [
-    {
-      name: "login",
-      description: "Generate a configuration file with your login details",
-    },
+    tunnelLogin,
     {
       name: "create",
       description:
         'Creates a tunnel, registers it with Cloudflare edge and generates credential file used to run this tunnel. Use "cloudflared tunnel route" subcommand to map a DNS name to this tunnel and "cloudflared tunnel run" to start the connection',
-      additionalSuggestions: [
-        "cloudflared tunnel [tunnel command options] create [subcommand options] NAME",
-      ],
       options: [
-        {
-          name: "--config",
-          description:
-            'Specifies a config file in YAML format. (default: "/usr/local/etc/cloudflared/config.yml")',
-          args: {
-            name: "value",
-            description: "Config file",
-            generators: filepaths({ extensions: ["yml", "yaml"] }),
-          },
-          isRequired: true,
-        },
-        {
-          name: "--origincert",
-          description:
-            "Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]",
-          args: {
-            name: "value",
-            description: "Certificate generated",
-          },
-          isRequired: true,
-        },
-        {
-          name: "--autoupdate-freq",
-          description:
-            "Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)",
-          args: {
-            name: "value",
-            description: "Frequency",
-          },
-          isRequired: true,
-        },
-        {
-          name: "--no-autoupdate",
-          description:
-            "Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]",
-        },
-        {
-          name: "--metrics",
-          description:
-            'Listen address for metrics reporting. (default: "localhost:") [$TUNNEL_METRICS]',
-          args: {
-            name: "value",
-            description: "Adress",
-          },
-          isRequired: true,
-        },
-        {
-          name: "--pidfile",
-          description:
-            "Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]",
-          args: {
-            name: "value",
-            description: "Application PID",
-          },
-          isRequired: true,
-        },
-        {
-          name: "--loglevel",
-          description:
-            'Application logging level {debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs. (default: "info") [$TUNNEL_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              {
-                name: "debug",
-              },
-              {
-                name: "info",
-              },
-              {
-                name: "warn",
-              },
-              {
-                name: "error",
-              },
-              {
-                name: "fatal",
-              },
-            ],
-          },
-          isRequired: true,
-        },
-        {
-          name: ["--transport-loglevel", "--proto-loglevel"],
-          description:
-            'Transport logging level(previously called protocol logging level) {debug, info, warn, error, fatal} (default: "info") [$TUNNEL_PROTO_LOGLEVEL, $TUNNEL_TRANSPORT_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              {
-                name: "debug",
-              },
-              {
-                name: "info",
-              },
-              {
-                name: "warn",
-              },
-              {
-                name: "error",
-              },
-              {
-                name: "fatal",
-              },
-            ],
-          },
-          isRequired: true,
-        },
-        {
-          name: "--logfile",
-          description:
-            "Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]",
-          args: {
-            name: "value",
-            description: "File",
-            template: ["filepaths"],
-          },
-          isRequired: true,
-        },
-        {
-          name: "--log-directory",
-          description:
-            "Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]",
-          args: {
-            name: "value",
-            description: "Directory",
-            template: ["folders"],
-          },
-          isRequired: true,
-        },
-        {
-          name: "--trace-output",
-          description:
-            "Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]",
-          args: {
-            name: "value",
-            description: "Output file",
-          },
-          isRequired: true,
-        },
-        {
-          name: ["--output", "-o"],
-          description:
-            "Render output using given FORMAT. Valid options are 'json' or 'yaml'",
-          args: {
-            name: "format",
-            description: "Format",
-            suggestions: ["json", "yaml"],
-          },
-        },
-        {
-          name: ["--credentials-file", "--cred-file"],
-          description:
-            "Filepath at which to read/write the tunnel credentials [$TUNNEL_CRED_FILE]",
-          args: {
-            name: "value",
-            description: "Filepath",
-            template: ["filepaths", "folders"],
-          },
-        },
+        outputFormatOption,
+        credentialsFileOption,
         {
           name: ["--secret", "-s"],
           description:
@@ -556,7 +736,7 @@ const tunnel: Fig.Subcommand = {
         },
       ],
       args: {
-        name: "name",
+        name: "NAME",
       },
     },
     {
@@ -568,13 +748,7 @@ const tunnel: Fig.Subcommand = {
           name: "dns",
           description:
             "Creates a DNS CNAME record hostname that points to the tunnel",
-          options: [
-            {
-              name: ["--overwrite-dns", "-f"],
-              description:
-                "Overwrites existing DNS records with this hostname (default: false) [$TUNNEL_FORCE_PROVISIONING_DNS]",
-            },
-          ],
+          options: [overwriteDnsOption],
           args: [
             {
               name: "tunnel",
@@ -614,27 +788,11 @@ const tunnel: Fig.Subcommand = {
               name: "add",
               description:
                 "Add a new network to the routing table reachable via a Tunnel",
-              options: [
-                {
-                  name: ["--vnet", "--vn"],
-                  description:
-                    "The ID or name of the virtual network to which the route is associated to",
-                  args: {
-                    name: "value",
-                    description: "Id or name",
-                  },
-                },
-              ],
+              options: [vnetOption],
               args: [
-                {
-                  name: "command options",
-                  isOptional: true,
-                },
-                {
-                  name: "arguments",
-                  isVariadic: true,
-                  isOptional: true,
-                },
+                { name: "CIDR" },
+                { name: "TUNNEL" },
+                { name: "COMMENT", isOptional: true },
               ],
             },
             {
@@ -646,10 +804,6 @@ const tunnel: Fig.Subcommand = {
                   name: "--filter-is-deleted",
                   description:
                     "If false (default), only show non-deleted routes. If true, only show deleted routes. (default: false)",
-                  args: {
-                    name: "value",
-                    description: "Id or name",
-                  },
                 },
                 {
                   name: "--filter-tunnel-id",
@@ -694,87 +848,28 @@ const tunnel: Fig.Subcommand = {
                     description: "Vnet id",
                   },
                 },
-                {
-                  name: ["--output", "-o"],
-                  description:
-                    "Render output using given FORMAT. Valid options are 'json' or 'yaml'",
-                  args: {
-                    name: "format",
-                    description: "Format",
-                    suggestions: ["json", "yaml"],
-                  },
-                },
+                outputFormatOption,
               ],
-              args: {
-                name: "flags",
-                isOptional: true,
-                isVariadic: true,
-              },
             },
             {
               name: "delete",
               description:
                 "Delete a row from your organization's private routing table",
-              options: [
-                {
-                  name: ["--vnet", "--vn"],
-                  description:
-                    "The ID or name of the virtual network to which the route is associated to",
-                  args: {
-                    name: "value",
-                    description: "Id or name",
-                  },
-                },
-              ],
-              args: [
-                {
-                  name: "flags",
-                  isOptional: true,
-                  isVariadic: true,
-                },
-                {
-                  name: "CIDR",
-                },
-              ],
+              options: [vnetOption],
+              args: {
+                name: "Route ID or CIDR",
+              },
             },
             {
               name: "get",
               description:
                 "Check which row of the routing table matches a given IP",
-              options: [
-                {
-                  name: ["--vnet", "--vn"],
-                  description:
-                    "The ID or name of the virtual network to which the route is associated to",
-                  args: {
-                    name: "value",
-                    description: "Id or name",
-                  },
-                },
-              ],
-              args: [
-                {
-                  name: "flags",
-                  isOptional: true,
-                  isVariadic: true,
-                },
-                {
-                  name: "IP",
-                },
-              ],
+              options: [vnetOption],
+              args: {
+                name: "IP",
+              },
             },
           ],
-        },
-      ],
-      args: [
-        {
-          name: "command options",
-          isOptional: true,
-        },
-        {
-          name: "arguments",
-          isVariadic: true,
-          isOptional: true,
         },
       ],
     },
@@ -787,13 +882,8 @@ const tunnel: Fig.Subcommand = {
           name: "add",
           description:
             "Add a new virtual network to which IP routes can be attached",
-          options: [
-            {
-              name: ["--default", "-d"],
-              description:
-                "The virtual network becomes the default one for the account. This means that all operations that omit a virtual network will now implicitly be using this virtual network (i.e., the default one) such as new IP routes that are created. When this flag is not set, the virtual network will not become the default one in the account. (default: false)",
-            },
-          ],
+          options: [makeDefaultVnetOption],
+          args: [{ name: "NAME" }, { name: "comment", isOptional: true }],
         },
         {
           name: "list",
@@ -826,19 +916,21 @@ const tunnel: Fig.Subcommand = {
               description:
                 "If false (default), only show non-deleted virtual networks. If true, only show deleted virtual networks. (default: false)",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                "Render output using given FORMAT. Valid options are 'json' or 'yaml'",
-              args: {
-                name: "format",
-                description: "Format",
-                suggestions: ["json", "yaml"],
-              },
-            },
+            outputFormatOption,
           ],
         },
-        { name: "delete", description: "Delete a virtual network" },
+        {
+          name: "delete",
+          description: "Delete a virtual network",
+          options: [
+            {
+              name: ["--force", "-f"],
+              description:
+                "Force the deletion of the virtual network even if it is being relied upon by other resources. Those resources will either be deleted (e.g. IP Routes) or moved to the current default virtual network (default: false)",
+            },
+          ],
+          args: { name: "VIRTUAL_NETWORK" },
+        },
         {
           name: "update",
           description: "Update a virtual network",
@@ -860,23 +952,9 @@ const tunnel: Fig.Subcommand = {
                 description: "Comment",
               },
             },
-            {
-              name: ["--default", "-d"],
-              description:
-                "The virtual network becomes the default one for the account. This means that all operations that omit a virtual network will now implicitly be using this virtual network (i.e., the default one) such as new IP routes that are created. When this flag is not set, the virtual network will not become the default one in the account. (default: false)",
-            },
+            makeDefaultVnetOption,
           ],
-        },
-      ],
-      args: [
-        {
-          name: "command options",
-          isOptional: true,
-        },
-        {
-          name: "arguments",
-          isVariadic: true,
-          isOptional: true,
+          args: { name: "VIRTUAL_NETWORK" },
         },
       ],
     },
@@ -884,155 +962,7 @@ const tunnel: Fig.Subcommand = {
       name: "run",
       description: "Proxy a local web server by running the given tunnel",
       options: [
-        {
-          name: "--config",
-          description:
-            'Specifies a config file in YAML format. (default: "/usr/local/etc/cloudflared/config.yml")',
-          args: {
-            name: "value",
-            description: "Config file in YAML",
-            generators: filepaths({ extensions: ["yml", "yaml"] }),
-          },
-        },
-        {
-          name: "--origincert",
-          description:
-            "Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]",
-          args: {
-            name: "value",
-            description: "Path to the certificate",
-            template: ["filepaths"],
-          },
-        },
-        {
-          name: "--autoupdate-freq",
-          description:
-            "Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)",
-          args: {
-            name: "value",
-            description: "Autoupdate frequency",
-          },
-        },
-        {
-          name: "--no-autoupdate",
-          description:
-            "Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]",
-        },
-        {
-          name: "--metrics",
-          description:
-            'Listen address for metrics reporting. (default: "localhost:") [$TUNNEL_METRICS]',
-          args: {
-            name: "value",
-            description: "Listen address",
-          },
-        },
-        {
-          name: "--pidfile",
-          description:
-            "Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]",
-          args: {
-            name: "value",
-            description: "Application's PID",
-          },
-        },
-        {
-          name: "--loglevel",
-          description:
-            'Application logging level {debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs. (default: "info") [$TUNNEL_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              {
-                name: "debug",
-              },
-              {
-                name: "info",
-              },
-              {
-                name: "warn",
-              },
-              {
-                name: "error",
-              },
-              {
-                name: "fatal",
-              },
-            ],
-          },
-        },
-        {
-          name: ["--transport-loglevel", "--proto-loglevel"],
-          description:
-            'Transport logging level(previously called protocol logging level) {debug, info, warn, error, fatal} (default: "info") [$TUNNEL_PROTO_LOGLEVEL, $TUNNEL_TRANSPORT_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              {
-                name: "debug",
-              },
-              {
-                name: "info",
-              },
-              {
-                name: "warn",
-              },
-              {
-                name: "error",
-              },
-              {
-                name: "fatal",
-              },
-            ],
-          },
-        },
-        {
-          name: "--logfile",
-          description:
-            "Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]",
-          args: {
-            name: "value",
-            description: "File",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--log-directory",
-          description:
-            "Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]",
-          args: {
-            name: "value",
-            description: "File",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--trace-output",
-          description:
-            "Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]",
-          args: {
-            name: "value",
-            description: "File",
-            template: "filepaths",
-          },
-        },
-        {
-          name: ["--force", "-f"],
-          description:
-            "By default, if a tunnel is currently being run from a cloudflared, you can't simultaneously rerun it again from a second cloudflared. The --force flag lets you overwrite the previous tunnel. If you want to use a single hostname with multiple tunnels, you can do so with Cloudflare's Load Balancer product. (default: false)",
-        },
-        {
-          name: ["--credentials-file", "--cred-file"],
-          description:
-            "Filepath at which to read/write the tunnel credentials [$TUNNEL_CRED_FILE]",
-          args: {
-            name: "value",
-            description: "Filepath",
-            template: "filepaths",
-          },
-        },
+        credentialsFileOption,
         {
           name: "--credentials-contents",
           description:
@@ -1042,6 +972,8 @@ const tunnel: Fig.Subcommand = {
             description: "Contents of the tunnel credentials JSON",
           },
         },
+        postQuantumOption,
+        protocolOption,
         {
           name: ["--features", "-F"],
           description:
@@ -1050,275 +982,66 @@ const tunnel: Fig.Subcommand = {
             name: "value",
             description: "Features",
           },
+          isRepeatable: true,
         },
         {
           name: "--token",
           description:
-            "The Tunnel token. When provided along with credentials, this will take precedence. [$TUNNEL_TOKEN]",
+            "The Tunnel token. When provided along with credentials, this will take precedence. Also takes precedence over token-file [$TUNNEL_TOKEN]",
           args: {
             name: "value",
             description: "Tunnel token",
           },
         },
         {
-          name: "--url",
+          name: "--token-file",
           description:
-            'Connect to the local webserver at URL. (default: "http://localhost:8080") [$TUNNEL_URL]',
-          args: {
-            name: "URL",
-            description: "Url",
-          },
-        },
-        {
-          name: "--hello-world",
-          description:
-            "Run Hello World Server (default: false) [$TUNNEL_HELLO_WORLD]",
-        },
-        {
-          name: "--socks5",
-          description:
-            "Specify if this tunnel is running as a SOCK5 Server This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false) [$TUNNEL_SOCKS]",
-          dependsOn: ["--url"],
-        },
-        {
-          name: "--proxy-connect-timeout",
-          description:
-            "HTTP proxy timeout for establishing a new connection This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 30s)",
-          dependsOn: ["--url"],
-        },
-        {
-          name: "--proxy-tls-timeout",
-          description:
-            "HTTP proxy timeout for completing a TLS handshake This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 10s)",
-          dependsOn: ["--url"],
-        },
-        {
-          name: "--proxy-tcp-keepalive",
-          description:
-            "HTTP proxy TCP keepalive duration This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 30s)",
-          dependsOn: ["--url"],
-        },
-        {
-          name: "--proxy-no-happy-eyeballs",
-          description:
-            'HTTP proxy should disable "happy eyeballs" for IPv4/v6 fallback This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false)',
-          dependsOn: ["--url"],
-        },
-        {
-          name: "--proxy-keepalive-connections",
-          description:
-            "HTTP proxy maximum keepalive connection pool size This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 100)",
-          dependsOn: ["--url"],
-        },
-        {
-          name: "--proxy-keepalive-timeout",
-          description:
-            "HTTP proxy timeout for closing an idle connection This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 1m30s)",
-          dependsOn: ["--url"],
-        },
-        {
-          name: "--proxy-connection-timeout",
-          description: "DEPRECATED. No longer has any effect. (default: 1m30s)",
-          deprecated: true,
-        },
-        {
-          name: "--proxy-expect-continue-timeout",
-          description: "DEPRECATED. No longer has any effect. (default: 1m30s)",
-          deprecated: true,
-        },
-        {
-          name: "--http-host-header",
-          description:
-            "Sets the HTTP Host header for the local webserver. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress [$TUNNEL_HTTP_HOST_HEADER]",
-          dependsOn: ["--url"],
-        },
-        {
-          name: "--origin-server-name",
-          description:
-            "Hostname on the origin server certificate. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress [$TUNNEL_ORIGIN_SERVER_NAME]",
-          dependsOn: ["--url"],
-        },
-        {
-          name: "--unix-socket",
-          description:
-            "Path to unix socket to use instead of --url [$TUNNEL_UNIX_SOCKET]",
+            "Filepath at which to read the tunnel token. When provided along with credentials, this will take precedence. [$TUNNEL_TOKEN_FILE]",
           args: {
             name: "value",
-            description: "Unix socket path",
+            description: "Token file",
             template: "filepaths",
           },
         },
         {
-          name: "--origin-ca-pool",
+          name: "--icmpv4-src",
           description:
-            "Path to the CA for the certificate of your origin. This option should be used only if your certificate is not signed by Cloudflare. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress [$TUNNEL_ORIGIN_CA_POOL]",
-          dependsOn: ["--url"],
+            "Source address to send/receive ICMPv4 messages. If not provided cloudflared will dial a local address to determine the source IP or fallback to 0.0.0.0. [$TUNNEL_ICMPV4_SRC]",
+          args: { name: "value", description: "Address" },
         },
         {
-          name: "--no-tls-verify",
+          name: "--icmpv6-src",
           description:
-            "Disables TLS verification of the certificate presented by your origin. Will allow any certificate from the origin to be accepted. Note: The connection from your machine to Cloudflare's Edge is still encrypted. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false) [$NO_TLS_VERIFY]",
-          dependsOn: ["--url"],
+            "Source address and the interface name to send/receive ICMPv6 messages. If not provided cloudflared will dial a local address to determine the source IP or fallback to ::. [$TUNNEL_ICMPV6_SRC]",
+          args: { name: "value", description: "Address" },
         },
         {
-          name: "--no-chunked-encoding",
+          name: "--max-active-flows",
           description:
-            "Disables chunked transfer encoding; useful if you are running a WSGI server. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false) [$TUNNEL_NO_CHUNKED_ENCODING]",
-          dependsOn: ["--url"],
+            "Overrides the remote configuration for max active private network flows (TCP/UDP) that this cloudflared instance supports [$TUNNEL_MAX_ACTIVE_FLOWS]",
+          args: { name: "value", description: "Flows" },
         },
         {
-          name: "--bastion",
-          description: "Runs as jump host (default: false) [$TUNNEL_BASTION]",
-        },
-        {
-          name: "--proxy-address",
+          name: "--dns-resolver-addrs",
           description:
-            'Listen address for the proxy. (default: "127.0.0.1") [$TUNNEL_PROXY_ADDRESS]',
-          args: {
-            name: "value",
-            description: "Address",
-          },
+            "Overrides the dynamic DNS resolver resolution to use these address:port's instead. [$TUNNEL_DNS_RESOLVER_ADDRS]",
+          args: { name: "value", description: "Address:port" },
+          isRepeatable: true,
         },
-        {
-          name: "--proxy-port",
-          description:
-            "Listen port for the proxy. (default: 0) [$TUNNEL_PROXY_PORT]",
-          args: {
-            name: "value",
-            description: "Address",
-          },
-        },
+        ...proxyOptions,
       ],
+      args: {
+        name: "TUNNEL",
+        description: "Tunnel name or UUID",
+        isOptional: true,
+      },
     },
     {
       name: "list",
       description:
         "Cloudflared tunnel list will display all active tunnels, their created time and associated connections",
       options: [
-        {
-          name: "--config",
-          description:
-            'Specifies a config file in YAML format. (default: "/usr/local/etc/cloudflared/config.yml")',
-          args: {
-            name: "value",
-            description: "Config file",
-            generators: filepaths({ extensions: ["yml", "yaml"] }),
-          },
-        },
-        {
-          name: "--origincert",
-          description:
-            "Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]",
-          args: {
-            name: "value",
-            description: "Certificate path",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--autoupdate-freq",
-          description:
-            "Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)",
-          args: { name: "value", description: "Frequency" },
-        },
-        {
-          name: "--no-autoupdate",
-          description:
-            "Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]",
-        },
-        {
-          name: "--metrics",
-          description:
-            'Listen address for metrics reporting. (default: "localhost:") [$TUNNEL_METRICS]',
-          args: { name: "value", description: "Address" },
-        },
-        {
-          name: "--pidfile",
-          description:
-            "Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]",
-          args: { name: "value", description: "PID" },
-        },
-        {
-          name: "--loglevel",
-          description:
-            'Application logging level { value: debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs. (default: "info") [$TUNNEL_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              { name: "debug" },
-              { name: "info" },
-              { name: "warn" },
-              { name: "error" },
-              { name: "fatal" },
-            ],
-          },
-        },
-        {
-          name: ["--transport-loglevel", "--proto-loglevel"],
-          description:
-            'Transport logging level(previously called protocol logging level) { value: debug, info, warn, error, fatal} (default: "info") [$TUNNEL_PROTO_LOGLEVEL, $TUNNEL_TRANSPORT_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              {
-                name: "debug",
-              },
-              {
-                name: "info",
-              },
-              {
-                name: "warn",
-              },
-              {
-                name: "error",
-              },
-              {
-                name: "fatal",
-              },
-            ],
-          },
-        },
-        {
-          name: "--logfile",
-          description:
-            "Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]",
-          args: {
-            name: "value",
-            description: "File",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--log-directory",
-          description:
-            "Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]",
-          args: {
-            name: "value",
-            description: "Folder",
-            template: ["folders"],
-          },
-        },
-        {
-          name: "--trace-output",
-          description:
-            "Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]",
-          args: {
-            name: "value",
-            description: "Name",
-          },
-        },
-        {
-          name: ["--output", "-o"],
-          description:
-            "Render output using given FORMAT. Valid options are 'json' or 'yaml'",
-          args: {
-            name: "FORMAT",
-            description: "Format",
-            suggestions: ["json", "yaml"],
-          },
-        },
+        outputFormatOption,
         {
           name: ["--show-deleted", "-d"],
           description: "Include deleted tunnels in the list (default: false)",
@@ -1351,7 +1074,7 @@ const tunnel: Fig.Subcommand = {
         {
           name: ["--when", "-w"],
           description:
-            "List tunnels that are active at the given TIME in RFC3339 format (default: current time, 2022-04-07T20:03:58+01:00)",
+            "List tunnels that are active at the given TIME in RFC3339 format (default: current time)",
           args: {
             name: "TIME",
             description: "Time in RFC3339 format",
@@ -1365,15 +1088,11 @@ const tunnel: Fig.Subcommand = {
             description: "Id",
           },
         },
-        {
-          name: ["--show-recently-disconnected", "--rd"],
-          description:
-            "Include connections that have recently disconnected in the list (default: false)",
-        },
+        showRecentlyDisconnectedOption,
         {
           name: "--sort-by",
           description:
-            'Sorts the list of tunnels by the given field. Valid options are { value: name, id, createdAt, deletedAt, numConnections} (default: "name") [$TUNNEL_LIST_SORT_BY]',
+            'Sorts the list of tunnels by the given field. Valid options are {name, id, createdAt, deletedAt, numConnections} (default: "name") [$TUNNEL_LIST_SORT_BY]',
           args: {
             name: "value",
             description: "Field",
@@ -1394,159 +1113,60 @@ const tunnel: Fig.Subcommand = {
       ],
     },
     {
+      name: "ready",
+      description:
+        "Call /ready endpoint and return proper exit code (needs tunnel --metrics)",
+    },
+    {
       name: "info",
       description:
         "Cloudflared tunnel info displays details about the active connectors for a given tunnel (identified by name or uuid)",
       options: [
-        {
-          name: "--config",
-          description:
-            'Specifies a config file in YAML format. (default: "/usr/local/etc/cloudflared/config.yml")',
-          args: {
-            name: "value",
-            description: "Config file",
-            generators: filepaths({ extensions: ["yml", "yaml"] }),
-          },
-        },
-        {
-          name: "--origincert",
-          description:
-            "Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]",
-          args: {
-            name: "value",
-            description: "Certificate path",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--autoupdate-freq",
-          description:
-            "Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)",
-          args: { name: "value", description: "Frequency" },
-        },
-        {
-          name: "--no-autoupdate",
-          description:
-            "Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]",
-        },
-        {
-          name: "--metrics",
-          description:
-            'Listen address for metrics reporting. (default: "localhost:") [$TUNNEL_METRICS]',
-          args: { name: "value", description: "Address" },
-        },
-        {
-          name: "--pidfile",
-          description:
-            "Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]",
-          args: { name: "value", description: "PID" },
-        },
-        {
-          name: "--loglevel",
-          description:
-            'Application logging level { value: debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs. (default: "info") [$TUNNEL_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              { name: "debug" },
-              { name: "info" },
-              { name: "warn" },
-              { name: "error" },
-              { name: "fatal" },
-            ],
-          },
-        },
-        {
-          name: ["--transport-loglevel", "--proto-loglevel"],
-          description:
-            'Transport logging level(previously called protocol logging level) { value: debug, info, warn, error, fatal} (default: "info") [$TUNNEL_PROTO_LOGLEVEL, $TUNNEL_TRANSPORT_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              {
-                name: "debug",
-              },
-              {
-                name: "info",
-              },
-              {
-                name: "warn",
-              },
-              {
-                name: "error",
-              },
-              {
-                name: "fatal",
-              },
-            ],
-          },
-        },
-        {
-          name: "--logfile",
-          description:
-            "Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]",
-          args: {
-            name: "value",
-            description: "File",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--log-directory",
-          description:
-            "Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]",
-          args: {
-            name: "value",
-            description: "Folder",
-            template: ["folders"],
-          },
-        },
-        {
-          name: "--trace-output",
-          description:
-            "Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]",
-          args: {
-            name: "value",
-            description: "Name",
-          },
-        },
-        {
-          name: ["--output", "-o"],
-          description:
-            "Render output using given FORMAT. Valid options are 'json' or 'yaml'",
-          args: {
-            name: "FORMAT",
-            description: "Format",
-            suggestions: ["json", "yaml"],
-          },
-        },
-        {
-          name: ["--show-recently-disconnected", "--rd"],
-          description:
-            "Include connections that have recently disconnected in the list (default: false)",
-        },
+        outputFormatOption,
+        showRecentlyDisconnectedOption,
         {
           name: "--sort-by",
           description:
-            'Sorts the list of tunnels by the given field. Valid options are { value: name, id, createdAt, deletedAt, numConnections} (default: "name") [$TUNNEL_LIST_SORT_BY]',
+            'Sorts the list of connections of a tunnel by the given field (default: "createdAt") [$TUNNEL_INFO_SORT_BY]',
           args: {
             name: "value",
             description: "Field",
-            suggestions: [
-              "name",
-              "id",
-              "createdAt",
-              "deletedAt",
-              "numConnections",
-            ],
+            suggestions: ["id", "createdAt", "numConnections", "version"],
           },
         },
         {
           name: "--invert-sort",
           description:
-            "Inverts the sort order of the tunnel list. (default: false) [$TUNNEL_LIST_INVERT_SORT]",
+            "Inverts the sort order of the tunnel info. (default: false) [$TUNNEL_INFO_INVERT_SORT]",
+        },
+      ],
+      args: {
+        name: "TUNNEL",
+        description: "Tunnel",
+      },
+    },
+    {
+      name: "ingress",
+      description:
+        "Validate and test cloudflared tunnel's ingress configuration",
+      subcommands: [
+        {
+          name: "validate",
+          description:
+            "Validates the configuration file, ensuring your ingress rules are OK",
+          options: [
+            {
+              name: ["--json", "-j"],
+              description:
+                "Accepts a config in the form of json (as a command line argument) rather than read from a file [$TUNNEL_INGRESS_VALIDATE_JSON]",
+              args: { name: "value", description: "JSON config" },
+            },
+          ],
+        },
+        {
+          name: "rule",
+          description: "Check which ingress rule matches a given request URL",
+          args: { name: "URL" },
         },
       ],
     },
@@ -1555,139 +1175,17 @@ const tunnel: Fig.Subcommand = {
       description:
         "Cloudflared tunnel delete will delete tunnels with the given tunnel UUIDs or names. A tunnel cannot be deleted if it has active connections. To delete the tunnel unconditionally, use -f flag",
       options: [
-        {
-          name: "--config",
-          description:
-            'Specifies a config file in YAML format. (default: "/usr/local/etc/cloudflared/config.yml")',
-          args: {
-            name: "value",
-            description: "Config file",
-            generators: filepaths({ extensions: ["yml", "yaml"] }),
-          },
-        },
-        {
-          name: "--origincert",
-          description:
-            "Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]",
-          args: {
-            name: "value",
-            description: "Certificate path",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--autoupdate-freq",
-          description:
-            "Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)",
-          args: { name: "value", description: "Frequency" },
-        },
-        {
-          name: "--no-autoupdate",
-          description:
-            "Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]",
-        },
-        {
-          name: "--metrics",
-          description:
-            'Listen address for metrics reporting. (default: "localhost:") [$TUNNEL_METRICS]',
-          args: { name: "value", description: "Address" },
-        },
-        {
-          name: "--pidfile",
-          description:
-            "Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]",
-          args: { name: "value", description: "PID" },
-        },
-        {
-          name: "--loglevel",
-          description:
-            'Application logging level { value: debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs. (default: "info") [$TUNNEL_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              { name: "debug" },
-              { name: "info" },
-              { name: "warn" },
-              { name: "error" },
-              { name: "fatal" },
-            ],
-          },
-        },
-        {
-          name: ["--transport-loglevel", "--proto-loglevel"],
-          description:
-            'Transport logging level(previously called protocol logging level) { value: debug, info, warn, error, fatal} (default: "info") [$TUNNEL_PROTO_LOGLEVEL, $TUNNEL_TRANSPORT_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              {
-                name: "debug",
-              },
-              {
-                name: "info",
-              },
-              {
-                name: "warn",
-              },
-              {
-                name: "error",
-              },
-              {
-                name: "fatal",
-              },
-            ],
-          },
-        },
-        {
-          name: "--logfile",
-          description:
-            "Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]",
-          args: {
-            name: "value",
-            description: "File",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--log-directory",
-          description:
-            "Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]",
-          args: {
-            name: "value",
-            description: "Folder",
-            template: ["folders"],
-          },
-        },
-        {
-          name: "--trace-output",
-          description:
-            "Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]",
-          args: {
-            name: "value",
-            description: "Name",
-          },
-        },
-        {
-          name: ["--credentials-file", "--cred-file"],
-          description:
-            "Filepath at which to read/write the tunnel credentials [$TUNNEL_CRED_FILE]",
-          args: {
-            name: "value",
-            description: "Path",
-            template: ["filepaths"],
-          },
-        },
+        credentialsFileOption,
         {
           name: ["--force", "-f"],
           description:
-            "Cleans up any stale connections before the tunnel is deleted. cloudflared will not delete a tunnel with connections without this flag. (default: false) [$TUNNEL_RUN_FORCE_OVERWRITE]",
+            "Deletes a tunnel even if tunnel is connected and it has dependencies associated to it. (eg. IP routes). It is not possible to delete tunnels that have connections or non-deleted dependencies, without this flag. (default: false) [$TUNNEL_RUN_FORCE_OVERWRITE]",
         },
       ],
       args: {
         name: "TUNNEL",
         description: "Tunnel",
+        isVariadic: true,
       },
     },
     {
@@ -1696,584 +1194,88 @@ const tunnel: Fig.Subcommand = {
         "Delete connections for tunnels with the given UUIDs or names",
       options: [
         {
-          name: "--config",
+          name: ["--connector-id", "-c"],
           description:
-            'Specifies a config file in YAML format. (default: "/usr/local/etc/cloudflared/config.yml")',
-          args: {
-            name: "value",
-            description: "Config file",
-            generators: filepaths({ extensions: ["yml", "yaml"] }),
-          },
-        },
-        {
-          name: "--origincert",
-          description:
-            "Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]",
-          args: {
-            name: "value",
-            description: "Certificate path",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--autoupdate-freq",
-          description:
-            "Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)",
-          args: { name: "value", description: "Frequency" },
-        },
-        {
-          name: "--no-autoupdate",
-          description:
-            "Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]",
-        },
-        {
-          name: "--metrics",
-          description:
-            'Listen address for metrics reporting. (default: "localhost:") [$TUNNEL_METRICS]',
-          args: { name: "value", description: "Address" },
-        },
-        {
-          name: "--pidfile",
-          description:
-            "Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]",
-          args: { name: "value", description: "PID" },
-        },
-        {
-          name: "--loglevel",
-          description:
-            'Application logging level { value: debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs. (default: "info") [$TUNNEL_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              { name: "debug" },
-              { name: "info" },
-              { name: "warn" },
-              { name: "error" },
-              { name: "fatal" },
-            ],
-          },
-        },
-        {
-          name: ["--transport-loglevel", "--proto-loglevel"],
-          description:
-            'Transport logging level(previously called protocol logging level) { value: debug, info, warn, error, fatal} (default: "info") [$TUNNEL_PROTO_LOGLEVEL, $TUNNEL_TRANSPORT_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              {
-                name: "debug",
-              },
-              {
-                name: "info",
-              },
-              {
-                name: "warn",
-              },
-              {
-                name: "error",
-              },
-              {
-                name: "fatal",
-              },
-            ],
-          },
-        },
-        {
-          name: "--logfile",
-          description:
-            "Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]",
-          args: {
-            name: "value",
-            description: "File",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--log-directory",
-          description:
-            "Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]",
-          args: {
-            name: "value",
-            description: "Folder",
-            template: ["folders"],
-          },
-        },
-        {
-          name: "--trace-output",
-          description:
-            "Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]",
-          args: {
-            name: "value",
-            description: "Name",
-          },
-        },
-        {
-          name: ["--credentials-file", "--cred-file"],
-          description:
-            "Filepath at which to read/write the tunnel credentials [$TUNNEL_CRED_FILE]",
-          args: {
-            name: "value",
-            description: "Path",
-            template: ["filepaths"],
-          },
-        },
-        {
-          name: ["--force", "-f"],
-          description:
-            "Cleans up any stale connections before the tunnel is deleted. cloudflared will not delete a tunnel with connections without this flag. (default: false) [$TUNNEL_RUN_FORCE_OVERWRITE]",
+            "Constraints the cleanup to stop the connections of a single Connector (by its ID). You can find the various Connectors (and their IDs) currently connected to your tunnel via 'cloudflared tunnel info <name>'. [$TUNNEL_CLEANUP_CONNECTOR]",
+          args: { name: "value", description: "Connector ID" },
         },
       ],
       args: {
         name: "TUNNEL",
         description: "Tunnel",
+        isVariadic: true,
       },
     },
     {
       name: "token",
       description:
         "Fetch the credentials token for an existing tunnel (by name or UUID) that allows to run it",
-      options: [
-        {
-          name: "--config",
-          description:
-            'Specifies a config file in YAML format. (default: "/usr/local/etc/cloudflared/config.yml")',
-          args: {
-            name: "value",
-            description: "Config file",
-            generators: filepaths({ extensions: ["yml", "yaml"] }),
-          },
-        },
-        {
-          name: "--origincert",
-          description:
-            "Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]",
-          args: {
-            name: "value",
-            description: "Certificate path",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--autoupdate-freq",
-          description:
-            "Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)",
-          args: { name: "value", description: "Frequency" },
-        },
-        {
-          name: "--no-autoupdate",
-          description:
-            "Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]",
-        },
-        {
-          name: "--metrics",
-          description:
-            'Listen address for metrics reporting. (default: "localhost:") [$TUNNEL_METRICS]',
-          args: { name: "value", description: "Address" },
-        },
-        {
-          name: "--pidfile",
-          description:
-            "Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]",
-          args: { name: "value", description: "PID" },
-        },
-        {
-          name: "--loglevel",
-          description:
-            'Application logging level { value: debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs. (default: "info") [$TUNNEL_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              { name: "debug" },
-              { name: "info" },
-              { name: "warn" },
-              { name: "error" },
-              { name: "fatal" },
-            ],
-          },
-        },
-        {
-          name: ["--transport-loglevel", "--proto-loglevel"],
-          description:
-            'Transport logging level(previously called protocol logging level) { value: debug, info, warn, error, fatal} (default: "info") [$TUNNEL_PROTO_LOGLEVEL, $TUNNEL_TRANSPORT_LOGLEVEL]',
-          args: {
-            name: "value",
-            description: "Logging level",
-            suggestions: [
-              {
-                name: "debug",
-              },
-              {
-                name: "info",
-              },
-              {
-                name: "warn",
-              },
-              {
-                name: "error",
-              },
-              {
-                name: "fatal",
-              },
-            ],
-          },
-        },
-        {
-          name: "--logfile",
-          description:
-            "Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]",
-          args: {
-            name: "value",
-            description: "File",
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--log-directory",
-          description:
-            "Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]",
-          args: {
-            name: "value",
-            description: "Folder",
-            template: ["folders"],
-          },
-        },
-        {
-          name: "--trace-output",
-          description:
-            "Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]",
-          args: {
-            name: "value",
-            description: "Name",
-          },
-        },
-        {
-          name: ["--credentials-file", "--cred-file"],
-          description:
-            "Filepath at which to read/write the tunnel credentials [$TUNNEL_CRED_FILE]",
-          args: {
-            name: "value",
-            description: "Path",
-            template: ["filepaths"],
-          },
-        },
-        {
-          name: ["--force", "-f"],
-          description:
-            "Cleans up any stale connections before the tunnel is deleted. cloudflared will not delete a tunnel with connections without this flag. (default: false) [$TUNNEL_RUN_FORCE_OVERWRITE]",
-        },
-      ],
+      options: [credentialsFileOption],
       args: {
         name: "TUNNEL",
         description: "Tunnel",
       },
     },
     {
+      name: "diag",
+      description:
+        "Creates a diagnostic report from a local cloudflared instance",
+      options: [
+        {
+          name: "--metrics",
+          description:
+            "The metrics server address i.e.: 127.0.0.1:12345. If your instance is running in a Docker/Kubernetes environment you need to setup port forwarding for your application",
+          args: { name: "value", description: "Address" },
+        },
+        {
+          name: "--diag-container-id",
+          description: "Container ID or Name to collect logs from",
+          args: { name: "value", description: "Container" },
+        },
+        {
+          name: "--diag-pod-id",
+          description: "Kubernetes POD to collect logs from",
+          args: { name: "value", description: "Pod" },
+        },
+        {
+          name: "--no-diag-logs",
+          description: "Log collection will not be performed (default: false)",
+        },
+        {
+          name: "--no-diag-metrics",
+          description:
+            "Metric collection will not be performed (default: false)",
+        },
+        {
+          name: "--no-diag-system",
+          description:
+            "System information collection will not be performed (default: false)",
+        },
+        {
+          name: "--no-diag-runtime",
+          description:
+            "Runtime information collection will not be performed (default: false)",
+        },
+        {
+          name: "--no-diag-network",
+          description:
+            "Network diagnostics won't be performed (default: false)",
+        },
+      ],
+    },
+    proxyDns,
+    dbConnect,
+    {
       name: ["help", "h"],
       description: "Shows a list of commands or help for one command",
     },
   ],
   options: [
-    {
-      name: "--config",
-      description:
-        'Specifies a config file in YAML format. (default: "/usr/local/etc/cloudflared/config.yml")',
-      args: {
-        name: "value",
-        description: "Config file",
-        generators: filepaths({ extensions: ["yml", "yaml"] }),
-      },
-    },
-    {
-      name: "--origincert",
-      description:
-        "Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]",
-      args: {
-        name: "value",
-        description: "Certificate path",
-        template: "filepaths",
-      },
-    },
-    {
-      name: "--autoupdate-freq",
-      description:
-        "Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)",
-      args: { name: "value", description: "Frequency" },
-    },
-    {
-      name: "--no-autoupdate",
-      description:
-        "Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]",
-    },
-    {
-      name: "--metrics",
-      description:
-        'Listen address for metrics reporting. (default: "localhost:") [$TUNNEL_METRICS]',
-      args: { name: "value", description: "Address" },
-    },
-    {
-      name: "--pidfile",
-      description:
-        "Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]",
-      args: { name: "value", description: "PID" },
-    },
-    {
-      name: "--url",
-      description:
-        'Connect to the local webserver at URL. (default: "http://localhost:8080") [$TUNNEL_URL]',
-      args: { name: "URL", description: "Url" },
-    },
-    {
-      name: "--hello-world",
-      description:
-        "Run Hello World Server (default: false) [$TUNNEL_HELLO_WORLD]",
-    },
-    {
-      name: "--socks5",
-      description:
-        "Specify if this tunnel is running as a SOCK5 Server This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false) [$TUNNEL_SOCKS]",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--proxy-connect-timeout",
-      description:
-        "HTTP proxy timeout for establishing a new connection This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 30s)",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--proxy-tls-timeout",
-      description:
-        "HTTP proxy timeout for completing a TLS handshake This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 10s)",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--proxy-tcp-keepalive",
-      description:
-        "HTTP proxy TCP keepalive duration This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 30s)",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--proxy-no-happy-eyeballs",
-      description:
-        'HTTP proxy should disable "happy eyeballs" for IPv4/v6 fallback This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false)',
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--proxy-keepalive-connections",
-      description:
-        "HTTP proxy maximum keepalive connection pool size This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 100)",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--proxy-keepalive-timeout",
-      description:
-        "HTTP proxy timeout for closing an idle connection This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 1m30s)",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--proxy-connection-timeout",
-      description: "DEPRECATED. No longer has any effect. (default: 1m30s)",
-      deprecated: true,
-    },
-    {
-      name: "--proxy-expect-continue-timeout",
-      description: "DEPRECATED. No longer has any effect. (default: 1m30s)",
-      deprecated: true,
-    },
-    {
-      name: "--http-host-header",
-      description:
-        "Sets the HTTP Host header for the local webserver. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress [$TUNNEL_HTTP_HOST_HEADER]",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--origin-server-name",
-      description:
-        "Hostname on the origin server certificate. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress [$TUNNEL_ORIGIN_SERVER_NAME]",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--unix-socket",
-      description:
-        "Path to unix socket to use instead of --url [$TUNNEL_UNIX_SOCKET]",
-      args: {
-        name: "value",
-        description: "Unix socket",
-        template: "filepaths",
-      },
-    },
-    {
-      name: "--origin-ca-pool",
-      description:
-        "Path to the CA for the certificate of your origin. This option should be used only if your certificate is not signed by Cloudflare. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress [$TUNNEL_ORIGIN_CA_POOL]",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--no-tls-verify",
-      description:
-        "Disables TLS verification of the certificate presented by your origin. Will allow any certificate from the origin to be accepted. Note: The connection from your machine to Cloudflare's Edge is still encrypted. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false) [$NO_TLS_VERIFY]",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--no-chunked-encoding",
-      description:
-        "Disables chunked transfer encoding; useful if you are running a WSGI server. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false) [$TUNNEL_NO_CHUNKED_ENCODING]",
-      dependsOn: ["--url"],
-    },
-    {
-      name: "--bastion",
-      description: "Runs as jump host (default: false) [$TUNNEL_BASTION]",
-    },
-    {
-      name: "--proxy-address",
-      description:
-        'Listen address for the proxy. (default: "127.0.0.1") [$TUNNEL_PROXY_ADDRESS]',
-      args: {
-        name: "value",
-        description: "Address",
-      },
-    },
-    {
-      name: "--proxy-port",
-      description:
-        "Listen port for the proxy. (default: 0) [$TUNNEL_PROXY_PORT]",
-      args: {
-        name: "value",
-        description: "Address",
-      },
-    },
-    {
-      name: "--loglevel",
-      description:
-        'Application logging level { value: debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs. (default: "info") [$TUNNEL_LOGLEVEL]',
-      args: {
-        name: "value",
-        description: "Logging level",
-        suggestions: [
-          { name: "debug" },
-          { name: "info" },
-          { name: "warn" },
-          { name: "error" },
-          { name: "fatal" },
-        ],
-      },
-    },
-    {
-      name: ["--transport-loglevel", "--proto-loglevel"],
-      description:
-        'Transport logging level(previously called protocol logging level) { value: debug, info, warn, error, fatal} (default: "info") [$TUNNEL_PROTO_LOGLEVEL, $TUNNEL_TRANSPORT_LOGLEVEL]',
-      args: {
-        name: "value",
-        description: "Logging level",
-        suggestions: [
-          {
-            name: "debug",
-          },
-          {
-            name: "info",
-          },
-          {
-            name: "warn",
-          },
-          {
-            name: "error",
-          },
-          {
-            name: "fatal",
-          },
-        ],
-      },
-    },
-    {
-      name: "--logfile",
-      description:
-        "Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]",
-      args: {
-        name: "value",
-        description: "File",
-        template: "filepaths",
-      },
-    },
-    {
-      name: "--log-directory",
-      description:
-        "Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]",
-      args: {
-        name: "value",
-        description: "Folder",
-        template: ["folders"],
-      },
-    },
-    {
-      name: "--trace-output",
-      description:
-        "Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]",
-      args: {
-        name: "value",
-        description: "Name",
-      },
-    },
-    {
-      name: "--proxy-dns",
-      description:
-        "Run a DNS over HTTPS proxy server. (default: false) [$TUNNEL_DNS]",
-    },
-    {
-      name: "--proxy-dns-port",
-      description:
-        "Listen on given port for the DNS over HTTPS proxy server. (default: 53) [$TUNNEL_DNS_PORT]",
-      args: { name: "value", description: "Port" },
-    },
-    {
-      name: "--proxy-dns-address",
-      description:
-        'Listen address for the DNS over HTTPS proxy server. (default: "localhost") [$TUNNEL_DNS_ADDRESS]',
-      args: { name: "value", description: "Listen address" },
-    },
-    {
-      name: "--proxy-dns-upstream",
-      description:
-        'Upstream endpoint URL, you can specify multiple endpoints for redundancy. (default: "https://1.1.1.1/dns-query", "https://1.0.0.1/dns-query")  (accepts multiple inputs) [$TUNNEL_DNS_UPSTREAM]',
-      args: {
-        name: "value",
-        description: "Upstream endpoint",
-        isVariadic: true,
-      },
-    },
-    {
-      name: "--proxy-dns-max-upstream-conns",
-      description:
-        "Maximum concurrent connections to upstream. Setting to 0 means unlimited. (default: 5) [$TUNNEL_DNS_MAX_UPSTREAM_CONNS]",
-      args: { name: "URL", description: "Max concurrent connections" },
-    },
-    {
-      name: "--proxy-dns-bootstrap",
-      description:
-        'Bootstrap endpoint URL, you can specify multiple endpoints for redundancy. (default: "https://162.159.36.1/dns-query", "https://162.159.46.1/dns-query", "https://[2606:4700:4700::1111]/dns-query", "https://[2606:4700:4700::1001]/dns-query")  (accepts multiple inputs) [$TUNNEL_DNS_BOOTSTRAP]',
-      args: {
-        name: "value",
-        description: "Bootstrap endpoint",
-        isVariadic: true,
-      },
-    },
-    {
-      name: ["--credentials-file", "--cred-file"],
-      description:
-        "Filepath at which to read/write the tunnel credentials [$TUNNEL_CRED_FILE]",
-      args: {
-        name: "value",
-        description: "Path",
-        template: ["filepaths"],
-      },
-    },
-    {
-      name: "--region",
-      description:
-        "Cloudflare Edge region to connect to. Omit or set to empty to connect to the global region. [$TUNNEL_REGION]",
-      args: { name: "value", description: "Region" },
-    },
+    ...cloudflaredOptions,
+    ...proxyOptions,
+    ...loggingOptions,
+    ...proxyDnsOptions,
+    ...edgeOptions,
     {
       name: "--hostname",
       description:
@@ -2295,12 +1297,12 @@ const tunnel: Fig.Subcommand = {
     {
       name: "--tag",
       description:
-        "Custom tags used to identify this tunnel, in format KEY=VALUE. Multiple tags may be specified  (accepts multiple inputs) [$TUNNEL_TAG]",
+        "Custom tags used to identify this tunnel via added HTTP request headers to the origin, in format KEY=VALUE. Multiple tags may be specified [$TUNNEL_TAG]",
       args: {
-        name: "KEY",
+        name: "KEY=VALUE",
         description: "Tag",
-        isVariadic: true,
       },
+      isRepeatable: true,
     },
     {
       name: "--retries",
@@ -2312,7 +1314,7 @@ const tunnel: Fig.Subcommand = {
       name: "--grace-period",
       description:
         "When cloudflared receives SIGINT/SIGTERM it will stop accepting new requests, wait for in-progress requests to terminate, then shutdown. Waiting for in-progress requests will timeout after this grace period, or when a second SIGTERM/SIGINT is received. (default: 30s) [$TUNNEL_GRACE_PERIOD]",
-      args: { name: "value", description: "Time (s)" },
+      args: { name: "value", description: "Duration" },
     },
     {
       name: "--compression-quality",
@@ -2324,6 +1326,7 @@ const tunnel: Fig.Subcommand = {
         suggestions: [
           { name: "0", description: "Off" },
           { name: "1", description: "Low" },
+          { name: "2", description: "Medium" },
           { name: "3", description: "High" },
         ],
       },
@@ -2335,14 +1338,18 @@ const tunnel: Fig.Subcommand = {
       args: { name: "value", description: "Name" },
     },
     {
+      name: "--allowed-mail",
+      description:
+        "Email addresses or wildcard domains allowed to access a protected Quick Tunnel. May be repeated or comma-separated",
+      args: { name: "value", description: "Email or domain" },
+      isRepeatable: true,
+    },
+    protocolOption,
+    {
       name: "--ui",
       description:
-        "Launch tunnel UI. Tunnel logs are scrollable via 'j', 'k', or arrow keys. (default: false)",
-    },
-    {
-      name: ["--overwrite-dns", "-f"],
-      description:
-        "Overwrites existing DNS records with this hostname (default: false) [$TUNNEL_FORCE_PROVISIONING_DNS]",
+        "(deprecated) Launch tunnel UI. Tunnel logs are scrollable via 'j', 'k', or arrow keys. (default: false)",
+      deprecated: true,
     },
   ],
   args: {
@@ -2351,35 +1358,116 @@ const tunnel: Fig.Subcommand = {
   },
 };
 
+const tail: Fig.Subcommand = {
+  name: "tail",
+  description: "Stream logs from a remote cloudflared",
+  subcommands: [
+    {
+      name: "token",
+      description: "Get management access jwt for a tunnel",
+      hidden: true,
+      args: { name: "TUNNEL_ID" },
+    },
+  ],
+  options: [
+    {
+      name: "--connector-id",
+      description:
+        "Access a specific cloudflared instance by connector id (for when a tunnel has multiple cloudflared's) [$TUNNEL_MANAGEMENT_CONNECTOR]",
+      args: { name: "value", description: "Connector ID" },
+    },
+    {
+      name: "--event",
+      description:
+        "Filter by specific Events (cloudflared, http, tcp, udp) otherwise, defaults to send all events [$TUNNEL_MANAGEMENT_FILTER_EVENTS]",
+      args: {
+        name: "value",
+        suggestions: ["cloudflared", "http", "tcp", "udp"],
+      },
+      isRepeatable: true,
+    },
+    {
+      name: "--level",
+      description:
+        'Filter by specific log levels (debug, info, warn, error). Filters by debug log level by default (default: "debug") [$TUNNEL_MANAGEMENT_FILTER_LEVEL]',
+      args: {
+        name: "value",
+        suggestions: ["debug", "info", "warn", "error"],
+      },
+    },
+    {
+      name: "--sample",
+      description:
+        "Sample log events by percentage (0.0 .. 1.0). No sampling by default (default: 1) [$TUNNEL_MANAGEMENT_FILTER_SAMPLE]",
+      args: { name: "value", description: "Ratio" },
+    },
+    {
+      name: "--token",
+      description:
+        "Access token for a specific tunnel [$TUNNEL_MANAGEMENT_TOKEN]",
+      args: { name: "value", description: "Token" },
+    },
+    tunnelLogLevelOption,
+    originCertOption,
+    logOutputOption,
+  ],
+  args: {
+    name: "TUNNEL-ID",
+    isOptional: true,
+  },
+};
+
+const management: Fig.Subcommand = {
+  name: "management",
+  description: "Monitor cloudflared tunnels via management API",
+  hidden: true,
+  subcommands: [
+    {
+      name: "token",
+      description: "Get management access jwt for a specific resource",
+      options: [
+        {
+          name: "--resource",
+          description: "Resource type for token permissions",
+          args: {
+            name: "value",
+            suggestions: ["logs", "admin", "host_details"],
+          },
+          isRequired: true,
+        },
+        originCertOption,
+        tunnelLogLevelOption,
+        logOutputOption,
+      ],
+      args: { name: "TUNNEL_ID" },
+    },
+  ],
+};
+
 const completionSpec: Fig.Spec = {
   name: "cloudflared",
   description:
     "Cloudflared connects your machine or user identity to Cloudflare's global network",
-  subcommands: [update, version, proxyDns, service, help, access, tunnel],
+  subcommands: [
+    update,
+    version,
+    proxyDns,
+    service,
+    help,
+    access,
+    tunnel,
+    { ...tunnelLogin, hidden: true },
+    dbConnect,
+    tail,
+    management,
+  ],
   options: [
+    ...edgeOptions,
+    logOutputOption,
+    ...proxyDnsOptions,
     {
-      name: ["--credentials-file", "--cred-file"],
-      description:
-        "Filepath at which to read/write the tunnel credentials [$TUNNEL_CRED_FILE]",
-      args: {
-        name: "value",
-        description: "Credentials path",
-        template: "filepaths",
-      },
-    },
-    {
-      name: "--region",
-      description:
-        "Cloudflare Edge region to connect to. Omit or set to empty to connect to the global region. [$TUNNEL_REGION]",
-      args: {
-        name: "value",
-        description: "Region",
-      },
-    },
-    {
-      name: ["--overwrite-dns", "-f"],
-      description:
-        "Overwrites existing DNS records with this hostname (default: false) [$TUNNEL_FORCE_PROVISIONING_DNS]",
+      name: ["--version", "-v", "-V"],
+      description: "Print the version",
     },
     {
       name: ["--help", "-h"],
@@ -2387,7 +1475,5 @@ const completionSpec: Fig.Spec = {
       isPersistent: true,
     },
   ],
-  // Only uncomment if cloudflared takes an argument
-  // args: {}
 };
 export default completionSpec;

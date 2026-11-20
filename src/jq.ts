@@ -1,7 +1,18 @@
+// jq v1.8.2 (latest release tag jq-1.8.2 / Homebrew, 2026-11-19). Source: jq-1.8.2 release tarball (src/main.c usage() and option parser, docs/content/manual/manual.yml "Invoking jq")
+
 const sharedOptions: Fig.Option[] = [
   {
-    name: "--version",
+    name: ["--version", "-V"],
     description: "Output the jq version and exit with zero",
+  },
+  {
+    name: "--build-configuration",
+    description:
+      "Output the build configuration of jq and exit with zero (format is unspecified and may change)",
+  },
+  {
+    name: ["--help", "-h"],
+    description: "Output the jq help and exit with zero",
   },
   {
     name: "--seq",
@@ -12,6 +23,11 @@ const sharedOptions: Fig.Option[] = [
     name: "--stream",
     description:
       "Parse the input in streaming fashion, outputting arrays of path and leaf values",
+  },
+  {
+    name: "--stream-errors",
+    description:
+      "Like --stream, but invalid JSON inputs yield array values where the first element is the error and the second is a path",
   },
   {
     name: ["--slurp", "-s"],
@@ -42,7 +58,8 @@ const sharedOptions: Fig.Option[] = [
     description: "Use the given number of spaces for indentation",
     args: {
       name: "n",
-      description: "No more than 7",
+      description: "Number of spaces (no more than 7)",
+      suggestions: ["0", "1", "2", "3", "4", "5", "6", "7"],
     },
   },
   {
@@ -57,7 +74,7 @@ const sharedOptions: Fig.Option[] = [
   {
     name: ["--ascii-output", "-a"],
     description:
-      "Jq usually outputs non-ASCII Unicode codepoints as UTF-8, even if the input specified them as escape sequences",
+      "Output non-ASCII Unicode codepoints as escape sequences, producing pure ASCII output",
   },
   {
     name: "--unbuffered",
@@ -66,7 +83,7 @@ const sharedOptions: Fig.Option[] = [
   {
     name: ["--sort-keys", "-S"],
     description:
-      "Output the fields of each object with the keys in sorted orde",
+      "Output the fields of each object with the keys in sorted order",
   },
   {
     name: ["--raw-output", "-r"],
@@ -74,20 +91,28 @@ const sharedOptions: Fig.Option[] = [
       "If the filter's result is a string then it will be written directly to standard output rather than being formatted as a JSON string with quotes",
   },
   {
+    name: "--raw-output0",
+    description:
+      "Like -r but jq will print NUL instead of newline after each output",
+  },
+  {
     name: ["--join-output", "-j"],
     description: "Like -r but jq won't print a newline after each output",
   },
   {
     name: ["-f", "--from-file"],
-    description: "Read filter from the file rather than from a command line",
+    description:
+      "Read the filter from a file rather than from a command line, like awk's -f option",
     args: {
       name: "filename",
       template: "filepaths",
     },
   },
   {
-    name: "-L",
-    description: "Prepend directory to the search list for modules",
+    name: ["-L", "--library-path"],
+    description:
+      "Prepend directory to the search list for modules (disables the builtin search list)",
+    isRepeatable: true,
     args: {
       name: "directory",
       template: "folders",
@@ -96,12 +121,18 @@ const sharedOptions: Fig.Option[] = [
   {
     name: ["-e", "--exit-status"],
     description:
-      "Sets the exit status of jq to 0 if the last output values was neither false nor null, 1 if the last output value was either false or null, or 4 if no valid result was ever produced",
+      "Sets the exit status of jq to 0 if the last output value was neither false nor null, 1 if the last output value was either false or null, or 4 if no valid result was ever produced",
+  },
+  {
+    name: ["-b", "--binary"],
+    description:
+      "Open input and output streams in binary mode (only has an effect on Windows)",
   },
   {
     name: "--arg",
     description:
       "This option passes a value to the jq program as a predefined variable",
+    isRepeatable: true,
     args: [
       {
         name: "name",
@@ -115,6 +146,7 @@ const sharedOptions: Fig.Option[] = [
     name: "--argjson",
     description:
       "This option passes a JSON-encoded value to the jq program as a predefined variable",
+    isRepeatable: true,
     args: [
       {
         name: "name",
@@ -128,6 +160,7 @@ const sharedOptions: Fig.Option[] = [
     name: "--slurpfile",
     description:
       "This option reads all the JSON texts in the named file and binds an array of the parsed JSON values to the given global variable",
+    isRepeatable: true,
     args: [
       {
         name: "variable name",
@@ -142,6 +175,7 @@ const sharedOptions: Fig.Option[] = [
     name: "--rawfile",
     description:
       "This option reads in the named file and binds its contents to the given global variable",
+    isRepeatable: true,
     args: [
       {
         name: "variable name",
@@ -171,6 +205,17 @@ const sharedOptions: Fig.Option[] = [
       isOptional: true,
       template: "filepaths",
     },
+  },
+  {
+    name: "--debug-dump-disasm",
+    description: "Dump the disassembly of the compiled program (debugging aid)",
+    hidden: true,
+  },
+  {
+    name: "--debug-trace",
+    description:
+      "Trace the execution of the program (debugging aid, --debug-trace=all traces more)",
+    hidden: true,
   },
 ];
 

@@ -1,3 +1,5 @@
+// Taskwarrior v3.5.0 (GitHub release 2026-08-16, checked 2026-11-20). Source: src/commands/Cmd*.cpp,
+// src/main.cpp, the default reports/aliases in src/Context.cpp and doc/man/task.1.in at tag v3.5.0
 const RECURRING_STRINGS = [
   "daily",
   "day",
@@ -293,6 +295,28 @@ const modifications: Fig.Generator = {
   },
 };
 
+// script helper commands (task(1) "HELPER SUBCOMMANDS"), meant for add-ons and shell completion
+const helperCommand = (
+  name: string,
+  description: string,
+  args?: Fig.Arg | Fig.Arg[],
+  deprecated?: boolean
+): Fig.Subcommand => ({
+  name,
+  description,
+  hidden: true,
+  ...(deprecated && { deprecated }),
+  ...(args && { args }),
+});
+
+const helperFilters: Fig.Arg = {
+  name: "filters",
+  description: "Task search criteria",
+  isOptional: true,
+  isVariadic: true,
+  generators: filters,
+};
+
 const completionSpec: Fig.Spec = {
   name: "taskwarrior",
   description: "A command line todo manager",
@@ -365,7 +389,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "burndown.weekly",
+      name: ["burndown.weekly", "burndown"],
       description:
         "Shows a graphical burndown chart, by week.  Note that 'burndown' is an alias to the 'burndown.weekly' report. Is affected by the context",
       args: {
@@ -400,7 +424,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "month",
-          description: "The year number",
+          description: "The month number",
           isOptional: true,
           isVariadic: true,
         },
@@ -481,7 +505,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "ghistory.monthly",
+      name: ["ghistory.monthly", "ghistory"],
       description: "Shows a graphical report of task status by month",
       args: {
         name: "filters",
@@ -529,7 +553,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "history.monthly",
+      name: ["history.monthly", "history"],
       description: "Shows a report of task history by month",
       args: {
         name: "filters",
@@ -605,6 +629,17 @@ const completionSpec: Fig.Spec = {
       name: "long",
       description:
         "Provides the most detailed listing of tasks matching the filter",
+      args: {
+        name: "filters",
+        description: "Task search criteria",
+        isOptional: true,
+        isVariadic: true,
+        generators: filters,
+      },
+    },
+    {
+      name: "list",
+      description: "Provides a listing of tasks with most details",
       args: {
         name: "filters",
         description: "Task search criteria",
@@ -995,8 +1030,147 @@ const completionSpec: Fig.Spec = {
       name: "version",
       description: "Shows the Taskwarrior version number",
     },
+    {
+      name: "calc",
+      description: "Evaluates an expression with the Taskwarrior calculator",
+      args: { name: "expression", isVariadic: true },
+    },
+    {
+      name: "colors",
+      description: "Shows all colors, a sample, or a legend",
+      args: {
+        name: "sample",
+        isOptional: true,
+        isVariadic: true,
+        suggestions: ["sample", "legend"],
+      },
+    },
+    {
+      name: "columns",
+      description: "Shows all supported columns and formatting styles",
+      args: { name: "substring", isOptional: true },
+    },
+    {
+      name: "config",
+      description: "Changes settings in the task configuration",
+      args: [
+        { name: "name", isOptional: true },
+        { name: "value", isOptional: true },
+      ],
+    },
+    {
+      name: "execute",
+      description: "Executes external commands and scripts",
+      args: { name: "command", isCommand: true },
+    },
+    {
+      name: "import",
+      description: "Imports JSON files",
+      args: {
+        name: "file",
+        isOptional: true,
+        isVariadic: true,
+        template: "filepaths",
+      },
+    },
+    {
+      name: "import-v2",
+      description: "Imports Taskwarrior v2.x files",
+    },
+    {
+      name: "show",
+      description: "Shows all configuration variables or a subset",
+      args: { name: "substring", isOptional: true, suggestions: ["all"] },
+    },
+    {
+      name: ["synchronize", "sync"],
+      description: "Synchronizes data with the configured sync server",
+    },
+    helperCommand(
+      "_aliases",
+      "Generates a list of all aliases, for autocompletion purposes"
+    ),
+    helperCommand("_columns", "Displays only a list of supported columns"),
+    helperCommand(
+      "_commands",
+      "Generates a list of all commands, for autocompletion purposes"
+    ),
+    helperCommand(
+      "_config",
+      "Lists all supported configuration variables, for completion purposes"
+    ),
+    helperCommand(
+      "_context",
+      "Lists all supported contexts, for completion purposes"
+    ),
+    helperCommand(
+      "_get",
+      "Accesses and displays DOM references, e.g. 2.due.year or rc.<name>",
+      { name: "DOM", isVariadic: true }
+    ),
+    helperCommand(
+      "_ids",
+      "Shows only the IDs of matching tasks as a list. Deprecated in favor of _unique",
+      helperFilters,
+      true
+    ),
+    helperCommand(
+      "_projects",
+      "Shows only a list of all project names used. Deprecated in favor of _unique",
+      helperFilters,
+      true
+    ),
+    helperCommand(
+      "_show",
+      "Shows all configuration settings in a machine-readable format"
+    ),
+    helperCommand(
+      "_tags",
+      "Shows only a list of all tags used. Deprecated in favor of _unique",
+      helperFilters,
+      true
+    ),
+    helperCommand("_udas", "Shows only the defined UDA names, as a list"),
+    helperCommand("_unique", "Reports a unique set of attribute values", [
+      { name: "attribute", description: "Attribute to list, e.g. project" },
+      helperFilters,
+    ]),
+    helperCommand(
+      "_urgency",
+      "Displays the urgency measure of a task",
+      helperFilters
+    ),
+    helperCommand(
+      "_uuids",
+      "Shows only the UUIDs of matching tasks, among all tasks, as a list. Deprecated in favor of _unique",
+      helperFilters,
+      true
+    ),
+    helperCommand("_version", "Shows only the Taskwarrior version number"),
+    helperCommand(
+      "_zshattributes",
+      "Generates a list of all attributes, for zsh autocompletion purposes"
+    ),
+    helperCommand(
+      "_zshcommands",
+      "Generates a list of all commands, for zsh autocompletion purposes"
+    ),
+    helperCommand(
+      "_zshids",
+      "Shows the IDs and descriptions of matching tasks",
+      helperFilters
+    ),
+    helperCommand(
+      "_zshuuids",
+      "Shows the UUIDs and descriptions of matching tasks",
+      helperFilters
+    ),
   ],
   options: [
+    {
+      name: "--help",
+      description: "Shows the long usage text, same as the help command",
+    },
     {
       name: "--version",
       description:

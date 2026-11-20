@@ -1,4 +1,11 @@
+// npx bundled with npm v12.2.3 (npm registry latest and git tag v12.2.3, 2026-11-20). Source: npm/cli@v12.2.3 bin/npx-cli.js, lib/commands/exec.js, workspaces/config definitions, docs/commands/npm-exec.md and npx.md (static read, not run)
 import autocannon from "./autocannon";
+import { npmSearchGenerator } from "./npm";
+
+const scriptShellArg: Fig.Arg = {
+  name: "shell",
+  suggestions: ["bash", "fish", "zsh"],
+};
 
 export const npxSuggestions: Fig.Suggestion[] = [
   {
@@ -203,30 +210,93 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["--package", "-p"],
-      description: "Package to be installed",
+      description: "The package or packages to install",
+      isRepeatable: true,
       args: {
-        name: "package",
+        name: "package-spec",
+        generators: npmSearchGenerator,
+        debounce: true,
       },
+    },
+    {
+      name: ["--call", "-c"],
+      args: {
+        name: "script",
+      },
+      description: "Execute string as if inside `npm run-script`",
+    },
+    {
+      name: ["--workspace", "-w"],
+      description:
+        "Run the command in the context of the given workspace of the current project",
+      isRepeatable: true,
+      args: {
+        name: "workspace-name",
+      },
+    },
+    {
+      name: ["--workspaces", "-ws"],
+      description:
+        "Run the command in the context of all configured workspaces",
+    },
+    {
+      name: ["--include-workspace-root", "-iwr"],
+      description:
+        "Include the workspace root when workspaces are enabled for a command",
+    },
+    {
+      name: "--allow-scripts",
+      description:
+        "Comma-separated list of packages whose install scripts are allowed to run",
+      isRepeatable: true,
+      args: {
+        name: "package-list",
+      },
+    },
+    {
+      name: "--strict-allow-scripts",
+      description:
+        "Fail instead of warning when a dependency has install scripts not covered by allowScripts",
+    },
+    {
+      name: "--dangerously-allow-all-scripts",
+      description:
+        "Run every dependency install script, bypassing the allowScripts policy",
+    },
+    {
+      name: ["--yes", "-y"],
+      description:
+        "Automatically answer yes to the prompt to install missing packages",
+      exclusiveOn: ["--no", "--no-install"],
+    },
+    {
+      name: "--no",
+      description: "Refuse to install missing packages",
+      exclusiveOn: ["--yes", "-y"],
+    },
+    {
+      name: "--no-install",
+      description: "Skip installation if a package is missing",
+      deprecated: { description: "Use --no" },
+    },
+    {
+      name: "--script-shell",
+      description: "Shell to execute the command with",
+      args: scriptShellArg,
+    },
+    {
+      name: "--shell",
+      description: "Shell to execute the command with",
+      deprecated: { description: "Use --script-shell" },
+      args: scriptShellArg,
     },
     {
       name: "--cache",
       args: {
         name: "path",
-        template: "filepaths",
+        template: "folders",
       },
       description: "Location of the npm cache",
-    },
-    {
-      name: "--always-spawn",
-      description: "Always spawn a child process to execute the command",
-    },
-    {
-      name: "-y",
-      description: "Execute npx command without prompting for confirmation",
-    },
-    {
-      description: "Skip installation if a package is missing",
-      name: "--no-install",
     },
     {
       args: {
@@ -237,71 +307,8 @@ const completionSpec: Fig.Spec = {
       name: "--userconfig",
     },
     {
-      name: ["--call", "-c"],
-      args: {
-        name: "script",
-      },
-      description: "Execute string as if inside `npm run-script`",
-    },
-    {
-      name: ["--shell", "-s"],
-      description: "Shell to execute the command with, if any",
-      args: {
-        name: "shell",
-        suggestions: [
-          {
-            name: "bash",
-          },
-          {
-            name: "fish",
-          },
-          {
-            name: "zsh",
-          },
-        ],
-      },
-    },
-    {
-      args: {
-        name: "shell-fallback",
-        suggestions: [
-          {
-            name: "bash",
-          },
-          {
-            name: "fish",
-          },
-          {
-            name: "zsh",
-          },
-        ],
-      },
-      name: "--shell-auto-fallback",
-      description:
-        'Generate shell code to use npx as the "command not found" fallback',
-    },
-    {
-      name: "--ignore-existing",
-      description:
-        "Ignores existing binaries in $PATH, or in the localproject. This forces npx to do a temporary install and use the latest version",
-    },
-    {
       name: ["--quiet", "-q"],
-      description:
-        "Suppress output from npx itself. Subcommands will not be affected",
-    },
-    {
-      name: "--npm",
-      args: {
-        name: "path to binary",
-        template: "filepaths",
-      },
-      description: "Npm binary to use for internal operations",
-    },
-    {
-      args: {},
-      description: "Extra node argument when calling a node binary",
-      name: ["--node-arg", "-n"],
+      description: "Only show warnings and errors (alias for --loglevel warn)",
     },
     {
       description: "Show version number",

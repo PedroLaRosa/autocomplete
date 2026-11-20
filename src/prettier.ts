@@ -1,3 +1,4 @@
+// Prettier v3.10.1 (npm latest dist-tag and git tags, 2026-11-20). Source: prettier@3.10.1 package contents (internal/legacy-cli.mjs CLI option table and usage generator, index.mjs core and language option definitions), `prettier --help` output of the repo's installed 3.9.10 (same option set), docs/cli.md at tag 3.10.1 and the 3.6.0 release notes for --experimental-cli. Not run: the 3.10.1 binary itself. Experimental-CLI-only flags (--no-cache, --config-path, --no-ignore) are not modelled
 const completionSpec: Fig.Spec = {
   name: "prettier",
   description: "Run Prettier from the command line",
@@ -5,21 +6,20 @@ const completionSpec: Fig.Spec = {
   options: [
     {
       name: ["-c", "--check"],
-      description: "Check if your files are formatted",
-      args: {
-        name: "file, dir, or glob",
-        template: ["filepaths", "folders"],
-        isVariadic: true,
-      },
+      description:
+        "Check if the given files are formatted, print a summary and paths to unformatted files",
+      exclusiveOn: ["-l", "--list-different"],
     },
     {
       name: ["-l", "--list-different"],
       description:
         "Print the names of files that are different from Prettier's formatting",
+      exclusiveOn: ["-c", "--check"],
     },
     {
       name: ["-w", "--write"],
       description: "Edit files in-place",
+      exclusiveOn: ["--debug-check"],
       isDangerous: true,
     },
     {
@@ -30,6 +30,11 @@ const completionSpec: Fig.Spec = {
         default: "always",
         suggestions: ["always", "avoid"],
       },
+    },
+    {
+      name: "--bracket-same-line",
+      description:
+        "Put > of opening tags on the last line instead of on a new line",
     },
     {
       name: "--no-bracket-spacing",
@@ -55,6 +60,26 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--experimental-operator-position",
+      description:
+        "Where to print operators when binary expressions wrap lines",
+      args: {
+        name: "position",
+        default: "end",
+        suggestions: ["start", "end"],
+      },
+    },
+    {
+      name: "--experimental-ternaries",
+      description:
+        "Use curious ternaries, with the question mark after the condition",
+    },
+    {
+      name: "--no-experimental-ternaries",
+      description:
+        "Default behavior of ternaries; keep question marks on the same line as the consequent",
+    },
+    {
       name: "--html-whitespace-sensitivity",
       description: "How to handle whitespaces in HTML",
       args: {
@@ -66,10 +91,20 @@ const completionSpec: Fig.Spec = {
     {
       name: "--jsx-bracket-same-line",
       description: "Put > on the last line instead of at a new line",
+      deprecated: { description: "Use --bracket-same-line" },
     },
     {
       name: "--jsx-single-quote",
       description: "Use single quotes in JSX",
+    },
+    {
+      name: "--object-wrap",
+      description: "How to wrap object literals",
+      args: {
+        name: "mode",
+        default: "preserve",
+        suggestions: ["preserve", "collapse"],
+      },
     },
     {
       name: "--parser",
@@ -82,6 +117,7 @@ const completionSpec: Fig.Spec = {
           "babel-flow",
           "babel-ts",
           "typescript",
+          "acorn",
           "espree",
           "meriyah",
           "css",
@@ -89,15 +125,18 @@ const completionSpec: Fig.Spec = {
           "scss",
           "json",
           "json5",
+          "jsonc",
           "json-stringify",
           "graphql",
           "markdown",
           "mdx",
           "vue",
           "yaml",
+          "glimmer",
           "html",
           "angular",
           "lwc",
+          "mjml",
         ],
       },
     },
@@ -132,6 +171,10 @@ const completionSpec: Fig.Spec = {
         "Do not print semicolons, except at the beginning of lines which may need them",
     },
     {
+      name: "--single-attribute-per-line",
+      description: "Enforce single attribute per line in HTML, Vue and JSX",
+    },
+    {
       name: "--single-quote",
       description: "Use single quotes instead of double quotes",
     },
@@ -148,8 +191,8 @@ const completionSpec: Fig.Spec = {
       description: "Print trailing commas wherever possible when multi-line",
       args: {
         name: "type",
-        default: "es5",
-        suggestions: ["es5", "none", "all"],
+        default: "all",
+        suggestions: ["all", "es5", "none"],
       },
     },
     {
@@ -193,7 +236,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--find-config-path",
       description:
-        "Finds a path to the configuration file for the given input file",
+        "Find and print the path to a configuration file for the given input file",
       args: {
         name: "file",
         template: "filepaths",
@@ -202,28 +245,19 @@ const completionSpec: Fig.Spec = {
     {
       name: "--ignore-path",
       description: "Path to a file with patterns describing files to ignore",
+      isRepeatable: true,
       args: {
         name: "path",
         template: "filepaths",
-        default: ".prettierignore",
       },
     },
     {
       name: "--plugin",
       description: "Add a plugin",
+      isRepeatable: true,
       args: {
         name: "path",
         template: "folders",
-      },
-    },
-    {
-      name: "--plugin-search-dir",
-      description:
-        "Custom directory that contains prettier plugins in node_modules subdirectory",
-      args: {
-        name: "path",
-        template: "folders",
-        isVariadic: true,
       },
     },
     {
@@ -234,7 +268,6 @@ const completionSpec: Fig.Spec = {
       name: "--cursor-offset",
       description:
         "Print (to stderr) where a cursor at the given position would move to after formatting",
-      exclusiveOn: ["--range-start", "--range-end"],
       args: {
         name: "int",
         default: "-1",
@@ -243,7 +276,6 @@ const completionSpec: Fig.Spec = {
     {
       name: "--range-end",
       description: "Format code ending at a given character offset (exclusive)",
-      exclusiveOn: ["--cursor-offset"],
       args: {
         name: "int",
         default: "Infinity",
@@ -286,7 +318,7 @@ const completionSpec: Fig.Spec = {
       description: "Insert @format pragma into file's first docblock comment",
     },
     {
-      name: "--loglevel",
+      name: "--log-level",
       description: "What level of logs to report",
       args: {
         name: "level",
@@ -300,8 +332,14 @@ const completionSpec: Fig.Spec = {
         "Require either '@prettier' or '@format' to be present in the file's first docblock comment in order for it to be formatted",
     },
     {
+      name: "--check-ignore-pragma",
+      description:
+        "Check whether the file's first docblock comment contains '@noprettier' or '@noformat' to determine if it should be formatted",
+    },
+    {
       name: "--stdin-filepath",
       description: "Path to the file to pretend that stdin comes from",
+      exclusiveOn: ["--cache"],
       args: {
         name: "path",
         template: "filepaths",
@@ -319,10 +357,38 @@ const completionSpec: Fig.Spec = {
       name: "--debug-check",
       description:
         "This will cause Prettier to print an error message if it detects that code correctness might have changed",
+      exclusiveOn: ["-w", "--write"],
     },
     {
       name: "--no-error-on-unmatched-pattern",
       description: "Prevent errors when pattern is unmatched",
+    },
+    {
+      name: "--cache",
+      description: "Only format changed files",
+      exclusiveOn: ["--stdin-filepath"],
+    },
+    {
+      name: "--experimental-cli",
+      description:
+        "Use the experimental high-performance CLI (also enabled by PRETTIER_EXPERIMENTAL_CLI)",
+    },
+    {
+      name: "--cache-location",
+      description: "Path to the cache file",
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--cache-strategy",
+      description: "Strategy for the cache to use for detecting changed files",
+      dependsOn: ["--cache"],
+      args: {
+        name: "strategy",
+        suggestions: ["metadata", "content"],
+      },
     },
   ],
   args: {

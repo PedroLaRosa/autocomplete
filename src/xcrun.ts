@@ -1,3 +1,7 @@
+// xcrun version 70 (macOS 15 Command Line Tools, 2026-11-19). Source: `xcrun --help`,
+// `man xcrun`, and `--help` of notarytool and stapler.
+const pathArg: Fig.Arg = { name: "path", template: "filepaths" };
+
 const completionSpec: Fig.Spec = {
   name: "xcrun",
   description:
@@ -59,6 +63,64 @@ const completionSpec: Fig.Spec = {
       name: "simctl",
       loadSpec: "simctl",
     },
+    {
+      name: "notarytool",
+      description: "Manage submissions to the Apple notary service",
+      subcommands: [
+        {
+          name: "store-credentials",
+          description: "Save Notary service credentials to the Keychain",
+        },
+        {
+          name: "submit",
+          description: "Submit an archive to the Notary service",
+        },
+        {
+          name: "info",
+          description: "Get status information for a submission",
+        },
+        {
+          name: "wait",
+          description: "Wait for completion of a previous submission",
+        },
+        {
+          name: "history",
+          description: "Get a list of previous submissions for your team",
+        },
+        {
+          name: "log",
+          description:
+            "Retrieve notarization log for a single completed submission",
+        },
+      ],
+    },
+    {
+      name: "stapler",
+      description: "Attach and validate notarization tickets",
+      subcommands: [
+        {
+          name: "staple",
+          description: "Retrieve a ticket and attach it to the file at path",
+          options: [{ name: "-q" }, { name: "-v" }],
+          args: pathArg,
+        },
+        {
+          name: "validate",
+          description: "Validate an existing stapled ticket",
+          options: [{ name: "-q" }, { name: "-v" }],
+          args: pathArg,
+        },
+      ],
+    },
+    {
+      name: "devicectl",
+      description: "Interact with connected Apple devices (requires Xcode)",
+    },
+    {
+      name: "xctrace",
+      description:
+        "Record, import and export Instruments traces (requires Xcode)",
+    },
   ],
   options: [
     {
@@ -76,7 +138,22 @@ const completionSpec: Fig.Spec = {
     {
       name: "--sdk",
       description: "Find the tool for the given SDK name",
-      args: { name: "sdk name" },
+      // ponytail: static list; `xcodebuild -showsdks` needs full Xcode and is slow
+      args: {
+        name: "sdk name",
+        suggestions: [
+          "macosx",
+          "iphoneos",
+          "iphonesimulator",
+          "appletvos",
+          "appletvsimulator",
+          "watchos",
+          "watchsimulator",
+          "xros",
+          "xrsimulator",
+          "driverkit",
+        ],
+      },
     },
     {
       name: "--toolchain",
@@ -85,15 +162,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-l", "--log"],
-      description: "Show command path to be executed (and --run)",
+      description: "Show commands to be executed (with --run)",
     },
     {
       name: ["-f", "--find"],
-      description: "Find and print the tool path",
+      description: "Only find and print the tool path",
     },
     {
-      name: "--run",
-      description: "(Default) find and execute the tool",
+      name: ["-r", "--run"],
+      description: "Find and execute the tool (the default behavior)",
     },
     {
       name: ["-n", "--no-cache"],

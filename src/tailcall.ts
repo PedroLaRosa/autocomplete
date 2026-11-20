@@ -1,3 +1,8 @@
+// Tailcall v1.6.14 (npm @tailcallhq/tailcall latest, 2026-11-19).
+// Source: static read of the clap strings embedded in the linux-x64 binary of @tailcallhq/core-linux-x64-gnu 1.6.14 (not executed);
+// the upstream repo tailcallhq/tailcall is no longer cloneable here. Subcommands, `start --verify-ssl`, `check --n-plus-one-queries`
+// and the existence of `check --schema` are verified; the help text and the `check --format` flag could not be verified and were left as they were.
+
 const completionSpec: Fig.Spec = {
   name: "tailcall",
   description:
@@ -8,6 +13,8 @@ const completionSpec: Fig.Spec = {
       description: "Validate a composition spec",
       args: {
         name: "FILE_PATHS",
+        description:
+          "Path for the configuration files separated by spaces if more than one",
         template: "filepaths",
         isVariadic: true,
       },
@@ -33,26 +40,41 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "start",
-      description: "Launch the GraphQL Server for the specific configuration",
+      description: "Starts the GraphQL server on the configured port",
       args: {
-        name: "PATHS",
+        name: "FILE_PATHS",
+        description:
+          "Path for the configuration files or http(s) link to config files separated by spaces if more than one",
         template: ["filepaths", "folders"],
         isVariadic: true,
       },
+      options: [
+        {
+          name: "--verify-ssl",
+          description:
+            "Controls SSL/TLS certificate verification for remote config files. Set to false to skip certificate verification (not recommended for production)",
+          args: {
+            name: "VERIFY_SSL",
+            suggestions: ["true", "false"],
+          },
+        },
+      ],
     },
     {
       name: "init",
-      description: "Bootstrap a new TailCall project",
+      description: "Initialize a new project",
       args: {
-        name: "FILE_PATH",
+        name: "FOLDER_PATH",
         template: "folders",
       },
     },
     {
       name: "gen",
-      description: "Generate GraphQL configurations from various sources",
+      description:
+        "Generates a Tailcall Configuration from one or more source files",
       args: {
-        name: "CONFIG_FILE",
+        name: "FILE_PATH",
+        description: "Path of the configuration file",
         template: "filepaths",
       },
     },

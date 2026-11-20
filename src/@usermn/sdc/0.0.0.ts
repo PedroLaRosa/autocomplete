@@ -52,5 +52,7 @@ versions["0.0.7"] = {
   ],
 };
 
+versions["0.0.8"] = {};
+
 export { versions };
 export default completion;

@@ -1,3 +1,8 @@
+// softwareupdate (macOS built-in tool, no standalone version; man page bundled with Xcode 27.3 beta 2, 2026-11-19).
+// Source: softwareupdate(8) from the keith/xcode-man-pages mirror (commit 6ddd0b2) plus the existing spec; NOT a live run on macOS.
+// Added --os-only, --safari-only, --stdinpass, --user, --launch-installer, --schedule; --download now accepts labels and -a/-r;
+// --full-installer-version moved under --fetch-full-installer. Options that are not in the man page (--dump-state,
+// --evaluate-products, --history, --no-scan, --product-types, --products, --verbose) were kept from the previous spec, unverified.
 const updatesGenerator: Fig.Generator = {
   script: ["softwareupdate", "--list"],
   postProcess: (out) => {
@@ -20,6 +25,35 @@ const updatesGenerator: Fig.Generator = {
   },
 };
 
+const updateLabelArg: Fig.Arg = {
+  name: "label",
+  isVariadic: true,
+  isOptional: true,
+  generators: updatesGenerator,
+};
+
+const updateSelectionOptions: Fig.Option[] = [
+  {
+    name: ["-a", "--all"],
+    description:
+      "All updates applicable to your system, including non-recommended ones",
+    exclusiveOn: ["-r", "--recommended"],
+  },
+  {
+    name: ["-r", "--recommended"],
+    description: "Only updates recommended for your system",
+    exclusiveOn: ["-a", "--all"],
+  },
+  {
+    name: "--os-only",
+    description: "Only macOS updates",
+  },
+  {
+    name: "--safari-only",
+    description: "Only Safari updates",
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "softwareupdate",
   description:
@@ -32,32 +66,32 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-d", "--download"],
-      description: "Download Only",
+      description:
+        "Download the specified updates without installing them (install them later with --install or System Settings)",
+      args: updateLabelArg,
+      options: updateSelectionOptions,
     },
     {
       name: ["-i", "--install"],
-      description: "Install",
-      args: {
-        name: "label",
-        isVariadic: true,
-        isOptional: true,
-        generators: updatesGenerator,
-      },
+      description: "Download and install the specified updates",
+      args: updateLabelArg,
       options: [
-        {
-          name: ["-a", "--all"],
-          description: "All appropriate updates",
-          exclusiveOn: ["-r", "--recommended"],
-        },
+        ...updateSelectionOptions,
         {
           name: ["-R", "--restart"],
           description:
-            "Automatically restart (or shut down) if required to complete installation",
+            "Automatically restart if required to complete installation (use --force to always perform a forced reboot)",
         },
         {
-          name: ["-r", "--recommended"],
-          description: "Only recommended updates",
-          exclusiveOn: ["-a", "--all"],
+          name: "--stdinpass",
+          description:
+            "Collect a password from stdin without interaction (Apple silicon only)",
+        },
+        {
+          name: "--user",
+          description:
+            "An owner user to authorize installation (Apple silicon only)",
+          args: { name: "user" },
         },
       ],
     },
@@ -68,19 +102,31 @@ const completionSpec: Fig.Spec = {
     {
       name: "--fetch-full-installer",
       description: "Install the latest recommended macOS Installer",
-    },
-    {
-      name: "--full-installer-version",
-      description: "The version of macOS to install",
-      args: { name: "version" },
+      options: [
+        {
+          name: "--full-installer-version",
+          description: "The version of macOS to install",
+          args: { name: "version" },
+        },
+        {
+          name: "--launch-installer",
+          description:
+            "Launch the installer automatically after it has been downloaded",
+        },
+      ],
     },
     {
       name: "--install-rosetta",
-      description: "Install Rosetta 2",
+      description: "Install Rosetta (Apple silicon Macs only)",
     },
     {
       name: "--background",
-      description: "Trigger a background scan and update operation",
+      description: "Trigger a background check with a forced scan",
+    },
+    {
+      name: "--schedule",
+      description:
+        "Return the per-machine automatic (background) check preference",
     },
     /** Other Tools: */
     {
@@ -129,14 +175,14 @@ const completionSpec: Fig.Spec = {
     {
       name: "--force",
       description:
-        'Force an operation to complete.  Use with --background to trigger a background scan regardless of "Automatically check" pref',
+        'Force an operation to complete. Use with --restart to always perform a forced reboot, or with --background to trigger a background scan regardless of "Automatically check" pref',
       isDangerous: true,
       isPersistent: true,
     },
     {
       name: "--agree-to-license",
       description:
-        "Agree to the software license agreement without user interaction",
+        "Agree to the software license agreement without user interaction (e.g. with --install-rosetta)",
       isPersistent: true,
     },
     {

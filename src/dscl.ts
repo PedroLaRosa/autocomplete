@@ -1,3 +1,8 @@
+// dscl (macOS Directory Service CLI, no standalone version; dscl(1) man page shipped with Xcode 27.2 (27B52), 2026-11-20).
+// Source: dscl(1) from keith/xcode-man-pages at Xcode 27.2 (page unchanged since Xcode 16.0 RC 1), cross-checked against
+// apple-oss-distributions/DSTools tag DSTools-162 (dscl/dscl.m) for option parsing and command aliases. Man pages and OSS
+// source only, not a live run on macOS. Not covered on purpose: the interactive-only commands (cd, pushd/pd, popd, auth/su,
+// authonly, quit/q), the "." alias of read (it would collide with the "." datasource), and undocumented switches (-H, -t, -appleversion).
 // https://stackoverflow.com/a/70994696/6183068
 const satisfies =
   <T>() =>
@@ -19,7 +24,8 @@ const dsclOptions: Fig.Option[] = [
   },
   {
     name: "-P",
-    description: "Authenticate with password",
+    description:
+      "Authentication password (insecure on the command line, use -p to be prompted)",
     args: {
       name: "password",
       description: "Password to authenticate with",
@@ -31,6 +37,7 @@ const dsclOptions: Fig.Option[] = [
     args: {
       name: "file",
       description: "File path",
+      template: "folders",
     },
   },
   {
@@ -68,7 +75,7 @@ const generateDsclPath: Fig.Generator = {
     // can't guarantee that dscl is the first token. If it's not found,
     // this is -1, so searching for `datasource` will start from index 0
     const dsclIndex = tokens.indexOf("dscl");
-    let datasource: string;
+    let datasource: string | undefined;
     for (let i = dsclIndex + 1; i < tokens.length; i++) {
       const token = tokens[i];
       // skip if the current token is a flag
@@ -83,11 +90,14 @@ const generateDsclPath: Fig.Generator = {
       datasource = token;
       break;
     }
+    if (datasource === undefined) {
+      return [];
+    }
     const lastSlashIndex = lastToken.lastIndexOf("/");
     const path = lastToken.slice(0, lastSlashIndex < 0 ? 0 : lastSlashIndex);
     const { stdout: lines } = await executeShellCommand({
       command: "dscl",
-      args: [datasource, "-list", path ?? "/"],
+      args: [datasource, "-list", path || "/"],
     });
     return lines
       .trim()
@@ -103,7 +113,7 @@ const generateDsclPath: Fig.Generator = {
 const dsclArgs = satisfies<Record<string, Fig.Arg>>()({
   path: {
     name: "path",
-    description: "Path to the record",
+    description: "Path of the record or directory (e.g. /Users/alice)",
     generators: generateDsclPath,
   },
   key: {
@@ -117,11 +127,12 @@ const dsclArgs = satisfies<Record<string, Fig.Arg>>()({
   },
   plistPath: {
     name: "plist path",
-    description: "Path to the plist file",
+    description:
+      "Colon-separated path of keys inside the plist value (e.g. mcx_application_data:loginwindow:test)",
   },
   valueIndex: {
     name: "value index",
-    description: "Value index of the key",
+    description: "Index of the value in the key's list of values",
   },
   val: {
     name: "val",
@@ -129,7 +140,7 @@ const dsclArgs = satisfies<Record<string, Fig.Arg>>()({
   },
   vals: {
     name: "vals",
-    description: "Value of the key",
+    description: "Values of the key",
     isVariadic: true,
   },
   oldVal: {
@@ -154,7 +165,7 @@ const dsclSubcommands: Fig.Subcommand = {
   name: "dscl",
   subcommands: [
     {
-      name: ["read", "-read"],
+      name: ["read", "-read", "cat", "-cat"],
       description: "Prints a directory",
       args: [
         arg("path", { isOptional: true }),
@@ -291,7 +302,17 @@ const dsclSubcommands: Fig.Subcommand = {
       name: ["passwd", "-passwd"],
       description: "Changes the password of a user",
       args: [
-        dsclArgs.path,
+        {
+          ...dsclArgs.path,
+          name: "user path",
+          description: "Full path of the user record (e.g. /Users/alice)",
+        },
+        {
+          name: "password",
+          description:
+            "New password, or the old password when a new password follows",
+          isOptional: true,
+        },
         {
           name: "new password",
           description: "New password of the user",
@@ -309,7 +330,16 @@ const completionSpec: Fig.Spec = {
   options: dsclOptions,
   args: {
     name: "datasource",
-    suggestions: [".", "..", "localhost", "localonly"],
+    description: "Directory node or host to operate on",
+    suggestions: [
+      { name: ".", description: "Local domain" },
+      { name: "..", description: "Parent of the local domain" },
+      { name: "localhost", description: "Local Directory Service daemon" },
+      {
+        name: "localonly",
+        description: "Separate daemon with only the Local plug-in",
+      },
+    ],
     isOptional: true,
     loadSpec: dsclSubcommands,
   },

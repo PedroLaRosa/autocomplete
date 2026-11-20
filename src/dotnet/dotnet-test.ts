@@ -1,169 +1,38 @@
 import { filepaths } from "@tabsmith/autocomplete-generators";
+import {
+  artifactsPathOption,
+  configurationOption,
+  disableBuildServersOption,
+  frameworkOption,
+  interactiveOption,
+  noLogoOption,
+  noRestoreOption,
+  targetPlatformOptions,
+  verbosityOption,
+} from "./shared";
 
-const projectGenerator = filepaths({ extensions: ["csproj", "sln", "dll"] });
-
+// `dotnet test` runs either VSTest (default) or Microsoft.Testing.Platform
+// (opted in through the "test" section of global.json). Options that exist
+// in only one of the modes are noted in their description.
 const completionSpec: Fig.Spec = {
   name: "test",
   description:
-    "The dotnet test command is used to execute unit tests in a given solution. The dotnet test command builds the solution and runs a test host application for each test project in the solution. The test host executes tests in the given project using a test framework, for example: MSTest, NUnit, or xUnit, and reports the success or failure of each test. If all tests are successful, the test runner returns 0 as an exit code; otherwise if any test fails, it returns 1",
+    ".NET Test Command. Runs VSTest by default; to use Microsoft.Testing.Platform, opt in through global.json",
   args: {
-    name: "PROJECT | SOLUTION | DIRECTORY | DLL",
-    generators: projectGenerator,
+    name: "project | solution | directory | dll | exe",
+    description:
+      "The project, solution, directory, or test assembly to run tests for. If not specified, the current directory is used",
+    isOptional: true,
+    generators: filepaths({
+      extensions: ["csproj", "fsproj", "vbproj", "sln", "slnx", "dll", "exe"],
+    }),
   },
   options: [
     {
-      name: ["-a", "--test-adapter-path"],
-      description:
-        "Path to a directory to be searched for additional test adapters. Only .dll files with suffix .TestAdapter.dll are inspected. If not specified, the directory of the test .dll is searched",
-      args: {
-        name: "path",
-        template: "folders",
-      },
-    },
-    {
-      name: "--arch",
-      description:
-        "Specifies the target architecture. This is a shorthand syntax for setting the Runtime Identifier (RID), where the provided value is combined with the default RID. For example, on a win-x64 machine, specifying --arch x86 sets the RID to win-x86. If you use this option, don't use the -r|--runtime option. Available since .NET 6 Preview 7",
-      args: {
-        name: "architecture",
-      },
-    },
-    {
-      name: "--blame",
-      description:
-        "Runs the tests in blame mode. This option is helpful in isolating problematic tests that cause the test host to crash. When a crash is detected, it creates a sequence file in TestResults/<Guid>/<Guid>_Sequence.xml that captures the order of tests that were run before the crash",
-    },
-    {
-      name: "--blame-crash",
-      description:
-        "Runs the tests in blame mode and collects a crash dump when the test host exits unexpectedly. This option depends on the version of .NET used, the type of error, and the operating system",
-    },
-    {
-      name: "--blame-crash-dump-type",
-      description:
-        "The type of crash dump to be collected. Implies --blame-crash",
-      args: {
-        name: "type",
-      },
-    },
-    {
-      name: "--blame-crash-collect-always",
-      description:
-        "Collects a crash dump on expected as well as unexpected test host exit",
-    },
-    {
-      name: "--blame-hang",
-      description:
-        "Run the tests in blame mode and collects a hang dump when a test exceeds the given timeout",
-    },
-    {
-      name: "--blame-hang-timeout",
-      description:
-        "Per-test timeout, after which a hang dump is triggered and the test host process and all of its child processes are dumped and terminated",
-      args: {
-        name: "timeout",
-      },
-    },
-    {
-      name: ["-c", "--configuration"],
-      description:
-        "Defines the build configuration. The default for most projects is Debug, but you can override the build configuration settings in your project",
-      args: {
-        name: "configuration",
-        suggestions: ["Debug", "Release"],
-      },
-    },
-    {
-      name: "--collect",
-      description: "Enables data collector for the test run",
-      args: {
-        name: "name",
-      },
-    },
-    {
-      name: ["-d", "--diag"],
-      description:
-        "Enables diagnostic mode for the test platform and writes diagnostic messages to the specified file and to files next to it. The process that is logging the messages determines which files are created, such as *.host_<date>.txt for test host log, and *.datacollector_<date>.txt for data collector log",
-      args: {
-        name: "file",
-        template: "filepaths",
-      },
-    },
-    {
-      name: ["-f", "--framework"],
-      description:
-        "Forces the use of dotnet or .NET Framework test host for the test binaries. This option only determines which type of host to use. The actual framework version to be used is determined by the runtimeconfig.json of the test project. When not specified, the TargetFramework assembly attribute is used to determine the type of host. When that attribute is stripped from the .dll, the .NET Framework host is used",
-      args: {
-        name: "framework",
-      },
-    },
-    {
-      name: "--filter",
-      description:
-        "Filters out tests in the current project using the given expression. For more information, see the Filter option details section. For more information and examples on how to use selective unit test filtering, see Running selective unit tests",
-      args: {
-        name: "expression",
-      },
-    },
-    {
-      name: "--interactive",
-      description:
-        "Allows the command to stop and wait for user input or action. For example, to complete authentication. Available since .NET Core 3.0 SDK",
-    },
-    {
-      name: ["-l", "--logger"],
-      description:
-        'Specifies a logger for test results. Unlike MSBuild, dotnet test doesn\'t accept abbreviations: instead of -l "console;v=d" use -l "console;verbosity=detailed". Specify the parameter multiple times to enable multiple loggers',
-    },
-    {
-      name: "--no-build",
-      description:
-        "Doesn't build the test project before running it. It also implicitly sets the - --no-restore flag",
-    },
-    {
-      name: "--nologo",
-      description:
-        "Run tests without displaying the Microsoft TestPlatform banner. Available since .NET Core 3.0 SDK",
-    },
-    {
-      name: ["-o", "--output"],
-      description:
-        "Directory in which to find the binaries to run. If not specified, the default path is ./bin/<configuration>/<framework>/. For projects with multiple target frameworks (via the TargetFrameworks property), you also need to define --framework when you specify this option. dotnet test always runs tests from the output directory. You can use AppDomain.BaseDirectory to consume test assets in the output directory",
-      args: {
-        name: "directory",
-        template: "folders",
-      },
-    },
-    {
-      name: "--os",
-      description:
-        "Specifies the target operating system (OS). This is a shorthand syntax for setting the Runtime Identifier (RID), where the provided value is combined with the default RID. For example, on a win-x64 machine, specifying --os os sets the RID to os-x64. If you use this option, don't use the -r|--runtime option. Available since .NET 6 Preview 7",
-      args: {
-        name: "os",
-      },
-    },
-    {
-      name: ["-r", "--results-directory"],
-      description:
-        "The directory where the test results are going to be placed. If the specified directory doesn't exist, it's created. The default is TestResults in the directory that contains the project file",
-      args: {
-        name: "directory",
-        template: "folders",
-      },
-    },
-    {
-      name: "--runtime",
-      description: "The target runtime to test for",
-      args: {
-        name: "runtime",
-      },
-    },
-    {
       name: ["-s", "--settings"],
-      description:
-        "The .runsettings file to use for running the tests. The TargetPlatform element (x86|x64) has no effect for dotnet test. To run tests that target x86, install the x86 version of .NET Core. The bitness of the dotnet.exe that is on the path is what will be used for running tests",
+      description: "The settings file to use when running tests (VSTest only)",
       args: {
-        name: "file",
+        name: "settings-file",
         generators: filepaths({ extensions: ["runsettings"] }),
       },
     },
@@ -172,18 +41,255 @@ const completionSpec: Fig.Spec = {
       description: "List the discovered tests instead of running the tests",
     },
     {
-      name: ["-v", "--verbosity"],
+      name: ["-e", "--environment"],
       description:
-        "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. The default is minimal. For more information, see LoggerVerbosity",
+        "Sets the value of an environment variable. Creates the variable if it does not exist, overrides if it does. In VSTest mode this forces the tests to be run in an isolated process. This argument can be specified multiple times to provide multiple variables",
+      isRepeatable: true,
       args: {
-        name: "verbosity",
-        suggestions: ["quiet", "minimal", "normal", "detailed", "diagnostic"],
+        name: "name=value",
       },
     },
     {
+      name: "--filter",
+      description:
+        "Run tests that match the given expression, e.g. --filter 'FullyQualifiedName~Namespace.Class' (VSTest only). See https://aka.ms/vstest-filtering for more information on filtering support",
+      args: {
+        name: "expression",
+      },
+    },
+    {
+      name: "--test-adapter-path",
+      description:
+        "The path to the custom adapters to use for the test run (VSTest only)",
+      isRepeatable: true,
+      args: {
+        name: "adapter-path",
+        template: "folders",
+      },
+    },
+    {
+      name: ["-l", "--logger"],
+      description:
+        "The logger to use for test results, e.g. --logger trx (VSTest only). See https://aka.ms/vstest-report for more information on logger arguments",
+      isRepeatable: true,
+      args: {
+        name: "logger",
+      },
+    },
+    {
+      name: ["-o", "--output"],
+      description:
+        "The output directory to place built artifacts in (VSTest). With Microsoft.Testing.Platform, the verbosity of test output (Normal or Detailed)",
+      args: {
+        name: "output",
+        template: "folders",
+        suggestions: ["Normal", "Detailed"],
+      },
+    },
+    artifactsPathOption,
+    {
+      name: ["-d", "--diag"],
+      description: "Enable verbose logging to the specified file (VSTest only)",
+      args: {
+        name: "log-file",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--no-build",
+      description:
+        "Do not build the project before testing. Implies --no-restore",
+    },
+    {
+      name: "--results-directory",
+      description:
+        "The directory where the test results will be placed. The specified directory will be created if it does not exist",
+      args: {
+        name: "results-dir",
+        template: "folders",
+      },
+    },
+    {
+      name: "--collect",
+      description:
+        "The friendly name of the data collector to use for the test run (VSTest only). More info here: https://aka.ms/vstest-collect",
+      isRepeatable: true,
+      args: {
+        name: "data-collector-name",
+      },
+    },
+    {
+      name: "--blame",
+      description:
+        "Runs the tests in blame mode, which helps to isolate problematic tests that cause the test host to crash or hang (VSTest only)",
+    },
+    {
+      name: "--blame-crash",
+      description:
+        "Runs the tests in blame mode and collects a crash dump when the test host exits unexpectedly (VSTest only). Implies --blame",
+    },
+    {
+      name: "--blame-crash-dump-type",
+      description:
+        "The type of crash dump to be collected (VSTest only). Implies --blame-crash",
+      args: {
+        name: "dump-type",
+        suggestions: ["full", "mini"],
+      },
+    },
+    {
+      name: "--blame-crash-collect-always",
+      description:
+        "Enables collecting crash dump on expected as well as unexpected testhost exit (VSTest only)",
+    },
+    {
+      name: "--blame-hang",
+      description:
+        "Run the tests in blame mode and enables collecting hang dump when test exceeds the given timeout (VSTest only)",
+    },
+    {
+      name: "--blame-hang-dump-type",
+      description:
+        "The type of hang dump to be collected (VSTest only). When 'none' is used the test host is terminated on timeout, but no dump is collected. Implies --blame-hang",
+      args: {
+        name: "dump-type",
+        suggestions: ["full", "mini", "none"],
+      },
+    },
+    {
+      name: "--blame-hang-timeout",
+      description:
+        "Per-test timeout, after which hang dump is triggered and the testhost process is terminated (VSTest only). Default is 1h. For example: 1.5h, 90m, 5400s, 5400000ms",
+      args: {
+        name: "timespan",
+      },
+    },
+    noLogoOption,
+    configurationOption(
+      "The configuration to use for running tests. The default for most projects is 'Debug'"
+    ),
+    frameworkOption(
+      "The target framework to run tests for. The target framework must also be specified in the project file"
+    ),
+    noRestoreOption,
+    interactiveOption,
+    verbosityOption(),
+    ...targetPlatformOptions("The target runtime to test for"),
+    {
+      name: ["-p", "--property"],
+      description: "Set or override MSBuild properties (NAME=VALUE)",
+      isRepeatable: true,
+      args: {
+        name: "name=value",
+      },
+    },
+    disableBuildServersOption,
+    {
+      name: "--target",
+      description:
+        "Build these targets in this project. Use a semicolon or a comma to separate multiple targets, or specify each target separately",
+      hidden: true,
+      isRepeatable: true,
+      args: {
+        name: "target",
+      },
+    },
+    {
+      name: "--project",
+      description:
+        "Microsoft.Testing.Platform only. Defines the path of the project or solution file to test. Use path to the project file, or path to the directory containing the project file. If not specified, it defaults to the current directory",
+      args: {
+        name: "project-or-solution-path",
+        template: ["folders", "filepaths"],
+      },
+    },
+    {
+      name: "--solution",
+      description:
+        "Microsoft.Testing.Platform only. Defines the path of the solution file to test. Use path to the solution file, or path to the directory containing the solution file. If not specified, it defaults to the current directory",
+      args: {
+        name: "solution-path",
+        template: ["folders", "filepaths"],
+      },
+    },
+    {
+      name: "--test-modules",
+      description:
+        "Microsoft.Testing.Platform only. Run tests for the specified test modules",
+      args: {
+        name: "expression",
+      },
+    },
+    {
+      name: "--root-directory",
+      description:
+        "Microsoft.Testing.Platform only. The test modules have the specified root directory",
+      args: {
+        name: "root-path",
+        template: "folders",
+      },
+    },
+    {
+      name: "--config-file",
+      description:
+        "Microsoft.Testing.Platform only. Specifies a testconfig.json file",
+      args: {
+        name: "config-file",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--diagnostic-output-directory",
+      description:
+        "Microsoft.Testing.Platform only. Output directory of the diagnostic logging. If not specified the file will be generated inside the default 'TestResults' directory",
+      args: {
+        name: "diagnostic-dir",
+        template: "folders",
+      },
+    },
+    {
+      name: "--max-parallel-test-modules",
+      description:
+        "Microsoft.Testing.Platform only. The max number of test modules that can run in parallel",
+      args: {
+        name: "number",
+      },
+    },
+    {
+      name: "--minimum-expected-tests",
+      description:
+        "Microsoft.Testing.Platform only. Specifies the minimum number of tests that are expected to run",
+      args: {
+        name: "number",
+      },
+    },
+    {
+      name: "--no-ansi",
+      description: "Microsoft.Testing.Platform only. Disable ANSI output",
+    },
+    {
+      name: "--no-progress",
+      description:
+        "Microsoft.Testing.Platform only. Disable progress reporting",
+    },
+    {
+      name: "--no-launch-profile",
+      description:
+        "Microsoft.Testing.Platform only. Do not attempt to use launchSettings.json or [app].run.json to configure the application",
+    },
+    {
+      name: "--no-launch-profile-arguments",
+      description:
+        "Microsoft.Testing.Platform only. Do not use arguments specified in launch profile to run the application",
+    },
+    {
       name: "--",
+      description:
+        "Delimits arguments to dotnet test from RunSettings arguments (VSTest) or arguments for the test application (Microsoft.Testing.Platform)",
       args: {
         name: "args",
+        isVariadic: true,
+        isOptional: true,
       },
     },
   ],

@@ -1,3 +1,4 @@
+// CocoaPods v1.17.0 (latest stable on rubygems.org and GitHub tag, released 2026-07-06; verified 2026-11-20). Source: lib/cocoapods/command/*.rb at tag 1.17.0 plus the bundled gems read statically: cocoapods-trunk 1.6.0, cocoapods-plugins 1.0.0, cocoapods-search 1.0.1, cocoapods-try 1.2.0, cocoapods-deintegrate 1.0.5 and CLAide 1.1.0 (global options)
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const POD_ICON =
@@ -6,6 +7,22 @@ const podSpecAndFoldersGenerator = filepaths({
   extensions: ["podspec"],
   editFileSuggestions: { icon: POD_ICON },
 });
+
+const platformSuggestions: Fig.Suggestion[] = [
+  { name: "ios", icon: "📱" },
+  { name: "macos", icon: "💻" },
+  { name: "tvos", icon: "📺" },
+  { name: "watchos", icon: "⌚" },
+  { name: "visionos", icon: "🥽" },
+  { name: "ios,macos", icon: "💻" },
+];
+
+const validationDirOption: Fig.Option = {
+  name: "--validation-dir",
+  description:
+    "The directory to use for validation. If none is specified a temporary directory will be used",
+  args: { name: "DIR", template: "folders" },
+};
 
 const completionSpec: Fig.Spec = {
   name: "pod",
@@ -105,7 +122,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      description: "Setup the CocoaPods environment",
+      description: "Set up the CocoaPods environment",
       name: "setup",
       options: [
         {
@@ -177,6 +194,13 @@ const completionSpec: Fig.Spec = {
               description: "Pick from all versions of the given podspec",
             },
             {
+              name: "--version",
+              description: "Print a specific version of the given podspec",
+              args: {
+                name: "VERSION",
+              },
+            },
+            {
               name: "--allow-root",
               description: "Allows CocoaPods to run as root",
               icon: "🔐",
@@ -198,6 +222,13 @@ const completionSpec: Fig.Spec = {
             {
               name: "--show-all",
               description: "Print all versions of the given podspec",
+            },
+            {
+              name: "--version",
+              description: "Print a specific version of the given podspec",
+              args: {
+                name: "VERSION",
+              },
             },
             {
               name: "--allow-root",
@@ -278,20 +309,7 @@ const completionSpec: Fig.Spec = {
                 "Lint against specific platforms (defaults to all platforms supported by the podspec). Multiple platforms must be comma-delimited",
               args: {
                 name: "platform",
-                suggestions: [
-                  {
-                    name: "ios",
-                    icon: "📱",
-                  },
-                  {
-                    name: "macos",
-                    icon: "💻",
-                  },
-                  {
-                    name: "ios,macos",
-                    icon: "💻",
-                  },
-                ],
+                suggestions: platformSuggestions,
               },
             },
             {
@@ -336,6 +354,7 @@ const completionSpec: Fig.Spec = {
                 name: "CONFIGURATION",
               },
             },
+            validationDirOption,
             {
               name: "--allow-root",
               description: "Allows CocoaPods to run as root",
@@ -345,6 +364,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "NAME.podspec|DIRECTORY|http://PATH/NAME.podspec",
             isOptional: true,
+            isVariadic: true,
             generators: podSpecAndFoldersGenerator,
           },
         },
@@ -401,6 +421,10 @@ const completionSpec: Fig.Spec = {
       name: "outdated",
       options: [
         {
+          name: "--ignore-prerelease",
+          description: "Don't consider prerelease versions to be updates",
+        },
+        {
           name: "--project-directory",
           description: "The path to the root of the project directory",
           args: {
@@ -431,6 +455,10 @@ const completionSpec: Fig.Spec = {
       ],
       args: {
         name: "XCODEPROJ",
+        description:
+          "Xcode project to generate targets from (defaults to the only .xcodeproj in the current directory)",
+        isOptional: true,
+        template: "folders",
       },
     },
     {
@@ -558,6 +586,17 @@ const completionSpec: Fig.Spec = {
         },
       ],
       subcommands: [
+        {
+          description: "List all known plugins",
+          name: "list",
+          options: [
+            {
+              name: "--allow-root",
+              description: "Allows CocoaPods to run as root",
+              icon: "🔐",
+            },
+          ],
+        },
         {
           description: "Search for known plugins",
           name: "search",
@@ -722,20 +761,7 @@ const completionSpec: Fig.Spec = {
                 "Lint against specific platforms (defaults to all platforms supported by the podspec). Multiple platforms must be comma-delimited",
               args: {
                 name: "platform",
-                suggestions: [
-                  {
-                    name: "ios",
-                    icon: "📱",
-                  },
-                  {
-                    name: "macos",
-                    icon: "💻",
-                  },
-                  {
-                    name: "ios,macos",
-                    icon: "💻",
-                  },
-                ],
+                suggestions: platformSuggestions,
               },
             },
             {
@@ -798,6 +824,7 @@ const completionSpec: Fig.Spec = {
                 name: "CONFIGURATION",
               },
             },
+            validationDirOption,
             {
               name: "--allow-root",
               description: "Allows CocoaPods to run as root",
@@ -807,6 +834,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "PODSPEC_PATHS",
             isOptional: true,
+            isVariadic: true,
             generators: podSpecAndFoldersGenerator,
           },
         },
@@ -852,6 +880,11 @@ const completionSpec: Fig.Spec = {
           name: "--tvos",
           icon: "📺",
           description: "Restricts the search to Pods supported on tvOS",
+        },
+        {
+          name: "--visionos",
+          icon: "🥽",
+          description: "Restricts the search to Pods supported on visionOS",
         },
         {
           name: "--no-pager",
@@ -915,6 +948,10 @@ const completionSpec: Fig.Spec = {
                 "Does not perform the step of pushing REPO to its remote",
             },
             {
+              name: "--no-lint",
+              description: "Does not perform the Lint step",
+            },
+            {
               name: "--no-private",
               description:
                 "Lint includes checks that apply only to public repos",
@@ -955,6 +992,11 @@ const completionSpec: Fig.Spec = {
               description:
                 "Disallow pushing that would overwrite an existing spec",
             },
+            {
+              name: "--update-sources",
+              description: "Make sure sources are up-to-date before a push",
+            },
+            validationDirOption,
             {
               name: "--allow-root",
               description: "Allows CocoaPods to run as root",
@@ -1033,7 +1075,7 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
-          description: "Validates all specs in a repo list",
+          description: "Validates all specs in a repo",
           name: "lint",
           options: [
             {
@@ -1050,6 +1092,21 @@ const completionSpec: Fig.Spec = {
             name: "NAME|DIRECTORY",
             isOptional: true,
           },
+        },
+        {
+          description: "List repos",
+          name: "list",
+          options: [
+            {
+              name: "--count-only",
+              description: "Show the total number of repos",
+            },
+            {
+              name: "--allow-root",
+              description: "Allows CocoaPods to run as root",
+              icon: "🔐",
+            },
+          ],
         },
         {
           description: "Update a spec repo",
@@ -1330,6 +1387,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "POD_NAMES",
         isOptional: true,
+        isVariadic: true,
       },
     },
     {
@@ -1361,22 +1419,35 @@ const completionSpec: Fig.Spec = {
   ],
   options: [
     {
+      name: "--version",
+      description: "Show the version of the tool",
+    },
+    {
+      name: "--allow-root",
+      description: "Allows CocoaPods to run as root",
+      icon: "🔐",
+    },
+    {
       name: "--silent",
       icon: "🔇",
       description: "Show nothing",
+      isPersistent: true,
     },
     {
       name: "--verbose",
       icon: "🔊",
       description: "Show more debugging information",
+      isPersistent: true,
     },
     {
       name: "--no-ansi",
       description: "Show output without ANSI codes",
+      isPersistent: true,
     },
     {
       name: "--help",
       description: "Show help banner of specified command",
+      isPersistent: true,
     },
   ],
 };

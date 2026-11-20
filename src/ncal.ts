@@ -1,3 +1,6 @@
+// ncal (macOS 15.5 BSD cal/ncal, misc_cmds-45 from the Apple OSS mirror, man page dated 2019-03-07, 2026-11-19).
+// Source: ncal.1 and ncal.c read from github.com/apple-oss-distributions/misc_cmds (not run on macOS; misc_cmds-45 is
+// also the newest upstream tag). The country code list was regenerated from the switches table in ncal.c.
 export const monthSuggestions: Fig.Suggestion[] = [
   "january",
   "february",
@@ -33,8 +36,7 @@ const countryCodeSuggestion: Fig.Suggestion[] = [
   ["IS", "Iceland"],
   ["IT", "Italy"],
   ["JP", "Japan"],
-  ["LI", "Lithuania"],
-  ["LN", "Latin"],
+  ["LT", "Lithuania"],
   ["LU", "Luxembourg"],
   ["LV", "Latvia"],
   ["NL", "Netherlands"],
@@ -44,7 +46,7 @@ const countryCodeSuggestion: Fig.Suggestion[] = [
   ["RO", "Romania"],
   ["RU", "Russia"],
   ["SI", "Slovenia"],
-  ["SW", "Sweden"],
+  ["SE", "Sweden"],
   ["TR", "Turkey"],
   ["US", "United States"],
   ["YU", "Yugoslavia"],
@@ -169,6 +171,20 @@ const completionSpec: Fig.Spec = {
         name: "yyyy-mm-dd",
         description: "Date to use as the current date",
       },
+    },
+  ],
+  args: [
+    {
+      name: "month",
+      description:
+        "Month as a number between 1 and 12 or a full or abbreviated name; a single argument is taken as the year",
+      isOptional: true,
+      suggestions: monthSuggestions,
+    },
+    {
+      name: "year",
+      description: "Year to display (1-9999), which must be fully specified",
+      isOptional: true,
     },
   ],
 };

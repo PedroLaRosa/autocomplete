@@ -1,3 +1,4 @@
+// mkfifo (macOS BSD, Apple OSS file_cmds-457.140.3 and file_cmds-479 man page dated 1994-01-05, 2026-11-19). Source: apple-oss-distributions/file_cmds mkfifo/mkfifo.1 + mkfifo.c (getopt "m:"); man pages and source only, not run on macOS. Unchanged upstream: -m is the only option (GNU-only --mode/-Z/--context not added).
 const completionSpec: Fig.Spec = {
   name: "mkfifo",
   description: "Make FIFOs (first-in, first-out)",
@@ -5,16 +6,16 @@ const completionSpec: Fig.Spec = {
     {
       name: "-m",
       description:
-        "Set the file permission bits of newly-created fifos to mode, without respect to the current umask; the mode is specified as in chmod(1)",
+        "Set the file permission bits of the created fifos to the specified mode, ignoring the umask of the calling process; the mode is specified as in chmod(1)",
       args: {
-        name: "MODE",
+        name: "mode",
         suggestions: ["0666", "0644", "0444"],
         default: "0666",
       },
     },
   ],
   args: {
-    name: "FIFO",
+    name: "fifo_name",
     description: "FIFO(s) to create",
     isVariadic: true,
   },

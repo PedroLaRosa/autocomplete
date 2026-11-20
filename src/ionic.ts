@@ -1,7 +1,106 @@
+// Ionic CLI v7.2.1 (npm @ionic/cli latest, git tag @ionic/cli@7.2.1, 2026-11-20). Source: ionic-team/ionic-cli at 7.2.1,
+// packages/@ionic/cli/src/commands and lib (command tree, options, defaults, global options, Angular and React project
+// runners) cross-checked with ionic-docs scripts/data/cli.json. Options that only exist for one project type (React:
+// --public-url, --ci, --https, ...) are included for the commands that pass them on.
+// ponytail: left out share, state and telemetry (stubs that only throw
+// "has been removed"), git clone (no-op, run body commented out) and ionitron
+const reactCiOption: Fig.Option = {
+  name: "--ci",
+  description: "Treat warnings as build failures, test runner does not watch",
+};
+
+// Options of the React project type build runner (react-scripts)
+const reactBuildOptions: Fig.Option[] = [
+  {
+    name: "--public-url",
+    description: "The URL at which the app will be served",
+    args: {
+      name: "url",
+    },
+  },
+  reactCiOption,
+  {
+    name: "--no-source-map",
+    description: "Do not generate source maps",
+  },
+  {
+    name: "--no-inline-runtime-chunk",
+    description:
+      "Do not include the runtime script in index.html (import instead)",
+  },
+];
+
+// Options of the React project type serve runner (react-scripts)
+const reactServeOptions: Fig.Option[] = [
+  {
+    name: "--https",
+    description: "Use HTTPS for the dev server",
+  },
+  {
+    name: "--react-editor",
+    description: "Specify the editor that opens files upon crash",
+    args: {
+      name: "editor",
+    },
+  },
+];
+
 const completionSpec = {
   name: "ionic",
   description:
     "The Ionic command-line interface (CLI) is the go-to tool for developing Ionic apps",
+  options: [
+    {
+      name: ["--help", "-h"],
+      description: "Display help for commands",
+      isPersistent: true,
+    },
+    {
+      name: ["--version", "-v"],
+      description: "Print the CLI version",
+    },
+    {
+      name: "--verbose",
+      description: "Print debug log messages",
+      isPersistent: true,
+    },
+    {
+      name: "--quiet",
+      description: "Only print warning and error log messages",
+      isPersistent: true,
+    },
+    {
+      name: "--no-interactive",
+      description:
+        "Disable interactivity such as progress indicators and prompts",
+      isPersistent: true,
+    },
+    {
+      name: "--no-color",
+      description: "Disable colors in stdout",
+      isPersistent: true,
+    },
+    {
+      name: "--confirm",
+      description: "Automatically answer YES to confirmation prompts",
+      isPersistent: true,
+    },
+    {
+      name: "--project",
+      description: "The project ID to use in a multi-app configuration setup",
+      args: {
+        name: "id",
+      },
+      isPersistent: true,
+      hidden: true,
+    },
+    {
+      name: "--json",
+      description: "Use JSON when operating with stdout, if possible",
+      isPersistent: true,
+      hidden: true,
+    },
+  ],
   subcommands: [
     {
       name: "build",
@@ -42,6 +141,8 @@ const completionSpec = {
           name: "--watch",
           description: "Rebuild when files change",
         },
+
+        ...reactBuildOptions,
       ],
       description:
         "Build web assets and prepare your app for any platform targets",
@@ -51,19 +152,52 @@ const completionSpec = {
       description: "Enables tab-completion for Ionic CLI commands",
     },
     {
-      name: "docs",
-      options: [
+      name: ["generate", "g"],
+      args: [
         {
-          name: ["--browser", "-w"],
+          name: "schematic",
           description:
-            "Specifies the browser to use (safari, firefox, google chrome)",
-          args: {
-            name: "browser",
-            suggestions: ["safari", "firefox", "google chrome"],
-          },
+            "The type of feature (e.g. page, component, directive, service)",
+          suggestions: [
+            "page",
+            "component",
+            "service",
+            "module",
+            "class",
+            "directive",
+            "guard",
+            "pipe",
+            "interface",
+            "enum",
+          ],
+        },
+        {
+          name: "name",
+          description: "The name/path of the feature being generated",
         },
       ],
-      description: "Open the Ionic documentation website",
+      description: "Create Pages, Components, & Angular Features",
+    },
+    {
+      name: "help",
+      hidden: true,
+      options: [
+        {
+          name: "--json",
+          description: "Print help in JSON format",
+        },
+      ],
+      args: {
+        name: "command",
+        description: "The command you desire help with",
+        isOptional: true,
+      },
+      description: "Provides help for a certain command",
+    },
+    {
+      name: "version",
+      hidden: true,
+      description: "Returns the current CLI version",
     },
     {
       name: "info",
@@ -80,10 +214,19 @@ const completionSpec = {
       options: [
         {
           name: "--type",
-          description: "Type of project (e.g. angular, react, vue, custom)",
+          description:
+            "Type of project (e.g. angular, angular-standalone, react, vue, custom, vue-vite, react-vite)",
           args: {
             name: "type",
-            suggestions: ["angular", "react", "vue", "custom"],
+            suggestions: [
+              "angular",
+              "angular-standalone",
+              "react",
+              "vue",
+              "custom",
+              "vue-vite",
+              "react-vite",
+            ],
           },
         },
         {
@@ -127,12 +270,12 @@ const completionSpec = {
       args: [
         {
           name: "email",
-          description: "Your email address",
+          description: "Your email address (deprecated)",
           isOptional: true,
         },
         {
           name: "password",
-          description: "Your password",
+          description: "Your password (deprecated)",
           isOptional: true,
         },
       ],
@@ -154,7 +297,7 @@ const completionSpec = {
       description: "Remove and recreate dependencies and generated files",
     },
     {
-      name: "serve",
+      name: ["serve", "s"],
       options: [
         {
           name: "--external",
@@ -166,6 +309,7 @@ const completionSpec = {
           description: "Use specific host for the dev server",
           args: {
             name: "host",
+            default: "localhost",
           },
         },
         {
@@ -181,27 +325,11 @@ const completionSpec = {
           description: "The host used for the browser or web view",
           args: {
             name: "host",
-            default: "localhost",
           },
         },
         {
           name: "--no-livereload",
           description: "Do not spin up dev server--just serve files",
-        },
-        {
-          name: "--lab-host",
-          description: "Use specific host for Ionic Lab server",
-          args: {
-            name: "host",
-            default: 8200,
-          },
-        },
-        {
-          name: "--lab-port",
-          description: "Use specific port for Ionic Lab server",
-          args: {
-            name: "port",
-          },
         },
         {
           name: "--no-open",
@@ -213,7 +341,13 @@ const completionSpec = {
             "Specifies the browser to use (safari, firefox, google chrome)",
           args: {
             name: "browser",
-            suggestions: ["safari", "firefox", "google chrome"],
+            suggestions: [
+              "safari",
+              "firefox",
+              "google chrome",
+              "google-chrome",
+              "chrome",
+            ],
           },
         },
         {
@@ -222,11 +356,6 @@ const completionSpec = {
           args: {
             name: "path",
           },
-        },
-        {
-          name: ["--lab", "-l"],
-          description:
-            "Test your apps on multiple platform types in the browser",
         },
         {
           name: "--ssl",
@@ -259,6 +388,9 @@ const completionSpec = {
           name: "--source-map",
           description: "Output sourcemaps",
         },
+
+        ...reactServeOptions,
+        reactCiOption,
       ],
       description: "Start a local dev server for app dev/testing",
     },
@@ -276,15 +408,16 @@ const completionSpec = {
         {
           name: "--type",
           description:
-            "Type of project to start (e.g. vue, angular, react, ionic-angular, ionic1)",
+            "Type of project to start (e.g. vue, angular, angular-standalone, react)",
           args: {
             name: "type",
-            suggestions: ["vue", "angular", "react", "ionic-angular", "ionic1"],
+            suggestions: ["vue", "angular", "angular-standalone", "react"],
           },
         },
         {
           name: "--cordova",
           description: "Include Cordova integration",
+          deprecated: true,
         },
         {
           name: "--capacitor",
@@ -400,7 +533,7 @@ const completionSpec = {
           description: "Set config values",
         },
         {
-          name: "unset",
+          name: ["unset", "delete", "del"],
           options: [
             {
               name: ["--global", "-g"],
@@ -420,7 +553,7 @@ const completionSpec = {
       ],
     },
     {
-      name: "capacitor",
+      name: ["capacitor", "cap"],
       description: "Capacitor commands Ionic",
       subcommands: [
         {
@@ -448,8 +581,12 @@ const completionSpec = {
               description: "Flag to use the production configuration",
             },
             {
-              name: ["configuration", "-c"],
+              name: ["--configuration", "-c"],
               description: "Specify the configuration to use",
+              args: {
+                name: "conf",
+                template: ["filepaths", "folders"],
+              },
             },
             {
               name: "--source-map",
@@ -459,6 +596,8 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -475,12 +614,21 @@ const completionSpec = {
               description: "Do not invoke an Ionic build",
             },
             {
+              name: "--inline",
+              description:
+                "Use inline source maps (only available on capacitor 4.2.0+)",
+            },
+            {
               name: "--prod",
               description: "Flag to use the production configuration",
             },
             {
-              name: ["configuration", "-c"],
+              name: ["--configuration", "-c"],
               description: "Specify the configuration to use",
+              args: {
+                name: "conf",
+                template: ["filepaths", "folders"],
+              },
             },
             {
               name: "--source-map",
@@ -490,11 +638,14 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
             description: "The platform to copy (e.g. android, ios)",
             isOptional: true,
+            suggestions: ["ios", "android"],
           },
           description: "Copy web assets to native platforms",
         },
@@ -589,6 +740,8 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -603,6 +756,11 @@ const completionSpec = {
             {
               name: "--no-build",
               description: "Do not invoke an Ionic build",
+            },
+            {
+              name: "--inline",
+              description:
+                "Use inline source maps (only available on capacitor 4.1.0+)",
             },
             {
               name: "--prod",
@@ -624,6 +782,8 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -647,8 +807,8 @@ const completionSpec = {
       ],
     },
     {
-      name: "deploy",
-      description: "AppFlow deploy commands for Ionic",
+      name: "live-update",
+      description: "Ionic Live Updates functionality",
       subcommands: [
         {
           name: "add",
@@ -694,41 +854,7 @@ const completionSpec = {
               },
             },
           ],
-          description: "Adds Appflow Deploy to the project",
-        },
-        {
-          name: "build",
-          options: [
-            {
-              name: "--environment",
-              description:
-                "The group of environment variables exposed to your build",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--channel",
-              description:
-                "The channel you want to auto deploy the build to. This can be repeated multiple times if multiple channels need to be specified",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--commit",
-              description: "Commit (defaults to HEAD)",
-              args: {
-                name: "sha1",
-              },
-            },
-            {
-              name: "--skip-download",
-              description:
-                "Skip downloading build artifacts after command succeeds",
-            },
-          ],
-          description: "Create a deploy build on Appflow",
+          description: "Adds Ionic Live Updates plugin to the project",
         },
         {
           name: "configure",
@@ -776,13 +902,14 @@ const completionSpec = {
             name: "platform",
             description: "The native platform (e.g. ios, android)",
             isOptional: true,
+            suggestions: ["ios", "android"],
           },
-          description: "Overrides Appflow Deploy configuration",
+          description: "Overrides Ionic Live Updates plugin configuration",
         },
         {
           name: "manifest",
           description:
-            "Generates a manifest file for the deploy service from a built app directory",
+            "Generates a manifest file for the Ionic Live Updates service from a built app directory",
         },
       ],
     },
@@ -798,159 +925,36 @@ const completionSpec = {
       ],
     },
     {
-      name: "package",
-      description: "Package commands for Ionic",
+      name: "monitoring",
+      hidden: true,
+      description: "Commands relating to Ionic Appflow Error Monitoring",
       subcommands: [
         {
-          name: "build",
+          name: "syncmaps",
           options: [
             {
-              name: "--signing-certificate",
-              description: "Signing certificate",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--environment",
-              description:
-                "The group of environment variables exposed to your build",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--native-config",
-              description:
-                "The group of native config variables exposed to your build",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--destination",
-              description:
-                "The configuration to deploy the build artifact to the app store",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--commit",
-              description: "Commit (defaults to HEAD)",
-              args: {
-                name: "sha1",
-              },
-            },
-            {
-              name: "--build-stack",
-              description:
-                'Target platform ("Android", "iOS - Xcode 11 (Preferred)", "iOS - Xcode 10")',
-              args: {
-                name: "name",
-                suggestions: [
-                  "Android",
-                  "iOS - Xcode 11 (Preferred)",
-                  "iOS - Xcode 10",
-                ],
-              },
-            },
-            {
-              name: "--build-file-name",
-              description: "The name for the downloaded build file",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--ipa-name",
-              description: "The name for the downloaded ipa file",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--dsym-name",
-              description: "The name for the downloaded dsym file",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--apk-name",
-              description: "The name for the downloaded apk file",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--aab-name",
-              description: "The name for the downloaded aab file",
-              args: {
-                name: "name",
-              },
-            },
-            {
-              name: "--artifact-type",
-              description: "The artifact type (aab, apk, ipa, dsym)",
-              args: {
-                name: "name",
-                suggestions: ["aab", "apl", "ipa", "dysm"],
-              },
-            },
-            {
-              name: "--skip-download",
-              description:
-                "Skip downloading build artifacts after command succeeds",
+              name: "--build",
+              description: "Invoke a production Ionic build",
             },
           ],
-          args: [
-            {
-              name: "platform",
-              description: "The platform to package (android, ios)",
-              suggestions: ["ios", "android"],
-            },
-            {
-              name: "type",
-              description:
-                "The build type (debug, release, development, ad-hoc, app-store, enterprise)",
-              suggestions: [
-                "debug",
-                "release",
-                "development",
-                "ad-hoc",
-                "app-stpre",
-                "enterprise",
-              ],
-            },
-          ],
-          description: "Create a package build on Appflow",
-        },
-        {
-          name: "deploy",
-          args: [
-            {
-              name: "build-id",
-              description:
-                "The build id of the desired successful package build",
-            },
-            {
-              name: "destination",
-              description:
-                "The destination to deploy the build artifact to the app store",
-            },
-          ],
+          args: {
+            name: "snapshot_id",
+            description:
+              "Specify a Snapshot ID to associate the uploaded sourcemaps with",
+            isOptional: true,
+          },
           description:
-            "Deploys a binary to a destination, such as an app store using Appflow",
+            "Build & upload sourcemaps to Ionic Appflow Monitoring service",
         },
       ],
     },
     {
       name: "ssl",
       description: "SSL commands for Ionic",
+      deprecated: true,
       subcommands: [
         {
-          name: "generate",
+          name: ["generate", "g"],
           options: [
             {
               name: "--key-path",
@@ -1025,6 +1029,7 @@ const completionSpec = {
     {
       name: "ssh",
       description: "SSH commands for Ionic",
+      deprecated: true,
       subcommands: [
         {
           name: "add",
@@ -1042,7 +1047,7 @@ const completionSpec = {
           description: "Add an SSH public key to Ionic",
         },
         {
-          name: "delete",
+          name: ["delete", "remove", "rm"],
           args: {
             name: "key-id",
             description: "The ID of the public key to delete",
@@ -1050,7 +1055,7 @@ const completionSpec = {
           description: "Delete an SSH public key from Ionic",
         },
         {
-          name: "generate",
+          name: ["generate", "g"],
           options: [
             {
               name: ["--type", "-t"],
@@ -1086,7 +1091,7 @@ const completionSpec = {
           description: "Generates a private and public SSH key pair",
         },
         {
-          name: "list",
+          name: ["list", "ls"],
           options: [
             {
               name: "--json",
@@ -1110,39 +1115,11 @@ const completionSpec = {
       ],
     },
     {
-      name: "doctor",
-      description: "Doctor commands for Ionic",
-      subcommands: [
-        {
-          name: "check",
-          args: {
-            name: "id",
-            description: "The issue identifier",
-            isOptional: true,
-          },
-          description: "Check the health of your Ionic project",
-        },
-        {
-          name: "list",
-          description: "List all issues and their identifiers",
-        },
-        {
-          name: "treat",
-          args: {
-            name: "id",
-            description: "The issue identifier",
-            isOptional: true,
-          },
-          description: "Attempt to fix issues in your Ionic project",
-        },
-      ],
-    },
-    {
-      name: "integrations",
+      name: ["integrations", "integration", "i"],
       description: "Integration commands for Ionic",
       subcommands: [
         {
-          name: "disable",
+          name: ["disable", "dis", "delete", "del", "remove", "rm"],
           args: {
             name: "name",
             description:
@@ -1152,7 +1129,7 @@ const completionSpec = {
           description: "Disable an integration",
         },
         {
-          name: "enable",
+          name: ["enable", "en", "add"],
           options: [
             {
               name: "--add",
@@ -1180,7 +1157,7 @@ const completionSpec = {
           description: "Add & enable integrations to your app",
         },
         {
-          name: "list",
+          name: ["list", "ls"],
           description: "List available and active integrations in your app",
         },
       ],
@@ -1212,7 +1189,7 @@ const completionSpec = {
       ],
     },
     {
-      name: "cordova",
+      name: ["cordova", "cdv"],
       description: "Cordova commands for Ionic",
       subcommands: [
         {
@@ -1262,6 +1239,8 @@ const completionSpec = {
               name: "--source-map",
               description: "Output source maps",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -1402,7 +1381,7 @@ const completionSpec = {
             },
             {
               name: "--ssl",
-              description: "Use HTTPS for the dev serve",
+              description: "Use HTTPS for the dev server",
             },
             {
               name: "--prod",
@@ -1431,14 +1410,9 @@ const completionSpec = {
               name: "--source-map",
               description: "Output source maps",
             },
-            {
-              name: "--buildconfig",
-              description: "Use the specified build configuration",
-              args: {
-                name: "file",
-                template: ["filepaths", "folders"],
-              },
-            },
+
+            ...reactBuildOptions,
+            ...reactServeOptions,
           ],
           args: {
             name: "platform",
@@ -1448,7 +1422,7 @@ const completionSpec = {
           description: "Emulate an Ionic project on a simulator/emulator",
         },
         {
-          name: "platform",
+          name: ["platform", "platforms"],
           options: [
             {
               name: "--no-resources",
@@ -1462,7 +1436,16 @@ const completionSpec = {
               description:
                 "Add, remove, or update a platform; ls, check, or save all project platforms",
               isOptional: true,
-              suggestions: ["add", "remove", "update", "ls", "check", "save"],
+              suggestions: [
+                "add",
+                "remove",
+                "rm",
+                "update",
+                "ls",
+                "list",
+                "check",
+                "save",
+              ],
             },
             {
               name: "platform",
@@ -1475,7 +1458,7 @@ const completionSpec = {
           description: "Manage Cordova platform targets",
         },
         {
-          name: "plugin",
+          name: ["plugin", "plugins"],
           options: [
             {
               name: "--force",
@@ -1496,7 +1479,7 @@ const completionSpec = {
               description:
                 "Add or remove a plugin; ls or save all project plugins",
               isOptional: true,
-              suggestions: ["add", "remove", "ls", "save"],
+              suggestions: ["add", "remove", "rm", "ls", "list", "save"],
             },
             {
               name: "plugin",
@@ -1534,6 +1517,8 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -1558,7 +1543,7 @@ const completionSpec = {
             "Checks and print out all the requirements for platforms",
         },
         {
-          name: "resources",
+          name: ["resources", "res"],
           options: [
             {
               name: ["--icon", "-i"],
@@ -1699,6 +1684,13 @@ const completionSpec = {
                 template: ["filepaths", "folders"],
               },
             },
+            {
+              name: "--source-map",
+              description: "Output source maps",
+            },
+
+            ...reactBuildOptions,
+            ...reactServeOptions,
           ],
           args: {
             name: "platform",

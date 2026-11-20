@@ -1,3 +1,12 @@
+// GNU Wget v1.25.0 (latest stable: gitlab.com/gnuwget/wget tag v1.25.0 / Homebrew formula, 2026-11-20).
+// Source: read statically, not run. src/main.c option table + print_help() and doc/wget.texi at tag v1.25.0
+// (the 1.21.4 `wget --help` shipped in Ubuntu was only used to cross-check). Options that exist only in some
+// builds (c-ares: --dns-servers/--bind-dns-address, Metalink, OpenSSL/LibreSSL --random-file, HAVE_DEBUG -d) are
+// included as documented in the manual. Not included: VMS/Watt-32/EGD-only flags (--ftp-stmlf, --wdebug, --egd-file).
+const file = (name = "FILE"): Fig.Arg => ({ name, template: "filepaths" });
+const folder = (name: string): Fig.Arg => ({ name, template: "folders" });
+const list = (name: string): Fig.Arg => ({ name });
+
 const completionSpec: Fig.Spec = {
   name: "wget",
   description: "A non-interactive network retriever",
@@ -7,6 +16,7 @@ const completionSpec: Fig.Spec = {
     description: "The url(s) to retrieve",
   },
   options: [
+    // Startup
     {
       name: ["-V", "--version"],
       description: "Display the version of Wget and exit",
@@ -17,13 +27,26 @@ const completionSpec: Fig.Spec = {
       description: "Go to background after startup",
     },
     {
-      name: ["-e", "--execute=COMMAND"],
+      name: ["-e", "--execute"],
       description: "Execute a `.wgetrc'-style command",
+      isRepeatable: true,
+      args: { name: "COMMAND" },
     },
-    { name: ["-o", "--output-file=FILE"], description: "Log messages to FILE" },
+
+    // Logging and input file
     {
-      name: ["-a", "--append-output=FILE"],
+      name: ["-o", "--output-file"],
+      description: "Log messages to FILE",
+      args: file(),
+    },
+    {
+      name: ["-a", "--append-output"],
       description: "Append messages to FILE",
+      args: file(),
+    },
+    {
+      name: ["-d", "--debug"],
+      description: "Print lots of debugging information",
     },
     { name: ["-q", "--quiet"], description: "Quiet (no output)" },
     {
@@ -35,44 +58,72 @@ const completionSpec: Fig.Spec = {
       description: "Turn off verboseness, without being quiet",
     },
     {
-      name: "--report-speed=TYPE",
-      description: "Output bandwidth as TYPE.  TYPE can be bits",
+      name: "--report-speed",
+      description: "Output bandwidth as TYPE",
+      args: { name: "TYPE", suggestions: ["bits"] },
     },
     {
-      name: ["-i", "--input-file=FILE"],
+      name: ["-i", "--input-file"],
       description: "Download URLs found in local or external FILE",
+      args: file(),
+    },
+    {
+      name: "--input-metalink",
+      description:
+        "Download files covered in local Metalink FILE (needs a build with Metalink support)",
+      args: file(),
     },
     { name: ["-F", "--force-html"], description: "Treat input file as HTML" },
     {
-      name: ["-B", "--base=URL"],
-      description: "Resolves HTML input-file links (-i -F) relative to URL",
+      name: ["-B", "--base"],
+      description: "Resolve HTML input-file links (-i -F) relative to URL",
+      args: { name: "URL" },
     },
-    { name: "--config=FILE", description: "Specify config file to use" },
+    {
+      name: "--config",
+      description: "Specify config file to use",
+      args: file(),
+    },
     { name: "--no-config", description: "Do not read any config file" },
     {
-      name: "--rejected-log=FILE",
+      name: "--rejected-log",
       description: "Log reasons for URL rejection to FILE",
+      args: file(),
     },
+
+    // Download
     {
-      name: ["-t", "--tries=NUMBER"],
+      name: ["-t", "--tries"],
       description: "Set number of retries to NUMBER (0 unlimits)",
+      args: { name: "NUMBER", suggestions: ["0", "inf"] },
     },
     {
       name: "--retry-connrefused",
       description: "Retry even if connection is refused",
     },
     {
-      name: "--retry-on-http-error",
-      description: "Comma-separated list of HTTP errors to retry",
+      name: "--retry-on-host-error",
+      description: "Consider host errors as non-fatal, transient errors",
     },
     {
-      name: ["-O", "--output-document=FILE"],
+      name: "--retry-on-http-error",
+      description: "Comma-separated list of HTTP errors to retry",
+      args: list("ERRORS"),
+    },
+    {
+      name: ["-O", "--output-document"],
       description: "Write documents to FILE",
+      args: file(),
     },
     {
       name: ["-nc", "--no-clobber"],
       description:
         "Skip downloads that would download to existing files (overwriting them)",
+    },
+    {
+      name: "--backups",
+      description: "Before writing file X, rotate up to N backup files",
+      args: { name: "N" },
     },
     {
       name: "--no-netrc",
@@ -83,10 +134,31 @@ const completionSpec: Fig.Spec = {
       description: "Resume getting a partially-downloaded file",
     },
     {
-      name: "--start-pos=OFFSET",
+      name: "--start-pos",
       description: "Start downloading from zero-based position OFFSET",
+      args: { name: "OFFSET" },
     },
-    { name: "--progress=TYPE", description: "Select progress gauge type" },
+    {
+      name: "--progress",
+      description: "Select progress gauge type",
+      args: {
+        name: "TYPE",
+        suggestions: [
+          { name: "bar", description: "ASCII progress bar (default)" },
+          {
+            name: "dot",
+            description: "Print one dot per fixed amount of data",
+          },
+          "bar:force",
+          "bar:noscroll",
+          "bar:force:noscroll",
+          "dot:default",
+          "dot:binary",
+          "dot:mega",
+          "dot:giga",
+        ],
+      },
+    },
     {
       name: "--show-progress",
       description: "Display the progress bar in any verbosity mode",
@@ -95,50 +167,99 @@ const completionSpec: Fig.Spec = {
       name: ["-N", "--timestamping"],
       description: "Don't re-retrieve files unless newer than local",
     },
+    {
+      name: "--no-if-modified-since",
+      description:
+        "Don't use conditional if-modified-since get requests in timestamping mode",
+    },
+    {
+      name: "--no-use-server-timestamps",
+      description:
+        "Don't set the local file's timestamp by the one on the server",
+    },
     { name: ["-S", "--server-response"], description: "Print server response" },
     { name: "--spider", description: "Don't download anything" },
     {
-      name: ["-T", "--timeout=SECONDS"],
+      name: ["-T", "--timeout"],
       description: "Set all timeout values to SECONDS",
+      args: { name: "SECONDS" },
     },
     {
-      name: "--dns-timeout=SECS",
+      name: "--dns-servers",
+      description:
+        "List of DNS servers to query, comma separated (needs a build with c-ares)",
+      args: list("ADDRESSES"),
+    },
+    {
+      name: "--bind-dns-address",
+      description:
+        "Bind DNS resolver to ADDRESS (hostname or IP) on local host (needs a build with c-ares)",
+      args: { name: "ADDRESS" },
+    },
+    {
+      name: "--dns-timeout",
       description: "Set the DNS lookup timeout to SECS",
+      args: { name: "SECS" },
     },
     {
-      name: "--connect-timeout=SECS",
+      name: "--connect-timeout",
       description: "Set the connect timeout to SECS",
+      args: { name: "SECS" },
     },
     {
-      name: "--read-timeout=SECS",
+      name: "--read-timeout",
       description: "Set the read timeout to SECS",
+      args: { name: "SECS" },
     },
     {
-      name: ["-w", "--wait=SECONDS"],
-      description: "Wait SECONDS between retrievals",
+      name: ["-w", "--wait"],
+      description:
+        "Wait SECONDS between retrievals (applies if more than 1 URL is to be retrieved)",
+      args: { name: "SECONDS" },
     },
     {
-      name: "--waitretry=SECONDS",
-      description: "Wait 1..SECONDS between retries of a retrieval",
+      name: "--waitretry",
+      description:
+        "Wait 1..SECONDS between retries of a retrieval (applies if more than 1 URL is to be retrieved)",
+      args: { name: "SECONDS" },
     },
     {
       name: "--random-wait",
-      description: "Wait from 0.5*WAIT...1.5*WAIT secs between retrievals",
+      description:
+        "Wait from 0.5*WAIT...1.5*WAIT secs between retrievals (applies if more than 1 URL is to be retrieved)",
     },
     { name: "--no-proxy", description: "Explicitly turn off proxy" },
     {
-      name: ["-Q", "--quota=NUMBER"],
+      name: ["-Q", "--quota"],
       description: "Set retrieval quota to NUMBER",
+      args: { name: "NUMBER" },
     },
     {
-      name: "--bind-address=ADDRESS",
+      name: "--bind-address",
       description: "Bind to ADDRESS (hostname or IP) on local host",
+      args: { name: "ADDRESS" },
     },
-    { name: "--limit-rate=RATE", description: "Limit download rate to RATE" },
+    {
+      name: "--limit-rate",
+      description: "Limit download rate to RATE",
+      args: { name: "RATE" },
+    },
     { name: "--no-dns-cache", description: "Disable caching DNS lookups" },
     {
-      name: "--restrict-file-names=OS",
-      description: "Restrict chars in file names to ones OS allows",
+      name: "--restrict-file-names",
+      description: "Restrict chars in file names to ones the OS allows",
+      args: {
+        name: "OS",
+        description: "Comma-separated list of modes",
+        suggestions: [
+          "unix",
+          "windows",
+          "nocontrol",
+          "ascii",
+          "lowercase",
+          "uppercase",
+        ],
+      },
     },
     {
       name: "--ignore-case",
@@ -153,28 +274,66 @@ const completionSpec: Fig.Spec = {
       description: "Connect only to IPv6 addresses",
     },
     {
-      name: "--user=USER",
-      description: "Set both ftp and http user to USER",
+      name: "--prefer-family",
+      description: "Connect first to addresses of the specified family",
+      args: { name: "FAMILY", suggestions: ["IPv6", "IPv4", "none"] },
     },
     {
-      name: "--password=PASS",
+      name: "--user",
+      description: "Set both ftp and http user to USER",
+      args: { name: "USER" },
+    },
+    {
+      name: "--password",
       description: "Set both ftp and http password to PASS",
+      args: { name: "PASS" },
     },
     { name: "--ask-password", description: "Prompt for passwords" },
+    {
+      name: "--use-askpass",
+      description:
+        "Specify credential handler for requesting username and password (default: WGET_ASKPASS or SSH_ASKPASS)",
+      args: { name: "COMMAND" },
+    },
     { name: "--no-iri", description: "Turn off IRI support" },
     {
-      name: "--local-encoding=ENC",
+      name: "--local-encoding",
       description: "Use ENC as the local encoding for IRIs",
+      args: { name: "ENC" },
     },
     {
-      name: "--remote-encoding=ENC",
+      name: "--remote-encoding",
       description: "Use ENC as the default remote encoding",
+      args: { name: "ENC" },
     },
     { name: "--unlink", description: "Remove file before clobber" },
+    {
+      name: "--keep-badhash",
+      description:
+        "Keep files with checksum mismatch, appending .badhash (needs a build with Metalink support)",
+    },
+    {
+      name: "--metalink-index",
+      description:
+        "Metalink application/metalink4+xml metaurl ordinal NUMBER (needs a build with Metalink support)",
+      args: { name: "NUMBER", suggestions: ["0", "inf"] },
+    },
+    {
+      name: "--metalink-over-http",
+      description:
+        "Use Metalink metadata from HTTP response headers (needs a build with Metalink support)",
+    },
+    {
+      name: "--preferred-location",
+      description:
+        "Preferred location for Metalink resources (needs a build with Metalink support)",
+    },
     {
       name: "--xattr",
       description: "Turn on storage of metadata in extended file attributes",
     },
+
+    // Directories
     {
       name: ["-nd", "--no-directories"],
       description: "Don't create directories",
@@ -192,53 +351,94 @@ const completionSpec: Fig.Spec = {
       description: "Use protocol name in directories",
     },
     {
-      name: ["-P", "--directory-prefix=PREFIX"],
+      name: ["-P", "--directory-prefix"],
       description: "Save files to PREFIX/",
+      args: folder("PREFIX"),
     },
     {
-      name: "--cut-dirs=NUMBER",
+      name: "--cut-dirs",
       description: "Ignore NUMBER remote directory components",
+      args: { name: "NUMBER" },
     },
-    { name: "--http-user=USER", description: "Set http user to USER" },
+
+    // HTTP options
     {
-      name: "--http-password=PASS",
+      name: "--http-user",
+      description: "Set http user to USER",
+      args: { name: "USER" },
+    },
+    {
+      name: "--http-password",
       description: "Set http password to PASS",
+      args: { name: "PASS" },
+    },
+    {
+      name: "--http-passwd",
+      description: "Deprecated alias of --http-password",
+      deprecated: true,
+      args: { name: "PASS" },
     },
     { name: "--no-cache", description: "Disallow server-cached data" },
     {
+      name: "--default-page",
+      description: "Change the default page name (normally 'index.html')",
+      args: { name: "NAME" },
+    },
+    {
       name: ["-E", "--adjust-extension"],
       description: "Save HTML/CSS documents with proper extensions",
+    },
+    {
+      name: "--html-extension",
+      description: "Deprecated alias of --adjust-extension",
+      deprecated: true,
     },
     {
       name: "--ignore-length",
       description: "Ignore 'Content-Length' header field",
     },
     {
-      name: "--header=STRING",
+      name: "--header",
       description: "Insert STRING among the headers",
+      isRepeatable: true,
+      args: { name: "STRING" },
     },
     {
-      name: "--compression=TYPE",
-      description:
-        "Choose compression, one of auto, gzip and none. (default: none)",
+      name: "--compression",
+      description: "Choose compression (default: none)",
+      args: { name: "TYPE", suggestions: ["auto", "gzip", "none"] },
     },
     {
       name: "--max-redirect",
       description: "Maximum redirections allowed per page",
+      args: { name: "NUMBER" },
     },
-    { name: "--proxy-user=USER", description: "Set USER as proxy username" },
     {
-      name: "--proxy-password=PASS",
+      name: "--proxy-user",
+      description: "Set USER as proxy username",
+      args: { name: "USER" },
+    },
+    {
+      name: "--proxy-password",
       description: "Set PASS as proxy password",
+      args: { name: "PASS" },
     },
     {
-      name: "--referer=URL",
+      name: "--proxy-passwd",
+      description: "Deprecated alias of --proxy-password",
+      deprecated: true,
+      args: { name: "PASS" },
+    },
+    {
+      name: "--referer",
       description: "Include 'Referer: URL' header in HTTP request",
+      args: { name: "URL" },
     },
     { name: "--save-headers", description: "Save the HTTP headers to file" },
     {
-      name: ["-U", "--user-agent=AGENT"],
+      name: ["-U", "--user-agent"],
       description: "Identify as AGENT instead of Wget/VERSION",
+      args: { name: "AGENT" },
     },
     {
       name: "--no-http-keep-alive",
@@ -246,78 +446,244 @@ const completionSpec: Fig.Spec = {
     },
     { name: "--no-cookies", description: "Don't use cookies" },
     {
-      name: "--load-cookies=FILE",
+      name: "--load-cookies",
       description: "Load cookies from FILE before session",
+      args: file(),
     },
     {
-      name: "--save-cookies=FILE",
+      name: "--save-cookies",
       description: "Save cookies to FILE after session",
+      args: file(),
     },
     {
       name: "--keep-session-cookies",
       description: "Load and save session (non-permanent) cookies",
     },
     {
-      name: "--post-data=STRING",
+      name: "--post-data",
       description: "Use the POST method; send STRING as the data",
+      args: { name: "STRING" },
     },
     {
-      name: "--post-file=FILE",
+      name: "--post-file",
       description: "Use the POST method; send contents of FILE",
+      args: file(),
     },
     {
-      name: "--method=HTTPMethod",
+      name: "--method",
       description: 'Use method "HTTPMethod" in the request',
+      args: { name: "HTTPMethod" },
     },
     {
-      name: "--body-data=STRING",
-      description: "Send STRING as data. --method MUST be set",
+      name: "--body-data",
+      description: "Send STRING as data (--method must be set)",
+      dependsOn: ["--method"],
+      args: { name: "STRING" },
     },
     {
-      name: "--body-file=FILE",
-      description: "Send contents of FILE. --method MUST be set",
+      name: "--body-file",
+      description: "Send contents of FILE (--method must be set)",
+      dependsOn: ["--method"],
+      args: file(),
+    },
+    {
+      name: "--content-disposition",
+      description:
+        "Honor the Content-Disposition header when choosing local file names (EXPERIMENTAL)",
     },
     {
       name: "--content-on-error",
       description: "Output the received content on server errors",
     },
     {
-      name: "--secure-protocol=PR",
-      description: "Choose secure protocol, one of auto, SSLv2,",
+      name: "--auth-no-challenge",
+      description:
+        "Send Basic HTTP authentication information without first waiting for the server's challenge",
+    },
+
+    // HTTPS (SSL/TLS) options
+    {
+      name: "--secure-protocol",
+      description: "Choose secure protocol",
+      args: {
+        name: "PR",
+        suggestions: [
+          "auto",
+          "SSLv2",
+          "SSLv3",
+          "TLSv1",
+          "TLSv1_1",
+          "TLSv1_2",
+          "TLSv1_3",
+          "PFS",
+        ],
+      },
     },
     { name: "--https-only", description: "Only follow secure HTTPS links" },
     {
       name: "--no-check-certificate",
       description: "Don't validate the server's certificate",
     },
-    { name: "--certificate=FILE", description: "Client certificate file" },
     {
-      name: "--certificate-type=TYPE",
-      description: "Client certificate type, PEM or DER",
-    },
-    { name: "--private-key=FILE", description: "Private key file" },
-    {
-      name: "--private-key-type=TYPE",
-      description: "Private key type, PEM or DER",
+      name: "--certificate",
+      description: "Client certificate file",
+      args: file(),
     },
     {
-      name: "--ca-certificate=FILE",
+      name: "--certificate-type",
+      description: "Client certificate type",
+      args: { name: "TYPE", suggestions: ["PEM", "DER"] },
+    },
+    { name: "--private-key", description: "Private key file", args: file() },
+    {
+      name: "--private-key-type",
+      description: "Private key type",
+      args: { name: "TYPE", suggestions: ["PEM", "DER"] },
+    },
+    {
+      name: "--ca-certificate",
       description: "File with the bundle of CAs",
+      args: file(),
     },
     {
-      name: "--ca-directory=DIR",
+      name: "--ca-directory",
       description: "Directory where hash list of CAs is stored",
+      args: folder("DIR"),
     },
-    { name: "--crl-file=FILE", description: "File with bundle of CRLs" },
     {
-      name: "--ciphers=STR",
-      description:
-        "Set the priority string (GnuTLS) or cipher list string (OpenSSL) directly",
+      name: "--crl-file",
+      description: "File with bundle of CRLs",
+      args: file(),
     },
+    {
+      name: "--pinnedpubkey",
+      description:
+        "Public key (PEM/DER) file, or base64 encoded sha256 hashes preceded by 'sha256//' and separated by ';', to verify peer against",
+      args: file("FILE/HASHES"),
+    },
+    {
+      name: "--random-file",
+      description:
+        "File with random data for seeding the SSL PRNG (OpenSSL and LibreSSL only)",
+      args: file(),
+    },
+    {
+      name: "--ciphers",
+      description:
+        "Set the priority string (GnuTLS) or cipher list string (OpenSSL) directly, overriding --secure-protocol",
+      args: { name: "STR" },
+    },
+
+    // HSTS options
+    { name: "--no-hsts", description: "Disable HSTS" },
+    {
+      name: "--hsts-file",
+      description: "Path of HSTS database (will override default)",
+      args: file(),
+    },
+
+    // FTP options
+    {
+      name: "--ftp-user",
+      description: "Set ftp user to USER",
+      args: { name: "USER" },
+    },
+    {
+      name: "--ftp-password",
+      description: "Set ftp password to PASS",
+      args: { name: "PASS" },
+    },
+    {
+      name: "--no-remove-listing",
+      description: "Don't remove '.listing' files",
+    },
+    { name: "--no-glob", description: "Turn off FTP file name globbing" },
+    {
+      name: "--no-passive-ftp",
+      description: 'Disable the "passive" transfer mode',
+    },
+    {
+      name: "--preserve-permissions",
+      description: "Preserve remote file permissions",
+    },
+    {
+      name: "--retr-symlinks",
+      description: "When recursing, get linked-to files (not dir)",
+    },
+
+    // FTPS options
+    {
+      name: "--ftps-implicit",
+      description: "Use implicit FTPS (default port is 990)",
+    },
+    {
+      name: "--ftps-resume-ssl",
+      description:
+        "Resume the SSL/TLS session started in the control connection when opening a data connection (default)",
+    },
+    {
+      name: "--no-ftps-resume-ssl",
+      description:
+        "Don't resume the SSL/TLS session of the control connection in data connections",
+    },
+    {
+      name: "--ftps-clear-data-connection",
+      description:
+        "Cipher the control channel only; all the data will be in plaintext",
+    },
+    {
+      name: "--ftps-fallback-to-ftp",
+      description:
+        "Fall back to FTP if FTPS is not supported in the target server",
+    },
+
+    // WARC options
+    {
+      name: "--warc-file",
+      description: "Save request/response data to a .warc.gz file",
+      args: { name: "FILENAME", template: "filepaths" },
+    },
+    {
+      name: "--warc-header",
+      description: "Insert STRING into the warcinfo record",
+      isRepeatable: true,
+      args: { name: "STRING" },
+    },
+    {
+      name: "--warc-max-size",
+      description: "Set maximum size of WARC files to NUMBER",
+      args: { name: "NUMBER" },
+    },
+    { name: "--warc-cdx", description: "Write CDX index files" },
+    {
+      name: "--warc-dedup",
+      description: "Do not store records listed in this CDX file",
+      args: { name: "FILENAME", template: "filepaths" },
+    },
+    {
+      name: "--no-warc-compression",
+      description: "Do not compress WARC files with GZIP",
+    },
+    {
+      name: "--no-warc-digests",
+      description: "Do not calculate SHA1 digests",
+    },
+    {
+      name: "--no-warc-keep-log",
+      description: "Do not store the log file in a WARC record",
+    },
+    {
+      name: "--warc-tempdir",
+      description: "Location for temporary files created by the WARC writer",
+      args: folder("DIRECTORY"),
+    },
+
+    // Recursive download
     { name: ["-r", "--recursive"], description: "Specify recursive download" },
     {
-      name: ["-l", "--level=NUMBER"],
+      name: ["-l", "--level"],
       description: "Maximum recursion depth (inf or 0 for infinite)",
+      args: { name: "NUMBER", suggestions: ["0", "inf"] },
     },
     {
       name: "--delete-after",
@@ -326,6 +692,11 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-k", "--convert-links"],
       description: "Make links in downloaded HTML or CSS point to local files",
+    },
+    {
+      name: "--convert-file-only",
+      description:
+        "Convert the file part of the URLs only (usually known as the basename)",
     },
     {
       name: ["-K", "--backup-converted"],
@@ -340,41 +711,59 @@ const completionSpec: Fig.Spec = {
       description: "Get all images, etc. needed to display HTML page",
     },
     {
-      name: ["-A", "--accept=LIST"],
+      name: "--strict-comments",
+      description: "Turn on strict (SGML) handling of HTML comments",
+    },
+
+    // Recursive accept/reject
+    {
+      name: ["-A", "--accept"],
       description: "Comma-separated list of accepted extensions",
+      args: list("LIST"),
     },
     {
-      name: ["-R", "--reject=LIST"],
+      name: ["-R", "--reject"],
       description: "Comma-separated list of rejected extensions",
+      args: list("LIST"),
     },
     {
-      name: "--accept-regex=REGEX",
+      name: "--accept-regex",
       description: "Regex matching accepted URLs",
+      args: { name: "REGEX" },
     },
     {
-      name: "--reject-regex=REGEX",
+      name: "--reject-regex",
       description: "Regex matching rejected URLs",
+      args: { name: "REGEX" },
     },
-    { name: "--regex-type=TYPE", description: "Regex type (posix)" },
     {
-      name: ["-D", "--domains=LIST"],
+      name: "--regex-type",
+      description: "Regex type (pcre needs a build with PCRE support)",
+      args: { name: "TYPE", suggestions: ["posix", "pcre"] },
+    },
+    {
+      name: ["-D", "--domains"],
       description: "Comma-separated list of accepted domains",
+      args: list("LIST"),
     },
     {
-      name: "--exclude-domains=LIST",
+      name: "--exclude-domains",
       description: "Comma-separated list of rejected domains",
+      args: list("LIST"),
     },
     {
       name: "--follow-ftp",
       description: "Follow FTP links from HTML documents",
     },
     {
-      name: "--follow-tags=LIST",
+      name: "--follow-tags",
       description: "Comma-separated list of followed HTML tags",
+      args: list("LIST"),
     },
     {
-      name: "--ignore-tags=LIST",
+      name: "--ignore-tags",
       description: "Comma-separated list of ignored HTML tags",
+      args: list("LIST"),
     },
     {
       name: ["-H", "--span-hosts"],
@@ -382,12 +771,19 @@ const completionSpec: Fig.Spec = {
     },
     { name: ["-L", "--relative"], description: "Follow relative links only" },
     {
-      name: ["-I", "--include-directories=LIST"],
+      name: ["-I", "--include-directories"],
       description: "List of allowed directories",
+      args: list("LIST"),
     },
     {
-      name: ["-X", "--exclude-directories=LIST"],
+      name: "--trust-server-names",
+      description:
+        "Use the name specified by the redirection URL's last component",
+    },
+    {
+      name: ["-X", "--exclude-directories"],
       description: "List of excluded directories",
+      args: list("LIST"),
     },
     {
       name: ["-np", "--no-parent"],
@@ -395,210 +791,5 @@ const completionSpec: Fig.Spec = {
     },
   ],
 };
-
-// GNU Wget 1.20.3, a non-interactive network retriever.
-// Usage: wget [OPTION]... [URL]...
-
-// Mandatory arguments to long options are mandatory for short options too.
-
-// Startup:
-//   -V,  --version                   display the version of Wget and exit
-//   -h,  --help                      print this help
-//   -b,  --background                go to background after startup
-//   -e,  --execute=COMMAND           execute a `.wgetrc'-style command
-
-// Logging and input file:
-//   -o,  --output-file=FILE          log messages to FILE
-//   -a,  --append-output=FILE        append messages to FILE
-//   -q,  --quiet                     quiet (no output)
-//   -v,  --verbose                   be verbose (this is the default)
-//   -nv, --no-verbose                turn off verboseness, without being quiet
-//        --report-speed=TYPE         output bandwidth as TYPE.  TYPE can be bits
-//   -i,  --input-file=FILE           download URLs found in local or external FILE
-//   -F,  --force-html                treat input file as HTML
-//   -B,  --base=URL                  resolves HTML input-file links (-i -F)
-//                                      relative to URL
-//        --config=FILE               specify config file to use
-//        --no-config                 do not read any config file
-//        --rejected-log=FILE         log reasons for URL rejection to FILE
-
-// Download:
-//   -t,  --tries=NUMBER              set number of retries to NUMBER (0 unlimits)
-//        --retry-connrefused         retry even if connection is refused
-//        --retry-on-http-error=ERRORS    comma-separated list of HTTP errors to retry
-//   -O,  --output-document=FILE      write documents to FILE
-//   -nc, --no-clobber                skip downloads that would download to
-//                                      existing files (overwriting them)
-//        --no-netrc                  don't try to obtain credentials from .netrc
-//   -c,  --continue                  resume getting a partially-downloaded file
-//        --start-pos=OFFSET          start downloading from zero-based position OFFSET
-//        --progress=TYPE             select progress gauge type
-//        --show-progress             display the progress bar in any verbosity mode
-//   -N,  --timestamping              don't re-retrieve files unless newer than
-//                                      local
-//        --no-if-modified-since      don't use conditional if-modified-since get
-//                                      requests in timestamping mode
-//        --no-use-server-timestamps  don't set the local file's timestamp by
-//                                      the one on the server
-//   -S,  --server-response           print server response
-//        --spider                    don't download anything
-//   -T,  --timeout=SECONDS           set all timeout values to SECONDS
-//        --dns-timeout=SECS          set the DNS lookup timeout to SECS
-//        --connect-timeout=SECS      set the connect timeout to SECS
-//        --read-timeout=SECS         set the read timeout to SECS
-//   -w,  --wait=SECONDS              wait SECONDS between retrievals
-//        --waitretry=SECONDS         wait 1..SECONDS between retries of a retrieval
-//        --random-wait               wait from 0.5*WAIT...1.5*WAIT secs between retrievals
-//        --no-proxy                  explicitly turn off proxy
-//   -Q,  --quota=NUMBER              set retrieval quota to NUMBER
-//        --bind-address=ADDRESS      bind to ADDRESS (hostname or IP) on local host
-//        --limit-rate=RATE           limit download rate to RATE
-//        --no-dns-cache              disable caching DNS lookups
-//        --restrict-file-names=OS    restrict chars in file names to ones OS allows
-//        --ignore-case               ignore case when matching files/directories
-//   -4,  --inet4-only                connect only to IPv4 addresses
-//   -6,  --inet6-only                connect only to IPv6 addresses
-//        --prefer-family=FAMILY      connect first to addresses of specified family,
-//                                      one of IPv6, IPv4, or none
-//        --user=USER                 set both ftp and http user to USER
-//        --password=PASS             set both ftp and http password to PASS
-//        --ask-password              prompt for passwords
-//        --use-askpass=COMMAND       specify credential handler for requesting
-//                                      username and password.  If no COMMAND is
-//                                      specified the WGET_ASKPASS or the SSH_ASKPASS
-//                                      environment variable is used.
-//        --no-iri                    turn off IRI support
-//        --local-encoding=ENC        use ENC as the local encoding for IRIs
-//        --remote-encoding=ENC       use ENC as the default remote encoding
-//        --unlink                    remove file before clobber
-//        --xattr                     turn on storage of metadata in extended file attributes
-
-// Directories:
-//   -nd, --no-directories            don't create directories
-//   -x,  --force-directories         force creation of directories
-//   -nH, --no-host-directories       don't create host directories
-//        --protocol-directories      use protocol name in directories
-//   -P,  --directory-prefix=PREFIX   save files to PREFIX/..
-//        --cut-dirs=NUMBER           ignore NUMBER remote directory components
-
-// HTTP options:
-//        --http-user=USER            set http user to USER
-//        --http-password=PASS        set http password to PASS
-//        --no-cache                  disallow server-cached data
-//        --default-page=NAME         change the default page name (normally
-//                                      this is 'index.html'.)
-//   -E,  --adjust-extension          save HTML/CSS documents with proper extensions
-//        --ignore-length             ignore 'Content-Length' header field
-//        --header=STRING             insert STRING among the headers
-//        --compression=TYPE          choose compression, one of auto, gzip and none. (default: none)
-//        --max-redirect              maximum redirections allowed per page
-//        --proxy-user=USER           set USER as proxy username
-//        --proxy-password=PASS       set PASS as proxy password
-//        --referer=URL               include 'Referer: URL' header in HTTP request
-//        --save-headers              save the HTTP headers to file
-//   -U,  --user-agent=AGENT          identify as AGENT instead of Wget/VERSION
-//        --no-http-keep-alive        disable HTTP keep-alive (persistent connections)
-//        --no-cookies                don't use cookies
-//        --load-cookies=FILE         load cookies from FILE before session
-//        --save-cookies=FILE         save cookies to FILE after session
-//        --keep-session-cookies      load and save session (non-permanent) cookies
-//        --post-data=STRING          use the POST method; send STRING as the data
-//        --post-file=FILE            use the POST method; send contents of FILE
-//        --method=HTTPMethod         use method "HTTPMethod" in the request
-//        --body-data=STRING          send STRING as data. --method MUST be set
-//        --body-file=FILE            send contents of FILE. --method MUST be set
-//        --content-disposition       honor the Content-Disposition header when
-//                                      choosing local file names (EXPERIMENTAL)
-//        --content-on-error          output the received content on server errors
-//        --auth-no-challenge         send Basic HTTP authentication information
-//                                      without first waiting for the server's
-//                                      challenge
-
-// HTTPS (SSL/TLS) options:
-//        --secure-protocol=PR        choose secure protocol, one of auto, SSLv2,
-//                                      SSLv3, TLSv1, TLSv1_1, TLSv1_2 and PFS
-//        --https-only                only follow secure HTTPS links
-//        --no-check-certificate      don't validate the server's certificate
-//        --certificate=FILE          client certificate file
-//        --certificate-type=TYPE     client certificate type, PEM or DER
-//        --private-key=FILE          private key file
-//        --private-key-type=TYPE     private key type, PEM or DER
-//        --ca-certificate=FILE       file with the bundle of CAs
-//        --ca-directory=DIR          directory where hash list of CAs is stored
-//        --crl-file=FILE             file with bundle of CRLs
-//        --pinnedpubkey=FILE/HASHES  Public key (PEM/DER) file, or any number
-//                                    of base64 encoded sha256 hashes preceded by
-//                                    'sha256//' and separated by ';', to verify
-//                                    peer against
-//        --random-file=FILE          file with random data for seeding the SSL PRNG
-
-//        --ciphers=STR           Set the priority string (GnuTLS) or cipher list string (OpenSSL) directly.
-//                                    Use with care. This option overrides --secure-protocol.
-//                                    The format and syntax of this string depend on the specific SSL/TLS engine.
-// HSTS options:
-//        --no-hsts                   disable HSTS
-//        --hsts-file                 path of HSTS database (will override default)
-
-// FTP options:
-//        --ftp-user=USER             set ftp user to USER
-//        --ftp-password=PASS         set ftp password to PASS
-//        --no-remove-listing         don't remove '.listing' files
-//        --no-glob                   turn off FTP file name globbing
-//        --no-passive-ftp            disable the "passive" transfer mode
-//        --preserve-permissions      preserve remote file permissions
-//        --retr-symlinks             when recursing, get linked-to files (not dir)
-
-// FTPS options:
-//        --ftps-implicit                 use implicit FTPS (default port is 990)
-//        --ftps-resume-ssl               resume the SSL/TLS session started in the control connection when
-//                                          opening a data connection
-//        --ftps-clear-data-connection    cipher the control channel only; all the data will be in plaintext
-//        --ftps-fallback-to-ftp          fall back to FTP if FTPS is not supported in the target server
-// WARC options:
-//        --warc-file=FILENAME        save request/response data to a .warc.gz file
-//        --warc-header=STRING        insert STRING into the warcinfo record
-//        --warc-max-size=NUMBER      set maximum size of WARC files to NUMBER
-//        --warc-cdx                  write CDX index files
-//        --warc-dedup=FILENAME       do not store records listed in this CDX file
-//        --no-warc-compression       do not compress WARC files with GZIP
-//        --no-warc-digests           do not calculate SHA1 digests
-//        --no-warc-keep-log          do not store the log file in a WARC record
-//        --warc-tempdir=DIRECTORY    location for temporary files created by the
-//                                      WARC writer
-
-// Recursive download:
-//   -r,  --recursive                 specify recursive download
-//   -l,  --level=NUMBER              maximum recursion depth (inf or 0 for infinite)
-//        --delete-after              delete files locally after downloading them
-//   -k,  --convert-links             make links in downloaded HTML or CSS point to
-//                                      local files
-//        --convert-file-only         convert the file part of the URLs only (usually known as the basename)
-//        --backups=N                 before writing file X, rotate up to N backup files
-//   -K,  --backup-converted          before converting file X, back up as X.orig
-//   -m,  --mirror                    shortcut for -N -r -l inf --no-remove-listing
-//   -p,  --page-requisites           get all images, etc. needed to display HTML page
-//        --strict-comments           turn on strict (SGML) handling of HTML comments
-
-// Recursive accept/reject:
-//   -A,  --accept=LIST               comma-separated list of accepted extensions
-//   -R,  --reject=LIST               comma-separated list of rejected extensions
-//        --accept-regex=REGEX        regex matching accepted URLs
-//        --reject-regex=REGEX        regex matching rejected URLs
-//        --regex-type=TYPE           regex type (posix)
-//   -D,  --domains=LIST              comma-separated list of accepted domains
-//        --exclude-domains=LIST      comma-separated list of rejected domains
-//        --follow-ftp                follow FTP links from HTML documents
-//        --follow-tags=LIST          comma-separated list of followed HTML tags
-//        --ignore-tags=LIST          comma-separated list of ignored HTML tags
-//   -H,  --span-hosts                go to foreign hosts when recursive
-//   -L,  --relative                  follow relative links only
-//   -I,  --include-directories=LIST  list of allowed directories
-//        --trust-server-names        use the name specified by the redirection
-//                                      URL's last component
-//   -X,  --exclude-directories=LIST  list of excluded directories
-//   -np, --no-parent                 don't ascend to the parent directory
-
-// Email bug reports, questions, discussions to <bug-wget@gnu.org>
-// and/or open issues at https://savannah.gnu.org/bugs/?func=additem&group=wget.
 
 export default completionSpec;

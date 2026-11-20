@@ -1,3 +1,4 @@
+// split (macOS BSD split, Apple OSS text_cmds-199 (split unchanged since text_cmds-190.0.1 / macOS 15), man page dated 2023-05-26, 2026-11-19). Source: apple-oss-distributions/text_cmds split/split.1 + split/split.c (getopt "0::..9::a:b:cdl:n:p:"); man page and source only, not run on macOS. Changes: added -c and -n, -b/-l/-n/-p are mutually exclusive (usage() in split.c), -a default documented, descriptions refreshed. GNU-only options (--suffix-length, -e, -t, --filter, ...) are not on macOS and are not listed.
 const completionSpec: Fig.Spec = {
   name: "split",
   description:
@@ -6,7 +7,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-a",
       description:
-        "Use suffix_length letters to form the suffix of the file name",
+        "Use suffix_length letters to form the suffix of the file name (two letters by default)",
       args: {
         name: "suffix_length",
       },
@@ -19,28 +20,43 @@ const completionSpec: Fig.Spec = {
         name: "byte_count",
         description: "N[K|k|M|m|G|g]",
       },
-      exclusiveOn: ["-p"],
+      exclusiveOn: ["-l", "-n", "-p"],
+    },
+    {
+      name: "-c",
+      description:
+        "Continue creating files and do not overwrite existing output files",
     },
     {
       name: "-d",
-      description: "Use a numeric suffix instead of a alphabetic suffix",
+      description: "Use a numeric suffix instead of an alphabetic suffix",
     },
     {
       name: "-l",
-      description: "Create split files line_count lines in length",
+      description:
+        "Create split files line_count lines in length (1000 by default)",
       args: {
         name: "line_count",
       },
-      exclusiveOn: ["-p"],
+      exclusiveOn: ["-b", "-n", "-p"],
+    },
+    {
+      name: "-n",
+      description:
+        "Split file into chunk_count smaller files. The first n - 1 files will be of size (size of file / chunk_count) and the last file will contain the remaining bytes",
+      args: {
+        name: "chunk_count",
+      },
+      exclusiveOn: ["-b", "-l", "-p"],
     },
     {
       name: "-p",
       description:
-        "The file is split whenever an input line matches pattern, which is interpreted as an extended regular expression. The matching line will be the first line of the next output file. This option is incompatible with the -b and -l options",
+        "The file is split whenever an input line matches pattern, which is interpreted as an extended regular expression. The matching line will be the first line of the next output file. This option is incompatible with the -b, -l and -n options",
       args: {
         name: "pattern",
       },
-      exclusiveOn: ["-b", "-l"],
+      exclusiveOn: ["-b", "-l", "-n"],
     },
   ],
   args: [

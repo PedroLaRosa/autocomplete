@@ -1,7 +1,13 @@
+// adb 1.0.41, Android SDK Platform-Tools 37.0.1 (Homebrew android-platform-tools cask, 2026-11-20).
+// Source: AOSP packages/modules/adb client/commandline.cpp, client/adb_install.cpp, docs/user/adb.1.md read statically
+// at the 26Q2-release commit 9084198 (pinned by nmeum/android-tools 37.0.0p1) and at GrapheneOS mirror tag 2026111800
+// (client sources identical). Not run: the platform-tools 37.0.1 binary was not available, so any change made only in 37.0.1 is unchecked.
 const installOptions: Fig.Option[] = [
   {
     name: "-l",
-    description: "Forward-lock the app",
+    description:
+      "Forward-lock the app (no longer supported by the package manager)",
+    deprecated: true,
   },
   {
     name: "-r",
@@ -17,7 +23,9 @@ const installOptions: Fig.Option[] = [
   },
   {
     name: "-s",
-    description: "Install on SD card instead of internal storage",
+    description:
+      "Install on SD card instead of internal storage (no longer supported by the package manager)",
+    deprecated: true,
   },
   {
     name: "-g",
@@ -42,6 +50,18 @@ const installOptions: Fig.Option[] = [
   {
     description: "Force streaming APK directly into Package Manager",
     name: "--streaming",
+  },
+  {
+    description: "Use incremental installation",
+    name: "--incremental",
+  },
+  {
+    description: "Disable incremental installation",
+    name: "--no-incremental",
+  },
+  {
+    description: "Wait for an incremental installation to finish",
+    name: "--wait",
   },
   {
     description: "Use fast deploy",
@@ -72,10 +92,10 @@ const installOptions: Fig.Option[] = [
   },
 ];
 
-const compressionOptions: Fig.Option[] = [
+const transferOptions: Fig.Option[] = [
   {
     description:
-      "Enable compression with a specified algorithm (any, none, brotli)",
+      "Enable compression with a specified algorithm (any, none, brotli, lz4, zstd)",
     name: "-z",
     args: {
       name: "ALGORITHM",
@@ -89,12 +109,22 @@ const compressionOptions: Fig.Option[] = [
         {
           name: "brotli",
         },
+        {
+          name: "lz4",
+        },
+        {
+          name: "zstd",
+        },
       ],
     },
   },
   {
     description: "Disable compression",
     name: "-Z",
+  },
+  {
+    description: "Suppress progress messages",
+    name: "-q",
   },
 ];
 
@@ -120,8 +150,16 @@ const forwardConnectionSuggestions: Fig.Suggestion[] = [
     insertValue: "dev:",
   },
   {
+    name: "dev-raw",
+    insertValue: "dev-raw:",
+  },
+  {
     name: "jdwp",
     insertValue: "jdwp:",
+  },
+  {
+    name: "vsock",
+    insertValue: "vsock:",
   },
   {
     name: "acceptfd",
@@ -145,6 +183,19 @@ const reverseConnectionSuggestions: Fig.Suggestion[] = [
   {
     name: "localfilesystem",
     insertValue: "localfilesystem:",
+  },
+];
+
+const protoFormatOptions = (exclusiveWith: string[] = []): Fig.Option[] => [
+  {
+    name: "--proto-text",
+    description: "Output as text protobuf",
+    exclusiveOn: [...exclusiveWith, "--proto-binary"],
+  },
+  {
+    name: "--proto-binary",
+    description: "Output as binary protobuf",
+    exclusiveOn: [...exclusiveWith, "--proto-text"],
   },
 ];
 
@@ -210,6 +261,7 @@ const completionSpec: Fig.Spec = {
       description: "Sideload the given full OTA package",
       args: {
         name: "OTAPACKAGE",
+        template: "filepaths",
       },
     },
     {
@@ -229,7 +281,7 @@ const completionSpec: Fig.Spec = {
           name: "device",
         },
         {
-          description: "Reset offline/unauthorized devices to force reconnect`",
+          description: "Reset offline/unauthorized devices to force reconnect",
           name: "offline",
         },
       ],
@@ -407,13 +459,18 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: "-k",
-          description: "Keep the data and cache directories",
+          description:
+            "Keep the data and cache directories (the adb client currently refuses this; use `adb shell cmd package uninstall -k`)",
         },
       ],
+      args: {
+        name: "PACKAGE",
+      },
     },
     {
       name: "bugreport",
-      description: "Write bugreport to given PATH [default=bugreport.zip];",
+      description:
+        "Write bugreport to given PATH [default=bugreport.zip]; if PATH is a directory, the bug report is saved in that directory",
       args: {
         name: "PATH",
         isOptional: true,
@@ -428,20 +485,6 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "[PAIRING CODE]",
-          isOptional: true,
-        },
-      ],
-    },
-    {
-      name: "ppp",
-      description: "Run PPP over USB",
-      args: [
-        {
-          name: "TTY",
-        },
-        {
-          name: "[PARAMETER...]",
-          isVariadic: true,
           isOptional: true,
         },
       ],
@@ -504,6 +547,9 @@ const completionSpec: Fig.Spec = {
         {
           name: "-e",
           description: "Choose escape character, or `none` default '~'",
+          args: {
+            name: "ESCAPE",
+          },
         },
         {
           name: "-n",
@@ -519,7 +565,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "-tt",
-          description: "-tt: force pty allocation",
+          description: "Force pty allocation",
         },
         {
           name: "-x",
@@ -544,6 +590,16 @@ const completionSpec: Fig.Spec = {
           name: "services",
           description: "List all discovered services",
         },
+        {
+          name: "track-services",
+          description: "Stream discovered services",
+          options: protoFormatOptions(),
+        },
+        {
+          name: "list-known-hosts",
+          description: "Show ADB Wi-Fi paired devices",
+          options: protoFormatOptions(),
+        },
       ],
     },
     {
@@ -552,7 +608,7 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           description:
-            "Only push files that are newer on the host than the device",
+            "Only push files that have different timestamps on the host than the device",
           name: "--sync",
         },
         {
@@ -560,7 +616,7 @@ const completionSpec: Fig.Spec = {
             "Dry run: push files to device without storing to the filesystem",
           name: "-n",
         },
-        ...compressionOptions,
+        ...transferOptions,
       ],
       args: [
         {
@@ -587,7 +643,7 @@ const completionSpec: Fig.Spec = {
           description: "List files that would be copied, but don't copy them",
           name: "-l",
         },
-        ...compressionOptions,
+        ...transferOptions,
       ],
       args: {
         isOptional: true,
@@ -627,16 +683,16 @@ const completionSpec: Fig.Spec = {
           description: "Preserve file timestamp and mode",
           name: "-a",
         },
-        ...compressionOptions,
+        ...transferOptions,
       ],
       args: [
         {
           name: "REMOTE",
           isVariadic: true,
-          template: "filepaths",
         },
         {
           name: "LOCAL",
+          template: "filepaths",
         },
       ],
     },
@@ -662,7 +718,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--no-rebind",
           description:
-            "Reversal fails if the specified socket is already bound through a previous reverse command",
+            "Forwarding fails if the specified socket is already bound through a previous forward command",
         },
       ],
       args: [
@@ -711,6 +767,131 @@ const completionSpec: Fig.Spec = {
           suggestions: reverseConnectionSuggestions,
         },
       ],
+    },
+    {
+      name: "server-status",
+      description:
+        "Display server configuration (USB backend, mDNS backend, log location, binary path)",
+    },
+    {
+      name: "attach",
+      description: "Attach a detached USB device (libusb backend only)",
+    },
+    {
+      name: "detach",
+      description:
+        "Detach from a USB device to allow use by other processes (libusb backend only)",
+    },
+    {
+      name: "features",
+      description: "List features supported by both adb server and device",
+    },
+    {
+      name: "host-features",
+      description: "List features supported by adb server",
+    },
+    // ponytail: undocumented but accepted commands; internal plumbing (abb, raw, inc-server, server, ls, backup, restore, ...) left out
+    {
+      name: "transport-id",
+      description: "Print the transport id of the selected device",
+      hidden: true,
+    },
+    {
+      name: "reboot-bootloader",
+      description:
+        "Reboot the device into the bootloader (same as reboot bootloader)",
+      hidden: true,
+    },
+    {
+      name: "reboot-fastboot",
+      description: "Reboot the device into userspace fastboot (fastbootd)",
+      hidden: true,
+    },
+    {
+      name: "rescue",
+      description: "Interact with a device in rescue mode",
+      hidden: true,
+      subcommands: [
+        {
+          name: "getprop",
+          description: "Print system properties of the device in rescue mode",
+          args: {
+            name: "PROPERTY",
+            isOptional: true,
+          },
+        },
+        {
+          name: "install",
+          description: "Install an OTA package on the device in rescue mode",
+          args: {
+            name: "OTAPACKAGE",
+            template: "filepaths",
+          },
+        },
+        {
+          name: "wipe",
+          description: "Wipe the device in rescue mode",
+          args: {
+            name: "TARGET",
+            suggestions: ["userdata"],
+          },
+        },
+      ],
+    },
+    {
+      name: "track-jdwp",
+      description:
+        "Continuously list pids of processes hosting a JDWP transport as they change",
+      hidden: true,
+    },
+    {
+      name: "track-app",
+      description:
+        "Continuously list debuggable and profileable app processes as they change",
+      hidden: true,
+      options: protoFormatOptions(),
+    },
+    {
+      name: "exec-out",
+      description:
+        "Run remote command without a pty, streaming raw binary stdout",
+      hidden: true,
+      args: {
+        name: "COMMAND",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "exec-in",
+      description:
+        "Run remote command without a pty, streaming raw stdin to it",
+      hidden: true,
+      args: {
+        name: "COMMAND",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "track-devices",
+      description:
+        "Same as the devices command, but does not return; it sends updates when the list of devices changes",
+      options: [
+        {
+          name: "-l",
+          description: "Use legacy long output",
+          exclusiveOn: ["--proto-text", "--proto-binary"],
+        },
+        ...protoFormatOptions(["-l"]),
+      ],
+    },
+    {
+      name: "pubkey",
+      description: "Print the public key for the given private key FILE",
+      hidden: true,
+      args: {
+        name: "FILE",
+        template: "filepaths",
+      },
     },
   ],
   options: [
@@ -762,6 +943,18 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "socket",
       },
+    },
+    {
+      description:
+        "Only with 'start-server' or 'server nodaemon': the server only connects to the given USB device",
+      name: "--one-device",
+      args: {
+        name: "SERIAL|USB",
+      },
+    },
+    {
+      description: "Exit if stdout is closed",
+      name: "--exit-on-write-error",
     },
   ],
 };

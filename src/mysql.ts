@@ -1,8 +1,31 @@
+// mysql v26.10.0 Innovation (github.com/mysql/mysql-server tag mysql-26.10.0, 2026-11-20; current LTS is 9.7.4). Source: static read of client/mysql.cc (my_long_options),
+// client/include/*opt-longopts.h, mysys/my_default.cc and sql-common/client.cc; the binary was not run.
+// Options that exist only in 26.x (--force-pqc, --use-pqc-sign, --tls-kex) are missing from 9.7 LTS and 8.4 LTS.
 const completionSpec: Fig.Spec = {
   name: "mysql",
   description: "Mysql is a terminal-based front-end to MySQL",
-  args: {},
+  args: {
+    name: "database",
+    description: "Database to use",
+    isOptional: true,
+  },
   options: [
+    {
+      name: "--authentication-oci-client-config-profile",
+      description:
+        "Configuration profile to read from the OCI configuration file. Default is DEFAULT",
+      args: {
+        name: "profile",
+      },
+    },
+    {
+      name: "--authentication-openid-connect-client-id-token-file",
+      description: "Location of the OpenID Connect ID token file",
+      args: {
+        name: "file_name",
+        template: "filepaths",
+      },
+    },
     {
       name: "--auto-rehash",
       description: "Enable automatic rehashing",
@@ -49,13 +72,19 @@ const completionSpec: Fig.Spec = {
       description: "Display result set metadata",
     },
     {
+      name: "--commands",
+      description: "Enable or disable processing of local mysql commands",
+    },
+    {
       name: ["--comments", "-c"],
       description:
         "Whether to retain or strip comments in statements sent to the server",
     },
     {
       name: ["--compress", "-C"],
-      description: "Compress all information sent between client and server",
+      description:
+        "Compress all information sent between client and server. Deprecated, use --compression-algorithms instead",
+      deprecated: true,
     },
     {
       name: "--compression-algorithms",
@@ -89,9 +118,13 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--debug",
+      name: ["-#", "--debug"],
       description:
         "Write debugging log; supported only if MySQL was built with debugging support",
+      args: {
+        name: "debug_options",
+        isOptional: true,
+      },
     },
     {
       name: "--debug-check",
@@ -174,16 +207,23 @@ const completionSpec: Fig.Spec = {
       description: "Continue even if an SQL error occurs",
     },
     {
+      name: "--force-pqc",
+      description: "Require a PQC-compatible TLS key exchange",
+    },
+    {
       name: "--get-server-public-key",
       description: "Request RSA public key from server",
     },
     {
-      name: ["--help", "-?"],
+      name: ["--help", "-?", "-I"],
       description: "Display help message and exit",
     },
     {
       name: "--histignore",
       description: "Patterns specifying which statements to ignore for logging",
+      args: {
+        name: "pattern_list",
+      },
     },
     {
       name: ["-h", "--host"],
@@ -209,6 +249,15 @@ const completionSpec: Fig.Spec = {
       insertValue: "{cursor}'",
     },
     {
+      name: "--init-command-add",
+      description:
+        "Add SQL statement to the list to execute after connecting. Re-executed on reconnect",
+      args: {
+        name: "command",
+      },
+      insertValue: "{cursor}'",
+    },
+    {
       name: "--line-numbers",
       description: "Write line numbers for errors",
     },
@@ -223,8 +272,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "--local-infile",
       description: "Enable or disable for LOCAL capability for LOAD DATA",
+      requiresSeparator: true,
       args: {
-        name: "is-local-inflie",
+        name: "is-local-infile",
+        isOptional: true,
         suggestions: [
           {
             name: "0",
@@ -290,6 +341,19 @@ const completionSpec: Fig.Spec = {
       description: "Read no option files",
     },
     {
+      name: "--no-login-paths",
+      description: "Do not read login paths from the login path file",
+    },
+    {
+      name: "--oci-config-file",
+      description:
+        "Location of the OCI configuration file. Default is ~/.oci/config on Linux",
+      args: {
+        name: "file_name",
+        template: "filepaths",
+      },
+    },
+    {
       name: ["-o", "--one-database"],
       description:
         "Ignore statements except those for the default database named on the command line",
@@ -297,8 +361,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "--pager",
       description: "Use the given command for paging query output",
+      requiresSeparator: true,
       args: {
         name: "command",
+        isOptional: true,
       },
     },
     {
@@ -306,11 +372,58 @@ const completionSpec: Fig.Spec = {
       description: "Password to use when connecting to server",
       args: {
         name: "password",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--password1",
+      description: "Password for the first factor authentication plugin",
+      args: {
+        name: "password",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--password2",
+      description: "Password for the second factor authentication plugin",
+      args: {
+        name: "password",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--password3",
+      description: "Password for the third factor authentication plugin",
+      args: {
+        name: "password",
+        isOptional: true,
       },
     },
     {
       name: ["--pipe", "-W"],
       description: "Connect to server using named pipe (Windows only)",
+    },
+    {
+      name: "--plugin-authentication-kerberos-client-mode",
+      description:
+        "Kerberos authentication mode. Default is SSPI (Windows only)",
+      args: {
+        name: "mode",
+        suggestions: [{ name: "SSPI" }, { name: "GSSAPI" }],
+      },
+    },
+    {
+      name: "--plugin-authentication-webauthn-client-preserve-privacy",
+      description:
+        "Allow selection of the discoverable credential used to sign the challenge. By default all credentials for the relying party sign it",
+    },
+    {
+      name: "--plugin-authentication-webauthn-device",
+      description:
+        "Which libfido2 device to use. 0 (the first device) is the default",
+      args: {
+        name: "device",
+      },
     },
     {
       name: "--plugin-dir",
@@ -342,7 +455,7 @@ const completionSpec: Fig.Spec = {
       name: "--protocol",
       description: "Transport protocol to use",
       args: {
-        name: "format_str",
+        name: "protocol",
         suggestions: [
           { name: "TCP" },
           { name: "SOCKET" },
@@ -363,6 +476,13 @@ const completionSpec: Fig.Spec = {
       name: "--reconnect",
       description:
         "If the connection to the server is lost, automatically try to reconnect",
+    },
+    {
+      name: "--register-factor",
+      description: "Factor (or factors) for which to register authentication",
+      args: {
+        name: "factor_list",
+      },
     },
     {
       name: ["-U", "--safe-updates", "--i-am-a-dummy"],
@@ -435,7 +555,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-S", "--socket"],
       description:
-        'Unix socket file or Windows named pipe to use"File that contains list of trusted SSL Certificate Authorities"',
+        "Unix socket file or Windows named pipe to use for the connection",
       args: {
         name: "name",
       },
@@ -469,6 +589,9 @@ const completionSpec: Fig.Spec = {
     {
       name: "--ssl-cipher",
       description: "Permissible ciphers for connection encryption",
+      args: {
+        name: "cipher_list",
+      },
     },
     {
       name: "--ssl-crl",
@@ -505,6 +628,33 @@ const completionSpec: Fig.Spec = {
     {
       name: "--ssl-mode",
       description: "Desired security state of connection to server",
+      args: {
+        name: "mode",
+        suggestions: [
+          { name: "DISABLED" },
+          { name: "PREFERRED" },
+          { name: "REQUIRED" },
+          { name: "VERIFY_CA" },
+          { name: "VERIFY_IDENTITY" },
+        ],
+      },
+    },
+    {
+      name: "--ssl-session-data",
+      description: "Session data file to use to enable SSL session reuse",
+      args: {
+        name: "filename",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--ssl-session-data-continue-on-failed-reuse",
+      description:
+        "Allow the connection to succeed even if the session data cannot be reused",
+    },
+    {
+      name: "--system-command",
+      description: "Enable the system mysql command (disabled by default)",
     },
     {
       name: ["-j", "--syslog"],
@@ -523,11 +673,28 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--telemetry-client",
+      description: "Load the telemetry_client plugin",
+    },
+    {
       name: "--tls-ciphersuites",
       description: "Permissible TLSv1.3 ciphersuites for encrypted connections",
       args: {
         name: "ciphersuite_list",
-        template: "filepaths",
+      },
+    },
+    {
+      name: "--tls-kex",
+      description: "TLS key exchange groups to use",
+      args: {
+        name: "group_list",
+      },
+    },
+    {
+      name: "--tls-sni-servername",
+      description: "SNI server name to pass to the server",
+      args: {
+        name: "server_name",
       },
     },
     {
@@ -535,11 +702,17 @@ const completionSpec: Fig.Spec = {
       description: "Permissible TLS protocols for encrypted connections",
       args: {
         name: "protocol_list",
+        suggestions: [{ name: "TLSv1.2" }, { name: "TLSv1.3" }],
       },
     },
     {
       name: ["-n", "--unbuffered"],
       description: "Flush the buffer after each query",
+    },
+    {
+      name: "--use-pqc-sign",
+      description:
+        "Whether to advertise PQC TLS handshake signature algorithms. OFF advertises only classical ones",
     },
     {
       name: ["-u", "--user"],
@@ -550,7 +723,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-v", "--verbose"],
-      description: "Verbose mode",
+      description:
+        "Verbose mode. Give it three times for the table output format",
+      isRepeatable: true,
     },
     {
       name: ["-V", "--version"],

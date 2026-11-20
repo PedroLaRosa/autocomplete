@@ -1,3 +1,9 @@
+// GNU tar v1.35 (newest upstream release, 2023-07-18; cross-checked against Homebrew gnu-tar and the Ubuntu archive, 2026-11-19).
+// Source: tar-1.35 source tree read statically (src/tar.c + src/names.c argp option tables, src/warning.c, src/checkpoint.c,
+// doc/tar.1 from the Ubuntu tar_1.35+dfsg.orig tarball) and `tar --help` of the installed GNU tar 1.35.
+// Not covered: the Texinfo manual (stripped from the +dfsg tarball); ftp.gnu.org and savannah are unreachable from the sandbox.
+// This spec describes GNU tar only (bsdtar/libarchive on macOS differs).
+
 const sizeSuffixes: Fig.Suggestion[] = [
   { name: "Blocks", insertValue: "{cursor}b" },
   { name: "Bytes", insertValue: "{cursor}c" },
@@ -155,7 +161,49 @@ const compressionOptions: Fig.Option[] = [
   {
     name: "--checkpoint-action",
     description: "Run ACTION on each checkpoint",
-    args: { name: "ACTION" },
+    isRepeatable: true,
+    args: {
+      name: "ACTION",
+      suggestions: [
+        { name: "bell", description: "Ring the terminal bell" },
+        { name: "dot", description: "Print a dot to the standard listing" },
+        {
+          name: "echo",
+          insertValue: "echo={cursor}",
+          displayName: "echo=STRING",
+          description:
+            "Print STRING (or the default checkpoint message) to standard error",
+        },
+        {
+          name: "exec",
+          insertValue: "exec={cursor}",
+          displayName: "exec=COMMAND",
+          description: "Execute COMMAND",
+        },
+        {
+          name: "sleep",
+          insertValue: "sleep={cursor}",
+          displayName: "sleep=TIME",
+          description: "Sleep for TIME seconds",
+        },
+        {
+          name: "totals",
+          description: "Print the total bytes processed so far",
+        },
+        {
+          name: "ttyout",
+          insertValue: "ttyout={cursor}",
+          displayName: "ttyout=STRING",
+          description: "Write STRING to /dev/tty",
+        },
+        {
+          name: "wait",
+          insertValue: "wait={cursor}",
+          displayName: "wait=SIGNAL",
+          description: "Wait for SIGNAL",
+        },
+      ],
+    },
   },
   {
     name: "--full-time",
@@ -210,7 +258,7 @@ const dumpOptions: Fig.Option[] = [
     args: {
       name: "NAME[:GID]",
       description:
-        "If GID is not supplied, NAME can be either a user name or numeric GID",
+        "If GID is not supplied, NAME can be either a group name or numeric GID",
     },
   },
   {
@@ -242,7 +290,7 @@ const dumpOptions: Fig.Option[] = [
     name: "--owner",
     description: "Force NAME as owner for added files",
     args: {
-      name: "NAME[:GID]",
+      name: "NAME[:UID]",
       description:
         "If UID is not supplied, NAME can be either a user name or numeric UID",
     },
@@ -269,16 +317,13 @@ const dumpOptions: Fig.Option[] = [
   },
   {
     name: "--add-file",
-    description: "Add FILE to the archive",
+    description:
+      "Add FILE to the archive (useful if its name starts with a dash)",
+    isRepeatable: true,
     args: {
       name: "FILE",
       template: "filepaths",
     },
-  },
-  {
-    name: "--exclude",
-    description: "Exclude files matching PATTERN",
-    args: { name: "PATTERN", description: "A glob-style wildcard pattern" },
   },
   { name: "--exclude-backups", description: "Exclude backup and lock files" },
   {
@@ -352,10 +397,11 @@ const dumpOptions: Fig.Option[] = [
   },
   {
     name: ["N", "-N", "--newer", "--after-date"],
-    description: "Only store files newer than DATE",
+    description: "Only store files newer than DATE-OR-FILE",
     args: {
-      name: "DATE",
-      description: "If DATE starts with / or . it is taken to be a file name",
+      name: "DATE-OR-FILE",
+      description:
+        "If it starts with / or . it is taken to be a file name whose mtime is used",
       template: "filepaths",
     },
   },
@@ -366,54 +412,6 @@ const dumpOptions: Fig.Option[] = [
   {
     name: ["P", "-P", "--absolute-names"],
     description: "Don't strip leading slashes from file names",
-  },
-  {
-    name: "--anchored",
-    description: "Patterns match file name start",
-    dependsOn: ["--exclude"],
-    exclusiveOn: ["--no-anchored"],
-  },
-  {
-    name: "--ignore-case",
-    description: "Ignore case",
-    dependsOn: ["--exclude"],
-    exclusiveOn: ["--no-ignore-case"],
-  },
-  {
-    name: "--no-anchored",
-    description: "Patterns match after any /",
-    dependsOn: ["--exclude"],
-    exclusiveOn: ["--anchored"],
-  },
-  {
-    name: "--no-ignore-case",
-    description: "Case sensitive matching",
-    dependsOn: ["--exclude"],
-    exclusiveOn: ["--ignore-case"],
-  },
-  {
-    name: "--no-wildcards",
-    description: "Verbatim string matching",
-    dependsOn: ["--exclude"],
-    exclusiveOn: ["--wildcards"],
-  },
-  {
-    name: "--no-wildcards-match-slash",
-    description: "Wildcards do not match /",
-    dependsOn: ["--exclude", "--wildcards"],
-    exclusiveOn: ["--no-wildcards", "--wildcards-match-slash"],
-  },
-  {
-    name: "--wildcards",
-    description: "Use wildcards",
-    dependsOn: ["--exclude"],
-    exclusiveOn: ["--no-wildcards"],
-  },
-  {
-    name: "--wildcards-match-slash",
-    description: "Wildcards match /",
-    dependsOn: ["--exclude", "--wildcards"],
-    exclusiveOn: ["--no-wildcards", "--no-wildcards-match-slash"],
   },
   {
     name: "--clamp-mtime",
@@ -478,19 +476,115 @@ const readOptions: Fig.Option[] = [
   },
 ];
 
-const warningSuggestions: Fig.Suggestion[] = [
-  { name: "all", description: "Enable all warning messages" },
-  { name: "none", description: "Disable all warning messages" },
+// Keywords accepted by --warning (src/warning.c); each also accepts a "no-" prefix to disable it
+const warningKeywords: { name: string; description: string }[] = [
+  // General
   {
     name: "filename-with-nuls",
     description: '"%s: file name read contains nul character"',
   },
-  {
-    name: "no-filename-with-nuls",
-    description: 'No "%s: file name read contains nul character"',
-  },
   { name: "alone-zero-block", description: '"A lone zero block at %s"' },
-  { name: "no-alone-zero-block", description: 'No "A lone zero block at %s"' },
+  {
+    name: "missing-zero-blocks",
+    description: '"Terminating zero blocks missing at %s" (off by default)',
+  },
+  {
+    name: "verbose",
+    description:
+      "The group of warnings enabled by --verbose: rename-directory, new-directory, decompress-program, existing-file and record-size",
+  },
+  // Creating archives
+  {
+    name: "cachedir",
+    description: '"%s: contains a cache directory tag %s; %s"',
+  },
+  {
+    name: "file-shrank",
+    description: '"%s: File shrank by %s bytes; padding with zeros"',
+  },
+  {
+    name: "xdev",
+    description:
+      '"%s: file is on a different filesystem; not dumped", "%s: directory is on a different device: not purging"',
+  },
+  {
+    name: "file-ignored",
+    description:
+      '"%s: Unknown file type; file ignored", "%s: socket ignored", "%s: door ignored"',
+  },
+  {
+    name: "file-unchanged",
+    description: '"%s: file is unchanged; not dumped"',
+  },
+  {
+    name: "ignore-archive",
+    description: '"%s: archive cannot contain itself; not dumped"',
+  },
+  {
+    name: "file-removed",
+    description: '"%s: File removed before we read it"',
+  },
+  { name: "file-changed", description: '"%s: file changed as we read it"' },
+  {
+    name: "failed-read",
+    description:
+      "Warnings about unreadable files or directories (applies only together with --ignore-failed-read)",
+  },
+  // Extracting archives
+  { name: "existing-file", description: '"%s: skipping existing file"' },
+  {
+    name: "timestamp",
+    description:
+      '"%s: implausibly old time stamp %s", "%s: time stamp %s is %s s in the future"',
+  },
+  {
+    name: "contiguous-cast",
+    description: '"Extracting contiguous files as regular files"',
+  },
+  {
+    name: "symlink-cast",
+    description: '"Attempting extraction of symbolic links as hard links"',
+  },
+  {
+    name: "unknown-cast",
+    description: "\"%s: Unknown file type '%c', extracted as normal file\"",
+  },
+  { name: "ignore-newer", description: '"Current %s is newer or same age"' },
+  {
+    name: "unknown-keyword",
+    description: "\"Ignoring unknown extended header keyword '%s'\"",
+  },
+  {
+    name: "decompress-program",
+    description:
+      "Verbose description of failures occurring when trying to run alternative decompressor programs",
+  },
+  { name: "record-size", description: '"Record size = %lu blocks"' },
+  {
+    name: "xattr-write",
+    description:
+      "Failures to set POSIX ACLs, extended attributes or SELinux contexts on extracted files",
+  },
+  // Incremental extraction
+  {
+    name: "rename-directory",
+    description:
+      '"%s: Directory has been renamed from %s", "%s: Directory has been renamed"',
+  },
+  { name: "new-directory", description: '"%s: Directory is new"' },
+  {
+    name: "bad-dumpdir",
+    description: "\"Malformed dumpdir: 'X' never used\"",
+  },
+];
+
+const warningSuggestions: Fig.Suggestion[] = [
+  { name: "all", description: "Enable all warning messages" },
+  { name: "none", description: "Disable all warning messages" },
+  ...warningKeywords.flatMap(({ name, description }) => [
+    { name, description },
+    { name: `no-${name}`, description: `Disable: ${description}` },
+  ]),
 ];
 
 const keepExclusives: string[] = [
@@ -543,13 +637,18 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--hole-detection",
-      description: "Use METHOD to detect holes in sparse files",
+      description: "Use METHOD to detect holes in sparse files (implies -S)",
       isPersistent: true,
       args: {
         name: "METHOD",
         default: "seek",
-        isOptional: true,
-        suggestions: ["seek", "raw"],
+        suggestions: [
+          { name: "seek", description: "Use SEEK_DATA and SEEK_HOLE" },
+          {
+            name: "raw",
+            description: "Scan the file contents for zero blocks",
+          },
+        ],
       },
     },
     {
@@ -560,9 +659,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--sparse-version",
-      description: "Set version of the sparse format to use",
+      description: "Set version of the sparse format to use (implies -S)",
       isPersistent: true,
-      dependsOn: ["S", "-S", "--sparse"],
       args: {
         name: "MAJOR[.MINOR]",
         suggestions: ["0", "0.1", "1"],
@@ -709,7 +807,7 @@ const completionSpec: Fig.Spec = {
       isPersistent: true,
     },
     {
-      name: "-null",
+      name: "--null",
       description:
         "Instruct subsequent -T options to read null-terminated names verbatim",
       dependsOn: ["T", "-T", "--files-from"],
@@ -785,6 +883,8 @@ const completionSpec: Fig.Spec = {
           "literal",
           "shell",
           "shell-always",
+          "shell-escape",
+          "shell-escape-always",
           "c",
           "c-maybe",
           "escape",
@@ -828,14 +928,82 @@ const completionSpec: Fig.Spec = {
       isPersistent: true,
     },
     {
+      name: "--warning",
+      description: "Enable or disable warning messages identified by KEYWORD",
+      isRepeatable: true,
+      isPersistent: true,
+      args: {
+        name: "KEYWORD",
+        default: "all",
+        suggestions: warningSuggestions,
+      },
+    },
+    {
       name: ["w", "-w", "--interactive", "--confirmation"],
       description: "Ask for confirmation for every action",
+    },
+    // File name matching options (affect both exclude and include patterns)
+    {
+      name: "--exclude",
+      description: "Exclude files matching PATTERN",
+      isRepeatable: true,
+      isPersistent: true,
+      args: { name: "PATTERN", description: "A glob-style wildcard pattern" },
+    },
+    {
+      name: "--anchored",
+      description: "Patterns match file name start",
+      isPersistent: true,
+      exclusiveOn: ["--no-anchored"],
+    },
+    {
+      name: "--no-anchored",
+      description: "Patterns match after any / (default for exclusion)",
+      isPersistent: true,
+      exclusiveOn: ["--anchored"],
+    },
+    {
+      name: "--ignore-case",
+      description: "Ignore case",
+      isPersistent: true,
+      exclusiveOn: ["--no-ignore-case"],
+    },
+    {
+      name: "--no-ignore-case",
+      description: "Case sensitive matching (default)",
+      isPersistent: true,
+      exclusiveOn: ["--ignore-case"],
+    },
+    {
+      name: "--wildcards",
+      description: "Use wildcards (default for exclusion)",
+      isPersistent: true,
+      exclusiveOn: ["--no-wildcards"],
+    },
+    {
+      name: "--no-wildcards",
+      description: "Verbatim string matching",
+      isPersistent: true,
+      exclusiveOn: ["--wildcards"],
+    },
+    {
+      name: "--wildcards-match-slash",
+      description: "Wildcards match / (default for exclusion)",
+      isPersistent: true,
+      exclusiveOn: ["--no-wildcards", "--no-wildcards-match-slash"],
+    },
+    {
+      name: "--no-wildcards-match-slash",
+      description: "Wildcards do not match /",
+      isPersistent: true,
+      exclusiveOn: ["--no-wildcards", "--wildcards-match-slash"],
     },
   ],
   subcommands: [
     {
       name: ["A", "-A", "--catenate", "--concatenate"],
       description: "Append archive to the end of another archive",
+      options: fileOptions,
       args: {
         name: "ARCHIVE",
         isVariadic: true,
@@ -919,16 +1087,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--pax-option",
           description: "Control pax keywords when creating PAX archives",
-          dependsOn: ["H", "-H", "--format"],
-          exclusiveOn: [
-            "--old-archive",
-            "--portability",
-            "--old-archive",
-            "--portability",
-            "--posix",
-            "o",
-            "-o",
-          ],
+          exclusiveOn: ["--old-archive", "--portability", "--posix", "o", "-o"],
           args: { name: "keyword[[:]=value][,keyword[[:]=value]]..." },
         },
         {
@@ -947,100 +1106,6 @@ const completionSpec: Fig.Spec = {
           name: ["V", "-V", "--label"],
           description: "Create archive with volume name TEXT",
           args: { name: "TEXT" },
-        },
-        {
-          name: "--warning",
-          description:
-            "Enable or disable warning messages identified by KEYWORD",
-          isRepeatable: true,
-          isPersistent: true,
-          args: {
-            name: "KEYWORD",
-            default: "all",
-            suggestions: [
-              ...warningSuggestions,
-              {
-                name: "cachedir",
-                description: '"%s: contains a cache directory tag %s; %s"',
-              },
-              {
-                name: "no-cachedir",
-                description: 'No "%s: contains a cache directory tag %s; %s"',
-              },
-              {
-                name: "file-shrank",
-                description:
-                  '"%s: File shrank by %s bytes; padding with zeros"',
-              },
-              {
-                name: "no-file-shrank",
-                description:
-                  'No "%s: File shrank by %s bytes; padding with zeros"',
-              },
-              {
-                name: "xdev",
-                description:
-                  '"%s: file is on a different filesystem; not dumped"',
-              },
-              {
-                name: "no-xdev",
-                description:
-                  'No "%s: file is on a different filesystem; not dumped"',
-              },
-              {
-                name: "file-ignored",
-                description:
-                  '"%s: Unknown file type; file ignored", "%s: socket ignored", "%s: door ignored"',
-              },
-              {
-                name: "no-file-ignored",
-                description:
-                  'No "%s: Unknown file type; file ignored", "%s: socket ignored", "%s: door ignored"',
-              },
-              {
-                name: "file-unchanged",
-                description: '"%s: file is unchanged; not dumped"',
-              },
-              {
-                name: "no-file-unchanged",
-                description: 'No "%s: file is unchanged; not dumped"',
-              },
-              {
-                name: "ignore-archive",
-                description: '"%s: file is the archive; not dumped"',
-              },
-              {
-                name: "no-ignore-archive",
-                description: 'No "%s: file is the archive; not dumped"',
-              },
-              {
-                name: "file-removed",
-                description: '"%s: File removed before we read it"',
-              },
-              {
-                name: "no-file-removed",
-                description: 'No "%s: File removed before we read it"',
-              },
-              {
-                name: "file-changed",
-                description: '"%s: file changed as we read it"',
-              },
-              {
-                name: "no-file-changed",
-                description: 'No "%s: file changed as we read it"',
-              },
-              {
-                name: "failed-read",
-                description:
-                  "Enables warnings about unreadable files or directories",
-              },
-              {
-                name: "no-failed-read",
-                description:
-                  "Suppresses warnings about unreadable files or directories",
-              },
-            ],
-          },
         },
         {
           name: ["o", "-o"],
@@ -1115,7 +1180,8 @@ const completionSpec: Fig.Spec = {
         ...readOptions,
         {
           name: ["k", "-k", "--keep-old-files"],
-          description: "Don't replace existing files when extracting",
+          description:
+            "Don't replace existing files when extracting, treat them as errors",
           exclusiveOn: [
             "--keep-newer-files",
             "--keep-directory-symlink",
@@ -1142,8 +1208,10 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--one-top-level",
-          description: "Extract all files into DIR",
-          args: { name: "DIR" },
+          description:
+            "Extract all files into a single top-level directory (DIR, or the archive name without its suffix)",
+          exclusiveOn: ["P", "-P", "--absolute-names"],
+          args: { name: "DIR", isOptional: true, template: "folders" },
         },
         {
           name: "--overwrite",
@@ -1242,133 +1310,6 @@ const completionSpec: Fig.Spec = {
           args: { name: "NUMBER" },
         },
         {
-          name: "--warning",
-          description:
-            "Enable or disable warning messages identified by KEYWORD",
-          isRepeatable: true,
-          isPersistent: true,
-          args: {
-            name: "KEYWORD",
-            default: "all",
-            suggestions: [
-              ...warningSuggestions,
-              {
-                name: "existing-file",
-                description: '"%s: skipping existing file"',
-              },
-              {
-                name: "no-existing-file",
-                description: 'No "%s: skipping existing file"',
-              },
-              {
-                name: "timestamp",
-                description:
-                  '"%s: implausibly old time stamp %s", "%s: time stamp %s is %s s in the future"',
-              },
-              {
-                name: "no-timestamp",
-                description:
-                  'No "%s: implausibly old time stamp %s", "%s: time stamp %s is %s s in the future"',
-              },
-              {
-                name: "contiguous-cast",
-                description: '"Extracting contiguous files as regular files"',
-              },
-              {
-                name: "no-contiguous-cast",
-                description:
-                  'No "Extracting contiguous files as regular files"',
-              },
-              {
-                name: "symlink-cast",
-                description:
-                  '"Attempting extraction of symbolic links as hard links"',
-              },
-              {
-                name: "no-symlink-cast",
-                description:
-                  'No "Attempting extraction of symbolic links as hard links"',
-              },
-              {
-                name: "unknown-cast",
-                description:
-                  "\"%s: Unknown file type '%c', extracted as normal file\"",
-              },
-              {
-                name: "no-unknown-cast",
-                description:
-                  "No \"%s: Unknown file type '%c', extracted as normal file\"",
-              },
-              {
-                name: "ignore-newer",
-                description: '"Current %s is newer or same age"',
-              },
-              {
-                name: "no-ignore-newer",
-                description: 'No "Current %s is newer or same age"',
-              },
-              {
-                name: "unknown-keyword",
-                description:
-                  "\"Ignoring unknown extended header keyword '%s'\"",
-              },
-              {
-                name: "no-unknown-keyword",
-                description:
-                  "No \"Ignoring unknown extended header keyword '%s'\"",
-              },
-              {
-                name: "decompress-program",
-                description:
-                  "Enables verbose description of failures occurring when trying to run alternative decompressor programs",
-              },
-              {
-                name: "no-decompress-program",
-                description:
-                  "Suppresses verbose description of failures occurring when trying to run alternative decompressor programs",
-              },
-              {
-                name: "record-size",
-                description: '"Record size = %lu blocks"',
-              },
-              {
-                name: "no-record-size",
-                description: 'No "Record size = %lu blocks"',
-              },
-              // Keywords controlling incremental extraction
-              {
-                name: "rename-directory",
-                description:
-                  '"%s: Directory has been renamed from %s", "%s: Directory has been renamed"',
-              },
-              {
-                name: "no-rename-directory",
-                description:
-                  'No "%s: Directory has been renamed from %s", "%s: Directory has been renamed"',
-              },
-              { name: "new-directory", description: '"%s: Directory is new"' },
-              {
-                name: "no-new-directory",
-                description: 'No "%s: Directory is new"',
-              },
-              {
-                name: "xdev",
-                description:
-                  '"%s: directory is on a different device: not purging"',
-              },
-              {
-                name: "no-xdev",
-                description:
-                  'No "%s: directory is on a different device: not purging"',
-              },
-              {
-                name: "bad-dumpdir",
-                description: "\"Malformed dumpdir: 'X' never used\"",
-              },
-            ],
-          },
-        },
-        {
           name: ["o", "-o"],
           description: "Same as --no-same-owner",
           exclusiveOn: ["--no-same-owner", "--same-owner"],
@@ -1402,6 +1343,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "--show-defaults",
       description: "Show built-in defaults for various tar options and exit",
+    },
+    {
+      name: "--show-snapshot-field-ranges",
+      description: "Show valid ranges for snapshot-file fields and exit",
     },
     {
       name: ["?", "-?", "--help"],

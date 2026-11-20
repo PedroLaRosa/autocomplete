@@ -1,14 +1,14 @@
+// readlink (macOS 15 BSD, stat.1 dated 2017-06-22 in Apple OSS file_cmds-457.140.3 and file_cmds-479, 2026-11-19).
+// Source: stat.1 + stat.c (readlink mode: getopt "fn") from apple-oss-distributions/file_cmds; man page / OSS mirror only, not run on macOS.
+// The old spec described stat's -f format option; in readlink mode -f takes no argument and canonicalizes the path.
 const completionSpec: Fig.Spec = {
   name: "readlink",
-  description: "Display file status",
+  description: "Display the target of a symbolic link",
   options: [
     {
       name: "-f",
       description:
-        "Display information using the specified format; similar to printf(3) formats in that they start with %, are then followed by a sequence of formatting characters, and end in a character that selects the field of the struct stat which is to be formatted",
-      args: {
-        name: "format",
-      },
+        "Canonicalize the output by following every symlink in every component of the path; the file does not need to be a symbolic link",
     },
     {
       name: "-n",

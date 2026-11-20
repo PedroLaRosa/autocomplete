@@ -1,26 +1,77 @@
+// mkinitcpio v42.2 (latest git tag of archlinux/mkinitcpio, 2026-11-19). Source: usage() and option parsing of the mkinitcpio script, man/mkinitcpio.8.adoc and shell/zsh-completion at v42.2; not run (Arch Linux tool).
+// Hook names come from /usr/lib/initcpio/install; lsinitcpio (separate tool) is not covered.
+const hookGenerator: Fig.Generator = {
+  script: ["ls", "/usr/lib/initcpio/install"],
+  postProcess: (out) =>
+    out
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => ({
+        name: line,
+        icon: "fig://icon?type=file",
+      })),
+};
+
+const commaSeparatedHooks: Fig.Arg = {
+  name: "hooks",
+  generators: {
+    ...hookGenerator,
+    trigger: ",",
+    getQueryTerm: ",",
+  },
+};
+
+const pathOption = (name: string, description: string): Fig.Option => ({
+  name,
+  description,
+  args: {
+    name: "path",
+    template: "filepaths",
+  },
+});
+
 const completionSpec: Fig.Spec = {
   name: "mkinitcpio",
   description: "Create an initial ramdisk environment",
   options: [
     {
       name: ["--help", "-h"],
-      description: "Show help for mkinitcpio",
+      description: "Display this message and exit",
     },
     {
       name: ["--version", "-V"],
-      description: "Display version information",
+      description: "Display version information and exit",
     },
     {
       name: ["--addhooks", "-A"],
-      description: "Add additional hooks to the image",
+      description:
+        "Add additional hooks to the image, processed after all hooks from the config file (comma separated)",
+      isRepeatable: true,
+      args: commaSeparatedHooks,
+    },
+    {
+      name: "--add",
+      description: "Backwards compatible alias of --addhooks",
+      deprecated: true,
+      hidden: true,
+      isRepeatable: true,
+      args: commaSeparatedHooks,
+    },
+    {
+      name: ["--include", "-I"],
+      description:
+        "Add files or directories to the image (comma separated, files may be given as source:destination:mode)",
+      isRepeatable: true,
       args: {
-        name: "hooks",
-        template: "filepaths",
+        name: "paths",
+        template: ["filepaths", "folders"],
       },
     },
     {
       name: ["--config", "-c"],
-      description: "Use config file to generate the ramdisk",
+      description:
+        "Use config file to generate the ramdisk (default: /etc/mkinitcpio.conf)",
       args: {
         name: "config",
         template: "filepaths",
@@ -48,6 +99,7 @@ const completionSpec: Fig.Spec = {
       description: "Generate a CPIO image as filename",
       args: {
         name: "filename",
+        template: "filepaths",
       },
     },
     {
@@ -55,13 +107,17 @@ const completionSpec: Fig.Spec = {
       description: "Output help for hookname",
       args: {
         name: "hookname",
+        generators: hookGenerator,
       },
     },
     {
       name: ["--kernel", "-k"],
-      description: "Use kernelversion, instead of the current running kernel",
+      description:
+        "Use kernelversion, instead of the current running kernel. May be a path to a kernel image, a version or 'none' (no kernel modules are added)",
       args: {
         name: "kernelversion",
+        template: "filepaths",
+        suggestions: ["none"],
       },
     },
     {
@@ -77,10 +133,26 @@ const completionSpec: Fig.Spec = {
       description: "Disable color output",
     },
     {
-      name: ["--uefi", "-U"],
-      description: "Generate a UEFI executable as filename",
+      name: "--nopost",
+      description: "Do not run post hooks",
+    },
+    {
+      name: ["--uki", "-U"],
+      description: "Generate a unified kernel image as filename",
       args: {
         name: "filename",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--uefi",
+      description:
+        "Generate a unified kernel image as filename (deprecated, use --uki)",
+      deprecated: true,
+      hidden: true,
+      args: {
+        name: "filename",
+        template: "filepaths",
       },
     },
     {
@@ -89,15 +161,19 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--preset", "-p"],
-      description: "Build initramfs image(s) according to specified preset",
+      description:
+        "Build initramfs image(s) according to specified preset (a name from /etc/mkinitcpio.d or a path to a preset file)",
+      isRepeatable: true,
       args: {
         name: "preset",
+        template: "filepaths",
         generators: {
           script: ["ls", "/etc/mkinitcpio.d"],
           postProcess: (out) =>
             out
               .trim()
               .split("\n")
+              .filter(Boolean)
               .map((line) => ({
                 name: line.replace(/\.preset$/, ""),
               })),
@@ -105,18 +181,24 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: ["--remove", "-R"],
+      description:
+        "Remove initramfs image(s) generated by the specified preset(s). Only usable with --preset or --allpresets",
+    },
+    {
       name: ["--moduleroot", "-r"],
-      description: "Specifies the root directory to find modules in",
+      description:
+        "Specifies the root directory to find modules in (default: /)",
       args: {
         name: "root",
+        template: "folders",
       },
     },
     {
       name: ["--skiphooks", "-S"],
-      description: "Skip hooks when generating the image",
-      args: {
-        name: "hooks",
-      },
+      description: "Skip hooks when generating the image (comma separated)",
+      isRepeatable: true,
+      args: commaSeparatedHooks,
     },
     {
       name: ["--save", "-s"],
@@ -140,49 +222,59 @@ const completionSpec: Fig.Spec = {
       description: "Override the compression method with the compress program",
       args: {
         name: "compress",
-      },
-    },
-    {
-      name: "--cmdline",
-      description: "Use kernel command line with UEFI executable",
-      args: {
-        name: "filename",
-      },
-    },
-    {
-      name: "--splash",
-      description: "UEFI executables can show a bitmap file on boot",
-      args: {
-        name: "filename",
-      },
-    },
-    {
-      name: "--uefistub",
-      description: "UEFI stub image used for UEFI executable generation",
-      args: {
-        name: "filename",
-      },
-    },
-    {
-      name: "--kernelimage",
-      description: "Include a kernel image for the UEFI executable",
-      args: {
-        name: "filename",
+        suggestions: ["cat", "xz", "lz4", "zstd"],
       },
     },
     {
       name: "--microcode",
-      description: "Include microcode into the UEFI executable",
+      description:
+        "Deprecated, use the 'microcode' hook instead (currently acts like --allpresets)",
+      deprecated: true,
+      hidden: true,
       args: {
         name: "filename",
+        template: "filepaths",
+      },
+    },
+    // Options for unified kernel images (--uki)
+    {
+      name: "--cmdline",
+      description:
+        "Set kernel command line for the unified kernel image from a file or a drop-in directory",
+      args: {
+        name: "path",
+        template: ["filepaths", "folders"],
       },
     },
     {
-      name: "--osrelease",
-      description: "Include a os-release file for the UEFI executable",
-      args: {
-        name: "filename",
-      },
+      name: "--no-cmdline",
+      description:
+        "Do not embed a kernel command line in the unified kernel image",
+    },
+    pathOption(
+      "--splash",
+      "Bitmap file the unified kernel image shows on boot"
+    ),
+    pathOption(
+      "--uefistub",
+      "UEFI stub image used for unified kernel image generation"
+    ),
+    pathOption(
+      "--kernelimage",
+      "Include a kernel image for the unified kernel image"
+    ),
+    pathOption(
+      "--osrelease",
+      "Include an os-release file for the unified kernel image"
+    ),
+    pathOption(
+      "--ukiconfig",
+      "Configuration file to pass to ukify for unified kernel image generation"
+    ),
+    {
+      name: "--no-ukify",
+      description:
+        "Do not use ukify to build unified kernel images even if it is available",
     },
   ],
 };

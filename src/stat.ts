@@ -1,3 +1,4 @@
+// stat (macOS BSD stat, Apple OSS file_cmds-479 (stat unchanged since file_cmds-457.140.3 / macOS 15), man page dated 2017-06-22, 2026-11-19). Source: apple-oss-distributions/file_cmds stat/stat.1 + stat/stat.c (getopt "f:FlLnqrst:x" under __APPLE__; -H is compiled out on macOS); man page and source only, not run on macOS. Changes: file argument is optional, -F cannot be combined with -f/-r/-s/-x (stat.c errors "can't use format ... with -F"). GNU-only options (-c, --printf, -t terse, -f filesystem, --dereference) are not on macOS and are not listed.
 const completionSpec: Fig.Spec = {
   name: "stat",
   description: "Display file status",
@@ -6,6 +7,7 @@ const completionSpec: Fig.Spec = {
       name: "-F",
       description:
         "As in ls(1), display a slash ('/') immediately after each pathname that is a directory, an asterisk ('*') after each that is executable, an at sign ('@') after each symbolic link, a percent sign ('%') after each whiteout, an equal sign ('=') after each socket, and a vertical bar ('|') after each that is a FIFO.  The use of -F implies -l",
+      exclusiveOn: ["-f", "-r", "-s", "-x"],
     },
     {
       name: "-L",
@@ -64,7 +66,9 @@ const completionSpec: Fig.Spec = {
   ],
   args: {
     name: "file",
-    description: "File(s) to stat",
+    description:
+      "File(s) to stat (standard input is used when no file is given)",
+    isOptional: true,
     isVariadic: true,
     template: "filepaths",
   },

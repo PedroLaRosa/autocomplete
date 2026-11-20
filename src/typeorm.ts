@@ -1,140 +1,109 @@
+// TypeORM CLI v1.1.3 (npm latest, 2026-11-19). Source: installed typeorm@1.1.3 from npm, ran `typeorm --help`
+// and `typeorm <command> --help` for every command, and read the yargs builders in typeorm/commands/*.js.
+// The typeorm-ts-node-commonjs and typeorm-ts-node-esm wrappers (same commands) are not listed separately.
 const cliOptions: Record<string, Fig.Option> = {
-  help: { name: "--help", description: "Show help for command" },
+  help: { name: ["-h", "--help"], description: "Show help for command" },
   version: { name: ["-v", "--version"], description: "Show the version" },
-  connection: {
-    name: ["-c", "--connection"],
-    args: { name: "connection" },
-    description: "Name of the connection on which to run a query",
-  },
-  config: {
-    name: ["-f", "--config"],
-    description: "Name of the file with connection configuration",
+  dataSource: {
+    name: ["-d", "--dataSource"],
+    description: "Path to the file where your DataSource instance is defined",
     args: { name: "file", template: "filepaths" },
+    isRequired: true,
+  },
+  outputJs: {
+    name: ["-o", "--outputJs"],
+    description:
+      "Generate a migration file on Javascript instead of Typescript",
+  },
+  esm: {
+    name: "--esm",
+    description: "Generate a migration file on ESM instead of CommonJS",
+  },
+  timestamp: {
+    name: ["-t", "--timestamp"],
+    description: "Custom timestamp for the migration name",
+    args: { name: "timestamp" },
   },
 };
+
+const transactionOption = (action: "run" | "revert"): Fig.Option => ({
+  name: ["-t", "--transaction"],
+  description: `Indicates if transaction should be used or not for migration ${action} (enabled by default)`,
+  args: {
+    name: "mode",
+    default: "default",
+    suggestions: [
+      { name: "default", description: "Use the data source's configuration" },
+      { name: "all", description: "Run everything in a single transaction" },
+      { name: "each", description: "Use one transaction per migration" },
+      { name: "none", description: "Do not use transactions" },
+    ],
+  },
+});
+
+const pathArg = (what: string): Fig.Arg => ({
+  name: "path",
+  description: `Path of the ${what} file`,
+  template: "filepaths",
+});
+
+// Commands that only need the data source option
+const dataSourceCommand = (
+  name: string,
+  description: string
+): Fig.Subcommand => ({
+  name,
+  description,
+  options: [cliOptions.help, cliOptions.dataSource, cliOptions.version],
+});
 
 const completionSpec: Fig.Spec = {
   name: "typeorm",
   description: "TypeORM CLI",
   subcommands: [
-    {
-      name: "schema:sync",
-      description: "Synchronizes your entities with database schema",
-      options: [
-        cliOptions.help,
-        {
-          ...cliOptions.connection,
-          description:
-            "Name of the connection on which schema synchronization needs to to run",
-        },
-        cliOptions.config,
-        cliOptions.version,
-      ],
-    },
-    {
-      name: "schema:log",
-      description: "Shows sql to be executed by schema:sync command",
-      options: [
-        cliOptions.help,
-        {
-          ...cliOptions.connection,
-          description:
-            "Name of the connection of which schema sync log should be shown",
-        },
-        cliOptions.config,
-        cliOptions.version,
-      ],
-    },
-    {
-      name: "schema:drop",
-      description:
-        "Drops all tables in the database on your default connection",
-      options: [
-        cliOptions.help,
-        {
-          ...cliOptions.connection,
-          description: "Name of the connection on which to drop all tables",
-        },
-        cliOptions.config,
-        cliOptions.version,
-      ],
-    },
+    dataSourceCommand(
+      "schema:sync",
+      "Synchronizes your entities with database schema"
+    ),
+    dataSourceCommand(
+      "schema:log",
+      "Shows sql to be executed by schema:sync command"
+    ),
+    dataSourceCommand(
+      "schema:drop",
+      "Drops all tables in the database on your default dataSource"
+    ),
     {
       name: "query",
-      description: "Executes given SQL query on a default connection",
-      args: { name: "query", description: "The SQL Query to run" },
-      options: [
-        cliOptions.help,
-        cliOptions.connection,
-        cliOptions.config,
-        cliOptions.version,
-      ],
+      description: "Executes given SQL query on a default dataSource",
+      args: {
+        name: "query",
+        description: "The SQL Query to run",
+        isOptional: true,
+      },
+      options: [cliOptions.help, cliOptions.dataSource, cliOptions.version],
     },
     {
       name: "entity:create",
       description: "Generates a new entity",
-      options: [
-        cliOptions.help,
-        cliOptions.connection,
-        {
-          name: ["-n", "--name"],
-          description: "Name of the entity class",
-          args: { name: "entity" },
-          isRequired: true,
-        },
-        {
-          name: ["-d", "--dir"],
-          description: "Directory where entity should be created",
-          args: { name: "directory", template: "folders" },
-        },
-        cliOptions.config,
-        cliOptions.version,
-      ],
+      args: pathArg("entity"),
+      options: [cliOptions.help, cliOptions.version],
     },
     {
       name: "subscriber:create",
       description: "Generates a new subscriber",
-      options: [
-        cliOptions.help,
-        cliOptions.connection,
-        {
-          name: ["-n", "--name"],
-          description: "Name of the subscriber class",
-          args: { name: "subscriber" },
-          isRequired: true,
-        },
-        {
-          name: ["-d", "--dir"],
-          description: "Directory where subscriber should be created",
-          args: { name: "directory", template: "folders" },
-        },
-        cliOptions.config,
-        cliOptions.version,
-      ],
+      args: pathArg("subscriber"),
+      options: [cliOptions.help, cliOptions.version],
     },
     {
       name: "migration:create",
       description: "Creates a new migration file",
+      args: pathArg("migration"),
       options: [
         cliOptions.help,
-        cliOptions.connection,
-        {
-          name: ["-n", "--name"],
-          description: "Name of the migration class",
-          args: { name: "migration" },
-          isRequired: true,
-        },
-        {
-          name: ["-d", "--dir"],
-          description: "Directory where migration should be created",
-          args: { name: "directory", template: "folders" },
-        },
-        cliOptions.config,
-        {
-          name: ["-o", "--outputJs"],
-          description:
-            "Generate a migration file on Javascript instead of Typescript",
-        },
+        cliOptions.outputJs,
+        cliOptions.esm,
+        cliOptions.timestamp,
         cliOptions.version,
       ],
     },
@@ -142,30 +111,16 @@ const completionSpec: Fig.Spec = {
       name: "migration:generate",
       description:
         "Generates a new migration file with sql needs to be executed to update schema",
+      args: pathArg("migration"),
       options: [
         cliOptions.help,
-        cliOptions.connection,
-        {
-          name: ["-n", "--name"],
-          description: "Name of the migration class",
-          args: { name: "migration" },
-          isRequired: true,
-        },
-        {
-          name: ["-d", "--dir"],
-          description: "Directory where migration should be created",
-          args: { name: "directory", template: "folders" },
-        },
+        cliOptions.dataSource,
         {
           name: ["-p", "--pretty"],
           description: "Pretty-print generated SQL",
         },
-        cliOptions.config,
-        {
-          name: ["-o", "--outputJs"],
-          description:
-            "Generate a migration file on Javascript instead of Typescript",
-        },
+        cliOptions.outputJs,
+        cliOptions.esm,
         {
           name: ["--dr", "--dryrun"],
           description:
@@ -174,8 +129,9 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--ch", "--check"],
           description:
-            "Verifies that the current database is up to date and that no migrations are needed",
+            "Verifies that the current database is up to date and that no migrations are needed (otherwise exits with code 1)",
         },
+        cliOptions.timestamp,
         cliOptions.version,
       ],
     },
@@ -184,38 +140,31 @@ const completionSpec: Fig.Spec = {
       description: "Runs all pending migrations",
       options: [
         cliOptions.help,
-        cliOptions.connection,
+        cliOptions.dataSource,
+        transactionOption("run"),
         {
-          name: ["-t", "--transaction"],
+          name: ["-f", "--fake"],
           description:
-            "Indicates if transaction should be used or not for migration run",
+            "Fakes running the migrations if table schema has already been changed manually or externally (e.g. through another project)",
         },
-        cliOptions.config,
         cliOptions.version,
       ],
     },
-    {
-      name: "migration:show",
-      description: "Show all migrations and whether they have been run or not",
-      options: [
-        cliOptions.help,
-        cliOptions.connection,
-        cliOptions.config,
-        cliOptions.version,
-      ],
-    },
+    dataSourceCommand(
+      "migration:show",
+      "Show all migrations and whether they have been run or not"
+    ),
     {
       name: "migration:revert",
       description: "Reverts last executed migration",
       options: [
         cliOptions.help,
-        cliOptions.connection,
+        cliOptions.dataSource,
+        transactionOption("revert"),
         {
-          name: ["-t", "--transaction"],
-          description:
-            "Indicates if transaction should be used or not for migration revert",
+          name: ["-f", "--fake"],
+          description: "Fakes reverting the migration",
         },
-        cliOptions.config,
         cliOptions.version,
       ],
     },
@@ -224,22 +173,16 @@ const completionSpec: Fig.Spec = {
       description: "Prints TypeORM version this project uses",
       options: [cliOptions.help, cliOptions.version],
     },
-    {
-      name: "cache:clear",
-      description: "Clears all data stored in query runner cache",
-      options: [
-        cliOptions.help,
-        cliOptions.connection,
-        cliOptions.config,
-        cliOptions.version,
-      ],
-    },
+    dataSourceCommand(
+      "cache:clear",
+      "Clears all data stored in query runner cache"
+    ),
     {
       name: "init",
-      description: "Generates initial TypeORM project structure",
+      description:
+        "Generates initial TypeORM project structure (inside a directory called as name, or the current directory when no name is given)",
       options: [
         cliOptions.help,
-        cliOptions.connection,
         {
           name: ["-n", "--name"],
           description: "Name of the project directory",
@@ -251,24 +194,22 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "database",
             suggestions: [
+              "postgres",
               "mysql",
               "mariadb",
-              "postgres",
-              "cockroachdb",
-              "sqlite",
+              "better-sqlite3",
               "mssql",
               "oracle",
-              "cordova",
-              "nativescript",
-              "react-native",
-              "expo",
               "mongodb",
+              "cockroachdb",
+              "spanner",
             ],
           },
         },
         {
           name: "--express",
-          description: "Indicates if express should be included in the project",
+          description:
+            "Indicates if express server sample code should be included in the project",
         },
         {
           name: "--docker",
@@ -276,9 +217,13 @@ const completionSpec: Fig.Spec = {
             "Set to true if docker-compose must be generated as well",
         },
         {
-          name: ["--pm", "--manager"],
-          description: "Install packages",
-          args: { name: "manager", suggestions: ["npm", "yarn"] },
+          name: ["--ms", "--module"],
+          description: "Module system to use for project",
+          args: {
+            name: "module",
+            default: "commonjs",
+            suggestions: ["commonjs", "esm"],
+          },
         },
         cliOptions.version,
       ],

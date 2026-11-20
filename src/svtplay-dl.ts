@@ -1,9 +1,113 @@
+// svtplay-dl 4.211 (latest release tag on github.com/spaam/svtplay-dl and PyPI, 2026-11-19).
+// Source: read statically from the 4.211 tag (lib/svtplay_dl/utils/parser.py argparse definitions and the
+// lib/svtplay_dl/service/*.py supported domains); the program was not executed.
+
+// Domains handled by the services of svtplay-dl 4.211 (used to recognise a URL on the clipboard)
+const supportedDomains = [
+  "aftonbladet.se",
+  "tv.aftonbladet.se",
+  "affarsvarlden.se",
+  "angelstudios.com",
+  "atgplay.se",
+  "bigbrother.se",
+  "cmore.se",
+  "cmore.dk",
+  "cmore.no",
+  "cmore.fi",
+  "colbertnation.com",
+  "comedycentral.se",
+  "thedailyshow.com",
+  "di.se",
+  "dn.se",
+  "mobil.dn.se",
+  "csp.picsearch.com",
+  "csp.screen9.com",
+  "cdn.screen9.com",
+  "disney.se",
+  "video.disney.se",
+  "disneyjunior.disney.se",
+  "discoveryplus.se",
+  "discoveryplus.no",
+  "discoveryplus.dk",
+  "discoveryplus.com",
+  "dr.dk",
+  "efn.se",
+  "eurosportplayer.com",
+  "expressen.se",
+  "facebook.com",
+  "filmarkivet.se",
+  "flowonline.tv",
+  "juicyplay.se",
+  "koket.se",
+  "lemonwhale.com",
+  "mtv.se",
+  "nhl.com",
+  "nickelodeon.dk",
+  "nickelodeon.nl",
+  "nickelodeon.no",
+  "nickelodeon.se",
+  "npo.nl",
+  "npo3.nl",
+  "ntr.nl",
+  "omroepwnl.nl",
+  "zapp.nl",
+  "nrk.no",
+  "tv.nrk.no",
+  "tv.nrksuper.no",
+  "p3.no",
+  "oppetarkiv.se",
+  "pluto.tv",
+  "radioplay.se",
+  "regeringen.se",
+  "riksdagen.se",
+  "ruv.is",
+  "solidsport.com",
+  "solidtango.com",
+  "sportlib.se",
+  "sverigesradio.se",
+  "svd.se",
+  "svt.se",
+  "svtbarn.se",
+  "svtflow.se",
+  "svtplay.se",
+  "beta.svtplay.se",
+  "tv3play.ee",
+  "tv3play.lt",
+  "tv3play.lv",
+  "tv3play.tv3.ee",
+  "tv4.se",
+  "tv4play.se",
+  "tvplay.lv",
+  "tvplay.skaties.lv",
+  "play.tv3.lt",
+  "twitch.tv",
+  "clips.twitch.tv",
+  "ur.se",
+  "betaplay.ur.se",
+  "urplay.se",
+  "urskola.se",
+  "vasaloppet.tv",
+  "vg.no",
+  "vgtv.no",
+  "viafree.se",
+  "viafree.no",
+  "viafree.dk",
+  "viafree.fi",
+  "viagame.com",
+  "viasatsport.se",
+  "vimeo.com",
+  "player.vimeo.com",
+  "watch.pokemon.com",
+];
+
 const svtplayDlGenerators: Record<string, Fig.Generator> = {
   listClipboard: {
     script: ["pbpaste"],
     postProcess: function (out) {
       const regex = new RegExp(
-        "^(https?://)?(www.)?(aftonbladet.se|dbtv.no|di.se|dn.se|dr.dk|efn.se|expressen.se|filmarkivet.se|flowonline.tv|nickelodeon.nl|nickelodeon.no|nickelodeon.se|nrk.se|oppetarkiv.se|pokemon.com|ruv.is|riksdagen.se|svd.se|sverigesradio.se|svtplay.se|viafree.se|viafree.no|viafree.dk|tv3play.ee|tv3play.it|tv3play.lv|tv4.se|tv4play.se|twitch.tv|ur.se|urplay.se|vg.no|viagame.com|viasat4play.no|viasatsport.se)/.+$"
+        `^(https?://)?(www\\.)?(${supportedDomains
+          .map((domain) => domain.replace(/\./g, "\\."))
+          .join("|")})/.+$`
       );
       try {
         if (regex.test(out))
@@ -43,6 +147,13 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-o", "--output"],
       description: "Outputs to the given filename or folder",
+      args: { name: "output", template: ["filepaths", "folders"] },
+    },
+    {
+      name: "--filename",
+      description:
+        "Filename format (default: {title}.s{season}e{episode}.{episodename}-{id}-{service}.{ext})",
+      args: { name: "filename" },
     },
     {
       name: "--subfolder",
@@ -51,16 +162,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--config",
-      args: { name: "configfile" },
+      args: { name: "configfile", template: "filepaths" },
       description: "Specify configuration file",
     },
     {
       name: ["-f", "--force"],
       description: "Overwrite if file exists already",
-    },
-    {
-      name: ["-r", "--resume"],
-      description: "Resume a download (RTMP obsolete)",
     },
     {
       name: ["-l", "--live"],
@@ -82,12 +189,17 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-u", "--username"],
       args: { name: "username" },
-      description: "Username (if applicable)",
+      description: "Username",
     },
     {
       name: ["-p", "--password"],
       args: { name: "password" },
-      description: "Password (if applicable)",
+      description: "Password",
+    },
+    {
+      name: "--token",
+      args: { name: "token" },
+      description: "Token",
     },
     {
       name: ["-t", "--thumbnail"],
@@ -153,6 +265,25 @@ const completionSpec: Fig.Spec = {
       description: "Only download video if audio and video is separated",
     },
     {
+      name: "--socket-timeout",
+      args: { name: "SECONDS" },
+      description: "Time to wait before giving up in seconds (default: 20)",
+    },
+    {
+      name: "--max-retries",
+      args: { name: "N" },
+      description: "Number of times to retry a failed download (default: 5)",
+    },
+    {
+      name: "--abort-on-error",
+      description: "Abort on error, it won't continue downloading more videos",
+    },
+    {
+      name: "--tydligare-tal",
+      description:
+        "Only download videos with 'tydligare tal' independent on language",
+    },
+    {
       name: ["-q", "--quality"],
       args: { name: "quality" },
       description:
@@ -165,7 +296,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-P", "--preferred"],
-      args: { name: "preferred" },
+      args: { name: "preferred", suggestions: ["dash", "hls", "http"] },
       description: "Preferred download method (dash, hls, or http)",
     },
     {
@@ -191,19 +322,26 @@ const completionSpec: Fig.Spec = {
         "Choose the language of the audio (it can override the default one), use --list-quality to show which one to choose from",
     },
     {
-      name: "--audio-role",
-      args: { name: "AUDIO_ROLE" },
+      name: "--video-role",
+      args: { name: "VIDEO_ROLE" },
       description:
-        "Choose the role of the audio (it can override the default one), use --list-quality to show which one to choose from",
+        "Choose the role of the video (it can override the default one), use --list-quality to show which one to choose from. Default: main",
+    },
+    {
+      name: "--resolution",
+      args: { name: "RESOLUTION" },
+      description:
+        "Choose what video resolution to download e.g. 480,720,1080. Comma separated",
     },
     {
       name: ["-S", "--subtitle"],
-      description: "Download subtitle from the site if available",
+      description:
+        "Download subtitle from the site if available. Both merged and separately stored if used with -M",
     },
     {
       name: ["-M", "--merge-subtitle"],
       description:
-        "Merge subtitle with video/audio file with corresponding ISO639-3 language code. This invokes --remux automatically",
+        "Merge subtitle with video/audio file with corresponding ISO639-3 language code. Also saved separately if used with -S",
     },
     {
       name: "--force-subtitle",
@@ -239,12 +377,8 @@ const completionSpec: Fig.Spec = {
       description: "Include clips from websites when using -A",
     },
     {
-      name: "--cmore-operatorlist",
-      description: "Show operatorlist for cmore",
-    },
-    {
-      name: "--cmore-operator",
-      args: { name: "operator" },
+      name: ["-R", "--reverse"],
+      description: "Reverse download order",
     },
     {
       name: "--no-remux",
@@ -265,9 +399,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--output-format",
-      args: { name: "mp4,mkv" },
+      args: { name: "output_format", suggestions: ["mp4", "mkv"] },
       description:
         "Format you want resulting file in (mkv or mp4), mp4 is default",
+    },
+    {
+      name: "--chapters",
+      description: "Get chapters and add it to the file",
     },
   ],
 };

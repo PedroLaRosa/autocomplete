@@ -1,3 +1,7 @@
+// micro v2.0.15 (GitHub release tag and Homebrew formula, re-verified 2026-11-20).
+// Source: cmd/micro/micro.go (flags, usage, positional args),
+// internal/config/settings.go (options, defaults, choices) and
+// runtime/help/options.md at v2.0.15 (static read, not run)
 const boolArgDefaultFalse: Fig.Arg = {
   name: "bool",
   description: "True/false",
@@ -21,6 +25,14 @@ const completionSpec: Fig.Spec = {
       description: "Manage plugins",
       options: [
         {
+          name: "install",
+          description: "Install plugin(s)",
+          args: {
+            name: "plugin",
+            isVariadic: true,
+          },
+        },
+        {
           name: "remove",
           description: "Remove plugin(s)",
           args: {
@@ -42,6 +54,7 @@ const completionSpec: Fig.Spec = {
           description: "Search for a plugin",
           args: {
             name: "plugin",
+            isVariadic: true,
           },
         },
         {
@@ -73,7 +86,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--debug",
-      description: "Enable debug mode",
+      description: "Enable debug mode (enables logging to ./log.txt)",
+    },
+    {
+      name: "--profile",
+      description: "Enable CPU profiling (writes profile info to ./micro.prof)",
     },
     {
       name: "--version",
@@ -112,9 +129,8 @@ const completionSpec: Fig.Spec = {
       description: "The directory to place backups in",
       args: {
         name: "dir",
-        default: "~/.config/micro.backups",
+        description: 'Empty string ("") means ConfigDir/backups',
         template: "folders",
-        suggestions: ["~/.config/micro.backups"],
       },
     },
     {
@@ -125,7 +141,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--clipboard",
-      description: "Apecifies how the system clipboard should be accessed",
+      description: "Specifies how the system clipboard should be accessed",
       args: {
         name: "type",
         default: "external",
@@ -189,7 +205,137 @@ const completionSpec: Fig.Spec = {
     {
       name: "--divreverse",
       description: "Reverse colors specified by the colorscheme",
+      args: boolArgDefaultTrue,
+    },
+    {
+      name: "--detectlimit",
+      description:
+        "Limit the number of first lines matched to determine the filetype (0 means no limit)",
+      args: {
+        name: "lines",
+        default: "100",
+        suggestions: ["0", "100"],
+      },
+    },
+    {
+      name: "--fakecursor",
+      description:
+        "Render the cursor using terminal colors rather than the actual terminal cursor",
       args: boolArgDefaultFalse,
+    },
+    {
+      name: "--helpsplit",
+      description: "Split type used by the help command",
+      args: {
+        name: "type",
+        default: "hsplit",
+        suggestions: ["hsplit", "vsplit"],
+      },
+    },
+    {
+      name: "--hlsearch",
+      description:
+        "Highlight all instances of the searched text after a successful search",
+      args: boolArgDefaultFalse,
+    },
+    {
+      name: "--hltaberrors",
+      description:
+        "Highlight tabs when spaces are expected, and spaces when tabs are expected",
+      args: boolArgDefaultFalse,
+    },
+    {
+      name: "--hltrailingws",
+      description: "Highlight trailing whitespaces at ends of lines",
+      args: boolArgDefaultFalse,
+    },
+    {
+      name: "--lockbindings",
+      description: "Prevent plugins and lua scripts from binding any keys",
+      args: boolArgDefaultFalse,
+    },
+    {
+      name: "--matchbraceleft",
+      description:
+        "Match the brace to the left of the cursor if there is none under it",
+      args: boolArgDefaultTrue,
+    },
+    {
+      name: "--matchbracestyle",
+      description: "Whether to underline or highlight matching braces",
+      args: {
+        name: "style",
+        default: "underline",
+        suggestions: ["underline", "highlight"],
+      },
+    },
+    {
+      name: "--multiopen",
+      description: "How to lay out multiple files opened at startup",
+      args: {
+        name: "layout",
+        default: "tab",
+        suggestions: ["tab", "vsplit", "hsplit"],
+      },
+    },
+    {
+      name: "--pageoverlap",
+      description:
+        "Number of lines from the current view to keep in view when paging up or down",
+      args: {
+        name: "lines",
+        default: "2",
+        suggestions: ["0", "1", "2", "3", "5"],
+      },
+    },
+    {
+      name: "--reload",
+      description:
+        "Reload behavior of the current buffer when the file has changed",
+      args: {
+        name: "mode",
+        default: "prompt",
+        suggestions: ["prompt", "auto", "disabled"],
+      },
+    },
+    {
+      name: "--scrollbarchar",
+      description: "Character used for displaying the scrollbar",
+      args: {
+        name: "char",
+        default: "|",
+        suggestions: ["|"],
+      },
+    },
+    {
+      name: "--showchars",
+      description:
+        "Characters shown for invisible characters, as key=value pairs (keys: space, tab, ispace, itab)",
+      args: {
+        name: "pairs",
+        suggestions: ["tab=>,space=.,itab=|>,ispace=|"],
+      },
+    },
+    {
+      name: "--tabhighlight",
+      description:
+        "Invert the tab characters' colors with respect to the tab bar",
+      args: boolArgDefaultFalse,
+    },
+    {
+      name: "--tabreverse",
+      description: "Reverse the tab bar colors when active",
+      args: boolArgDefaultTrue,
+    },
+    {
+      name: "--truecolor",
+      description:
+        "Whether to use true colors (24-bit) with true color schemes",
+      args: {
+        name: "mode",
+        default: "auto",
+        suggestions: ["auto", "on", "off"],
+      },
     },
     {
       name: "--encoding",
@@ -252,7 +398,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--indentchar",
-      description: "Sets the indentation character",
+      description:
+        "Sets the character shown for tab characters (use the tab key of --showchars instead)",
+      deprecated: true,
       args: {
         name: "character",
         default: " ",
@@ -502,9 +650,11 @@ const completionSpec: Fig.Spec = {
   ],
   args: {
     name: "file",
+    description:
+      "File(s) to open, optionally followed by +LINE[:COL] or +/REGEX (or FILE:LINE[:COL] with the parsecursor option)",
     template: ["filepaths"],
-
     isOptional: true,
+    isVariadic: true,
   },
 };
 export default completionSpec;

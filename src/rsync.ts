@@ -1,100 +1,119 @@
+// rsync v3.5.2 (latest tag of RsyncProject/rsync, released 2026-11-04, same as the Homebrew formula, 2026-11-20).
+// Source: static read of the tagged source (options.c popt tables and --info/--debug word tables, rsync.1.md
+// option summary and per-option text, NEWS.md); the rsync binary was not built or run (sandbox policy).
+// Daemon-only options (--daemon, --config, --dparam, --no-detach) are documented in rsync.1.md DAEMON OPTIONS.
+// Internal options (--server, --sender, --qsort, --old-compress, --new-compress) are deliberately left out.
 import { knownHosts, configHosts } from "./ssh";
 
-const infoArgs: Fig.SingleOrArray<Fig.Arg> = [
-  { name: "BACKUP", description: "Mention files backed up" },
-  {
-    name: "COPY",
-    description: "Mention files copied locally on the receiving side",
-  },
-  { name: "DEL", description: "Mention deletions on the receiving side" },
-  {
-    name: "FLIST",
-    description: "Mention file-list receiving/sending (levels 1-2)",
-  },
-  {
-    name: "MISC",
-    description: "Mention miscellaneous information (levels 1-2)",
-  },
-  {
-    name: "MOUNT",
-    description: "Mention mounts that were found or skipped",
-  },
-  {
-    name: "NAME",
-    description: "Mention 1) updated file/dir names, 2) unchanged names",
-  },
-  {
-    name: "PROGRESS",
-    description: "Mention 1) per-file progress or 2) total transfer progress",
-  },
-  {
-    name: "REMOVE",
-    description: "Mention files removed on the sending side",
-  },
-  {
-    name: "SKIP",
-    description: "Mention files that are skipped due to options used",
-  },
-  {
-    name: "STATS",
-    description: "Mention statistics at end of run (levels 1-3)",
-  },
-  { name: "SYMSAFE", description: "Mention symlinks that are unsafe" },
-  { name: "ALL", description: "Set all --info options (e.g. all4)" },
-  {
-    name: "NONE",
-    description: "Silence all --info options (same as all0)",
-  },
-  { name: "HELP", description: "Output this help message" },
-];
+const infoArg: Fig.Arg = {
+  name: "FLAGS",
+  suggestions: [
+    { name: "BACKUP", description: "Mention files backed up" },
+    {
+      name: "COPY",
+      description: "Mention files copied locally on the receiving side",
+    },
+    { name: "DEL", description: "Mention deletions on the receiving side" },
+    {
+      name: "FLIST",
+      description: "Mention file-list receiving/sending (levels 1-2)",
+    },
+    {
+      name: "MISC",
+      description: "Mention miscellaneous information (levels 1-2)",
+    },
+    {
+      name: "MOUNT",
+      description: "Mention mounts that were found or skipped",
+    },
+    {
+      name: "NAME",
+      description: "Mention 1) updated file/dir names, 2) unchanged names",
+    },
+    {
+      name: "NONREG",
+      description: "Mention skipped non-regular files (default 1, 0 disables)",
+    },
+    {
+      name: "PROGRESS",
+      description: "Mention 1) per-file progress or 2) total transfer progress",
+    },
+    {
+      name: "REMOVE",
+      description: "Mention files removed on the sending side",
+    },
+    {
+      name: "SKIP",
+      description:
+        "Mention files skipped due to transfer overrides (levels 1-2)",
+    },
+    {
+      name: "STATS",
+      description: "Mention statistics at end of run (levels 1-3)",
+    },
+    { name: "SYMSAFE", description: "Mention symlinks that are unsafe" },
+    { name: "ALL", description: "Set all --info options (e.g. all4)" },
+    {
+      name: "NONE",
+      description: "Silence all --info options (same as all0)",
+    },
+    { name: "HELP", description: "Output this help message" },
+  ],
+};
 
-const debugArgs: Fig.SingleOrArray<Fig.Arg> = [
-  { name: "BACKUP", description: "Mention files backed up" },
-  {
-    name: "COPY",
-    description: "Mention files copied locally on the receiving side",
-  },
-  { name: "DEL", description: "Mention deletions on the receiving side" },
-  {
-    name: "FLIST",
-    description: "Mention file-list receiving/sending (levels 1-2)",
-  },
-  {
-    name: "MISC",
-    description: "Mention miscellaneous information (levels 1-2)",
-  },
-  {
-    name: "MOUNT",
-    description: "Mention mounts that were found or skipped",
-  },
-  {
-    name: "NAME",
-    description: "Mention 1) updated file/dir names, 2) unchanged names",
-  },
-  {
-    name: "PROGRESS",
-    description: "Mention 1) per-file progress or 2) total transfer progress",
-  },
-  {
-    name: "REMOVE",
-    description: "Mention files removed on the sending side",
-  },
-  {
-    name: "SKIP",
-    description: "Mention files that are skipped due to options used",
-  },
-  {
-    name: "STATS",
-    description: "Mention statistics at end of run (levels 1-3)",
-  },
-  { name: "SYMSAFE", description: "Mention symlinks that are unsafe" },
-  { name: "ALL", description: "Set all --info options (e.g. all4)" },
-  {
-    name: "NONE",
-    description: "Silence all --info options (same as all0)",
-  },
-  { name: "HELP", description: "Output this help message" },
-];
+const debugArg: Fig.Arg = {
+  name: "FLAGS",
+  suggestions: [
+    { name: "ACL", description: "Debug extra ACL info" },
+    { name: "BACKUP", description: "Debug backup actions (levels 1-2)" },
+    { name: "BIND", description: "Debug socket bind actions" },
+    { name: "CHDIR", description: "Debug when the current directory changes" },
+    { name: "CONNECT", description: "Debug connection events (levels 1-2)" },
+    {
+      name: "CMD",
+      description: "Debug commands+options that are issued (levels 1-2)",
+    },
+    { name: "DEL", description: "Debug delete actions (levels 1-3)" },
+    {
+      name: "DELTASUM",
+      description: "Debug delta-transfer checksumming (levels 1-4)",
+    },
+    { name: "DUP", description: "Debug weeding of duplicate names" },
+    { name: "EXIT", description: "Debug exit events (levels 1-3)" },
+    { name: "FILTER", description: "Debug filter actions (levels 1-3)" },
+    { name: "FLIST", description: "Debug file-list operations (levels 1-4)" },
+    { name: "FUZZY", description: "Debug fuzzy scoring (levels 1-2)" },
+    { name: "GENR", description: "Debug generator functions" },
+    { name: "HASH", description: "Debug hashtable code" },
+    { name: "HLINK", description: "Debug hard-link actions (levels 1-3)" },
+    {
+      name: "ICONV",
+      description: "Debug iconv character conversions (levels 1-2)",
+    },
+    { name: "IO", description: "Debug I/O routines (levels 1-4)" },
+    { name: "NSTR", description: "Debug negotiation strings" },
+    {
+      name: "OWN",
+      description: "Debug ownership changes in users & groups (levels 1-2)",
+    },
+    { name: "PROTO", description: "Debug protocol information" },
+    { name: "RECV", description: "Debug receiver functions" },
+    { name: "SEND", description: "Debug sender functions" },
+    {
+      name: "TIME",
+      description: "Debug setting of modified times (levels 1-2)",
+    },
+    { name: "ALL", description: "Set all --debug options (e.g. all4)" },
+    {
+      name: "NONE",
+      description: "Silence all --debug options (same as all0)",
+    },
+    { name: "HELP", description: "Output this help message" },
+  ],
+};
+
+const folderArg = (name: string): Fig.Arg => ({ name, template: "folders" });
+const fileArg = (name: string): Fig.Arg => ({ name, template: "filepaths" });
 
 const completionSpec: Fig.Spec = {
   name: "rsync",
@@ -123,22 +142,46 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-v", "--verbose"],
       description: "Increase verbosity",
+      isRepeatable: true,
     },
     {
       name: "--info",
       description: "Fine-grained informational verbosity",
       requiresSeparator: true,
-      args: infoArgs,
+      args: infoArg,
     },
     {
       name: "--debug",
       description: "Fine-grained debug verbosity",
       requiresSeparator: true,
-      args: debugArgs,
+      args: debugArg,
+    },
+    {
+      name: "--stderr",
+      description: "Change stderr output mode (default: errors)",
+      requiresSeparator: true,
+      args: {
+        name: "MODE",
+        suggestions: [
+          {
+            name: "errors",
+            description: "Send errors directly to stderr from every process",
+          },
+          {
+            name: "all",
+            description: "Write all messages directly to stderr",
+          },
+          {
+            name: "client",
+            description: "Send all messages to the client side",
+          },
+        ],
+      },
     },
     {
       name: "--msgs2stderr",
-      description: "Special output handling for debugging",
+      description: "Same as --stderr=all (use --stderr instead)",
+      deprecated: true,
     },
     {
       name: ["--quiet", "-q"],
@@ -146,7 +189,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--no-motd",
-      description: "Suppress daemon-mode MOTD (see manpage caveat)",
+      description: "Suppress daemon-mode MOTD",
     },
     {
       name: ["--checksum", "-c"],
@@ -154,14 +197,21 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-a", "--archive"],
-      description: "Archive mode; equals -rlptgoD (no -H,-A,-X)",
-      exclusiveOn: ["-H", "-A", "-X"],
+      description: "Archive mode; equals -rlptgoD (no -A,-X,-U,-N,-H)",
     },
     {
       name: "--no-OPTION",
       description: "Turn off an implied OPTION (e.g. --no-D)",
     },
     { name: ["-r", "--recursive"], description: "Recurse into directories" },
+    {
+      name: ["--inc-recursive", "--i-r"],
+      description: "Enable incremental recursion",
+    },
+    {
+      name: ["--no-inc-recursive", "--no-i-r"],
+      description: "Disable incremental recursion",
+    },
     { name: ["-R", "--relative"], description: "Use relative path names" },
     {
       name: "--no-implied-dirs",
@@ -176,10 +226,7 @@ const completionSpec: Fig.Spec = {
       name: "--backup-dir",
       description: "Make backups into hierarchy based in DIR",
       requiresSeparator: true,
-      args: {
-        name: "DIR",
-        template: "folders",
-      },
+      args: folderArg("DIR"),
     },
     {
       name: "--suffix",
@@ -195,7 +242,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--inplace",
-      description: "Update destination files in-place (SEE MAN PAGE)",
+      description: "Update destination files in-place",
     },
     { name: "--append", description: "Append data onto shorter files" },
     {
@@ -205,10 +252,14 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-d", "--dirs"],
       description: "Transfer directories without recursing",
-      args: {
-        name: "DIR",
-        template: "folders",
-      },
+    },
+    {
+      name: ["--old-dirs", "--old-d"],
+      description: "Works like --dirs when talking to old rsync",
+    },
+    {
+      name: "--mkpath",
+      description: "Create destination's missing path components",
     },
     { name: ["-l", "--links"], description: "Copy symlinks as symlinks" },
     {
@@ -222,6 +273,16 @@ const completionSpec: Fig.Spec = {
     {
       name: "--safe-links",
       description: "Ignore symlinks that point outside the source tree",
+    },
+    {
+      name: "--insecure-links",
+      description: "Follow attacker-owned symlinks in operator paths",
+    },
+    {
+      name: "--confine-root",
+      description: "Refuse operator paths resolving outside DIR",
+      requiresSeparator: true,
+      args: folderArg("DIR"),
     },
     {
       name: "--munge-links",
@@ -245,6 +306,7 @@ const completionSpec: Fig.Spec = {
       name: "--chmod",
       description: "Affect file and/or directory permissions",
       requiresSeparator: true,
+      isRepeatable: true,
       args: {
         name: "CHMOD",
       },
@@ -252,9 +314,12 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-A", "--acls"],
       description: "Preserve ACLs (implies --perms)",
-      dependsOn: ["--perms"],
     },
-    { name: ["-X", "--xattrs"], description: "Preserve extended attributes" },
+    {
+      name: ["-X", "--xattrs"],
+      description: "Preserve extended attributes",
+      isRepeatable: true,
+    },
     {
       name: ["-o", "--owner"],
       description: "Preserve owner (super-user only)",
@@ -268,23 +333,37 @@ const completionSpec: Fig.Spec = {
       name: "--copy-devices",
       description: "Copy device contents as regular file",
     },
+    {
+      name: "--write-devices",
+      description: "Write to devices as files (implies --inplace)",
+    },
     { name: "--specials", description: "Preserve special files" },
+    {
+      name: "--drop-D",
+      description: "Receiver refuses to create devices/specials",
+    },
     { name: "-D", description: "Same as --devices --specials" },
     { name: ["-t", "--times"], description: "Preserve modification times" },
     {
+      name: ["-U", "--atimes"],
+      description: "Preserve access (use) times",
+      isRepeatable: true,
+    },
+    {
+      name: "--open-noatime",
+      description: "Avoid changing the atime on opened files",
+    },
+    {
+      name: ["-N", "--crtimes"],
+      description: "Preserve create times (newness)",
+    },
+    {
       name: ["-O", "--omit-dir-times"],
       description: "Omit directories from --times",
-      dependsOn: ["--times"],
-      args: {
-        name: "DIR",
-        template: "folders",
-        isVariadic: true,
-      },
     },
     {
       name: ["-J", "--omit-link-times"],
       description: "Omit symlinks from --times",
-      dependsOn: ["--times"],
     },
     { name: "--super", description: "Receiver attempts super-user activities" },
     {
@@ -308,17 +387,32 @@ const completionSpec: Fig.Spec = {
       description: "Copy files whole (without delta-xfer algorithm)",
     },
     {
-      name: "--checksum-choice",
-      description: "Choose the checksum algorithms",
+      name: ["--no-whole-file", "--no-W"],
+      description: "Use the delta-xfer algorithm",
+    },
+    {
+      name: ["--checksum-choice", "--cc"],
+      description: "Choose the checksum algorithm",
       requiresSeparator: true,
       args: {
         name: "ALGORITHM",
-        suggestions: ["auto", "md4", "md5", "none"],
+        suggestions: [
+          "auto",
+          "xxh128",
+          "xxh3",
+          "xxh64",
+          "xxhash",
+          "md5",
+          "md4",
+          "sha1",
+          "none",
+        ],
       },
     },
     {
       name: ["-x", "--one-file-system"],
       description: "Don't cross filesystem boundaries",
+      isRepeatable: true,
     },
     {
       name: ["-B", "--block-size"],
@@ -344,7 +438,10 @@ const completionSpec: Fig.Spec = {
         name: "PATH",
       },
     },
-    { name: "--existing", description: "Skip creating new files on receiver" },
+    {
+      name: ["--existing", "--ignore-non-existing"],
+      description: "Skip creating new files on receiver",
+    },
     {
       name: "--ignore-existing",
       description: "Skip updating files that already exist on receiver",
@@ -352,6 +449,11 @@ const completionSpec: Fig.Spec = {
     {
       name: "--remove-source-files",
       description: "Sender removes synchronized files (non-dirs)",
+    },
+    {
+      name: "--remove-sent-files",
+      description: "Same as --remove-source-files (use that instead)",
+      deprecated: true,
     },
     {
       name: "--delete",
@@ -417,19 +519,28 @@ const completionSpec: Fig.Spec = {
         name: "SIZE",
       },
     },
-    { name: "--partial", description: "Keep partially transferred files" },
     {
-      name: "--partial-dir=DIR",
-      description: "Put a partially transferred file into DIR",
+      name: "--max-alloc",
+      description: "Change a limit relating to memory alloc",
       requiresSeparator: true,
       args: {
-        name: "DIR",
-        template: "folders",
+        name: "SIZE",
       },
+    },
+    { name: "--partial", description: "Keep partially transferred files" },
+    {
+      name: "--partial-dir",
+      description: "Put a partially transferred file into DIR",
+      requiresSeparator: true,
+      args: folderArg("DIR"),
     },
     {
       name: "--delay-updates",
       description: "Put all updated files into place at transfer's end",
+    },
+    {
+      name: "--delay-symlinks",
+      description: "Create symlinks after all files are in place",
     },
     {
       name: ["-m", "--prune-empty-dirs"],
@@ -456,7 +567,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--chown=USER:GROUP",
+      name: "--chown",
       description: "Simple username/groupname mapping",
       requiresSeparator: true,
       args: {
@@ -483,21 +594,6 @@ const completionSpec: Fig.Spec = {
       name: ["-I", "--ignore-times"],
       description: "Don't skip files that match in size and mod-time",
     },
-    {
-      name: "-M",
-      description: "Send OPTION to the remote side only",
-      args: {
-        name: "OPTION",
-      },
-    },
-    {
-      name: "--remote-option",
-      description: "Send OPTION to the remote side only",
-      requiresSeparator: true,
-      args: {
-        name: "OPTION",
-      },
-    },
     { name: "--size-only", description: "Skip files that match in size" },
     {
       name: "-@",
@@ -517,62 +613,69 @@ const completionSpec: Fig.Spec = {
     {
       name: "-T",
       description: "Create temporary files in directory DIR",
-      args: {
-        name: "DIR",
-        template: "folders",
-      },
+      args: folderArg("DIR"),
     },
     {
       name: "--temp-dir",
       description: "Create temporary files in directory DIR",
       requiresSeparator: true,
-      args: {
-        name: "DIR",
-        template: "folders",
-      },
+      args: folderArg("DIR"),
     },
     {
       name: ["-y", "--fuzzy"],
       description: "Find similar file for basis if no dest file",
+      isRepeatable: true,
     },
     {
       name: "--compare-dest",
       description: "Also compare destination files relative to DIR",
       requiresSeparator: true,
-      args: {
-        name: "DIR",
-        template: "folders",
-      },
+      isRepeatable: true,
+      args: folderArg("DIR"),
     },
     {
       name: "--copy-dest",
       description:
         "Also compare destination files relative to DIR and include copies of unchanged files",
-      args: {
-        name: "DIR",
-        template: "folders",
-      },
+      requiresSeparator: true,
+      isRepeatable: true,
+      args: folderArg("DIR"),
     },
     {
       name: "--link-dest",
       description: "Hardlink to files in DIR when unchanged",
       requiresSeparator: true,
-      args: {
-        name: "DIR",
-        template: "folders",
-      },
+      isRepeatable: true,
+      args: folderArg("DIR"),
     },
     {
       name: ["-z", "--compress"],
       description: "Compress file data during the transfer",
     },
     {
-      name: "--compress-level",
+      name: ["--compress-choice", "--zc"],
+      description: "Choose the compression algorithm",
+      requiresSeparator: true,
+      args: {
+        name: "ALGORITHM",
+        suggestions: ["zstd", "lz4", "zlibx", "zlib", "none"],
+      },
+    },
+    {
+      name: ["--compress-level", "--zl"],
       description: "Explicitly set compression level",
       requiresSeparator: true,
       args: {
         name: "NUM",
         suggestions: Array.from(Array(10).keys()).map((v) => v.toString()),
+      },
+    },
+    {
+      name: ["--compress-threads", "--zt"],
+      description: "Explicitly set compression threads",
+      requiresSeparator: true,
+      args: {
+        name: "NUM",
       },
     },
     {
@@ -590,6 +693,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-f",
       description: "Add a file-filtering RULE",
+      isRepeatable: true,
       args: {
         name: "RULE",
       },
@@ -598,23 +702,22 @@ const completionSpec: Fig.Spec = {
       name: "--filter",
       description: "Add a file-filtering RULE",
       requiresSeparator: true,
+      isRepeatable: true,
       args: {
         name: "RULE",
       },
     },
     {
       name: "-F",
-      description: "Same as --filter='dir-merge /.rsync-filter'",
-      args: {
-        name: "DIR",
-        template: "folders",
-        isVariadic: true,
-      },
+      description:
+        "Same as --filter='dir-merge /.rsync-filter'; repeated: --filter='- .rsync-filter'",
+      isRepeatable: true,
     },
     {
       name: "--exclude",
       description: "Exclude files matching PATTERN",
       requiresSeparator: true,
+      isRepeatable: true,
       args: {
         name: "PATTERN",
       },
@@ -623,15 +726,14 @@ const completionSpec: Fig.Spec = {
       name: "--exclude-from",
       description: "Read exclude patterns from FILE",
       requiresSeparator: true,
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
+      isRepeatable: true,
+      args: fileArg("FILE"),
     },
     {
       name: "--include",
       description: "Don't exclude files matching PATTERN",
       requiresSeparator: true,
+      isRepeatable: true,
       args: {
         name: "PATTERN",
       },
@@ -640,27 +742,39 @@ const completionSpec: Fig.Spec = {
       name: "--include-from",
       description: "Read include patterns from FILE",
       requiresSeparator: true,
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
+      isRepeatable: true,
+      args: fileArg("FILE"),
     },
     {
       name: "--files-from",
       description: "Read list of source-file names from FILE",
       requiresSeparator: true,
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
+      args: fileArg("FILE"),
     },
     {
       name: ["-0", "--from0"],
       description: "All *-from/filter files are delimited by 0s",
     },
     {
-      name: ["-s", "--protect-args"],
-      description: "No space-splitting; only wildcard special-chars",
+      name: "--old-args",
+      description: "Disable the modern argument-protection idiom",
+      exclusiveOn: ["-s", "--secluded-args"],
+    },
+    {
+      name: ["-s", "--secluded-args", "--protect-args"],
+      description: "Use the protocol to safely send the arguments",
+    },
+    {
+      name: "--trust-sender",
+      description: "Trust the remote sender's file list",
+    },
+    {
+      name: "--copy-as",
+      description: "Specify user & optional group for the copy",
+      requiresSeparator: true,
+      args: {
+        name: "USER[:GROUP]",
+      },
     },
     {
       name: "--address",
@@ -690,6 +804,15 @@ const completionSpec: Fig.Spec = {
       name: "--blocking-io",
       description: "Use blocking I/O for the remote shell",
     },
+    {
+      name: "--outbuf",
+      description: "Set out buffering to None, Line, or Block",
+      requiresSeparator: true,
+      args: {
+        name: "BUFFER",
+        suggestions: ["N", "L", "B"],
+      },
+    },
     { name: "--stats", description: "Give some file-transfer stats" },
     {
       name: ["-8", "--8-bit-output"],
@@ -698,12 +821,31 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-h", "--human-readable"],
       description: "Output numbers in a human-readable format",
+      isRepeatable: true,
     },
     { name: "--progress", description: "Show progress during transfer" },
     { name: "-P", description: "Same as --partial --progress" },
     {
       name: ["-i", "--itemize-changes"],
       description: "Output a change-summary for all updates",
+      isRepeatable: true,
+    },
+    {
+      name: "-M",
+      description: "Send OPTION to the remote side only",
+      isRepeatable: true,
+      args: {
+        name: "OPTION",
+      },
+    },
+    {
+      name: "--remote-option",
+      description: "Send OPTION to the remote side only",
+      requiresSeparator: true,
+      isRepeatable: true,
+      args: {
+        name: "OPTION",
+      },
     },
     {
       name: "--out-format",
@@ -714,13 +856,19 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--log-format",
+      description: "Same as --out-format (use that instead)",
+      deprecated: true,
+      requiresSeparator: true,
+      args: {
+        name: "FORMAT",
+      },
+    },
+    {
       name: "--log-file",
       description: "Log what we're doing to the specified FILE",
       requiresSeparator: true,
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
+      args: fileArg("FILE"),
     },
     {
       name: "--log-file-format",
@@ -734,10 +882,13 @@ const completionSpec: Fig.Spec = {
       name: "--password-file",
       description: "Read daemon-access password from FILE",
       requiresSeparator: true,
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
+      args: fileArg("FILE"),
+    },
+    {
+      name: "--early-input",
+      description: "Use FILE for daemon's early exec input",
+      requiresSeparator: true,
+      args: fileArg("FILE"),
     },
     {
       name: "--list-only",
@@ -752,15 +903,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--stop-at",
-      description: "Stop rsync at year-month-dayThour:minute",
-      requiresSeparator: true,
-      args: {
-        name: "y-m-dTh:m",
-      },
-    },
-    {
-      name: "--time-limit",
+      name: "--stop-after",
       description: "Stop rsync after MINS minutes have elapsed",
       requiresSeparator: true,
       args: {
@@ -768,40 +911,40 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--outbuf",
-      description: "Set output buffering to None, Line, or Block",
+      name: "--time-limit",
+      description: "Same as --stop-after (use that instead)",
+      deprecated: true,
       requiresSeparator: true,
       args: {
-        name: "BUFFER",
-        suggestions: ["N", "L", "B"],
+        name: "MINS",
       },
     },
+    {
+      name: "--stop-at",
+      description: "Stop rsync at the specified point in time",
+      requiresSeparator: true,
+      args: {
+        name: "y-m-dTh:m",
+      },
+    },
+    { name: "--fsync", description: "Fsync every written file" },
     {
       name: "--write-batch",
       description: "Write a batched update to FILE",
       requiresSeparator: true,
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
+      args: fileArg("FILE"),
     },
     {
       name: "--only-write-batch",
       description: "Like --write-batch but w/o updating destination",
       requiresSeparator: true,
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
+      args: fileArg("FILE"),
     },
     {
       name: "--read-batch",
       description: "Read a batched update from FILE",
       requiresSeparator: true,
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
+      args: fileArg("FILE"),
     },
     {
       name: "--protocol",
@@ -827,13 +970,56 @@ const completionSpec: Fig.Spec = {
         name: "NUM",
       },
     },
-    {
-      name: "--noatime",
-      description: "Do not alter atime when opening source files",
-    },
     { name: ["-4", "--ipv4"], description: "Prefer IPv4" },
     { name: ["-6", "--ipv6"], description: "Prefer IPv6" },
-    { name: "--version", description: "Print version number" },
+    {
+      name: "--nice",
+      description: "Adjust rsync CPU and I/O priorities",
+      requiresSeparator: true,
+      isRepeatable: true,
+      args: {
+        name: "SETTINGS",
+        suggestions: [
+          "19/idle",
+          "local:10,remote:idle",
+          "local:19/be_7,remote:5",
+        ],
+      },
+    },
+    {
+      name: "--no-nice",
+      description: "Clear earlier --nice settings",
+    },
+    {
+      name: "--daemon",
+      description: "Run as an rsync daemon",
+    },
+    {
+      name: "--config",
+      description: "Specify alternate rsyncd.conf file (with --daemon)",
+      requiresSeparator: true,
+      dependsOn: ["--daemon"],
+      args: fileArg("FILE"),
+    },
+    {
+      name: "--dparam",
+      description: "Override global daemon config parameter (-M with --daemon)",
+      requiresSeparator: true,
+      dependsOn: ["--daemon"],
+      args: {
+        name: "OVERRIDE",
+      },
+    },
+    {
+      name: "--no-detach",
+      description: "Do not detach from the parent (with --daemon)",
+      dependsOn: ["--daemon"],
+    },
+    {
+      name: ["-V", "--version"],
+      description: "Print the version + other info and exit",
+      isRepeatable: true,
+    },
     {
       /*
        * This is according with rsync spec.

@@ -1,3 +1,7 @@
+// pkgutil (macOS built-in tool, no standalone version; man page bundled with Xcode 27.3 beta 2, 2026-11-19).
+// Source: pkgutil(1) from the keith/xcode-man-pages mirror (commit 6ddd0b2) plus the existing spec; NOT a live run on macOS.
+// Added --expand-full / --flatten-full, fixed --groups-plist (was --group-plist), removed --verify / --repair
+// (they relied on repair_packages(8), which no longer exists and is absent from the current man page).
 interface PostProcessPkgFilenames {
   pathPrefix?: string;
 }
@@ -77,9 +81,35 @@ export const pkgutilGenerators: Record<string, Fig.Generator> = {
   },
 };
 
+const expandArgs: Fig.Arg[] = [
+  {
+    name: "pkg-path",
+    description: "The path to the flat package to expand",
+    template: "filepaths",
+  },
+  {
+    name: "dir-path",
+    description: "The path to the directory to expand the package into",
+    template: "folders",
+  },
+];
+
+const flattenArgs: Fig.Arg[] = [
+  {
+    name: "dir-path",
+    description: "The path to the directory to flatten",
+    template: "folders",
+  },
+  {
+    name: "pkg-path",
+    description: "The path to the flat package to create",
+    template: "filepaths",
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "pkgutil",
-  description: "Query and manipulate for macOS Installer packages and receipts",
+  description: "Query and manipulate macOS Installer packages and receipts",
   subcommands: [
     {
       name: ["--packages", "--pkgs"],
@@ -106,24 +136,6 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "package-id",
         description: "The package ID to export the plist of",
-        generators: pkgutilGenerators.packageIds,
-      },
-    },
-    {
-      name: "--verify",
-      description: "Run repair_packages(8) to verify the specified package-id",
-      args: {
-        name: "package-id",
-        description: "The package ID to verify",
-        generators: pkgutilGenerators.packageIds,
-      },
-    },
-    {
-      name: "--repair",
-      description: "Run repair_packages(8) to repair the specified package-id",
-      args: {
-        name: "package-id",
-        description: "The package ID to repair",
         generators: pkgutilGenerators.packageIds,
       },
     },
@@ -178,12 +190,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--groups",
-      description: "List all of the package groups ont he specified --volume",
+      description: "List all of the package groups on the specified --volume",
     },
     {
-      name: "--group-plist",
+      name: "--groups-plist",
       description:
-        "List all of the package groups ont he specified --volume in Mac OS X plist(5) format",
+        "List all of the package groups on the specified --volume in Mac OS X plist(5) format",
     },
     {
       name: "--group-pkgs",
@@ -217,35 +229,25 @@ const completionSpec: Fig.Spec = {
       name: "--expand",
       description:
         "Expand the flat package at pkg-path into a new directory specified by dir-path",
-      args: [
-        {
-          name: "pkg-path",
-          description: "The path to the flat package to expand",
-          template: "filepaths",
-        },
-        {
-          name: "dir-path",
-          description: "The path to the directory to expand the package into",
-          template: "folders",
-        },
-      ],
+      args: expandArgs,
+    },
+    {
+      name: "--expand-full",
+      description:
+        "Expand the flat package at pkg-path into a new directory specified by dir-path, including expanding the Payload contents of each package",
+      args: expandArgs,
     },
     {
       name: "--flatten",
       description:
         "Flatten the dir-path into a new flat package created at pkg-path",
-      args: [
-        {
-          name: "dir-path",
-          description: "The path to the directory to flatten",
-          template: "folders",
-        },
-        {
-          name: "pkg-path",
-          description: "The path to the flat package to create",
-          template: "filepaths",
-        },
-      ],
+      args: flattenArgs,
+    },
+    {
+      name: "--flatten-full",
+      description:
+        "Flatten the dir-path into a new flat package created at pkg-path, including archiving the Payload contents of each package (expects a directory created by --expand-full)",
+      args: flattenArgs,
     },
     {
       name: "--bom",
@@ -295,7 +297,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--volume",
-      description: "Perform all operations on specified volume",
+      description:
+        "Perform all operations on the specified volume or home directory (default: /)",
       args: {
         name: "volume",
         description: "Volume to perform operations on",
@@ -323,12 +326,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "--regexp",
       description:
-        "Use regex to match package-id arguments, if an exact match isn't found",
+        "Try to match package-id arguments as a regular expression if an exact match isn't found",
     },
     {
       name: "--pkgs",
       description:
-        "List all installed package IDs, optionally matching kwarg REGEXP, on the specified --volume",
+        "List all installed package IDs matching REGEXP on the specified --volume (the = is required)",
       requiresSeparator: true,
       args: {
         name: "REGEXP",

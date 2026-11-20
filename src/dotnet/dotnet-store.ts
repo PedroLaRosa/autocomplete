@@ -1,82 +1,74 @@
-import { filepaths } from "@tabsmith/autocomplete-generators";
+import {
+  disableBuildServersOption,
+  frameworkOption,
+  noLogoOption,
+  projectFileGenerator,
+  useCurrentRuntimeOption,
+  verbosityOption,
+} from "./shared";
 
 const completionSpec: Fig.Spec = {
   name: "store",
   description:
-    "Dotnet store stores the specified assemblies in the runtime package store. By default, assemblies are optimized for the target runtime and framework. For more information, see the runtime package store topic",
+    "Stores the specified assemblies for the .NET Platform. By default, these will be optimized for the target runtime and framework",
   options: [
-    {
-      name: ["-f", "--framework"],
-      description:
-        "Specifies the target framework. The target framework has to be specified in the project file",
-      isRequired: true,
-      args: {
-        name: "framework",
-      },
-    },
     {
       name: ["-m", "--manifest"],
       description:
-        "The package store manifest file is an XML file that contains the list of packages to store. The format of the manifest file is compatible with the SDK-style project format. So, a project file that references the desired packages can be used with the -m|--manifest option to store assemblies in the runtime package store",
-      isRequired: true,
+        "The XML file that contains the list of packages to be stored",
       isRepeatable: true,
       args: {
-        name: "manifest",
-        generators: filepaths({ extensions: ["csproj"] }),
-      },
-    },
-    {
-      name: ["-r", "--runtime"],
-      isRequired: true,
-      description: "The runtime identifier to target",
-      args: {
-        name: "runtime",
+        name: "project-manifest",
+        generators: projectFileGenerator,
       },
     },
     {
       name: "--framework-version",
       description:
-        "Specifies the .NET SDK version. This option enables you to select a specific framework version beyond the framework specified by the -f|--framework option",
+        "The Microsoft.NETCore.App package version that will be used to run the assemblies",
       args: {
-        name: "version",
+        name: "framework-version",
       },
     },
     {
       name: ["-o", "--output"],
-      description:
-        "Specifies the path to the runtime package store. If not specified, it defaults to the store subdirectory of the user profile .NET installation directory",
+      description: "The output directory to store the given assemblies in",
       args: {
-        name: "path",
+        name: "output-dir",
+        template: "folders",
+      },
+    },
+    {
+      name: ["-w", "--working-dir"],
+      description: "The working directory used by the command to execute",
+      args: {
+        name: "working-dir",
         template: "folders",
       },
     },
     {
       name: "--skip-optimization",
-      description: "Skips the optimization phase",
+      description: "Skip the optimization phase",
     },
     {
       name: "--skip-symbols",
       description:
-        "Skips symbol generation. Currently, you can only generate symbols on Windows and Linux",
+        "Skip creating symbol files which can be used for profiling the optimized assemblies",
     },
+    frameworkOption(
+      "The target framework to store packages for. The target framework has to be specified in the project file"
+    ),
     {
-      name: ["-v", "--verbosity"],
-      description:
-        "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. For more information, see LoggerVerbosity",
+      name: ["-r", "--runtime"],
+      description: "The target runtime to store packages for",
       args: {
-        name: "verbosity",
-        suggestions: ["quiet", "minimal", "normal", "detailed", "diagnostic"],
+        name: "runtime-identifier",
       },
     },
-    {
-      name: ["-w", "--working-dir"],
-      description:
-        "The working directory used by the command. If not specified, it uses the obj subdirectory of the current directory",
-      args: {
-        name: "directory",
-        template: "folders",
-      },
-    },
+    verbosityOption(),
+    useCurrentRuntimeOption("Use current runtime as the target runtime"),
+    disableBuildServersOption,
+    noLogoOption,
   ],
 };
 

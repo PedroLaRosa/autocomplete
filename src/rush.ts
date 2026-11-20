@@ -1,3 +1,10 @@
+// Rush v5.182.1 (npm @microsoft/rush "latest", published 2026-10-30; re-verified 2026-11-20).
+// Source: command/flag tables from the CommandLineHelp snapshot of the 5.182.1 release commit of
+// microsoft/rushstack (libraries/rush-lib/src/cli), cross-checked against the parameter definitions
+// in the published @microsoft/rush-lib 5.182.1 bundle. Not run. Unreleased main-branch changes
+// (PNPM catalog wording in "rush add") are left out. Commands defined only by a repo's own
+// command-line.json (import-strings, upload, --ship, --minimal) are intentionally not listed.
+// Conditional flags of custom phased commands (--watch, --install, --no-ipc) are not on build/rebuild.
 import stripJsonComments from "strip-json-comments";
 import { npmSearchGenerator } from "./npm";
 
@@ -42,53 +49,175 @@ const projectGenerator: Fig.Generator = {
 const PROJECT_SELECTION_OPTIONS: Fig.Option[] = [
   {
     name: ["-t", "--to"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--to" parameter expands this selection to include PROJECT and all its dependencies. "." can be used as shorthand for the project in the current working directory. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-T", "--to-except"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--to-except" parameter expands this selection to include all dependencies of PROJECT, but not PROJECT itself. "." can be used as shorthand for the project in the current working directory. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-f", "--from"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--from" parameter expands this selection to include PROJECT and all projects that depend on it, plus all dependencies of this set.  "." can be used as shorthand for the project in the current working directory. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-o", "--only"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--only" parameter expands this selection to include PROJECT; its dependencies are not added. "." can be used as shorthand for the project in the current working directory. Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-i", "--impacted-by"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--impacted-by" parameter expands this selection to include PROJECT and any projects that depend on PROJECT (and thus might be broken by changes to PROJECT). "." can be used as shorthand for the project in the current working directory. Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-I", "--impacted-by-except"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--impacted-by-except" parameter works the same as "--impacted-by" except that PROJECT itself is not added to the selection. "." can be used as shorthand for the project in the current working directory. Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: "--to-version-policy",
+    isRepeatable: true,
     args: { name: "VERSION_POLICY_NAME" },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. The "--to-version-policy" parameter is equivalent to specifying "--to" for each of the projects belonging to VERSION_POLICY_NAME. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: "--from-version-policy",
+    isRepeatable: true,
     args: { name: "VERSION_POLICY_NAME" },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. The "--from-version-policy" parameter is equivalent to specifying "--from" for each of the projects belonging to VERSION_POLICY_NAME.  For details, refer to the website article "Selecting subsets of projects"',
   },
 ];
+
+const VARIANT_OPTION: Fig.Option = {
+  name: "--variant",
+  args: { name: "VARIANT" },
+  description:
+    "Run command using a variant installation configuration. This parameter may alternatively be specified via the RUSH_VARIANT environment variable",
+};
+
+const SKIP_UPDATE_OPTION: Fig.Option = {
+  name: ["-s", "--skip-update"],
+  description:
+    'If specified, the "rush update" command will not be run after updating the package.json files',
+};
+
+/** Options shared by "rush install" and "rush update" */
+const INSTALL_OPTIONS: Fig.Option[] = [
+  {
+    name: ["-p", "--purge"],
+    description: 'Perform "rush purge" before starting the installation',
+  },
+  {
+    name: "--bypass-policy",
+    description:
+      'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)',
+  },
+  {
+    name: "--no-link",
+    description:
+      'If "--no-link" is specified, then project symlinks will NOT be created after the installation completes. You will need to run "rush link" manually. This flag is useful for automated builds that want to report stages individually or perform extra operations in between the two stages. This flag is not supported when using workspaces',
+  },
+  {
+    name: "--network-concurrency",
+    args: { name: "COUNT" },
+    description:
+      "If specified, limits the maximum number of concurrent network requests. This is useful when troubleshooting network failures",
+  },
+  {
+    name: "--debug-package-manager",
+    description:
+      "Activates verbose logging for the package manager. You will probably want to pipe the output of Rush to a file when using this command",
+  },
+  {
+    name: "--max-install-attempts",
+    args: { name: "NUMBER" },
+    description:
+      "Overrides the default maximum number of install attempts. The default value is 1",
+  },
+  {
+    name: "--ignore-hooks",
+    description:
+      'Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping',
+  },
+  {
+    name: "--offline",
+    description:
+      'Enables installation to be performed without internet access. PNPM will instead report an error if the necessary NPM packages cannot be obtained from the local cache. For details, see the documentation for PNPM\'s "--offline" parameter',
+  },
+  VARIANT_OPTION,
+];
+
+/** Options shared by the default phased commands "rush build" and "rush rebuild" */
+const PHASED_OPTIONS: Fig.Option[] = [
+  {
+    name: ["-p", "--parallelism"],
+    args: { name: "COUNT" },
+    description:
+      'Specifies the maximum number of concurrent processes to launch during a build. The COUNT should be a positive integer, a percentage value (eg. "50%") or the word "max" to specify a count that is equal to the number of CPU cores. If this parameter is omitted, then the default value depends on the operating system and number of CPU cores. This parameter may alternatively be specified via the RUSH_PARALLELISM environment variable',
+  },
+  {
+    name: "--timeline",
+    description:
+      "After the build is complete, print additional statistics and CPU usage information, including an ASCII chart of the start and stop times for each operation",
+  },
+  {
+    name: "--log-cobuild-plan",
+    description:
+      "(EXPERIMENTAL) Before the build starts, log information about the cobuild state. This will include information about clusters and the projects that are part of each cluster",
+  },
+  ...PROJECT_SELECTION_OPTIONS,
+  {
+    name: ["-v", "--verbose"],
+    description:
+      "Display the logs during the build, rather than just displaying the build status summary",
+  },
+  {
+    name: "--include-phase-deps",
+    description:
+      'If the selected projects are "unsafe" (missing some dependencies), add the minimal set of phase dependencies. For example, "--from A" normally might include the "_phase:test" phase for A\'s dependencies, even though changes to A can\'t break those tests. Using "--impacted-by A --include-phase-deps" avoids that work by performing "_phase:test" only for downstream projects',
+  },
+  {
+    name: "--ignore-hooks",
+    description:
+      'Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping',
+  },
+  {
+    name: "--node-diagnostic-dir",
+    args: { name: "DIRECTORY", template: "folders" },
+    description:
+      "Specifies the directory where Node.js diagnostic reports will be written. This directory will contain a subdirectory for each project and phase",
+  },
+  {
+    name: "--debug-build-cache-ids",
+    description:
+      "Logs information about the components of the build cache ids for individual operations. This is useful for debugging the incremental build logic",
+  },
+];
+
+const HOTLINK_PATH_OPTION: Fig.Option = {
+  name: "--path",
+  isRequired: true,
+  args: { name: "PATH", template: "folders" },
+  description:
+    'The path of folder of a project outside of this Rush repo, whose installation will be simulated using node_modules symlinks ("hotlinks"). This folder is the symlink target',
+};
 
 const completionSpec: Fig.Spec = {
   name: "rush",
@@ -99,10 +228,11 @@ const completionSpec: Fig.Spec = {
       description:
         "Adds one or more dependencies to the package.json and runs rush update",
       options: [
+        SKIP_UPDATE_OPTION,
         {
           name: ["-p", "--package"],
           description:
-            "Specify package to the dependencies of the current project",
+            'The name of the package which should be added as a dependency. A SemVer version specifier can be appended after an "@" sign. To add multiple packages, repeat the parameter, e.g. "rush add --package foo --package bar"',
           isRequired: true,
           isRepeatable: true,
           args: {
@@ -111,6 +241,12 @@ const completionSpec: Fig.Spec = {
             debounce: true,
           },
         },
+        {
+          name: "--all",
+          description:
+            "If specified, the dependency will be added to all projects",
+        },
+        VARIANT_OPTION,
         {
           name: "--exact",
           description:
@@ -127,19 +263,14 @@ const completionSpec: Fig.Spec = {
             'If specified, the package will be added to the "devDependencies" section of the package.json',
         },
         {
+          name: "--peer",
+          description:
+            'If specified, the package will be added to the "peerDependencies" section of the package.json',
+        },
+        {
           name: ["-m", "--make-consistent"],
           description:
             "If specified, other packages with this dependency will have their package.json files updated to use the same version of the dependency",
-        },
-        {
-          name: ["-s", "--skip-update"],
-          description:
-            'If specified, the "rush update" command will not be run after updating the package.json files',
-        },
-        {
-          name: "--all",
-          description:
-            "If specified, the dependency will be added to all projects",
         },
       ],
     },
@@ -154,6 +285,11 @@ const completionSpec: Fig.Spec = {
             "Verify the change file has been generated and that it is a valid JSON file",
         },
         {
+          name: "--verify-all",
+          description:
+            'Validate all change files in the repository, not just those added in the current branch. Reports errors for change files that reference nonexistent projects or target non-main projects in a lockstepped version policy. Requires the "strictChangefileValidation" experiment to be enabled',
+        },
+        {
           name: "--no-fetch",
           description:
             'Skips fetching the baseline branch before running "git diff" to detect changes',
@@ -161,7 +297,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-b", "--target-branch"],
           description:
-            'If this parameter is specified, compare the checked out branch with the specified branch to determine which projects were changed. If this parameter is not specified, the checked out branch is compared against the "master" branch',
+            'If this parameter is specified, compare the checked out branch with the specified branch to determine which projects were changed. If this parameter is not specified, the checked out branch is compared against the "main" branch',
           args: {
             name: "BRANCH",
           },
@@ -170,6 +306,17 @@ const completionSpec: Fig.Spec = {
           name: "--overwrite",
           description:
             "If a changefile already exists, overwrite without prompting (or erroring in --bulk mode)",
+        },
+        {
+          name: ["-c", "--commit"],
+          description:
+            "If this flag is specified generated changefiles will be commited automatically",
+        },
+        {
+          name: "--commit-message",
+          args: { name: "COMMIT_MESSAGE" },
+          description:
+            "If this parameter is specified generated changefiles will be commited automatically with the specified commit message",
         },
         {
           name: "--email",
@@ -209,16 +356,22 @@ const completionSpec: Fig.Spec = {
         "Checks each project's package.json files and ensures that all dependencies are of the same version throughout the repository",
       options: [
         {
-          name: "--variant",
-          description:
-            "Run command using a variant installation configuration. This parameter may alternatively be specified via the RUSH_VARIANT environment variable",
-          args: { name: "VARIANT" },
-        },
-        {
           name: "--json",
           description:
             "If this flag is specified, output will be in JSON format",
         },
+        {
+          name: "--verbose",
+          description:
+            "If this flag is specified, long lists of package names will not be truncated. This has no effect if the --json flag is also specified",
+        },
+        {
+          name: "--subspace",
+          args: { name: "SUBSPACE_NAME" },
+          description:
+            '(EXPERIMENTAL) Specifies an individual Rush subspace to check, requiring versions to be consistent only within that subspace (ignoring other subspaces). This parameter is required when the "subspacesEnabled" setting is set to true in subspaces.json',
+        },
+        VARIANT_OPTION,
       ],
     },
     {
@@ -245,7 +398,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-t", "--target-folder"],
-          args: { name: "PATH" },
+          args: { name: "PATH", template: "folders" },
           description:
             'By default, files are deployed to the "common/deploy" folder inside the Rush repo. Use this parameter to specify a different location. WARNING: USE CAUTION WHEN COMBINING WITH "--overwrite". This parameter may alternatively be specified via the RUSH_DEPLOY_TARGET_FOLDER environment variable',
         },
@@ -254,6 +407,11 @@ const completionSpec: Fig.Spec = {
           args: { name: "ARCHIVE_PATH" },
           description:
             'If specified, after the deployment has been prepared, "rush deploy" will create an archive containing the contents of the target folder. The newly created archive file will be placed according to the designated path, relative to the target folder. Supported file extensions: .zip',
+        },
+        {
+          name: "--create-archive-only",
+          description:
+            'If specified, "rush deploy" will only create an archive containing the contents of the target folder. The target folder will not be modified other than to create the archive file',
         },
       ],
     },
@@ -271,6 +429,11 @@ const completionSpec: Fig.Spec = {
           description:
             'When copying the template config files, this uncomments fragments that are used by the "rush-example" GitHub repo, which is a sample monorepo that illustrates many Rush features. This option is primarily intended for maintaining that example',
         },
+        {
+          name: "--include-experiments",
+          description:
+            "Include features that may not be complete features, useful for demoing specific future features or current work in progress features",
+        },
       ],
     },
     {
@@ -279,6 +442,7 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: "--name",
+          isRequired: true,
           args: { name: "AUTOINSTALLER_NAME" },
           description:
             "Specifies the name of the autoinstaller folder, which must conform to the naming rules for NPM packages",
@@ -292,7 +456,8 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: ["-p", "--project"],
-          args: { name: "PROJECT_NAME" },
+          isRequired: true,
+          args: { name: "PROJECT_NAME", generators: projectGenerator },
           description:
             'Specifies the name of the main Rush project to be deployed in this scenario. It will be added to the "deploymentProjectNames" setting',
         },
@@ -305,57 +470,39 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "init-subspace",
+      description: "Create a new subspace",
+      options: [
+        {
+          name: ["-n", "--name"],
+          isRequired: true,
+          args: { name: "SUBSPACE_NAME" },
+          description: "The name of the subspace that is being initialized",
+        },
+      ],
+    },
+    {
       name: "install",
       description:
         "Install package dependencies for all projects in the repo according to the shrinkwrap file",
       options: [
-        {
-          name: ["-p", "--purge"],
-          description: 'Perform "rush purge" before starting the installation',
-        },
-        {
-          name: "--bypass-policy",
-          description:
-            'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)',
-        },
-        {
-          name: "--no-link",
-          description:
-            'If "--no-link" is specified, then project symlinks will NOT be created after the installation completes. You will need to run "rush link" manually. This flag is useful for automated builds that want to report stages individually or perform extra operations in between the two stages. This flag is not supported when using workspaces',
-        },
-        {
-          name: "--network-concurrency",
-          args: { name: "COUNT" },
-          description:
-            "If specified, limits the maximum number of concurrent network requests. This is useful when troubleshooting network failures",
-        },
-        {
-          name: "--debug-package-manager",
-          description:
-            "Activates verbose logging for the package manager. You will probably want to pipe the output of Rush to a file when using this command",
-        },
-        {
-          name: "--max-install-attempts",
-          args: { name: "NUMBER" },
-          description:
-            "Overrides the default maximum number of install attempts. The default value is 3",
-        },
-        {
-          name: "--ignore-hooks",
-          description:
-            'Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping',
-        },
-        {
-          name: "--variant",
-          args: { name: "VARIANT" },
-          description:
-            "Run command using a variant installation configuration. This parameter may alternatively be specified via the RUSH_VARIANT environment variable",
-        },
+        ...INSTALL_OPTIONS,
         ...PROJECT_SELECTION_OPTIONS,
+        {
+          name: "--subspace",
+          args: { name: "SUBSPACE_NAME" },
+          description:
+            '(EXPERIMENTAL) Specifies a Rush subspace to be installed. Requires the "subspacesEnabled" feature to be enabled in subspaces.json',
+        },
         {
           name: "--check-only",
           description:
             "Only check the validity of the shrinkwrap file without performing an install",
+        },
+        {
+          name: "--resolution-only",
+          description:
+            "Only perform dependency resolution, useful for ensuring peer dependencies are up to date. This flag is only supported with PNPM versions earlier than 12",
         },
       ],
     },
@@ -392,13 +539,14 @@ const completionSpec: Fig.Spec = {
         {
           name: "--detailed",
           description:
-            "For the non --json view, if this flag is specified, include path (-p), version (-v) columns along with the project's applicable: versionPolicy, versionPolicyName, shouldPublish, and reviewPolicy fields",
+            "For the non --json view, if this flag is specified, include path (-p), version (-v) columns along with the project's applicable: versionPolicy, versionPolicyName, shouldPublish, reviewPolicy, and tags fields",
         },
         {
           name: "--json",
           description:
             "If this flag is specified, output will be in JSON format",
         },
+        ...PROJECT_SELECTION_OPTIONS,
       ],
     },
     {
@@ -464,7 +612,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--release-folder",
-          args: { name: "FOLDER" },
+          args: { name: "FOLDER", template: "folders" },
           description:
             "This parameter is used with --pack parameter to provide customized location for the tarballs instead of the default value",
         },
@@ -531,6 +679,28 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "remove",
+      description:
+        "Removes one or more dependencies from the package.json and runs rush update",
+      options: [
+        SKIP_UPDATE_OPTION,
+        {
+          name: ["-p", "--package"],
+          description:
+            'The name of the package which should be removed. To remove multiple packages, repeat the parameter, e.g. "rush remove --package foo --package bar"',
+          isRequired: true,
+          isRepeatable: true,
+          args: { name: "PACKAGE" },
+        },
+        {
+          name: "--all",
+          description:
+            "If specified, the dependency will be removed from all projects that declare it",
+        },
+        VARIANT_OPTION,
+      ],
+    },
+    {
       name: "scan",
       description:
         "When migrating projects into a Rush repo, this command is helpful for detecting undeclared dependencies",
@@ -561,48 +731,7 @@ const completionSpec: Fig.Spec = {
       description:
         "Install package dependencies for all projects in the repo, and create or update the shrinkwrap file as needed",
       options: [
-        {
-          name: ["-p", "--purge"],
-          description: 'Perform "rush purge" before starting the installation',
-        },
-        {
-          name: "--bypass-policy",
-          description:
-            'Overrides enforcement of the "gitPolicy" rules from rush.json (use honorably!)',
-        },
-        {
-          name: "--no-link",
-          description:
-            'If "--no-link" is specified, then project symlinks will NOT be created after the installation completes.  You will need to run "rush link" manually. This flag is useful for automated builds that want to report stages individually or perform extra operations in between the two stages. This flag is not supported when using workspaces',
-        },
-        {
-          name: "--network-concurrency",
-          args: { name: "COUNT" },
-          description:
-            "If specified, limits the maximum number of concurrent network requests. This is useful when troubleshooting network failures",
-        },
-        {
-          name: "--debug-package-manager",
-          description:
-            "Activates verbose logging for the package manager.  You will probably want to pipe the output of Rush to a file when using this command",
-        },
-        {
-          name: "--max-install-attempts",
-          args: { name: "NUMBER" },
-          description:
-            "Overrides the default maximum number of install attempts. The default value is 3",
-        },
-        {
-          name: "--ignore-hooks",
-          description:
-            'Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping',
-        },
-        {
-          name: "--variant",
-          args: { name: "VARIANT" },
-          description:
-            "Run command using a variant installation configuration. This parameter may alternatively be specified via the RUSH_VARIANT environment variable",
-        },
+        ...INSTALL_OPTIONS,
         {
           name: "--full",
           description:
@@ -615,14 +744,28 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "update-autoinstaller",
-      description: "Updates autoinstaller package dependenices",
+      name: "install-autoinstaller",
+      description: "Install autoinstaller package dependencies",
       options: [
         {
           name: "--name",
+          isRequired: true,
           args: { name: "AUTOINSTALLER_NAME" },
           description:
-            "Specifies the name of the autoinstaller, which must be one of the folders under common/autoinstallers",
+            "The name of the autoinstaller, which must be one of the folders under common/autoinstallers",
+        },
+      ],
+    },
+    {
+      name: "update-autoinstaller",
+      description: "Updates autoinstaller package dependencies",
+      options: [
+        {
+          name: "--name",
+          isRequired: true,
+          args: { name: "AUTOINSTALLER_NAME" },
+          description:
+            "The name of the autoinstaller, which must be one of the folders under common/autoinstallers",
         },
       ],
     },
@@ -642,9 +785,23 @@ const completionSpec: Fig.Spec = {
           description: "A static credential, to be cached",
         },
         {
-          name: ["-d", "--delete"],
+          name: "--delete",
           description: "If specified, delete stored credentials",
         },
+      ],
+    },
+    {
+      name: "upgrade-interactive",
+      description:
+        "Provides interactive prompt for upgrading package dependencies per project",
+      options: [
+        {
+          name: "--make-consistent",
+          description:
+            "When upgrading dependencies from a single project, also upgrade dependencies from other projects",
+        },
+        SKIP_UPDATE_OPTION,
+        VARIANT_OPTION,
       ],
     },
     {
@@ -683,7 +840,10 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--override-bump",
-          args: { name: "BUMPTYPE" },
+          args: {
+            name: "BUMPTYPE",
+            suggestions: ["prerelease", "patch", "preminor", "minor", "major"],
+          },
           description:
             "Overrides the bump type in the version-policy.json for the specified version policy. Valid BUMPTYPE values include: prerelease, patch, preminor, minor, major. This setting only works for lock-step version policy in bump action",
         },
@@ -701,56 +861,76 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "alert",
+      description:
+        "(EXPERIMENTAL) View and manage Rush alerts for the repository",
+      options: [
+        {
+          name: ["-s", "--snooze"],
+          args: { name: "ALERT_ID" },
+          description: "Temporarily suspend the specified alert for one week",
+        },
+        {
+          name: "--forever",
+          dependsOn: ["--snooze"],
+          description:
+            'Combined with "--snooze", causes that alert to be suspended permanently',
+        },
+      ],
+    },
+    {
+      name: "bridge-package",
+      description:
+        "(EXPERIMENTAL) Use hotlinks to simulate upgrade of a dependency for all consumers across a lockfile",
+      options: [
+        HOTLINK_PATH_OPTION,
+        {
+          name: "--version",
+          args: { name: "SEMVER_RANGE" },
+          description:
+            'Specify which installed versions should be hotlinked. The default value is "*"',
+        },
+        {
+          name: "--subspace",
+          isRepeatable: true,
+          args: { name: "SUBSPACE_NAME" },
+          description:
+            "The name of the subspace to use for the hotlinked package",
+        },
+      ],
+    },
+    {
+      name: "link-package",
+      description:
+        "(EXPERIMENTAL) Use hotlinks to simulate installation of a locally built project folder as a dependency of specific projects",
+      options: [
+        HOTLINK_PATH_OPTION,
+        {
+          name: "--project",
+          isRepeatable: true,
+          args: { name: "PROJECT_NAME", generators: projectGenerator },
+          description:
+            'A list of Rush project names that will be hotlinked to the "--path" folder. If not specified, the default is the project of the current working directory',
+        },
+      ],
+    },
+    {
       name: "build",
       description:
         "Build all projects that haven't been built, or have changed since they were last built",
       options: [
-        {
-          name: ["-p", "--parallelism"],
-          args: { name: "COUNT" },
-          description:
-            'Specifies the maximum number of concurrent processes to launch during a build. The COUNT should be a positive integer or else the word "max" to specify a count that is equal to the number of CPU cores. If this parameter is omitted, then the default value depends on the operating system and number of CPU cores. This parameter may alternatively be specified via the RUSH_PARALLELISM environment variable',
-        },
-        ...PROJECT_SELECTION_OPTIONS,
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Display the logs during the build, rather than just displaying the build status summary",
-        },
+        ...PHASED_OPTIONS,
         {
           name: ["-c", "--changed-projects-only"],
           description:
             'Normally the incremental build logic will rebuild changed projects as well as any projects that directly or indirectly depend on a changed project. Specify "--changed-projects-only" to ignore dependent projects, only rebuilding those projects whose files were changed. Note that this parameter is "unsafe"; it is up to the developer to ensure that the ignored projects are okay to ignore',
-        },
-        {
-          name: "--ignore-hooks",
-          description:
-            'Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping',
         },
       ],
     },
     {
       name: "rebuild",
       description: "Clean and rebuild the entire set of projects",
-      options: [
-        {
-          name: ["-p", "--parallelism"],
-          args: { name: "COUNT" },
-          description:
-            'Specifies the maximum number of concurrent processes to launch during a build. The COUNT should be a positive integer or else the word "max" to specify a count that is equal to the number of CPU cores. If this parameter is omitted, then the default value depends on the operating system and number of CPU cores. This parameter may alternatively be specified via the RUSH_PARALLELISM environment variable',
-        },
-        ...PROJECT_SELECTION_OPTIONS,
-        {
-          name: ["-v", "--verbose"],
-          description:
-            "Display the logs during the build, rather than just displaying the build status summary",
-        },
-        {
-          name: "--ignore-hooks",
-          description:
-            'Skips execution of the "eventHooks" scripts defined in rush.json. Make sure you know what you are skipping',
-        },
-      ],
+      options: PHASED_OPTIONS,
     },
     {
       name: "tab-complete",
@@ -780,6 +960,10 @@ const completionSpec: Fig.Spec = {
       name: ["-d", "--debug"],
       description:
         "Show the full call stack if an error occurs while executing the tool",
+    },
+    {
+      name: ["-q", "--quiet"],
+      description: "Hide rush startup information",
     },
   ],
 };

@@ -1,4 +1,6 @@
-import { knownHosts, configHosts } from "./ssh";
+// scp (OpenSSH v10.6, openssh-portable tag V_10_6_P2, 2026-11-19). Source: scp.1 man page and scp.c getopt/usage from the tagged source tree.
+// Not run against a live scp binary. Transfers use the SFTP protocol by default; -O selects the legacy SCP protocol.
+import { knownHosts, configHosts, sshConfigKeywords } from "./ssh";
 
 const completionSpec: Fig.Spec = {
   name: "scp",
@@ -28,10 +30,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "-3",
       description: `Copies between two remote hosts are transferred through the local
-host.  Without this option the data is copied directly between the
-two remote hosts.  Note that this option disables the progress
-meter and selects batch mode for the second host, since scp cannot
-ask for passwords or passphrases for both hosts`,
+host.  This mode is the default, but see also -R for copying data
+directly between two remote hosts.  Note that when using the legacy
+SCP protocol (-O), this option selects batch mode for the second
+host as scp cannot ask for passwords or passphrases for both hosts`,
     },
     {
       name: "-4",
@@ -66,12 +68,23 @@ ask for passwords or passphrases for both hosts`,
       },
     },
     {
+      name: "-D",
+      description:
+        "Connect directly to a local SFTP server program rather than a remote one via ssh(1). This option may be useful in debugging the client and server",
+      args: {
+        name: "sftp_server_path",
+        description: "Path to the local SFTP server program",
+        template: "filepaths",
+      },
+    },
+    {
       name: "-F",
       description:
         "Specifies an alternative per-user configuration file for ssh. This option is directly passed to ssh(1)",
       args: {
         name: "ssh_config",
         description: "The selected ssh config",
+        template: "filepaths",
       },
     },
     {
@@ -81,6 +94,7 @@ ask for passwords or passphrases for both hosts`,
       args: {
         name: "identity_file",
         description: "Specified identity file",
+        template: "filepaths",
       },
     },
     {
@@ -93,7 +107,8 @@ shortcut to specify a ProxyJump configuration directive.  This
 option is directly passed to ssh(1)`,
       args: {
         name: "destination",
-        description: "Scp destination",
+        description:
+          "Jump host(s), separated by commas for multiple hops (shortcut for ProxyJump)",
       },
     },
     {
@@ -105,6 +120,11 @@ option is directly passed to ssh(1)`,
       },
     },
     {
+      name: "-O",
+      description:
+        "Use the legacy SCP protocol for file transfers instead of the SFTP protocol",
+    },
+    {
       name: "-o",
       description: `Can be used to pass options to ssh in the format used in
 ssh_config(5).  This is useful for specifying options for which
@@ -113,77 +133,7 @@ the options listed below, and their possible values, see
 ssh_config(5)`,
       args: {
         name: "option",
-        suggestions: [
-          { name: "AddressFamily" },
-          { name: "BatchMode" },
-          { name: "BindAddress" },
-          { name: "ChallengeResponseAuthentication" },
-          { name: "CheckHostIP" },
-          { name: "Cipher" },
-          { name: "Ciphers" },
-          { name: "ClearAllForwardings" },
-          { name: "Compression" },
-          { name: "CompressionLevel" },
-          { name: "ConnectionAttempts" },
-          { name: "ConnectTimeout" },
-          { name: "ControlMaster" },
-          { name: "ControlPath" },
-          { name: "ControlPersist" },
-          { name: "DynamicForward" },
-          { name: "EscapeChar" },
-          { name: "ExitOnForwardFailure" },
-          { name: "ForwardAgent" },
-          { name: "ForwardX11" },
-          { name: "ForwardX11Timeout" },
-          { name: "ForwardX11Trusted" },
-          { name: "GatewayPorts" },
-          { name: "GlobalKnownHostsFile" },
-          { name: "GSSAPIAuthentication" },
-          { name: "GSSAPIDelegateCredentials" },
-          { name: "HashKnownHosts" },
-          { name: "Host" },
-          { name: "HostbasedAuthentication" },
-          { name: "HostKeyAlgorithms" },
-          { name: "HostKeyAlias" },
-          { name: "HostName" },
-          { name: "IdentityFile" },
-          { name: "IdentitiesOnly" },
-          { name: "IPQoS" },
-          { name: "KbdInteractiveAuthentication" },
-          { name: "KbdInteractiveDevices" },
-          { name: "KexAlgorithms" },
-          { name: "LocalCommand" },
-          { name: "LocalForward" },
-          { name: "LogLevel" },
-          { name: "MACs" },
-          { name: "NoHostAuthenticationForLocalhost" },
-          { name: "NumberOfPasswordPrompts" },
-          { name: "PasswordAuthentication" },
-          { name: "PermitLocalCommand" },
-          { name: "PKCS11Provider" },
-          { name: "Port" },
-          { name: "PreferredAuthentications" },
-          { name: "Protocol" },
-          { name: "ProxyCommand" },
-          { name: "PubkeyAuthentication" },
-          { name: "RekeyLimit" },
-          { name: "RequestTTY" },
-          { name: "RhostsRSAAuthentication" },
-          { name: "RSAAuthentication" },
-          { name: "SendEnv" },
-          { name: "ServerAliveInterval" },
-          { name: "ServerAliveCountMax" },
-          { name: "StrictHostKeyChecking" },
-          { name: "TCPKeepAlive" },
-          { name: "Tunnel" },
-          { name: "TunnelDevice" },
-          { name: "UsePrivilegedPort" },
-          { name: "User" },
-          { name: "UserKnownHostsFile" },
-          { name: "VerifyHostKeyDNS" },
-          { name: "VisualHostKey" },
-          { name: "XAuthLocation" },
-        ],
+        suggestions: sshConfigKeywords,
       },
     },
     {
@@ -198,12 +148,21 @@ reserved for preserving the times and modes of the file`,
     {
       name: "-p",
       description:
-        "Preserves modification times, access times, and modes from the original file",
+        "Preserves modification times, access times, and file mode bits from the source file",
     },
     {
       name: "-q",
       description:
         "Quiet mode: disables the progress meter as well as warning and diagnostic messages from ssh(1)",
+    },
+    {
+      name: "-R",
+      description: `Copies between two remote hosts are transferred through the local
+host by default.  This option instead copies between two remote
+hosts by connecting to the origin host and executing scp there.
+This requires that scp running on the origin host can authenticate
+to the destination host without requiring a password.  Deprecated
+upstream: scp warns that this mode will soon be removed`,
     },
     {
       name: "-r",
@@ -234,6 +193,30 @@ filenames`,
       name: "-v",
       description:
         "Verbose mode.  Causes scp and ssh(1) to print debugging messages about their progress. This is helpful in debugging connection, authentication, and configuration problems",
+    },
+    {
+      name: "-X",
+      description:
+        "Specify an option that controls aspects of SFTP protocol behaviour",
+      isRepeatable: true,
+      args: {
+        name: "sftp_option",
+        description: "SFTP option in the form name=value",
+        suggestions: [
+          {
+            name: "nrequests",
+            insertValue: "nrequests=",
+            description:
+              "Number of concurrent SFTP read or write requests (default 64)",
+          },
+          {
+            name: "buffer",
+            insertValue: "buffer=",
+            description:
+              "Maximum buffer size for a single SFTP read/write operation (default 32KB)",
+          },
+        ],
+      },
     },
   ],
 };

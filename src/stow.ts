@@ -1,17 +1,27 @@
+// GNU Stow v2.4.1 (git tag v2.4.1 of aspiers/stow, same as Homebrew stable; 2026-11-19).
+// Source: bin/stow.in (usage() and Getopt::Long definitions in parse_options), doc/stow.texi and NEWS, read statically (binary not run).
+// chkstow (bundled utility) is not covered by this spec.
+
+const regexArg = (name: string): Fig.Arg => ({
+  name,
+  description: "Perl regular expression",
+});
+
 const completionSpec: Fig.Spec = {
   name: "stow",
   description: "Manage farms of symbolic links",
-
+  args: {
+    name: "package",
+    description: "Package directory name inside the stow directory",
+    isVariadic: true,
+    isOptional: true,
+    template: ["folders"],
+  },
   options: [
-    {
-      name: ["-n", "--no"],
-      description:
-        "Do not perform any operations that modify the filesystem; merely show what would happen",
-    },
     {
       name: ["-d", "--dir"],
       description:
-        "Set the stow directory to 'DIR' instead of the current directory. This also has the effect of making the default target directory be the parent of 'DIR'",
+        "Set the stow directory to DIR (default is $STOW_DIR if set, else the current directory). This also makes the default target directory the parent of DIR",
       args: {
         name: "DIR",
         template: ["folders"],
@@ -20,41 +30,57 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-t", "--target"],
       description:
-        "Set the target directory to 'DIR' instead of the parent of the stow directory",
+        "Set the target directory to DIR instead of the parent of the stow directory",
       args: {
         name: "DIR",
         template: ["folders"],
       },
     },
     {
-      name: ["-v", "--verbose"],
-      description:
-        "Send verbose output to standard error describing what Stow is doing. Verbosity levels are from 0 to 5; 0 is the default. Using '-v' or '--verbose' increases the verbosity by one; using `--verbose=N' sets it to N",
-      args: {
-        name: "level",
-        suggestions: ["0", "1", "2", "3", "4", "5"],
-      },
-    },
-    {
       name: ["-S", "--stow"],
       description:
-        "Stow the packages that follow this option into the target directory. This is the default action and so can be omitted if you are only stowing packages rather than performing a mixture of stow/delete/restow actions",
+        "Stow the packages that follow this option into the target directory (the default action)",
     },
     {
       name: ["-D", "--delete"],
       description:
-        "Unstow the packages that follow this option from the target directory rather than installing them",
+        "Unstow the packages that follow this option from the target directory",
     },
     {
       name: ["-R", "--restow"],
       description:
-        "Restow packages (first unstow, then stow again). This is useful for pruning obsolete symlinks from the target tree after updating the software in a package",
+        "Restow the packages that follow this option (first unstow, then stow again)",
+    },
+    {
+      name: "--ignore",
+      description: "Ignore files ending in this Perl regex",
+      isRepeatable: true,
+      args: regexArg("REGEX"),
+    },
+    {
+      name: "--defer",
+      description:
+        "Don't stow files beginning with this Perl regex if the file is already stowed to another package",
+      isRepeatable: true,
+      args: regexArg("REGEX"),
+    },
+    {
+      name: "--override",
+      description:
+        "Force stowing files beginning with this Perl regex if the file is already stowed to another package",
+      isRepeatable: true,
+      args: regexArg("REGEX"),
     },
     {
       name: "--adopt",
       description:
-        "This behaviour is specifically intended to alter the contents of your stow directory.  If you do not want that, this option is not for you",
+        "Import existing plain files from the target into the stow package, then stow them. This alters the contents of your stow directory",
       isDangerous: true,
+    },
+    {
+      name: "--dotfiles",
+      description:
+        "Replace a 'dot-' prefix in package file and folder names with a period when stowing",
     },
     {
       name: "--no-folding",
@@ -62,36 +88,30 @@ const completionSpec: Fig.Spec = {
         "Disable folding of newly stowed directories when stowing, and refolding of newly foldable directories when unstowing",
     },
     {
-      name: "--ignore",
-      description: "Ignore files ending in this Perl regex",
-      args: {
-        name: "REGEX",
-      },
+      name: ["-p", "--compat"],
+      description:
+        "Use the legacy algorithm for unstowing (scan the whole target tree)",
     },
     {
-      name: "--defer",
+      name: ["-n", "--no", "--simulate"],
       description:
-        "Don't stow files beginning with this Perl regex if the file is already stowed to another package",
-      args: {
-        name: "REGEX",
-      },
+        "Do not perform any operations that modify the filesystem; merely show what would happen",
     },
     {
-      name: "--override",
+      name: ["-v", "--verbose"],
       description:
-        "Force stowing files beginning with this Perl regex if the file is already stowed to another package",
+        "Send verbose output to standard error. Each use increases the verbosity by one; --verbose=N sets the level to N",
+      isRepeatable: true,
       args: {
-        name: "REGEX",
+        name: "level",
+        description: "Verbosity level (0 to 5, default 0)",
+        isOptional: true,
+        suggestions: ["0", "1", "2", "3", "4", "5"],
       },
-    },
-    {
-      name: "--dotfiles",
-      description:
-        "Enable special handling for 'dotfiles' (files or folders whose name begins with a period) in the package directory. If this option is enabled, Stow will add a preprocessing step for each file or folder whose name begins with 'dot - ', and replace the 'dot- ' prefix in the name by a period (.). This is useful when Stow is used to manage collections of dotfiles, to avoid having a package directory full of hidden files",
     },
     {
       name: ["-V", "--version"],
-      description: "Show Stow version, and exit",
+      description: "Show Stow version number, and exit",
     },
     {
       name: ["-h", "--help"],

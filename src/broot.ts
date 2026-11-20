@@ -1,192 +1,210 @@
+// broot v1.62.0 (git tag Canop/broot v1.62.0, released 2026-11-01; checked 2026-11-20).
+// Source: src/cli/args.rs (clap definitions), src/tree/tree_options.rs, src/cli/mod.rs,
+// src/shell_install/mod.rs and CHANGELOG.md read statically from a shallow clone at the tag;
+// the binary was not built or run. Removed since the previous spec: -o/--out (deprecated in
+// v1.6.0, gone from the argument list), the -v alias of --version (only --version exists) and
+// the --show-gitignored/--no-show-gitignored names (now --git-ignored/--no-git-ignored).
+
+/**
+ * Builds a flag and its counter-flag (each flag has a counter-flag so that
+ * a flag set in the configuration file can be cancelled on the command line)
+ */
+const flagPair = (
+  on: { name: string; short: string; description: string },
+  off: { name: string; short: string; description: string }
+): Fig.Option[] => [
+  {
+    name: [on.name, on.short],
+    description: on.description,
+    exclusiveOn: [off.name, off.short],
+  },
+  {
+    name: [off.name, off.short],
+    description: off.description,
+    exclusiveOn: [on.name, on.short],
+  },
+];
+
+const sortFlags: Fig.Option[] = [
+  {
+    name: "--sort-by-count",
+    description: "Sort by count (only show one level of the tree)",
+  },
+  {
+    name: "--sort-by-date",
+    description: "Sort by date (only show one level of the tree)",
+  },
+  {
+    name: "--sort-by-size",
+    description: "Sort by size (only show one level of the tree)",
+  },
+  {
+    name: "--sort-by-type",
+    description: "Same as --sort-by-type-dirs-first",
+  },
+  {
+    name: "--sort-by-type-dirs-first",
+    description:
+      "Sort by type, directories first (only show one level of the tree)",
+  },
+  {
+    name: "--sort-by-type-dirs-last",
+    description:
+      "Sort by type, directories last (only show one level of the tree)",
+  },
+].map((option) => ({ ...option, exclusiveOn: ["--no-sort"] }));
+
 const completionSpec: Fig.Spec = {
   name: "broot",
   description:
-    "Broot lets you explore file hierarchies with a tree-like view, manipulate files, launch actions, and define your own shortcuts. broot is best launched as br: this shell function gives you access to more commands, especially cd. The br shell function is interactively installed on first broot launch. Flags and options can be classically passed on launch but also written in the configuration file. Each flag has a counter-flag so that you can cancel at command line a flag which has been set in the configuration file",
+    "Broot lets you explore file hierarchies with a tree-like view, manipulate and preview files, launch actions, and define your own shortcuts. broot is best launched as br: this shell function gives you access to more commands, especially cd. The br shell function is interactively installed on first broot launch. Flags and options can be classically passed on launch but also written in the configuration file. Each flag has a counter-flag so that you can cancel at command line a flag which has been set in the configuration file",
   options: [
-    {
-      name: ["--dates", "-d"],
-      description: "Show the last modified date of files and directories",
-      exclusiveOn: ["--no-dates", "-D"],
-    },
-    {
-      name: ["--no-dates", "-D"],
-      description: "Don't show the last modified date",
-      exclusiveOn: ["--dates", "-d"],
-    },
-    {
-      name: ["--only-folders", "-f"],
-      description: "Only show folders",
-      exclusiveOn: ["--no-only-folders", "-F"],
-    },
-    {
-      name: ["--no-only-folders", "-F"],
-      description: "Show folders and files alike",
-      exclusiveOn: ["--only-folders", "-f"],
-    },
+    ...flagPair(
+      {
+        name: "--dates",
+        short: "-d",
+        description: "Show the last modified date of files and directories",
+      },
+      {
+        name: "--no-dates",
+        short: "-D",
+        description: "Don't show the last modified date",
+      }
+    ),
+    ...flagPair(
+      {
+        name: "--only-folders",
+        short: "-f",
+        description: "Only show folders",
+      },
+      {
+        name: "--no-only-folders",
+        short: "-F",
+        description: "Show folders and files alike",
+      }
+    ),
     {
       name: "--show-root-fs",
       description: "Show filesystem info on top",
     },
     {
+      name: "--max-depth",
+      description: "Only show trees up to a certain depth",
+      args: {
+        name: "max-depth",
+      },
+    },
+    {
       name: ["--show-git-info", "-g"],
-      description: "Show git statuses on files and stats of repository",
-      exclusiveOn: ["--no-show-git-info", "-G"],
+      description:
+        "Show git statuses on files and stats on repo; repeat (-gg) to only show files with a git status",
+      isRepeatable: 2,
     },
     {
       name: ["--no-show-git-info", "-G"],
-      description: "Don't show git statuses on files nor stats",
-      exclusiveOn: ["--show-git-info", "-g"],
+      description: "Show less git information (undoes one -g)",
+      isRepeatable: 2,
     },
     {
       name: "--git-status",
       description:
-        "Only show files having an interesting git status, including hidden ones",
+        "Only show files having an interesting git status, including hidden ones (same as -gg)",
     },
-    {
-      name: ["--hidden", "-h"],
-      description: "Show hidden files",
-      exclusiveOn: ["--no-hidden", "-H"],
-    },
-    {
-      name: ["--no-hidden", "-H"],
-      description: "Don't show hidden files",
-      exclusiveOn: ["--hidden", "-h"],
-    },
-    {
-      name: ["--show-gitignored", "-i"],
-      description: "Show files which should be ignored according to git",
-      exclusiveOn: ["--no-show-gitignored", "-I"],
-    },
-    {
-      name: ["--no-show-gitignored", "-I"],
-      description: "Don't show gitignored files",
-      exclusiveOn: ["--show-gitignored", "-i"],
-    },
-    {
-      name: ["--permissions", "-p"],
-      description: "Show permissions with owner and group",
-      exclusiveOn: ["--no-permissions", "-P"],
-    },
-    {
-      name: ["--no-permissions", "-P"],
-      description: "Don't show permissions",
-      exclusiveOn: ["--permissions", "-p"],
-    },
-    {
-      name: ["--sizes", "-s"],
-      description:
-        "Show the sizes of files and directories. When this mode is on, children aren't shown so that the biggest entries at the selected level can be sorted first",
-      exclusiveOn: ["--no-sizes", "-S"],
-    },
-    {
-      name: ["--no-sizes", "-S"],
-      description: "Don't show sizes",
-      exclusiveOn: ["--sizes", "-s"],
-    },
-    {
-      name: "--sort-by-count",
-      description: "Sort by count (only show one level of the tree)",
-      exclusiveOn: ["--no-sort"],
-    },
-    {
-      name: "--sort-by-date",
-      description: "Sort by date (only show one level of the tree)",
-      exclusiveOn: ["--no-sort"],
-    },
-    {
-      name: "--sort-by-size",
-      description: "Sort by size (only show one level of the tree)",
-      exclusiveOn: ["--no-sort"],
-    },
-    {
-      name: ["--whale-spotting", "-w"],
-      description: "Sort by size, show ignored and hidden files",
-    },
+    ...flagPair(
+      {
+        name: "--hidden",
+        short: "-h",
+        description: "Show hidden files",
+      },
+      {
+        name: "--no-hidden",
+        short: "-H",
+        description: "Don't show hidden files",
+      }
+    ),
+    ...flagPair(
+      {
+        name: "--git-ignored",
+        short: "-i",
+        description: "Show git ignored files",
+      },
+      {
+        name: "--no-git-ignored",
+        short: "-I",
+        description: "Don't show git ignored files",
+      }
+    ),
+    ...flagPair(
+      {
+        name: "--permissions",
+        short: "-p",
+        description: "Show permissions",
+      },
+      {
+        name: "--no-permissions",
+        short: "-P",
+        description: "Don't show permissions",
+      }
+    ),
+    ...flagPair(
+      {
+        name: "--sizes",
+        short: "-s",
+        description: "Show the size of files and directories",
+      },
+      {
+        name: "--no-sizes",
+        short: "-S",
+        description: "Don't show sizes",
+      }
+    ),
+    ...sortFlags,
     {
       name: "--no-sort",
       description: "Don't sort",
-      exclusiveOn: ["--sort-by-count", "--sort-by-date", "--sort-by-size"],
+      exclusiveOn: sortFlags.map((option) => option.name as string),
     },
     {
-      name: ["--trim-root", "-t"],
-      description:
-        "Trim the root: remove elements which would exceed the screen size. This removes the scrollbar",
-      exclusiveOn: ["--no-trim-root", "-T"],
+      name: "--tree",
+      description: "Show the tree, when allowed by sorting mode",
+      exclusiveOn: ["--no-tree"],
     },
     {
-      name: ["--no-trim-root", "-T"],
-      description:
-        "Don't trim the root (still trim the deeper levels). A scrollbar may be used when there are too many elements to show on screen",
-      exclusiveOn: ["--trim-root", "-t"],
+      name: "--no-tree",
+      description: "Do not show the tree, even if allowed by sorting mode",
+      exclusiveOn: ["--tree"],
     },
+    ...flagPair(
+      {
+        name: "--whale-spotting",
+        short: "-w",
+        description: "Sort by size, show ignored and hidden files",
+      },
+      {
+        name: "--no-whale-spotting",
+        short: "-W",
+        description: "No sort, no show hidden, no show git ignored",
+      }
+    ),
+    ...flagPair(
+      {
+        name: "--trim-root",
+        short: "-t",
+        description: "Trim the root too and don't show a scrollbar",
+      },
+      {
+        name: "--no-trim-root",
+        short: "-T",
+        description: "Don't trim the root level, show a scrollbar",
+      }
+    ),
     {
       name: "--install",
       description: "Install or reinstall the br shell function",
     },
     {
-      name: "--get-root",
-      description: "Ask for the current root of the remote broot",
-    },
-    {
-      name: "--color",
-      description:
-        "Controls styling of the output (default: auto). If set to auto, all styling is removed when output is piped",
-      args: {
-        suggestions: ["yes", "no", "auto"],
-        isOptional: true,
-      },
-    },
-    {
-      name: "--help",
-      description:
-        "Prints a help page, with more or less the same content as this man page",
-    },
-    {
-      name: ["--version", "-v"],
-      description: "Prints the version of broot",
-    },
-    {
-      name: "--outcmd",
-      description: "Where to write a command if broot produces one",
-      args: {
-        name: "cmd-export-path",
-      },
-    },
-    {
-      name: ["--cmd", "-c"],
-      description: "Semicolon separated commands to execute on start of broot",
-      args: {
-        name: "commands",
-      },
-    },
-    {
-      name: "--conf",
-      description: "Semicolon separated paths to specific config files",
-      args: {
-        name: "conf",
-      },
-    },
-    {
-      name: "--height",
-      description:
-        "Height to use if you don't want to fill the screen or for file export (by default the terminal height is used)",
-      args: {
-        name: "height",
-      },
-    },
-    {
-      name: ["--out", "-o"],
-      description: "Where to write the produced path, if any",
-      args: {
-        name: "file-export-path",
-        template: "filepaths",
-        suggestCurrentToken: true,
-      },
-    },
-    {
       name: "--set-install-state",
-      description:
-        "Set the installation state. This is mostly useful in installation scripts to override the normal installation process",
+      description: "Manually set installation state",
       args: {
         name: "state",
         suggestions: ["undefined", "refused", "installed"],
@@ -194,31 +212,102 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--print-shell-function",
-      description:
-        "Print to stdout the br function for the given shell. This can be used in your own installation process overriden the standard one",
+      description: "Print to stdout the br function for a given shell",
       args: {
         name: "shell",
-        suggestions: ["bash", "fish", "zsh"],
+        suggestions: ["bash", "zsh", "fish", "nushell", "powershell"],
+      },
+    },
+    {
+      name: "--write-default-conf",
+      description: "Write default conf files in given directory",
+      args: {
+        name: "path",
+        template: "folders",
+      },
+    },
+    {
+      name: "--conf",
+      description: "Semicolon separated paths to specific config files",
+      args: {
+        name: "paths",
+      },
+    },
+    {
+      name: ["--cmd", "-c"],
+      description: "Semicolon separated commands to execute",
+      args: {
+        name: "cmd",
+      },
+    },
+    {
+      name: "--outcmd",
+      description: "Where to write the produced cmd (if any)",
+      args: {
+        name: "path",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--verb-output",
+      description: "Optional path for verbs using `:write_output`",
+      args: {
+        name: "verb-output",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--color",
+      description: "Whether to have styles and colors (default: auto)",
+      args: {
+        name: "color",
+        suggestions: ["auto", "yes", "no"],
+      },
+    },
+    {
+      name: "--height",
+      description:
+        "Height (if you don't want to fill the screen or for file export)",
+      args: {
+        name: "height",
       },
     },
     {
       name: "--listen",
-      description: "Listen for commands",
+      description: "A socket to listen to for commands",
       args: {
-        name: "listen",
+        name: "socket",
       },
     },
     {
+      name: "--listen-auto",
+      description: "Create a random socket to listen to for commands",
+    },
+    {
+      name: "--get-root",
+      description: "Ask for the current root of the remote broot",
+    },
+    {
       name: "--send",
-      description: "Send commands to a remote broot then quits",
+      description: "A socket to send commands to",
       args: {
-        name: "send",
+        name: "socket",
       },
+    },
+    {
+      name: "--help",
+      description: "Print help information",
+    },
+    {
+      name: "--version",
+      description: "Print the version",
     },
   ],
   args: {
-    name: "ROOT",
-    description: "Sets the root directory",
+    name: "root",
+    description: "Root directory",
+    isOptional: true,
+    template: "filepaths",
   },
 };
 export default completionSpec;

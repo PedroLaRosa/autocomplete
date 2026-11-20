@@ -1,3 +1,5 @@
+// mailsy v5.0.0 (npm latest, last published 2024-05-24; upstream repo HEAD 2024-12-03 has no CLI changes; checked 2026-11-19).
+// Source: static read of index.js (commander 9 definitions) from the npm tarball, identical to the GitHub repo's index.js; not run.
 const completionSpec: Fig.Spec = {
   name: "mailsy",
   description: "⚡️ Quickly generate a disposable email straight from terminal",

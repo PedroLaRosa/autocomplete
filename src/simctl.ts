@@ -1,8 +1,80 @@
-import { describe } from "node:test";
+// simctl from Xcode 27, CoreSimulator-1171.7 (re-verified 2026-11-20). Source:
+// keith/zsh-xcode-completions specs/simctl.txt @ bef240f2 (2026-10-02), a dump of
+// `xcrun simctl help <subcommand>` that also covers the undocumented/internal
+// subcommands (marked hidden here). Xcode is not installed here, so simctl was not
+// run; Apple's Xcode 27.1 and 27.2 release notes (the newest found) mention no simctl CLI changes.
+
+const archArgs: Fig.Arg = {
+  name: "arch",
+  suggestions: ["arm64", "x86_64"],
+};
+
+const maskOption: Fig.Option = {
+  name: "--mask",
+  description:
+    "For non-rectangular displays, handle the mask by policy: ignored: The mask is ignored and the unmasked framebuffer is saved. alpha: The mask is used as premultiplied alpha. black: The mask is rendered black",
+  requiresSeparator: "=",
+  args: { name: "policy", suggestions: ["ignored", "alpha", "black"] },
+};
+
+const jsonOptions: Fig.Option[] = [
+  {
+    name: ["-j", "--json"],
+    description: "Print as JSON",
+  },
+  {
+    name: "--json-fd",
+    description: "Specify the file descriptor to write JSON output to",
+    requiresSeparator: "=",
+    args: { name: "fd" },
+  },
+  {
+    name: "--json-output",
+    description: "Specify the file path to write JSON output to",
+    requiresSeparator: "=",
+    args: { name: "file path", template: "filepaths" },
+  },
+];
+
+const checkedAllocationsOption: Fig.Option = {
+  name: "--checked-allocations",
+  description: "Enable checked allocations (if supported)",
+};
+
+const archOption: Fig.Option = {
+  name: ["-a", "--arch"],
+  description:
+    "Specify an architecture to use when spawning a universal binary",
+  args: archArgs,
+};
+
+const displayOption: Fig.Option = {
+  name: "--display",
+  description:
+    "Screen ID, name, device name, screen or port UUID, or 'internal'/'external'. See 'simctl io <device> enumerate'",
+  requiresSeparator: "=",
+  args: { name: "display" },
+};
 
 const completionSpec: Fig.Spec = {
   name: "simctl",
-  description: "",
+  description: "Command line utility to control the Simulator",
+  options: [
+    {
+      name: "--set",
+      description: "Use the device set at the given path",
+      args: { name: "path", template: "folders" },
+    },
+    {
+      name: "--profiles",
+      description: "Use the simulator profiles at the given path",
+      args: { name: "path", template: "folders" },
+    },
+    {
+      name: "--version",
+      description: "Print the simctl and CoreSimulator version",
+    },
+  ],
   subcommands: [
     {
       name: "addmedia",
@@ -19,6 +91,29 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "addphoto",
+      description: "Add photos to the photo library of a device",
+      hidden: true,
+      args: [
+        { name: "device" },
+        { name: "path", isVariadic: true, template: "filepaths" },
+      ],
+    },
+    {
+      name: "addvideo",
+      description: "Add videos to the photo library of a device",
+      hidden: true,
+      args: [
+        { name: "device" },
+        { name: "path", isVariadic: true, template: "filepaths" },
+      ],
+    },
+    {
+      name: "appinfo",
+      description: "Show information about an installed application",
+      args: [{ name: "device" }, { name: "bundle identifier" }],
+    },
+    {
       name: "boot",
       description: "Boot a device or device pair",
       args: {
@@ -30,7 +125,7 @@ const completionSpec: Fig.Spec = {
           description:
             "Specify the architecture to use when booting the simulator (eg: 'arm64' or 'x86_64')",
           requiresSeparator: "=",
-          isRepeatable: true,
+          args: archArgs,
         },
         {
           name: "--disabledJob",
@@ -38,6 +133,7 @@ const completionSpec: Fig.Spec = {
             "Disables the given launchd job. Multiple jobs can be disabled by passing multiple flags",
           requiresSeparator: "=",
           isRepeatable: true,
+          args: { name: "job" },
         },
         {
           name: "--enabledJob",
@@ -45,6 +141,29 @@ const completionSpec: Fig.Spec = {
             "Enables the given launchd job when it would normally be disabled. Multiple jobs can be enabled by passing multiple flags",
           requiresSeparator: "=",
           isRepeatable: true,
+          args: { name: "job" },
+        },
+        checkedAllocationsOption,
+      ],
+    },
+    {
+      name: "bootstatus",
+      description: "Check device boot status",
+      hidden: true,
+      args: { name: "device" },
+      options: [
+        {
+          name: "-b",
+          description: "Boot the device if it isn't already booted",
+        },
+        {
+          name: "-d",
+          description: "Print data migration information, if it's available",
+        },
+        {
+          name: "-c",
+          description:
+            "Continuously monitor boot status through multiple boot/shutdown cycles",
         },
       ],
     },
@@ -85,6 +204,57 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "darwinup",
+      description:
+        "Invoke darwinup to install a root for the specified simulator runtime",
+      hidden: true,
+      args: [
+        {
+          name: "platform",
+          description:
+            "The Simulator platform. To target a runtime disk image, specify the path to that runtime instead (invalid with -s)",
+          suggestions: [
+            "iphonesimulator",
+            "watchsimulator",
+            "appletvsimulator",
+          ],
+        },
+        {
+          name: "command",
+          description: "See darwinup usage for additional commands",
+          suggestions: [
+            {
+              name: "install",
+              description: "Install the roots specified by the archives",
+            },
+            {
+              name: "list",
+              description:
+                "List the installed roots, optionally filtered by the archives",
+            },
+            {
+              name: "uninstall",
+              description: "Remove the roots specified by the archives",
+            },
+          ],
+        },
+        { name: "archive", isOptional: true, isVariadic: true },
+      ],
+      options: [
+        { name: "-f", description: "Force operation to succeed at all costs" },
+        {
+          name: "-n",
+          description:
+            "Dry run; prints arguments that would have been sent to darwinup",
+        },
+        {
+          name: "-s",
+          description: "Use the SDK root path instead of the runtime root",
+        },
+        { name: "-v", description: "More verbose output" },
+      ],
+    },
+    {
       name: "delete",
       description:
         "Delete specified devices, unavailable devices, or all devices",
@@ -116,19 +286,21 @@ const completionSpec: Fig.Spec = {
           name: "-X",
           description:
             "Run all diagnostics with no timeout. It ignores the --timeout value if it is specified",
-          exclusiveOn: ["timeout"],
+          exclusiveOn: ["--timeout"],
         },
         {
           name: "--timeout",
           description:
             "Specify a duration (in seconds) to wait for the log collection before timeout",
           requiresSeparator: "=",
+          args: { name: "duration" },
         },
         {
           name: "--output",
           description:
             "Specify the output directory. If not provided the temporary directory is used",
           requiresSeparator: "=",
+          args: { name: "path", template: "folders" },
         },
         {
           name: "--no-archive",
@@ -150,6 +322,7 @@ const completionSpec: Fig.Spec = {
             "Collect diagnostics only from the specified device. This option may be specified more than once to consider multiple devices. The --all-logs option causes all --udid options to be ignored",
           requiresSeparator: "=",
           isRepeatable: true,
+          args: { name: "device" },
         },
       ],
     },
@@ -287,19 +460,13 @@ const completionSpec: Fig.Spec = {
               description:
                 "Specifies the codec type: 'h264' or 'hevc'. Default is 'hevc'",
               requiresSeparator: "=",
+              args: { name: "codec", suggestions: ["h264", "hevc"] },
             },
+            displayOption,
             {
-              name: "--display",
-              description:
-                // eslint-disable-next-line @tabsmith/fig-linter/conventional-descriptions
-                "iOS: supports 'internal' or 'external'. Default is 'internal'. tvOS: supports only 'external' watchOS: supports only 'internal'",
-              requiresSeparator: "=",
-            },
-            {
-              name: "--mask",
+              ...maskOption,
               description:
                 "For non-rectangular displays, handle the mask by policy: ignored: The mask is ignored and the unmasked framebuffer is saved. alpha: Not supported, but retained for compatibility; the mask is rendered black. black: The mask is rendered black",
-              requiresSeparator: "=",
             },
             {
               name: "--force",
@@ -321,19 +488,30 @@ const completionSpec: Fig.Spec = {
               description:
                 "Can be 'png', 'tiff', 'bmp', 'gif', 'jpeg'. Default is png",
               requiresSeparator: "=",
+              args: {
+                name: "type",
+                suggestions: ["png", "tiff", "bmp", "gif", "jpeg"],
+              },
+            },
+            displayOption,
+            maskOption,
+          ],
+        },
+        {
+          name: "screenConfig",
+          description: "Manage device screen configuration",
+          options: [displayOption],
+          subcommands: [
+            {
+              name: "power",
+              description: "Set the power state of a screen",
+              args: { name: "state", suggestions: ["on", "off"] },
             },
             {
-              name: "--display",
+              name: "geometry",
               description:
-                // eslint-disable-next-line @tabsmith/fig-linter/conventional-descriptions
-                "iOS: supports 'internal' or 'external'. Default is 'internal'. tvOS: supports only 'external' watchOS: supports only 'internal'. You may also specify a port by UUID",
-              requiresSeparator: "=",
-            },
-            {
-              name: "--mask",
-              description:
-                "For non-rectangular displays, handle the mask by policy: ignored: The mask is ignored and the unmasked framebuffer is saved. alpha: The mask is used as premultiplied alpha. black: The mask is rendered black",
-              requiresSeparator: "=",
+                "Change the geometry of a screen; must be compatible with the screen's current mode",
+              args: { name: "<width>x<height>[@<scale>]" },
             },
           ],
         },
@@ -364,6 +542,12 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "keyboard",
+      description: "Set the device's keyboard language",
+      hidden: true,
+      args: [{ name: "device" }, { name: "language" }],
+    },
+    {
       name: "launch",
       description: "Launch an application by identifier on a device",
       args: [
@@ -381,18 +565,24 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: ["-w", "--wait-for-debugger"],
+          description: "Start the process suspended",
+        },
+        {
+          ...archOption,
+          description:
+            "Specify an architecture to use when spawning a universal binary. Requires runtime version 26 or newer",
         },
         {
           name: "--console",
           description:
             "Block and print the application's stdout and stderr to the current terminal. Signals received by simctl are passed through to the application. (Cannot be combined with --stdout or --stderr)",
-          exclusiveOn: ["console-pty", "stdout", "stderr"],
+          exclusiveOn: ["--console-pty", "--stdout", "--stderr"],
         },
         {
           name: "--console-pty",
           description:
             "Block and print the application's stdout and stderr to the current terminal via a PTY. Signals received by simctl are passed through to the application. (Cannot be combined with --stdout or --stderr)",
-          exclusiveOn: ["console", "stdout", "stderr"],
+          exclusiveOn: ["--console", "--stdout", "--stderr"],
         },
         {
           name: "--stdout",
@@ -401,7 +591,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "path",
           },
-          exclusiveOn: ["console", "console-pty"],
+          exclusiveOn: ["--console", "--console-pty"],
         },
         {
           name: "--stderr",
@@ -410,12 +600,183 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "path",
           },
-          exclusiveOn: ["console", "console-pty"],
+          exclusiveOn: ["--console", "--console-pty"],
         },
         {
           name: "--terminate-running-process",
+          description: "Terminate any running copy of the application",
+        },
+        checkedAllocationsOption,
+      ],
+    },
+    {
+      name: "legacyruntime",
+      description:
+        "Locate, copy, mount, and unmount simulator runtime disk images",
+      hidden: true,
+      options: [
+        {
+          name: "--cache-path",
           description:
-            "Terminate any running copy of the application. Note: Log output is often directed to stderr, not stdout",
+            "Override the RuntimeImageCachePath user default for the runtime image cache location",
+          isPersistent: true,
+          args: { name: "path", template: "folders" },
+        },
+      ],
+      subcommands: [
+        {
+          name: "mount",
+          description:
+            "Locate a Simulator Runtime for the given train and build, copy the disk image locally, then mount it to make the runtime available to CoreSimulator",
+          args: { name: "train-build" },
+          options: [
+            {
+              name: "--internal",
+              description: "Select the internal runtime (default)",
+              exclusiveOn: ["--customer"],
+            },
+            {
+              name: "--customer",
+              description: "Select the customer (public) runtime",
+              exclusiveOn: ["--internal"],
+            },
+            {
+              name: "--shadow",
+              description:
+                "Manually specify a different shadow image. The same base image can be mounted multiple times with different shadow files so modifications to one mount path are not visible to others",
+              args: { name: "path", template: "filepaths" },
+            },
+            {
+              name: "--no-sparse",
+              description:
+                "Keep the original image format and partition size instead of converting to a sparse image with a 100GB partition",
+            },
+            {
+              name: "--writable",
+              description:
+                "Mount the image as writable directly instead of using a shadow file",
+            },
+            {
+              name: "--use-existing",
+              description:
+                "Use the image at the given path instead of downloading one",
+              args: { name: "path", template: "filepaths" },
+            },
+            {
+              name: "--no-mount",
+              description:
+                "Copy the image to the cache (if not present) but do not mount it. Prints the path of the image as the last line of output",
+            },
+            { name: "--no-copy" },
+            {
+              name: "--print-only",
+              description:
+                "Print the path to the image on the network but take no other action",
+            },
+            {
+              name: "--max-cache-size",
+              description:
+                "Override the RuntimeImageCacheMaxSizeGB user default, in GB",
+              args: { name: "size" },
+            },
+          ],
+        },
+        {
+          name: "unmount",
+          description:
+            "Unmount the Simulator Runtime if it is mounted. Any booted simulators will be shut down first",
+          args: { name: "train-build", suggestions: ["all"] },
+          options: [
+            {
+              name: "--force",
+              description: "Force-unmount even if the disk is busy",
+            },
+          ],
+        },
+        {
+          name: "cache",
+          description: "List or clear the cached runtime disk images",
+          subcommands: [
+            {
+              name: "list",
+              description: "Lists cached runtime disk images",
+            },
+            {
+              name: "clear",
+              description:
+                "Deletes all simulator runtime disk images (excludes runtimes bundled with Xcode or downloaded runtimes in /Library)",
+              options: [
+                {
+                  name: "--dry-run",
+                  description:
+                    "Print what would have been deleted without deleting anything",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: "pin",
+          description: "Pin a device to use a specific runtime",
+          args: { name: "device" },
+          options: [
+            {
+              name: "--latest",
+              exclusiveOn: ["--build", "--path"],
+            },
+            {
+              name: "--system",
+              description:
+                "Use the system policy. Customer OS: match SDK build if possible. All others use latest (default)",
+            },
+            {
+              name: "--newest",
+              description:
+                "Always use the newest build matching the semantic version",
+            },
+            {
+              name: "--build",
+              description:
+                "Pin the device to use a specific build of the runtime. If multiple runtimes match one is randomly chosen",
+              args: { name: "train-version" },
+              exclusiveOn: ["--latest", "--path"],
+            },
+            {
+              name: "--path",
+              description: "Pin the device to use a specific runtime by path",
+              args: { name: "path to runtime", template: "folders" },
+              exclusiveOn: ["--latest", "--build"],
+            },
+          ],
+        },
+        {
+          name: "info",
+          description:
+            "Show the path to the runtime (defaults to the iOS runtime bundled with the selected Xcode)",
+          args: [
+            { name: "path", isOptional: true, suggestions: ["path"] },
+            {
+              name: "platform or train-build",
+              isOptional: true,
+              suggestions: ["iOS", "tvOS", "watchOS"],
+            },
+          ],
+        },
+        {
+          name: "update_dyld_shared_cache",
+          description: "Update the dyld shared cache for a specific runtime",
+          args: {
+            name: "platform, train-build or path",
+            suggestions: ["iOS", "tvOS", "watchOS"],
+          },
+        },
+        {
+          name: "remove_dyld_shared_cache",
+          description: "Remove the dyld shared cache for a specific runtime",
+          args: {
+            name: "platform or train-build",
+            suggestions: ["iOS", "tvOS", "watchOS"],
+          },
         },
       ],
     },
@@ -426,18 +787,17 @@ const completionSpec: Fig.Spec = {
       args: [
         {
           name: "type",
-          suggestions: ["devices", "deviceTypes", "runtimes", "pairs"],
+          suggestions: ["devices", "devicetypes", "runtimes", "pairs"],
+          isOptional: true,
         },
         {
           name: "search term",
           suggestions: ["available"],
+          isOptional: true,
         },
       ],
       options: [
-        {
-          name: ["-j", "--json"],
-          description: "Print as JSON",
-        },
+        ...jsonOptions,
         {
           name: ["-e", "--no-escape-slashes"],
           description: "Encode slashes without escapes in JSON output",
@@ -447,6 +807,11 @@ const completionSpec: Fig.Spec = {
           description: "More verbose output",
         },
       ],
+    },
+    {
+      name: "listapps",
+      description: "Show the installed applications",
+      args: { name: "device" },
     },
     {
       name: "location",
@@ -487,23 +852,34 @@ const completionSpec: Fig.Spec = {
         {
           name: "start",
           description:
-            "Set the location to a series of waypoints specified as 'lat,lon' pairs, interpolating between them over time.\nAt least two waypoints are required. Use '-' to read waypoints from stdin, one waypoint per li\nSpeed specifies how quickly to move between waypoints in meters per second. If not specified 20m/s is us\nThe system will issue location updates along the path between each pair of waypoints. Use distance or interval to \ncontrol how often those updates are issued. Distance will issue an update every <meters> travelled without regard\nfor the time between updates. Interval will issue updates at fixed times without regard for how much\nthe location moves between updates.\nIf neither are specified an interval of 1.0 seconds is used. If both are specified the system picks on\nExample simulating a direct line between San Francisco and New York City, with updates every km:\nset --distance=1000 --speed=260 37.629538,-122.395733 40.628083,-73.768254",
+            "Move through two or more 'lat,lon' waypoints over time ('-' reads them from stdin, one per line). Example: start --distance=1000 --speed=260 37.629538,-122.395733 40.628083,-73.768254",
           args: {
             name: "lat,lon",
             isVariadic: true,
+            suggestions: ["-"],
           },
           options: [
             {
-              name: "speed",
+              name: "--speed",
+              description:
+                "Meters per second to move between waypoints. Default is 20",
               requiresSeparator: "=",
+              args: { name: "meters/sec" },
             },
             {
-              name: "distance",
+              name: "--distance",
+              description: "Issue a location update every <meters> travelled",
               requiresSeparator: "=",
+              args: { name: "meters" },
+              exclusiveOn: ["--interval"],
             },
             {
-              name: "interval",
+              name: "--interval",
+              description:
+                "Issue a location update every <seconds>. Default is 1.0",
               requiresSeparator: "=",
+              args: { name: "seconds" },
+              exclusiveOn: ["--distance"],
             },
           ],
         },
@@ -524,6 +900,33 @@ const completionSpec: Fig.Spec = {
           description: "Enable or Disable verbose logging",
           suggestions: ["enable", "disable"],
         },
+      ],
+    },
+    {
+      name: "monitor",
+      description: "List notifications as they arrive",
+      hidden: true,
+    },
+    {
+      name: "notify_get_state",
+      description: "Get the state value of a darwin notification on a device",
+      hidden: true,
+      args: [{ name: "device" }, { name: "notification name" }],
+    },
+    {
+      name: "notify_post",
+      description: "Post a darwin notification on a device",
+      hidden: true,
+      args: [{ name: "device" }, { name: "notification name" }],
+    },
+    {
+      name: "notify_set_state",
+      description: "Set the state value of a darwin notification on a device",
+      hidden: true,
+      args: [
+        { name: "device" },
+        { name: "notification name" },
+        { name: "state" },
       ],
     },
     {
@@ -561,7 +964,7 @@ const completionSpec: Fig.Spec = {
       name: "pbcopy",
       description: "Copy standard input onto the device pasteboard",
       args: {
-        name: "device of 'host'",
+        name: "device",
       },
       options: [
         {
@@ -574,13 +977,19 @@ const completionSpec: Fig.Spec = {
       description:
         "Print the contents of the device's pasteboard to standard output",
       args: {
-        name: "device of 'host'",
+        name: "device",
       },
       options: [
         {
           name: "-v",
         },
       ],
+    },
+    {
+      name: "pbinfo",
+      description: "Print information about the device's pasteboard",
+      hidden: true,
+      args: { name: "device or 'host'", suggestions: ["host"] },
     },
     {
       name: "pbsync",
@@ -601,6 +1010,45 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "-v",
+        },
+      ],
+    },
+    {
+      name: "personalization",
+      description:
+        "Provides utility when working with personalization manifests",
+      subcommands: [
+        {
+          name: "personalize",
+          description:
+            "Personalize the runtime, generating a new personalization manifest",
+          args: { name: "identifier" },
+        },
+        {
+          name: "remove-manifest",
+          description:
+            "Remove a manifest file from /Library/Developer/CoreSimulator/Cryptex/Personalization",
+          args: { name: "filename" },
+        },
+        {
+          name: "remove-all-manifests",
+          description:
+            "Remove all manifests from /Library/Developer/CoreSimulator/Cryptex/Personalization",
+        },
+        {
+          name: "remove-personalization",
+          description: "Remove the runtime's personalization and remount it",
+          args: { name: "id" },
+        },
+        {
+          name: "revoke-manifests",
+          description:
+            "Revoke manifests, requiring all runtime cryptex mounts to be re-personalized",
+        },
+        {
+          name: "scan-and-personalize",
+          description:
+            "Update personalization manifests of runtimes that need it and remount them as a cryptex",
         },
       ],
     },
@@ -662,6 +1110,20 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "reboot",
+      description: "Reboot a device",
+      args: { name: "device" },
+    },
+    {
+      name: "register",
+      description: "Register a service from one bootstrap into another",
+      hidden: true,
+      args: [
+        { name: "<source device or 'host'>/<service>" },
+        { name: "<destination device>/<service>" },
+      ],
+    },
+    {
       name: "rename",
       description: "Rename a device",
       args: [
@@ -671,6 +1133,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "name",
         },
+      ],
+    },
+    {
+      name: "reset",
+      description: "Reset a given archive or database",
+      hidden: true,
+      args: [
+        { name: "device" },
+        { name: "subsystem", suggestions: ["launch_services"] },
       ],
     },
     {
@@ -703,19 +1174,41 @@ const completionSpec: Fig.Spec = {
             "Delete a simulator runtime from the secure storage area. If runtime is a disk image any booted simulators are shutdown and the disk is unmounted first. Use the alias 'all' to delete all images",
           args: {
             name: "identifier",
+            isOptional: true,
+            suggestions: ["all"],
           },
           options: [
             {
               name: ["-d", "--notUsedSinceDays"],
               description: "Delete images not used within the past <days> days",
+              args: { name: "days" },
+            },
+            {
+              name: ["-u", "--unusable"],
+              description: "Delete images that are marked as unusable",
+            },
+            {
+              name: ["-o", "--outdated"],
+              description:
+                "Delete runtimes that have a newer version available with the same runtime identifier",
             },
             {
               name: ["-n", "--dry-run"],
               description:
                 "Print what images would be deleted without actually deleting anything",
-              exclusiveOn: ["identifier"],
+            },
+            {
+              name: ["-k", "--keep-asset"],
+              description:
+                "Keep the associated mobile asset when deleting the runtime",
             },
           ],
+        },
+        {
+          name: "unmount",
+          description:
+            "Unmount a runtime disk image without deleting it; booted simulators using it are shut down",
+          args: { name: "identifier" },
         },
         {
           name: "verify",
@@ -726,57 +1219,98 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "list",
-          description: "",
+          description: "List runtime disk images",
           options: [
             {
               name: "-v",
               description: "Print more verbose output",
             },
+            ...jsonOptions,
+          ],
+        },
+        {
+          name: "scan-and-mount",
+          description:
+            "Scan the runtime storage location for orphaned runtimes that need to be added",
+        },
+        {
+          name: "match",
+          description: "Show or override the SDK to runtime build mapping",
+          subcommands: [
             {
-              name: ["-j", "--json"],
-              description: "Print as JSON",
+              name: "list",
+              description:
+                "List the SDK build to runtime build mapping rules for the selected Xcode. Manual overrides using 'match set' have the highest priority",
+              options: [
+                {
+                  name: "-v",
+                  description:
+                    "Verbose mode. Includes the full preferred build map, user override map, and known SDK names",
+                },
+                ...jsonOptions,
+              ],
+            },
+            {
+              name: "set",
+              description:
+                "Override which build of a runtime Xcode prefers for building and running with a given SDK",
+              args: [
+                {
+                  name: "sdk canonical name",
+                },
+                {
+                  name: "runtime build",
+                  isOptional: true,
+                },
+              ],
+              options: [
+                {
+                  name: "--default",
+                  description:
+                    "Clear the override for the given SDK and revert to default behavior",
+                },
+                {
+                  name: "--sdkBuild",
+                  description:
+                    "Explicitly specify the SDK build, eg for an Xcode other than the selected Xcode",
+                  args: { name: "sdk build" },
+                },
+              ],
             },
           ],
         },
         {
-          name: "match list",
-          description:
-            "List the SDK build to runtime build mapping rules for the selected Xcode. Preferred means the runtime was either bundled with Xcode, exactly matched your SDK version, or the downloadable index indicated a better match for your SDK Manual overrides using 'match set' have the highest priority",
-          options: [
+          name: "dyld_shared_cache",
+          description: "Manage the dyld shared cache of runtimes",
+          subcommands: [
             {
-              name: "-v",
+              name: "update",
               description:
-                "Verbose mode. Includes the full preferred build map, user override map, and known SDK names",
+                "Update the dyld shared cache for the runtime; no-op if it exists unless --force",
+              args: { name: "runtime", isOptional: true },
+              options: [
+                {
+                  name: "--all",
+                  description:
+                    "Update the shared cache for all available runtimes",
+                },
+                {
+                  name: "--force",
+                  description:
+                    "Force re-creation if the shared cache already exists",
+                },
+              ],
             },
             {
-              name: ["-j", "--json"],
-              description: "Print as JSON",
-            },
-          ],
-        },
-        {
-          name: "match set",
-          description:
-            "Override the SDK to runtime build mapping. This controls which build of a given runtime Xcode will prefer for building and running when using that SDK. This matters most often during Beta releases when there are multiple builds for a given OS version. If --sdkBuild is not specified it is assumed you mean the SDK build for the currently selected Xcode.\n\nNote: Remember this is about build numbers, not semantic versions. When using the iOS 16.0 SDK Xcwill always prefer an iOS 16.0 runtime. Matching policy controls what to do when there are multiiOS 16.0 runtimes availabeg if the iOS 16.0 SDK is 20A245 and the available runtimes are (20A248, 20A252, 20A254) which should Xcode use for building, SwiftUI Previews, and when launching iOS 16.0 Simulators? They are all iOS 16.0 runtimes so a policy must decide which one is selected",
-          args: [
-            {
-              name: "sdk canonical name",
-            },
-            {
-              name: "runtime build",
-            },
-          ],
-          options: [
-            {
-              name: "--default",
-              description:
-                "Clear the override for the given SDK and revert to default behavior",
-              exclusiveOn: ["runtime build"],
-            },
-            {
-              name: "--sdkBuild",
-              description:
-                "Explicitly specify the SDK build, eg for an Xcode other than the selected Xcode",
+              name: "remove",
+              description: "Remove the dyld shared cache for the runtime",
+              args: { name: "runtime", isOptional: true },
+              options: [
+                {
+                  name: "--all",
+                  description: "Remove the shared caches for all runtimes",
+                },
+              ],
             },
           ],
         },
@@ -814,13 +1348,16 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: ["-w", "--wait-for-debugger"],
+          description: "Start the process suspended",
         },
         {
           name: ["-s", "--standalone"],
+          description:
+            "Use a NULL mach bootstrap port; the process cannot connect to other services",
+          deprecated: true,
         },
-        {
-          name: ["-a", "--arch"],
-        },
+        archOption,
+        checkedAllocationsOption,
       ],
     },
     {
@@ -847,43 +1384,72 @@ const completionSpec: Fig.Spec = {
               name: "--time",
               description:
                 "Set the date or time to a fixed value. If the string is a valid ISO date string it will also set the date on relevant devices",
+              args: { name: "string" },
             },
             {
               name: "--dataNetwork",
-              description:
-                "If specified must be one of 'hide', 'wifi', '3g', '4g', 'lte', 'lte-a', 'lte+', '5g', '5g+', '5g-uwb', or '5g-uc'",
+              description: "Set the data network type",
+              args: {
+                name: "dataNetworkType",
+                suggestions: [
+                  "hide",
+                  "wifi",
+                  "3g",
+                  "4g",
+                  "lte",
+                  "lte-a",
+                  "lte+",
+                  "5g",
+                  "5g+",
+                  "5g-uwb",
+                  "5g-uc",
+                ],
+              },
             },
             {
               name: "--wifiMode",
-              description:
-                "If specified must be one of 'searching', 'failed', or 'active'",
+              description: "Set the Wi-Fi mode",
+              args: {
+                name: "mode",
+                suggestions: ["searching", "failed", "active"],
+              },
             },
             {
               name: "--wifiBars",
-              description: "If specified must be 0-3",
+              description: "Set the number of Wi-Fi bars (0-3)",
+              args: { name: "int", suggestions: ["0", "1", "2", "3"] },
             },
             {
               name: "--cellularMode",
-              description:
-                "If specified must be one of 'notSupported', 'searching', 'failed', or 'active'",
+              description: "Set the cellular mode",
+              args: {
+                name: "mode",
+                suggestions: ["notSupported", "searching", "failed", "active"],
+              },
             },
             {
               name: "--cellularBars",
-              description: "If specified must be 0-4",
+              description: "Set the number of cellular bars (0-4)",
+              args: { name: "int", suggestions: ["0", "1", "2", "3", "4"] },
             },
             {
               name: "--operatorName",
               description:
                 "Set the cellular operator/carrier name. Use '' for the empty string",
+              args: { name: "string" },
             },
             {
               name: "--batteryState",
-              description:
-                "If specified must be one of 'charging', 'charged', or 'discharging'",
+              description: "Set the battery state",
+              args: {
+                name: "state",
+                suggestions: ["charging", "charged", "discharging"],
+              },
             },
             {
               name: "--batteryLevel",
-              description: "If specified must be 0-100",
+              description: "Set the battery level (0-100)",
+              args: { name: "int" },
             },
           ],
         },
@@ -911,35 +1477,47 @@ const completionSpec: Fig.Spec = {
         {
           name: "appearance",
           description:
-            "When invoked without arguments prints the current user interface appearance style:\nlight\nThe Light appearance style.\ndark\nThe Dark appearance style.\nunsupported\nThe platform or runtime version do not support appearance styles.\nunknown\nThe current style is unknown or there was an error detecting it",
-          additionalSuggestions: ["light", "dark"],
+            "Print the current user interface appearance style (light, dark, unsupported or unknown), or set it to light or dark",
+          args: {
+            name: "style",
+            isOptional: true,
+            suggestions: ["light", "dark"],
+          },
         },
         {
           name: "increase_contrast",
           description:
-            "When invoked without arguments prints whether the Increase Contrast mode is currently enabled:\nenabled\nIncrease Contrast is enabled.\ndisabled\nIncrease Contrast is disabled.\nunsupported\nThe platform or runtime version do not support the Increase Contrast setting.\nunknown\nThe current setting is unknown or there was an error detecting it",
-          additionalSuggestions: ["enabled", "disabled"],
+            "Print whether Increase Contrast mode is enabled (enabled, disabled, unsupported or unknown), or enable or disable it",
+          args: {
+            name: "state",
+            isOptional: true,
+            suggestions: ["enabled", "disabled"],
+          },
         },
         {
           name: "content_size",
           description:
-            "When invoked without arguments prints the current preferred content size category, from the following possible values:",
-          additionalSuggestions: [
-            "extra-small",
-            "small",
-            "medium",
-            "large",
-            "extra-large",
-            "extra-extra-large",
-            "extra-extra-extra-large",
-            "accessibility-medium",
-            "accessibility-large",
-            "accessibility-extra-large",
-            "accessibility-extra-extra-large",
-            "accessibility-extra-extra-extra-large",
-            "unknown",
-            "unsupported",
-          ],
+            "Print the current preferred content size category, or set it. 'increment' or 'decrement' selects the category one step larger or smaller than the current one",
+          args: {
+            name: "size",
+            isOptional: true,
+            suggestions: [
+              "increment",
+              "decrement",
+              "extra-small",
+              "small",
+              "medium",
+              "large",
+              "extra-large",
+              "extra-extra-large",
+              "extra-extra-extra-large",
+              "accessibility-medium",
+              "accessibility-large",
+              "accessibility-extra-large",
+              "accessibility-extra-extra-large",
+              "accessibility-extra-extra-extra-large",
+            ],
+          },
         },
       ],
     },
@@ -961,6 +1539,12 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "pair UUID",
       },
+    },
+    {
+      name: "unregister",
+      description: "Unregister a service from a device's bootstrap",
+      hidden: true,
+      args: [{ name: "device" }, { name: "service" }],
     },
     {
       name: "upgrade",

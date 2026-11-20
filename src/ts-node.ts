@@ -1,3 +1,6 @@
+// ts-node v10.9.2 (npm "latest", published 2023-12-08; 11.0.0-beta.1 is only a pre-release; verified 2026-11-20).
+// Source: the `arg` parser and --help text in src/bin.ts and website/docs/options.md at tag v10.9.2.
+// Every flag is accepted in both --camelCase and --hyphen-case, so both spellings are listed.
 import { dependenciesGenerator } from "./npm";
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
@@ -11,7 +14,9 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-v", "--version"],
-      description: "Print version information of the ts-node module",
+      description:
+        "Print version information of the ts-node module; -vvv prints additional information",
+      isRepeatable: 3,
     },
     {
       name: ["-e", "--eval"],
@@ -24,6 +29,19 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-p", "--print"],
       description: "Evaluate script and print result",
+    },
+    {
+      name: "--esm",
+      description: "Bootstrap with the ESM loader, enabling full ESM support",
+    },
+    {
+      name: "--swc",
+      description: "Use the faster swc transpiler",
+    },
+    {
+      name: ["-s", "--script-mode", "--scriptMode"],
+      description:
+        "Resolve Typescript config relative to the script's directory",
     },
     {
       name: ["-r", "--require"],
@@ -40,24 +58,29 @@ const completionSpec: Fig.Spec = {
       description: "Always open interactive REPL",
     },
     {
-      name: "--show-config",
+      name: ["--show-config", "--showConfig"],
       description: "Print resolved Typescript config to the terminal",
     },
     {
-      name: "--cwd-mode",
+      name: ["--cwd-mode", "--cwdMode"],
       description:
         "Resolve Typescript config based on the current working directory",
     },
     {
-      name: ["-T", "--transpile-only"],
+      name: ["-T", "--transpile-only", "--transpileOnly"],
       description: "Use the Typescript transpile module mode",
     },
     {
-      name: ["-H", "--compiler-host"],
+      name: ["--type-check", "--typeCheck"],
+      description: "Type check even when --transpile-only would skip it",
+    },
+    {
+      name: ["-H", "--compiler-host", "--compilerHost"],
       description: "Use the Typescript compiler host API",
     },
     {
       name: ["-I", "--ignore"],
+      isRepeatable: true,
       description: "Ignore patterns from Typescript compilation",
       args: {
         name: "pattern",
@@ -103,14 +126,15 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: ["-D", "--ignore-diagnostics"],
+      name: ["-D", "--ignore-diagnostics", "--ignoreDiagnostics"],
+      isRepeatable: true,
       description: "Specify Typescript diagnostic code to ignore",
       args: {
         name: "code",
       },
     },
     {
-      name: ["-O", "--compiler-options"],
+      name: ["-O", "--compiler-options", "--compilerOptions"],
       insertValue: "-O '{cursor}'",
       description: "JSON object that will be merged with the compiler options",
       args: {
@@ -118,8 +142,8 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--cwd",
-      description: "Specify working directory",
+      name: ["--cwd", "--dir"],
+      description: "Behave as if invoked within this working directory",
       args: {
         name: "cwd",
         generators: {
@@ -137,15 +161,19 @@ const completionSpec: Fig.Spec = {
       description: "Use the pretty formatter for diagnostic errors",
     },
     {
-      name: "--skip-project",
+      name: ["--skip-project", "--skipProject"],
       description: "Skip reading Typescript config",
+    },
+    {
+      name: "--emit",
+      description: "Emit output files into .ts-node directory",
     },
     {
       name: "--scope",
       description: "Scope compilation to scope directory specified",
     },
     {
-      name: "--scope-dir",
+      name: ["--scope-dir", "--scopeDir"],
       description: "Directory for scope parameter",
       args: {
         name: "directory",
@@ -155,22 +183,33 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--skip-ignore",
+      name: ["--skip-ignore", "--skipIgnore"],
       description: "Skip --ignore checks",
     },
     {
-      name: "--prefer-ts-exts",
+      name: ["--prefer-ts-exts", "--preferTsExts"],
       description:
         "Prefer Typescript files over JavaScript files when importing files",
     },
     {
-      name: "--log-error",
+      name: ["--log-error", "--logError"],
       description:
         "Pipe Typescript errors to stderr instead of throwing exceptions",
     },
     {
-      name: "--no-experimental-repl-await",
+      name: ["--no-experimental-repl-await", "--noExperimentalReplAwait"],
       description: "Disable the top-level await function in REPL",
+    },
+    {
+      name: [
+        "--experimental-specifier-resolution",
+        "--experimentalSpecifierResolution",
+      ],
+      description: "Equivalent to node's --experimental-specifier-resolution",
+      args: {
+        name: "mode",
+        suggestions: ["node", "explicit"],
+      },
     },
   ],
   args: {

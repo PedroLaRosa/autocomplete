@@ -1,11 +1,23 @@
+// pmset (macOS 15.5 / Darwin 24.5, /usr/bin/pmset, 2026-11-19). Source: `man pmset`,
+// cross-checked against the argument strings in the /usr/bin/pmset binary
 const settings: Fig.Suggestion[] = [
   {
-    name: ["displaysleep", "dim"],
+    name: "displaysleep",
     description: "Display sleep timer (value in minutes, or 0 to disable)",
   },
   {
-    name: ["disksleep", "spindown"],
+    name: "dim",
+    description: "Display sleep timer; replaced by 'displaysleep' in 10.4",
+    deprecated: { description: "Use 'displaysleep'" },
+  },
+  {
+    name: "disksleep",
     description: "Disk spindown timer (value in minutes, or 0 to disable)",
+  },
+  {
+    name: "spindown",
+    description: "Disk spindown timer; replaced by 'disksleep' in 10.4",
+    deprecated: { description: "Use 'disksleep'" },
   },
   {
     name: "sleep",
@@ -20,21 +32,17 @@ const settings: Fig.Suggestion[] = [
     description: "Wake on modem ring (value = 0/1)",
   },
   {
+    name: "powernap",
+    description: "Enable/disable Power Nap on supported machines (value = 0/1)",
+  },
+  {
+    name: "proximitywake",
+    description:
+      "Wake from sleep based on proximity of devices using the same iCloud id (value = 0/1)",
+  },
+  {
     name: "autorestart",
     description: "Automatic restart on power loss (value = 0/1)",
-  },
-  {
-    name: "dps",
-    description:
-      "Dynamically change processor speed based on load (value = 0/1)",
-  },
-  {
-    name: "reduce",
-    description: "Reduce processor speed (value = 0/1)",
-  },
-  {
-    name: "powerbutton",
-    description: "Sleep the machine when power button is pressed (value=0/1)",
   },
   {
     name: "lidwake",
@@ -64,11 +72,41 @@ const settings: Fig.Suggestion[] = [
   {
     name: "hibernatemode",
     description:
-      "Change hibernation mode. 0 = normal sleep, 1 = hibernate mode, 3 = safe sleep, 25 = hibernate mode for post-2005 portable Macs",
+      "Change hibernation mode. 0 = plain sleep, 3 = safe sleep (portable default), 25 = hibernate",
   },
   {
     name: "hibernatefile",
-    description: "Change hibernation image file location. (value = path)",
+    description:
+      "Change hibernation image file location; must be on the root volume (value = path)",
+  },
+  {
+    name: "standby",
+    description:
+      "Automatically hibernate after sleeping for the standby delay (value = 0/1)",
+  },
+  {
+    name: "standbydelayhigh",
+    description:
+      "Seconds before entering standby when battery is above highstandbythreshold",
+  },
+  {
+    name: "standbydelaylow",
+    description:
+      "Seconds before entering standby when battery is below highstandbythreshold",
+  },
+  {
+    name: "highstandbythreshold",
+    description:
+      "Battery percentage that selects standbydelayhigh or standbydelaylow (default 50)",
+  },
+  {
+    name: "autopoweroff",
+    description:
+      "Write a hibernation image and enter low power chipset sleep after autopoweroffdelay (value = 0/1)",
+  },
+  {
+    name: "autopoweroffdelay",
+    description: "Seconds before entering autopoweroff mode",
   },
   {
     name: "ttyskeepawake",
@@ -84,6 +122,24 @@ const settings: Fig.Suggestion[] = [
     name: "destroyfvkeyonstandby",
     description:
       "Destroy File Vault Key when going to standby mode. (value: 1 - Destroy, 0 - Retain)",
+  },
+];
+
+const upsSettings: Fig.Suggestion[] = [
+  {
+    name: "haltlevel",
+    description:
+      "UPS battery level at which to trigger an emergency shutdown (value in %, -1 to disable)",
+  },
+  {
+    name: "haltafter",
+    description:
+      "Trigger emergency shutdown after this long on UPS power (value in minutes, -1 to disable)",
+  },
+  {
+    name: "haltremain",
+    description:
+      "Trigger emergency shutdown when this much UPS runtime remains (value in minutes, -1 to disable)",
   },
 ];
 
@@ -145,9 +201,9 @@ const completionSpec: Fig.Spec = {
                 "Display an ongoing log of battery state as read directly from battery",
             },
             {
-              name: "profiles",
+              name: "therm",
               description:
-                "Display the settings associated with each Energy Saver profile. 10.5+",
+                "Show thermal conditions that affect CPU speed. Not available on all platforms",
             },
             {
               name: "thermlog",
@@ -162,16 +218,6 @@ const completionSpec: Fig.Spec = {
               name: "assertionslog",
               description:
                 "Show a log of assertion creations and releases. 10.6+",
-            },
-            {
-              name: "activity",
-              description:
-                "Display a summary of power state of Display wrangler and Disk Queue Manager.10.6+",
-            },
-            {
-              name: "activitylog",
-              description:
-                "Show a log of power state changes to Display Wrangler and Disk Queue Manager. 10.6+",
             },
             {
               name: "sysload",
@@ -203,12 +249,31 @@ const completionSpec: Fig.Spec = {
             {
               name: "history",
               description:
-                "A debugging tool. Prints a timeline of system sleeplwake UUIDs",
+                "A debugging tool. Prints a timeline of system sleep/wake UUIDs",
             },
             {
               name: "historydetailed",
               description:
                 "Prints driver-level timings for a sleep/wake. Pass a UUID as an argument",
+            },
+            {
+              name: "powerstate",
+              description:
+                "Prints the current power states for I/O Kit drivers. Optionally pass class names",
+            },
+            {
+              name: "powerstatelog",
+              description:
+                "Periodically prints power state residency times for drivers ([-i interval] [class names])",
+            },
+            {
+              name: "stats",
+              description: "Prints the number of sleeps and wakes since boot",
+            },
+            {
+              name: "systemstate",
+              description:
+                "Prints the current power state of the system and available capabilities",
             },
             {
               name: "everything",
@@ -218,16 +283,21 @@ const completionSpec: Fig.Spec = {
           ],
         },
         {
-          name: "UUID",
-          description: "Used for historydetailed",
+          name: "UUID | class names",
+          description:
+            "UUID for historydetailed; I/O Kit class names for powerstate and powerstatelog",
           isOptional: true,
+          isVariadic: true,
         },
       ],
     },
     {
       name: "schedule",
       description: "For setting up one-time power events",
-      options: [{ name: "cancel" }],
+      options: [
+        { name: "cancel", description: "Cancel a scheduled event" },
+        { name: "cancelall", description: "Cancel all scheduled events" },
+      ],
       args: [
         { name: "type", suggestions: events },
         {
@@ -235,12 +305,22 @@ const completionSpec: Fig.Spec = {
           description:
             '"MM/dd/yy HH:mm:ss" (in 24 hour format; must be in quotes)',
         },
+        {
+          name: "owner",
+          description: "Who or what is scheduling this one-time power event",
+          isOptional: true,
+        },
       ],
     },
     {
       name: "repeat",
       description: "For setting up daily/weekly power on and power off events",
-      subcommands: [{ name: "cancel" }],
+      subcommands: [
+        {
+          name: "cancel",
+          description: "Cancel all repeating power events",
+        },
+      ],
       args: [
         { name: "type", suggestions: events },
         {
@@ -249,17 +329,50 @@ const completionSpec: Fig.Spec = {
             'A subset of MTWRFSU ("M" and "MTWRF" are valid strings)',
         },
         {
-          name: "date/time",
-          description:
-            '"MM/dd/yy HH:mm:ss" (in 24 hour format; must be in quotes)',
+          name: "time",
+          description: "HH:mm:ss (24 hour format)",
         },
+      ],
+    },
+    {
+      name: "relative",
+      description:
+        "Schedule a wake or power on in seconds from the end of sleep/shutdown; cannot be cancelled",
+      args: [
+        { name: "type", suggestions: ["wake", "poweron"] },
+        { name: "seconds" },
       ],
     },
   ],
   args: {
-    description: "Override settings and sleep now",
+    description: "Action to perform",
     isOptional: true,
-    suggestions: ["sleepnow", "noidle", "lock", "touch"],
+    suggestions: [
+      { name: "sleepnow", description: "Cause an immediate system sleep" },
+      {
+        name: "displaysleepnow",
+        description: "Cause the display to go to sleep immediately",
+      },
+      { name: "touch", description: "Re-read existing settings from disk" },
+      {
+        name: "boot",
+        description: "Tell the kernel that system boot is complete",
+      },
+      {
+        name: "restoredefaults",
+        description: "Restore power management settings to their defaults",
+      },
+      {
+        name: "resetdisplayambientparams",
+        description:
+          "Reset the ambient light parameters for certain Apple displays",
+      },
+      {
+        name: "noidle",
+        description: "Prevent idle sleep while running",
+        deprecated: { description: "Use caffeinate(8)" },
+      },
+    ],
   },
   options: [
     {
@@ -280,7 +393,10 @@ const completionSpec: Fig.Spec = {
     {
       name: "-u",
       description: "Settings for UPS",
-      args: [{ name: "setting", suggestions: settings }, { name: "value" }],
+      args: [
+        { name: "setting", suggestions: [...settings, ...upsSettings] },
+        { name: "value" },
+      ],
     },
   ],
 };

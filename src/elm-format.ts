@@ -1,3 +1,6 @@
+// elm-format v0.8.8 (npm "latest" and GitHub tag 0.8.8, 2026-11-19). Source: src/ElmFormat/CliFlags.hs and
+// src/ElmFormat/Cli.hs at tag 0.8.8 of https://github.com/avh4/elm-format (optparse-applicative definitions read
+// statically, not run). Hidden `--json` / `--from-json` flags are marked hidden.
 const supportedElmVersions = [
   {
     name: "0.19",
@@ -8,7 +11,7 @@ const supportedElmVersions = [
 ];
 
 /**
- * Based on [elm-format](https://github.com/avh4/elm-format), version 0.8.5. A cli tool for formatting Elm code.
+ * Based on [elm-format](https://github.com/avh4/elm-format), version 0.8.8. A cli tool for formatting Elm code.
  */
 const completionSpec: Fig.Spec = {
   name: "elm-format",
@@ -47,13 +50,24 @@ const completionSpec: Fig.Spec = {
         name: "VERSION",
         description: "Valid values: 0.18, 0.19. Default: auto",
         suggestions: supportedElmVersions,
-        isOptional: true,
       },
+    },
+    {
+      name: "--json",
+      description: "Instead of formatting, write the AST to stdout",
+      hidden: true,
+    },
+    {
+      name: "--from-json",
+      description: "Read the JSON AST input and write Elm source",
+      hidden: true,
     },
   ],
   args: {
     name: "INPUT",
-    template: "filepaths",
+    description: "Elm files or directories to format",
+    isVariadic: true,
+    template: ["filepaths", "folders"],
   },
 };
 export default completionSpec;

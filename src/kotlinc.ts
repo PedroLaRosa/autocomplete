@@ -1,7 +1,15 @@
+// kotlinc (Kotlin compiler for JVM) v2.4.21 (latest stable tag of JetBrains/kotlin, 2026-11-19). Source: compiler/arguments DSL (CommonToolArguments.kt, CommonCompilerArguments.kt, JvmCompilerArguments.kt) at tag v2.4.21 and kotlin-web-site docs/topics/compiler/compiler-reference.md (compiler not run). Only the standard options are listed, the unstable advanced -X options are left out.
 const completionSpec: Fig.Spec = {
   name: "kotlinc",
   description: "Kotlin compiler for JVM",
-  subcommands: [
+  args: {
+    name: "source files",
+    description: "Kotlin source files, directories or @argfiles to compile",
+    isVariadic: true,
+    isOptional: true,
+    template: "filepaths",
+  },
+  options: [
     {
       name: "-version",
       description: "Display the compiler version",
@@ -16,6 +24,11 @@ const completionSpec: Fig.Spec = {
       description: "Turn any warnings into a compilation error",
     },
     {
+      name: "-Wextra",
+      description:
+        "Enable additional declaration, expression, and type compiler checks that emit warnings if true",
+    },
+    {
       name: "-verbose",
       description:
         "Enable verbose logging output which includes details of the compilation process",
@@ -27,6 +40,13 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "script-file",
         template: "filepaths",
+      },
+    },
+    {
+      name: ["-expression", "-e"],
+      description: "Evaluate the given string as a Kotlin script",
+      args: {
+        name: "expression",
       },
     },
     {
@@ -52,6 +72,7 @@ const completionSpec: Fig.Spec = {
       name: "-P",
       description:
         "Pass an option to a Kotlin compiler plugin. Available plugins and their options are listed in the Tools > Compiler plugins section of the documentation",
+      isRepeatable: true,
       args: {
         name: "plugin:pluginId:optionName=value",
       },
@@ -81,6 +102,7 @@ const completionSpec: Fig.Spec = {
       name: "-opt-in",
       description:
         "Enable usages of API that requires opt-in with a requirement annotation specified by the given fully qualified name",
+      isRepeatable: true,
       args: {
         name: "annotation",
       },
@@ -118,11 +140,57 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "-jvm-default",
+      description:
+        "Control how functions declared in interfaces are compiled to default methods on the JVM. The default is enable",
+      args: {
+        name: "mode",
+        suggestions: [
+          {
+            name: "enable",
+            description:
+              "Generate default methods and DefaultImpls classes for compatibility (default since language version 2.2)",
+          },
+          {
+            name: "no-compatibility",
+            description:
+              "Generate default methods only, without DefaultImpls classes",
+          },
+          {
+            name: "disable",
+            description:
+              "Do not generate JVM default methods (default up to language version 2.1)",
+          },
+        ],
+      },
+    },
+    {
       name: "-jvm-target",
       description:
-        "Specify the target version of the generated JVM bytecode. Possible values are 1.8, 9, 10, ..., 21. The default value is 1.8",
+        "Specify the target version of the generated JVM bytecode. Possible values are 1.8, 9, 10, ..., 26. The default value is 1.8",
       args: {
         name: "version",
+        suggestions: [
+          "1.8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26",
+        ],
       },
     },
     {

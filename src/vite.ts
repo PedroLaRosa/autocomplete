@@ -1,52 +1,62 @@
+// Vite v8.3.8 (npm registry latest, 2026-11-19). Source: vite@8.3.8 npm package, `vite --help`, `vite build|optimize|preview|dev|serve --help` and the cac command definitions in dist/node/cli.js.
+// Removed since the previous spec: --https (dropped in Vite 3, now the server.https config option).
+
+const serverOptions: Fig.Option[] = [
+  {
+    name: "--host",
+    description: "Specify the hostname",
+    args: { name: "host", isOptional: true },
+  },
+  {
+    name: "--port",
+    description: "Specify the port",
+    args: { name: "port" },
+  },
+  {
+    name: "--open",
+    description: "Open browser on startup",
+    args: {
+      name: "path",
+      isOptional: true,
+    },
+  },
+  {
+    name: "--strictPort",
+    description: "Exit if the specified port is already in use",
+  },
+];
+
+const forceOption: Fig.Option = {
+  name: "--force",
+  description: "Force the optimizer to ignore the cache and re-bundle",
+};
+
+const rootArg: Fig.Arg = {
+  name: "root",
+  isOptional: true,
+  template: "folders",
+};
+
 const completionSpec: Fig.Spec = {
   name: "vite",
   description: "Native ESM-powered web dev build tool",
   icon: "https://vitejs.dev/logo.svg",
-  args: {
-    name: "root",
-    isOptional: true,
-    template: "folders",
-  },
+  args: rootArg,
   options: [
     {
       name: ["-h", "--help"],
       description: "Show help message",
       isPersistent: true,
     },
-    {
-      name: "--host",
-      description: "Specify the hostname",
-      args: { name: "host", isOptional: true },
-    },
-    {
-      name: "--port",
-      description: "Specify the port",
-      args: { name: "port" },
-    },
-    {
-      name: "--https",
-      description: "Use TLS + HTTP/2",
-    },
-    {
-      name: "--open",
-      description: "Open browser on startup",
-      args: {
-        name: "browser",
-        isOptional: true,
-        template: "filepaths",
-      },
-    },
+    ...serverOptions,
     {
       name: "--cors",
       description: "Enable CORS",
     },
+    forceOption,
     {
-      name: "--strictPort",
-      description: "Exit if the port is already in use",
-    },
-    {
-      name: "--force",
-      description: "For the optimizer to re-bundle",
+      name: "--experimentalBundle",
+      description: "Use experimental full bundle mode (highly experimental)",
     },
     {
       name: ["-c", "--config"],
@@ -82,8 +92,31 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--clearScreen",
-      description: "Enable screen clearing when logging",
+      description: "Allow or disable screen clearing when logging",
       isPersistent: true,
+    },
+    {
+      name: "--configLoader",
+      description:
+        "How to load the config file: bundle it with Rolldown (default), process it on the fly with the runner (experimental) or load it with the native runtime (experimental)",
+      isPersistent: true,
+      args: {
+        name: "loader",
+        suggestions: [
+          { name: "bundle", description: "Bundle the config with Rolldown" },
+          { name: "runner", description: "Process the config on the fly" },
+          { name: "native", description: "Load using the native runtime" },
+        ],
+      },
+    },
+    {
+      name: "--profile",
+      description: "Start built-in Node.js inspector",
+      isPersistent: true,
+      args: {
+        name: "name",
+        isOptional: true,
+      },
     },
     {
       name: ["-d", "--debug"],
@@ -109,14 +142,18 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "mode",
         generators: {
-          script: ["ls", "-l1A"],
+          script: ["ls", "-1A"],
           postProcess: (out) =>
-            out
-              .split("\n")
-              .filter((line) => line.startsWith(".env."))
-              .map((name) => ({
-                name,
-              })),
+            [
+              ...new Set(
+                out
+                  .split("\n")
+                  .filter((line) => line.startsWith(".env."))
+                  .map((line) => line.slice(".env.".length))
+                  .map((mode) => mode.replace(/\.local$/, ""))
+                  .filter(Boolean)
+              ),
+            ].map((name) => ({ name })),
         },
       },
     },
@@ -127,25 +164,39 @@ const completionSpec: Fig.Spec = {
   ],
   subcommands: [
     {
+      name: ["dev", "serve"],
+      description: "Start dev server (the default command)",
+      args: rootArg,
+      options: [
+        ...serverOptions,
+        {
+          name: "--cors",
+          description: "Enable CORS",
+        },
+        forceOption,
+        {
+          name: "--experimentalBundle",
+          description:
+            "Use experimental full bundle mode (highly experimental)",
+        },
+      ],
+    },
+    {
       name: "build",
       icon: "🛠",
       description: "Build for production",
-      args: {
-        name: "root",
-        isOptional: true,
-        template: "folders",
-      },
+      args: rootArg,
       options: [
         {
           name: "--target",
-          description: "Transpile target (must be a valid esbuild target)",
+          description: "Transpile target (default: baseline-widely-available)",
           args: {
             name: "target",
           },
         },
         {
           name: "--outDir",
-          description: "Output directory",
+          description: "Output directory (default: dist)",
           args: {
             name: "dir",
             template: "folders",
@@ -153,7 +204,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--assetsDir",
-          description: "Directory under outDir to place assets in",
+          description:
+            "Directory under outDir to place assets in (default: assets)",
           args: {
             name: "dir",
             template: "folders",
@@ -161,7 +213,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--assetsInlineLimit",
-          description: "Static asset base64 inline threshold in bytes",
+          description:
+            "Static asset base64 inline threshold in bytes (default: 4096)",
           args: {
             name: "number",
           },
@@ -177,15 +230,25 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--sourcemap",
-          description: "Output sourcemaps for build",
+          description: "Output source maps for build",
+          args: {
+            name: "output",
+            isOptional: true,
+            suggestions: [{ name: "inline" }, { name: "hidden" }],
+          },
         },
         {
           name: "--minify",
-          description: "Enable minification",
+          description:
+            "Enable or disable minification, or specify the minifier to use (default: oxc)",
           args: {
             name: "minifier",
             isOptional: true,
-            suggestions: [{ name: "terser" }, { name: "esbuild" }],
+            suggestions: [
+              { name: "oxc" },
+              { name: "terser" },
+              { name: "esbuild" },
+            ],
           },
         },
         {
@@ -212,60 +275,35 @@ const completionSpec: Fig.Spec = {
           name: ["-w", "--watch"],
           description: "Rebuilds when modules have changed on disk",
         },
+        {
+          name: "--app",
+          description: "Same as `builder: {}` in the config",
+        },
       ],
     },
     {
       name: "optimize",
       icon: "📦",
-      description: "Pre-bundle dependencies",
-      args: {
-        name: "root",
-        isOptional: true,
-        template: "folders",
-      },
-      options: [
-        {
-          name: "--force",
-          description: "For the optimizer to re-bundle",
-        },
-      ],
+      description:
+        "Pre-bundle dependencies (deprecated, the pre-bundle process runs automatically)",
+      deprecated: true,
+      args: rootArg,
+      options: [forceOption],
     },
     {
       name: "preview",
       icon: "✨",
       description: "Locally preview the production build",
-      args: {
-        name: "root",
-        isOptional: true,
-        template: "folders",
-      },
+      args: rootArg,
       options: [
+        ...serverOptions,
         {
-          name: "--host",
-          description: "Specify the hostname",
-          args: { name: "host", isOptional: true },
-        },
-        {
-          name: "--port",
-          description: "Specify the port",
-          args: { name: "port" },
-        },
-        {
-          name: "--https",
-          description: "Use TLS + HTTP/2",
-        },
-        {
-          name: "--open",
-          description: "Open browser on startup",
+          name: "--outDir",
+          description: "Output directory (default: dist)",
           args: {
-            name: "browser",
-            isOptional: true,
-            template: "filepaths",
+            name: "dir",
+            template: "folders",
           },
-        },
-        {
-          name: "--strictPort",
-          description: "Exit if the port is already in use",
         },
       ],
     },

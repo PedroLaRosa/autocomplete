@@ -1,3 +1,4 @@
+// base32 (GNU coreutils 9.12, released 2026-09-14; macOS has no base32, only Linux/Homebrew coreutils, 2026-11-19). Source: coreutils v9.12 src/basenc.c usage() and option table (no -h short option for --help)
 const completionSpec: Fig.Spec = {
   name: "base32",
   description: "Base32 encode/decode data and print to standard output",
@@ -6,7 +7,7 @@ const completionSpec: Fig.Spec = {
   },
   options: [
     {
-      name: ["--help", "-h"],
+      name: "--help",
       description: "Display this help and exit",
     },
     {
@@ -34,7 +35,8 @@ const completionSpec: Fig.Spec = {
   ],
   args: {
     name: "FILE",
-    description: "File to base32 encode/decode",
+    description:
+      "File to base32 encode/decode (standard input when absent or -)",
     template: "filepaths",
   },
 };

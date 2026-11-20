@@ -1,3 +1,10 @@
+// PM2 v7.1.2 (npm latest, released 2026-11-03; synced 2026-11-19).
+// Source: read statically from the published npm package (lib/binaries/CLI.js
+// commander definitions, lib/API/Startup.js, Extra.js, LogManagement.js,
+// pm2-plus/PM2IO.js, lib/completion.js, CHANGELOG.md). The binary was not run.
+// Not covered: the separate pm2-runtime, pm2-dev and pm2-docker binaries.
+// Commands absent from 7.1.2 CLI.js and removed here: snapshot, profile,
+// gracefulReload, web, gc, interact (register is now an alias of plus).
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const generators: Record<string, Fig.Generator> = {
@@ -20,15 +27,67 @@ const numberArg: Fig.Arg = {
   name: "number",
 };
 
+const delayArg: Fig.Arg = {
+  name: "delay",
+};
+
 const pathArg: Fig.Arg = {
   name: "path",
   template: "filepaths",
 };
 
+const infoNodeOption: Fig.Option = {
+  name: "--info-node",
+  description: "Set url info node",
+  args: {
+    name: "url",
+    isOptional: true,
+  },
+};
+
+const linesOption: Fig.Option = {
+  name: "--lines",
+  description: "Number of log lines to display per process (default: 200)",
+  args: numberArg,
+};
+
+const processArg: Fig.Arg = {
+  name: "id|name|namespace|all|json|stdin",
+  isVariadic: true,
+};
+
+const startupPlatforms = [
+  "systemd",
+  "upstart",
+  "systemv",
+  "openrc",
+  "launchd",
+  "rcd",
+  "rcd-openbsd",
+  "smf",
+];
+
 const platformArg: Fig.Arg = {
   name: "platform",
   isOptional: true,
-  suggestions: ["systemd", "upstart", "launchd", "rcd"],
+  suggestions: [
+    ...startupPlatforms,
+    "ubuntu",
+    "centos",
+    "arch",
+    "oracle",
+    "amazon",
+    "macos",
+    "freebsd",
+    "openbsd",
+    "solaris",
+  ],
+};
+
+const unstartupPlatformArg: Fig.Arg = {
+  name: "platform",
+  isOptional: true,
+  suggestions: startupPlatforms,
 };
 
 const jsonFileArg: Fig.Arg = {
@@ -36,6 +95,23 @@ const jsonFileArg: Fig.Arg = {
   generators: generators.jsonFileGenerator,
 };
 
+// start, stop and restart document --watch differently (see commander
+// definitions); only the root/start form takes optional paths
+const watchOption = (description: string, withPaths = false): Fig.Option => ({
+  name: "--watch",
+  description,
+  ...(withPaths && {
+    isRepeatable: true,
+    args: {
+      name: "paths",
+      isOptional: true,
+      template: "folders",
+    },
+  }),
+});
+
+// Global options defined on the root commander program: commander 2.x accepts
+// them before or after any subcommand
 const sharedOptions: Fig.Option[] = [
   {
     name: ["-V", "--version"],
@@ -48,6 +124,13 @@ const sharedOptions: Fig.Option[] = [
   {
     name: ["-s", "--silent"],
     description: "Hides all messages",
+  },
+  {
+    name: "--ext",
+    description: "Watch only this file extensions",
+    args: {
+      name: "extensions",
+    },
   },
   {
     name: ["-m", "--mini-list"],
@@ -63,19 +146,27 @@ const sharedOptions: Fig.Option[] = [
   },
   {
     name: ["-n", "--name"],
-    description: "Sets a name for script",
+    description: "Sets a name for the process in the process list",
     args: nameArg,
   },
   {
     name: ["-i", "--instances"],
     description:
       "Launches [number] instances (for networked app)(load balanced)",
-    args: numberArg,
+    args: {
+      ...numberArg,
+      suggestions: ["max"],
+    },
   },
   {
     name: "--parallel",
     description: "Number of parallel actions (for restart/reload)",
     args: numberArg,
+  },
+  {
+    name: "--shutdown-with-message",
+    description:
+      "Shutdown an application with process.send('shutdown') instead of process.kill(pid, SIGINT)",
   },
   {
     name: ["-l", "--log"],
@@ -106,21 +197,17 @@ const sharedOptions: Fig.Option[] = [
   {
     name: ["-k", "--kill-timeout"],
     description: "Delays before sending final SIGKILL signal to process",
-    args: {
-      name: "delay",
-    },
+    args: delayArg,
   },
   {
     name: "--listen-timeout",
     description: "Listen timeout on application reload",
-    args: {
-      name: "delay",
-    },
+    args: delayArg,
   },
   {
     name: "--max-memory-restart",
     description:
-      "Specify max memory amount used to autorestart (in octet or use syntax like 100M)",
+      "Restart the app if an amount of memory is exceeded (in bytes, or with a K, M or G suffix such as 100M)",
     args: {
       name: "memory",
     },
@@ -128,15 +215,30 @@ const sharedOptions: Fig.Option[] = [
   {
     name: "--restart-delay",
     description: "Specify a delay between restarts (in milliseconds)",
-    args: {
-      name: "delay",
-    },
+    args: delayArg,
+  },
+  {
+    name: "--exp-backoff-restart-delay",
+    description:
+      "Specify a delay between restarts (in milliseconds) that grows exponentially",
+    args: delayArg,
   },
   {
     name: "--env",
-    description: "Specify environment to get specific env variables",
+    description:
+      "Specify which set of environment variables from ecosystem file must be injected",
     args: {
       name: "Environment Name",
+    },
+  },
+  {
+    name: "--filter-env",
+    description:
+      "Filter out outgoing global values that contain provided strings (alone: drop all but PATH, HOME...)",
+    isRepeatable: true,
+    args: {
+      name: "envs",
+      isOptional: true,
     },
   },
   {
@@ -145,7 +247,12 @@ const sharedOptions: Fig.Option[] = [
     args: {
       name: "type",
       default: "raw",
+      suggestions: ["raw", "json"],
     },
+  },
+  {
+    name: "--time",
+    description: "Enable time logging",
   },
   {
     name: ["-x", "--execute-command"],
@@ -153,7 +260,7 @@ const sharedOptions: Fig.Option[] = [
   },
   {
     name: "--max-restarts",
-    description: "Only Restart the script COUNT times",
+    description: "Only restart the script COUNT times",
     args: {
       name: "Count",
       isOptional: true,
@@ -181,9 +288,19 @@ const sharedOptions: Fig.Option[] = [
     },
   },
   {
+    name: "--namespace",
+    description: "Start application within specified namespace",
+    args: {
+      name: "ns",
+    },
+  },
+  {
     name: "--cwd",
-    description: "Runs target script as <username>",
-    args: pathArg,
+    description: "Runs target script from path <cwd>",
+    args: {
+      name: "path",
+      template: "folders",
+    },
   },
   {
     name: "--hp",
@@ -211,20 +328,28 @@ const sharedOptions: Fig.Option[] = [
     },
   },
   {
+    name: "--cron-restart",
+    description: "(Alias) restarts a running process based on a cron pattern",
+    args: {
+      name: "Cron Pattern",
+    },
+  },
+  {
     name: ["-w", "--write"],
     description: "Writes configuration in local folder",
   },
   {
     name: "--interpreter",
     description:
-      "The interpreter pm2 should use for executing app (bash, python…)",
+      "Set a specific interpreter to use for executing app, default: node",
     args: {
       name: "interpreter",
     },
   },
   {
     name: "--interpreter-args",
-    description: "Interprets options (alias of –node-args)",
+    description:
+      "Set arguments to pass to the interpreter (alias of --node-args)",
     args: {
       name: "Arguments",
     },
@@ -239,100 +364,107 @@ const sharedOptions: Fig.Option[] = [
   {
     name: "--no-daemon",
     description:
-      "Runs pm2 daemon in the foreground if it doesn’t exist already",
+      "Runs pm2 daemon in the foreground if it doesn't exist already",
   },
   {
     name: ["-a", "--update-env"],
     description: "Updates environment on restart/reload (-a <=> apply)",
   },
-  { name: "–-source-map-support", description: "Force source map support" },
+  { name: "--source-map-support", description: "Force source map support" },
   {
-    name: "–-only",
+    name: "--only",
     description: "With json declaration, allow to only act on one application",
     args: appArg,
   },
   {
-    name: "–-disable-source-map-support",
-    description: "Force source map support",
+    name: "--disable-source-map-support",
+    description: "Disable source map support",
   },
   {
-    name: "–-wait-ready",
+    name: "--wait-ready",
     description: "Asks pm2 to wait for ready event from your app",
   },
   {
-    name: "–-merge-logs",
+    name: "--merge-logs",
     description:
       "Merges logs from different instances but keep error and out separated",
   },
   {
-    name: "–-watch",
-    description: "Watches application folder for changes (default: )",
-    args: {
-      name: "paths",
-      template: ["folders"],
-      isVariadic: true,
-    },
-  },
-  {
-    name: "–-ignore-watch",
-    description: "Folder/files to be ignored watching",
+    name: "--ignore-watch",
+    description: "List of paths to ignore (name or regex)",
     args: {
       name: "Folder or Files",
       template: ["folders", "filepaths"],
-      isVariadic: true,
     },
   },
   {
-    name: "–-node-args",
-    description: "Space delimited arguments to pass to node in cluster mode",
+    name: "--watch-delay",
+    description:
+      "Specify a restart delay after changing files (--watch-delay 4 (in sec) or 4000ms)",
+    args: delayArg,
+  },
+  {
+    name: "--node-args",
+    description: "Space delimited arguments to pass to node",
     args: {
       name: "Node Args",
-      description: "–node-args=`–debug=7001 –trace-deprecation`",
+      description: "--node-args='--debug=7001 --trace-deprecation'",
     },
   },
-  { name: "–-no-color", description: "Skip colors" },
+  { name: "--no-color", description: "Skip colors" },
   {
-    name: "–-no-vizion",
+    name: "--no-vizion",
     description: "Starts an app without vizion feature (versioning control)",
   },
   {
-    name: "–-no-autorestart",
+    name: "--no-autostart",
+    description: "Adds an app without automatic start",
+  },
+  {
+    name: "--no-autorestart",
     description: "Starts an app without automatic restart",
   },
   {
-    name: "–-no-treekill",
+    name: "--stop-exit-codes",
+    description:
+      "Specify a list of exit codes that should skip automatic restart",
+    args: {
+      name: "exit_codes",
+    },
+  },
+  {
+    name: "--no-treekill",
     description: "Only kills the main process, not detached children",
   },
-  { name: "–-no-pmx", description: "Starts an app without apm" },
-  { name: "–-no-automation", description: "Starts an app without apm" },
-  { name: "–-trace", description: "Enables transaction tracing with km" },
+  { name: "--no-pmx", description: "Starts an app without pmx" },
+  { name: "--no-automation", description: "Starts an app without pmx" },
+  { name: "--trace", description: "Enables transaction tracing with km" },
   {
-    name: "–-disable-trace",
+    name: "--disable-trace",
     description: "Disables transaction tracing with km",
   },
   {
-    name: "–-attach",
+    name: "--attach",
     description: "Attaches logging after your start/restart/stop/reload",
   },
   {
-    name: "–-sort",
-    description: "Sort process according to field’s name",
+    name: "--sort",
+    description: "Sort process according to field's name",
     args: {
-      name: "field name",
-      description: "Field_name:sort",
+      name: "field_name:sort",
     },
   },
-  { name: "–-v8", description: "Enables v8 data collecting" },
+  { name: "--v8", description: "Enables v8 data collecting" },
   {
-    name: "–-event-loop-inspector",
-    description: "Enables event-loop-inspector dump in apm",
+    name: "--event-loop-inspector",
+    description: "Enables event-loop-inspector dump in pmx",
   },
   {
-    name: "–-deep-monitoring",
+    name: "--deep-monitoring",
     description:
-      "Enables all monitoring tools (equivalent to –v8 –event-loop-inspector –trace)",
+      "Enables all monitoring tools (equivalent to --v8 --event-loop-inspector --trace)",
   },
-  { name: ["-h", "–-help"], description: "Outputs usage information" },
+  { name: ["-h", "--help"], description: "Outputs usage information" },
 ];
 
 const completionSpec: Fig.Spec = {
@@ -342,23 +474,68 @@ const completionSpec: Fig.Spec = {
     {
       name: "start",
       description: "Starts and daemonizes an app",
-      options: sharedOptions,
+      options: [
+        ...sharedOptions,
+        watchOption("Watch folder for changes", true),
+        {
+          name: "--fresh",
+          description: "Rebuild Dockerfile",
+        },
+        {
+          name: "--daemon",
+          description: "Run container in Daemon mode (debug purposes)",
+        },
+        {
+          name: "--container",
+          description: "Start application in container mode",
+        },
+        {
+          name: "--dist",
+          description:
+            "With --container; change local Dockerfile to containerize all files in current directory",
+          dependsOn: ["--container"],
+        },
+        {
+          name: "--image-name",
+          description: "With --dist; set the exported image name",
+          dependsOn: ["--dist"],
+          args: {
+            name: "name",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--node-version",
+          description: "With --container, set a specific major Node.js version",
+          dependsOn: ["--container"],
+          args: {
+            name: "major",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--dockerdaemon",
+          description: "For debugging purpose",
+        },
+      ],
       args: {
-        name: "file, json, stdin, app name, pm id, etc",
+        name: "name|namespace|file|ecosystem|id",
+        isVariadic: true,
+        template: "filepaths",
       },
     },
     {
       name: "trigger",
-      description: "Deploy your json",
+      description: "Trigger process action",
       args: [
         {
-          name: "Proc Name",
+          name: "id|proc_name|namespace|all",
         },
         {
-          name: "Action Name",
+          name: "action_name",
         },
         {
-          name: "Params",
+          name: "params",
           isOptional: true,
         },
       ],
@@ -367,7 +544,7 @@ const completionSpec: Fig.Spec = {
       name: "deploy",
       description: "Deploy your json",
       args: {
-        name: "File or environment",
+        name: "file|environment",
         template: "filepaths",
       },
     },
@@ -390,25 +567,31 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "create",
+      description: "Create a boilerplate application from a sample (prompts)",
+    },
+    {
       name: "startOrGracefulReload",
-      description: "Start or gracefully reolad JSON file",
+      description: "Start or gracefully reload JSON file",
       args: jsonFileArg,
     },
     {
       name: "stop",
       description: "Stop a process",
-      options: sharedOptions,
-      args: {
-        name: "id, name, all, json, stdin, etc",
-      },
+      options: [
+        ...sharedOptions,
+        watchOption("Stop watching folder for changes"),
+      ],
+      args: processArg,
     },
     {
       name: "restart",
       description: "Restart a process",
-      options: sharedOptions,
-      args: {
-        name: "id, name, all, json, stdin, etc",
-      },
+      options: [
+        ...sharedOptions,
+        watchOption("Toggle watching folder for changes"),
+      ],
+      args: processArg,
     },
     {
       name: "scale",
@@ -417,29 +600,26 @@ const completionSpec: Fig.Spec = {
       args: [appArg, numberArg],
     },
     {
-      name: "snapshot",
-      description: "Snapshot PM2 memory",
+      name: "profile:mem",
+      description: "Sample PM2 heap memory",
+      args: {
+        name: "time",
+        isOptional: true,
+      },
     },
     {
-      name: "profile",
-      description: "Profile CPU",
+      name: "profile:cpu",
+      description: "Profile PM2 CPU",
       args: {
-        name: "command",
+        name: "time",
+        isOptional: true,
       },
     },
     {
       name: "reload",
       description: "Reload processes (for apps using HTTP/HTTPS)",
       args: {
-        name: "name or all",
-      },
-    },
-    {
-      name: "gracefulReload",
-      description:
-        "Gracefully reload a process. Send a “shutdown” message to close all connections",
-      args: {
-        name: "name or all",
+        name: "id|name|namespace|all",
       },
     },
     {
@@ -448,10 +628,16 @@ const completionSpec: Fig.Spec = {
       args: nameArg,
     },
     {
-      name: "delete",
+      name: "inspect",
+      description: "Inspect a process",
+      args: nameArg,
+    },
+    {
+      name: ["delete", "del"],
       description: "Stops and deletes a process from pm2 process list",
       args: {
-        name: "name, id, script, all, json, stdin, etc",
+        name: "name|id|namespace|script|all|json|stdin",
+        isVariadic: true,
       },
     },
     {
@@ -462,13 +648,13 @@ const completionSpec: Fig.Spec = {
           name: "signal",
         },
         {
-          name: "pm2_id or name",
+          name: "pm2_id|name",
         },
       ],
     },
     {
       name: "ping",
-      description: "Ping pm2 daemon - if not it will launch up",
+      description: "Ping pm2 daemon - if not up it will launch it",
     },
     {
       name: "updatePM2",
@@ -481,10 +667,49 @@ const completionSpec: Fig.Spec = {
     {
       name: ["install", "module:install"],
       description: "Install or update a module and run it forever",
-      options: sharedOptions,
+      options: [
+        ...sharedOptions,
+        {
+          name: "--tarball",
+          description: "Is local tarball",
+        },
+        {
+          name: "--install",
+          description: "Run yarn install before starting module",
+        },
+        {
+          name: "--docker",
+          description: "Is docker container",
+        },
+        {
+          name: "--v1",
+          description: "Install module in v1 manner (do not use it)",
+        },
+        {
+          name: "--safe",
+          description:
+            "Keep module backup, if new module fail = restore with previous",
+          args: {
+            name: "time",
+            isOptional: true,
+          },
+        },
+      ],
       args: {
-        name: "module or git://",
-        isOptional: true,
+        name: "module|git:// url",
+      },
+    },
+    {
+      name: "module:update",
+      description: "Update a module and run it forever",
+      options: [
+        {
+          name: "--tarball",
+          description: "Is local tarball",
+        },
+      ],
+      args: {
+        name: "module|git:// url",
       },
     },
     {
@@ -503,8 +728,28 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "package",
+      description: "Check & package TAR type module",
+      args: {
+        name: "target",
+        isOptional: true,
+        template: "filepaths",
+      },
+    },
+    {
       name: ["publish", "module:publish"],
       description: "Publish the module you are currently on",
+      options: [
+        {
+          name: "--npm",
+          description: "Publish on npm",
+        },
+      ],
+      args: {
+        name: "folder",
+        isOptional: true,
+        template: "folders",
+      },
     },
     {
       name: "set",
@@ -522,10 +767,10 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "multiset",
-      description: "Multiset eg `key1 val1 key2 val2`",
+      description: 'Multiset eg "key1 val1 key2 val2"',
       args: {
-        name: "key value",
-        isVariadic: true,
+        name: "value",
+        description: "All key/value pairs in one quoted string",
       },
     },
     {
@@ -572,9 +817,9 @@ const completionSpec: Fig.Spec = {
         "Give a full pm2 report for https://github.com/Unitech/pm2/issues",
     },
     {
-      name: ["link", "interact"],
-      description: "Linking action to keymetrics.io",
-      options: sharedOptions,
+      name: "link",
+      description: "Link with the pm2 monitoring dashboard",
+      options: [...sharedOptions, infoNodeOption],
       args: [
         {
           name: "secret",
@@ -592,37 +837,86 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "unlink",
-      description: "Linking action to keymetrics.io",
+      description: "Unlink with the pm2 monitoring dashboard",
+    },
+    {
+      name: "monitor",
+      description: "Monitor target process",
+      args: {
+        ...nameArg,
+        isOptional: true,
+      },
     },
     {
       name: "unmonitor",
       description: "Unmonitor target process",
-      args: nameArg,
-    },
-    {
-      name: "monitor",
-      description: "<Unm>onitor target process",
-      args: nameArg,
+      args: {
+        ...nameArg,
+        isOptional: true,
+      },
     },
     {
       name: "open",
-      description: "Open dashboard in browser",
+      description: "Open the pm2 monitoring dashboard",
     },
     {
-      name: "register",
-      description: "Create an account on keymetrics",
+      name: ["plus", "register"],
+      description: "Enable pm2 plus",
+      options: [
+        infoNodeOption,
+        {
+          name: ["-d", "--discrete"],
+          description: "Silent mode",
+        },
+        {
+          name: ["-a", "--install-all"],
+          description: "Install all modules (force yes)",
+        },
+      ],
+      args: [
+        {
+          name: "command",
+          isOptional: true,
+          suggestions: [
+            "connect",
+            "login",
+            "register",
+            "authenticate",
+            "validate",
+            "help",
+            "welcome",
+            "logout",
+            "create",
+            "web",
+          ],
+        },
+        {
+          name: "option",
+          isOptional: true,
+        },
+      ],
     },
     {
       name: "login",
-      description: "Login to keymetrics and link current PM2",
+      description: "Login to pm2 plus",
     },
     {
-      name: "web",
-      description: "Launch a health API on 0.0.0.0:9615",
+      name: "logout",
+      description: "Logout from pm2 plus",
     },
     {
       name: ["dump", "save"],
       description: "Dump all processes for resurrecting them later",
+      options: [
+        {
+          name: "--force",
+          description: "Force deletion of dump file, even if empty",
+        },
+      ],
+    },
+    {
+      name: "cleardump",
+      description: "Create empty dump file",
     },
     {
       name: "send",
@@ -644,7 +938,7 @@ const completionSpec: Fig.Spec = {
           name: "pm id",
         },
         {
-          name: "command",
+          name: "command separator",
           isOptional: true,
         },
       ],
@@ -655,12 +949,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "unstartup",
-      description: "Disable and clear auto startup",
-      args: platformArg,
+      description: "Disable the pm2 startup hook",
+      args: unstartupPlatformArg,
     },
     {
       name: "startup",
-      description: "Setup script for pm2 at boot",
+      description: "Enable the pm2 startup hook",
       args: platformArg,
     },
     {
@@ -669,7 +963,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["ecosystem", "init"],
-      description: "Generate a process conf file",
+      description: "Generate a process conf file (mode = null or simple)",
       args: {
         name: "mode",
         isOptional: true,
@@ -680,19 +974,26 @@ const completionSpec: Fig.Spec = {
       name: "reset",
       description: "Reset counters for process",
       args: {
-        name: "name, id, or all",
+        name: "name|id|all",
       },
     },
     {
       name: "describe",
-      description: "Describe all parameters of a process id",
+      description: "Describe all parameters of a process",
       args: {
-        name: "id",
+        name: "name|id",
       },
     },
     {
       name: ["desc", "info", "show"],
-      description: "(alias) Describe all parameters of a process id",
+      description: "(alias) Describe all parameters of a process",
+      args: {
+        name: "name|id",
+      },
+    },
+    {
+      name: "env",
+      description: "List all environment variables of a process id",
       args: {
         name: "id",
       },
@@ -710,12 +1011,23 @@ const completionSpec: Fig.Spec = {
       description: "List all processes in JSON format",
     },
     {
+      name: ["slist", "sysinfos"],
+      description: "List system infos in JSON",
+      options: [
+        {
+          name: ["-t", "--tree"],
+          description: "Show as tree",
+        },
+      ],
+    },
+    {
       name: "prettylist",
       description: "Print json in a prettified JSON",
     },
     {
       name: "monit",
       description: "Launch termcaps monitoring",
+      options: [linesOption],
     },
     {
       name: "imonit",
@@ -724,21 +1036,75 @@ const completionSpec: Fig.Spec = {
     {
       name: ["dashboard", "dash"],
       description: "Launch dashboard with monitoring and logs",
+      options: [linesOption],
     },
     {
       name: "flush",
       description: "Flush logs",
+      args: {
+        name: "id|name",
+        isOptional: true,
+      },
     },
     {
       name: "reloadLogs",
       description: "Reload all logs",
     },
     {
-      name: "logs",
-      description: "Stream logs logs file",
-      options: sharedOptions,
+      name: ["logs", "log"],
+      description: "Stream logs file. Default stream all logs",
+      options: [
+        ...sharedOptions,
+        {
+          name: "--json",
+          description: "JSON log output",
+        },
+        {
+          name: "--format",
+          description: "Formatted log output",
+        },
+        {
+          name: "--raw",
+          description: "Raw output",
+        },
+        {
+          name: "--err",
+          description: "Only shows error output",
+        },
+        {
+          name: "--out",
+          description: "Only shows standard output",
+        },
+        {
+          name: "--lines",
+          description:
+            "Output the last N lines, instead of the last 15 by default",
+          args: numberArg,
+        },
+        {
+          name: "--timestamp",
+          description: "Add timestamps (default format YYYY-MM-DD-HH:mm:ss)",
+          args: {
+            name: "format",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--nostream",
+          description: "Print logs without launching the log stream",
+        },
+        {
+          name: "--highlight",
+          description: "Highlights the given value",
+          args: {
+            name: "value",
+            isOptional: true,
+          },
+        },
+      ],
       args: {
-        name: "id or name",
+        name: "id|name|namespace",
+        isOptional: true,
       },
     },
     {
@@ -768,20 +1134,60 @@ const completionSpec: Fig.Spec = {
       args: nameArg,
     },
     {
-      name: "gc",
-      description: "Force PM2 to trigger garbage collection",
-    },
-    {
       name: "deepUpdate",
       description: "Performs a deep update of PM2",
     },
     {
       name: ["serve", "expose"],
       description: "Serves a directory over http via port",
+      options: [
+        {
+          name: "--port",
+          description: "Specify port to listen to",
+          args: {
+            name: "port",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--spa",
+          description: "Always serving index.html on inexistant sub path",
+        },
+        {
+          name: "--ftp",
+          description: "Directory listing like python http.server",
+        },
+        {
+          name: "--basic-auth-username",
+          description: "Set basic auth username",
+          args: {
+            name: "username",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--basic-auth-password",
+          description: "Set basic auth password",
+          args: {
+            name: "password",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--monitor",
+          description:
+            "Frontend app monitoring (auto integrate snippet on html files)",
+          args: {
+            name: "frontend-app",
+            isOptional: true,
+          },
+        },
+      ],
       args: [
         {
           name: "path",
           isOptional: true,
+          template: "folders",
         },
         {
           name: "port",
@@ -789,8 +1195,34 @@ const completionSpec: Fig.Spec = {
         },
       ],
     },
+    {
+      name: "examples",
+      description: "Display pm2 usage examples",
+    },
+    {
+      name: "completion",
+      description:
+        "Output the shell completion script, or install/uninstall it",
+      args: {
+        name: "action",
+        isOptional: true,
+        suggestions: ["install", "uninstall"],
+      },
+    },
+    {
+      name: "install-otel",
+      description:
+        "Install OpenTelemetry tracing packages (required for --trace)",
+    },
+    {
+      name: "uninstall-otel",
+      description: "Remove OpenTelemetry tracing packages",
+    },
   ],
-  options: sharedOptions,
+  options: [
+    ...sharedOptions,
+    watchOption("Watches application folder for changes", true),
+  ],
 };
 
 export default completionSpec;

@@ -1,13 +1,25 @@
+// Mosh v1.4.0 (GitHub tag mosh-1.4.0 and Homebrew formula, latest release, 2026-11-20). Source: usage text and
+// GetOptions in scripts/mosh.pl and man/mosh.1 at mosh-1.4.0 (both unchanged on master). Option values may be given as
+// "--opt value" or "--opt=value" (Perl Getopt::Long), so no option is marked requiresEquals
 import { knownHosts, configHosts } from "./ssh";
 
 const completionSpec: Fig.Spec = {
   name: "mosh",
-  description: "",
-  args: {
-    name: "user@hostname",
-    description: "Address of remote machine to log into",
-    generators: [knownHosts, configHosts, { template: "history" }],
-  },
+  description:
+    "Mobile shell, a remote terminal that supports roaming and intermittent connectivity",
+  args: [
+    {
+      name: "user@hostname",
+      description: "Address of remote machine to log into",
+      generators: [knownHosts, configHosts, { template: "history" }],
+    },
+    {
+      name: "command",
+      description: "Command to run on the remote machine",
+      isOptional: true,
+      isVariadic: true,
+    },
+  ],
   options: [
     {
       name: ["--help", "-h"],
@@ -16,15 +28,16 @@ const completionSpec: Fig.Spec = {
     {
       name: "--client",
       description: 'Mosh client on local machine (default: "mosh-client")',
+      args: { name: "path", template: "filepaths" },
     },
     {
       name: "--server",
       description: 'Mosh server on remote machine (default: "mosh-server")',
+      args: { name: "command" },
     },
     {
       name: "--predict",
       description: "Local echo options",
-      requiresEquals: true,
       args: {
         suggestions: [
           {
@@ -41,6 +54,18 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "-a",
+      description: "Use local echo even on fast links (--predict=always)",
+    },
+    {
+      name: "-n",
+      description: "Never use local echo (--predict=never)",
+    },
+    {
+      name: ["--predict-overwrite", "-o"],
+      description: "Prediction overwrites instead of inserting",
+    },
+    {
       name: "-4",
       description: "Use IPv4 only",
     },
@@ -51,18 +76,17 @@ const completionSpec: Fig.Spec = {
     {
       name: "--family",
       description: "Network Type",
-      requiresEquals: true,
       args: {
         suggestions: [
           { name: "inet", description: "Use IPv4 only" },
-          { name: "ine6", description: "Use IPv6 only" },
+          { name: "inet6", description: "Use IPv6 only" },
           {
             name: "auto",
             description: "Autodetect network type for single-family hosts only",
           },
           { name: "all", description: "Try all network types" },
           {
-            name: "prefer-inet4",
+            name: "prefer-inet",
             description: "Use all network types, but try IPv4 first [default]",
           },
           {
@@ -76,25 +100,29 @@ const completionSpec: Fig.Spec = {
       name: ["--port", "-p"],
       description:
         "Server-side UDP port or range, (No effect on server-side SSH port)",
+      args: { name: "PORT[:PORT2]" },
     },
     {
       name: "--bind-server",
       description:
-        '{ssh|any|IP}, ask the server to reply from an IP address, (default: "ssh")',
+        'Ask the server to reply from an IP address, (default: "ssh")',
+      args: { name: "ssh|any|IP", suggestions: ["ssh", "any"] },
     },
     {
       name: "--ssh",
-      requiresSeparator: true,
-      args: {
-        name: "command",
-        isCommand: true,
-      },
+      args: { name: "command" },
       description:
         'Ssh command to run when setting up session, (example: "ssh -p 2222")',
     },
     {
+      name: "--ssh-pty",
+      description: "Allocate a pseudo tty on ssh connection (default)",
+      exclusiveOn: ["--no-ssh-pty"],
+    },
+    {
       name: "--no-ssh-pty",
       description: "Do not allocate a pseudo tty on ssh connection",
+      exclusiveOn: ["--ssh-pty"],
     },
     {
       name: "--no-init",
@@ -108,7 +136,6 @@ const completionSpec: Fig.Spec = {
       name: "--experimental-remote-ip",
       description:
         "Select the method for discovering the remote IP address to use for mosh",
-      requiresSeparator: true,
       args: {
         name: "method",
         suggestions: ["local", "remote", "proxy"],
@@ -120,7 +147,5 @@ const completionSpec: Fig.Spec = {
       description: "Version and copyright information",
     },
   ],
-  // Only uncomment if mosh takes an argument
-  // args: {}
 };
 export default completionSpec;

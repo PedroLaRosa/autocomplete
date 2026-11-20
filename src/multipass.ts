@@ -1,13 +1,16 @@
+// Multipass v1.17.2 (latest stable tag of canonical/multipass, matches the Homebrew cask, 2026-11-20).
+// Source: src/client/cli/client.cpp, src/client/cli/cmd/*.cpp (all 33 commands), argparser.cpp,
+// constants.h and docs/reference/{command-line-interface,settings} at tag v1.17.2 (static read, not run)
 const sharedOpts: Record<string, Fig.Option> = {
   help: {
     name: ["-h", "--help"],
     description: "Displays help on commandline options",
     isPersistent: true,
   },
-  helpAll: {
-    name: "--help-all",
-    description: "Displays help including Qt specific options",
-    isPersistent: true,
+  version: {
+    name: ["-V", "--version"],
+    description: "Show version details",
+    hidden: true,
   },
   verbose: {
     name: ["-v", "--verbose"],
@@ -16,6 +19,7 @@ const sharedOpts: Record<string, Fig.Option> = {
       "option for more detail. Maximum verbosity is obtained " +
       "with 4 (or more) v's, i.e. -vvvv",
     isPersistent: true,
+    isRepeatable: 4,
   },
   format: {
     name: "--format",
@@ -107,7 +111,39 @@ const multipassGenerators: Record<string, Fig.Generator> = {
       });
     },
   },
+  allSnapshots: {
+    script: ["multipass", "list", "--snapshots", "--format=json"],
+    postProcess: (out) => {
+      const info = JSON.parse(out).info;
+      return Object.keys(info).flatMap((instance) =>
+        Object.keys(info[instance]).map((snapshot) => ({
+          name: `${instance}.${snapshot}`,
+          description: info[instance][snapshot].comment || "Snapshot",
+        }))
+      );
+    },
+  },
+  allZones: {
+    script: ["multipass", "zones", "--format=json"],
+    postProcess: (out) => {
+      const zones = JSON.parse(out);
+      return Object.keys(zones).map((zone) => ({
+        name: zone,
+        description: zones[zone].available ? "Available" : "Unavailable",
+      }));
+    },
+  },
 };
+
+const settingKeys = [
+  "client.apps.windows-terminal.profiles",
+  "client.primary-name",
+  "local.bridged-network",
+  "local.driver",
+  "local.image.mirror",
+  "local.passphrase",
+  "local.privileged-mounts",
+];
 
 const completionSpec: Fig.Spec = {
   name: "multipass",
@@ -116,11 +152,14 @@ const completionSpec: Fig.Spec = {
     {
       name: "alias",
       description: "Create an alias",
-      args: [
+      options: [
         {
-          name: "options",
-          isOptional: true,
+          name: ["-n", "--no-map-working-directory"],
+          description:
+            "Do not automatically map the host execution path to a mounted path",
         },
+      ],
+      args: [
         {
           name: "definition",
           description: "Alias definition in the form <instance>:<command>",
@@ -139,28 +178,110 @@ const completionSpec: Fig.Spec = {
       options: [sharedOpts.format],
     },
     {
+      name: ["authenticate", "auth"],
+      description: "Authenticate client",
+      args: {
+        name: "passphrase",
+        description:
+          "Passphrase to register with the Multipass service. If omitted, a prompt will be displayed for entering the passphrase",
+        isOptional: true,
+      },
+    },
+    {
+      name: "clone",
+      description: "Clone an instance",
+      options: [
+        {
+          name: ["-n", "--name"],
+          description:
+            'An optional custom name for the cloned instance. Default: "<source_name>-cloneN"',
+          args: { name: "destination-name" },
+        },
+      ],
+      args: {
+        name: "source_name",
+        description: "The name of the source instance to be cloned",
+        generators: multipassGenerators.allAvailableInstances,
+      },
+    },
+    {
       name: "delete",
-      description: "Delete instances",
+      description: "Delete instances and snapshots",
       options: [
         {
           name: "--all",
-          description: "Delete all instances",
+          description: "Delete all instances and snapshots",
         },
         {
           name: ["-p", "--purge"],
-          description: "Purge instances immediately",
+          description:
+            "Permanently delete specified instances and snapshots immediately",
         },
       ],
       args: {
         isVariadic: true,
-        name: "name",
-        description: "Name of instances to delete",
-        generators: multipassGenerators.allAvailableInstances,
+        name: "instance[.snapshot]",
+        description: "Names of instances and snapshots to delete",
+        generators: [
+          multipassGenerators.allAvailableInstances,
+          multipassGenerators.allSnapshots,
+        ],
+      },
+    },
+    {
+      name: "disable-zones",
+      description: "Make zones unavailable",
+      options: [
+        {
+          name: "--all",
+          description: "Disable all zones",
+        },
+        {
+          name: "--force",
+          description: "Do not ask for confirmation",
+        },
+      ],
+      args: {
+        isVariadic: true,
+        isOptional: true,
+        name: "zone",
+        description: "Name of the zones to make unavailable",
+        generators: multipassGenerators.allZones,
+      },
+    },
+    {
+      name: "enable-zones",
+      description: "Make zones available",
+      options: [
+        {
+          name: "--all",
+          description: "Enable all zones",
+        },
+      ],
+      args: {
+        isVariadic: true,
+        isOptional: true,
+        name: "zone",
+        description: "Name of the zones to make available",
+        generators: multipassGenerators.allZones,
       },
     },
     {
       name: "exec",
       description: "Run a command on an instance",
+      options: [
+        {
+          name: ["-d", "--working-directory"],
+          description: "Change to <dir> before execution",
+          exclusiveOn: ["-n", "--no-map-working-directory"],
+          args: { name: "dir" },
+        },
+        {
+          name: ["-n", "--no-map-working-directory"],
+          description: "Do not map the host execution path to a mounted path",
+          exclusiveOn: ["-d", "--working-directory"],
+        },
+      ],
       args: [
         {
           name: "name",
@@ -181,6 +302,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "--show-unsupported",
           description: "Show unsupported cloud images as well",
+        },
+        {
+          name: "--force-update",
+          description: "Force the image information to update from the network",
         },
       ],
       args: {
@@ -205,19 +330,17 @@ const completionSpec: Fig.Spec = {
             "Output in raw format. For now, this affects only the " +
             'representation of empty values (i.e. "" instead of "<empty>")',
         },
+        {
+          name: "--keys",
+          description:
+            "List available settings keys, or just <arg> if provided and a valid key",
+        },
       ],
       args: {
         name: "key",
-        description:
-          "Path to the setting whose configured value should be obtained",
-        suggestions: [
-          "client.gui.autostart",
-          "client.gui.hotkey",
-          "client.primary-name",
-          "local.bridged-network",
-          "local.driver",
-          "local.privileged-mounts",
-        ],
+        description: "Setting key, i.e. path to the intended setting",
+        isOptional: true,
+        suggestions: settingKeys,
       },
     },
     {
@@ -231,24 +354,36 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "info",
-      description: "Display information about instances",
+      description: "Display information about instances or snapshots",
       options: [
         sharedOpts.format,
         {
-          name: "--all",
-          description: "Display info for all instances",
+          name: "--snapshots",
+          description:
+            "Display detailed information about the snapshots of specified instances",
+        },
+        {
+          name: "--no-runtime-information",
+          description:
+            "Retrieve from the daemon only the information obtained without running commands on the instance",
+          hidden: true,
         },
       ],
       args: {
         isVariadic: true,
-        name: "name",
-        description: "Names of instances to display information about",
-        generators: multipassGenerators.allAvailableInstances,
+        isOptional: true,
+        name: "instance[.snapshot]",
+        description:
+          "Names of instances or snapshots to display information about",
+        generators: [
+          multipassGenerators.allAvailableInstances,
+          multipassGenerators.allSnapshots,
+        ],
       },
     },
     {
       name: "launch",
-      description: "Create and start an Ubuntu instance",
+      description: "Create and start a cloud instance",
       options: [
         sharedOpts.timeout,
         {
@@ -263,21 +398,21 @@ const completionSpec: Fig.Spec = {
           name: ["-d", "--disk"],
           description:
             "Disk space to allocate. Positive integers, in bytes, or " +
-            "with K, M, G suffix " +
-            "Minimum: 512M, default: 5G.",
+            "decimals, with K, M, G suffix. " +
+            "Minimum: 1G, default: 5G",
           args: {
             name: "disk",
             default: "5G",
           },
         },
         {
-          name: ["-m", "--mem"],
+          name: ["-m", "--memory"],
           description:
             "Amount of memory to allocate. Positive integers, in " +
-            "bytes, or with K, M, G suffix " +
-            "Minimum: 128M, default: 1G.",
+            "bytes, or decimals, with K, M, G suffix. " +
+            "Minimum: 512M, default: 1G",
           args: {
-            name: "mem",
+            name: "memory",
             default: "1G",
           },
         },
@@ -290,23 +425,27 @@ const completionSpec: Fig.Spec = {
             "in 'Home'",
           args: {
             name: "name",
-            default: "primary",
           },
         },
         {
           name: "--cloud-init",
           description:
-            "Path to a user-data cloud-init configuration, or '-' for" +
-            "stdin",
+            "Path or URL to a user-data cloud-init configuration, or '-' " +
+            "for stdin",
           args: {
-            name: "file",
+            name: "file | url",
+            template: "filepaths",
           },
         },
         {
           name: "--network",
           description:
             "Add a network interface to the instance, where <spec> is " +
-            'in the "key=value,key=value" format',
+            'in the "key=value,key=value" format, with the keys name ' +
+            "(required, see the networks command; 'bridged' uses " +
+            "local.bridged-network), mode (auto|manual, default: auto) " +
+            "and mac (default: random). A bare <name> means name=<name>",
+          isRepeatable: true,
           args: {
             name: "spec",
           },
@@ -315,20 +454,52 @@ const completionSpec: Fig.Spec = {
           name: "--bridged",
           description: "Adds one `--network bridged` network",
         },
+        {
+          name: "--zone",
+          description: "The zone in which to launch the instance",
+          args: {
+            name: "zone",
+            generators: multipassGenerators.allZones,
+          },
+        },
+        {
+          name: "--mount",
+          description:
+            "Mount a local directory inside the instance. If <target> is " +
+            "omitted, the mount point will be under /home/ubuntu/<source-dir>",
+          isRepeatable: true,
+          args: {
+            name: "source:target",
+            template: "folders",
+          },
+        },
       ],
       args: {
         isOptional: true,
         name: "image",
         description:
-          "Optional image to launch. If omitted, then the default " +
-          "Ubuntu LTS will be used",
+          "Optional image to launch, as [<remote:>]<image> or an http://, " +
+          "https:// or file:// URL. If omitted, the latest Ubuntu LTS " +
+          "will be used",
         generators: multipassGenerators.allAvailableImages,
       },
     },
     {
-      name: "list",
-      description: "List all available instances",
-      options: [sharedOpts.format],
+      name: ["list", "ls"],
+      description: "List all available instances or snapshots",
+      options: [
+        sharedOpts.format,
+        {
+          name: "--snapshots",
+          description: "List all available snapshots",
+        },
+        {
+          name: "--no-ipv4",
+          description:
+            "Do not query the instances for the IPv4's they are using",
+          hidden: true,
+        },
+      ],
     },
     {
       name: "mount",
@@ -341,6 +512,7 @@ const completionSpec: Fig.Spec = {
             "File and folder ownership will be mapped from " +
             "<host> to <instance> inside the instance. Can " +
             "be used multiple times",
+          isRepeatable: true,
           args: {
             name: "host:instance",
           },
@@ -352,8 +524,21 @@ const completionSpec: Fig.Spec = {
             "File and folder ownership will be mapped from " +
             "<host> to <instance> inside the instance. Can " +
             "be used multiple times",
+          isRepeatable: true,
           args: {
             name: "host:instance",
+          },
+        },
+        {
+          name: ["-t", "--type"],
+          description:
+            "Specify the type of mount to use. Classic mounts use technology " +
+            "built into Multipass, native mounts use hypervisor and/or " +
+            "platform specific mounts",
+          args: {
+            name: "type",
+            suggestions: ["classic", "native"],
+            default: "classic",
           },
         },
       ],
@@ -377,8 +562,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "networks",
-      description: "List all available networks interfaces",
+      description: "List available network interfaces",
       options: [sharedOpts.format],
+    },
+    {
+      name: "prefer",
+      description: "Switch the current alias context",
+      args: {
+        name: "name",
+        description: "Name of the context to switch to",
+      },
     },
     {
       name: "purge",
@@ -421,29 +614,38 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "set",
-      description: "Set a configuration setting",
+      name: "restore",
+      description: "Restore an instance from a snapshot",
+      options: [
+        {
+          name: ["-d", "--destructive"],
+          description: "Discard the current state of the instance",
+        },
+      ],
       args: {
-        name: "key=value",
+        name: "instance.snapshot",
         description:
-          "A key-value pair. The key specifies a path to " +
-          "the setting to configure. The value is its intended value",
-        suggestions: [
-          "client.gui.autostart=",
-          "client.gui.hotkey=",
-          "client.primary-name=",
-          "local.bridged-network=",
-          "local.driver=",
-          "local.privileged-mounts=",
-        ],
+          "The instance to restore and snapshot to use, in <instance>.<snapshot> format",
+        generators: multipassGenerators.allSnapshots,
       },
     },
     {
-      name: "shell",
-      description: "Open a shell on a running instance",
+      name: "set",
+      description: "Set a configuration setting",
+      args: {
+        name: "key[=value]",
+        description:
+          "A key, or a key-value pair. The key specifies a path to the " +
+          "setting to configure. The value is its intended value. If only " +
+          "the key is given, the value will be prompted for",
+        suggestions: settingKeys.map((key) => `${key}=`),
+      },
+    },
+    {
+      name: ["shell", "sh", "connect"],
+      description: "Open a shell on an instance",
       options: [sharedOpts.timeout],
       args: {
-        isVariadic: true,
         isOptional: true,
         name: "name",
         description:
@@ -451,6 +653,29 @@ const completionSpec: Fig.Spec = {
           "'primary' (the configured primary instance name) will be " +
           "assumed. If the instance is not running, an attempt is " +
           "made to start it (see `start` for more info)",
+        generators: multipassGenerators.allAvailableInstances,
+      },
+    },
+    {
+      name: "snapshot",
+      description: "Take a snapshot of an instance",
+      options: [
+        {
+          name: ["-n", "--name"],
+          description:
+            'An optional name for the snapshot. Default: "snapshotN"',
+          args: { name: "name" },
+        },
+        {
+          name: ["--comment", "-c", "-m"],
+          description:
+            "An optional free comment to associate with the snapshot",
+          args: { name: "comment" },
+        },
+      ],
+      args: {
+        name: "instance",
+        description: "The instance to take a snapshot of",
         generators: multipassGenerators.allAvailableInstances,
       },
     },
@@ -490,13 +715,23 @@ const completionSpec: Fig.Spec = {
           name: ["-t", "--time"],
           description:
             "Time from now, in minutes, to delay shutdown of the instance",
+          exclusiveOn: ["-c", "--cancel", "--force"],
           args: {
             name: "time",
+            default: "0",
           },
         },
         {
           name: ["-c", "--cancel"],
           description: "Cancel a pending delayed shutdown",
+          exclusiveOn: ["-t", "--time", "--force"],
+        },
+        {
+          name: "--force",
+          description:
+            "Force the instance to shut down immediately. Warning: this could " +
+            "potentially corrupt a running instance, so use with caution",
+          exclusiveOn: ["-t", "--time", "-c", "--cancel"],
         },
       ],
       args: {
@@ -529,8 +764,18 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "transfer",
+      name: ["transfer", "copy-files"],
       description: "Transfer files between the host and instances",
+      options: [
+        {
+          name: ["-r", "--recursive"],
+          description: "Recursively copy entire directories",
+        },
+        {
+          name: ["-p", "--parents"],
+          description: "Make parent directories as needed",
+        },
+      ],
       args: [
         {
           isVariadic: true,
@@ -550,7 +795,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "umount",
+      name: ["umount", "unmount"],
       description: "Unmount a directory from an instance",
       args: {
         isVariadic: true,
@@ -563,10 +808,18 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "unalias",
-      description: "Remove an alias",
+      description: "Remove aliases",
+      options: [
+        {
+          name: "--all",
+          description: "Remove all aliases from current context",
+        },
+      ],
       args: {
+        isVariadic: true,
+        isOptional: true,
         name: "name",
-        description: "The name of the alias to remove",
+        description: "Names of aliases to remove",
       },
     },
     {
@@ -574,9 +827,24 @@ const completionSpec: Fig.Spec = {
       description: "Show version details",
       options: [sharedOpts.format],
     },
+    {
+      name: "wait-ready",
+      description: "Wait for the Multipass daemon to be ready",
+      options: [
+        {
+          name: "--timeout",
+          description:
+            "Maximum time, in seconds, to wait for the command to complete",
+          args: { name: "timeout" },
+        },
+      ],
+    },
+    {
+      name: "zones",
+      description: "List all availability zones",
+      options: [sharedOpts.format],
+    },
   ],
-  options: [sharedOpts.help, sharedOpts.helpAll, sharedOpts.verbose],
-  // Only uncomment if multipass takes an argument
-  // args: {}
+  options: [sharedOpts.help, sharedOpts.version, sharedOpts.verbose],
 };
 export default completionSpec;

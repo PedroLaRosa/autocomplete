@@ -1,66 +1,71 @@
-import { filepaths } from "@tabsmith/autocomplete-generators";
+import {
+  artifactsPathOption,
+  configurationOption,
+  disableBuildServersOption,
+  frameworkOption,
+  interactiveOption,
+  msbuildOptions,
+  noLogoOption,
+  outputOption,
+  projectSolutionOrFileGenerator,
+  verbosityOption,
+} from "./shared";
 
 const completionSpec: Fig.Spec = {
   name: "clean",
-  description:
-    "The dotnet clean command cleans the output of the previous build. It's implemented as an MSBuild target, so the project is evaluated when the command is run. Only the outputs created during the build are cleaned. Both intermediate (obj) and final output (bin) folders are cleaned",
+  // The dotnet CLI does not bundle single-dash flags (-lp, -bl, -lang, ...).
+  parserDirectives: { flagsArePosixNoncompliant: true },
+  description: ".NET Clean Command",
   args: {
-    name: "project",
+    name: "project | solution | file",
     description:
-      "The MSBuild project or solution to clean. If a project or solution file is not specified, MSBuild searches the current working directory for a file that has a file extension that ends in proj or sln, and uses that file",
+      "The project or solution or C# (file-based program) file to operate on. If a file is not specified, the command will search the current directory for a project or solution",
     isOptional: true,
-    generators: filepaths({ extensions: ["csproj", "sln"] }),
+    isVariadic: true,
+    generators: projectSolutionOrFileGenerator,
   },
   options: [
-    {
-      name: ["-c", "--configuration"],
-      description:
-        "Defines the build configuration. The default for most projects is Debug, but you can override the build configuration settings in your project. This option is only required when cleaning if you specified it during build time",
-      args: {
-        name: "configuration",
-        suggestions: ["Debug", "Release"],
-      },
-    },
-    {
-      name: ["-f", "--framework"],
-      description:
-        "The framework that was specified at build time. The framework must be defined in the project file. If you specified the framework at build time, you must specify the framework when cleaning",
-      args: {
-        name: "framework",
-      },
-    },
-    {
-      name: "--interactive",
-      description:
-        "Allows the command to stop and wait for user input or action. For example, to complete authentication. Available since .NET Core 3.0 SDK",
-    },
-    {
-      name: "--nologo",
-      description:
-        "Doesn't display the startup banner or the copyright message. Available since .NET Core 3.0 SDK",
-    },
-    {
-      name: ["-o", "--output"],
-      description:
-        "The directory that contains the build artifacts to clean. Specify the -f|--framework <FRAMEWORK> switch with the output directory switch if you specified the framework when the project was built",
-      args: {
-        name: "directory",
-        template: "folders",
-      },
-    },
+    frameworkOption(
+      "The target framework to clean for. The target framework must also be specified in the project file"
+    ),
     {
       name: ["-r", "--runtime"],
-      description:
-        "Cleans the output folder of the specified runtime. This is used when a self-contained deployment was created",
-    },
-    {
-      name: ["-v", "--verbosity"],
-      description:
-        "Sets the verbosity level of the command. Allowed values are q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]. Not supported in every command. See specific command page to determine if this option is available",
+      description: "The target runtime to clean for",
       args: {
-        name: "verbosity",
-        suggestions: ["quiet", "minimal", "normal", "detailed", "diagnostic"],
+        name: "runtime-identifier",
       },
+    },
+    configurationOption(
+      "The configuration to clean for. The default for most projects is 'Debug'"
+    ),
+    interactiveOption,
+    verbosityOption(),
+    outputOption("The directory containing the build artifacts to clean"),
+    artifactsPathOption,
+    noLogoOption,
+    disableBuildServersOption,
+    ...msbuildOptions(),
+  ],
+  subcommands: [
+    {
+      name: "file-based-apps",
+      description: "Removes artifacts created for file-based apps",
+      hidden: true,
+      options: [
+        {
+          name: "--dry-run",
+          description:
+            "Determines changes without actually modifying the file system",
+        },
+        {
+          name: "--days",
+          description:
+            "How many days an artifact folder needs to be unused in order to be removed",
+          args: {
+            name: "days",
+          },
+        },
+      ],
     },
   ],
 };

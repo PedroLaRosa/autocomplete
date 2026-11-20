@@ -1,3 +1,6 @@
+// IPATool v2.8.1 (latest GitHub release tag, checked via git ls-remote and the Homebrew formula, 2026-11-19).
+// Source: static read of the cobra command definitions in cmd/*.go at tag v2.8.1 (shallow clone) and the
+// README `ipatool --help` output; the binary was not executed (needs an Apple account/App Store).
 type SearchResult = {
   level: string;
   count: number;
@@ -43,10 +46,18 @@ const bundleIdentifierGenerator: Fig.Generator = {
   },
 };
 
+const platformSuggestions = [
+  "iphone",
+  "ipad",
+  "appletv",
+  "watchos",
+  "visionos",
+  "macos",
+];
+
 const bundleIdentifierOption: Fig.Option = {
   name: ["-b", "--bundle-identifier"],
-  description: "Bundle identifier of the app",
-  isRequired: true,
+  description: "Bundle identifier of the app (overrides the app ID when found)",
   args: {
     name: "identifier",
     generators: bundleIdentifierGenerator,
@@ -54,6 +65,34 @@ const bundleIdentifierOption: Fig.Option = {
     debounce: true,
   },
 };
+
+const appIdOption: Fig.Option = {
+  name: ["-i", "--app-id"],
+  description: "ID of the target app",
+  args: {
+    name: "id",
+  },
+};
+
+const externalVersionIdOption = (description: string): Fig.Option => ({
+  name: "--external-version-id",
+  description,
+  args: {
+    name: "id",
+  },
+});
+
+const platformOption = (
+  description: string,
+  suggestions: string[] = platformSuggestions
+): Fig.Option => ({
+  name: "--platform",
+  description,
+  args: {
+    name: "platform",
+    suggestions,
+  },
+});
 
 const completionSpec: Fig.Spec = {
   name: "ipatool",
@@ -82,13 +121,17 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: ["-e", "--email"],
-              description: "Apple ID email address",
-              isRequired: true,
+              description: "Apple ID email address or phone number",
+              args: {
+                name: "email",
+              },
             },
             {
               name: ["-p", "--password"],
-              description: "Apple ID password",
-              isRequired: true,
+              description: "Password for the Apple ID",
+              args: {
+                name: "password",
+              },
             },
           ],
         },
@@ -123,8 +166,10 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "download",
-      description: "Download (encrypted) iOS app packages from the App Store",
+      description:
+        "Download iOS, iPadOS, tvOS, watchOS, visionOS, and macOS app packages from the App Store",
       options: [
+        appIdOption,
         bundleIdentifierOption,
         {
           name: ["-o", "--output"],
@@ -134,10 +179,29 @@ const completionSpec: Fig.Spec = {
             template: "folders",
           },
         },
+        externalVersionIdOption(
+          "External version identifier of the target app (defaults to latest version when not specified)"
+        ),
+        platformOption("Platform to download for"),
         {
           name: "--purchase",
           description: "Obtain a license for the app if needed",
         },
+      ],
+    },
+    {
+      name: "get-version-metadata",
+      description: "Retrieves the metadata for a specific version of an app",
+      options: [
+        appIdOption,
+        bundleIdentifierOption,
+        {
+          ...externalVersionIdOption(
+            "External version identifier of the target app"
+          ),
+          isRequired: true,
+        },
+        platformOption("Platform to retrieve metadata for"),
       ],
     },
     {
@@ -146,25 +210,71 @@ const completionSpec: Fig.Spec = {
       args: { name: "command", isOptional: true, template: "help" },
     },
     {
+      name: "list-purchases",
+      description: "List apps owned by the authenticated App Store account",
+      options: [
+        {
+          name: ["-l", "--max-results"],
+          description: "Maximum number of apps to return per page (max 100)",
+          args: {
+            name: "max results",
+            default: "10",
+          },
+        },
+        {
+          name: ["-p", "--page"],
+          description: "Page of owned apps to return",
+          args: {
+            name: "page",
+            default: "1",
+          },
+        },
+        platformOption(
+          "Filter by platform",
+          platformSuggestions.filter((platform) => platform !== "watchos")
+        ),
+      ],
+    },
+    {
+      name: "list-versions",
+      description: "List the available versions of an App Store app",
+      options: [
+        appIdOption,
+        bundleIdentifierOption,
+        platformOption("Platform to list versions for"),
+      ],
+    },
+    {
+      name: "mcp",
+      description: "Serve App Store tools over MCP using stdio",
+    },
+    {
       name: "purchase",
       description: "Obtain a license for the app from the App Store",
-      options: [bundleIdentifierOption],
+      options: [
+        appIdOption,
+        bundleIdentifierOption,
+        platformOption("Platform to purchase for"),
+      ],
     },
     {
       name: "search",
-      description: "Search for iOS apps available on the App Store",
+      description:
+        "Search for iOS, iPadOS, tvOS, watchOS, visionOS, and macOS apps available on the App Store",
       args: {
-        name: "query",
+        name: "term",
       },
       options: [
         {
           name: ["-l", "--limit"],
-          description: "Limit the number of results",
+          description:
+            "Maximum amount of search results to retrieve; visionOS supports up to 12",
           args: {
             name: "limit",
             default: "5",
           },
         },
+        platformOption("Platform to search"),
       ],
     },
   ],
@@ -185,8 +295,16 @@ const completionSpec: Fig.Spec = {
       isPersistent: true,
     },
     {
+      name: "--keychain-passphrase",
+      description: "Passphrase for unlocking keychain",
+      isPersistent: true,
+      args: {
+        name: "passphrase",
+      },
+    },
+    {
       name: "--format",
-      description: "Output format",
+      description: "Sets output format for command",
       isPersistent: true,
       args: {
         name: "format",

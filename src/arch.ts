@@ -1,3 +1,6 @@
+// arch(1) from macOS (Xcode 27.3 beta 2 man page mirror, 2026-11-19; arch.1 itself unchanged since Feb 2021). Source: man page (keith/xcode-man-pages)
+// and arch.c from apple-oss-distributions/system_cmds tag system_cmds-1042.120.1, read statically (macOS tool, not run on macOS).
+// arch.c also accepts -arm and -arm64_32 but the man page documents only the five names below; -<arch> and -arch can be mixed.
 const archNames: { name: string; description: string }[] = [
   { name: "i386", description: "32-bit intel" },
   { name: "x86_64", description: "64-bit intel" },
@@ -10,14 +13,13 @@ const archOptions: Fig.Option[] = archNames.map((arch) => ({
   name: "-" + arch.name,
   description: arch.description,
   isRepeatable: true,
-  exclusiveOn: ["-arch"],
   icon: "fig://icon?type=cpu",
 }));
 
 const archOption: Fig.Option = {
   name: "-arch",
+  description: "Add an architecture to the list to try (same as -<arch_name>)",
   isRepeatable: true,
-  exclusiveOn: archOptions.map(({ name }) => name as string),
   args: {
     name: "arch_name",
     suggestions: archNames.map((arch) => ({
@@ -49,7 +51,8 @@ const completionSpec: Fig.Spec = {
     ...archOptions,
     {
       name: "-c",
-      description: "Clear the environment that will be passed to the command",
+      description:
+        "Clear the environment that will be passed to the command to be run",
     },
     {
       name: "-d",
@@ -71,7 +74,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-h",
-      description: "Print a help message and exit",
+      description: "Print a usage message and exit",
     },
   ],
   args: {

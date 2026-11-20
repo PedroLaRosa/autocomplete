@@ -1,3 +1,4 @@
+// defaults on macOS 15.5 (24F74, 2026-11-19). Source: `defaults help` and `man defaults`
 const domain: Fig.Arg = {
   name: "domain",
   generators: {
@@ -12,7 +13,7 @@ const domain: Fig.Arg = {
   },
   suggestions: [
     {
-      name: "-globalDomain",
+      name: ["-globalDomain", "-g", "NSGlobalDomain"],
       description: "Global domain",
     },
     {
@@ -27,11 +28,21 @@ const key: Fig.Arg = {
   name: "key",
 };
 
+const optionalDomain: Fig.Arg = { ...domain, isOptional: true };
+const optionalKey: Fig.Arg = { ...key, isOptional: true };
+
+const plistPath: Fig.Arg = {
+  name: "path",
+  description: "Path to a plist, or - for stdin/stdout",
+  template: "filepaths",
+  suggestions: [{ name: "-", description: "Standard input/output" }],
+};
+
 const value: Fig.Arg = {
   name: "value",
 };
 
-const valueArgs = [
+const valueArgs: Fig.Option[] = [
   {
     name: "-string",
     args: {
@@ -95,26 +106,71 @@ const valueArgs = [
       name: "array_item",
     },
   },
+  {
+    name: "-dict",
+    description: "Dictionary that overwrites the key",
+    args: {
+      isVariadic: true,
+      name: "key_value",
+    },
+  },
+  {
+    name: "-dict-add",
+    description: "Add key/value pairs to the dictionary",
+    args: {
+      isVariadic: true,
+      name: "key_value",
+    },
+  },
 ];
 
 const completionSpec: Fig.Spec = {
   name: "defaults",
   description: "Command line interface to a user's defaults",
+  options: [
+    {
+      name: "-currentHost",
+      description: "Restrict operations to the host the user is logged in on",
+      exclusiveOn: ["-host"],
+    },
+    {
+      name: "-host",
+      description: "Restrict operations to hostname",
+      args: { name: "hostname" },
+      exclusiveOn: ["-currentHost"],
+    },
+  ],
   subcommands: [
     {
       name: "read",
       description: "Shows defaults",
-      args: [domain, key],
+      args: [optionalDomain, optionalKey],
     },
     {
       name: "write",
-      description: "Writes key for domain",
-      args: [domain, key, value],
+      description: "Writes key for domain, or a plist over the whole domain",
+      args: [domain, key, { ...value, isOptional: true }],
+      options: valueArgs,
     },
     {
       name: "delete",
       description: "Deletes domain or key in domain",
-      args: [domain, key],
+      args: [optionalDomain, optionalKey],
+    },
+    {
+      name: "delete-all",
+      description: "Deletes domain or key in domain from all containers",
+      args: [domain, optionalKey],
+    },
+    {
+      name: "import",
+      description: "Writes the plist at path (or stdin) to domain",
+      args: [domain, plistPath],
+    },
+    {
+      name: "export",
+      description: "Saves domain as a binary plist to path, or XML to stdout",
+      args: [domain, plistPath],
     },
     {
       name: "rename",
@@ -171,6 +227,8 @@ const completionSpec: Fig.Spec = {
 
 //   delete <domain>                      deletes domain
 //   delete <domain> <key>                deletes key in domain
+//   delete-all <domain>                  deletes the domain from all containers
+//   delete-all <domain> <key>            deletes key in domain from all containers
 
 //   import <domain> <path to plist>      writes the plist at path to domain
 //   import <domain> -                    writes a plist from stdin to domain

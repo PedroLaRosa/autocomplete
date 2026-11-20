@@ -1,21 +1,14 @@
-const vaporCommands = [
-  "clean",
-  "heroku",
-  "new",
-  "run",
-  "supervisor",
-  "xcode",
-  "build",
-];
-
+// Vapor Toolbox 20.0.2 (Homebrew formula vapor / GitHub tag 20.0.2, 2026-11-19). Source: static read of
+// Sources/VaporToolbox/{Vapor,New}.swift (swift-argument-parser definitions) and the generated
+// VaporToolbox.docc/vapor.md at that tag; the binary was not run (macOS/Swift only).
+// Toolbox 20 is a rewrite whose only subcommand is `new` (also the default subcommand); the former
+// build, clean, heroku, run, supervisor and xcode commands no longer exist. `new` additionally accepts
+// per-template variables (e.g. --fluent / --no-fluent) that are read from the template's manifest at
+// runtime, so they are not listed here.
 const completionSpec: Fig.Spec = {
   name: "vapor",
   description: "Vapor Toolbox (Server-side Swift web framework)",
   subcommands: [
-    {
-      name: "build",
-      description: "Builds an app in the console",
-    },
     {
       name: "new",
       description: "Generates a new app",
@@ -25,92 +18,76 @@ const completionSpec: Fig.Spec = {
       },
       options: [
         {
-          name: ["--template", "-T"],
+          name: ["--template", "-t"],
           description: "The URL of a Git repository to use as a template",
+          args: {
+            name: "url",
+          },
         },
         {
           name: "--branch",
           description: "Template repository branch to use",
+          args: {
+            name: "branch",
+          },
+        },
+        {
+          name: "--manifest",
+          description:
+            "The path of the manifest file. Defaults to `manifest.yml`",
+          args: {
+            name: "file",
+            template: "filepaths",
+          },
         },
         {
           name: ["--output", "-o"],
           description: "The directory to place the new project in",
+          args: {
+            name: "path",
+            template: "folders",
+          },
         },
         {
           name: "--no-commit",
           description: "Skips adding a first commit to the newly created repo",
         },
-      ],
-    },
-    {
-      name: "clean",
-      description: "Cleans temporary files",
-      options: [
         {
-          name: ["--update", "-u"],
-          description: "Delete Package.resolved file if it exists",
+          name: "--no-git",
+          description: "Skips adding a Git repository to the project folder",
         },
         {
-          name: ["--global", "-g"],
-          description: "Clean Xcode's global DerivedData cache",
+          name: ["--yes", "-y"],
+          description: "Automatically answer yes to all questions",
+          exclusiveOn: ["--no", "-n"],
         },
         {
-          name: ["--swiftpm", "-s"],
-          description: "Delete .swiftpm folder",
-        },
-      ],
-    },
-    {
-      name: "heroku",
-      description: "Commands for working with Heroku",
-      subcommands: [
-        {
-          name: "init",
-          description: "Configures app for deployment to Heroku",
+          name: ["--no", "-n"],
+          description: "Automatically answer no to all questions",
+          exclusiveOn: ["--yes", "-y"],
         },
         {
-          name: "push",
-          description: "Deploys app to Heroku",
+          name: ["--verbose", "-v"],
+          description: "Prints additional information",
+        },
+        {
+          name: "--dump-variables",
+          description:
+            "Dumps template variables as JSON (experimental and unstable)",
+          hidden: true,
         },
       ],
-    },
-    {
-      name: "run",
-      description:
-        "Runs an app from the console. Equivalent to `swift run --enable-test-discovery Run`",
-    },
-    {
-      name: "supervisor",
-      description: "Commands for working with Supervisord",
-      subcommands: [
-        {
-          name: "init",
-          description: "Creates a Supervisor entry for the current project",
-        },
-        {
-          name: "restart",
-          description: "Restarts current project in Supervisor",
-        },
-        {
-          name: "update",
-          description: "Updates Supervisor entry for current project",
-        },
-      ],
-    },
-    {
-      name: "xcode",
-      description: "Opens an app in Xcode",
     },
   ],
   options: [
     {
       name: ["--help", "-h"],
-      description: "Show help for vapor",
-      args: {
-        name: "command",
-        description: "Display usage information about the specified command",
-        suggestions: vaporCommands,
-      },
+      description: "Show help information",
+      isPersistent: true,
+    },
+    {
+      name: "--version",
+      description: "Show the version",
     },
   ],
 };

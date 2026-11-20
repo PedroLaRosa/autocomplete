@@ -1,3 +1,139 @@
+// LastPass CLI (lpass) v1.6.2 (latest upstream tag lastpass/lastpass-cli and Homebrew formula lastpass-cli 1.6.2, 2026-11-19). Source: static read of the v1.6.2 source (cmd-*.c getopt tables, cmd.h usage strings, notes.c note types, lpass.c), lpass.1.txt man page and contrib/completions-lpass.fish; binary not executed.
+// Notes: usage text and man page list --color for generate, but cmd-generate.c rejects it, so it is not offered there. `export` writes CSV to standard output and takes no filename. --title-format and --app exist in the source but not in the man page.
+
+const names = (option: Fig.Option): string[] =>
+  Array.isArray(option.name) ? option.name : [option.name];
+
+// Mark every option of a group as mutually exclusive with the others of the group
+const makeExclusive = (
+  options: Fig.Option[],
+  alsoExclusiveWith: string[] = []
+): Fig.Option[] =>
+  options.map((option) => ({
+    ...option,
+    exclusiveOn: [
+      ...options.filter((other) => other !== option).flatMap(names),
+      ...alsoExclusiveWith,
+    ],
+  }));
+
+const syncOption: Fig.Option = {
+  name: "--sync",
+  description: "Control when the operation synchronizes with the server",
+  args: {
+    name: "sync",
+    suggestions: [
+      {
+        name: "auto",
+        description:
+          "Sync changes in the background and refresh a stale cache before showing values",
+      },
+      {
+        name: "now",
+        description: "Synchronize before the command exits or shows a value",
+      },
+      { name: "no", description: "Do not contact the server" },
+    ],
+    default: "auto",
+  },
+};
+
+const colorOption: Fig.Option = {
+  name: "--color",
+  description: "Control colored output to the terminal",
+  args: {
+    name: "color",
+    suggestions: ["auto", "never", "always"],
+    default: "auto",
+  },
+};
+
+const nonInteractiveOption: Fig.Option = {
+  name: "--non-interactive",
+  description:
+    "Read data from standard input until EOF (or the first newline unless editing notes) instead of using the editor",
+};
+
+const noteTypes: Fig.Suggestion[] = [
+  { name: "amex", description: "American Express" },
+  { name: "bank", description: "Bank Account" },
+  { name: "credit-card", description: "Credit Card" },
+  { name: "database", description: "Database" },
+  { name: "drivers-license", description: "Driver's License" },
+  { name: "email", description: "Email Account" },
+  { name: "health-insurance", description: "Health Insurance" },
+  { name: "im", description: "Instant Messenger" },
+  { name: "insurance", description: "Insurance" },
+  { name: "mastercard", description: "Mastercard" },
+  { name: "membership", description: "Membership" },
+  { name: "passport", description: "Passport" },
+  { name: "server", description: "Server" },
+  { name: "ssn", description: "Social Security" },
+  { name: "software-license", description: "Software License" },
+  { name: "ssh-key", description: "SSH Key" },
+  { name: "visa", description: "VISA" },
+  { name: "wifi", description: "Wi-Fi Password" },
+];
+
+const exportFields = [
+  "id",
+  "url",
+  "username",
+  "password",
+  "extra",
+  "name",
+  "fav",
+  "grouping",
+  "group",
+  "fullname",
+  "last_touch",
+  "last_modified_gmt",
+  "attachpresent",
+];
+
+const booleanSuggestions = ["true", "false"];
+
+// Options of `share useradd` and `share usermod`
+const shareUserOptions: Fig.Option[] = [
+  {
+    name: "--read-only",
+    description: "Give the user read-only access to the shared folder",
+    args: { name: "read-only", suggestions: booleanSuggestions },
+  },
+  {
+    name: "--hidden",
+    description: "Hide passwords from the user",
+    args: { name: "hidden", suggestions: booleanSuggestions },
+  },
+  {
+    name: "--admin",
+    description: "Make the user an administrator of the shared folder",
+    args: { name: "admin", suggestions: booleanSuggestions },
+  },
+];
+
+const shareArg: Fig.Arg = {
+  name: "SHARE",
+  description: "Name of the shared folder",
+};
+
+const shareUsernameArg: Fig.Arg = {
+  name: "USERNAME",
+  description: "Username (email address) of the shared folder member",
+};
+
+// Entry parts selectable with `lpass add` (one at most; --notes and --note-type are handled separately)
+const addFieldChoices: Fig.Option[] = [
+  { name: ["--username", "-u"], description: "Add only the username" },
+  { name: ["--password", "-p"], description: "Add only the password" },
+  { name: "--url", description: "Add only the URL" },
+  {
+    name: "--field",
+    description: "Add only the given field",
+    args: { name: "FIELD", description: "Name of the field to add" },
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "lpass",
   description: "Command line interface for LastPass",
@@ -9,27 +145,19 @@ const completionSpec: Fig.Spec = {
         {
           name: "--trust",
           description:
-            "Subsequent logins will not require multifactor authentication",
+            "Do not require multifactor authentication on subsequent logins",
         },
         {
           name: "--plaintext-key",
-          description: "Save decryption key to the hard disk in plaintext",
-          args: {
-            name: "--force",
-            description: "Skip user confirmation",
-            isOptional: true,
-          },
+          description:
+            "Save the decryption key to the hard disk in plaintext (discouraged)",
         },
         {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
+          name: ["--force", "-f"],
+          description: "Skip the confirmation for --plaintext-key",
+          dependsOn: ["--plaintext-key"],
         },
+        colorOption,
       ],
       args: {
         name: "USERNAME",
@@ -38,41 +166,115 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "logout",
-      description: "Log out of LastPass",
+      description: "Log out of LastPass and remove the local cache and keys",
       options: [
         {
-          name: "--force",
+          name: ["--force", "-f"],
           description: "Skip user confirmation",
         },
+        colorOption,
       ],
     },
     {
-      name: "ls",
-      description: "List names in groups in a tree structure",
+      name: "passwd",
+      description: "Change the master password and re-encrypt all entries",
+    },
+    {
+      name: "show",
+      description: "Show the password or a selected field of an entry",
       options: [
+        syncOption,
         {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          requiresSeparator: true,
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
+          name: ["--clip", "-c"],
+          description: "Copy the output to the clipboard",
         },
         {
+          name: ["--quiet", "-q"],
+          description: "Print nothing and only set the return code",
+        },
+        {
+          name: ["--expand-multi", "-x"],
+          description: "Show the information of all matching entries",
+        },
+        {
+          name: ["--json", "-j"],
+          description: "Generate JSON output instead of human-readable text",
+        },
+        ...makeExclusive([
+          { name: "--all", description: "Show all fields" },
+          { name: ["--username", "-u"], description: "Show only the username" },
+          { name: ["--password", "-p"], description: "Show only the password" },
+          { name: "--url", description: "Show only the URL" },
+          { name: "--notes", description: "Show only the notes" },
+          {
+            name: "--field",
+            description: "Show only the given field",
+            args: { name: "FIELD", description: "Name of the field to show" },
+          },
+          { name: "--id", description: "Show only the ID" },
+          { name: "--name", description: "Show only the name" },
+          {
+            name: "--attach",
+            description: "Show the given attachment",
+            args: { name: "ATTACHID", description: "Attachment ID" },
+          },
+        ]),
+        ...makeExclusive([
+          {
+            name: ["--basic-regexp", "-G"],
+            description:
+              "Match entries with a case-insensitive regular expression",
+          },
+          {
+            name: ["--fixed-strings", "-F"],
+            description: "Match entries containing the exact substring",
+          },
+        ]),
+        {
+          name: "--format",
+          description:
+            "Printf-style format for each field (placeholders such as %fn and %fv)",
+          args: { name: "FORMAT" },
+        },
+        {
+          name: "--title-format",
+          description:
+            "Printf-style format for the entry header (placeholders such as %an, %ai and %au)",
+          args: { name: "FORMAT" },
+        },
+        colorOption,
+      ],
+      args: {
+        name: "NAME|UNIQUEID",
+        description: "Name or unique ID of the entry to show",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "ls",
+      description: "List entries in groups in a tree structure",
+      options: [
+        syncOption,
+        {
           name: ["--long", "-l"],
-          description: "Show the last modification time",
+          description: "Also list the modification (or last use) time",
         },
         {
           name: "-m",
-          description: "Show the last modified time",
+          description: "Show the last modification time (default with --long)",
         },
         {
           name: "-u",
-          description: "Show the last used time",
+          description:
+            "Show the last use time instead of the modification time with --long",
         },
+        {
+          name: "--format",
+          description:
+            "Printf-style format for each entry (placeholders such as %an, %ai and %au)",
+          args: { name: "FORMAT" },
+        },
+        colorOption,
       ],
       args: {
         name: "GROUP",
@@ -81,220 +283,13 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "passwd",
-      description: "Change LastPass password and reencrypt all entries",
-    },
-    {
-      name: "show",
-      description: "Show password or selected field",
-      options: [
-        {
-          name: "--sync",
-          description: "When the current operation syncs to server",
-          requiresSeparator: true,
-          args: {
-            name: "sync",
-            suggestions: ["auto", "now", "no"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-        {
-          name: ["--clip", "-c"],
-          description: "Copy to the clipboard",
-        },
-        {
-          name: ["--quiet", "-q"],
-          description: "Display no output and only sets return code",
-        },
-        {
-          name: ["--expand-multi", "-x"],
-          description: "Show information from all matching sites",
-        },
-        {
-          name: ["--json", "-j"],
-          description: "Generate json output instead of human-readable text",
-        },
-        {
-          name: "--all",
-          description: "Show all fields",
-          exclusiveOn: [
-            "--username",
-            "--password",
-            "--url",
-            "--notes",
-            "--field",
-            "--id",
-            "--name",
-            "--attachid",
-          ],
-        },
-        {
-          name: "--username",
-          description: "Show only the username",
-          exclusiveOn: [
-            "--all",
-            "--password",
-            "--url",
-            "--notes",
-            "--field",
-            "--id",
-            "--name",
-            "--attachid",
-          ],
-        },
-        {
-          name: "--password",
-          description: "Show only the password",
-          exclusiveOn: [
-            "--all",
-            "--username",
-            "--url",
-            "--notes",
-            "--field",
-            "--id",
-            "--name",
-            "--attachid",
-          ],
-        },
-        {
-          name: "--url",
-          description: "Show only the URL",
-          exclusiveOn: [
-            "--all",
-            "--username",
-            "--password",
-            "--notes",
-            "--field",
-            "--id",
-            "--name",
-            "--attachid",
-          ],
-        },
-        {
-          name: "--notes",
-          description: "Show only the notes",
-          exclusiveOn: [
-            "--all",
-            "--username",
-            "--password",
-            "--url",
-            "--field",
-            "--id",
-            "--name",
-            "--attachid",
-          ],
-        },
-        {
-          name: "--field",
-          description: "Show only the field",
-          exclusiveOn: [
-            "--all",
-            "--username",
-            "--password",
-            "--url",
-            "--notes",
-            "--id",
-            "--name",
-            "--attachid",
-          ],
-          args: {
-            name: "FIELD",
-            description: "Show only this field",
-          },
-        },
-        {
-          name: "--id",
-          description: "Show only the ID",
-          exclusiveOn: [
-            "--all",
-            "--username",
-            "--password",
-            "--url",
-            "--notes",
-            "--field",
-            "--name",
-            "--attachid",
-          ],
-        },
-        {
-          name: "--name",
-          description: "Show only the name",
-          exclusiveOn: [
-            "--all",
-            "--username",
-            "--password",
-            "--url",
-            "--notes",
-            "--field",
-            "--id",
-            "--attachid",
-          ],
-        },
-        {
-          name: "--attach",
-          description: "Show only the attachment",
-          exclusiveOn: [
-            "--all",
-            "--username",
-            "--password",
-            "--url",
-            "--notes",
-            "--field",
-            "--id",
-            "--name",
-          ],
-          args: {
-            name: "ATTACHID",
-            description: "Attachment ID",
-          },
-        },
-        {
-          name: ["--basic-regexp", "-G"],
-          description:
-            "Show sites matching case-insensitive regular expression",
-          exclusiveOn: ["--fixed-strings", "-F"],
-        },
-        {
-          name: ["--fixed-strings", "-F"],
-          description: "Show sites matching this exact substring",
-          exclusiveOn: ["--basic-regexp", "-G"],
-        },
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-      ],
-      args: {
-        name: "UNIQENAME|UNIQUEID",
-        description: "Shows entry with this unique name or ID",
-      },
-    },
-    {
       name: "mv",
-      description: "Move LastPass entry to a different group",
-      options: [
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-      ],
+      description: "Move an entry to a different group",
+      options: [syncOption, colorOption],
       args: [
         {
           name: "UNIQUENAME|UNIQUEID",
-          description: "Unique name or ID to move",
+          description: "Unique name or ID of the entry to move",
         },
         {
           name: "GROUP",
@@ -306,220 +301,56 @@ const completionSpec: Fig.Spec = {
       name: "add",
       description: "Add a new entry",
       options: [
-        {
-          name: "--sync",
-          description: "When the current operation syncs to server",
-          requiresSeparator: true,
-          args: {
-            name: "sync",
-            suggestions: ["auto", "now", "no"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-        {
-          name: "--non-interactive",
-          description:
-            "Accept data until EOF or, unless the notes field is being edited, the first new line",
-        },
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-        {
-          name: "--username",
-          description: "Add only the username",
-          exclusiveOn: [
-            "--password",
-            "--url",
-            "--notes",
-            "--field",
-            "--note-type",
-          ],
-        },
-        {
-          name: "--password",
-          description: "Add only the password",
-          exclusiveOn: [
-            "--username",
-            "--url",
-            "--notes",
-            "--field",
-            "--note-type",
-          ],
-        },
-        {
-          name: "--url",
-          description: "Add only the URL",
-          exclusiveOn: [
-            "--username",
-            "--password",
-            "--notes",
-            "--field",
-            "--note-type",
-          ],
-        },
+        syncOption,
+        nonInteractiveOption,
+        colorOption,
+        ...makeExclusive(addFieldChoices, ["--notes", "--note-type"]),
         {
           name: "--notes",
           description: "Add only the notes",
-          exclusiveOn: [
-            "--username",
-            "--password",
-            "--url",
-            "--field",
-            "--note-type",
-          ],
-        },
-        {
-          name: "--field",
-          description: "Add only the field",
-          exclusiveOn: [
-            "--username",
-            "--password",
-            "--url",
-            "--notes",
-            "--note-type",
-          ],
-          args: {
-            name: "FIELD",
-            description: "Add only this field",
-          },
+          exclusiveOn: addFieldChoices.flatMap(names),
         },
         {
           name: "--note-type",
-          description: "Add only the note",
-          exclusiveOn: [
-            "--username",
-            "--password",
-            "--url",
-            "--notes",
-            "--field",
-          ],
+          description: "Create a secure note of the given type",
+          exclusiveOn: addFieldChoices.flatMap(names),
           args: {
             name: "NOTETYPE",
-            description: "Type of note to add",
-            suggestions: [
-              "amex",
-              "bank",
-              "credit",
-              "database",
-              "drivers_license",
-              "email",
-              "health_insurance",
-              "im",
-              "mastercard",
-              "membership",
-              "passport",
-              "server",
-              "software_license",
-              "ssh_key",
-              "ssn",
-              "visa",
-              "wifi",
-            ],
+            description: "Type of the secure note",
+            suggestions: noteTypes,
           },
+        },
+        {
+          name: "--app",
+          description: "Create the entry as an application",
+          hidden: true,
         },
       ],
       args: {
         name: "NAME|UNIQUEID",
-        description: "Name or unique ID of the entry to add",
+        description:
+          "Name of the entry to create or unique ID of the entry to overwrite",
       },
     },
     {
       name: "edit",
-      description: "Edit existing entry",
+      description: "Edit an existing entry",
       options: [
-        {
-          name: "--sync",
-          description: "When the current operation syncs to server",
-          requiresSeparator: true,
-          args: {
-            name: "sync",
-            suggestions: ["auto", "now", "no"],
-            isOptional: true,
-            default: "auto",
+        syncOption,
+        nonInteractiveOption,
+        colorOption,
+        ...makeExclusive([
+          { name: "--name", description: "Edit only the name" },
+          { name: ["--username", "-u"], description: "Edit only the username" },
+          { name: ["--password", "-p"], description: "Edit only the password" },
+          { name: "--url", description: "Edit only the URL" },
+          { name: "--notes", description: "Edit only the notes" },
+          {
+            name: "--field",
+            description: "Edit only the given field",
+            args: { name: "FIELD", description: "Name of the field to edit" },
           },
-        },
-        {
-          name: "--non-interactive",
-          description:
-            "Accept data until EOF or, unless the notes field is being edited, the first new line",
-        },
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-        {
-          name: ["--name", "--username"],
-          description: "Edit only the name (or username)",
-          exclusiveOn: [
-            "--password",
-            "--url",
-            "--notes",
-            "--field",
-            "--note-type",
-          ],
-        },
-        {
-          name: "--password",
-          description: "Edit only the password",
-          exclusiveOn: [
-            "--username",
-            "--url",
-            "--notes",
-            "--field",
-            "--note-type",
-          ],
-        },
-        {
-          name: "--url",
-          description: "Edit only the URL",
-          exclusiveOn: [
-            "--username",
-            "--password",
-            "--notes",
-            "--field",
-            "--note-type",
-          ],
-        },
-        {
-          name: "--notes",
-          description: "Edit only the notes",
-          exclusiveOn: [
-            "--username",
-            "--password",
-            "--url",
-            "--field",
-            "--note-type",
-          ],
-        },
-        {
-          name: "--field",
-          description: "Edit only the field",
-          exclusiveOn: [
-            "--username",
-            "--password",
-            "--url",
-            "--notes",
-            "--note-type",
-          ],
-          args: {
-            name: "FIELD",
-            description: "Edit just this field",
-          },
-        },
+        ]),
       ],
       args: {
         name: "NAME|UNIQUEID",
@@ -528,126 +359,56 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "generate",
-      description: "Create randomly generated password",
+      description: "Create an entry with a randomly generated password",
       options: [
-        {
-          name: "--sync",
-          description: "When the current operation syncs to server",
-          requiresSeparator: true,
-          args: {
-            name: "sync",
-            suggestions: ["auto", "now", "no"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
+        syncOption,
         {
           name: ["--clip", "-c"],
-          description: "Copy the text to the clipboard",
+          description: "Copy the generated password to the clipboard",
         },
         {
           name: "--username",
-          description: "Generate password for this username",
-          args: {
-            name: "USERNAME",
-            description: "Username to generate the password for",
-          },
+          description: "Set the username of the entry",
+          args: { name: "USERNAME", description: "Username of the entry" },
         },
         {
           name: "--url",
-          description: "Generate password for this URL",
-          args: {
-            name: "URL",
-            description: "URL to generate the password for",
-          },
+          description: "Set the URL of the entry",
+          args: { name: "URL", description: "URL of the entry" },
         },
         {
           name: "--no-symbols",
-          description: "Generate password without symbols",
+          description: "Generate a password without symbols",
         },
       ],
       args: [
         {
           name: "NAME|UNIQUEID",
           description:
-            "Name or unique ID of the entry to generate the password for",
+            "Name of the entry to create or unique ID of the entry to update",
         },
         {
           name: "LENGTH",
-          description: "Length of the password to create",
+          description: "Length of the password to generate",
         },
       ],
     },
     {
       name: "duplicate",
-      description: "Duplicate existing entry",
-      options: [
-        {
-          name: "--sync",
-          description: "When the current operation syncs to server",
-          requiresSeparator: true,
-          args: {
-            name: "sync",
-            suggestions: ["auto", "now", "no"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-      ],
+      description: "Duplicate an entry under a new ID",
+      options: [syncOption, colorOption],
       args: {
         name: "UNIQUENAME|UNIQUEID",
-        description: "Unique name or unique ID of the entry to duplicate",
+        description: "Unique name or ID of the entry to duplicate",
       },
     },
     {
       name: "rm",
-      description: "Removes existing entry",
-      options: [
-        {
-          name: "--sync",
-          description: "When the current operation syncs to server",
-          requiresSeparator: true,
-          args: {
-            name: "sync",
-            suggestions: ["auto", "now", "no"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-      ],
+      description: "Remove an entry",
+      options: [syncOption, colorOption],
       args: {
         name: "UNIQUENAME|UNIQUEID",
-        description: "Unique name or unique ID of the entry to remove",
+        description: "Unique name or ID of the entry to remove",
       },
     },
     {
@@ -656,306 +417,156 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: ["--quiet", "-q"],
-          description: "Display no output and only sets return code",
+          description: "Print nothing and only set the return code",
         },
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
+        colorOption,
       ],
     },
     {
       name: "sync",
-      description: "Sync the local cache against the LastPass server",
+      description: "Synchronize the local cache with the LastPass server",
       options: [
         {
           name: ["--background", "-b"],
-          description: "Syncronization occurs in a daemonized process",
+          description: "Synchronize in a daemonized background process",
         },
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
+        colorOption,
       ],
     },
     {
       name: "import",
-      description: "Import account information from an unencrypted CSV",
+      description: "Import accounts from an unencrypted CSV file",
       options: [
-        {
-          name: "--sync",
-          description: "When the current operation syncs to server",
-          requiresSeparator: true,
-          args: {
-            name: "sync",
-            suggestions: ["auto", "now", "no"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
+        syncOption,
         {
           name: "--keep-dupes",
-          description: "Keeps any duplicate entries",
+          description: "Import entries that already exist in the vault",
         },
       ],
       args: {
         name: "FILENAME",
-        description: "CSV filename to import from",
+        description: "CSV file to import (reads standard input if omitted)",
+        isOptional: true,
+        template: "filepaths",
       },
     },
     {
       name: "export",
-      description: "Export account information to an unencrypted CSV",
+      description:
+        "Export all accounts to standard output as unencrypted CSV (including passwords)",
       options: [
-        {
-          name: "--sync",
-          description: "When the current operation syncs to server",
-          requiresSeparator: true,
-          args: {
-            name: "sync",
-            suggestions: ["auto", "now", "no"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
-        {
-          name: "--color",
-          description: "Control colored output to the terminal",
-          args: {
-            name: "color",
-            suggestions: ["auto", "never", "always"],
-            isOptional: true,
-            default: "auto",
-          },
-        },
+        syncOption,
+        colorOption,
         {
           name: "--fields",
-          description:
-            "Comma-separated subset of: id, url, username, password, extra, name, fav, id, grouping, group, fullname, last_touch, last_modified_gmt, attachpresent",
+          description: "Comma-separated list of fields to export",
           args: {
             name: "FIELDLIST",
-            suggestions: [
-              "id,url,username,password,extra,name,fav,id,grouping,group,fullname,last_touch,last_modified_gmt,attachpresent",
-            ],
+            description: "Comma-separated subset of the available fields",
+            suggestions: exportFields,
           },
         },
       ],
-      args: {
-        name: "FILENAME",
-        description: "CSV filename to export to",
-      },
     },
     {
       name: "share",
-      description: "LastPass Sharing Center functionality",
+      description: "Manage shared folders",
+      options: [
+        { ...syncOption, isPersistent: true },
+        { ...colorOption, isPersistent: true },
+      ],
       subcommands: [
         {
           name: "userls",
           description:
-            "List the LastPass users which have access to the Shared Folders",
+            "List the users and groups with access to a shared folder",
+          args: shareArg,
         },
         {
           name: "useradd",
-          description: "Add user to Shared Folders",
-          options: [
-            {
-              name: "--read-only",
-              description: "Control read or write access",
-              args: [
-                {
-                  name: "true",
-                  description: "Grant read only access",
-                },
-                {
-                  name: "false",
-                  description: "Grant write access",
-                },
-              ],
-            },
-            {
-              name: "--hidden",
-              description: "Share user view permission",
-              args: [
-                {
-                  name: "true",
-                  description: "User can only view entry",
-                },
-                {
-                  name: "false",
-                  description: "User can view entry and secrets",
-                },
-              ],
-            },
-            {
-              name: "--admin",
-              description: "Share user administer permission",
-              args: [
-                {
-                  name: "true",
-                  description: "User can administer entry",
-                },
-                {
-                  name: "false",
-                  description: "User cannot administer entry",
-                },
-              ],
-            },
-          ],
-          args: [
-            {
-              name: "SHARE",
-              description: "Entry to share",
-            },
-            {
-              name: "USERNAME",
-              description: "User to share entry with",
-            },
-          ],
+          description: "Add a user to a shared folder",
+          options: shareUserOptions,
+          args: [shareArg, shareUsernameArg],
         },
         {
           name: "usermod",
-          description: "Modify user on Shared Folders",
-          options: [
-            {
-              name: "--read-only",
-              description: "Control read or write access",
-              args: [
-                {
-                  name: "true",
-                  description: "Grant read only access",
-                },
-                {
-                  name: "false",
-                  description: "Grant write access",
-                },
-              ],
-            },
-            {
-              name: "--hidden",
-              description: "Share user view permission",
-              args: [
-                {
-                  name: "true",
-                  description: "User can only view entry",
-                },
-                {
-                  name: "false",
-                  description: "User can view entry and secrets",
-                },
-              ],
-            },
-            {
-              name: "--admin",
-              description: "Share user administer permission",
-              args: [
-                {
-                  name: "true",
-                  description: "User can administer entry",
-                },
-                {
-                  name: "false",
-                  description: "User cannot administer entry",
-                },
-              ],
-            },
-          ],
-          args: [
-            {
-              name: "SHARE",
-              description: "Entry to modify",
-            },
-            {
-              name: "USERNAME",
-              description: "User access to modify",
-            },
-          ],
+          description: "Modify the permissions of a user of a shared folder",
+          options: shareUserOptions,
+          args: [shareArg, shareUsernameArg],
         },
         {
           name: "userdel",
-          description: "Remove user from Shared Folders",
-          args: [
-            {
-              name: "SHARE",
-              description: "LastPass entry to remove user from",
-            },
-            {
-              name: "USERNAME",
-              description: "LastPass user to remove",
-            },
-          ],
+          description: "Remove a user from a shared folder",
+          args: [shareArg, shareUsernameArg],
         },
         {
           name: "create",
-          description: "Create new LastPass Shared Folder",
+          description: "Create a shared folder",
           args: {
             name: "SHARE",
-            description: "LastPass Shared Folder to create",
+            description: "Name of the shared folder to create",
           },
         },
         {
           name: "rm",
-          description: "LastPass Shared Folder to remove",
+          description: "Delete a shared folder",
           args: {
             name: "SHARE",
-            description: "LastPass Shared Folder to remove",
+            description: "Name of the shared folder to delete",
           },
         },
         {
           name: "limit",
-          description: "Manipulate LastPass Shared Folder access",
+          description:
+            "Show or change the account access list of a user of a shared folder",
           options: [
-            {
-              name: ["--deny", "--allow"],
-              description: "Deny or allow access",
-            },
-            {
-              name: ["--add", "--rm", "--clear"],
-              description: "Add, remove, or clear acces",
-            },
+            ...makeExclusive([
+              {
+                name: "--deny",
+                description: "Treat the list as a blacklist",
+              },
+              {
+                name: "--allow",
+                description: "Treat the list as a whitelist",
+              },
+            ]),
+            ...makeExclusive([
+              {
+                name: "--add",
+                description: "Add the sites to the access list",
+              },
+              {
+                name: "--rm",
+                description: "Remove the sites from the access list",
+              },
+              {
+                name: "--clear",
+                description: "Reset the access list",
+              },
+            ]),
           ],
           args: [
-            {
-              name: "SHARE",
-              description: "Shared Folder to remove",
-            },
-            {
-              name: "USERNAME",
-              description: "User access to manipulate",
-            },
+            shareArg,
+            shareUsernameArg,
             {
               name: "sites",
-              description: "LastPass sites to manipulate",
+              description: "Sites to add to or remove from the access list",
               isOptional: true,
+              isVariadic: true,
             },
           ],
         },
       ],
-      args: {
-        name: "SHARE",
-        description: "LastPass Shared folder to query",
-      },
     },
   ],
   options: [
     {
       name: ["--help", "-h"],
-      description: "Display the help for lpass",
+      description: "Show the usage",
     },
     {
-      name: "--version",
-      description: "Display the version of lpass",
+      name: ["--version", "-v"],
+      description: "Show the version",
     },
   ],
 };

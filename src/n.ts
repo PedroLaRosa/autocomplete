@@ -1,15 +1,26 @@
+// n v12.0.0 (tj/n tag v12.0.0, released 2026-11-18, npm and Homebrew agree, 2026-11-19). Source: bin/n of tj/n v12.0.0
+// (display_help, argument parsing and dispatch read directly; script not run) plus CHANGELOG.md (v11.0.0 and v12.0.0).
 import node from "./node";
 
 const versionArg: Fig.Arg = {
   name: "version",
   suggestions: [
     {
-      name: ["latest", "current"],
-      description: "Newest official release",
+      name: "latest",
+      description: "Newest release excluding alphas",
+    },
+    {
+      name: "latest-any",
+      description: "Newest release including alphas",
+    },
+    {
+      name: "current",
+      description: "Newest release excluding alphas",
+      deprecated: true,
     },
     {
       name: "lts",
-      description: "Newest Long Term Support official release",
+      description: "Newest Long Term Support release",
     },
     {
       name: "auto",
@@ -18,14 +29,15 @@ const versionArg: Fig.Arg = {
     },
     {
       name: "engine",
-      description: "Read version from package.json",
+      description:
+        "Read version from package.json (devEngines or engines field)",
     },
   ],
   generators: {
     script: ["n", "lsr", "--all"],
     postProcess: function (out) {
       const set = new Set<string>();
-      const versions = out.split("\n").slice(1);
+      const versions = out.split("\n").filter(Boolean);
       for (const version of versions) {
         set.add(version); // 16.1.2
         const split = version.split(".");
@@ -40,7 +52,6 @@ const versionArg: Fig.Arg = {
       });
     },
   },
-  isOptional: false,
 };
 const optionalVersionArg: Fig.Arg = {
   ...versionArg,
@@ -61,7 +72,7 @@ const completionSpec: Fig.Spec = {
       args: versionArg,
     },
     {
-      name: ["rm", "–"],
+      name: ["rm", "-"],
       description: "Remove a Node.js version",
       args: variadicVersionArg,
     },
@@ -79,13 +90,18 @@ const completionSpec: Fig.Spec = {
       description: "Remove the installed Node.js",
     },
     {
+      name: "download",
+      description: "Download a Node.js version into the cache",
+      args: versionArg,
+    },
+    {
       name: ["ls", "list"],
       description: "Output downloaded versions",
     },
     {
       name: ["lsr", "ls-remote", "list-remote"],
       description: "Output matching versions available for download",
-      args: versionArg,
+      args: optionalVersionArg,
       options: [
         {
           name: "--all",
@@ -147,7 +163,29 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-d", "--download"],
-      description: "Download only",
+      description: "Download if necessary. Used with run/exec/which",
+    },
+    {
+      name: "--cleanup",
+      description: "Remove cached version after install",
+    },
+    {
+      name: "--offline",
+      description:
+        "Resolve target version against cached downloads instead of internet lookup",
+    },
+    {
+      name: "--latest",
+      description: "Output the latest Node.js version available",
+    },
+    {
+      name: "--lts",
+      description: "Output the latest LTS Node.js version available",
+    },
+    {
+      name: "--stable",
+      description: "Output the latest LTS Node.js version available",
+      deprecated: true,
     },
     {
       name: ["-a", "--arch"],

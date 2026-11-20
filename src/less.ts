@@ -1,3 +1,4 @@
+// less v581.2 (macOS 15 /usr/bin/less --version, 2026-11-19). Source: less(1) man page on macOS 15
 const completionSpec: Fig.Spec = {
   name: "less",
   description: "Opposite of more",
@@ -9,7 +10,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-?", "--help"],
       description:
-        'This option displays a summary of the commands accepted by less (the same as the h command).  (Depending on how your shell interprets the question mark, it may be necessary to quote the question mark, thus: "-?"',
+        'This option displays a summary of the commands accepted by less (the same as the h command).  (Depending on how your shell interprets the question mark, it may be necessary to quote the question mark, thus: "-\\?"',
     },
     {
       name: ["-a", "--search-skip-screen"],
@@ -397,7 +398,9 @@ other words, the beginning of each line is assumed to be normal
 lines.  For the purpose of keeping track of screen appearance,
 these escape sequences are assumed to not move the cursor.
 OSC 8 hyperlinks are sequences of the form:
-ESC ] 8 ; 
+ESC ] 8 ; ... \\7
+The terminating sequence may be either a BEL character (\\7) or
+the two-character sequence "ESC \\".
 ANSI color escape sequences are sequences of the form:
 ESC [ ... m
 where the "..." is zero or more color specification characters.
@@ -499,7 +502,7 @@ forward movement command larger than one line`,
     },
 
     {
-      name: ["-x", "--tabs="],
+      name: ["-x", "--tabs"],
       args: { name: "n,..." },
       description: `Sets tab stops.  If only one n is specified, tab stops are set
 at multiples of n.  If multiple values separated by commas are
@@ -541,7 +544,8 @@ lines, the scrolling window automatically changes to 36 lines`,
     },
 
     {
-      name: "--quotes",
+      name: ['-"', "--quotes"],
+      args: { name: "cc" },
       description: `Changes the filename quoting character.  This may be necessary
 if you are trying to name a file which contains both spaces and
 quote characters.  Followed by a single character, this changes
@@ -565,6 +569,7 @@ as blank lines`,
 
     {
       name: ["-#", "--shift"],
+      args: { name: "n" },
       description: `Specifies the default number of positions to scroll horizontally
 in the RIGHTARROW and LEFTARROW commands.  If the number
 specified is zero, it sets the default number of positions to
@@ -598,6 +603,7 @@ each character of the pattern is typed in`,
 
     {
       name: "--line-num-width",
+      args: { name: "n" },
       description: `Sets the minimum width of the line number field when the -N
 option is in effect.  The default is 7 characters`,
     },
@@ -633,6 +639,7 @@ multiple times`,
     },
     {
       name: "--rscroll",
+      args: { name: "c" },
       description: `This option changes the character used to mark truncated lines.
 It may begin with a two-character attribute indicator like
 LESSBINFMT does.  If there is no attribute indicator, standout
@@ -645,6 +652,7 @@ different invocations of less`,
     },
     {
       name: "--status-col-width",
+      args: { name: "n" },
       description: `Sets the width of the status column when the -J option is in
 effect.  The default is 2 characters`,
     },
@@ -668,7 +676,9 @@ standards/standards/ecma-48)`,
     {
       name: "--wheel-lines",
       args: { name: "n" },
-      description: `Set the number of lines to scroll when the mouse wheel is rolled`,
+      description: `Set the number of lines to scroll when the mouse wheel is
+scrolled and the --mouse or --MOUSE option is in effect.  The
+default is 1 line`,
     },
   ],
 };
