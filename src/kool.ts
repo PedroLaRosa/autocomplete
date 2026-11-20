@@ -1,3 +1,7 @@
+// Kool v3.9.0 (GitHub release kool-dev/kool tag 3.9.0, 2026-11-20). Source: shallow clone of tag 3.9.0, read
+// statically (cobra definitions in commands/*.go and the generated docs/05-Commands-Reference); the binary was not run.
+// The pre-3.0 top-level `kool deploy` was replaced upstream by `kool cloud`.
+
 const getScripts: Fig.Generator = {
   script: ["kool", "run", "--help"],
   postProcess: (output) => {
@@ -18,129 +22,175 @@ const getServices: Fig.Generator = {
   splitOn: "\n",
 };
 
+const envOption: Fig.Option = {
+  name: ["--env", "-e"],
+  description: "Environment variables",
+  isRepeatable: true,
+  args: { name: "env" },
+};
+
+const tailOption: Fig.Option = {
+  name: ["--tail", "-t"],
+  description:
+    "Number of lines to show from the end of the logs for each container. A value equal to 0 will show all lines",
+  args: { name: "tail", default: "25" },
+};
+
+const followOption: Fig.Option = {
+  name: ["--follow", "-f"],
+  description: "Follow log output",
+};
+
+const containerOption: Fig.Option = {
+  name: ["--container", "-c"],
+  description: "Container target",
+  args: { name: "container", default: "default" },
+};
+
+const purgeOption: Fig.Option = {
+  name: "--purge",
+  description: "Remove all persistent data from volume mounts on containers",
+};
+
+const rebuildDescription = "Updates and builds service's images";
+
+const answersOptions: Fig.Option[] = [
+  {
+    name: ["--answer", "-a"],
+    description:
+      "Answer to a preset question as REF=value (comma separate multiple choices)",
+    isRepeatable: true,
+    args: { name: "answer" },
+  },
+  {
+    name: ["--no-interaction", "-n"],
+    description:
+      "Fail on any preset question without an answer instead of prompting",
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "kool",
-  description: "Cloud and docker environments made easy",
+  description: "Cloud native environments made easy",
   subcommands: [
     {
-      name: "create",
-      description: "Create a new project using a preset",
+      name: "cloud",
+      description: "Interact with Kool.dev Cloud and manage your deployments",
       options: [
         {
-          name: "--verbose",
-          description: "Increases output verbosity",
+          name: "--domain",
+          description: "Environment domain name to deploy to",
+          isPersistent: true,
+          args: { name: "domain" },
         },
         {
-          name: ["--help", "-h"],
-          description: "Help for create",
+          name: "--token",
+          description: "Token to authenticate with Kool.dev Cloud API",
+          isPersistent: true,
+          args: { name: "token" },
         },
       ],
-      args: [
-        {
-          name: "preset",
-          description: "Preset that will be used to create the project",
-        },
-        {
-          name: "folder",
-          description: "Folder where the project will be created",
-          template: "folders",
-        },
-      ],
-    },
-    {
-      name: "deploy",
-      description: "Deploy a local application to a Kool Cloud environment",
       subcommands: [
         {
-          name: "destroy",
-          description: "Destroy an environment deployed to Kool Cloud",
+          name: "deploy",
+          description:
+            "Deploy a local application to a Kool.dev Cloud environment",
           options: [
             {
-              name: "--verbose",
-              description: "Increases output verbosity",
+              name: "--domain-extra",
+              description: "List of extra domain aliases",
+              isRepeatable: true,
+              args: { name: "domain" },
             },
             {
-              name: ["--help", "-h"],
-              description: "Help for destroy",
+              name: "--platform",
+              description: "Platform for docker build",
+              args: { name: "platform", default: "linux/amd64" },
+            },
+            {
+              name: "--timeout",
+              description:
+                "Timeout in minutes for waiting the deployment to finish",
+              args: { name: "minutes" },
+            },
+            {
+              name: "--www-redirect",
+              description: "Redirect www to non-www domain",
             },
           ],
         },
         {
+          name: "destroy",
+          description: "Destroy an environment deployed to Kool.dev Cloud",
+        },
+        {
           name: "exec",
           description:
-            "Execute a command inside a running service container deployed to Kool Cloud",
-          options: [
+            "Execute a command inside a running service container deployed to Kool.dev Cloud",
+          parserDirectives: { optionsMustPrecedeArguments: true },
+          options: [containerOption],
+          args: [
             {
-              name: "--verbose",
-              description: "Increases output verbosity",
+              name: "service",
+              description: "Service you want to execute a command",
             },
             {
-              name: ["--container", "-c"],
-              description: "Container target",
-              args: { name: "container", default: "default" },
-            },
-            {
-              name: ["--help", "-h"],
-              description: "Help for exec",
+              name: "command",
+              description: "Command to execute inside the container",
+              isOptional: true,
+              isVariadic: true,
             },
           ],
         },
         {
           name: "logs",
           description:
-            "See the logs of running service container deployed to Kool Cloud",
-          options: [
-            {
-              name: "--verbose",
-              description: "Increases output verbosity",
-            },
-            {
-              name: ["--container", "-c"],
-              description: "Container target",
-              args: { name: "container", default: "default" },
-            },
-            {
-              name: ["--follow", "-f"],
-              description: "Follow log output",
-            },
-            {
-              name: ["--tail", "-t"],
-              description:
-                "Number of lines to show from the end of the logs for each container. A value equal to 0 will show all lines",
-              args: { name: "tail", default: "25" },
-            },
-            {
-              name: ["--help", "-h"],
-              description: "Help for logs",
-            },
-          ],
+            "See the logs of running service container deployed to Kool.dev Cloud",
+          options: [containerOption, followOption, tailOption],
+          args: {
+            name: "service",
+            description: "Service to get logs from",
+          },
+        },
+        {
+          name: "setup",
+          description: "Set up local configuration files for deployment",
         },
       ],
-      options: [
+    },
+    {
+      name: "completion",
+      description: "Generate shell completion configuration script",
+      hidden: true,
+      args: {
+        name: "shell",
+        suggestions: ["bash", "zsh", "fish", "powershell"],
+      },
+    },
+    {
+      name: "create",
+      description: "Create a new project using a preset",
+      options: answersOptions,
+      args: [
         {
-          name: "--verbose",
-          description: "Increases output verbosity",
+          name: "preset",
+          description: "Preset that will be used to create the project",
+          isOptional: true,
         },
         {
-          name: ["--help", "-h"],
-          description: "Help for deploy",
+          name: "folder",
+          description: "Folder where the project will be created",
+          isOptional: true,
+          template: "folders",
         },
       ],
     },
     {
       name: "docker",
       description: "Create a new container (a powered up 'docker run')",
+      parserDirectives: { optionsMustPrecedeArguments: true },
       options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
-        {
-          name: ["--env", "-e"],
-          description: "Environment variables",
-          isRepeatable: true,
-          args: { name: "env" },
-        },
+        envOption,
         {
           name: ["--network", "-n"],
           description: "Connect a container to a network",
@@ -154,14 +204,16 @@ const completionSpec: Fig.Spec = {
           args: { name: "publish" },
         },
         {
+          name: ["--user", "-u"],
+          description:
+            "Username or UID (format: <name|uid>[:<group|gid>]) to run the container as",
+          args: { name: "user" },
+        },
+        {
           name: ["--volume", "-v"],
           description: "Bind mount a volume",
           isRepeatable: true,
           args: { name: "volume" },
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for docker",
         },
       ],
       args: [
@@ -180,25 +232,13 @@ const completionSpec: Fig.Spec = {
     {
       name: "exec",
       description: "Execute a command inside a running service container",
+      parserDirectives: { optionsMustPrecedeArguments: true },
       options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
         {
           name: ["--detach", "-d"],
           description: "Detached mode: Run command in the background",
         },
-        {
-          name: ["--env", "-e"],
-          description: "Environment variables",
-          isRepeatable: true,
-          args: { name: "env" },
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for exec",
-        },
+        envOption,
       ],
       args: [
         {
@@ -215,40 +255,11 @@ const completionSpec: Fig.Spec = {
     {
       name: "info",
       description: "Print out information about the local environment",
-      options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for info",
-        },
-      ],
     },
     {
       name: "logs",
       description: "Display log output from running service containers",
-      options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
-        {
-          name: ["--follow", "-f"],
-          description: "Follow log output",
-        },
-        {
-          name: ["--tail", "-t"],
-          description:
-            "Number of lines to show from the end of the logs for each container. A value equal to 0 will show all lines",
-          args: { name: "tail", default: "25" },
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for logs",
-        },
-      ],
+      options: [followOption, tailOption],
       args: {
         name: "service",
         description: "Service to get logs from",
@@ -260,38 +271,36 @@ const completionSpec: Fig.Spec = {
       name: "preset",
       description:
         "Install configuration files customized for Kool in the current directory",
-      options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for preset",
-        },
-      ],
+      options: answersOptions,
       args: {
         name: "preset",
         description: "Preset that will be used to configure the project",
+        isOptional: true,
       },
+    },
+    {
+      name: "proxy",
+      description: "Manage Kool's local proxy",
+      subcommands: [
+        {
+          name: "aliases",
+          description:
+            "List configured internal proxy aliases for the current project",
+        },
+        {
+          name: "trust",
+          description: "Trust the local proxy certificate authority",
+        },
+      ],
     },
     {
       name: "recipe",
       description:
         "Adds configuration for some recipe in the current work directory",
-      options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for recipe",
-        },
-      ],
       args: {
         name: "recipe",
         description: "Recipe that will be used to add configuration",
+        isOptional: true,
       },
     },
     {
@@ -299,22 +308,10 @@ const completionSpec: Fig.Spec = {
       description:
         "Restart running service containers (the same as 'kool stop' followed by 'kool start')",
       options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
-        {
-          name: "--purge",
-          description:
-            "Remove all persistent data from volume mounts on containers",
-        },
+        purgeOption,
         {
           name: "--rebuild",
-          description: "Updates and builds service's images",
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for restart",
+          description: rebuildDescription,
         },
       ],
       args: {
@@ -328,51 +325,31 @@ const completionSpec: Fig.Spec = {
     {
       name: "run",
       description: "Execute a script defined in kool.yml",
-      options: [
+      parserDirectives: { optionsMustPrecedeArguments: true },
+      options: [envOption],
+      args: [
         {
-          name: "--verbose",
-          description: "Increases output verbosity",
+          name: "script",
+          description: "Script to be executed",
+          generators: getScripts,
         },
         {
-          name: ["--env", "-e"],
-          description: "Environment variables",
-          isRepeatable: true,
-          args: { name: "env" },
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for run",
+          name: "arg",
+          description: "Arguments passed to a single-line script",
+          isOptional: true,
+          isVariadic: true,
         },
       ],
-      args: {
-        name: "script",
-        description: "Script to be executed",
-        generators: getScripts,
-      },
     },
     {
       name: "self-update",
       description: "Update kool to the latest version",
-      options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for self-update",
-        },
-      ],
     },
     {
       name: "share",
       description:
         "Live share your local environment on the Internet using an HTTP tunnel",
       options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
         {
           name: "--port",
           description:
@@ -391,20 +368,12 @@ const completionSpec: Fig.Spec = {
             "The subdomain used to generate your public https://subdomain.kool.live URL",
           args: { name: "subdomain" },
         },
-        {
-          name: ["--help", "-h"],
-          description: "Help for share",
-        },
       ],
     },
     {
       name: "start",
       description: "Start service containers defined in docker-compose.yml",
       options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
         {
           name: ["--foreground", "-f"],
           description: "Start containers in foreground mode",
@@ -416,11 +385,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["--rebuild", "-b"],
-          description: "Updates and builds service's images",
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for start",
+          description: rebuildDescription,
         },
       ],
       args: {
@@ -434,35 +399,11 @@ const completionSpec: Fig.Spec = {
     {
       name: "status",
       description: "Show the status of all service containers",
-      options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for status",
-        },
-      ],
     },
     {
       name: "stop",
       description: "Stop and destroy running service containers",
-      options: [
-        {
-          name: "--verbose",
-          description: "Increases output verbosity",
-        },
-        {
-          name: "--purge",
-          description:
-            "Remove all persistent data from volume mounts on containers",
-        },
-        {
-          name: ["--help", "-h"],
-          description: "Help for stop",
-        },
-      ],
+      options: [purgeOption],
       args: {
         name: "service",
         description: "Service you want to stop",
@@ -474,12 +415,31 @@ const completionSpec: Fig.Spec = {
   ],
   options: [
     {
+      name: "--output",
+      description:
+        "Output format: json (machine-readable). For 'kool run', place before the script name",
+      isPersistent: true,
+      args: { name: "format", suggestions: ["json", "text"] },
+    },
+    {
       name: "--verbose",
       description: "Increases output verbosity",
+      isPersistent: true,
+    },
+    {
+      name: ["--working_dir", "-w"],
+      description: "Changes the working directory for the command",
+      isPersistent: true,
+      args: { name: "dir", template: "folders" },
     },
     {
       name: ["--help", "-h"],
       description: "Help for kool",
+      isPersistent: true,
+    },
+    {
+      name: ["--version", "-v"],
+      description: "Version for kool",
     },
   ],
 };
