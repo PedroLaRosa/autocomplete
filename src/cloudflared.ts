@@ -1,5 +1,6 @@
-// cloudflared 2026.11.1 (GitHub release cloudflare/cloudflared, 2026-11-17).
-// Source: urfave/cli definitions in cmd/cloudflared at tag 2026.11.1 (binary not installed)
+// cloudflared 2026.11.1 (newest git tag of cloudflare/cloudflared, same as the Homebrew formula, 2026-11-20).
+// Source: urfave/cli definitions in cmd/cloudflared and cfapi at tag 2026.11.1, walked statically with a go/ast
+// extractor (binary not installed). Hidden legacy flags (ssh server, quic tuning, ...) are left out on purpose.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 // ponytail: upstream appends this note to every legacy origin flag
@@ -215,6 +216,46 @@ const loggingOptions: Fig.Option[] = [
     args: { name: "value", description: "Name" },
   },
   logOutputOption,
+];
+
+// ConfigureProxyDNSFlags upstream: the proxy-dns feature was removed in 2026.2.0, the flags are only accepted so that
+// existing scripts do not break. They are visible in upstream help with an empty usage
+const proxyDnsNote =
+  "Removed proxy-dns feature, only accepted for compatibility";
+const proxyDnsOptions: Fig.Option[] = [
+  { name: "--proxy-dns", description: proxyDnsNote, deprecated: true },
+  {
+    name: "--proxy-dns-port",
+    description: proxyDnsNote,
+    deprecated: true,
+    args: { name: "value", description: "Port" },
+  },
+  {
+    name: "--proxy-dns-address",
+    description: proxyDnsNote,
+    deprecated: true,
+    args: { name: "value", description: "Address" },
+  },
+  {
+    name: "--proxy-dns-upstream",
+    description: proxyDnsNote,
+    deprecated: true,
+    isRepeatable: true,
+    args: { name: "value", description: "Upstream" },
+  },
+  {
+    name: "--proxy-dns-max-upstream-conns",
+    description: proxyDnsNote,
+    deprecated: true,
+    args: { name: "value", description: "Max connections" },
+  },
+  {
+    name: "--proxy-dns-bootstrap",
+    description: proxyDnsNote,
+    deprecated: true,
+    isRepeatable: true,
+    args: { name: "value", description: "Bootstrap" },
+  },
 ];
 
 // configureProxyFlags upstream: shared by `tunnel` and `tunnel run`
@@ -639,33 +680,44 @@ const access: Fig.Subcommand = {
   ],
 };
 
+// Also registered (hidden) as a top-level command upstream, for compatibility
+const tunnelLogin: Fig.Subcommand = {
+  name: "login",
+  description: "Generate a configuration file with your login details",
+  options: [
+    {
+      name: "--loginURL",
+      description:
+        "The URL used to login (default is https://dash.cloudflare.com/argotunnel)",
+      args: { name: "value" },
+    },
+    {
+      name: "--callbackURL",
+      description:
+        "The URL used for the callback (default is https://login.cloudflareaccess.org/)",
+      args: { name: "value" },
+    },
+    {
+      name: ["--fedramp", "-f"],
+      description: "Login with FedRAMP High environment (default: false)",
+    },
+  ],
+};
+
+// Hidden stub upstream, exits with "command is no longer supported"
+const dbConnect: Fig.Subcommand = {
+  name: "db-connect",
+  description: "Removed command, no longer supported by cloudflared",
+  deprecated: true,
+  hidden: true,
+};
+
 const tunnel: Fig.Subcommand = {
   name: "tunnel",
   description:
     "Use Cloudflare Tunnel to expose private services to the Internet or to Cloudflare connected private users",
   subcommands: [
-    {
-      name: "login",
-      description: "Generate a configuration file with your login details",
-      options: [
-        {
-          name: "--loginURL",
-          description:
-            "The URL used to login (default is https://dash.cloudflare.com/argotunnel)",
-          args: { name: "value" },
-        },
-        {
-          name: "--callbackURL",
-          description:
-            "The URL used for the callback (default is https://login.cloudflareaccess.org/)",
-          args: { name: "value" },
-        },
-        {
-          name: ["--fedramp", "-f"],
-          description: "Login with FedRAMP High environment (default: false)",
-        },
-      ],
-    },
+    tunnelLogin,
     {
       name: "create",
       description:
@@ -1211,6 +1263,8 @@ const tunnel: Fig.Subcommand = {
         },
       ],
     },
+    proxyDns,
+    dbConnect,
     {
       name: ["help", "h"],
       description: "Shows a list of commands or help for one command",
@@ -1220,6 +1274,7 @@ const tunnel: Fig.Subcommand = {
     ...cloudflaredOptions,
     ...proxyOptions,
     ...loggingOptions,
+    ...proxyDnsOptions,
     ...edgeOptions,
     {
       name: "--hostname",
@@ -1401,12 +1456,15 @@ const completionSpec: Fig.Spec = {
     help,
     access,
     tunnel,
+    { ...tunnelLogin, hidden: true },
+    dbConnect,
     tail,
     management,
   ],
   options: [
     ...edgeOptions,
     logOutputOption,
+    ...proxyDnsOptions,
     {
       name: ["--version", "-v", "-V"],
       description: "Print the version",
