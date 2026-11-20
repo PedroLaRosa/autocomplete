@@ -1,25 +1,28 @@
-const stringArg: Fig.Arg = {
-  name: "string",
-};
+// Hasura CLI v2.51.9 (latest stable cli/v2.51.9 tag of hasura/graphql-engine, tag dated 2026-11-10; checked 2026-11-20). Source: cobra command and flag definitions in cli/commands/*.go read statically at that tag (binary not executed).
+// The v3 / DDN `ddn` CLI is a separate tool and is not covered here.
 
-const sharedOptions: Fig.Option[] = [
+const rootOptions: Fig.Option[] = [
   {
     name: "--envfile",
     description: ".env filename to load ENV vars from",
+    isPersistent: true,
     args: {
-      name: "string",
+      name: "file",
+      default: ".env",
       template: "filepaths",
     },
   },
   {
     name: ["-h", "--help"],
     description: "Help for hasura",
+    isPersistent: true,
   },
   {
     name: "--log-level",
     description: "Log level",
+    isPersistent: true,
     args: {
-      name: "string",
+      name: "level",
       suggestions: ["DEBUG", "INFO", "WARN", "ERROR", "FATAL"],
       default: "INFO",
     },
@@ -27,53 +30,120 @@ const sharedOptions: Fig.Option[] = [
   {
     name: "--no-color",
     description: "Do not colorize output",
+    isPersistent: true,
   },
   {
     name: "--project",
-    description: "Directory where commands are executed",
+    description: "Directory where commands are executed (default: current dir)",
+    isPersistent: true,
     args: {
-      name: "string",
+      name: "directory",
       template: "folders",
     },
   },
   {
     name: "--skip-update-check",
     description: "Skip automatic update check on command execution",
+    isPersistent: true,
+  },
+  {
+    name: "--cli-ext-path",
+    description: "Path to cli-ext binary",
+    hidden: true,
+    isPersistent: true,
+    args: {
+      name: "path",
+      template: "filepaths",
+    },
   },
 ];
-
-const adminSecretOption: Fig.Option = {
-  name: "--admin-secret",
-  description: "Admin secret for Hasura GraphQL engine",
-  args: stringArg,
-};
-
-const certificateAuthorityOption: Fig.Option = {
-  name: "--certificate-authority",
-  description: "Path to a cert file for the certificate authority",
-  args: {
-    name: "string",
-    template: "filepaths",
-  },
-};
 
 const endpointOption: Fig.Option = {
   name: "--endpoint",
   description:
     "Http(s) endpoint for Hasura GraphQL engine (env `HASURA_GRAPHQL_ENDPOINT`)",
-  args: stringArg,
+  args: { name: "url" },
+};
+
+const adminSecretOption: Fig.Option = {
+  name: "--admin-secret",
+  description: "Admin secret for Hasura GraphQL engine",
+  args: { name: "secret" },
+};
+
+const accessKeyOption: Fig.Option = {
+  name: "--access-key",
+  description:
+    "Access key for Hasura GraphQL engine, use --admin-secret instead",
+  deprecated: true,
+  args: { name: "key" },
 };
 
 const insecureSkipTLSVerifyOption: Fig.Option = {
   name: "--insecure-skip-tls-verify",
   description: "Skip TLS verification and disable cert checking",
 };
-const actionsSharedOptions: Fig.Option[] = [
-  adminSecretOption,
-  certificateAuthorityOption,
+
+const certificateAuthorityOption: Fig.Option = {
+  name: "--certificate-authority",
+  description: "Path to a cert file for the certificate authority",
+  args: {
+    name: "file",
+    template: "filepaths",
+  },
+};
+
+const headerOption: Fig.Option = {
+  name: "--header",
+  description:
+    'Custom HTTP header to send with every request to Hasura GraphQL engine, in "Name: value" form',
+  isRepeatable: true,
+  args: { name: "header" },
+};
+
+const disableInteractiveOption: Fig.Option = {
+  name: "--disable-interactive",
+  description: "Disables interactive prompts",
+};
+
+const databaseNameOption: Fig.Option = {
+  name: "--database-name",
+  description: "Database on which operation should be applied",
+  args: { name: "database" },
+};
+
+// Connection flags accepted by scripts update-project-v2/v3 (no --header there)
+const scriptsConnectionOptions: Fig.Option[] = [
   endpointOption,
+  adminSecretOption,
+  accessKeyOption,
   insecureSkipTLSVerifyOption,
+  certificateAuthorityOption,
 ];
+
+// Connection flags accepted by console, deploy and (as persistent flags) the actions, metadata, migrate and seed groups
+const connectionOptions: Fig.Option[] = [
+  ...scriptsConnectionOptions,
+  headerOption,
+];
+
+const asPersistent = (options: Fig.Option[]): Fig.Option[] =>
+  options.map((option) => ({ ...option, isPersistent: true }));
+
+const noTransactionOption: Fig.Option = {
+  name: "--no-transaction",
+  description: "Disable transaction for migration",
+  exclusiveOn: ["--per-migration-transaction"],
+};
+
+const perMigrationTransactionOption: Fig.Option = {
+  name: "--per-migration-transaction",
+  description:
+    "Enable per-migration transaction control; add '-- hasura:no-transaction' as the first line of a SQL file to run that migration without a transaction (not supported on MSSQL/BigQuery sources)",
+  exclusiveOn: ["--no-transaction"],
+};
+
+const outputFormatSuggestions = ["json", "yaml"];
 
 const completionSpec: Fig.Spec = {
   name: "hasura",
@@ -81,78 +151,70 @@ const completionSpec: Fig.Spec = {
   subcommands: [
     {
       name: "actions",
-      description: "Manage Hasura actions",
+      description: "Manage Hasura Actions",
+      options: asPersistent(connectionOptions),
       subcommands: [
         {
           name: "codegen",
-          description: "Generate code for actions",
+          description: "Generate code for Actions",
           options: [
             {
               name: "--derive-from",
-              description: "Derive action from a hasura operation",
-              args: stringArg,
+              description: "Derive Action from a Hasura operation",
+              args: { name: "operation" },
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
           ],
           args: {
-            name: "action name",
+            name: "action-name",
             isOptional: true,
             isVariadic: true,
           },
         },
         {
           name: "create",
-          description: "Create a Hasura action",
+          description: "Create a Hasura Action",
           options: [
             {
               name: "--derive-from",
-              description: "Derive action from a Hasura operation",
-              args: stringArg,
+              description: "Derive Action from a Hasura operation",
+              args: { name: "operation" },
             },
             {
               name: "--kind",
-              description: "Kind to use in action",
+              description: "Kind to use in Action",
               args: {
-                name: "string",
-                isOptional: true,
+                name: "kind",
                 suggestions: ["synchronous", "asynchronous"],
               },
             },
             {
               name: "--webhook",
-              description: "Webhook to use in action",
-              args: {
-                name: "webhook",
-                isOptional: true,
-              },
+              description: "Webhook to use in Action",
+              args: { name: "webhook" },
             },
             {
               name: "--with-codegen",
-              description: "Create action along with codegen",
+              description: "Create Action along with codegen",
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
           ],
           args: {
-            name: "action name",
-            isOptional: true,
+            name: "action-name",
           },
         },
         {
           name: "use-codegen",
-          description: "Use the codegen to generate code for Hasura actions",
+          description: "Use the codegen to generate code for Hasura Actions",
           options: [
             {
               name: "--framework",
               description: "Framework to be used by codegen",
-              args: stringArg,
+              args: { name: "framework" },
             },
             {
               name: "--output-dir",
               description: "Directory to create the codegen files",
               args: {
-                name: "string",
+                name: "directory",
                 template: "folders",
               },
             },
@@ -160,72 +222,75 @@ const completionSpec: Fig.Spec = {
               name: "--with-starter-kit",
               description: "Clone starter kit for a framework",
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
           ],
         },
       ],
-      options: [...actionsSharedOptions, ...sharedOptions],
     },
     {
-      name: "completions",
-      description: "Generate auto completion code",
+      name: "completion",
+      description: "Generate auto-completion code",
       options: [
         {
           name: "--file",
           description: "File to which output has to be written",
           args: {
-            name: "string",
+            name: "file",
             template: "filepaths",
           },
         },
-        ...sharedOptions,
       ],
       args: {
         name: "shell",
-        isOptional: true,
         suggestions: ["bash", "zsh"],
       },
     },
     {
       name: "console",
-      description: "Open the console to manage the database and try out APIs",
+      description: "Open the Console to manage the database and try out APIs",
       options: [
         {
           name: "--address",
           description: "Address to serve console and migration API from",
           args: {
-            name: "string",
+            name: "address",
             default: "localhost",
-            isOptional: true,
+          },
+        },
+        {
+          name: "--api-host",
+          description:
+            "Host serving migrate API (preview: usage may change in future)",
+          args: {
+            name: "url",
+            default: "http://localhost",
           },
         },
         {
           name: "--api-port",
-          description: "Port for serving migrate api",
+          description: "Port for serving migrate API",
           args: {
-            name: "string",
-            isOptional: true,
+            name: "port",
             default: "9693",
           },
         },
         {
           name: "--browser",
           description: "Open console in a specific browser",
-          args: stringArg,
+          args: { name: "browser" },
+        },
+        {
+          name: "--console-hge-endpoint",
+          description:
+            "Endpoint on which the CLI Console should reach the HGE server",
+          args: { name: "url" },
         },
         {
           name: "--console-port",
           description: "Port for serving console",
           args: {
-            name: "string",
+            name: "port",
             default: "9695",
-            isOptional: true,
           },
-        },
-        {
-          name: "--insecure-skip-tls-verify",
-          description: "Skip TLS verification and disable cert checking",
         },
         {
           name: "--no-browser",
@@ -236,7 +301,7 @@ const completionSpec: Fig.Spec = {
           description:
             "Directory where static assets mentioned in the console html template can be served from",
           args: {
-            name: "string",
+            name: "directory",
             template: "folders",
           },
         },
@@ -245,43 +310,126 @@ const completionSpec: Fig.Spec = {
           description:
             "When rendering console, use assets provided by HGE server",
         },
-        ...actionsSharedOptions,
-        ...sharedOptions,
+        ...connectionOptions,
       ],
     },
     {
-      name: "init",
+      name: "deploy",
       description:
-        "Initialize a directory for Hasura GraphQL engine migrations",
+        "Apply Hasura Metadata and database migrations to graphql-engine (preview)",
       options: [
-        adminSecretOption,
-        endpointOption,
         {
-          name: "--install-manifest",
-          description: "Install manifest to be cloned",
-          args: stringArg,
+          name: "--with-seeds",
+          description: "Apply available seeds data to databases",
         },
+        ...connectionOptions,
+        disableInteractiveOption,
+        {
+          name: "--disable-auto-state-migration",
+          description:
+            "After a config v3 update, disable automatically moving state from hdb_catalog.schema_migrations to catalog state",
+          hidden: true,
+        },
+        noTransactionOption,
+        perMigrationTransactionOption,
+      ],
+    },
+    {
+      name: "docs",
+      description: "Generate CLI docs in various formats",
+      hidden: true,
+      options: [
+        {
+          name: "--type",
+          description: "Type of documentation to generate",
+          args: {
+            name: "type",
+            suggestions: ["man", "md", "mdx", "rest", "yaml"],
+            default: "md",
+          },
+        },
+        {
+          name: "--directory",
+          description: "Directory where docs should be generated",
+          args: {
+            name: "directory",
+            default: "docs",
+            template: "folders",
+          },
+        },
+      ],
+    },
+    {
+      name: "help",
+      description: "Help about any command",
+      args: {
+        name: "command",
+        isOptional: true,
+        isVariadic: true,
+      },
+    },
+    {
+      name: "init",
+      description: "Initialize a new Hasura GraphQL engine project",
+      options: [
         {
           name: "--version",
           description: "Config version to be used",
           args: {
             name: "int",
+            suggestions: ["2", "3"],
             default: "3",
           },
         },
+        {
+          name: "--directory",
+          description:
+            "Name of directory where files will be created, use the directory-name argument instead",
+          deprecated: true,
+          args: {
+            name: "directory",
+            template: "folders",
+          },
+        },
+        endpointOption,
+        adminSecretOption,
+        accessKeyOption,
+        {
+          name: "--install-manifest",
+          description:
+            "Install manifest to be cloned, refer to the install-manifests directory of hasura/graphql-engine instead",
+          deprecated: true,
+          args: { name: "manifest" },
+        },
+        {
+          name: "--fetch",
+          description:
+            "Fetch the metadata and migrations from server without prompt",
+          hidden: true,
+        },
       ],
       args: {
-        name: "directory name",
+        name: "directory-name",
         isOptional: true,
+        template: "folders",
       },
     },
     {
-      name: ["md", "metadata"],
+      name: ["metadata", "md"],
+      description:
+        "Manage Hasura GraphQL engine Metadata saved in the database",
+      options: asPersistent(connectionOptions),
       subcommands: [
         {
           name: "apply",
-          description: "Apply Hasura metadata on a database",
+          description: "Apply Hasura Metadata on a database",
           options: [
+            {
+              name: "--from-file",
+              description:
+                "Apply metadata from migrations/metadata.[yaml|json], deprecated with config v1",
+              deprecated: true,
+            },
             {
               name: "--dry-run",
               description:
@@ -291,25 +439,70 @@ const completionSpec: Fig.Spec = {
               name: ["-o", "--output"],
               description: "Specify an output format to show applied metadata",
               args: {
-                name: "string",
-                isOptional: true,
-                suggestions: ["json", "yaml"],
+                name: "format",
+                suggestions: outputFormatSuggestions,
                 default: "json",
               },
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
+            {
+              name: "--disallow-inconsistent-metadata",
+              description: "Disallow inconsistent metadata to be applied",
+            },
           ],
         },
         {
-          name: "clear",
-          description: "Clear Hasura GraphQL engine metadata on the database",
-          options: [...actionsSharedOptions, ...sharedOptions],
+          name: "apply-data-sources",
+          description:
+            "Apply only the data sources (connection configuration) from the project metadata",
+          options: [
+            {
+              name: "--dry-run",
+              description:
+                "Show the metadata API request that would be sent to the server, without applying it",
+            },
+          ],
+        },
+        {
+          name: ["clear", "reset"],
+          description: "Clear Hasura GraphQL engine Metadata on the database",
+        },
+        {
+          name: "codemod",
+          description: "Run codemods on Hasura Metadata",
+          subcommands: [
+            {
+              name: "migrate-postgres-comments",
+              description:
+                "Copy PostgreSQL table, column, function and computed-field COMMENTs into local Hasura Metadata",
+              options: [
+                {
+                  name: "--source",
+                  description:
+                    "The Postgres-family source to migrate comments for (default: all Postgres-family sources)",
+                  args: { name: "source" },
+                },
+                {
+                  name: "--dry-run",
+                  description:
+                    "Print the proposed metadata changes without writing any files",
+                },
+              ],
+            },
+          ],
         },
         {
           name: "diff",
-          description: "Show a highlighted diff of Hasura metadata",
-          options: [...actionsSharedOptions, ...sharedOptions],
+          description: "Show a highlighted diff of Hasura Metadata (preview)",
+          options: [
+            {
+              name: "--type",
+              description: "Specify a type of diff",
+              args: {
+                name: "type",
+                suggestions: ["unified-json", "unified-yaml", "yaml", "json"],
+              },
+            },
+          ],
           args: [
             {
               name: "file1",
@@ -326,48 +519,71 @@ const completionSpec: Fig.Spec = {
         {
           name: "export",
           description:
-            "Export Hasura GraphQL engine metadata from the database",
+            "Export Hasura GraphQL engine Metadata from the database",
           options: [
             {
               name: ["-o", "--output"],
-              description: "Specify an output format for exported metadata",
-              args: stringArg,
+              description:
+                "Write metadata to standard output in given format (does not modify project metadata)",
+              args: {
+                name: "format",
+                suggestions: outputFormatSuggestions,
+              },
             },
           ],
         },
         {
-          name: ["ic", "inconsistency", "inconsistencies"],
-          description: "Manage inconsistent objects in Hasura metadata",
+          name: ["inconsistency", "inconsistencies", "ic"],
+          description: "Manage inconsistent objects in the Hasura Metadata",
           subcommands: [
             {
               name: "drop",
-              description: "Drop inconsistent objects from the metadata",
-              options: [...actionsSharedOptions, ...sharedOptions],
+              description: "Drop inconsistent objects from the Hasura Metadata",
             },
             {
-              name: ["ls", "list"],
-              description: "List all inconsistent objects from the metadata",
-              options: [...actionsSharedOptions, ...sharedOptions],
+              name: ["list", "ls"],
+              description:
+                "List all inconsistent objects from the Hasura Metadata",
+              options: [
+                {
+                  name: ["-o", "--output"],
+                  description:
+                    "Select output format for inconsistent metadata objects",
+                  args: {
+                    name: "format",
+                    suggestions: ["json"],
+                  },
+                },
+              ],
             },
             {
               name: "status",
-              description: "Check if the metadata is inconsistent or not",
-              options: [...actionsSharedOptions, ...sharedOptions],
+              description:
+                "Check if the Hasura Metadata is inconsistent or not",
             },
           ],
-          options: [...actionsSharedOptions, ...sharedOptions],
         },
         {
           name: "reload",
-          description: "Reload Hasura GraphQL engine metadata on the database",
-          options: [...actionsSharedOptions, ...sharedOptions],
+          description:
+            "Reload Hasura GraphQL engine schema to pick up changes in any underlying data sources (database or remote schema)",
         },
       ],
-      options: [...actionsSharedOptions, ...sharedOptions],
     },
     {
       name: "migrate",
       description: "Manage migrations on the database",
+      options: asPersistent([
+        databaseNameOption,
+        ...connectionOptions,
+        disableInteractiveOption,
+        {
+          name: "--disable-auto-state-migration",
+          description:
+            "After a config v3 update, disable automatically moving state from hdb_catalog.schema_migrations to catalog state",
+          hidden: true,
+        },
+      ]),
       subcommands: [
         {
           name: "apply",
@@ -376,40 +592,38 @@ const completionSpec: Fig.Spec = {
             {
               name: "--up",
               description: "Apply all or N up migration steps",
-              args: {
-                name: "string",
-                isOptional: true,
-              },
+              exclusiveOn: ["--down", "--goto", "--version"],
+              args: { name: "steps" },
             },
             {
               name: "--down",
-              description: "Apply all or N up migration steps",
-              args: {
-                name: "string",
-                isOptional: true,
-              },
+              description: "Apply all or N down migration steps",
+              exclusiveOn: ["--up", "--goto", "--version"],
+              args: { name: "steps" },
             },
             {
-              name: "goto",
-              description:
-                "Apply migration chain up to to the version specified",
-              args: stringArg,
+              name: "--goto",
+              description: "Apply migration chain up to the version specified",
+              exclusiveOn: ["--up", "--down", "--version"],
+              args: { name: "version" },
             },
             {
               name: "--version",
               description: "Only apply this particular migration",
-              args: stringArg,
+              exclusiveOn: ["--up", "--down", "--goto"],
+              args: { name: "version" },
             },
             {
               name: "--skip-execution",
               description:
                 "Skip executing the migration action, but mark them as applied",
+              exclusiveOn: ["--dry-run"],
             },
             {
               name: "--type",
               description: "Type of migration to be used with version flag",
               args: {
-                name: "string",
+                name: "type",
                 suggestions: ["up", "down"],
                 default: "up",
               },
@@ -418,88 +632,105 @@ const completionSpec: Fig.Spec = {
               name: "--dry-run",
               description:
                 "Print the names of migrations which are going to be applied",
+              exclusiveOn: ["--skip-execution", "--all-databases"],
             },
             {
               name: "--all-databases",
               description:
-                "Set this flag to attempt to apply migrations on all databases present on server",
+                "Attempt to apply migrations on all databases present on server",
+              exclusiveOn: ["--dry-run"],
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
+            {
+              name: "--progressbar-logs",
+              description: "Print the logs of progressbar",
+              hidden: true,
+            },
+            noTransactionOption,
+            perMigrationTransactionOption,
           ],
         },
         {
           name: "create",
-          description: "Create files required for a migration",
+          description: "Create sql files required for a migration",
           options: [
-            {
-              name: "--down-sql",
-              description:
-                "Sql string/query that is to be used to create a down migration",
-              args: stringArg,
-            },
             {
               name: "--from-server",
               description:
-                "Take pg_dump of schema and Hasura metadata from the server",
-            },
-            {
-              name: "--metadata-from-file",
-              description:
-                "Path to a hasura metadata file to be used for up actions",
-              args: {
-                name: "string",
-                template: "filepaths",
-              },
-            },
-            {
-              name: "--metadata-from-server",
-              description:
-                "Take metadata from the server and write it as an up migration file",
-            },
-            {
-              name: "--schema",
-              description: "Name of Postgres schema to export as a migration",
-              args: {
-                name: "strings",
-                isVariadic: true,
-              },
+                "Take pg_dump of schema (default: public) and Hasura metadata from the server",
             },
             {
               name: "--sql-from-file",
               description:
                 "Path to an SQL file which contains the SQL statements",
               args: {
-                name: "string",
+                name: "file",
                 template: "filepaths",
               },
             },
             {
               name: "--sql-from-server",
               description:
-                "Take pg_dump from the server and save it as a migration",
+                "Take pg_dump from the server (default: public) and save it as a migration, use --from-server instead",
+              deprecated: true,
+            },
+            {
+              name: "--schema",
+              description:
+                "Name of Postgres schema to export as a migration, provide multiple schemas as a comma separated list",
+              isRepeatable: true,
+              args: {
+                name: "schemas",
+                default: "public",
+              },
+            },
+            {
+              name: "--metadata-from-file",
+              description:
+                "Path to a Hasura metadata file to be used for up actions, no longer accepted",
+              deprecated: true,
+              args: {
+                name: "file",
+                template: "filepaths",
+              },
+            },
+            {
+              name: "--metadata-from-server",
+              description:
+                "Take metadata from the server and write it as an up migration file, no longer accepted",
+              deprecated: true,
             },
             {
               name: "--up-sql",
               description:
                 "Sql string/query that is to be used to create an up migration",
-              args: stringArg,
+              args: { name: "sql" },
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
+            {
+              name: "--down-sql",
+              description:
+                "Sql string/query that is to be used to create a down migration",
+              args: { name: "sql" },
+            },
           ],
           args: {
-            name: "migration name",
-            isOptional: true,
+            name: "migration-name",
           },
         },
         {
           name: "delete",
-          description: "Clear migrations from local project and server",
+          description:
+            "Clear migrations from local project and server (preview)",
           options: [
+            {
+              name: "--version",
+              description: "Deletes the specified version in migrations",
+              exclusiveOn: ["--all"],
+              args: { name: "uint" },
+            },
             {
               name: "--all",
               description: "Clears all migrations for selected database",
+              exclusiveOn: ["--version"],
             },
             {
               name: "--force",
@@ -507,55 +738,52 @@ const completionSpec: Fig.Spec = {
               isDangerous: true,
             },
             {
-              name: "--version",
-              description: "Deletes the specified version in migrations",
-              args: {
-                name: "uint",
-              },
+              name: "--server",
+              description: "Reset migrations only on server",
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
           ],
         },
         {
           name: "squash",
-          description: "Squash multiple migrations into a single one",
+          description: "Squash multiple migrations into a single one (preview)",
           options: [
-            {
-              name: "--delete-source",
-              description:
-                "Delete the source files after squashing without any confirmation",
-            },
             {
               name: "--from",
               description: "Start squashing from this version",
+              isRequired: true,
+              args: { name: "uint" },
+            },
+            {
+              name: "--to",
+              description: "Squash up to this version",
               args: {
-                name: "uint",
+                name: "int",
+                default: "-1",
               },
             },
             {
               name: "--name",
               description: "Name for the new squashed migration",
               args: {
-                name: "string",
+                name: "name",
                 default: "squashed",
               },
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
+            {
+              name: "--delete-source",
+              description:
+                "Delete the source files after squashing without any confirmation",
+            },
           ],
         },
         {
           name: "status",
           description: "Display current status of migrations on a database",
-          ...actionsSharedOptions,
-          ...sharedOptions,
         },
       ],
-      options: [...actionsSharedOptions, ...sharedOptions],
     },
     {
-      name: ["plugin", "plugins"],
+      name: ["plugins", "plugin"],
       description: "Manage plugins for the CLI",
       subcommands: [
         {
@@ -565,17 +793,24 @@ const completionSpec: Fig.Spec = {
             {
               name: "--version",
               description: "Version to be installed",
-              args: stringArg,
+              args: { name: "version" },
             },
-            ...sharedOptions,
+            {
+              name: "--manifest-file",
+              description: "Specify local manifest file (dev)",
+              hidden: true,
+              args: {
+                name: "file",
+                template: "filepaths",
+              },
+            },
           ],
           args: {
-            name: "plugin name",
-            isOptional: true,
+            name: "plugin-name",
           },
         },
         {
-          name: "list",
+          name: ["list", "ls"],
           description:
             "List all available plugins from index, versions and installation status",
           options: [
@@ -584,16 +819,13 @@ const completionSpec: Fig.Spec = {
               description:
                 "Do not update the plugin index local cache, only show the list",
             },
-            ...sharedOptions,
           ],
         },
         {
           name: "uninstall",
           description: "Uninstall a plugin",
-          options: sharedOptions,
           args: {
-            name: "plugin name",
-            isOptional: true,
+            name: "plugin-name",
           },
         },
         {
@@ -603,47 +835,44 @@ const completionSpec: Fig.Spec = {
             {
               name: "--version",
               description: "Version to be upgraded",
-              args: stringArg,
+              args: { name: "version" },
             },
-            ...sharedOptions,
           ],
           args: {
-            name: "plugin name",
-            isOptional: true,
+            name: "plugin-name",
           },
         },
       ],
-      options: sharedOptions,
     },
     {
       name: "scripts",
-      description: "Execute helper scripts to manage Hasura projects",
+      description: "Execute helper scripts to manage Hasura Projects",
       subcommands: [
         {
-          name: "update-project-v2",
-          description: "Update the Hasura project from config v1 to v2",
+          name: ["update-project-v2", "update-config-v2"],
+          description: "Update the Hasura Project from config v1 to v2",
           options: [
             {
               name: "--metadata-dir",
               description: "Metadata directory",
               args: {
-                name: "string",
+                name: "directory",
+                default: "metadata",
                 template: "folders",
               },
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
+            ...scriptsConnectionOptions,
           ],
         },
         {
           name: "update-project-v3",
-          description: "Update the Hasura project from config v2 to v3",
+          description: "Update the Hasura Project from config v2 to v3",
           options: [
             {
               name: "--database-name",
               description:
                 "Database name for which the current migrations / seeds belong to",
-              args: stringArg,
+              args: { name: "database" },
             },
             {
               name: "--force",
@@ -652,18 +881,22 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--move-state-only",
-              description: "Do only a state migration from old hdb_catalog",
+              description:
+                "Do only a state migration from old hdb_catalog.* table to catalog state and skip others",
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
+            ...scriptsConnectionOptions,
           ],
         },
       ],
-      options: sharedOptions,
     },
     {
-      name: ["sd", "seed", "seeds"],
+      name: ["seed", "sd", "seeds"],
       description: "Manage seed data",
+      options: asPersistent([
+        databaseNameOption,
+        ...connectionOptions,
+        disableInteractiveOption,
+      ]),
       subcommands: [
         {
           name: "apply",
@@ -672,13 +905,17 @@ const completionSpec: Fig.Spec = {
             {
               name: ["-f", "--file"],
               description: "Seed file to apply",
+              isRepeatable: true,
               args: {
-                name: "string array",
+                name: "file",
                 template: "filepaths",
               },
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
+            {
+              name: "--all-databases",
+              description:
+                "Attempt to apply seeds on all databases present on server",
+            },
           ],
         },
         {
@@ -688,28 +925,15 @@ const completionSpec: Fig.Spec = {
             {
               name: "--from-table",
               description:
-                "Name of table from which seed file has to be initialized",
-              args: {
-                name: "string array",
-              },
+                "Name of table from which seed file has to be initialized, e.g. table1, myschema1.table1",
+              isRepeatable: true,
+              args: { name: "table" },
             },
-            ...actionsSharedOptions,
-            ...sharedOptions,
           ],
           args: {
-            name: "seed name",
+            name: "seed-name",
           },
         },
-      ],
-      options: [
-        {
-          name: "--database-name",
-          description:
-            "Database name for which the current migrations / seeds belong to",
-          args: stringArg,
-        },
-        ...actionsSharedOptions,
-        ...sharedOptions,
       ],
     },
     {
@@ -719,21 +943,16 @@ const completionSpec: Fig.Spec = {
         {
           name: "--version",
           description: "A specific version to install",
-          args: {
-            name: "string",
-            isOptional: true,
-          },
+          args: { name: "version" },
         },
-        ...sharedOptions,
       ],
     },
     {
       name: "version",
       description: "Print the CLI version",
-      options: sharedOptions,
     },
   ],
-  options: sharedOptions,
+  options: rootOptions,
 };
 
 export default completionSpec;
