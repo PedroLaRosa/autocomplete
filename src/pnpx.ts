@@ -1,144 +1,134 @@
+// pnpx v12.21.0 (pnpm npm package, latest dist-tag, 2026-11-20). pnpx is an alias of `pnpm dlx`. Source: read statically, not run: pnpm/pnpm tag v12.21.0
+// pnpm/crates/cli/src/cli_args/dlx.rs (DlxArgs), cli_command.rs (global options), reporter.rs (enums), the npm package's bin/pnpx.mjs and CHANGELOG.md.
+// The old npx-style options (--cache, --userconfig, --call, --shell, --always-spawn, --no-install, ...) are not options of `pnpm dlx` and were removed.
+import { npxSuggestions } from "./npx";
+import { npmSearchGenerator } from "./npm";
+
+const archOption = (
+  name: string,
+  description: string,
+  suggestions?: string[]
+): Fig.Option => ({
+  name,
+  description,
+  isRepeatable: true,
+  args: {
+    name: name.slice(2),
+    ...(suggestions && { suggestions }),
+  },
+});
+
 const completionSpec: Fig.Spec = {
   name: "pnpx",
-  description: "Execute binaries from npm packages",
-  subcommands: [
-    {
-      name: "create-react-native-app",
-      icon: "https://reactnative.dev/img/pwa/manifest-icon-512.png",
-      loadSpec: "create-react-native-app",
-    },
-    {
-      name: "react-native",
-      icon: "https://reactnative.dev/img/pwa/manifest-icon-512.png",
-      loadSpec: "react-native",
-    },
-    {
-      name: "tailwindcss",
-      icon: "https://tailwindcss.com/favicon-32x32.png",
-      loadSpec: "tailwindcss",
-    },
-    {
-      name: "next",
-      icon: "https://nextjs.org/static/favicon/favicon-16x16.png",
-      loadSpec: "next",
-    },
-    {
-      name: "gltfjsx",
-      icon: "https://raw.githubusercontent.com/pmndrs/branding/master/logo.svg",
-      loadSpec: "gltfjsx",
-    },
-    {
-      name: "prisma",
-      icon: "https://raw.githubusercontent.com/prisma/docs/main/src/images/favicon-16x16.png",
-      loadSpec: "prisma",
-    },
-  ],
+  description: "Run a package in a temporary environment",
+  args: {
+    name: "command",
+    isCommand: true,
+    description: "The command to run, followed by its arguments",
+    generators: npmSearchGenerator,
+    debounce: true,
+    suggestions: [...npxSuggestions],
+  },
   options: [
     {
-      name: ["--package", "-p"],
-      description: "Package to be executed",
+      name: "--package",
+      description: "The package to install before running the command",
+      isRepeatable: true,
       args: {
         name: "package",
+        generators: npmSearchGenerator,
+        debounce: true,
       },
     },
     {
-      name: "--cache",
+      name: ["-c", "--shell-mode"],
+      description:
+        "Run the command inside of a shell. Uses /bin/sh on UNIX and cmd.exe on Windows",
+    },
+    {
+      name: "--allow-build",
+      description:
+        "Package names allowed to run lifecycle (build) scripts during the dlx install",
+      isRepeatable: true,
+      args: { name: "package" },
+    },
+    archOption(
+      "--cpu",
+      "CPU architectures whose platform-tagged optional dependencies the dlx install should keep"
+    ),
+    archOption(
+      "--os",
+      "Operating systems whose platform-tagged optional dependencies the dlx install should keep"
+    ),
+    archOption(
+      "--libc",
+      "Libc families whose platform-tagged optional dependencies the dlx install should keep",
+      ["glibc", "musl"]
+    ),
+    {
+      name: ["-C", "--dir"],
+      description:
+        "Run as if pnpm was started in <path> instead of the current working directory",
+      args: {
+        name: "path",
+        template: "folders",
+      },
+    },
+    {
+      name: "--env-file",
+      description:
+        "Load environment variables from a dotenv-style file before running",
+      isRepeatable: true,
       args: {
         name: "path",
         template: "filepaths",
       },
-      description: "Location of the npm cache",
     },
     {
-      name: "--always-spawn",
-      description: "Always spawn a child process to execute the command",
-    },
-    {
-      description: "Skip installation if a package is missing",
-      name: "--no-install",
-    },
-    {
-      args: {
-        name: "path",
-        template: "filepaths",
-      },
-      description: "Path to user npmrc",
-      name: "--userconfig",
-    },
-    {
-      name: ["--call", "-c"],
-      args: {
-        name: "script",
-      },
-      description: "Execute string as if inside `npm run-script`",
-    },
-    {
-      name: ["--shell", "-s"],
-      description: "Shell to execute the command with, if any",
-      args: {
-        name: "shell",
-        suggestions: [
-          {
-            name: "bash",
-          },
-          {
-            name: "fish",
-          },
-          {
-            name: "zsh",
-          },
-        ],
-      },
-    },
-    {
-      args: {
-        name: "shell-fallback",
-        suggestions: [
-          {
-            name: "bash",
-          },
-          {
-            name: "fish",
-          },
-          {
-            name: "zsh",
-          },
-        ],
-      },
-      name: "--shell-auto-fallback",
+      name: "--registry",
       description:
-        'Generate shell code to use pnpx as the "command not found" fallback',
+        "Base URL of the npm registry to resolve and fetch packages from",
+      args: { name: "url" },
     },
     {
-      name: "--ignore-existing",
-      description:
-        "Ignores existing binaries in $PATH, or in the localproject. This forces pnpx to do a temporary install and use the latest version",
-    },
-    {
-      name: ["--quiet", "-q"],
-      description:
-        "Suppress output from pnpx itself. Subcommands will not be affected",
-    },
-    {
-      name: "--npm",
+      name: "--store-dir",
+      description: "Directory in which the package store is created",
       args: {
-        name: "path to binary",
-        template: "filepaths",
+        name: "dir",
+        template: "folders",
       },
-      description: "Npm binary to use for internal operations",
     },
     {
-      args: {},
-      description: "Extra node argument when calling a node binary",
-      name: ["--node-arg", "-n"],
+      name: "--reporter",
+      description: "Reporter output format",
+      args: {
+        name: "reporter",
+        suggestions: ["default", "append-only", "ndjson", "silent"],
+      },
     },
     {
-      description: "Show version number",
-      name: ["--version", "-v"],
+      name: "--loglevel",
+      description: "What level of logs to print",
+      args: {
+        name: "level",
+        suggestions: ["silent", "error", "warn", "info", "debug"],
+      },
     },
     {
-      description: "Show help",
-      name: ["--help", "-h"],
+      name: "--no-progress",
+      description: "Disable dependency and download progress output",
+    },
+    {
+      name: ["-y", "--yes"],
+      description: "Automatically answer yes to prompts",
+    },
+    {
+      name: ["-v", "--version"],
+      description: "Print the pnpm version",
+    },
+    {
+      name: ["-h", "--help"],
+      description: "Print help",
     },
   ],
 };
