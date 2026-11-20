@@ -1,4 +1,7 @@
-// Ruff v0.17.5 (GitHub release astral-sh/ruff, 2026-11-12). Source: crates/ruff/src/args.rs, crates/ruff_linter/src/codes.rs and docs/configuration.md at tag 0.17.5
+// Ruff v0.17.6 (PyPI, Homebrew formula and GitHub tag 0.17.6, released 2026-11-19; re-verified 2026-11-20).
+// Source: crates/ruff/src/args.rs, crates/ruff_linter/src/codes.rs, registry.rs, settings/types.rs and
+// the generated help in docs/configuration.md at tag 0.17.6. 0.17.5 -> 0.17.6 changed no CLI flags or rule codes.
+// Checked all subcommands, every check/format/server/analyze graph option, enums and the 973 rule codes.
 
 const pythonVersions = [
   "py37",
