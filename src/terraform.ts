@@ -1,4 +1,7 @@
-// Terraform v1.17.2 (gh release hashicorp/terraform, 2026-11-19). Source: commands.go and internal/command/*.go Help() text at v1.17.2
+// Terraform v1.17.2 (latest stable per releases.hashicorp.com and git tags, checked 2026-11-20). Source: commands.go command table, Help() text of every
+// command and the flag parsers in internal/command/arguments/*.go, all read statically at tag v1.17.2 (binary not run).
+// Left out: hidden commands (env, push, rpcapi), experimental-build-only commands/flags (cloud, test cleanup, state migrate, -allow-deferral,
+// pluggable state storage flags of init) and the "stacks" subcommands, which come from a plugin downloaded at runtime.
 // If you edit commands or options, please copy our changes on to the terragrunt spec
 const workspaceList: Fig.Generator = {
   script: ["terraform", "workspace", "list"],
@@ -43,9 +46,9 @@ const lockOptions: Fig.Option[] = [
   {
     name: "-lock-timeout",
     requiresSeparator: true,
-    description: "Duration to retry a state lock. Default 0s",
+    description: "Duration to retry a state lock. Defaults to 0s",
     args: {
-      name: "seconds",
+      name: "duration",
     },
   },
 ];
@@ -84,6 +87,83 @@ const stateOption: Fig.Option = {
   args: {
     template: "filepaths",
   },
+};
+
+// -state is deprecated for plan, apply, destroy and refresh (warning: use the "path" attribute of the local backend)
+const deprecatedStateOption: Fig.Option = {
+  ...stateOption,
+  deprecated: true,
+};
+
+const stateOutOption: Fig.Option = {
+  name: "-state-out",
+  requiresSeparator: true,
+  description:
+    "Path to write state to that is different than '-state'. Legacy option for the local backend only",
+  args: {
+    template: "filepaths",
+  },
+};
+
+const backupOption: Fig.Option = {
+  name: "-backup",
+  requiresSeparator: true,
+  description:
+    "Path to write a backup of the existing state file before modifying it. Legacy option for the local backend only",
+  args: {
+    template: "filepaths",
+  },
+};
+
+// Legacy options that every state-modifying command accepts for the local backend
+const legacyStateOptions: Fig.Option[] = [
+  stateOption,
+  stateOutOption,
+  backupOption,
+];
+
+const compactWarningsOption: Fig.Option = {
+  name: "-compact-warnings",
+  description:
+    "If Terraform produces any warnings that are not accompanied by errors, show them in a more compact form that includes only the summary messages",
+};
+
+const parallelismOption: Fig.Option = {
+  name: "-parallelism",
+  requiresSeparator: true,
+  description:
+    "Limit the number of concurrent operations as Terraform walks the graph. Defaults to 10",
+  args: {
+    name: "n",
+  },
+};
+
+const targetOption: Fig.Option = {
+  name: "-target",
+  requiresSeparator: true,
+  description:
+    "Limit the operation to the given module, resource or resource instance and all of its dependencies. This flag can be used multiple times",
+  isRepeatable: true,
+  args: {
+    name: "resource",
+  },
+};
+
+const policiesOption: Fig.Option = {
+  name: "-policies",
+  requiresSeparator: true,
+  description:
+    "Evaluate Terraform policies from the given path. This flag can be used multiple times",
+  isRepeatable: true,
+  args: {
+    name: "path",
+    template: "folders",
+  },
+};
+
+const jsonUiOption: Fig.Option = {
+  name: "-json",
+  description: "Print machine readable UI output in JSON format",
 };
 
 const dryRunOption: Fig.Option = {
@@ -142,17 +222,19 @@ const varOptions: Fig.Option[] = [
   },
 ];
 
+const inputOption: Fig.Option = {
+  name: "-input",
+  requiresSeparator: true,
+  description: "Ask for input for variables if not directly set",
+  args: {
+    name: "true or false",
+    suggestions: ["true", "false"],
+  },
+};
+
 const generalSubCommandOptions: Fig.Option[] = [
   ...lockOptions,
-  {
-    name: "-input",
-    requiresSeparator: true,
-    description: "Ask for input for variables if not directly set",
-    args: {
-      name: "true or false",
-      suggestions: ["true", "false"],
-    },
-  },
+  inputOption,
   noColorOption,
 ];
 
@@ -168,14 +250,66 @@ const globalOptions: Fig.Option[] = [
       "Switch to a different working directory before executing the given subcommand",
     requiresSeparator: true,
     args: {
-      template: "filepaths",
+      name: "dir",
+      template: "folders",
     },
   },
   {
-    name: "-version",
+    name: ["-version", "-v"],
     description: "Show the current Terraform version",
   },
 ];
+
+const destroyOption: Fig.Option = {
+  name: "-destroy",
+  description:
+    "Select the 'destroy' planning mode, which creates a plan to destroy all objects currently managed by this configuration",
+};
+
+const refreshOnlyOption: Fig.Option = {
+  name: "-refresh-only",
+  description:
+    "Select the 'refresh only' planning mode, which checks whether remote objects still match the most recent apply without proposing actions to undo outside changes",
+};
+
+const minimalRefreshOption: Fig.Option = {
+  name: "-minimal-refresh",
+  description:
+    "Skip refreshing objects that the initial plan shows as unchanged since the most recent apply",
+};
+
+const refreshOption: Fig.Option = {
+  name: "-refresh",
+  requiresSeparator: true,
+  description:
+    "Update the state prior to checking for differences. Defaults to true",
+  args: {
+    name: "true or false",
+    suggestions: ["true", "false"],
+  },
+};
+
+const replaceOption: Fig.Option = {
+  name: "-replace",
+  requiresSeparator: true,
+  description:
+    "Force replacement of a resource instance. This flag can be used multiple times",
+  isRepeatable: true,
+  args: {
+    name: "resource",
+    generators: addressList,
+  },
+};
+
+const invokeOption: Fig.Option = {
+  name: "-invoke",
+  requiresSeparator: true,
+  description:
+    "Invoke a single action by its address instead of planning resource changes",
+  args: {
+    name: "action",
+  },
+};
 
 const mainCommands: Fig.Subcommand[] = [
   {
@@ -262,6 +396,7 @@ const mainCommands: Fig.Subcommand[] = [
         },
       },
       ignoreRemoteVersionOption,
+      policiesOption,
       testDirectoryOption,
       ...varOptions,
       ...generalSubCommandOptions,
@@ -291,26 +426,10 @@ const mainCommands: Fig.Subcommand[] = [
     name: "plan",
     description: "Show changes required by the current configuration",
     options: [
-      {
-        name: "-compact-warnings",
-        description:
-          "If Terraform produces any warnings that are not accompanied by errors, show them in a more compact form that includes only the summary messages",
-      },
-      {
-        name: "-destroy",
-        description:
-          "If set, generates a plan to destroy all the known resources",
-      },
-      {
-        name: "-refresh-only",
-        description:
-          "Check whether remote objects still match the most recent apply without proposing actions to undo outside changes",
-      },
-      {
-        name: "-minimal-refresh",
-        description:
-          "Skip refreshing objects that the initial plan shows as unchanged since the most recent apply",
-      },
+      compactWarningsOption,
+      destroyOption,
+      refreshOnlyOption,
+      minimalRefreshOption,
       {
         name: "-detailed-exitcode",
         description: "Return a detailed exit code when the command exits",
@@ -325,47 +444,23 @@ const mainCommands: Fig.Subcommand[] = [
           template: "filepaths",
         },
       },
+      invokeOption,
+      jsonUiOption,
       {
         name: "-out",
         requiresSeparator: true,
-        description: "The path to save the generated execution plan",
-      },
-      {
-        name: "-parallelism",
-        description:
-          "Limit the number of concurrent operation as Terraform walks the graph. Defaults to 10",
+        description: "Write a plan file to the given path",
         args: {
-          name: "number",
+          name: "path",
+          template: "filepaths",
         },
       },
-      {
-        name: "-refresh",
-        requiresSeparator: true,
-        description: "Update the state prior to checking for differences",
-        args: {
-          name: "true or false",
-          suggestions: ["true", "false"],
-        },
-      },
-      {
-        name: "-replace",
-        requiresSeparator: true,
-        description:
-          "Force replacement of a resource instance. This flag can be used multiple times",
-        isRepeatable: true,
-        args: {
-          name: "resource",
-          generators: addressList,
-        },
-      },
-      stateOption,
-      {
-        name: "-target",
-        displayName: "-target=resource",
-        description:
-          "A Resource Address to target. This flag can be used multiple times",
-        isRepeatable: true,
-      },
+      parallelismOption,
+      policiesOption,
+      refreshOption,
+      replaceOption,
+      deprecatedStateOption,
+      targetOption,
       ...varOptions,
       ...generalSubCommandOptions,
       ...globalOptions,
@@ -374,12 +469,59 @@ const mainCommands: Fig.Subcommand[] = [
   {
     name: "apply",
     description: "Create or update infrastructure",
-    options: [...globalOptions],
+    args: {
+      name: "plan",
+      description: "Saved plan file created by terraform plan",
+      template: "filepaths",
+      isOptional: true,
+    },
+    options: [
+      {
+        name: "-auto-approve",
+        description: "Skip interactive approval of plan before applying",
+      },
+      backupOption,
+      compactWarningsOption,
+      destroyOption,
+      invokeOption,
+      jsonUiOption,
+      minimalRefreshOption,
+      parallelismOption,
+      policiesOption,
+      refreshOption,
+      refreshOnlyOption,
+      replaceOption,
+      deprecatedStateOption,
+      stateOutOption,
+      targetOption,
+      ...varOptions,
+      ...generalSubCommandOptions,
+      ...globalOptions,
+    ],
   },
   {
     name: "destroy",
     description: "Destroy previously-created infrastructure",
-    options: [...globalOptions],
+    options: [
+      {
+        name: "-auto-approve",
+        description: "Skip interactive approval of plan before applying",
+      },
+      backupOption,
+      compactWarningsOption,
+      jsonUiOption,
+      minimalRefreshOption,
+      parallelismOption,
+      policiesOption,
+      refreshOption,
+      replaceOption,
+      deprecatedStateOption,
+      stateOutOption,
+      targetOption,
+      ...varOptions,
+      ...generalSubCommandOptions,
+      ...globalOptions,
+    ],
   },
 ];
 
@@ -387,17 +529,90 @@ const otherCommands: Fig.Subcommand[] = [
   {
     name: "console",
     description: "Try Terraform expressions at an interactive command prompt",
-    options: [...globalOptions],
+    options: [
+      compactWarningsOption,
+      inputOption,
+      {
+        name: "-plan",
+        description:
+          "Create a new plan and evaluate expressions against its planned state instead of the current state",
+      },
+      {
+        name: "-scope",
+        requiresSeparator: true,
+        description:
+          "Module instance address that declares the scope to use when evaluating expressions. Defaults to the root module",
+        args: {
+          name: "module",
+        },
+      },
+      stateOption,
+      targetOption,
+      ...varOptions,
+      ...globalOptions,
+    ],
   },
   {
     name: "fmt",
     description: "Reformat your configuration in the standard style",
-    options: [...globalOptions],
+    args: {
+      name: "target",
+      description: "Directory or file to format, or '-' to read from stdin",
+      template: ["filepaths", "folders"],
+      isOptional: true,
+      isVariadic: true,
+    },
+    options: [
+      {
+        name: "-list",
+        requiresSeparator: true,
+        description:
+          "List files whose formatting differs (always disabled if using stdin). Defaults to true",
+        args: {
+          name: "true or false",
+          suggestions: ["true", "false"],
+        },
+      },
+      {
+        name: "-write",
+        requiresSeparator: true,
+        description:
+          "Write to source files (always disabled if using stdin or -check). Defaults to true",
+        args: {
+          name: "true or false",
+          suggestions: ["true", "false"],
+        },
+      },
+      {
+        name: "-diff",
+        description: "Display diffs of formatting changes",
+      },
+      {
+        name: "-check",
+        description:
+          "Check if the input is formatted. Exit status will be 0 if all input is properly formatted and non-zero otherwise",
+      },
+      noColorOption,
+      {
+        name: "-recursive",
+        description: "Also process files in subdirectories",
+      },
+      ...globalOptions,
+    ],
   },
   {
     name: "force-unlock",
     description: "Release a stuck lock on the current workspace",
-    options: [...globalOptions],
+    args: {
+      name: "lock id",
+    },
+    options: [
+      {
+        name: "-force",
+        description: "Don't ask for input for unlock confirmation",
+      },
+      ...globalOptions,
+    ],
   },
   {
     name: "get",
@@ -466,16 +681,52 @@ const otherCommands: Fig.Subcommand[] = [
   {
     name: "import",
     description: "Associate existing infrastructure with a Terraform resource",
-    options: [...globalOptions],
+    args: [
+      {
+        name: "address",
+        description: "Address to import the resource to",
+      },
+      {
+        name: "id",
+        description: "Resource-specific ID of the resource being imported",
+      },
+    ],
+    options: [
+      {
+        name: "-config",
+        requiresSeparator: true,
+        description:
+          "Path to a directory of Terraform configuration files to use to configure the provider. Defaults to the working directory",
+        args: {
+          name: "path",
+          template: "folders",
+        },
+      },
+      ignoreRemoteVersionOption,
+      ...legacyStateOptions,
+      ...varOptions,
+      ...generalSubCommandOptions,
+      ...globalOptions,
+    ],
   },
   {
     name: "login",
     description: "Obtain and save credentials for a remote host",
+    args: {
+      name: "hostname",
+      description: "Defaults to app.terraform.io",
+      isOptional: true,
+    },
     options: [...globalOptions],
   },
   {
     name: "logout",
     description: "Remove locally-stored credentials for a remote host",
+    args: {
+      name: "hostname",
+      description: "Defaults to app.terraform.io",
+      isOptional: true,
+    },
     options: [...globalOptions],
   },
   {
@@ -499,7 +750,22 @@ const otherCommands: Fig.Subcommand[] = [
   {
     name: "output",
     description: "Show output values from your root module",
-    options: [...globalOptions],
+    args: {
+      name: "name",
+      description: "Name of a single output to print",
+      isOptional: true,
+    },
+    options: [
+      stateOption,
+      noColorOption,
+      jsonOption,
+      {
+        name: "-raw",
+        description:
+          "Print the raw string of a value that can be converted to a string, rather than a human-oriented representation",
+      },
+      ...globalOptions,
+    ],
   },
   {
     name: "providers",
@@ -614,12 +880,29 @@ const otherCommands: Fig.Subcommand[] = [
   {
     name: "refresh",
     description: "Update the state to match remote systems",
-    options: [...globalOptions],
+    options: [
+      compactWarningsOption,
+      jsonUiOption,
+      parallelismOption,
+      deprecatedStateOption,
+      stateOutOption,
+      backupOption,
+      targetOption,
+      ...varOptions,
+      ...generalSubCommandOptions,
+      ...globalOptions,
+    ],
   },
   {
     name: "show",
     description: "Show the current state or a saved plan",
-    options: [...globalOptions],
+    args: {
+      name: "path",
+      description: "Saved plan or state file to show",
+      template: "filepaths",
+      isOptional: true,
+    },
+    options: [noColorOption, jsonOption, ...varOptions, ...globalOptions],
   },
   {
     name: "stacks",
@@ -669,6 +952,16 @@ const otherCommands: Fig.Subcommand[] = [
           dryRunOption,
           ...lockOptions,
           ignoreRemoteVersionOption,
+          ...legacyStateOptions,
+          {
+            name: "-backup-out",
+            requiresSeparator: true,
+            description:
+              "Path to write a backup of the destination state file. Legacy option for the local backend only",
+            args: {
+              template: "filepaths",
+            },
+          },
           ...varOptions,
           ...globalOptions,
         ],
@@ -692,6 +985,7 @@ const otherCommands: Fig.Subcommand[] = [
               "Write the state even if lineages don't match or the remote serial is higher",
           },
           ...lockOptions,
+          ignoreRemoteVersionOption,
           ...varOptions,
           ...globalOptions,
         ],
@@ -714,6 +1008,8 @@ const otherCommands: Fig.Subcommand[] = [
           },
           ...lockOptions,
           ignoreRemoteVersionOption,
+          stateOption,
+          backupOption,
           ...varOptions,
           ...globalOptions,
         ],
@@ -783,6 +1079,7 @@ const otherCommands: Fig.Subcommand[] = [
         },
       },
       ignoreRemoteVersionOption,
+      ...legacyStateOptions,
       ...varOptions,
       ...globalOptions,
     ],
@@ -830,7 +1127,16 @@ const otherCommands: Fig.Subcommand[] = [
         name: "-parallelism",
         requiresSeparator: true,
         description:
-          "Limit the number of concurrent operations within a test run. Defaults to 10",
+          "Limit the number of concurrent operations within the plan or apply of a test run. Defaults to 10",
+        args: {
+          name: "n",
+        },
+      },
+      {
+        name: "-run-parallelism",
+        requiresSeparator: true,
+        description:
+          "Limit the number of test runs that execute in parallel within a file. Defaults to 10",
         args: {
           name: "n",
         },
@@ -848,7 +1154,21 @@ const otherCommands: Fig.Subcommand[] = [
   {
     name: "untaint",
     description: "Remove the 'tainted' state from a resource instance",
-    options: [...globalOptions],
+    args: {
+      generators: addressList,
+      name: "address",
+    },
+    options: [
+      {
+        name: "-allow-missing",
+        description:
+          "If specified, the command will succeed (exit code 0) even if the resource is missing",
+      },
+      ...lockOptions,
+      ignoreRemoteVersionOption,
+      ...legacyStateOptions,
+      ...globalOptions,
+    ],
   },
   {
     name: "version",
@@ -902,15 +1222,11 @@ const otherCommands: Fig.Subcommand[] = [
         options: [
           {
             name: "-force",
-            requiresSeparator: true,
             description:
-              "Delete the workspace even if its state is not empty. Defaults to false",
-            args: {
-              name: "true or false",
-              suggestions: ["true", "false"],
-            },
+              "Delete the workspace even if it is managing resources. Terraform can no longer track or manage the workspace's infrastructure",
           },
           ...lockOptions,
+          ...globalOptions,
         ],
       },
       {
@@ -922,14 +1238,9 @@ const otherCommands: Fig.Subcommand[] = [
         options: [
           {
             name: "-or-create",
-            requiresSeparator: true,
-            description:
-              "Create the workspace if it doesn't exist. Defaults to false",
-            args: {
-              name: "true or false",
-              suggestions: ["true", "false"],
-            },
+            description: "Create the workspace if it doesn't exist",
           },
+          ...globalOptions,
         ],
       },
     ],
