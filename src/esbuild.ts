@@ -1,3 +1,7 @@
+// esbuild v0.28.2 (npm latest and git tag v0.28.2, 2026-11-20). Source: static read of the v0.28.2 Go source
+// (cmd/esbuild/main.go help text, pkg/cli/cli_impl.go flag parser, pkg/cli/cli_js_table.go engines,
+// internal/logger/msg_ids.go log identifiers, internal/compat/*_table.go feature names); binary not run.
+// Not in --help but accepted by the parser (documented on esbuild.github.io): --alias, --conditions, --log-style.
 import { keyValueList, valueList } from "@tabsmith/autocomplete-generators";
 
 const icon =
@@ -42,16 +46,16 @@ const spec: Fig.Spec = {
       {
         name: "--define",
         description:
-          "Replace variable names with a literal value, eg. --define:DEBUG=true",
+          "Substitute K with V while parsing, eg. --define:DEBUG=true",
         requiresSeparator: ":",
-        args: { name: "name=value" },
+        args: { name: "K=V" },
         priority: 51,
       },
       {
         name: "--external",
-        description: "Exclude modules from the build",
+        description: "Exclude module M from the bundle (can use * wildcards)",
         requiresSeparator: ":",
-        args: { name: "module specifier" },
+        args: { name: "M" },
         priority: 51,
       },
       {
@@ -63,10 +67,10 @@ const spec: Fig.Spec = {
       },
       {
         name: "--loader",
-        description: "For a given file extension, specify a loader",
+        description: "Use loader L to load file extension X",
         requiresSeparator: ":",
         args: {
-          name: "loaders",
+          name: "X=L",
           generators: keyValueList({
             keys: extensions,
             values: [
@@ -75,6 +79,8 @@ const spec: Fig.Spec = {
               "ts",
               "tsx",
               "css",
+              "global-css",
+              "local-css",
               "json",
               "text",
               "base64",
@@ -82,6 +88,7 @@ const spec: Fig.Spec = {
               "dataurl",
               "binary",
               "copy",
+              "empty",
             ],
             cache: true,
           }),
@@ -90,7 +97,7 @@ const spec: Fig.Spec = {
       },
       {
         name: "--minify",
-        description: "Minify the output (sets all the --minify-* options)",
+        description: "Minify the output (sets all --minify-* flags)",
         priority: 51,
       },
       {
@@ -108,6 +115,13 @@ const spec: Fig.Spec = {
         priority: 51,
       },
       {
+        name: "--packages",
+        description: 'Set to "external" to avoid bundling any package',
+        requiresSeparator: "=",
+        args: { name: "mode", suggestions: ["bundle", "external"] },
+        priority: 51,
+      },
+      {
         name: "--platform",
         description: "The platform target",
         requiresSeparator: "=",
@@ -116,7 +130,7 @@ const spec: Fig.Spec = {
       },
       {
         name: "--serve",
-        description: "Start a local HTTP server on this host:port",
+        description: "Start a local HTTP server on this host:port for outputs",
         requiresSeparator: "=",
         args: { isOptional: true, name: "[address:]port" },
         priority: 51,
@@ -129,21 +143,36 @@ const spec: Fig.Spec = {
       {
         name: "--target",
         description:
-          "Set the environment target. Can be a particular ES version or browser version, eg. chrome101",
+          "Set the environment target, eg. es2017, chrome58, firefox57, safari11, edge16, node10",
         requiresSeparator: "=",
         args: {
           name: "target",
           generators: valueList({
             values: [
               "esnext",
+              "es5",
+              "es2015",
               "es2016",
+              "es2017",
+              "es2018",
+              "es2019",
+              "es2020",
+              "es2021",
               "es2022",
+              "es2023",
+              "es2024",
+              "es2025",
               "chrome",
+              "deno",
+              "edge",
               "firefox",
+              "hermes",
               "ie",
+              "ios",
               "node",
-              "safari",
               "opera",
+              "rhino",
+              "safari",
             ],
           }),
         },
@@ -151,7 +180,8 @@ const spec: Fig.Spec = {
       },
       {
         name: "--watch",
-        description: "Rebuild on file system changes",
+        description:
+          "Rebuild on file system changes (stops when stdin is closed, use --watch=forever to ignore stdin)",
         priority: 51,
         requiresSeparator: "=",
         args: {
@@ -161,6 +191,22 @@ const spec: Fig.Spec = {
         },
       },
       // Advanced options:
+      {
+        name: "--abs-paths",
+        description:
+          "Emit absolute instead of relative paths in these situations",
+        requiresSeparator: "=",
+        args: {
+          name: "situations",
+          generators: valueList({ values: ["code", "log", "metafile"] }),
+        },
+      },
+      {
+        name: "--alias",
+        description: "Substitute one package for another",
+        requiresSeparator: ":",
+        args: { name: "old=new" },
+      },
       {
         name: "--allow-overwrite",
         description: "Allow output files to overwrite input files",
@@ -173,26 +219,32 @@ const spec: Fig.Spec = {
       },
       {
         name: "--asset-names",
-        description: "Path template for 'file' loader files",
+        description: 'Path template to use for "file" loader files',
         requiresSeparator: "=",
         args: { name: "template", default: "[name]-[hash]" },
       },
       {
         name: "--banner",
-        description: "Text to be prepended to each output file type",
+        description: "Text to be prepended to each output file of type T",
         requiresSeparator: ":",
         args: {
-          name: "ext=text[,ext=text...]",
-          generators: keyValueList({ keys: extensions, cache: true }),
+          name: "T=text",
+          generators: keyValueList({ keys: ["css", "js"] }),
         },
       },
       {
+        name: "--certfile",
+        description: 'Certificate for serving HTTPS (see also "--keyfile")',
+        requiresSeparator: "=",
+        args: { name: "path", template: "filepaths" },
+      },
+      {
         name: "--charset",
-        description: "Use UTF-8 instead of escaped codepoints in ASCII",
+        description: "Do not escape UTF-8 code points",
         insertValue: "--charset=utf8",
         displayName: "--charset=utf8",
         requiresSeparator: "=",
-        args: {},
+        args: { name: "charset", suggestions: ["utf8", "ascii"] },
       },
       {
         name: "--chunk-names",
@@ -202,15 +254,37 @@ const spec: Fig.Spec = {
       },
       {
         name: "--color",
-        description: "Force use of terminal colors",
+        description: "Force use of color terminal escapes",
         requiresSeparator: "=",
-        args: { name: "enabled", suggestions: ["true", "false"] },
+        args: {
+          name: "enabled",
+          isOptional: true,
+          suggestions: ["true", "false"],
+        },
+      },
+      {
+        name: "--conditions",
+        description: "Additional package.json export conditions",
+        requiresSeparator: "=",
+        args: { name: "conditions" },
+      },
+      {
+        name: "--cors-origin",
+        description: "Allow cross-origin requests from this origin",
+        requiresSeparator: "=",
+        args: { name: "origin" },
       },
       {
         name: "--drop",
         description: "Remove certain constructs",
         requiresSeparator: ":",
         args: { suggestions: ["console", "debugger"] },
+      },
+      {
+        name: "--drop-labels",
+        description: "Remove labeled statements with these label names",
+        requiresSeparator: "=",
+        args: { name: "labels" },
       },
       {
         name: "--entry-names",
@@ -220,16 +294,16 @@ const spec: Fig.Spec = {
       },
       {
         name: "--footer",
-        description: "Text to be appended to each file type",
+        description: "Text to be appended to each output file of type T",
         requiresSeparator: ":",
         args: {
-          name: "ext=text",
+          name: "T=text",
           generators: keyValueList({ keys: ["css", "js"] }),
         },
       },
       {
         name: "--global-name",
-        description: "The name of the global if using --format=iife",
+        description: "The name of the global for the IIFE format",
         requiresSeparator: "=",
         args: { name: "name" },
       },
@@ -241,13 +315,13 @@ const spec: Fig.Spec = {
       {
         name: "--inject",
         description:
-          "Import the file into all input files, automatically replace matching globals",
+          "Import the file F into all input files and automatically replace matching globals with imports",
         requiresSeparator: ":",
-        args: { name: "import", template: "filepaths" },
+        args: { name: "F", template: "filepaths" },
       },
       {
         name: "--jsx-factory",
-        description: "What to use for the JSX factory",
+        description: "What to use for JSX instead of React.createElement",
         requiresSeparator: "=",
         args: {
           name: "factory",
@@ -256,19 +330,23 @@ const spec: Fig.Spec = {
       },
       {
         name: "--jsx-fragment",
-        description: "What to use for the JS Fragment factory",
+        description: "What to use for JSX instead of React.Fragment",
         requiresSeparator: "=",
         args: { name: "fragment", suggestions: ["React.Fragment", "Fragment"] },
       },
       {
         name: "--jsx",
-        description: "Preserve JSX instead of transforming",
+        description: "Set the JSX transform mode",
         requiresSeparator: "=",
         args: {
           suggestions: [
             {
+              name: "transform",
+              description: "Transform JSX using the factory and fragment",
+            },
+            {
               name: "preserve",
-              description: "Preserve JSX instead of transforming",
+              description: "Disable transforming JSX to JS",
             },
             {
               name: "automatic",
@@ -279,18 +357,28 @@ const spec: Fig.Spec = {
       },
       {
         name: "--jsx-dev",
-        description: "Toggles development mode for the automatic runtime",
+        description: "Use React's automatic runtime in development mode",
       },
       {
         name: "--jsx-import-source",
         description:
-          "Overrides the root import for runtime functions (default: react)",
+          "Override the package name for the automatic runtime (default: react)",
         requiresSeparator: "=",
         args: { name: "source", default: "react" },
       },
       {
+        name: "--jsx-side-effects",
+        description: "Do not remove unused JSX expressions",
+      },
+      {
         name: "--keep-names",
-        description: "Preserve 'name' on functions and classes",
+        description: 'Preserve "name" on functions and classes',
+      },
+      {
+        name: "--keyfile",
+        description: 'Key for serving HTTPS (see also "--certfile")',
+        requiresSeparator: "=",
+        args: { name: "path", template: "filepaths" },
       },
       {
         name: "--legal-comments",
@@ -300,6 +388,12 @@ const spec: Fig.Spec = {
           name: "location",
           suggestions: ["none", "inline", "eof", "linked", "external"],
         },
+      },
+      {
+        name: "--line-limit",
+        description: "Lines longer than this will be wrapped onto a new line",
+        requiresSeparator: "=",
+        args: { name: "count" },
       },
       {
         name: "--log-level",
@@ -320,26 +414,33 @@ const spec: Fig.Spec = {
       },
       {
         name: "--log-limit",
-        description: "Maximum message count, 0 to disable",
+        description: "Maximum message count or 0 to disable",
         requiresSeparator: "=",
         args: { name: "count", default: "6" },
       },
       {
         name: "--log-override",
-        description: "For a particular identifier, set the log level",
+        description: "Use log level Y for log messages with identifier X",
         requiresSeparator: ":",
         args: {
-          name: "identifier:level",
+          name: "X=Y",
           generators: keyValueList({
             keys: [
               // JS
+              "assert-to-with",
+              "assert-type-json",
               "assign-to-constant",
+              "assign-to-define",
               "assign-to-import",
+              "bigint",
               "call-import-namespace",
+              "class-name-will-throw",
               "commonjs-variable-in-esm",
+              "confusing-typescript-cast",
               "delete-super-property",
               "direct-eval",
               "duplicate-case",
+              "duplicate-class-member",
               "duplicate-object-key",
               "empty-import-meta",
               "equals-nan",
@@ -351,6 +452,9 @@ const spec: Fig.Spec = {
               "private-name-will-throw",
               "semicolon-after-return",
               "suspicious-boolean-not",
+              "suspicious-define",
+              "suspicious-logical-operator",
+              "suspicious-nullish-coalescing",
               "this-is-undefined-in-esm",
               "unsupported-dynamic-import",
               "unsupported-jsx-comment",
@@ -361,17 +465,19 @@ const spec: Fig.Spec = {
               "css-syntax-error",
               "invalid-@charset",
               "invalid-@import",
-              "invalid-@nest",
               "invalid-@layer",
               "invalid-calc",
               "js-comment-in-css",
+              "undefined-composes-from",
               "unsupported-@charset",
               "unsupported-@namespace",
+              "unsupported-css-nesting",
               "unsupported-css-property",
 
               // Bundler
               "ambiguous-reexport",
               "different-path-case",
+              "empty-glob",
               "ignored-bare-import",
               "ignored-dynamic-import",
               "import-is-undefined",
@@ -379,13 +485,22 @@ const spec: Fig.Spec = {
 
               // Source maps
               "invalid-source-mappings",
-              "sections-in-source-map",
               "missing-source-map",
               "unsupported-source-map-comment",
+
+              // Groups
+              "package.json",
+              "tsconfig.json",
             ],
             values: ["verbose", "debug", "info", "warning", "error", "silent"],
           }),
         },
+      },
+      {
+        name: "--log-style",
+        description: "Set the log message style",
+        requiresSeparator: "=",
+        args: { name: "style", suggestions: ["default", "visualstudio"] },
       },
       {
         name: "--main-fields",
@@ -411,9 +526,13 @@ const spec: Fig.Spec = {
       },
       {
         name: "--mangle-quoted",
-        description: "Enable mangling (renaming) quoted properties",
+        description: "Enable renaming of quoted properties",
         requiresSeparator: "=",
-        args: { name: "status", suggestions: ["true", "false"] },
+        args: {
+          name: "status",
+          isOptional: true,
+          suggestions: ["true", "false"],
+        },
       },
       {
         name: "--metafile",
@@ -427,7 +546,7 @@ const spec: Fig.Spec = {
       },
       {
         name: "--minify-whitespace",
-        description: "Remove unnecessary whitespace in output files",
+        description: "Remove whitespace in output files",
       },
       {
         name: "--minify-identifiers",
@@ -439,35 +558,35 @@ const spec: Fig.Spec = {
       },
       {
         name: "--out-extension",
-        description: "Use a custom output extension for each extension",
+        description: 'Use a custom output extension instead of ".js"',
         requiresSeparator: ":",
         args: {
           name: "ext=new",
-          generators: keyValueList({ keys: extensions, cache: true }),
+          generators: keyValueList({ keys: [".js", ".css"] }),
         },
       },
       {
         name: "--outbase",
         description:
-          "Base path used to determine entrypoint output paths, for multiple entrypoints",
+          "The base path used to determine entry point output paths (for multiple entry points)",
         requiresSeparator: "=",
         args: { name: "path", template: "folders" },
       },
       {
         name: "--preserve-symlinks",
-        description: "Disable symlink resolution",
+        description: "Disable symlink resolution for module lookup",
       },
       {
         name: "--public-path",
-        description: "Set the base URL for the 'file' loader",
+        description: 'Set the base URL for the "file" loader',
         requiresSeparator: "=",
         args: { name: "path", template: "folders" },
       },
       {
         name: "--pure",
-        description: "Mark the name as a pure function for tree shaking",
+        description: "Mark the name N as a pure function for tree shaking",
         requiresSeparator: ":",
-        args: { name: "name" },
+        args: { name: "N" },
       },
       {
         name: "--reserve-props",
@@ -477,63 +596,84 @@ const spec: Fig.Spec = {
       },
       {
         name: "--resolve-extensions",
-        description: "Comma-separated list of implicit extensions",
+        description: "A comma-separated list of implicit extensions",
         requiresSeparator: "=",
         args: {
           name: "extensions",
-          generators: keyValueList({ keys: extensions, cache: true }),
+          generators: valueList({ values: extensions, cache: true }),
         },
       },
       {
+        name: "--serve-fallback",
+        description: "Serve this HTML page when the request doesn't match",
+        requiresSeparator: "=",
+        args: { name: "path", template: "filepaths" },
+      },
+      {
         name: "--servedir",
-        description: "What to serve in addition to the generated output files",
+        description: "What to serve in addition to generated output files",
         requiresSeparator: "=",
         args: { name: "path", template: "folders" },
       },
       {
         name: "--source-root",
-        description: "Set the sourceRoot field in generated source maps",
+        description: 'Set the "sourceRoot" field in generated source maps',
         requiresSeparator: "=",
         args: { name: "URL" },
       },
       {
         name: "--sourcefile",
-        description:
-          "Set the source file for the source map if there's no file name to use",
+        description: "Set the source file for the source map (for stdin)",
         requiresSeparator: "=",
         args: { name: "name" },
       },
       {
         name: "--sourcemap",
-        description: "Generate source maps?",
+        description: "Emit a source map",
         requiresSeparator: "=",
         args: {
           name: "options",
           isOptional: true,
           suggestions: [
             {
-              name: "external",
-              description: "Generate a separate .map.js file with no comment",
+              name: "linked",
+              description:
+                "Emit a separate .map file and link to it with a comment",
             },
-            { name: "inline", description: "Append source maps to JS files" },
+            {
+              name: "external",
+              description: "Emit a separate .map file with no link comment",
+            },
+            {
+              name: "inline",
+              description: "Emit the source map with an inline data URL",
+            },
+            {
+              name: "both",
+              description: "Emit both an inline and an external source map",
+            },
           ],
         },
         priority: 51,
       },
       {
         name: "--sources-content",
-        description: "Omit the sourcesContent field in generated source maps",
+        description: 'Omit "sourcesContent" in generated source maps',
         insertValue: "--sources-content=false",
         displayName: "--sources-content=false",
         requiresSeparator: "=",
-        args: { suggestions: ["false"] },
+        args: {
+          name: "status",
+          isOptional: true,
+          suggestions: ["false", "true"],
+        },
       },
       {
         name: "--supported",
-        description: "Consider a given syntax to be supported",
+        description: "Consider syntax F to be supported (true | false)",
         requiresSeparator: ":",
         args: {
-          name: "syntax=status",
+          name: "F=status",
           generators: keyValueList({
             keys: [
               "arbitrary-module-namespace-names",
@@ -554,6 +694,7 @@ const spec: Fig.Spec = {
               "class-static-blocks",
               "class-static-field",
               "const-and-let",
+              "decorators",
               "default-argument",
               "destructuring",
               "dynamic-import",
@@ -561,10 +702,17 @@ const spec: Fig.Spec = {
               "export-star-as",
               "for-await",
               "for-of",
+              "from-base64",
+              "function-name-configurable",
+              "function-or-class-property-access",
               "generator",
               "hashbang",
               "import-assertions",
+              "import-attributes",
+              "import-defer",
               "import-meta",
+              "import-source",
+              "inline-script",
               "logical-assignment",
               "nested-rest-binding",
               "new-target",
@@ -580,6 +728,7 @@ const spec: Fig.Spec = {
               "regexp-lookbehind-assertions",
               "regexp-match-indices",
               "regexp-named-capture-groups",
+              "regexp-set-notation",
               "regexp-sticky-and-unicode-flags",
               "regexp-unicode-property-escapes",
               "rest-argument",
@@ -587,11 +736,22 @@ const spec: Fig.Spec = {
               "top-level-await",
               "typeof-exotic-object-is-object",
               "unicode-escapes",
+              "using",
+
+              // CSS
+              "color-functions",
+              "gradient-double-position",
+              "gradient-interpolation",
+              "gradient-midpoints",
               "hex-rgba",
-              "rebecca-purple",
-              "modern-rgb-hsl",
+              "hwb",
+              "inline-style",
               "inset-property",
+              "is-pseudo-class",
+              "media-range",
+              "modern-rgb-hsl",
               "nesting",
+              "rebecca-purple",
             ],
             values: ["true", "false"],
           }),
@@ -601,17 +761,37 @@ const spec: Fig.Spec = {
         name: "--tree-shaking",
         description: "Force tree shaking on or off",
         requiresSeparator: "=",
-        args: { name: "status", suggestions: ["true", "false"] },
+        args: {
+          name: "status",
+          isOptional: true,
+          suggestions: ["true", "false"],
+        },
       },
       {
         name: "--tsconfig",
-        description: "Use this TypeScript config instead of the default",
+        description: "Use this tsconfig.json file instead of other ones",
         requiresSeparator: "=",
         args: { name: "path", template: "filepaths" },
       },
       {
+        name: "--tsconfig-raw",
+        description: "Override all tsconfig.json files with this string",
+        requiresSeparator: "=",
+        args: { name: "json" },
+      },
+      {
         name: "--version",
         description: "Print the current version and exit",
+      },
+      {
+        name: "--watch-delay",
+        description: "Wait before watch mode rebuilds (in milliseconds)",
+        requiresSeparator: "=",
+        args: { name: "milliseconds" },
+      },
+      {
+        name: ["--help", "-h"],
+        description: "Print help text and exit",
       },
     ] as Fig.Option[]
   ).map((option) => ({ ...option, icon })),
