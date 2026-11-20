@@ -1,4 +1,7 @@
-// PHP v8.5.12 (php-src latest release, 2026-11-19). Source: `php --help` (8.5.5) and the OPTIONS table in sapi/cli/php_cli.c on PHP-8.5
+// PHP v8.6.0 (php-src tag php-8.6.0 and Homebrew php formula, 2026-11-20). Source: the OPTIONS table and
+// usage text of sapi/cli/php_cli.c at php-8.6.0 (read statically, not run); in 8.6.0 -C and -q are listed in
+// `php --help`, and -? / --usage are help aliases. The php/ subspecs (artisan, bin/console, please) are
+// generated at runtime from `php <script> list --format=json`.
 
 const fileExists = async (
   executeCommand: Fig.ExecuteCommandFunction,
@@ -95,7 +98,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "file", template: "filepaths" },
     },
     {
-      name: ["-h", "--help"],
+      name: ["-h", "-?", "--help", "--usage"],
       description: "This help",
     },
     {
@@ -203,13 +206,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-C", "--no-chdir"],
-      description: "Do not chdir to the script's directory (CGI compatibility)",
-      hidden: true,
+      description: "Do not chdir to the script's directory (no-op in CLI)",
     },
     {
       name: ["-q", "--no-header"],
-      description: "Do not output HTTP headers (CGI compatibility)",
-      hidden: true,
+      description: "Do not output HTTP headers (no-op in CLI)",
     },
   ],
 };
