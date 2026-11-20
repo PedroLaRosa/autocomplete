@@ -1,3 +1,6 @@
+// grep 2.6.0-FreeBSD (macOS BSD grep; apple-oss-distributions/text_cmds tag text_cmds-199 and text_cmds-190.0.1 (macOS 15 era), 2026-11-20).
+// Source: text_cmds/grep/grep.1 (man page dated 2021-11-10, identical in both tags) and text_cmds/grep/grep.c (Apple getopt_long table and optstr), read statically, not run on macOS.
+// GNU grep 3.11 `--help` was used to keep the GNU-only flags that the spec already listed (-P, -T); no new GNU-only flags were added.
 const completionSpec: Fig.Spec = {
   name: "grep",
   description:
@@ -10,68 +13,92 @@ const completionSpec: Fig.Spec = {
     {
       name: "file",
       template: "filepaths",
+      isVariadic: true,
+      isOptional: true,
     },
   ],
   options: [
     {
       name: "--help",
-      description:
-        "Print a usage message briefly summarizing these command-line options and the bug-reporting address, then exit",
+      description: "Print a brief usage message and exit",
     },
     {
       name: ["-E", "--extended-regexp"],
       description:
-        "Interpret PATTERN as an extended regular expression (-E is specified by POSIX.)",
+        "Interpret the pattern as an extended regular expression (behave as egrep)",
     },
     {
-      name: ["-F", "--fixed-string"],
+      name: ["-F", "--fixed-strings"],
       description:
-        "Interpret PATTERN as a list of fixed strings, separated by newlines, any of which is to be matched. (-F is specified by POSIX.)",
+        "Interpret the pattern as a set of fixed strings, separated by newlines, any of which is to be matched (behave as fgrep)",
     },
     {
       name: ["-G", "--basic-regexp"],
       description:
-        "Interpret PATTERN as a basic regular expression (BRE, see below). This is the default",
+        "Interpret the pattern as a basic regular expression. This is the default",
+    },
+    {
+      name: ["-P", "--perl-regexp"],
+      description:
+        "Interpret the pattern as a Perl regular expression (GNU grep only, not available in macOS grep)",
     },
     {
       name: ["-e", "--regexp"],
       description:
-        "Use PATTERN as the pattern. This can be used to specify multiple search patterns, or to protect a pattern beginning with a hyphen (-). (-e is specified by POSIX.)",
+        "Use the given pattern for the search. An input line is selected if it matches any of the specified patterns. Useful to specify multiple patterns, or a pattern beginning with a hyphen (-)",
+      isRepeatable: true,
       args: {
         name: "pattern",
       },
     },
     {
+      name: ["-f", "--file"],
+      description:
+        "Read one or more newline separated patterns from a file. Empty pattern lines match every input line. An empty file matches nothing",
+      isRepeatable: true,
+      args: {
+        name: "FILE",
+        template: "filepaths",
+      },
+    },
+    {
       name: ["-i", "--ignore-case", "-y"],
       description:
-        "Ignore case distinctions in both the PATTERN and the input files. (-i is specified by POSIX.)",
+        "Perform case insensitive matching. By default, grep is case sensitive (-y is an obsolete synonym)",
     },
     {
       name: ["-v", "--invert-match"],
       description:
-        "Invert the sense of matching, to select non-matching lines. (-v is specified by POSIX.)",
+        "Select lines that do not match any of the specified patterns",
     },
     {
       name: ["-w", "--word-regexp"],
       description:
-        "Select only those lines containing matches that form whole words. The test is that the matching substring must either be at the beginning of the line, or preceded by a non-word constituent character. Similarly, it must be either at the end of the line or followed by a non-word constituent character. Word-constituent characters are letters, digits, and the underscore",
+        "Select only lines containing matches that form whole words. Has no effect if -x is also specified",
     },
     {
       name: ["-x", "--line-regexp"],
       description:
-        "Select only those matches that exactly match the whole line. (-x is specified by POSIX.)",
+        "Select only those matches that exactly match the whole line",
+    },
+    {
+      name: ["-z", "--null-data"],
+      description:
+        "Treat input and output data as sequences of lines terminated by a zero byte instead of a newline",
     },
     {
       name: ["-c", "--count"],
       description:
-        "Suppress normal output; instead print a count of matching lines for each input file. With the -v, --invert-match option, count non-matching lines. (-c is specified by POSIX.)",
+        "Suppress normal output; instead print a count of selected lines for each input file",
     },
     {
-      name: "--color",
+      name: ["--color", "--colour"],
       description:
-        "Surround the matched (non-empty) strings, matching lines, context lines, file names, line numbers, byte offsets, and separators (for fields and groups of context lines) with escape sequences to display them in color on the terminal. The colors are defined by the environment variable GREP_COLORS. The deprecated environment variable GREP_COLOR is still supported, but its setting does not have priority",
+        "Mark up the matching text with color escape sequences. The color is read from the GREP_COLOR (BSD) or GREP_COLORS (GNU) environment variable",
+      requiresSeparator: true,
       args: {
         name: "WHEN",
+        isOptional: true,
         default: "auto",
         suggestions: ["never", "always", "auto"],
       },
@@ -80,18 +107,17 @@ const completionSpec: Fig.Spec = {
       name: ["-L", "--files-without-match"],
       exclusiveOn: ["-l", "--files-with-matches"],
       description:
-        "Suppress normal output; instead print the name of each input file from which no output would normally have been printed. The scanning will stop on the first match",
+        "Suppress normal output; instead print the name of each input file that has no selected lines",
     },
     {
       name: ["-l", "--files-with-matches"],
       exclusiveOn: ["-L", "--files-without-match"],
       description:
-        "Suppress normal output; instead print the name of each input file from which output would normally have been printed. The scanning will stop on the first match. (-l is specified by POSIX.)",
+        "Suppress normal output; instead print the name of each input file that has selected lines. The search of a file stops at the first match",
     },
     {
       name: ["-m", "--max-count"],
-      description:
-        "Stop reading a file after NUM matching lines. If the input is standard input from a regular file, and NUM matching lines are output, grep ensures that the standard input is positioned to just after the last matching line before exiting, regardless of the presence of trailing context lines. This enables a calling process to resume a search. When grep stops after NUM matching lines, it outputs any trailing context lines. When the -c or --count option is also used, grep does not output a count greater than NUM. When the -v or --invert-match option is also used, grep stops after outputting NUM non-matching lines",
+      description: "Stop reading a file after NUM matching lines",
       args: {
         name: "NUM",
       },
@@ -99,37 +125,37 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-o", "--only-matching"],
       description:
-        "Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line",
+        "Print only the matching parts of a line, with each such part on a separate output line",
     },
     {
       name: ["-q", "--quiet", "--silent"],
       description:
-        "Quiet; do not write anything to standard output. Exit immediately with zero status if any match is found, even if an error was detected. Also see the -s or --no-messages option. (-q is specified by POSIX.)",
+        "Quiet mode: suppress normal output. The search stops at the first match",
     },
     {
       name: ["-s", "--no-messages"],
       description:
-        "Suppress error messages about nonexistent or unreadable files. Portability note: unlike GNU grep, 7th Edition Unix grep did not conform to POSIX, because it lacked -q and its -s option behaved like GNU grep's -q option. USG -style grep also lacked -q but its -s option behaved like GNU grep. Portable shell scripts should avoid both -q and -s and should redirect standard and error output to /dev/null instead. (-s is specified by POSIX.)",
+        "Silent mode: suppress error messages about nonexistent or unreadable files",
     },
     {
       name: ["-b", "--byte-offset"],
       description:
-        "Print the 0-based byte offset within the input file before each line of output. If -o (--only-matching) is specified, print the offset of the matching part itself",
+        "Print the byte offset of each matched pattern in front of the respective output line",
     },
     {
       name: ["-H", "--with-filename"],
       description:
-        "Print the file name for each match. This is the default when there is more than one file to search",
+        "Always print the file name for each match. This is the default when there is more than one file to search",
     },
     {
       name: ["-h", "--no-filename"],
       description:
-        "Suppress the prefixing of file names on output. This is the default when there is only one file (or only standard input) to search",
+        "Never print the file name with output lines. This is the default when there is only one file (or only standard input) to search",
     },
     {
       name: "--label",
       description:
-        "Display input actually coming from standard input as input coming from file LABEL. This is especially useful when implementing tools like zgrep, e.g., gzip -cd foo.gz | grep --label=foo -H something",
+        "Label to use in place of (standard input) as the file name where a file name would normally be printed, for -H, -L and -l",
       args: {
         name: "LABEL",
       },
@@ -137,26 +163,25 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-n", "--line-number"],
       description:
-        "Prefix each line of output with the 1-based line number within its input file. (-n is specified by POSIX.)",
+        "Prefix each output line with its 1-based line number within its input file",
     },
     {
       name: ["-T", "--initial-tab"],
       description:
-        "Make sure that the first character of actual line content lies on a tab stop, so that the alignment of tabs looks normal. This is useful with options that prefix their output to the actual content: -H,-n, and -b. In order to improve the probability that lines from a single file will all start at the same column, this also causes the line number and byte offset (if present) to be printed in a minimum size field width",
+        "Make sure that the first character of actual line content lies on a tab stop (GNU grep only, not available in macOS grep)",
     },
     {
       name: ["-u", "--unix-byte-offsets"],
       description:
-        "Report Unix-style byte offsets. This switch causes grep to report byte offsets as if the file were a Unix-style text file, i.e., with CR characters stripped off. This will produce results identical to running grep on a Unix machine. This option has no effect unless -b option is also used; it has no effect on platforms other than MS-DOS and MS -Windows",
+        "Has no effect and is provided only for compatibility with GNU grep (obsolete there as well)",
     },
     {
       name: "--null",
-      description:
-        "Output a zero byte (the ASCII NUL character) instead of the character that normally follows a file name. For example, grep -lZ outputs a zero byte after each file name instead of the usual newline. This option makes the output unambiguous, even in the presence of file names containing unusual characters like newlines. This option can be used with commands like find -print0, perl -0, sort -z, and xargs -0 to process arbitrary file names, even those that contain newline characters",
+      description: "Print a zero byte after the file name",
     },
     {
       name: ["-A", "--after-context"],
-      description: "Print num lines of trailing context after each match",
+      description: "Print NUM lines of trailing context after each match",
       args: {
         name: "NUM",
       },
@@ -164,7 +189,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-B", "--before-context"],
       description:
-        "Print num lines of leading context before each match. See also the -A and -C options",
+        "Print NUM lines of leading context before each match. See also the -A and -C options",
       args: {
         name: "NUM",
       },
@@ -172,7 +197,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-C", "--context"],
       description:
-        "Print NUM lines of output context. Places a line containing a group separator (--) between contiguous groups of matches. With the -o or --only-matching option, this has no effect and a warning is given",
+        "Print NUM lines of leading and trailing context surrounding each match",
       args: {
         name: "NUM",
       },
@@ -180,7 +205,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-a", "--text"],
       description:
-        "Treat all files as ASCII text. Normally grep will simply print ``Binary file ... matches'' if files contain binary characters. Use of this option forces grep to output lines matching the specified pattern",
+        "Treat all files as ASCII text. Normally grep prints 'Binary file ... matches' if a file contains binary characters. This option forces grep to output the matching lines",
     },
     {
       name: "--binary-files",
@@ -240,7 +265,7 @@ const completionSpec: Fig.Spec = {
           },
           {
             name: "recurse",
-            description: "Read directories recursively",
+            description: "Read directories recursively (same as -R and -r)",
           },
         ],
       },
@@ -248,45 +273,44 @@ const completionSpec: Fig.Spec = {
     {
       name: "--exclude",
       description:
-        "Note that --exclude patterns take priority over --include patterns, and if no --include pattern is specified, all files are searched that are not excluded. Patterns are matched to the full path specified, not only to the filename component",
+        "Exclude files whose name matches the given pattern from the search. Patterns are matched to the full path specified, not only to the filename component. In macOS grep, --exclude and --include are processed in the order given and the last matching rule wins",
+      isRepeatable: true,
       args: {
         name: "GLOB",
-        isOptional: true,
       },
     },
     {
       name: "--exclude-dir",
       description:
-        "If -R is specified, only directories matching the given filename pattern are searched.  Note that --exclude-dir patterns take priority over --include-dir patterns",
+        "If recursing, exclude directories matching the given pattern from the search. In macOS grep, --exclude-dir and --include-dir are processed in the order given and the last matching rule wins",
       isRepeatable: true,
       args: {
         name: "dir",
         template: "folders",
-        isOptional: true,
       },
     },
     {
       name: "-I",
       description:
-        "Ignore binary files. This option is equivalent to --binary-file=without-match option",
+        "Ignore binary files. This option is equivalent to --binary-files=without-match",
     },
     {
       name: "--include",
       description:
-        "If specified, only files matching the given filename pattern are searched. Note that --exclude patterns take priority over --include patterns. Patterns are matched to the full path specified, not only to the filename component",
+        "Search only files whose name matches the given pattern. Patterns are matched to the full path specified, not only to the filename component. In macOS grep, --include and --exclude are processed in the order given and the last matching rule wins",
+      isRepeatable: true,
       args: {
         name: "GLOB",
-        isOptional: true,
       },
     },
     {
       name: "--include-dir",
       description:
-        "If -R is specified, only directories matching the given filename pattern are searched. Note that --exclude-dir patterns take priority over --include-dir patterns",
+        "If recursing, search only directories matching the given pattern (macOS grep only). --include-dir and --exclude-dir are processed in the order given and the last matching rule wins",
+      isRepeatable: true,
       args: {
         name: "dir",
         template: "folders",
-        isOptional: true,
       },
     },
     {
@@ -294,35 +318,57 @@ const completionSpec: Fig.Spec = {
       description: "Recursively search subdirectories listed",
     },
     {
+      name: "-O",
+      description:
+        "If recursing, follow symbolic links only if they were explicitly listed on the command line. The default is not to follow symbolic links (macOS grep only)",
+    },
+    {
+      name: "-p",
+      description:
+        "If recursing, do not follow any symbolic links. This is the default (macOS grep only)",
+    },
+    {
+      name: "-S",
+      description:
+        "If recursing, follow all symbolic links. The default is not to follow symbolic links (macOS grep only)",
+    },
+    {
       name: "--line-buffered",
       description:
         "Force output to be line buffered. By default, output is line buffered when standard output is a terminal and block buffered otherwise",
+    },
+    {
+      name: "--mmap",
+      description:
+        "Use mmap(2) instead of read(2) to read input, which can be faster but can cause undefined behavior (macOS grep only)",
     },
     {
       name: ["-U", "--binary"],
       description: "Search binary files, but do not attempt to print them",
     },
     {
-      name: ["-J", "-bz2decompress"],
+      name: ["-J", "--bz2decompress"],
       description:
-        "Decompress the bzip2(1) compressed file before looking for the text",
+        "Decompress the bzip2(1) compressed file before looking for the text (macOS grep only)",
+    },
+    {
+      name: ["-M", "--lzma"],
+      description:
+        "Decompress the LZMA compressed file before looking for the text (macOS grep only)",
+    },
+    {
+      name: ["-X", "--xz"],
+      description:
+        "Decompress the xz(1) compressed file before looking for the text (macOS grep only)",
+    },
+    {
+      name: ["-Z", "--decompress"],
+      description:
+        "Behave as zgrep: decompress gzip or compress(1) compressed files before looking for the text (macOS grep only, GNU grep uses -Z for --null)",
     },
     {
       name: ["-V", "--version"],
-      description: "Print version number of grep to the standard output stream",
-    },
-    {
-      name: ["-P", "--perl-regexp"],
-      description: "Interpret pattern as a Perl regular expression",
-    },
-    {
-      name: ["-f", "--file"],
-      description:
-        "Obtain patterns from FILE, one per line. The empty file contains zero patterns, and therefore matches nothing. (-f is specified by POSIX.)",
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
+      description: "Print version information and exit",
     },
   ],
   additionalSuggestions: [
