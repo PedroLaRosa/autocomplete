@@ -1,4 +1,8 @@
-// tkn v0.47.0 (gh release view -R tektoncd/cli, 2026-11-19). Source: docs/cmd and pkg/cmd at v0.47.0
+// tkn v0.47.0 (latest tag on tektoncd/cli and the Homebrew tektoncd-cli formula, 2026-11-20).
+// Source: command tree and flags from pkg/cmd (cobra definitions, shared pkg/flags and pkg/formatted)
+// and the generated docs/cmd reference at tag v0.47.0, read statically (binary not run).
+// Note: docs/cmd for the deprecated "hub" subcommands still shows an old "--type" default of tekton;
+// the pkg/cmd/hub source (default "artifact") is authoritative.
 
 const remoteOptions: Fig.Option[] = [
   {
@@ -39,6 +43,19 @@ const deleteOutput: Fig.Option = {
     "Output format. One of: json|yaml. Skips the confirmation prompt",
 };
 
+const printOutputFormats = [
+  "json",
+  "yaml",
+  "name",
+  "go-template",
+  "go-template-file",
+  "template",
+  "templatefile",
+  "jsonpath",
+  "jsonpath-as-json",
+  "jsonpath-file",
+];
+
 const printOptions: Fig.Option[] = [
   {
     name: "--allow-missing-template-keys",
@@ -49,7 +66,7 @@ const printOptions: Fig.Option[] = [
     name: ["--output", "-o"],
     description:
       "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-    args: { name: "output" },
+    args: { name: "output", suggestions: printOutputFormats },
   },
   {
     name: "--show-managed-fields",
@@ -129,7 +146,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             ...remoteOptions,
             {
@@ -248,7 +265,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -281,7 +298,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -331,7 +348,14 @@ const completionSpec: Fig.Spec = {
         },
       ],
     },
-    { name: "completion", description: "Prints shell completion scripts" },
+    {
+      name: "completion",
+      description: "Prints shell completion scripts",
+      args: {
+        name: "shell",
+        suggestions: ["bash", "zsh", "fish", "powershell"],
+      },
+    },
     {
       name: ["cr", "customruns", "customrun"],
       description: "Manage CustomRuns",
@@ -430,7 +454,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -467,7 +491,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -679,7 +703,7 @@ const completionSpec: Fig.Spec = {
               name: "--from",
               description: "Name of Catalog to which resource belongs",
               isPersistent: true,
-              args: { name: "from", default: "tekton" },
+              args: { name: "from" },
             },
             {
               name: ["--kubeconfig", "-k"],
@@ -766,12 +790,20 @@ const completionSpec: Fig.Spec = {
             {
               name: "--match",
               description: "Accept type of search. 'exact' or 'contains'",
-              args: { name: "match", default: "contains" },
+              args: {
+                name: "match",
+                default: "contains",
+                suggestions: ["exact", "contains"],
+              },
             },
             {
               name: ["--output", "-o"],
               description: "Accepts output format: [table, json, wide]",
-              args: { name: "output", default: "table" },
+              args: {
+                name: "output",
+                default: "table",
+                suggestions: ["table", "json", "wide"],
+              },
             },
             {
               name: "--platforms",
@@ -881,7 +913,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -909,7 +941,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -946,7 +978,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1020,7 +1052,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1078,7 +1110,7 @@ const completionSpec: Fig.Spec = {
             {
               name: ["--output", "-o"],
               description: "Format of PipelineRun (yaml, json or name)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: ["yaml", "json", "name"] },
             },
             {
               name: ["--param", "-p"],
@@ -1192,7 +1224,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1253,7 +1285,10 @@ const completionSpec: Fig.Spec = {
               name: "--grace",
               description:
                 "Gracefully cancel a PipelineRun To use this, you need to change the feature-flags configmap enable-api-fields to alpha instead of stable. Set to 'CancelledRunFinally' if you want to cancel the current running task and directly run the finally tasks. Set to 'StoppedRunFinally' if you want to cancel the remaining non-final task and directly run the finally tasks",
-              args: { name: "grace" },
+              args: {
+                name: "grace",
+                suggestions: ["CancelledRunFinally", "StoppedRunFinally"],
+              },
             },
             jsonYamlOutput,
           ],
@@ -1328,7 +1363,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1356,7 +1391,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1405,7 +1440,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--reverse",
@@ -1546,7 +1581,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1583,7 +1618,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1652,7 +1687,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1705,7 +1740,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--output",
               description: "Format of TaskRun (yaml or json)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: ["yaml", "json"] },
             },
             {
               name: ["--param", "-p"],
@@ -1788,7 +1823,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1915,7 +1950,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1943,7 +1978,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -1992,7 +2027,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--reverse",
@@ -2118,7 +2153,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2155,7 +2190,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2237,7 +2272,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
@@ -2274,7 +2309,7 @@ const completionSpec: Fig.Spec = {
               name: ["--output", "-o"],
               description:
                 "Output format. One of: (json, yaml, name, go-template, go-template-file, template, templatefile, jsonpath, jsonpath-as-json, jsonpath-file)",
-              args: { name: "output" },
+              args: { name: "output", suggestions: printOutputFormats },
             },
             {
               name: "--show-managed-fields",
