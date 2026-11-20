@@ -1,6 +1,8 @@
-// kubectl v1.37.2 (GitHub release kubernetes/kubernetes, 2026-11-19). Source:
-// `kubectl --help` walk on v1.34.1, plus the v1.34.1..v1.37.2 diff of
-// staging/src/k8s.io/kubectl/pkg/cmd and the 1.35-1.37 changelogs.
+// kubectl v1.37.2 (kubernetes/kubernetes tag v1.37.2 = Homebrew kubernetes-cli
+// and dl.k8s.io stable, 2026-11-20). Source: `kubectl --help` walk on v1.34.1
+// plus the 1.35-1.37 changelogs, re-audited on 2026-11-20 against the
+// kubernetes/kubectl v0.37.2 and cli-runtime v0.37.2 sources (pkg/cmd command
+// tree, flag definitions, output formats; read statically, binary not run).
 
 // Internal scripts for this spec, not to be confused with the script property
 const scripts = {
@@ -400,6 +402,34 @@ const outputWithTableFormats: Fig.Option = {
   },
 };
 
+// Standard RBAC verbs accepted by `create role` and `create clusterrole`
+const resourceVerbs = [
+  "*",
+  "get",
+  "delete",
+  "list",
+  "create",
+  "update",
+  "patch",
+  "watch",
+  "proxy",
+  "deletecollection",
+  "use",
+  "bind",
+  "escalate",
+  "impersonate",
+];
+
+// `-o` for commands that accept only a few output formats
+const outputFormats = (
+  formats: string[],
+  description = `Output format. One of: ${formats.join("|")}`
+): Fig.Option => ({
+  name: ["-o", "--output"],
+  description,
+  args: { name: "Output Format", suggestions: formats },
+});
+
 const detachKeys: Fig.Option = {
   name: "--detach-keys",
   requiresSeparator: true,
@@ -474,7 +504,7 @@ const completionSpec: Fig.Spec = {
       name: "api-resources",
       description: "Print the supported API resources on the server",
       options: [
-        sharedOpts.output,
+        outputFormats(["json", "yaml", "kyaml", "name", "wide"]),
         {
           name: "--api-group",
           description: "Limit to resources in the specified API group",
@@ -507,8 +537,8 @@ const completionSpec: Fig.Spec = {
           name: "--sort-by",
           requiresSeparator: true,
           description:
-            "If non-empty, sort nodes list using specified field. The field can be either 'name' or 'kind'",
-          args: {},
+            "If non-empty, sort list of resources using specified field. The field can be either 'name' or 'kind'",
+          args: { suggestions: ["name", "kind"] },
         },
         {
           name: "--verbs",
@@ -668,7 +698,10 @@ const completionSpec: Fig.Spec = {
             sharedOpts.allResources,
             sharedOpts.filename,
             sharedOpts.kustomize,
-            sharedOpts.output,
+            outputFormats(
+              ["yaml", "json"],
+              "Output format. Must be one of (yaml, json)"
+            ),
             sharedOpts.recursive,
             sharedOpts.selector,
           ],
@@ -1015,12 +1048,11 @@ const completionSpec: Fig.Spec = {
           description: "Displays one or many contexts from the kubeconfig file",
           args: { ...sharedArgs.listKubeConfContexts, isOptional: true },
           options: [
-            sharedOpts.output,
+            outputFormats(["name"], "Output format. One of: (name)"),
             {
               name: "--no-headers",
               description:
                 "When using the default or custom-column output format, don't print headers (default print headers)",
-              args: {},
             },
           ],
         },
@@ -1145,7 +1177,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "set-credentials",
           description: "Sets a user entry in kubeconfig",
-          args: sharedArgs.listClusters,
+          args: { name: "NAME" },
           options: [
             {
               name: "--client-certificate",
@@ -1325,7 +1357,6 @@ const completionSpec: Fig.Spec = {
           name: "--no-preserve",
           description:
             "The copied file/directory's ownership and permissions will not be preserved in the container",
-          args: {},
         },
         {
           name: "--retries",
@@ -1424,16 +1455,7 @@ const completionSpec: Fig.Spec = {
                 "Verb that applies to the resources contained in the rule",
               args: {
                 name: "VERB",
-                suggestions: [
-                  "*",
-                  "get",
-                  "list",
-                  "watch",
-                  "delete",
-                  "create",
-                  "update",
-                  "patch",
-                ],
+                suggestions: resourceVerbs,
               },
             },
           ],
@@ -1934,7 +1956,7 @@ const completionSpec: Fig.Spec = {
                 "Verb that applies to the resources contained in the rule",
               args: {
                 name: "VERB",
-                suggestions: ["get", "list", "watch", "delete"],
+                suggestions: resourceVerbs,
               },
             },
           ],
@@ -2578,7 +2600,10 @@ const completionSpec: Fig.Spec = {
         sharedOpts.dryRun,
         sharedOpts.filename,
         sharedOpts.kustomize,
-        sharedOpts.output,
+        outputFormats(
+          ["name"],
+          'Output mode. Use "-o name" for shorter output (resource/name)'
+        ),
         sharedOpts.recursive,
         sharedOpts.selector,
         sharedOpts.allResources,
@@ -2784,7 +2809,6 @@ const completionSpec: Fig.Spec = {
         {
           name: "--output-patch",
           description: "Output the patch if the resource is edited",
-          args: {},
         },
         {
           name: "--save-config",
@@ -3436,6 +3460,10 @@ const completionSpec: Fig.Spec = {
           description: "Include timestamps on each line in the log output",
         },
       ],
+    },
+    {
+      name: "options",
+      description: "Print the list of flags inherited by all commands",
     },
     {
       name: "patch",
@@ -4209,7 +4237,6 @@ const completionSpec: Fig.Spec = {
               name: "--all",
               description:
                 "Select all resources in the namespace of the specified resource types",
-              args: {},
             },
           ],
         },
@@ -4375,7 +4402,7 @@ const completionSpec: Fig.Spec = {
       description:
         "Print the client and server version information for the current context",
       options: [
-        sharedOpts.output,
+        outputFormats(["yaml", "json"], "One of 'yaml' or 'json'"),
         {
           name: "--client",
           description:
