@@ -3,7 +3,6 @@
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const stripAnsi = (text: string) =>
-   
   text.replace(/\u001b\[[0-9;]*[A-Za-z]/g, "");
 
 // `meteor create --list` prints "  <slug> v<meteor version>" followed by indented details

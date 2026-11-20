@@ -14,7 +14,6 @@ const projectAliasesGenerator: Fig.Generator = {
       .map((line) => line.split("│").slice(1, -1));
     rows.shift(); // first row is the table header
     return rows.flatMap((cells) => {
-       
       const projectId = (cells[1] ?? "")
         .replace(/\u001b\[[0-9;]*m/g, "")
         .replace(/\(current\)/, "")
