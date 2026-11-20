@@ -1,3 +1,5 @@
+// pytest v9.2.0 (PyPI latest release, 2026-11-20). Source: sdist pytest-9.2.0 read statically (not executed):
+// parser.addoption/addini calls in src/_pytest/**, cross-checked with the `pytest --help` output in doc/en/reference/reference.rst.
 const completionSpec: Fig.Spec = {
   name: "pytest",
   args: {
@@ -7,6 +9,7 @@ const completionSpec: Fig.Spec = {
       of the files of the form test_*.py or *_test.py in the current directory \
       and its subdirectories",
     isOptional: true,
+    isVariadic: true,
     template: ["filepaths", "folders"],
   },
   options: [
@@ -22,16 +25,16 @@ const completionSpec: Fig.Spec = {
     {
       name: "--basetemp",
       description:
-        "Base temporary directory for this test run.(warning: this directory is removed if it exists)",
+        "Base temporary directory for this test run (warning: this directory is removed if it exists)",
       args: {
         name: "Directory",
         template: "folders",
       },
     },
     {
-      name: "-c",
+      name: ["-c", "--config-file"],
       description:
-        "Load configuration from `file` instead of trying to locate one of the implicit configuration files",
+        "Load configuration from `FILE` instead of trying to locate one of the implicit configuration files",
       args: {
         name: "File",
         template: "filepaths",
@@ -119,7 +122,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--durations-min",
-      description: "Minimal duration in seconds for inclusion in slowest list",
+      description:
+        "Minimal duration in seconds for inclusion in slowest list. Default: 0.005 (or 0.0 if -vv is given)",
       args: {
         name: "N",
         default: "0.005",
@@ -145,7 +149,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--doctest-ignore-import-errors",
-      description: "Ignore doctest ImportErrors",
+      description: "Ignore doctest collection errors",
     },
     {
       name: "--doctest-modules",
@@ -163,6 +167,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--doctest-glob",
       description: "Doctests file matching pattern, default: test*.txt",
+      isRepeatable: true,
       args: {
         name: "Pattern",
         default: "test*.txt",
@@ -174,12 +179,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--failed-first", "--ff"],
-      description: "Run all tests, but run the last failures first",
+      description:
+        "Run all tests, but run the last failures first. This may re-order tests and thus lead to repeated fixture setup/teardown",
     },
     {
-      name: "--fixtures",
+      name: ["--fixtures", "--funcargs"],
       description:
-        "Shows builtin and custom fixtures. Note that this command omits fixtures with leading _ unless the -v option is added",
+        "Show available fixtures, sorted by plugin appearance (fixtures with leading '_' are only shown with '-v')",
     },
     {
       name: "--fixtures-per-test",
@@ -191,7 +197,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--help", "-h"],
-      description: "This shows help on command line and config-line options",
+      description: "Show help message and configuration info",
     },
     {
       name: "--ignore",
@@ -222,7 +228,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--junit-xml",
+      name: ["--junitxml", "--junit-xml"],
       description: "Create junit-xml style report file at given path",
       args: {
         name: "Path",
@@ -230,7 +236,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--junit-prefix",
+      name: ["--junitprefix", "--junit-prefix"],
       description: "Prepend prefix to classnames in junit-xml output",
       args: {
         name: "Str",
@@ -240,7 +246,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "-k",
       description:
-        "Only run tests which match the given substring expression. An expression is a python evaluatable expression where all names are substring-matched against test names and their parent classes. Example: -k 'test_method or test_other' matches all test functions and classes whose name contains 'test_method' or 'test_other', while -k 'not test_method' matches those that don't contain 'test_method' in their names. -k 'not test_method and not test_other' will eliminate the matches. Additionally keywords are matched to classes and functions containing extra names in their 'extra_keyword_matches' set, as well as functions which have names assigned directly to them. The matching is case- insensitive",
+        "Only run tests matching the given keyword expression, e.g. -k 'test_method or test_other', -k 'not (slow or network)'. Names in the expression are matched case-insensitively as substrings of the test's keywords: its own name (including any parametrization id), the names of its class, module and directories, the names of the markers applied to it or to its parents, attributes assigned directly to the test function, and any names in its 'extra_keyword_matches' set. Use -m to match marker names exactly, including their arguments",
       args: {
         name: "Expression",
         description: "Ex: 'test_method or test_other'",
@@ -257,7 +263,8 @@ const completionSpec: Fig.Spec = {
 
     {
       name: ["--last-failed-no-failures", "--lfnf"],
-      description: "Which tests to run with no previously (known) failures",
+      description:
+        "With --lf, determines whether to execute tests when there are no previously (known) failures or when no cached lastfailed data was found. 'all' (the default) runs the full test suite again, 'none' just emits a message about no known failures and exits successfully",
       args: {
         name: "Tests",
         suggestions: ["all", "none"],
@@ -280,7 +287,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--log-cli-level",
-      description: "Cli logging level",
+      description: "CLI logging level",
       args: {
         name: "Log CLI Level",
         suggestions: ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
@@ -288,35 +295,47 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--log-cli-format",
-      description: "Log format as used by the logging module",
+      description: "Log format used by the logging module",
       args: {
         name: "Log CLI Format",
       },
     },
     {
       name: "--log-cli-date-format",
-      description: "Log date format as used by the logging module",
+      description: "Log date format used by the logging module",
       args: { name: "Log CLI Date Format" },
     },
     {
       name: "--log-date-format",
-      description: "Log date format as used by the logging module",
+      description: "Log date format used by the logging module",
       args: { name: "Log Date Format" },
     },
     {
       name: "--log-format",
-      description: "Log format as used by the logging module",
+      description: "Log format used by the logging module",
       args: {
         name: "Log Format",
       },
     },
     {
       name: "--log-file",
-      description: "Path to a file where logging will be written to",
+      description: "Path to a file when logging will be written",
       args: {
         name: "Log File Path",
         template: "filepaths",
         suggestCurrentToken: true,
+      },
+    },
+    {
+      name: "--log-file-mode",
+      description: "Log file open mode",
+      args: {
+        name: "Mode",
+        default: "w",
+        suggestions: [
+          { name: "w", description: "Overwrite the log file" },
+          { name: "a", description: "Append to the log file" },
+        ],
       },
     },
     {
@@ -329,14 +348,22 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--log-file-date-format",
-      description: "Log date format as used by the logging module",
+      description: "Log date format used by the logging module",
       args: { name: "Log File Date Format" },
     },
     {
       name: "--log-file-format",
-      description: "Log format as used by the logging module",
+      description: "Log format used by the logging module",
       args: {
         name: "Log File Format",
+      },
+    },
+    {
+      name: "--log-disable",
+      description: "Disable a logger by name. Can be passed multiple times",
+      isRepeatable: true,
+      args: {
+        name: "Logger",
       },
     },
     {
@@ -350,7 +377,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-m",
-      description: "Only run tests matching given mark expression",
+      description:
+        "Only run tests matching given mark expression. For example: -m 'mark1 and not mark2'",
       args: {
         name: "Mark Expression",
       },
@@ -367,6 +395,14 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--max-warnings",
+      description:
+        "Exit with error if all tests pass but the number of warnings exceeds this threshold",
+      args: {
+        name: "num",
+      },
+    },
+    {
       name: ["--new-first", "--nf"],
       description:
         "Run tests from new files first, then the rest of the tests sorted by file mtime",
@@ -376,8 +412,22 @@ const completionSpec: Fig.Spec = {
       description: "Don't load any conftest.py files",
     },
     {
+      name: "--no-fold-skipped",
+      description: "Do not fold skipped tests in short summary",
+    },
+    {
+      name: "--force-short-summary",
+      description:
+        "Force condensed summary output regardless of verbosity level",
+    },
+    {
       name: "--no-header",
       description: "Disable header",
+    },
+    {
+      name: "--no-showlocals",
+      description:
+        "Hide locals in tracebacks (negate --showlocals passed through addopts)",
     },
     {
       name: "--no-summary",
@@ -385,20 +435,26 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["--override-ini", "-o"],
-      description: "Override ini option with `option=value` style`",
+      description: 'Override configuration option with "option=value" style',
+      isRepeatable: true,
       args: {
         name: "Override INI",
-        description: "Ex: `-o xfail_strict=True -o cache_dir=cache",
+        description: "Ex: `-o strict_xfail=True -o cache_dir=cache`",
       },
     },
     {
       name: "-p",
       description:
-        "Early-load given plugin module name or entry point (multi-allowed)",
+        "Early-load given plugin module name or entry point (multi-allowed). To avoid loading of plugins, use the `no:` prefix, e.g. `no:doctest`. See also --disable-plugin-autoload",
       isRepeatable: true,
       args: {
         name: "Plugin name",
       },
+    },
+    {
+      name: "--disable-plugin-autoload",
+      description:
+        "Disable plugin auto-loading through entry point packaging metadata. Only plugins explicitly specified in -p or env var PYTEST_PLUGINS will be loaded",
     },
     {
       name: "--pastebin",
@@ -429,6 +485,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--quiet", "-q"],
       description: "Decrease verbosity",
+      isRepeatable: true,
     },
     {
       name: "-r",
@@ -489,12 +546,16 @@ const completionSpec: Fig.Spec = {
     {
       name: ["--stepwise-skip", "--sw-skip"],
       description:
-        "Ignore the first failing test but stop on the next failing test",
+        "Ignore the first failing test but stop on the next failing test. Implicitly enables --stepwise",
+    },
+    {
+      name: ["--stepwise-reset", "--sw-reset"],
+      description:
+        "Resets stepwise state, restarting the stepwise workflow. Implicitly enables --stepwise",
     },
     {
       name: "--strict",
-      description: "Alias to --strict-markers",
-      deprecated: true,
+      description: "Enables the strict option",
     },
     {
       name: "--strict-config",
@@ -539,11 +600,17 @@ const completionSpec: Fig.Spec = {
       name: ["--version", "-V"],
       description:
         "Display pytest version and information about plugins. When given twice, also display information about plugins",
+      isRepeatable: true,
+    },
+    {
+      name: "--xfail-tb",
+      description: "Show tracebacks for xfail (as long as --tb != no)",
     },
     {
       name: ["--pythonwarnings", "-W"],
       description:
         "Set which warnings to report, see -W option of python itself",
+      isRepeatable: true,
       args: {
         name: "Warnings to report",
       },
