@@ -1,3 +1,7 @@
+// Spring Boot CLI v4.2.0 (latest release on Maven Central, spring-boot-cli 4.2.0 published 2026-11-19; git tag v4.2.0; checked 2026-11-20). Source: read statically from the
+// spring-boot repo at v4.2.0 (cli/spring-boot-cli: SpringCli, DefaultCommandFactory, InitCommand, EncodePasswordCommand, ShellCommand, HintCommand,
+// shipped shell-completion scripts); the CLI itself was not run. Since 4.0 the CLI only has init, encodepassword, shell and help/version (plus the hidden hint).
+// The dependency/version/language generators still query https://start.spring.io/metadata/client, which was unreachable here and so is not re-verified.
 type Data = {
   dependencies: Options<DependencyGroup>;
   packaging: Options<Option>;
@@ -83,31 +87,26 @@ const dependencyGenerator: Fig.Generator = {
   },
 };
 
-const versionGenerator: Fig.Generator = {
+const metadataGenerator = (
+  select: (data: Data) => Option[]
+): Fig.Generator => ({
   cache,
   custom: async (_, executeShellCommand) => {
     const data = await fetchData(executeShellCommand);
     if (!data) return [];
 
-    return data.bootVersion.values.map((version) => ({
-      name: version.id,
-      displayName: version.name,
+    return select(data).map((option) => ({
+      name: option.id,
+      displayName: option.name,
     }));
   },
-};
+});
 
-const javaVersionGenerator: Fig.Generator = {
-  cache,
-  custom: async (_, executeShellCommand) => {
-    const data = await fetchData(executeShellCommand);
-    if (!data) return [];
-
-    return data.javaVersion.values.map((version) => ({
-      name: version.id,
-      displayName: version.name,
-    }));
-  },
-};
+const versionGenerator = metadataGenerator((data) => data.bootVersion.values);
+const javaVersionGenerator = metadataGenerator(
+  (data) => data.javaVersion.values
+);
+const languageGenerator = metadataGenerator((data) => data.language.values);
 
 const completionSpec: Fig.Spec = {
   name: "spring",
@@ -120,8 +119,8 @@ const completionSpec: Fig.Spec = {
       description: "Initialize a new project using Spring Initializr",
       options: [
         {
-          name: ["-a", "---artifact-id"],
-          description: "Project coordinates",
+          name: ["-a", "--artifact-id"],
+          description: "Project coordinates; infer archive name",
           args: {
             name: "Name",
           },
@@ -141,7 +140,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "System",
             suggestions: ["maven", "gradle"],
-            default: "maven",
+            default: "gradle",
           },
         },
         {
@@ -170,16 +169,17 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--format",
-          description: "Format of the generated content",
+          description:
+            "Format of the generated content ('build' for a build file, 'project' for a project archive)",
           args: {
             name: "Format",
             suggestions: ["build", "project"],
-            default: "build",
+            default: "project",
           },
         },
         {
           name: ["-g", "--group-id"],
-          description: "Project coordinates",
+          description: "Project coordinates (for example 'org.test')",
           args: {
             name: "Group ID",
           },
@@ -195,18 +195,28 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--list",
-          description: "List the capabilities of the service",
+          description:
+            "List the capabilities of the service. Use it to discover the dependencies and the types that are available",
+        },
+        {
+          name: ["-l", "--language"],
+          description: "Programming language (for example 'java')",
+          args: {
+            name: "Language",
+            generators: languageGenerator,
+            debounce: true,
+          },
         },
         {
           name: ["-n", "--name"],
-          description: "Project name",
+          description: "Project name; infer application name",
           args: {
             name: "Name",
           },
         },
         {
           name: ["-p", "--packaging"],
-          description: "Project packaging",
+          description: "Project packaging (for example 'jar')",
           args: {
             name: "Packaging",
             suggestions: ["jar", "war"],
@@ -221,7 +231,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-t", "--type"],
-          description: "Project type",
+          description:
+            "Project type. Not normally needed if you use --build and/or --format. Defaults to the default type of the service",
           args: {
             name: "Type",
             suggestions: [
@@ -248,7 +259,6 @@ const completionSpec: Fig.Spec = {
                 description: "Generate a Maven based project archive",
               },
             ],
-            default: "gradle-project",
           },
         },
         {
@@ -261,7 +271,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-v", "--version"],
-          description: "Project version",
+          description: "Project version (for example '0.0.1-SNAPSHOT')",
           args: {
             name: "Version",
           },
@@ -272,6 +282,13 @@ const completionSpec: Fig.Spec = {
             "Extract the project archive. Inferred if a location is specified without an extension",
         },
       ],
+      args: {
+        name: "Location",
+        description:
+          "Where to write the project archive or build file, or the directory to extract into",
+        isOptional: true,
+        template: ["filepaths", "folders"],
+      },
     },
     {
       name: "encodepassword",
@@ -282,7 +299,14 @@ const completionSpec: Fig.Spec = {
           description: "The algorithm to use",
           args: {
             name: "Algorithm",
-            suggestions: ["default", "bcrypt", "pbkdf2"],
+            suggestions: [
+              {
+                name: "default",
+                description: "Delegating encoder (bcrypt by default)",
+              },
+              { name: "bcrypt", description: "BCrypt" },
+              { name: "pbkdf2", description: "PBKDF2" },
+            ],
             default: "default",
           },
         },
