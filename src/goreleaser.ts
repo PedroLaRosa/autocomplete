@@ -1,25 +1,127 @@
+// GoReleaser v2.20.3 (git tag v2.20.3 of goreleaser/goreleaser, 2026-11-20). Source: cmd/*.go (cobra definitions),
+// internal/skips/skips.go and cmd/root.go at that tag, plus charmbracelet/fang v1.0.0 (adds --version and the
+// hidden "man" command; cobra's default "completion" command stays enabled). Read statically, the binary was not run.
+// Removed upstream since the previous spec: --debug, --rm-dist and the --skip-* flags (use --skip=<option>).
+
+const buildSkips = ["before", "post-hooks", "pre-hooks", "validate"];
+
+const releaseSkips = [
+  "announce",
+  "archive",
+  "aur",
+  "aur-source",
+  "before",
+  "changelog",
+  "chocolatey",
+  "docker",
+  "flatpak",
+  "homebrew",
+  "iru",
+  "ko",
+  "makeself",
+  "mcp",
+  "nfpm",
+  "nix",
+  "notarize",
+  "publish",
+  "sbom",
+  "scoop",
+  "sign",
+  "snapcraft",
+  "srpm",
+  "validate",
+  "winget",
+];
+
+const initLanguages = [
+  "go",
+  "bun",
+  "deno",
+  "node",
+  "rust",
+  "zig",
+  "uv",
+  "poetry",
+];
+
+const configOption = (description: string): Fig.Option => ({
+  name: ["--config", "-f"],
+  description,
+  args: { name: "config", template: "filepaths" },
+});
+
+const parallelismOption = (description: string): Fig.Option => ({
+  name: ["--parallelism", "-p"],
+  description,
+  args: { name: "parallelism", default: "0" },
+});
+
+const timeoutOption = (description: string): Fig.Option => ({
+  name: "--timeout",
+  description,
+  args: { name: "timeout", default: "1h0m0s" },
+});
+
+const skipOption = (
+  description: string,
+  suggestions: string[]
+): Fig.Option => ({
+  name: "--skip",
+  description,
+  isRepeatable: true,
+  args: { name: "skip", suggestions },
+});
+
+const autoSnapshotOption: Fig.Option = {
+  name: "--auto-snapshot",
+  description: "Automatically sets --snapshot if the repository is dirty",
+};
+
+const deprecatedOption: Fig.Option = {
+  name: "--deprecated",
+  description: "Force print the deprecation message - tests only",
+  hidden: true,
+};
+
+const quietOption: Fig.Option = {
+  name: ["--quiet", "-q"],
+  description: "Quiet mode: no output",
+};
+
+const markdownFileOption = (name: string, description: string): Fig.Option => ({
+  name,
+  description,
+  args: { name: name.slice(2), template: "filepaths" },
+});
+
+const completionShellSubcommand = (shell: string): Fig.Subcommand => ({
+  name: shell,
+  description: `Generate the autocompletion script for ${shell}`,
+  options: [
+    {
+      name: "--no-descriptions",
+      description: "Disable completion descriptions",
+    },
+  ],
+});
+
+const completionShells = ["bash", "fish", "powershell", "zsh"];
+
 const completionSpec: Fig.Spec = {
   name: "goreleaser",
-  description: "Deliver Go binaries as fast and easily as possible",
+  description: "Release engineering, simplified",
   subcommands: [
     {
       name: ["b", "build"],
       description: "Builds the current project",
       options: [
+        autoSnapshotOption,
         {
           name: "--clean",
-          description: "Remove the dist folder before building",
+          description: "Removes the 'dist' directory before building",
         },
-        {
-          name: ["--config", "-f"],
-          description: "Load configuration from file",
-          args: { name: "config", template: ["filepaths"] },
-        },
-        {
-          name: "--deprecated",
-          description: "Force print the deprecation message - tests only",
-          hidden: true,
-        },
+        configOption("Load configuration from file"),
+        deprecatedOption,
         {
           name: "--id",
           description: "Builds only the specified build ids",
@@ -30,56 +132,26 @@ const completionSpec: Fig.Spec = {
           name: ["--output", "-o"],
           description:
             "Copy the binary to the path after the build. Only taken into account when using --single-target and a single id (either with --id or if configuration only has one build)",
-          args: { name: "output", template: ["filepaths"] },
+          args: { name: "output", template: "filepaths" },
         },
-        {
-          name: ["--parallelism", "-p"],
-          description:
-            "Amount tasks to run concurrently (default: number of CPUs)",
-          args: { name: "parallelism", default: "0" },
-        },
-        {
-          name: "--rm-dist",
-          description: "Remove the dist folder before building",
-          hidden: true,
-        },
+        parallelismOption(
+          "Number of tasks to run concurrently (default: number of CPUs)"
+        ),
         {
           name: "--single-target",
           description:
             "Builds only for current GOOS and GOARCH, regardless of what's set in the configuration file",
         },
-        {
-          name: "--skip",
-          description:
-            "Skip the given options (valid options are: before, post-hooks, pre-hooks, validate)",
-          isRepeatable: true,
-          args: { name: "skip" },
-        },
-        {
-          name: "--skip-before",
-          description: "Skips global before hooks",
-          hidden: true,
-        },
-        {
-          name: "--skip-post-hooks",
-          description: "Skips all post-build hooks",
-          hidden: true,
-        },
-        {
-          name: "--skip-validate",
-          description: "Skips several sanity checks",
-          hidden: true,
-        },
+        skipOption(
+          `Skip the given options (valid options are: ${buildSkips.join(", ")})`,
+          buildSkips
+        ),
         {
           name: "--snapshot",
           description:
             "Generate an unversioned snapshot build, skipping all validations",
         },
-        {
-          name: "--timeout",
-          description: "Timeout to the entire build process",
-          args: { name: "timeout", default: "30m0s" },
-        },
+        timeoutOption("Timeout to the entire build process"),
       ],
     },
     {
@@ -87,76 +159,27 @@ const completionSpec: Fig.Spec = {
       description: "Checks if configuration is valid",
       options: [
         {
-          name: ["--config", "-f"],
-          description: "Configuration file(s) to check",
-          hidden: true,
-          args: { name: "config", template: ["filepaths"] },
-        },
-        {
-          name: "--deprecated",
-          description: "Force print the deprecation message - tests only",
+          ...configOption("Configuration file(s) to check"),
           hidden: true,
         },
-        { name: ["--quiet", "-q"], description: "Quiet mode: no output" },
+        deprecatedOption,
+        quietOption,
       ],
+      args: {
+        name: "configuration files",
+        isVariadic: true,
+        template: "filepaths",
+      },
     },
     {
       name: "completion",
       description: "Generate the autocompletion script for the specified shell",
-      subcommands: [
-        {
-          name: "bash",
-          description: "Generate the autocompletion script for bash",
-          options: [
-            {
-              name: "--no-descriptions",
-              description: "Disable completion descriptions",
-            },
-          ],
-        },
-        {
-          name: "fish",
-          description: "Generate the autocompletion script for fish",
-          options: [
-            {
-              name: "--no-descriptions",
-              description: "Disable completion descriptions",
-            },
-          ],
-        },
-        {
-          name: "powershell",
-          description: "Generate the autocompletion script for powershell",
-          options: [
-            {
-              name: "--no-descriptions",
-              description: "Disable completion descriptions",
-            },
-          ],
-        },
-        {
-          name: "zsh",
-          description: "Generate the autocompletion script for zsh",
-          options: [
-            {
-              name: "--no-descriptions",
-              description: "Disable completion descriptions",
-            },
-          ],
-        },
-      ],
+      subcommands: completionShells.map(completionShellSubcommand),
     },
     {
       name: ["hc", "healthcheck"],
       description: "Checks if needed tools are installed",
-      options: [
-        {
-          name: ["--config", "-f"],
-          description: "Configuration file",
-          args: { name: "config", template: ["filepaths"] },
-        },
-        { name: ["--quiet", "-q"], description: "Quiet mode: no output" },
-      ],
+      options: [configOption("Configuration file"), quietOption],
     },
     {
       name: ["i", "init"],
@@ -168,10 +191,24 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "config",
             default: ".goreleaser.yaml",
-            template: ["filepaths"],
+            template: "filepaths",
+          },
+        },
+        {
+          name: ["--language", "-l"],
+          description: "Which language will be used",
+          args: {
+            name: "language",
+            default: "go",
+            suggestions: initLanguages,
           },
         },
       ],
+    },
+    {
+      name: "man",
+      description: "Generates GoReleaser's command line manpages",
+      hidden: true,
     },
     {
       name: ["schema", "jsonschema"],
@@ -180,7 +217,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--output", "-o"],
           description: "Where to save the JSONSchema file",
-          args: { name: "output", default: "-", template: ["filepaths"] },
+          args: { name: "output", default: "-", template: "filepaths" },
         },
       ],
     },
@@ -188,125 +225,57 @@ const completionSpec: Fig.Spec = {
       name: ["r", "release"],
       description: "Releases the current project",
       options: [
+        autoSnapshotOption,
+        { name: "--clean", description: "Removes the 'dist' directory" },
+        configOption("Load configuration from file"),
+        deprecatedOption,
         {
-          name: "--auto-snapshot",
+          name: "--draft",
           description:
-            "Automatically sets --snapshot if the repository is dirty",
-        },
-        { name: "--clean", description: "Removes the dist folder" },
-        {
-          name: ["--config", "-f"],
-          description: "Load configuration from file",
-          args: { name: "config", template: ["filepaths"] },
-        },
-        {
-          name: "--deprecated",
-          description: "Force print the deprecation message - tests only",
-          hidden: true,
+            "Whether to set the release to draft. Overrides release.draft in the configuration file",
         },
         {
           name: "--fail-fast",
           description:
             "Whether to abort the release publishing on the first error",
         },
-        {
-          name: ["--parallelism", "-p"],
-          description:
-            "Amount tasks to run concurrently (default: number of CPUs)",
-          args: { name: "parallelism", default: "0" },
-        },
-        {
-          name: "--release-footer",
-          description: "Load custom release notes footer from a markdown file",
-          args: { name: "release-footer", template: ["filepaths"] },
-        },
-        {
-          name: "--release-footer-tmpl",
-          description:
-            "Load custom release notes footer from a templated markdown file (overrides --release-footer)",
-          args: { name: "release-footer-tmpl", template: ["filepaths"] },
-        },
-        {
-          name: "--release-header",
-          description: "Load custom release notes header from a markdown file",
-          args: { name: "release-header", template: ["filepaths"] },
-        },
-        {
-          name: "--release-header-tmpl",
-          description:
-            "Load custom release notes header from a templated markdown file (overrides --release-header)",
-          args: { name: "release-header-tmpl", template: ["filepaths"] },
-        },
-        {
-          name: "--release-notes",
-          description:
-            "Load custom release notes from a markdown file (will skip GoReleaser changelog generation)",
-          args: { name: "release-notes", template: ["filepaths"] },
-        },
-        {
-          name: "--release-notes-tmpl",
-          description:
-            "Load custom release notes from a templated markdown file (overrides --release-notes)",
-          args: { name: "release-notes-tmpl", template: ["filepaths"] },
-        },
-        {
-          name: "--rm-dist",
-          description: "Removes the dist folder",
-          hidden: true,
-        },
-        {
-          name: "--skip",
-          description:
-            "Skip the given options (valid options are announce, aur, before, chocolatey, docker, homebrew, ko, nfpm, nix, publish, sbom, scoop, sign, snapcraft, validate, winget)",
-          isRepeatable: true,
-          args: { name: "skip" },
-        },
-        {
-          name: "--skip-announce",
-          description: "Skips announcing releases (implies --skip=validate)",
-          hidden: true,
-        },
-        {
-          name: "--skip-before",
-          description: "Skips global before hooks",
-          hidden: true,
-        },
-        {
-          name: "--skip-docker",
-          description: "Skips Docker Images/Manifests builds",
-          hidden: true,
-        },
-        { name: "--skip-ko", description: "Skips Ko builds", hidden: true },
-        {
-          name: "--skip-publish",
-          description: "Skips publishing artifacts (implies --skip=announce)",
-          hidden: true,
-        },
-        {
-          name: "--skip-sbom",
-          description: "Skips cataloging artifacts",
-          hidden: true,
-        },
-        {
-          name: "--skip-sign",
-          description: "Skips signing artifacts",
-          hidden: true,
-        },
-        {
-          name: "--skip-validate",
-          description: "Skips git checks",
-          hidden: true,
-        },
+        parallelismOption(
+          "Amount tasks to run concurrently (default: number of CPUs)"
+        ),
+        markdownFileOption(
+          "--release-footer",
+          "Load custom release notes footer from a markdown file"
+        ),
+        markdownFileOption(
+          "--release-footer-tmpl",
+          "Load custom release notes footer from a templated markdown file (overrides --release-footer)"
+        ),
+        markdownFileOption(
+          "--release-header",
+          "Load custom release notes header from a markdown file"
+        ),
+        markdownFileOption(
+          "--release-header-tmpl",
+          "Load custom release notes header from a templated markdown file (overrides --release-header)"
+        ),
+        markdownFileOption(
+          "--release-notes",
+          "Load custom release notes from a markdown file (will skip GoReleaser changelog generation)"
+        ),
+        markdownFileOption(
+          "--release-notes-tmpl",
+          "Load custom release notes from a templated markdown file (overrides --release-notes)"
+        ),
+        skipOption(
+          `Skip the given options (valid options are ${releaseSkips.join(", ")})`,
+          releaseSkips
+        ),
         {
           name: "--snapshot",
           description:
             "Generate an unversioned snapshot release, skipping all validations and without publishing any artifacts (implies --skip=announce,publish,validate)",
         },
-        {
-          name: "--timeout",
-          description: "Timeout to the entire release process",
-          args: { name: "timeout", default: "30m0s" },
-        },
+        timeoutOption("Timeout to the entire release process"),
       ],
     },
     {
@@ -322,24 +291,10 @@ const completionSpec: Fig.Spec = {
           name: "completion",
           description:
             "Generate the autocompletion script for the specified shell",
-          subcommands: [
-            {
-              name: "bash",
-              description: "Generate the autocompletion script for bash",
-            },
-            {
-              name: "fish",
-              description: "Generate the autocompletion script for fish",
-            },
-            {
-              name: "powershell",
-              description: "Generate the autocompletion script for powershell",
-            },
-            {
-              name: "zsh",
-              description: "Generate the autocompletion script for zsh",
-            },
-          ],
+          subcommands: completionShells.map((shell) => ({
+            name: shell,
+            description: `Generate the autocompletion script for ${shell}`,
+          })),
         },
         {
           name: ["hc", "healthcheck"],
@@ -358,13 +313,16 @@ const completionSpec: Fig.Spec = {
     },
   ],
   options: [
-    { name: "--debug", description: "Enable verbose mode", isPersistent: true },
     {
       name: "--verbose",
       description: "Enable verbose mode",
       isPersistent: true,
     },
     { name: ["--help", "-h"], description: "Display help", isPersistent: true },
+    {
+      name: ["--version", "-v"],
+      description: "Version for goreleaser",
+    },
   ],
 };
 export default completionSpec;
