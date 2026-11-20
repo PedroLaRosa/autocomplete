@@ -1,5 +1,7 @@
-// micro v2.0.15 (GitHub release, 2025-12-31). Source: cmd/micro/micro.go,
-// internal/config/settings.go and runtime/help/options.md at v2.0.15
+// micro v2.0.15 (GitHub release tag and Homebrew formula, re-verified 2026-11-20).
+// Source: cmd/micro/micro.go (flags, usage, positional args),
+// internal/config/settings.go (options, defaults, choices) and
+// runtime/help/options.md at v2.0.15 (static read, not run)
 const boolArgDefaultFalse: Fig.Arg = {
   name: "bool",
   description: "True/false",
@@ -648,9 +650,11 @@ const completionSpec: Fig.Spec = {
   ],
   args: {
     name: "file",
+    description:
+      "File(s) to open, optionally followed by +LINE[:COL] or +/REGEX (or FILE:LINE[:COL] with the parsecursor option)",
     template: ["filepaths"],
-
     isOptional: true,
+    isVariadic: true,
   },
 };
 export default completionSpec;
