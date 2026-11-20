@@ -1,6 +1,7 @@
 // AWS Elastic Beanstalk CLI (eb, package awsebcli) v3.27.7 (PyPI latest, 2026-11-20). Source: the awsebcli 3.27.7 sdist read statically, not executed:
 // cement/argparse controller definitions in ebcli/controllers/** and ebcli/labs/** plus the help strings in ebcli/resources/strings.py.
 // Options whose help is argparse.SUPPRESS are marked `hidden: true`. The separate `ebp` binary (custom platform workspaces) is not covered.
+// Cross-checked by script: every option string defined in the controllers is in this spec and no option here is missing upstream.
 const generateNames: Fig.Generator = {
   script: ["eb", "list"],
   postProcess: (str) => {
