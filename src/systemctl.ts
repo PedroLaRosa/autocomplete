@@ -1,3 +1,8 @@
+// systemctl (systemd) v262.2 (latest upstream release tag, 2026-11-20). Source: systemd v262.2 sources read statically
+// (not run; local systemd is 255.4 with no running manager): src/systemctl/systemctl.c option and verb tables, man/systemctl.xml,
+// shell-completion/bash/systemctl.in, plus src/shared/output-mode.c, src/basic/unit-def.c and src/basic/time-util.c for enum values.
+// Generator JSON keys (list-units: unit/load/active/sub/description; list-unit-files: unit_file/state/preset) match the v262.2 tables.
+// Upstream renamed --kill-who to --kill-whom; --marked is deprecated in favour of the enqueue-marked verb.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 type Unit = {
@@ -111,9 +116,56 @@ const unitFileGenerator: Fig.Generator = {
   },
 };
 
+const logLevels = [
+  "debug",
+  "info",
+  "notice",
+  "warning",
+  "err",
+  "crit",
+  "alert",
+  "emerg",
+];
+
+const logTargets = ["console", "journal", "journal-or-kmsg", "kmsg", "null"];
+
+const unitTypes = [
+  "service",
+  "socket",
+  "target",
+  "device",
+  "mount",
+  "automount",
+  "swap",
+  "timer",
+  "path",
+  "slice",
+  "scope",
+];
+
+const unitStates = [
+  // Load states
+  "stub",
+  "loaded",
+  "not-found",
+  "bad-setting",
+  "error",
+  "merged",
+  "masked",
+  // Active states
+  "active",
+  "reloading",
+  "inactive",
+  "failed",
+  "activating",
+  "deactivating",
+  "maintenance",
+  "refreshing",
+];
+
 const completionSpec: Fig.Spec = {
   name: "systemctl",
-  description: "",
+  description: "Control the systemd system and service manager",
   subcommands: [
     {
       name: "list-units",
@@ -126,8 +178,26 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "list-automounts",
+      description: "List automount units currently in memory, ordered by path",
+      args: {
+        name: "PATTERN",
+        isVariadic: true,
+        isOptional: true,
+      },
+    },
+    {
+      name: "list-paths",
+      description: "List path units currently in memory, ordered by path",
+      args: {
+        name: "PATTERN",
+        isVariadic: true,
+        isOptional: true,
+      },
+    },
+    {
       name: "list-sockets",
-      description: "List socket units currently in memory ordered by address",
+      description: "List socket units currently in memory, ordered by address",
       args: {
         name: "PATTERN",
         isVariadic: true,
@@ -137,7 +207,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "list-timers",
       description:
-        "List timer units currently in memory ordered by next elapse",
+        "List timer units currently in memory, ordered by next elapse",
       args: {
         name: "PATTERN",
         isVariadic: true,
@@ -155,11 +225,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "is-failed",
-      description: "Check whether units are failed",
+      description:
+        "Check whether units are failed or system is in degraded state",
       args: {
         name: "PATTERN",
         generators: unitGenerator,
         isVariadic: true,
+        isOptional: true,
       },
     },
     {
@@ -174,7 +246,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "show",
-      description: "Show properties of one or more",
+      description: "Show properties of one or more units/jobs or the manager",
       args: {
         name: "PATTERN or JOB",
         generators: unitGenerator,
@@ -203,9 +275,9 @@ const completionSpec: Fig.Spec = {
     {
       name: "list-dependencies",
       description:
-        "Recursively show units which are required or wanted by the units or by which those",
+        "Recursively show units which are required or wanted by the units or by which those units are required or wanted",
       args: {
-        name: "PATTERN",
+        name: "UNIT",
         generators: unitGenerator,
         isVariadic: true,
         isOptional: true,
@@ -257,11 +329,16 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "enqueue-marked",
+      description: "Enqueue jobs for all marked units",
+    },
+    {
       name: "reload-or-restart",
       description:
         "Reload one or more units if possible, otherwise start or restart",
       args: {
         name: "UNIT",
+        generators: unitGenerator,
         isVariadic: true,
       },
     },
@@ -306,6 +383,7 @@ const completionSpec: Fig.Spec = {
       description: "Freeze execution of unit processes",
       args: {
         name: "PATTERN",
+        generators: unitGenerator,
         isVariadic: true,
       },
     },
@@ -314,6 +392,7 @@ const completionSpec: Fig.Spec = {
       description: "Resume execution of a frozen unit",
       args: {
         name: "PATTERN",
+        generators: unitGenerator,
         isVariadic: true,
       },
     },
@@ -327,6 +406,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "PROPERTY=VALUE",
+          isVariadic: true,
         },
       ],
     },
@@ -378,10 +458,12 @@ const completionSpec: Fig.Spec = {
       args: [
         {
           name: "SERVICE",
+          generators: unitGenerator,
         },
         {
           name: "LEVEL",
           isOptional: true,
+          suggestions: logLevels,
         },
       ],
     },
@@ -391,10 +473,12 @@ const completionSpec: Fig.Spec = {
       args: [
         {
           name: "SERVICE",
+          generators: unitGenerator,
         },
         {
           name: "TARGET",
           isOptional: true,
+          suggestions: logTargets,
         },
       ],
     },
@@ -403,6 +487,15 @@ const completionSpec: Fig.Spec = {
       description: "Reset failed state for all, one, or more units",
       args: {
         name: "PATTERN",
+        isVariadic: true,
+        isOptional: true,
+      },
+    },
+    {
+      name: "whoami",
+      description: "Return unit caller or specified PIDs are part of",
+      args: {
+        name: "PID",
         isVariadic: true,
         isOptional: true,
       },
@@ -469,6 +562,10 @@ const completionSpec: Fig.Spec = {
       name: "preset-all",
       description:
         "Enable/disable all unit files based on preset configuration",
+    },
+    {
+      name: "is-enabled",
+      description: "Check whether unit files are enabled",
       args: {
         name: "UNIT",
         generators: unitFileGenerator,
@@ -477,7 +574,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "mask",
-      description: "Mask one or more unit files",
+      description: "Mask one or more units",
       args: {
         name: "UNIT",
         generators: unitFileGenerator,
@@ -486,7 +583,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "unmask",
-      description: "Unmask one or more unit files",
+      description: "Unmask one or more units",
       args: {
         name: "UNIT",
         generators: unitFileGenerator,
@@ -560,6 +657,15 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "list-machines",
+      description: "List local containers and host",
+      args: {
+        name: "PATTERN",
+        isVariadic: true,
+        isOptional: true,
+      },
+    },
+    {
       name: "list-jobs",
       description: "List jobs",
       args: {
@@ -603,6 +709,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "VARIABLE",
         isVariadic: true,
+        isOptional: true,
       },
     },
     {
@@ -619,6 +726,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "LEVEL",
         isOptional: true,
+        suggestions: logLevels,
       },
     },
     {
@@ -627,6 +735,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "TARGET",
         isOptional: true,
+        suggestions: logTargets,
       },
     },
     {
@@ -678,6 +787,11 @@ const completionSpec: Fig.Spec = {
       isDangerous: true,
     },
     {
+      name: "soft-reboot",
+      description: "Shut down and reboot userspace",
+      isDangerous: true,
+    },
+    {
       name: "exit",
       description: "Request user instance or container exit",
       args: {
@@ -692,11 +806,21 @@ const completionSpec: Fig.Spec = {
       args: [
         {
           name: "ROOT",
+          template: "folders",
+          isOptional: true,
         },
         {
           name: "INIT",
+          template: "filepaths",
+          isOptional: true,
         },
       ],
+      isDangerous: true,
+    },
+    {
+      name: "sleep",
+      description:
+        "Put the system to sleep (through one of the operations below)",
       isDangerous: true,
     },
     {
@@ -720,6 +844,52 @@ const completionSpec: Fig.Spec = {
         "Suspend the system, wake after a period of time, and hibernate",
       isDangerous: true,
     },
+    // Compatibility aliases, accepted but hidden from --help
+    {
+      name: "condstop",
+      description: "Legacy alias of 'stop'",
+      hidden: true,
+      args: {
+        name: "UNIT",
+        generators: unitGenerator,
+        isVariadic: true,
+      },
+    },
+    {
+      name: "condrestart",
+      description: "Legacy alias of 'try-restart'",
+      hidden: true,
+      args: {
+        name: "UNIT",
+        generators: unitGenerator,
+        isVariadic: true,
+      },
+    },
+    {
+      name: ["reload-or-try-restart", "condreload", "force-reload"],
+      description: "Legacy alias of 'try-reload-or-restart'",
+      hidden: true,
+      args: {
+        name: "UNIT",
+        generators: unitGenerator,
+        isVariadic: true,
+      },
+    },
+    {
+      name: "check",
+      description: "Deprecated alias of 'is-active'",
+      hidden: true,
+      args: {
+        name: "PATTERN",
+        generators: unitGenerator,
+        isVariadic: true,
+      },
+    },
+    {
+      name: "clear-jobs",
+      description: "Legacy alias of 'cancel'",
+      hidden: true,
+    },
   ],
   options: [
     {
@@ -732,11 +902,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--system",
-      description: "Connect to system manager",
+      description: "Connect to the system service manager",
     },
     {
       name: "--user",
-      description: "Connect to user service manager",
+      description: "Connect to the user service manager",
+    },
+    {
+      name: ["-C", "--capsule"],
+      description: "Connect to service manager of specified capsule",
+      args: { name: "NAME" },
     },
     {
       name: ["-H", "--host"],
@@ -745,13 +920,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-M", "--machine"],
-      description: "Operate on a local container",
+      description: "Operate on local container",
       args: { name: "CONTAINER" },
     },
     {
       name: ["-t", "--type"],
       description: "List units of a particular type",
-      args: { name: "TYPE" },
+      args: { name: "TYPE", suggestions: unitTypes },
     },
     {
       name: "--state",
@@ -759,6 +934,7 @@ const completionSpec: Fig.Spec = {
       exclusiveOn: ["--failed"],
       args: {
         name: "STATE",
+        suggestions: unitStates,
       },
     },
     {
@@ -770,6 +946,7 @@ const completionSpec: Fig.Spec = {
       name: ["-p", "--property"],
       description: "Show only properties by this name",
       exclusiveOn: ["-P"],
+      isRepeatable: true,
       args: {
         name: "NAME",
       },
@@ -778,6 +955,10 @@ const completionSpec: Fig.Spec = {
       name: "-P",
       description: "Equivalent to --value --property=NAME",
       exclusiveOn: ["-p", "--property", "--value"],
+      isRepeatable: true,
+      args: {
+        name: "NAME",
+      },
     },
     {
       name: ["-a", "--all"],
@@ -797,6 +978,14 @@ const completionSpec: Fig.Spec = {
       description: "Show reverse dependencies with 'list-dependencies'",
     },
     {
+      name: "--before",
+      description: "Show units ordered before with 'list-dependencies'",
+    },
+    {
+      name: "--after",
+      description: "Show units ordered after with 'list-dependencies'",
+    },
+    {
       name: "--with-dependencies",
       description:
         "Show unit dependencies with 'status', 'cat', 'list-units', and 'list-unit-files'",
@@ -807,6 +996,18 @@ const completionSpec: Fig.Spec = {
         "Specify how to deal with already queued jobs, when queueing a new job",
       args: {
         name: "MODE",
+        suggestions: [
+          "fail",
+          "lenient",
+          "replace",
+          "replace-irreversibly",
+          "isolate",
+          "ignore-dependencies",
+          "ignore-requirements",
+          "flush",
+          "triggering",
+          "restart-dependencies",
+        ],
       },
     },
     {
@@ -825,23 +1026,17 @@ const completionSpec: Fig.Spec = {
     {
       name: "--check-inhibitors",
       description:
-        "Specify if checking inhibitors before shutting down sleeping or hibernating",
+        "Whether to check inhibitors before shutting down, sleeping, or hibernating",
       exclusiveOn: ["-i"],
       args: {
         name: "MODE",
+        suggestions: ["auto", "yes", "no"],
       },
     },
     {
       name: "-i",
       description: "Shortcut for --check-inhibitors=no",
       exclusiveOn: ["--check-inhibitors"],
-    },
-    {
-      name: "--kill-who",
-      description: "Whom to send signal to",
-      args: {
-        name: "WHO",
-      },
     },
     {
       name: ["-s", "--signal"],
@@ -851,10 +1046,51 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--kill-whom",
+      description: "Whom to send signal to",
+      args: {
+        name: "WHOM",
+        suggestions: ["main", "control", "cgroup", "all"],
+      },
+    },
+    {
+      name: "--kill-who",
+      description: "Whom to send signal to (renamed to --kill-whom)",
+      deprecated: true,
+      args: {
+        name: "WHOM",
+        suggestions: ["main", "control", "cgroup", "all"],
+      },
+    },
+    {
+      name: "--kill-value",
+      description: "Signal value to enqueue",
+      args: {
+        name: "INT",
+      },
+    },
+    {
+      name: "--kill-subgroup",
+      description: "Send signal to sub-control group only",
+      args: {
+        name: "PATH",
+      },
+    },
+    {
       name: "--what",
       description: "Which types of resources to remove",
+      isRepeatable: true,
       args: {
         name: "RESOURCES",
+        suggestions: [
+          "runtime",
+          "state",
+          "cache",
+          "logs",
+          "configuration",
+          "fdstore",
+          "all",
+        ],
       },
     },
     {
@@ -863,16 +1099,25 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--dry-run",
-      description: "Only print what would be done",
+      description:
+        "Only print what would be done. Currently supported by verbs: halt, poweroff, reboot, kexec, soft-reboot, suspend, hibernate, suspend-then-hibernate, hybrid-sleep, default, rescue, emergency, and exit",
     },
     {
       name: ["-q", "--quiet"],
-      description: "Supress output",
+      description: "Suppress output",
+    },
+    {
+      name: ["-v", "--verbose"],
+      description: "Show unit logs while executing operation",
+    },
+    {
+      name: "--no-warn",
+      description: "Suppress several warnings shown by default",
     },
     {
       name: "--wait",
       description:
-        "For (re)start, wait until service stopped again. For is-system-running, wait until startup is completed",
+        "For (re)start, wait until service stopped again. For is-system-running, wait until startup is completed. For kill, wait until service stopped",
     },
     {
       name: "--no-block",
@@ -881,6 +1126,14 @@ const completionSpec: Fig.Spec = {
     {
       name: "--no-wall",
       description: "Don't send wall message before halt/power-off/reboot",
+    },
+    {
+      name: "--message",
+      description: "Specify human-readable reason for system shutdown",
+      isRepeatable: true,
+      args: {
+        name: "MESSAGE",
+      },
     },
     {
       name: "--no-reload",
@@ -896,11 +1149,11 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--no-pager",
-      description: "Do not pipe output into a pager",
+      description: "Do not start a pager",
     },
     {
       name: "--no-ask-password",
-      description: "Do not ask for system passwords",
+      description: "Do not prompt for password",
     },
     {
       name: "--global",
@@ -915,27 +1168,48 @@ const completionSpec: Fig.Spec = {
       name: ["-f", "--force"],
       description:
         "When enabling unit files, override existing symlinks. When shutting down, execute action immediately",
+      isRepeatable: true,
     },
     {
       name: "--preset-mode",
       description: "Apply only enable, only disable, or all presets",
       args: {
         name: "MODE",
+        suggestions: ["full", "enable-only", "disable-only"],
       },
     },
     {
       name: "--root",
       description:
         "Edit/enable/disable/mask unit files in the specified root directory",
+      exclusiveOn: ["--image"],
       args: {
         name: "PATH",
+        template: "folders",
+      },
+    },
+    {
+      name: "--image",
+      description:
+        "Edit/enable/disable/mask unit files in the specified disk image",
+      exclusiveOn: ["--root"],
+      args: {
+        name: "PATH",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--image-policy",
+      description: "Specify disk image dissection policy",
+      args: {
+        name: "POLICY",
       },
     },
     {
       name: ["-n", "--lines"],
       description: "Number of journal entries to show",
       args: {
-        name: "N",
+        name: "INTEGER",
       },
     },
     {
@@ -945,18 +1219,21 @@ const completionSpec: Fig.Spec = {
         name: "MODE",
         suggestions: [
           "short",
-          "short-precise",
+          "short-full",
           "short-iso",
           "short-iso-precise",
-          "short-full",
+          "short-precise",
           "short-monotonic",
+          "short-delta",
           "short-unix",
           "verbose",
           "export",
           "json",
           "json-pretty",
           "json-sse",
+          "json-seq",
           "cat",
+          "with-unit",
         ],
       },
     },
@@ -977,6 +1254,27 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "NAME",
       },
+    },
+    {
+      name: "--reboot-argument",
+      description: "Specify argument string to pass to reboot()",
+      args: {
+        name: "ARG",
+      },
+    },
+    {
+      name: "--kernel-cmdline",
+      description:
+        "Append to the kernel command line when loading the kernel from the booted boot loader entry",
+      isRepeatable: true,
+      args: {
+        name: "CMDLINE",
+      },
+    },
+    {
+      name: "--kernel-cmdline-reuse",
+      description:
+        "Like --kernel-cmdline=, but reuse the current kernel command line",
     },
     {
       name: "--plain",
@@ -1000,7 +1298,55 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--marked",
-      description: "Restart/reload previously marked units",
+      description:
+        "Restart/reload previously marked units (deprecated, use 'enqueue-marked')",
+      deprecated: true,
+    },
+    {
+      name: "--drop-in",
+      description: "Edit unit files using the specified drop-in file name",
+      args: {
+        name: "NAME",
+      },
+    },
+    {
+      name: "--when",
+      description:
+        "Schedule halt/power-off/reboot/kexec action after a certain timestamp",
+      args: {
+        name: "TIME",
+        suggestions: ["show", "cancel", "auto"],
+      },
+    },
+    {
+      name: "--stdin",
+      description: "Read new contents of edited file from stdin",
+    },
+    // Compatibility-only options, accepted but hidden from --help
+    {
+      name: "--fail",
+      description: "Shorthand for --job-mode=fail",
+      hidden: true,
+    },
+    {
+      name: "--irreversible",
+      description: "Shorthand for --job-mode=replace-irreversibly",
+      hidden: true,
+    },
+    {
+      name: "--ignore-dependencies",
+      description: "Shorthand for --job-mode=ignore-dependencies",
+      hidden: true,
+    },
+    {
+      name: "--ignore-inhibitors",
+      description: "Shortcut for --check-inhibitors=no",
+      hidden: true,
+    },
+    {
+      name: "--no-legend",
+      description: "Shortcut for --legend=no",
+      hidden: true,
     },
   ],
 };
