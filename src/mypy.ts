@@ -1,316 +1,560 @@
+// mypy v2.4.1 (PyPI latest, 2026-11-20). Source: python/mypy tag v2.4.1 read statically: mypy/main.py (define_options),
+// mypy/defaults.py, mypy/options.py, mypy/errorcodes.py and docs/source/command_line.rst. The sandbox refused to run
+// mypy, so `mypy --help` itself was not executed. Hidden (help-suppressed) flags are listed only where the source
+// comments say what they do.
+
+// Error codes registered in mypy/errorcodes.py (`--enable-error-code` / `--disable-error-code`)
+const errorCodes = [
+  "abstract",
+  "annotation-unchecked",
+  "arg-type",
+  "assert-type",
+  "assignment",
+  "attr-defined",
+  "await-not-async",
+  "call-arg",
+  "call-overload",
+  "comparison-overlap",
+  "deprecated",
+  "dict-item",
+  "empty-body",
+  "exhaustive-match",
+  "exit-return",
+  "explicit-any",
+  "explicit-override",
+  "func-returns-value",
+  "has-type",
+  "ignore-without-code",
+  "import",
+  "import-not-found",
+  "import-untyped",
+  "index",
+  "list-item",
+  "literal-required",
+  "maybe-unrecognized-str-typeform",
+  "metaclass",
+  "method-assign",
+  "misc",
+  "mutable-override",
+  "name-defined",
+  "name-match",
+  "narrowed-type-not-subtype",
+  "no-any-return",
+  "no-any-unimported",
+  "no-overload-impl",
+  "no-redef",
+  "no-untyped-call",
+  "no-untyped-def",
+  "nonetype-type",
+  "operator",
+  "override",
+  "overload-cannot-match",
+  "overload-overlap",
+  "possibly-undefined",
+  "prop-decorator",
+  "redundant-cast",
+  "redundant-expr",
+  "redundant-self",
+  "return",
+  "return-value",
+  "safe-super",
+  "str-bytes-safe",
+  "str-format",
+  "str-unpack",
+  "syntax",
+  "top-level-await",
+  "truthy-bool",
+  "truthy-function",
+  "truthy-iterable",
+  "type-abstract",
+  "type-arg",
+  "type-var",
+  "typeddict-item",
+  "typeddict-readonly-mutated",
+  "typeddict-unknown-key",
+  "unimported-reveal",
+  "union-attr",
+  "unreachable",
+  "unused-awaitable",
+  "unused-coroutine",
+  "unused-ignore",
+  "untyped-decorator",
+  "used-before-def",
+  "valid-newtype",
+  "valid-type",
+  "var-annotated",
+];
+
+// Most boolean flags also accept an inverse (`--no-x`, `--x`, `--allow-x` / `--disallow-x`, `--show-x` / `--hide-x`)
+const toggle = (
+  name: string,
+  inverse: string,
+  description: string
+): Fig.Option[] => [
+  { name, description },
+  { name: inverse, description: `Inverse of ${name}` },
+];
+
+const moduleArg: Fig.Arg = { name: "MODULE" };
+
+const report = (type: string, description: string): Fig.Option => ({
+  name: `--${type}-report`,
+  description,
+  args: { name: "DIR", template: "folders" },
+});
+
 const completionSpec: Fig.Spec = {
   name: "mypy",
   description: "Mypy is a static type checker for Python",
   options: [
+    // Optional arguments
     {
-      name: "--module",
-      description: "Asks mypy to type check the provided module",
+      name: ["-h", "--help"],
+      description: "Show this help message and exit",
     },
     {
-      name: "--package",
-      description: "Asks mypy to type check the provided package",
+      name: ["-v", "--verbose"],
+      description: "More verbose messages",
+      isRepeatable: true,
     },
     {
-      name: "--command",
-      description: "Asks mypy to type check the provided string as a program",
+      name: ["-V", "--version"],
+      description: "Show program's version number and exit",
+    },
+    {
+      name: ["-O", "--output"],
+      description: "Set a custom output format",
+      args: { name: "FORMAT", suggestions: ["json"] },
+    },
+
+    // Running code
+    {
+      name: ["-m", "--module"],
+      description: "Type-check module; can repeat for more modules",
+      isRepeatable: true,
+      args: { name: "MODULE" },
+    },
+    {
+      name: ["-p", "--package"],
+      description: "Type-check package recursively; can be repeated",
+      isRepeatable: true,
+      args: { name: "PACKAGE" },
+    },
+    {
+      name: ["-c", "--command"],
+      description: "Type-check program passed in as string",
+      isRepeatable: true,
+      args: { name: "PROGRAM_TEXT" },
     },
     {
       name: "--exclude",
       description:
-        "A regular expression that matches file names, directory names and paths which mypy should ignore while recursively discovering files to check",
+        "Regular expression to match file names, directory names or paths which mypy should ignore while recursively discovering files to check",
+      isRepeatable: true,
+      args: { name: "PATTERN" },
     },
-    { name: "--help", description: "Show help message and exit" },
-    { name: "--verbose", description: "More verbose messages" },
-    {
-      name: "--version",
-      description: "Show program's version number and exit",
-    },
+    ...toggle(
+      "--exclude-gitignore",
+      "--no-exclude-gitignore",
+      "Use .gitignore file(s) to exclude files from checking (in addition to any explicit --exclude if present)"
+    ),
+    ...toggle(
+      "--explicit-package-bases",
+      "--no-explicit-package-bases",
+      "Use current directory and MYPYPATH to determine module names of files passed"
+    ),
+    ...toggle(
+      "--fast-module-lookup",
+      "--no-fast-module-lookup",
+      "Enable the experimental fast path for resolving imports when many folders share a top-level namespace"
+    ),
+
+    // Config file
     {
       name: "--config-file",
       description:
-        "This flag makes mypy read configuration settings from the given file",
+        "Configuration file, must have a [mypy] section (defaults to mypy.ini, .mypy.ini, pyproject.toml, setup.cfg)",
+      args: { name: "CONFIG_FILE", template: "filepaths" },
     },
-    {
-      name: "--warn-unused-configs",
-      description:
-        "This flag makes mypy warn about unused [mypy-<pattern>] config file sections",
-    },
-    {
-      name: "--explicit-package-bases",
-      description:
-        "This flag tells mypy that top-level packages will be based in either the current directory, or a member of the MYPYPATH environment variable",
-    },
+    ...toggle(
+      "--warn-unused-configs",
+      "--no-warn-unused-configs",
+      "Warn about unused '[mypy-<pattern>]' or '[[tool.mypy.overrides]]' config sections"
+    ),
+
+    // Import discovery
+    ...toggle(
+      "--no-namespace-packages",
+      "--namespace-packages",
+      "Disable support for namespace packages (PEP 420, __init__.py-less)"
+    ),
     {
       name: "--ignore-missing-imports",
-      description: "This flag makes mypy ignore all missing imports",
+      description: "Silently ignore imports of missing modules",
     },
     {
-      name: "silent",
-      description:
-        "This flag adjusts how mypy follows imported modules that were not explicitly passed in via the command line",
+      name: "--follow-untyped-imports",
+      description: "Typecheck modules without stubs or py.typed marker",
+    },
+    {
+      name: "--follow-imports",
+      description: "How to treat imports",
+      args: {
+        name: "MODE",
+        default: "normal",
+        suggestions: [
+          { name: "normal", description: "Follow and type check all modules" },
+          "silent",
+          "skip",
+          "error",
+        ],
+      },
     },
     {
       name: "--python-executable",
       description:
-        "This flag will have mypy collect type information from PEP561 compliant packages installed for the Python executable EXECUTABLE",
+        "Python executable used for finding PEP 561 compliant installed packages and stubs",
+      args: { name: "EXECUTABLE", template: "filepaths" },
     },
     {
       name: "--no-site-packages",
-      description:
-        "This flag will disable searching for PEP561 compliant packages",
+      description: "Do not search for installed PEP 561 compliant packages",
     },
     {
       name: "--no-silence-site-packages",
       description:
-        "By default, mypy will suppress any error messages generated within PEP561 compliant packages",
+        "Do not silence errors in PEP 561 compliant installed packages",
     },
-    {
-      name: "--fast-module-lookup",
-      description:
-        "The default logic used to scan through search paths to resolve imports has a quadratic worse-case behavior in some cases, which is for instance triggered by a large number of folders sharing",
-    },
-    {
-      name: "--no-namespace-packages",
-      description:
-        "This flag disables import discovery of namespace packages (see PEP420)",
-    },
+
+    // Platform configuration
     {
       name: "--python-version",
-      description:
-        "This flag will make mypy type check your code as if it were run under Python version X",
+      description: "Type check code assuming it will be running on Python x.y",
+      args: {
+        name: "x.y",
+        suggestions: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"],
+      },
     },
     {
       name: "--platform",
       description:
-        "This flag will make mypy type check your code as if it were run under the given operating system",
+        "Type check special-cased code for the given OS platform (defaults to sys.platform)",
+      args: { name: "PLATFORM", suggestions: ["linux", "darwin", "win32"] },
     },
     {
       name: "--always-true",
       description:
-        "This flag will treat all variables named NAME as compile-time constants that are always true",
+        "Additional variable to be considered True (may be repeated)",
+      isRepeatable: true,
+      args: { name: "NAME" },
     },
     {
       name: "--always-false",
       description:
-        "This flag will treat all variables named NAME as compile-time constants that are always false",
+        "Additional variable to be considered False (may be repeated)",
+      isRepeatable: true,
+      args: { name: "NAME" },
     },
-    {
-      name: "--disallow-any-unimported",
-      description:
-        "This flag disallows usage of types that come from unfollowed imports (such types become aliases for Any)",
-    },
+
+    // Disallow dynamic typing
     {
       name: "--disallow-any-expr",
-      description:
-        "This flag disallows all expressions in the module that have type Any",
+      description: "Disallow all expressions that have type Any",
     },
     {
       name: "--disallow-any-decorated",
       description:
-        "This flag disallows functions that have Any in their signature after decorator transformation",
+        "Disallow functions that have Any in their signature after decorator transformation",
     },
     {
       name: "--disallow-any-explicit",
-      description:
-        "This flag disallows explicit Any in type positions such as type annotations and generic type parameters",
+      description: "Disallow explicit Any in type positions",
     },
-    {
-      name: "--disallow-any-generics",
-      description:
-        "This flag disallows usage of generic types that do not specify explicit type parameters",
-    },
-    {
-      name: "--disallow-subclassing-any",
-      description:
-        "This flag reports an error whenever a class subclasses a value of type Any",
-    },
-    {
-      name: "--disallow-untyped-calls",
-      description:
-        "This flag reports an error whenever a function with type annotations calls a function defined without annotations",
-    },
+    ...toggle(
+      "--disallow-any-generics",
+      "--allow-any-generics",
+      "Disallow usage of generic types that do not specify explicit type parameters"
+    ),
+    ...toggle(
+      "--disallow-any-unimported",
+      "--allow-any-unimported",
+      "Disallow Any types resulting from unfollowed imports"
+    ),
+    ...toggle(
+      "--disallow-subclassing-any",
+      "--allow-subclassing-any",
+      "Disallow subclassing values of type 'Any' when defining classes"
+    ),
+
+    // Untyped definitions and calls
+    ...toggle(
+      "--disallow-untyped-calls",
+      "--allow-untyped-calls",
+      "Disallow calling functions without type annotations from functions with type annotations"
+    ),
     {
       name: "--untyped-calls-exclude",
       description:
-        "This flag allows to selectively disable option--disallow-untyped-calls for functions and methods defined in specific packages, modules, or classes",
+        "Disable --disallow-untyped-calls for functions/methods coming from specific package, module, or class",
+      isRepeatable: true,
+      args: moduleArg,
     },
+    ...toggle(
+      "--disallow-untyped-defs",
+      "--allow-untyped-defs",
+      "Disallow defining functions without type annotations or with incomplete type annotations"
+    ),
+    ...toggle(
+      "--disallow-incomplete-defs",
+      "--allow-incomplete-defs",
+      "Disallow defining functions with incomplete type annotations (while still allowing entirely unannotated definitions)"
+    ),
+    ...toggle(
+      "--check-untyped-defs",
+      "--no-check-untyped-defs",
+      "Type check the interior of functions without type annotations"
+    ),
+    ...toggle(
+      "--disallow-untyped-decorators",
+      "--allow-untyped-decorators",
+      "Disallow decorating typed functions with untyped decorators"
+    ),
+
+    // None and Optional handling
+    ...toggle(
+      "--implicit-optional",
+      "--no-implicit-optional",
+      "Assume arguments with default values of None are Optional"
+    ),
+    ...toggle(
+      "--no-strict-optional",
+      "--strict-optional",
+      "Disable strict Optional checks"
+    ),
+
+    // Configuring warnings
+    ...toggle(
+      "--warn-redundant-casts",
+      "--no-warn-redundant-casts",
+      "Warn about casting an expression to its inferred type"
+    ),
+    ...toggle(
+      "--warn-unused-ignores",
+      "--no-warn-unused-ignores",
+      "Warn about unneeded '# type: ignore' comments"
+    ),
+    ...toggle(
+      "--no-warn-no-return",
+      "--warn-no-return",
+      "Do not warn about functions that end without returning"
+    ),
+    ...toggle(
+      "--warn-return-any",
+      "--no-warn-return-any",
+      "Warn about returning values of type Any from non-Any typed functions"
+    ),
+    ...toggle(
+      "--warn-unreachable",
+      "--no-warn-unreachable",
+      "Warn about statements or expressions inferred to be unreachable"
+    ),
+    ...toggle(
+      "--report-deprecated-as-note",
+      "--no-report-deprecated-as-note",
+      "Report importing or using deprecated features as notes instead of errors"
+    ),
     {
-      name: "--disallow-untyped-defs",
+      name: "--deprecated-calls-exclude",
       description:
-        "This flag reports an error whenever it encounters a function definition without type annotations or with incomplete type annotations",
+        "Disable deprecated warnings for functions/methods coming from specific package, module, or class",
+      isRepeatable: true,
+      args: moduleArg,
+    },
+
+    // Miscellaneous strictness flags
+    ...toggle(
+      "--allow-untyped-globals",
+      "--disallow-untyped-globals",
+      "Suppress toplevel errors caused by missing annotations"
+    ),
+    ...toggle(
+      "--allow-redefinition",
+      "--disallow-redefinition",
+      "Allow flexible variable redefinition with a new type"
+    ),
+    ...toggle(
+      "--allow-redefinition-old",
+      "--disallow-redefinition-old",
+      "Allow restricted, unconditional variable redefinition with a new type"
+    ),
+    {
+      name: "--allow-redefinition-new",
+      description: "Deprecated alias for --allow-redefinition",
+      deprecated: true,
     },
     {
-      name: "--disallow-incomplete-defs",
-      description:
-        "This flag reports an error whenever it encounters a partly annotated function definition, while still allowing entirely unannotated definitions",
+      name: "--disallow-redefinition-new",
+      description: "Inverse of --allow-redefinition-new",
+      deprecated: true,
     },
-    {
-      name: "--check-untyped-defs",
-      description:
-        "This flag is less severe than the previous two options -- it type checks the body of every function, regardless of whether it has type annotations",
-    },
-    {
-      name: "--disallow-untyped-decorators",
-      description:
-        "This flag reports an error whenever a function with type annotations is decorated with a decorator without annotations",
-    },
-    {
-      name: "--implicit-optional",
-      description:
-        "This flag causes mypy to treat arguments with a None default value as having an implicit pydata~typing",
-    },
-    {
-      name: "--no-strict-optional",
-      description: "This flag disables strict checking of pydata~typing",
-    },
-    {
-      name: "--warn-redundant-casts",
-      description:
-        "This flag will make mypy report an error whenever your code uses an unnecessary cast that can safely be removed",
-    },
-    {
-      name: "--warn-unused-ignores",
-      description:
-        "This flag will make mypy report an error whenever your code uses a # type ignore comment on a line that is not actually generating an error message",
-    },
-    {
-      name: "--no-warn-no-return",
-      description:
-        "By default, mypy will generate errors when a function is missing return statements in some execution paths",
-    },
-    {
-      name: "--warn-return-any",
-      description:
-        "This flag causes mypy to generate a warning when returning a value with type Any from a function declared with a non-Any return type",
-    },
-    {
-      name: "--warn-unreachable",
-      description:
-        "This flag will make mypy report an error whenever it encounters code determined to be unreachable or redundant after performing type analysis",
-    },
-    {
-      name: "--allow-untyped-globals",
-      description:
-        "This flag causes mypy to suppress errors caused by not being able to fully infer the types of global and class variables",
-    },
-    {
-      name: "--allow-redefinition",
-      description:
-        "By default, mypy won't allow a variable to be redefined with an unrelated type",
-    },
-    {
-      name: "--local-partial-types",
-      description:
-        "In mypy, the most common cases for partial types are variables initialized using None, but without explicit Optional annotations",
-    },
-    {
-      name: "--no-implicit-reexport",
-      description:
-        "By default, imported values to a module are treated as exported and mypy allows other modules to import them",
-    },
-    {
-      name: "--strict-equality",
-      description:
-        "By default, mypy allows always-false comparisons like 42 == 'no'",
-    },
-    {
-      name: "--extra-checks",
-      description:
-        "This flag enables additional checks that are technically correct but may be impractical in real code",
-    },
+    ...toggle(
+      "--no-implicit-reexport",
+      "--implicit-reexport",
+      "Treat imports as private unless aliased"
+    ),
+    ...toggle(
+      "--strict-equality",
+      "--no-strict-equality",
+      "Prohibit equality, identity, and container checks for non-overlapping types (except `None`)"
+    ),
+    ...toggle(
+      "--strict-equality-for-none",
+      "--no-strict-equality-for-none",
+      "Extend --strict-equality for `None` checks"
+    ),
+    ...toggle(
+      "--no-strict-bytes",
+      "--strict-bytes",
+      "Treat bytearray and memoryview as subtypes of bytes"
+    ),
+    ...toggle(
+      "--extra-checks",
+      "--no-extra-checks",
+      "Enable additional checks that are technically correct but may be impractical in real code"
+    ),
     {
       name: "--strict",
-      description: "This flag mode enables all optional error checking flags",
+      description:
+        "Strict mode; enables a defined subset of optional error-checking flags (see mypy --help for the list)",
+    },
+    {
+      name: "--strict-concatenate",
+      description: "Deprecated, use --extra-checks instead",
+      deprecated: true,
     },
     {
       name: "--disable-error-code",
-      description:
-        "This flag allows disabling one or multiple error codes globally",
+      description: "Disable a specific error code",
+      isRepeatable: true,
+      args: { name: "NAME", suggestions: errorCodes },
     },
     {
       name: "--enable-error-code",
-      description:
-        "This flag allows enabling one or multiple error codes globally",
+      description: "Enable a specific error code",
+      isRepeatable: true,
+      args: { name: "NAME", suggestions: errorCodes },
     },
-    {
-      name: "--show-error-context",
-      description:
-        "This flag will precede all errors with 'note' messages explaining the context of the error",
-    },
-    {
-      name: "--show-column-numbers",
-      description: "This flag will add column offsets to error messages",
-    },
-    {
-      name: "--show-error-end",
-      description:
-        "This flag will make mypy show not just that start position where an error was detected, but also the end position of the relevant expression",
-    },
-    {
-      name: "--hide-error-codes",
-      description:
-        "This flag will hide the error code [<code>] from error messages",
-    },
-    {
-      name: "--pretty",
-      description:
-        "Use visually nicer output in error messages use soft word wrap, show source code snippets, and show error location markers",
-    },
-    {
-      name: "--no-color-output",
-      description:
-        "This flag will disable color output in error messages, enabled by default",
-    },
-    {
-      name: "--no-error-summary",
-      description: "This flag will disable error summary",
-    },
-    {
-      name: "--show-absolute-path",
-      description: "Show absolute paths to files",
-    },
+    ...toggle(
+      "--no-local-partial-types",
+      "--local-partial-types",
+      "Disable local partial types to enable legacy type inference mode for containers"
+    ),
+
+    // Configuring error messages
+    ...toggle(
+      "--show-error-context",
+      "--hide-error-context",
+      'Precede errors with "note:" messages explaining context'
+    ),
+    ...toggle(
+      "--show-column-numbers",
+      "--hide-column-numbers",
+      "Show column numbers in error messages"
+    ),
+    ...toggle(
+      "--show-error-end",
+      "--hide-error-end",
+      "Show end line/end column numbers in error messages (implies --show-column-numbers)"
+    ),
+    ...toggle(
+      "--hide-error-codes",
+      "--show-error-codes",
+      "Hide error codes in error messages"
+    ),
+    ...toggle(
+      "--show-error-code-links",
+      "--hide-error-code-links",
+      "Show links to error code documentation"
+    ),
+    ...toggle(
+      "--pretty",
+      "--no-pretty",
+      "Use visually nicer output in error messages: use soft word wrap, show source code snippets, and show error location markers"
+    ),
+    ...toggle(
+      "--no-color-output",
+      "--color-output",
+      "Do not colorize error messages"
+    ),
+    ...toggle(
+      "--no-error-summary",
+      "--error-summary",
+      "Do not show error stats summary"
+    ),
+    ...toggle(
+      "--show-absolute-path",
+      "--hide-absolute-path",
+      "Show absolute paths to files"
+    ),
     {
       name: "--soft-error-limit",
       description:
-        "This flag will adjust the limit after which mypy will (sometimes) disable reporting most additional errors",
+        "Limit after which mypy will (sometimes) disable reporting most additional errors (negative means no limit)",
+      args: { name: "N", default: "-1" },
+    },
+
+    // Incremental mode
+    {
+      name: ["-i", "--incremental"],
+      description: "Enable the module cache (default)",
+      hidden: true,
     },
     {
       name: "--no-incremental",
-      description:
-        "This flag disables incremental mode mypy will no longer reference the cache when re-run",
+      description: "Disable module cache (inverse: --incremental)",
     },
     {
       name: "--cache-dir",
       description:
-        "By default, mypy stores all cache data inside of a folder named",
+        "Store module cache info in the given folder in incremental mode (defaults to '.mypy_cache')",
+      args: { name: "DIR", template: "folders" },
     },
     {
       name: "--sqlite-cache",
-      description: "Use an SQLite_ database to store the cache",
+      description: "Use a SQLite database to store the cache (default)",
+    },
+    {
+      name: "--no-sqlite-cache",
+      description:
+        "Write cache data to individual files instead of a SQLite database",
     },
     {
       name: "--cache-fine-grained",
       description:
         "Include fine-grained dependency information in the cache for the mypy daemon",
     },
+    ...toggle(
+      "--no-fixed-format-cache",
+      "--fixed-format-cache",
+      "Do not use new fixed format cache"
+    ),
     {
       name: "--skip-version-check",
-      description:
-        "By default, mypy will ignore cache data generated by a different version of mypy",
+      description: "Allow using cache written by older mypy version",
     },
     {
       name: "--skip-cache-mtime-checks",
       description: "Skip cache internal consistency checks based on mtime",
     },
+
+    // Advanced options
     {
       name: "--pdb",
-      description:
-        "This flag will invoke the Python debugger when mypy encounters a fatal error",
+      description: "Invoke pdb on fatal error",
     },
     {
-      name: "--tb",
-      description:
-        "If set, this flag will display a full traceback when mypy encounters a fatal error",
+      name: ["--show-traceback", "--tb"],
+      description: "Show traceback on fatal error",
     },
     {
       name: "--raise-exceptions",
@@ -318,90 +562,230 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--custom-typing-module",
+      description: "Use a custom typing module",
+      args: { name: "MODULE" },
+    },
+    {
+      name: "--enable-incomplete-feature",
       description:
-        "This flag lets you use a custom module as a substitute for the pymodtyping module",
+        "Enable support of incomplete/experimental features for early preview",
+      isRepeatable: true,
+      args: {
+        name: "FEATURE",
+        suggestions: [
+          {
+            name: "PreciseTupleTypes",
+            description: "Infer more precise tuple types in various scenarios",
+          },
+          {
+            name: "InlineTypedDict",
+            description: "Support inline TypedDict type syntax",
+          },
+        ],
+      },
     },
     {
       name: "--custom-typeshed-dir",
-      description:
-        "This flag specifies the directory where mypy looks for standard library typeshed stubs, instead of the typeshed that ships with mypy",
+      description: "Use the custom typeshed in DIR",
+      args: { name: "DIR", template: "folders" },
     },
-    {
-      name: "--warn-incomplete-stub",
-      description:
-        "This flag modifies both the option--disallow-untyped-defs and option--disallow-incomplete-defs flags so they also report errors if stubs in typeshed are missing type annotations or has incomplete annotations",
-    },
+    ...toggle(
+      "--warn-incomplete-stub",
+      "--no-warn-incomplete-stub",
+      "Warn if missing type annotation in typeshed, only relevant with --disallow-untyped-defs or --disallow-incomplete-defs enabled"
+    ),
     {
       name: "--shadow-file",
       description:
-        "When mypy is asked to type check SOURCE_FILE, this flag makes mypy read from and type check the contents of SHADOW_FILE instead",
+        "When encountering SOURCE_FILE, read and type check the contents of SHADOW_FILE instead",
+      isRepeatable: true,
+      args: [
+        { name: "SOURCE_FILE", template: "filepaths" },
+        { name: "SHADOW_FILE", template: "filepaths" },
+      ],
     },
     {
-      name: "--any-exprs-report",
-      description:
-        "Causes mypy to generate a text file report documenting how many expressions of type Any are present within your codebase",
+      name: ["-n", "--num-workers"],
+      description: "Number of separate mypy worker processes, or 'auto'",
+      args: { name: "VALUE", default: "0", suggestions: ["auto"] },
     },
-    {
-      name: "--cobertura-xml-report",
-      description:
-        "Causes mypy to generate a Cobertura XML type checking coverage report",
-    },
-    {
-      name: "--html-report",
-      description:
-        "Causes mypy to generate an HTML type checking coverage report",
-    },
-    {
-      name: "--linecount-report",
-      description:
-        "Causes mypy to generate a text file report documenting the functions and lines that are typed and untyped within your codebase",
-    },
-    {
-      name: "--linecoverage-report",
-      description:
-        "Causes mypy to generate a JSON file that maps each source file's absolute filename to a list of line numbers that belong to typed functions in that file",
-    },
-    {
-      name: "--lineprecision-report",
-      description:
-        "Causes mypy to generate a flat text file report with per-module statistics of how many lines are typechecked etc",
-    },
-    {
-      name: "--txt-report",
-      description:
-        "Causes mypy to generate a text file type checking coverage report",
-    },
-    {
-      name: "--xml-report",
-      description:
-        "Causes mypy to generate an XML type checking coverage report",
-    },
-    {
-      name: "--install-types",
-      description:
-        "This flag causes mypy to install known missing stub packages for third-party libraries using pip",
-    },
-    {
-      name: "--non-interactive",
-      description:
-        "When used together with option--install-types <mypy --install-types>, this causes mypy to install all suggested stub packages using pip without asking for confirmation, and then continues to perform type checking using the installed stubs, if some files or modules are provided to type check",
-    },
+    ...toggle(
+      "--no-native-parser",
+      "--native-parser",
+      "Do not use faster parser that parses directly to mypy AST"
+    ),
+
+    // Report generation
+    report(
+      "any-exprs",
+      "Generate a text file report documenting how many expressions of type Any are present within your codebase"
+    ),
+    report(
+      "cobertura-xml",
+      "Generate a Cobertura XML type checking coverage report"
+    ),
+    report("html", "Generate an HTML type checking coverage report"),
+    report(
+      "linecount",
+      "Generate a text file report documenting the functions and lines that are typed and untyped"
+    ),
+    report(
+      "linecoverage",
+      "Generate a JSON file that maps each source file's absolute filename to a list of line numbers that belong to typed functions"
+    ),
+    report(
+      "lineprecision",
+      "Generate a flat text file report with per-module statistics of how many lines are typechecked"
+    ),
+    report("txt", "Generate a text file type checking coverage report"),
+    report("xml", "Generate an XML type checking coverage report"),
+    report("xslt-html", "Generate an HTML type checking coverage report"),
+    report("xslt-txt", "Generate a text file type checking coverage report"),
+
+    // Miscellaneous
     {
       name: "--junit-xml",
       description:
-        "Causes mypy to generate a JUnit XML test result document with type checking results",
+        "Write a JUnit XML test result document with type checking results to the given file",
+      args: { name: "JUNIT_XML_OUTPUT_FILE", template: "filepaths" },
+    },
+    {
+      name: "--junit-format",
+      description: "Format of the JUnit XML document (used with --junit-xml)",
+      args: {
+        name: "FORMAT",
+        default: "global",
+        suggestions: [
+          { name: "global", description: "Single test with all errors" },
+          {
+            name: "per_file",
+            description: "One test entry per file with failures",
+          },
+        ],
+      },
     },
     {
       name: "--find-occurrences",
-      description:
-        "This flag will make mypy print out all usages of a class member based on static type information",
+      description: "Print out all usages of a class member (experimental)",
+      args: { name: "CLASS.MEMBER" },
     },
     {
       name: "--scripts-are-modules",
+      description: "Script x becomes module x instead of __main__",
+    },
+    ...toggle(
+      "--install-types",
+      "--no-install-types",
+      "Install detected missing library stub packages using pip"
+    ),
+    ...toggle(
+      "--non-interactive",
+      "--interactive",
+      "Install stubs without asking for confirmation and hide errors, with --install-types"
+    ),
+
+    // Hidden flags (help suppressed in define_options; descriptions from the source comments)
+    {
+      name: "--bazel",
+      description: "Change some behaviors for use with Bazel",
+      hidden: true,
+    },
+    {
+      name: "--package-root",
       description:
-        "This flag will give command line arguments that appear to be scripts",
+        "Treat directories below ROOT as packages even without __init__.py (may be repeated)",
+      isRepeatable: true,
+      hidden: true,
+      args: { name: "ROOT", template: "folders" },
+    },
+    {
+      name: "--cache-map",
+      description:
+        "Map source files to cache files, given as triples of source file, cache meta file and cache data file",
+      hidden: true,
+      args: { name: "FILE", isVariadic: true, template: "filepaths" },
+    },
+    {
+      name: "--timing-stats",
+      description:
+        "Dump timing stats for each processed file into the given output file",
+      hidden: true,
+      args: { name: "FILE", template: "filepaths" },
+    },
+    {
+      name: "--line-checking-stats",
+      description:
+        "Dump per line type checking timing stats for each processed file into the given output file",
+      hidden: true,
+      args: { name: "FILE", template: "filepaths" },
+    },
+    {
+      name: "--debug-cache",
+      description:
+        "Disable cache-related compressions and optimizations and write pretty-printed JSON cache files",
+      hidden: true,
+    },
+    {
+      name: "--debug-serialize",
+      description: "Run tree.serialize() even if cache generation is disabled",
+      hidden: true,
+    },
+    {
+      name: "--dump-deps",
+      description: "Dump all fine-grained dependencies to stdout",
+      hidden: true,
+    },
+    {
+      name: "--dump-graph",
+      description: "Dump the contents of the graph of SCCs and exit",
+      hidden: true,
+    },
+    {
+      name: "--semantic-analysis-only",
+      description: "Run semantic analysis only",
+      hidden: true,
+    },
+    {
+      name: "--logical-deps",
+      description:
+        "Add logical dependencies for code statistics (experimental, implies --cache-fine-grained)",
+      hidden: true,
+    },
+    {
+      name: "--export-ref-info",
+      description: "Export limited line-level dependency information",
+      hidden: true,
+    },
+    {
+      name: "--allow-empty-bodies",
+      description: "Allow function bodies to be omitted",
+      hidden: true,
+    },
+    {
+      name: "--disallow-empty-bodies",
+      description: "Inverse of --allow-empty-bodies",
+      hidden: true,
+    },
+    {
+      name: "-a",
+      description: "Write an annotated HTML source file (mypyc)",
+      hidden: true,
+      args: { name: "FILE", template: "filepaths" },
+    },
+    {
+      name: "--skip-c-gen",
+      description:
+        "Do not write any C files, keep existing ones and assume they exist (mypyc)",
+      hidden: true,
     },
   ],
+  args: {
+    name: "files",
+    description: "Python files or folders to type check",
+    template: "filepaths",
+    isVariadic: true,
+    isOptional: true,
+  },
 };
 
 export default completionSpec;
