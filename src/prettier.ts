@@ -1,4 +1,4 @@
-// Prettier v3.10.1 (GitHub release, 2026-11-12). Source: `prettier --help` (v3.9.10) and src/cli/cli-options.evaluate.js, src/main/core-options.evaluate.js, language options at tag 3.10.1
+// Prettier v3.10.1 (npm latest dist-tag and git tags, 2026-11-20). Source: prettier@3.10.1 package contents (internal/legacy-cli.mjs CLI option table and usage generator, index.mjs core and language option definitions), `prettier --help` output of the repo's installed 3.9.10 (same option set), docs/cli.md at tag 3.10.1 and the 3.6.0 release notes for --experimental-cli. Not run: the 3.10.1 binary itself. Experimental-CLI-only flags (--no-cache, --config-path, --no-ignore) are not modelled
 const completionSpec: Fig.Spec = {
   name: "prettier",
   description: "Run Prettier from the command line",
@@ -8,20 +8,18 @@ const completionSpec: Fig.Spec = {
       name: ["-c", "--check"],
       description:
         "Check if the given files are formatted, print a summary and paths to unformatted files",
-      args: {
-        name: "file, dir, or glob",
-        template: ["filepaths", "folders"],
-        isVariadic: true,
-      },
+      exclusiveOn: ["-l", "--list-different"],
     },
     {
       name: ["-l", "--list-different"],
       description:
         "Print the names of files that are different from Prettier's formatting",
+      exclusiveOn: ["-c", "--check"],
     },
     {
       name: ["-w", "--write"],
       description: "Edit files in-place",
+      exclusiveOn: ["--debug-check"],
       isDangerous: true,
     },
     {
@@ -75,6 +73,11 @@ const completionSpec: Fig.Spec = {
       name: "--experimental-ternaries",
       description:
         "Use curious ternaries, with the question mark after the condition",
+    },
+    {
+      name: "--no-experimental-ternaries",
+      description:
+        "Default behavior of ternaries; keep question marks on the same line as the consequent",
     },
     {
       name: "--html-whitespace-sensitivity",
@@ -265,7 +268,6 @@ const completionSpec: Fig.Spec = {
       name: "--cursor-offset",
       description:
         "Print (to stderr) where a cursor at the given position would move to after formatting",
-      exclusiveOn: ["--range-start", "--range-end"],
       args: {
         name: "int",
         default: "-1",
@@ -274,7 +276,6 @@ const completionSpec: Fig.Spec = {
     {
       name: "--range-end",
       description: "Format code ending at a given character offset (exclusive)",
-      exclusiveOn: ["--cursor-offset"],
       args: {
         name: "int",
         default: "Infinity",
@@ -356,6 +357,7 @@ const completionSpec: Fig.Spec = {
       name: "--debug-check",
       description:
         "This will cause Prettier to print an error message if it detects that code correctness might have changed",
+      exclusiveOn: ["-w", "--write"],
     },
     {
       name: "--no-error-on-unmatched-pattern",
@@ -365,6 +367,11 @@ const completionSpec: Fig.Spec = {
       name: "--cache",
       description: "Only format changed files",
       exclusiveOn: ["--stdin-filepath"],
+    },
+    {
+      name: "--experimental-cli",
+      description:
+        "Use the experimental high-performance CLI (also enabled by PRETTIER_EXPERIMENTAL_CLI)",
     },
     {
       name: "--cache-location",
@@ -377,6 +384,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--cache-strategy",
       description: "Strategy for the cache to use for detecting changed files",
+      dependsOn: ["--cache"],
       args: {
         name: "strategy",
         suggestions: ["metadata", "content"],
