@@ -1,6 +1,7 @@
-// pip v26.3 (GitHub release pypa/pip, 2026-11-02). Source: `pip3 <cmd> --help`
-// on 26.2.2 for every command, plus the 26.2.2...26.3 diff of
-// src/pip/_internal/{cli,commands} and NEWS.rst
+// pip v26.3 (latest stable on PyPI, released 2026-11-02, checked 2026-11-20). Source: the pip 26.3 sdist from PyPI,
+// read statically (not run): src/pip/_internal/{cli/cmdoptions.py,cli/req_command.py,commands/*.py} for every
+// command and option, plus NEWS.rst. Spellings that optparse accepts but `--help` does not print (it shows only the
+// first short and long name of an option) are listed as `hidden: true`.
 
 const listPackages: Fig.Generator = {
   script: ["pip", "list"],
@@ -16050,6 +16051,27 @@ const installedPackage: Fig.Arg = {
   isVariadic: true,
 };
 
+// Accepted by optparse but not printed by `--help`
+const hiddenGeneralAliases: Fig.Option[] = [
+  {
+    name: "--require-venv",
+    description: "Alias of --require-virtualenv",
+    hidden: true,
+  },
+  {
+    name: ["--log-file", "--local-log"],
+    description: "Alias of --log",
+    hidden: true,
+    args: file("path"),
+  },
+  {
+    name: "--default-timeout",
+    description: "Alias of --timeout",
+    hidden: true,
+    args: { name: "sec" },
+  },
+];
+
 const generalOptions: Fig.Option[] = [
   { name: ["-h", "--help"], description: "Show help" },
   {
@@ -16293,6 +16315,12 @@ const packageIndexOptions: Fig.Option[] = [
     args: { name: "url" },
   },
   {
+    name: "--pypi-url",
+    description: "Alias of --index-url",
+    hidden: true,
+    args: { name: "url" },
+  },
+  {
     name: "--extra-index-url",
     description:
       "Extra URLs of package indexes to use in addition to --index-url",
@@ -16308,6 +16336,7 @@ const packageIndexOptions: Fig.Option[] = [
     name: "--refresh-package",
     description:
       "Refresh package index information for the given packages instead of using cached responses",
+    isRepeatable: true,
     args: {
       name: "refresh_package",
       suggestions: [{ name: ":all:", description: "Apply to all packages" }],
@@ -16375,6 +16404,11 @@ const resolveOptions: Fig.Option[] = [
   },
   { name: "--no-deps", description: "Don't install package dependencies" },
   {
+    name: "--no-dependencies",
+    description: "Alias of --no-deps",
+    hidden: true,
+  },
+  {
     name: "--only-deps",
     description:
       "Take only the dependencies of the provided requirements into account, not the requirements themselves",
@@ -16387,8 +16421,19 @@ const resolveOptions: Fig.Option[] = [
     ],
   },
   {
+    name: "--only-dependencies",
+    description: "Alias of --only-deps",
+    hidden: true,
+  },
+  {
     name: "--src",
     description: "Directory to check out editable projects into",
+    args: dir,
+  },
+  {
+    name: ["--source", "--source-dir", "--source-directory"],
+    description: "Alias of --src",
+    hidden: true,
     args: dir,
   },
   ignoreRequiresPython,
@@ -16493,7 +16538,10 @@ const completionSpec: Fig.Spec = {
   name: "pip",
   description: "Python package manager",
   options: [
-    ...generalOptions.map((option) => ({ ...option, isPersistent: true })),
+    ...[...generalOptions, ...hiddenGeneralAliases].map((option) => ({
+      ...option,
+      isPersistent: true,
+    })),
     { name: ["-V", "--version"], description: "Show version and exit" },
   ],
   subcommands: [
@@ -16520,6 +16568,11 @@ const completionSpec: Fig.Spec = {
           name: "--user",
           description:
             "Install to the Python user install directory for your platform",
+        },
+        {
+          name: "--no-user",
+          description: "Do not install to the Python user install directory",
+          hidden: true,
         },
         {
           name: "--root",
@@ -16617,6 +16670,12 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-d", "--dest"],
           description: "Download packages into <dir>",
+          args: dir,
+        },
+        {
+          name: ["--destination-dir", "--destination-directory"],
+          description: "Alias of --dest",
+          hidden: true,
           args: dir,
         },
       ],
