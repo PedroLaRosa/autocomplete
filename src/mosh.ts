@@ -1,4 +1,6 @@
-// Mosh v1.4.0 (GitHub release mosh-1.4.0, 2022-10-27). Source: usage text and GetOptions in scripts/mosh.pl at mosh-1.4.0 (unchanged on master)
+// Mosh v1.4.0 (GitHub tag mosh-1.4.0 and Homebrew formula, latest release, 2026-11-20). Source: usage text and
+// GetOptions in scripts/mosh.pl and man/mosh.1 at mosh-1.4.0 (both unchanged on master). Option values may be given as
+// "--opt value" or "--opt=value" (Perl Getopt::Long), so no option is marked requiresEquals
 import { knownHosts, configHosts } from "./ssh";
 
 const completionSpec: Fig.Spec = {
@@ -26,19 +28,16 @@ const completionSpec: Fig.Spec = {
     {
       name: "--client",
       description: 'Mosh client on local machine (default: "mosh-client")',
-      requiresEquals: true,
       args: { name: "path", template: "filepaths" },
     },
     {
       name: "--server",
       description: 'Mosh server on remote machine (default: "mosh-server")',
-      requiresEquals: true,
       args: { name: "command" },
     },
     {
       name: "--predict",
       description: "Local echo options",
-      requiresEquals: true,
       args: {
         suggestions: [
           {
@@ -77,7 +76,6 @@ const completionSpec: Fig.Spec = {
     {
       name: "--family",
       description: "Network Type",
-      requiresEquals: true,
       args: {
         suggestions: [
           { name: "inet", description: "Use IPv4 only" },
@@ -108,22 +106,23 @@ const completionSpec: Fig.Spec = {
       name: "--bind-server",
       description:
         'Ask the server to reply from an IP address, (default: "ssh")',
-      requiresEquals: true,
       args: { name: "ssh|any|IP", suggestions: ["ssh", "any"] },
     },
     {
       name: "--ssh",
-      requiresSeparator: true,
-      args: {
-        name: "command",
-        isCommand: true,
-      },
+      args: { name: "command" },
       description:
         'Ssh command to run when setting up session, (example: "ssh -p 2222")',
     },
     {
+      name: "--ssh-pty",
+      description: "Allocate a pseudo tty on ssh connection (default)",
+      exclusiveOn: ["--no-ssh-pty"],
+    },
+    {
       name: "--no-ssh-pty",
       description: "Do not allocate a pseudo tty on ssh connection",
+      exclusiveOn: ["--ssh-pty"],
     },
     {
       name: "--no-init",
@@ -137,7 +136,6 @@ const completionSpec: Fig.Spec = {
       name: "--experimental-remote-ip",
       description:
         "Select the method for discovering the remote IP address to use for mosh",
-      requiresSeparator: true,
       args: {
         name: "method",
         suggestions: ["local", "remote", "proxy"],
