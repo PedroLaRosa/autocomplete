@@ -1,49 +1,14 @@
-const completionSpec: Fig.Spec = {
-  name: "nuxt",
-  description: "",
-  subcommands: [
-    { name: "dev", description: "Launch the development server" },
-    {
-      name: "start",
-      description:
-        "Start the production server (after running nuxt build). Use it for Node.js hosting like Heroku, Digital Ocean, etc",
-    },
-    {
-      name: "generate",
-      description:
-        "Build the application (if needed), generate every route as a HTML file and statically export to dist/ directory (used for static hosting)",
-    },
-    {
-      name: "build",
-      description:
-        "Build and optimize your application with webpack for production",
-    },
-    {
-      name: "webpack",
-      description: "Inspect the webpack config",
-      subcommands: [{ name: "subcommands coming soon" }],
-      options: [
-        {
-          name: "--name",
-          description: "Bundle name to inspect. (client, server, modern)",
-        },
-        { name: "--dev", description: "Inspect webpack config for dev mode" },
-        {
-          name: "--depth",
-          description:
-            "Inspection depth. Defaults to 2 to prevent verbose output",
-        },
-        {
-          name: "--no-colors",
-          description:
-            "Disable ANSI colors (disabled by default when TTY is not available or when piping to a file)",
-        },
-      ],
-    },
-  ],
+// Nuxt v4.6.4 (npm "latest", 2026-11-20). The nuxt package's `nuxt` binary is the
+// same CLI as nuxi (@nuxt/cli 4.0.3, published 2026-11-03), so this spec reuses
+// ./nuxi. Source: command and argument definitions in the published @nuxt/cli
+// 4.0.3 npm package, read statically; the binary was not run.
+// The old Nuxt 2 commands (webpack, nuxt start as a production server, ...) were
+// removed: Nuxt 2 is end-of-life and no longer what `nuxt` installs.
+import nuxiSpec from "./nuxi";
 
-  // Only uncomment if nuxt takes an argument
-  // args: {}
+const completionSpec: Fig.Spec = {
+  ...(nuxiSpec as Fig.Subcommand),
+  name: "nuxt",
 };
 
 export default completionSpec;
