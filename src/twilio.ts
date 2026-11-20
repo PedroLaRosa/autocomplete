@@ -1,6 +1,9 @@
-// Twilio CLI v7.3.0 (GitHub release twilio/twilio-cli, 2026-11-11). Source:
-// src/commands and package.json oclif plugins at tag 7.3.0, twilio-cli-core
-// 9.3.0 base flags. The generated `api` tree is left out on purpose.
+// Twilio CLI v7.3.0 (npm twilio-cli latest, tag twilio/twilio-cli 7.3.0, published
+// 2026-11-11; re-verified 2026-11-20). Source: src/commands and package.json oclif
+// plugins at tag 7.3.0 (plugin-autocomplete 1.4.6, plugin-plugins 2.4.7,
+// plugin-update 4.8.0, plugin-version 1.3.10 as locked), @twilio/cli-core 9.3.0 base
+// flags and its twilio_api_v2010.json (phone-numbers:buy flags). Read statically,
+// the CLI was not run. The generated `api` tree is left out on purpose.
 
 /** A version of Fig.Subcommand with a predictable name prop */
 interface TwilioSubcommand extends Fig.Subcommand {
@@ -97,7 +100,7 @@ function createSeparatedSubcommandTree(
 }
 
 const logOption: Fig.Option = {
-  name: "-l",
+  name: ["-l", "--cli-log-level"],
   args: {
     name: "level",
     description: "Level of logging messages",
@@ -113,7 +116,7 @@ const logOption: Fig.Option = {
 };
 
 const outputFormatOption: Fig.Option = {
-  name: "-o",
+  name: ["-o", "--cli-output-format"],
   description: "Format of command output",
   args: {
     name: "format",
@@ -251,6 +254,7 @@ const emailSubcommand: TwilioSubcommand = {
         {
           name: "--attachment",
           description: "Path for the file that you want to attach",
+          exclusiveOn: ["--no-attachment"],
           args: {
             name: "attachment",
             template: "filepaths",
@@ -266,6 +270,7 @@ const emailSubcommand: TwilioSubcommand = {
         {
           name: "--no-attachment",
           description: "Do not include or prompt for an attachment",
+          exclusiveOn: ["--attachment"],
         },
         {
           name: "--subject",
@@ -316,6 +321,15 @@ const emailSubcommand: TwilioSubcommand = {
 const feedbackSubcommand: TwilioSubcommand = {
   name: "feedback",
   description: "Provide feedback to the CLI team",
+};
+
+// The API schema only allows these two (case-sensitive) HTTP methods
+const httpMethodArg: Fig.Arg = {
+  name: "method",
+  suggestions: [
+    { name: "GET", icon: "fig://icon?type=string" },
+    { name: "POST", icon: "fig://icon?type=string" },
+  ],
 };
 
 const phoneNumbersBuyOptions: Fig.Option[] = [
@@ -743,7 +757,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
   {
     name: "--contains",
     description:
-      "The pattern on which to match phone numbers. Valid characters are `*`, `0-9`, `a-z`, and `A-Z`. The `*` character matches any single digit. For examples, see Example 2 and Example 3. If specified, this value must have at least two characters",
+      "Matching pattern to identify phone numbers. Between 2 and 16 characters long, allows digits (0-9) and latin letters (a-z, A-Z) plus the meta-characters `*`, `%`, `+` and `$`. With wildcards it must include at least two non-meta-characters",
     args: {
       name: "contains",
     },
@@ -771,8 +785,8 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     args: {
       name: "status",
       suggestions: [
-        { name: "active", icon: "fig://icon?type=string" },
-        { name: "inactive", icon: "fig://icon?type=string" },
+        { name: "Active", icon: "fig://icon?type=string" },
+        { name: "Inactive", icon: "fig://icon?type=string" },
       ],
     },
   },
@@ -930,6 +944,20 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     },
   },
   {
+    name: "--page",
+    description: "The page index. This value is simply for client state",
+    args: {
+      name: "page",
+    },
+  },
+  {
+    name: "--page-token",
+    description: "The page token. This is provided by the API",
+    args: {
+      name: "page-token",
+    },
+  },
+  {
     name: "--properties",
     description:
       "The properties you would like to display (JSON output always shows all properties)",
@@ -962,17 +990,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--sms-fallback-method",
     description:
       "The HTTP method that we should use to call `sms_fallback_url`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--sms-fallback-url",
@@ -986,17 +1004,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--sms-method",
     description:
       "The HTTP method that we should use to call `sms_url`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--sms-url",
@@ -1018,17 +1026,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--status-callback-method",
     description:
       "The HTTP method we should use to call `status_callback`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--trunk-sid",
@@ -1074,17 +1072,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--voice-fallback-method",
     description:
       "The HTTP method that we should use to call `voice_fallback_url`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--voice-fallback-url",
@@ -1098,17 +1086,7 @@ const phoneNumbersBuyOptions: Fig.Option[] = [
     name: "--voice-method",
     description:
       "The HTTP method that we should use to call `voice_url`. Can be: `GET` or `POST` and defaults to `POST`",
-    args: {
-      name: "method",
-      suggestions: [
-        { name: "head", icon: "fig://icon?type=string" },
-        { name: "get", icon: "fig://icon?type=string" },
-        { name: "post", icon: "fig://icon?type=string" },
-        { name: "patch", icon: "fig://icon?type=string" },
-        { name: "put", icon: "fig://icon?type=string" },
-        { name: "delete", icon: "fig://icon?type=string" },
-      ],
-    },
+    args: httpMethodArg,
   },
   {
     name: "--voice-receive-mode",
@@ -1224,13 +1202,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
         },
         {
           name: "--sms-fallback-method",
-          args: {
-            name: "method",
-            suggestions: [
-              { name: "GET", icon: "fig://icon?type=string" },
-              { name: "POST", icon: "fig://icon?type=string" },
-            ],
-          },
+          args: httpMethodArg,
           description:
             "The HTTP method that should be used to request the SmsFallbackUrl",
         },
@@ -1242,13 +1214,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
         },
         {
           name: "--sms-method",
-          args: {
-            name: "method",
-            suggestions: [
-              { name: "GET", icon: "fig://icon?type=string" },
-              { name: "POST", icon: "fig://icon?type=string" },
-            ],
-          },
+          args: httpMethodArg,
           description:
             "The HTTP method Twilio will use when making requests to the SmsUrl",
         },
@@ -1260,13 +1226,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
         },
         {
           name: "--voice-fallback-method",
-          args: {
-            name: "method",
-            suggestions: [
-              { name: "GET", icon: "fig://icon?type=string" },
-              { name: "POST", icon: "fig://icon?type=string" },
-            ],
-          },
+          args: httpMethodArg,
           description:
             "The HTTP method Twilio will use when requesting the VoiceFallbackUrl",
         },
@@ -1278,13 +1238,7 @@ const phoneNumbersSubcommand: TwilioSubcommand = {
         },
         {
           name: "--voice-method",
-          args: {
-            name: "method",
-            suggestions: [
-              { name: "GET", icon: "fig://icon?type=string" },
-              { name: "POST", icon: "fig://icon?type=string" },
-            ],
-          },
+          args: httpMethodArg,
           description:
             "The HTTP method Twilio will use when making requests to the VoiceUrl",
         },
@@ -1506,6 +1460,13 @@ const versionSubcommand: TwilioSubcommand = {
   ],
 };
 
+const zorkSubcommand: TwilioSubcommand = {
+  name: "zork",
+  description: "What could this be?",
+  hidden: true,
+  options: persistentOptions,
+};
+
 const autocompleteSubcommand: TwilioSubcommand = {
   name: "autocomplete",
   description: "Display autocomplete installation instructions",
@@ -1539,6 +1500,7 @@ const subcommands: TwilioSubcommand[] = [
   profilesSubcommand,
   updateSubcommand,
   versionSubcommand,
+  zorkSubcommand,
 ];
 
 const completionSpec: Fig.Spec = {
