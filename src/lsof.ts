@@ -1,17 +1,27 @@
+// lsof v4.99.7 (latest tag of lsof-org/lsof and Homebrew stable, 2026-11-20). Source: Lsof.8, src/usage.c, src/main.c (option string) and
+// lib/dialects/{linux,darwin}/machine.h of the 4.99.7 source tag, read statically (not built or run); cross-checked against Apple lsof-76 (4.91,
+// macOS libproc dialect) and the Linux `lsof -h` / `lsof -F?` output of an installed 4.95.0. Not run on macOS. Options that exist only on other
+// dialects (-A AFS, -C name cache, -D device cache, -k/-m kernel files, -z Solaris zones) are left out; Linux-only options are marked in their description.
+const fileStructureFlags: Fig.Suggestion[] = [
+  { name: "c", description: "File structure use count (not on Linux)" },
+  { name: "g", description: "File flag abbreviations" },
+  { name: "G", description: "File flags in hexadecimal" },
+];
+
 const completionSpec: Fig.Spec = {
   name: "lsof",
   description: "List open files",
   args: {
     name: "names",
-    description: "Select named files or files on named file systems",
-    template: ["folders"],
+    description: "Files or file systems (mount points) to select",
+    template: "filepaths",
     isVariadic: true,
     isOptional: true,
   },
   options: [
     {
-      name: ["-?", "-h", "--help"],
-      description: "Help",
+      name: ["-?", "-h"],
+      description: "Print help",
     },
     {
       name: "-a",
@@ -19,97 +29,112 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-b",
-      description: "Avoid kernel blocks",
+      description:
+        "Avoid kernel functions that might block (lstat, readlink, stat)",
     },
     {
       name: "-c",
       description:
-        "Select the listing of files for processes executing a command",
+        "Select files of processes whose command begins with the given characters",
+      isRepeatable: true,
       args: {
-        name: "string or regexp (optional ending with /i /b /x)",
+        name: "command",
+        description:
+          "Command prefix, ^command to exclude it, or /regex/ optionally ending with b, i or x",
       },
     },
     {
       name: "+c",
-      description: "COMMAND width (9)",
+      description:
+        "Maximum number of COMMAND column characters (default 9, 0 for all)",
       args: {
-        name: "number",
+        name: "width",
       },
     },
     {
       name: "+d",
       description:
-        "Search for all open instances/files/directories of directory",
+        "Search for open instances of a directory and the files it contains at its top level",
       args: {
-        name: "file",
-        template: ["folders"],
+        name: "directory",
+        template: "folders",
       },
     },
     {
       name: "-d",
-      description:
-        "Specify a list of file descriptors (FDs) to exclude from or include in the output listing",
+      description: "Select (or, with ^, exclude) files by file descriptor list",
       args: {
-        name: "File descriptor number",
+        name: "FDs",
+        description:
+          "Comma-separated FD names, numbers or ranges, e.g. cwd,1,3 or ^0-7 (fd selects all)",
       },
     },
     {
       name: "+D",
       description:
-        "Search tree for all open instances/files/directories of directory. *SLOW?*",
+        "Search the whole tree under a directory for open instances (can be slow)",
       args: {
-        name: "file",
-        template: ["folders"],
+        name: "directory",
+        template: "folders",
       },
     },
     {
+      name: "+e",
+      description:
+        "Linux: exempt a file system from blocking stat, lstat and most readlink calls (risky)",
+      isRepeatable: true,
+      args: {
+        name: "file system",
+        template: "folders",
+      },
+    },
+    {
+      name: "-e",
+      description:
+        "Linux: exempt a file system from blocking stat and lstat calls (risky)",
+      isRepeatable: true,
+      args: {
+        name: "file system",
+        template: "folders",
+      },
+    },
+    {
+      name: "+E",
+      description:
+        "Linux: show endpoint information of pipes, sockets, ptys, message queues and eventfds, plus the endpoint files",
+    },
+    {
+      name: "-E",
+      description:
+        "Linux: show endpoint information of pipes, sockets, ptys, message queues and eventfds",
+    },
+    {
       name: "+f",
-      description: "Enable path name arguments to be interpreted",
+      description:
+        "Treat names as file systems; with flags, list file structure information",
       args: {
         isOptional: true,
         name: "flags",
-        suggestions: [
-          {
-            name: "c",
-            description: "File structure use count",
-          },
-          {
-            name: "g",
-            description: "File flag abbreviations",
-          },
-          {
-            name: "G",
-            description: "File flags in hexadecimal",
-          },
-        ],
+        suggestions: fileStructureFlags,
       },
     },
     {
       name: "-f",
-      description: "Inhibit path name arguments to be interpreted",
+      description:
+        "Treat names as simple files; with flags, inhibit file structure information",
       args: {
+        isOptional: true,
         name: "flags",
-        suggestions: [
-          {
-            name: "c",
-            description: "File structure use count",
-          },
-          {
-            name: "g",
-            description: "File flag abbreviations",
-          },
-          {
-            name: "G",
-            description: "File flags in hexadecimal",
-          },
-        ],
+        suggestions: fileStructureFlags,
       },
     },
     {
       name: "-F",
-      description: "Select fields to output",
+      description:
+        "Select fields for output that is easy to parse (all fields when none are given)",
       args: {
-        name: "options",
+        name: "fields",
+        isOptional: true,
         isVariadic: true,
         suggestions: [
           {
@@ -134,7 +159,7 @@ const completionSpec: Fig.Spec = {
           },
           {
             name: "f",
-            description: "File descriptor (always selected)",
+            description: "File descriptor",
           },
           {
             name: "G",
@@ -162,7 +187,8 @@ const completionSpec: Fig.Spec = {
           },
           {
             name: "m",
-            description: "Marker between repeated output",
+            description:
+              "Marker between repeated output (always selected in repeat mode)",
           },
           {
             name: "M",
@@ -178,7 +204,7 @@ const completionSpec: Fig.Spec = {
           },
           {
             name: "p",
-            description: "Process ID (PID)",
+            description: "Process ID (PID, always selected)",
           },
           {
             name: "g",
@@ -217,31 +243,43 @@ const completionSpec: Fig.Spec = {
             description: "User ID (UID)",
           },
           {
+            name: "Z",
+            description: "SELinux security context (Linux)",
+          },
+          {
             name: "0",
-            description: "(zero) use NUL field terminator instead of N",
+            description: "Use NUL as field terminator instead of NL",
           },
         ],
       },
     },
     {
       name: "-F?",
-      description: "Show fields for -F",
+      description: "Show the field identification characters for -F",
     },
     {
       name: "-g",
-      description: "Exclude or select by process group IDs (PGID)",
+      description:
+        "Print process group IDs; with a list, select (or, with ^, exclude) those groups",
       args: {
-        name: "PGID",
-        description: "Process Group ID (comma separated)",
+        name: "PGIDs",
+        description: "Comma-separated process group IDs, e.g. 123,^456",
+        isOptional: true,
       },
+    },
+    {
+      name: "-H",
+      description: "Print human readable sizes, e.g. 123.4K",
     },
     {
       name: "-i",
       // below you will find a valiant attempt to codify the following description into generators
       description:
-        "Selects files by [46][protocol][@hostname|hostaddr][:service|port]",
+        "Select Internet files, optionally by [46][protocol][@hostname|hostaddr][:service|port]",
+      isRepeatable: true,
       args: {
-        name: "options",
+        name: "address",
+        isOptional: true,
         generators: [
           {
             script: ["echo"],
@@ -312,12 +350,32 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "-J",
+      description: "Output a single JSON object with a processes array",
+      exclusiveOn: ["-j", "-t"],
+    },
+    {
+      name: "-j",
+      description: "Output JSON Lines, one object per open file",
+      exclusiveOn: ["-J", "-t"],
+    },
+    {
+      name: "-K",
+      description: "Linux: list tasks (threads), or with i ignore them",
+      args: {
+        name: "mode",
+        isOptional: true,
+        suggestions: [{ name: "i", description: "Ignore tasks" }],
+      },
+    },
+    {
       name: "-l",
       description: "Inhibit conversion of user IDs to login names",
     },
     {
       name: "+L",
-      description: "Enable listing of file link counts",
+      description:
+        "List file link counts, or only files with fewer links than the number (+L1 finds unlinked files)",
       args: {
         isOptional: true,
         name: "number",
@@ -325,10 +383,16 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-L",
-      description: "Disable listing of file link counts",
+      description: "Do not list file link counts (default)",
+    },
+    {
+      name: "+m",
+      description:
+        "Write a mount supplement file to stdout, or read one from the given file (Linux)",
       args: {
         isOptional: true,
-        name: "number",
+        name: "file",
+        template: "filepaths",
       },
     },
     {
@@ -337,7 +401,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-M",
-      description: "Disable portMap registration",
+      description: "Disable portMap registration (default)",
     },
     {
       name: "-n",
@@ -349,18 +413,24 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-o",
-      description: "List file offset",
+      description:
+        "List file offset at all times, or with a number set the digits printed after 0t",
+      args: {
+        isOptional: true,
+        name: "digits",
+      },
     },
     {
       name: "-O",
-      description: "No overhead *RISKY*",
+      description:
+        "Do not fork helper processes that guard against blocking kernel calls (risky)",
     },
     {
       name: "-p",
-      description: "Exclude or select process identification numbers (PIDs)",
+      description: "Select (or, with ^, exclude) files of the given processes",
       args: {
         name: "PIDs",
-        description: "PIDs to select or exclude ( with ^)",
+        description: "Comma-separated process IDs, e.g. 123,^456",
       },
     },
     {
@@ -368,19 +438,29 @@ const completionSpec: Fig.Spec = {
       description: "No port names",
     },
     {
+      name: "-Q",
+      description:
+        "Ignore failed search terms: exit 0 and stay silent when nothing matches",
+    },
+    {
       name: "+r",
-      description: "Repeat every t seconds (15) until no files",
+      description:
+        "Repeat the listing every t seconds until no files are listed",
       args: {
-        name: "time (seconds)",
-        description: "Time per repeat",
+        name: "t[c<N>][m<fmt>]",
+        description:
+          "Delay in seconds (default 15), optional repeat limit c<N> and strftime marker format m<fmt>",
+        isOptional: true,
       },
     },
     {
       name: "-r",
-      description: "Repeat every t seconds (15) forever",
+      description: "Repeat the listing every t seconds forever",
       args: {
-        name: "time (seconds)",
-        description: "Time per repeat",
+        name: "t[c<N>][m<fmt>]",
+        description:
+          "Delay in seconds (default 15), optional repeat limit c<N> and strftime marker format m<fmt>",
+        isOptional: true,
       },
     },
     {
@@ -389,25 +469,30 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-s",
-      description: "List file size or exclude/select protocol",
+      description:
+        "List file size at all times, or select (or, with ^, exclude) TCP or UDP states",
       args: {
         isOptional: true,
         name: "protocol:state",
+        description: "E.g. TCP:LISTEN or UDP:^Idle",
       },
     },
     {
       name: "-S",
-      description: "Stat timeout in seconds (lstat/readlink/stat)",
+      description:
+        "Timeout in seconds for lstat, readlink and stat kernel calls (minimum 2, default 15)",
       args: {
         isOptional: true,
-        name: "timeout (seconds)",
+        name: "timeout",
       },
     },
     {
       name: "-T",
-      description: "Disable TCP/TPI info",
+      description:
+        "Select TCP/TPI information to report; with no value disable it",
       args: {
         name: "info",
+        isOptional: true,
         suggestions: [
           {
             name: "f",
@@ -417,46 +502,49 @@ const completionSpec: Fig.Spec = {
           { name: "q", description: "Selects queue length reporting" },
           { name: "s", description: "Selects connection state reporting" },
           { name: "w", description: "Selects window size reporting" },
-          { name: "", description: "Disables info" },
         ],
       },
     },
     {
       name: "-t",
-      description: "Specify terse listing",
+      description: "Terse output of process IDs only (implies -w)",
+      exclusiveOn: ["-J", "-j"],
     },
     {
       name: "-u",
-      description: "Exclude/select login|UID set",
+      description: "Select (or, with ^, exclude) files of the given users",
       args: {
-        name: "UIDs",
+        name: "users",
+        description: "Comma-separated login names or user IDs",
       },
     },
     {
       name: "-U",
-      description: "Select Unix socket",
+      description: "Select UNIX domain socket files",
     },
     {
       name: "-v",
-      description: "List version info",
+      description: "List version information",
     },
     {
       name: "-V",
-      description: "Verbose search",
+      description: "Report search items that were not found",
     },
     {
       name: "+w",
-      description: "Enable warnings",
+      description: "Enable warning messages",
     },
     {
       name: "-w",
-      description: "Disable warnings",
+      description: "Suppress warning messages",
     },
     {
       name: "-x",
-      description: "Cross over +d|+D File systems or symbolic links",
+      description:
+        "Let +d and +D cross file system mount points and symbolic links",
       args: {
         name: "cross-over option",
+        isOptional: true,
         suggestions: [
           {
             name: "f",
@@ -471,7 +559,23 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "-X",
-      description: "File descriptor table only",
+      description:
+        "File descriptor table only on macOS; skip TCP, UDP and UDPLITE files on Linux",
+    },
+    {
+      name: "-Z",
+      description:
+        "Linux: list SELinux security contexts, or select files by context",
+      isRepeatable: true,
+      args: {
+        name: "context",
+        description: "Security context such as A:B:C, *:B:C or A:B:*",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--",
+      description: "End of options, the following arguments are names",
     },
   ],
 };
