@@ -1,5 +1,10 @@
-// SurrealDB v4.0.1 (GitHub release "latest", 2026-11-09). Source: clap
-// definitions in surrealdb/server/src/cli/ and src/dbs/mod.rs at tag v4.0.1
+// SurrealDB v4.0.1 (latest stable git tag v4.0.1 and surrealdb crate 4.0.1, verified 2026-11-20).
+// Source: clap definitions of the `surreal` database executable in
+// surrealdb/server/src/cli/ and src/dbs/mod.rs at tag v4.0.1 (read statically).
+// Omitted on purpose: hidden compatibility stubs (`upgrade`, `extension`/`ext`/
+// `module`/`mod`, which only redirect to the separate Surreal CLI launcher, whose
+// source is not public) and hidden flags (--no-banner, --key, --strict,
+// --durable-sessions, --planner-strategy, --allow/deny-experimental).
 
 const logLevels = ["none", "full", "error", "warn", "info", "debug", "trace"];
 const logFormats = ["text", "json"];
@@ -63,6 +68,21 @@ const selectionOptions: Fig.Option[] = [
   },
 ];
 
+// `sql` takes the same pair but both are optional and `--database` needs `--namespace`
+const optionalSelectionOptions: Fig.Option[] = [
+  {
+    name: ["--namespace", "--ns"],
+    description: "The selected namespace",
+    args: { name: "namespace" },
+  },
+  {
+    name: ["--database", "--db"],
+    description: "The selected database",
+    dependsOn: ["--namespace"],
+    args: { name: "database" },
+  },
+];
+
 const requiredSelectionOptions = selectionOptions.map((option): Fig.Option => ({
   ...option,
   isRequired: true,
@@ -104,9 +124,15 @@ const duration = (
   args: { name: "duration", default: fallback },
 });
 
-const filePathOption = (flag: string, description: string): Fig.Option => ({
+// `dependsOn`: the TLS files come as a set (clap `requires_all` group)
+const filePathOption = (
+  flag: string,
+  description: string,
+  dependsOn?: string[]
+): Fig.Option => ({
   name: `--${flag}`,
   description,
+  dependsOn,
   args: { name: "file", template: "filepaths" },
 });
 
@@ -351,23 +377,28 @@ const completionSpec: Fig.Spec = {
         ...rootUserOptions,
         filePathOption(
           "kvs-ca",
-          "Path to the CA file used when connecting to the remote KV store"
+          "Path to the CA file used when connecting to the remote KV store",
+          ["--kvs-crt", "--kvs-key"]
         ),
         filePathOption(
           "kvs-crt",
-          "Path to the certificate file used when connecting to the remote KV store"
+          "Path to the certificate file used when connecting to the remote KV store",
+          ["--kvs-ca", "--kvs-key"]
         ),
         filePathOption(
           "kvs-key",
-          "Path to the private key file used when connecting to the remote KV store"
+          "Path to the private key file used when connecting to the remote KV store",
+          ["--kvs-ca", "--kvs-crt"]
         ),
         filePathOption(
           "web-crt",
-          "Path to the certificate file for encrypted client connections"
+          "Path to the certificate file for encrypted client connections",
+          ["--web-key"]
         ),
         filePathOption(
           "web-key",
-          "Path to the private key file for encrypted client connections"
+          "Path to the private key file for encrypted client connections",
+          ["--web-crt"]
         ),
         {
           name: "--client-ip",
@@ -534,7 +565,7 @@ const completionSpec: Fig.Spec = {
           "ws://localhost:8000"
         ),
         ...authOptions,
-        ...selectionOptions,
+        ...optionalSelectionOptions,
         {
           name: "--pretty",
           description: "Whether database responses should be pretty printed",
