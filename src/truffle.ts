@@ -1,73 +1,159 @@
+// Truffle v5.11.5 (npm latest, published 2023-09-13; no later release or tag, 2026-11-20).
+// Source: command meta files in the @truffle/core 5.11.5 npm tarball
+// (lib/commands/*/meta.js, lib/commands/commands.js, lib/global-command-options.js),
+// read statically (not run). Dynamic `truffle preserve` recipe flags come from
+// the @truffle/preserve-to-{ipfs,filecoin,buckets} plugin manifests.
 const truffleCommands: Fig.Suggestion[] = [
+  { name: "build" },
+  { name: "call" },
+  { name: "compile" },
+  { name: "config" },
+  { name: "console" },
+  { name: "create" },
+  { name: "dashboard" },
+  { name: "db" },
+  { name: "debug" },
+  { name: "deploy" },
+  { name: "develop" },
+  { name: "exec" },
+  { name: "help" },
+  { name: "init" },
+  { name: "migrate" },
+  { name: "networks" },
+  { name: "obtain" },
+  { name: "opcode" },
+  { name: "preserve" },
+  { name: "run" },
+  { name: "test" },
+  { name: "unbox" },
+  { name: "version" },
+  { name: "watch" },
+];
+
+// Global options that individual commands opt into (lib/global-command-options.js)
+const networkOption: Fig.Option = {
+  name: "--network",
+  description:
+    "Specify the network to use. Network name must exist in the configuration",
+  args: {
+    name: "name",
+  },
+};
+
+const configOption: Fig.Option = {
+  name: "--config",
+  description:
+    "Specify configuration file to be used. The default is truffle-config.js",
+  args: {
+    name: "file",
+    template: "filepaths",
+  },
+};
+
+const fromOption: Fig.Option = {
+  name: "--from",
+  description:
+    "Specify the default account from which to make calls or send transactions",
+  args: {
+    name: "account",
+  },
+};
+
+const quietOption: Fig.Option = {
+  name: "--quiet",
+  description: "Suppress excess logging output",
+};
+
+const urlOption = (description: string): Fig.Option => ({
+  name: "--url",
+  description,
+  args: {
+    name: "provider_url",
+  },
+});
+
+const verboseRpcOption: Fig.Option = {
+  name: "--verbose-rpc",
+  description: "Log communication between Truffle and the Ethereum client",
+};
+
+const compileAllOption: Fig.Option = {
+  name: "--compile-all",
+  description:
+    "Compile all contracts instead of intelligently choosing which contracts need to be compiled",
+};
+
+const requireOptions: Fig.Option[] = [
   {
-    name: "build",
+    name: ["--require", "-r"],
+    description: "Preload console environment from required JavaScript file",
+    args: {
+      name: "file",
+      description:
+        "The default export must be an object with named keys that will be used to populate the console environment",
+      template: "filepaths",
+    },
   },
   {
-    name: "compile",
+    name: "--require-none",
+    description:
+      "Do not load any user-defined JavaScript into the console environment. This option takes precedence over --require, -r, and values provided for console.require in your project's truffle-config.js",
+  },
+];
+
+const migrateOptions: Fig.Option[] = [
+  {
+    name: "--reset",
+    description:
+      "Run all migrations from the beginning, instead of running from the last completed migration",
   },
   {
-    name: "config",
+    name: ["--f", "-f"],
+    description:
+      "Run contracts from a specific migration. The number refers to the prefix of the migration file",
+    args: {
+      name: "number",
+    },
   },
   {
-    name: "console",
+    name: "--to",
+    description:
+      "Run contracts to a specific migration. The number refers to the prefix of the migration file",
+    args: {
+      name: "number",
+    },
+  },
+  compileAllOption,
+  {
+    name: "--compile-none",
+    description: "Do not compile any contracts before migrating",
+  },
+  verboseRpcOption,
+  {
+    name: "--interactive",
+    description:
+      "Prompt to confirm that the user wants to proceed after the dry run",
   },
   {
-    name: "create",
+    name: "--dry-run",
+    description: "Only perform a test or 'dry run' migration",
   },
   {
-    name: "debug",
+    name: "--skip-dry-run",
+    description: "Do not run a test or 'dry run' migration",
   },
   {
-    name: "deploy",
+    name: "--describe-json",
+    description: "Adds extra verbosity to the status of an ongoing migration",
   },
   {
-    name: "develop",
+    name: "--save",
+    description: "Specify whether the migration will save on chain",
+    hidden: true,
   },
-  {
-    name: "exec",
-  },
-  {
-    name: "help",
-  },
-  {
-    name: "init",
-  },
-  {
-    name: "install",
-  },
-  {
-    name: "networks",
-  },
-  {
-    name: "obtain",
-  },
-  {
-    name: "opcode",
-  },
-  {
-    name: "publish",
-  },
-  {
-    name: "run",
-  },
-  {
-    name: "version",
-  },
-  {
-    name: "watch",
-  },
-  {
-    name: "preserve",
-  },
-  {
-    name: "migrate",
-  },
-  {
-    name: "unbox",
-  },
-  {
-    name: "test",
-  },
+  networkOption,
+  configOption,
+  quietOption,
 ];
 
 const completionSpec: Fig.Spec = {
@@ -80,8 +166,62 @@ const completionSpec: Fig.Spec = {
       description: "Execute build pipeline (if configuration present)",
     },
     {
+      name: "call",
+      description: "Call read-only contract function with arguments",
+      args: [
+        {
+          name: "contract",
+          description:
+            "The address (contract-address) or name (contract-name) of the contract to be called",
+        },
+        {
+          name: "function",
+          description:
+            "The name of the function to be called (function-name) or its full ABI signature, not selector (function-signature)",
+        },
+        {
+          name: "args",
+          description: "List of arguments to be passed to the function",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
+      options: [
+        {
+          name: ["--fetch-external", "-x"],
+          description:
+            "Allows Truffle to fetch verified source for the contract being called; useful only when the contract is supplied by address",
+        },
+        urlOption(
+          "Connects to a specified provider given via URL, ignoring networks in config"
+        ),
+        {
+          ...networkOption,
+          description:
+            "The network to connect to, as specified in the Truffle config",
+        },
+        {
+          name: ["--block-number", "-b"],
+          description: "Specifies the block for the function to be called in",
+          args: {
+            name: "block_number",
+            default: "latest",
+          },
+        },
+        fromOption,
+        configOption,
+      ],
+    },
+    {
       name: "compile",
       description: "Compile contract source files",
+      args: {
+        name: "source",
+        description: "Source files to compile",
+        template: "filepaths",
+        isOptional: true,
+        isVariadic: true,
+      },
       options: [
         {
           name: "--list",
@@ -91,6 +231,7 @@ const completionSpec: Fig.Spec = {
             name: "filter",
             description:
               "The filter parameter must be one of the following: prereleases, releases, latestRelease or docker",
+            isOptional: true,
             suggestions: [
               {
                 name: "prereleases",
@@ -113,9 +254,25 @@ const completionSpec: Fig.Spec = {
             "Compile all contracts instead of only the contracts changed since last compile",
         },
         {
-          name: "--quiet",
-          description: "Suppress all compilation output",
+          name: "--compiler",
+          description:
+            "Specify a single compiler to use (e.g. --compiler=solc). Specify none to skip compilation",
+          args: {
+            name: "compiler-name",
+          },
         },
+        {
+          name: "--save-intermediate",
+          description:
+            "Save the raw compiler results into the output file, overwriting any existing content",
+          hidden: true,
+          args: {
+            name: "output-file",
+            template: "filepaths",
+          },
+        },
+        configOption,
+        quietOption,
       ],
     },
     {
@@ -141,6 +298,10 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
+        {
+          name: "list",
+          description: "List all Truffle config values",
+        },
       ],
       options: [
         {
@@ -162,34 +323,20 @@ const completionSpec: Fig.Spec = {
         "Run a console with contract abstractions and commands available",
       options: [
         {
-          name: "--network",
-          description: "Specify the network to use",
-          args: {
-            name: "name",
-            description: "Network name must exist in the configuration",
-          },
+          ...urlOption(
+            "Creates a provider using the given URL and connects to the network. This can be used outside of a Truffle project"
+          ),
+          exclusiveOn: ["--network"],
         },
         {
-          name: "--verbose-rpc",
+          ...networkOption,
           description:
-            "Log communication between Truffle and the Ethereum client",
+            "The network to connect to, as specified in the Truffle config",
+          exclusiveOn: ["--url"],
         },
-        {
-          name: ["--require", "-r"],
-          description:
-            "Preload console environment from required JavaScript file",
-          args: {
-            name: "file",
-            description:
-              'The default export must be an object with named keys that will be used to populate the console environment. For example, if your JavaScript is module.exports = { desert: "yes please!" } then breakfast will be available in the console with the value "yes please!."',
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--require-none",
-          description:
-            "Do not load any user-defined JavaScript into the console environment. This option takes precedence over --require, -r, and values provided for console.require in your project's truffle-config.js",
-        },
+        verboseRpcOption,
+        ...requireOptions,
+        configOption,
       ],
     },
     {
@@ -199,7 +346,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "artifact_type",
           description:
-            "Create a new artifact where artifact_type is one of the following: contract, migration, test or all. The new artifact is created along with one(or all) of the followingfiles: `contracts/ArtifactName.sol`, `migrations/####_artifact_name.js` or`tests/artifact_name.js`. (required)",
+            "Create a new artifact where artifact_type is one of the following: contract, migration, test or all. The new artifact is created along with one (or all) of the following files: `contracts/ArtifactName.sol`, `migrations/####_artifact_name.js` or `tests/artifact_name.js`",
           suggestions: [
             {
               name: "contract",
@@ -217,7 +364,57 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "ArtifactName",
-          description: "Name of new artifact. (required)",
+          description: "Name of new artifact",
+        },
+      ],
+    },
+    {
+      name: "dashboard",
+      description:
+        "Start Truffle Dashboard to sign development transactions using browser wallet",
+      options: [
+        {
+          name: "--port",
+          description:
+            "Start the dashboard and RPC endpoint on a specific port",
+          args: {
+            name: "number",
+          },
+        },
+        {
+          name: "--host",
+          description:
+            "Start the dashboard and RPC endpoint on a specific host",
+          args: {
+            name: "string",
+          },
+        },
+        {
+          name: "--no-auto-open",
+          description: "Disable opening dashboard in default browser on start",
+        },
+        {
+          name: "--verbose",
+          description:
+            "Log debug information from the Dashboard server and message bus",
+        },
+      ],
+    },
+    {
+      name: "db",
+      description: "Database interface commands",
+      subcommands: [
+        {
+          name: "serve",
+          description: "Start Truffle's GraphQL UI playground",
+        },
+        {
+          name: "query",
+          description: "Query @truffle/db",
+          args: {
+            name: "query",
+            description: "GraphQL query to run",
+          },
         },
       ],
     },
@@ -228,109 +425,117 @@ const completionSpec: Fig.Spec = {
         name: "transaction_hash",
         isOptional: true,
         description:
-          "Transaction ID to use for debugging. You can omit this to simply start the debugger and then load a transaction later",
+          "Transaction ID to use for debugging. Mandatory if --fetch-external is passed",
       },
       options: [
         {
-          name: "--network",
-          description: "The network to connect to",
-          args: {
-            name: "network",
-          },
+          ...networkOption,
+          description:
+            "The network to connect to, as specified in the Truffle config",
+          exclusiveOn: ["--url"],
+        },
+        {
+          ...urlOption(
+            "Connects to a specified provider given via URL, ignoring networks in config. This option allows using the debugger outside of a Truffle project"
+          ),
+          exclusiveOn: ["--network"],
         },
         {
           name: ["--fetch-external", "-x"],
           description:
-            "Allows the debugger to download source from source verification services to debug transactions involving external contracts. When used, a transaction hash is required. May be abbreviated -x",
+            "Allows debugging of external contracts with verified sources. When used, a transaction hash is required",
+        },
+        {
+          name: "--no-ens",
+          description:
+            "Disables ENS reverse resolution when decoding addresses",
+          exclusiveOn: ["--registry"],
+        },
+        {
+          name: "--registry",
+          description:
+            "Allows setting a custom registry for performing reverse ENS resolution, or setting such a registry at all on lesser-known networks",
+          args: {
+            name: "registry_address",
+          },
+          exclusiveOn: ["--no-ens"],
         },
         {
           name: "--compile-tests",
           description:
-            "Allows the debugger to compile Solidity test contracts. Implies --compile-all",
+            "Allows debugging of Solidity test contracts from the test directory. Implies --compile-all",
           exclusiveOn: ["--compile-all", "--compile-none"],
         },
         {
           name: "--compile-all",
           description:
-            "Forces the debugger to recompile all contracts, even when it would otherwise judge doing so unnecessary. Compilation results are not saved",
+            "Forces the debugger to recompile all contracts even if it detects that it can use the artifacts",
           exclusiveOn: ["--compile-tests", "--compile-none"],
         },
         {
           name: "--compile-none",
           description:
-            "Forces the debugger not to recompile contracts, even when it would otherwise judge it necessary. This option is dangerous and may cause errors. Please only use this if you are sure a recompilation is not necessary",
+            "Forces the debugger to use artifacts even if it detects a problem. Dangerous; may cause errors",
           exclusiveOn: ["--compile-tests", "--compile-all"],
         },
+        configOption,
       ],
     },
     {
       name: "deploy",
       description: "Alias for migrate. See migrate for details",
+      options: migrateOptions,
     },
     {
       name: "develop",
-      description: "Open a console with a development blockchaine",
+      description: "Open a console with a local development blockchain",
       options: [
         {
           name: "--log",
           description:
-            "Start/Connect to a Truffle develop session and log all RPC activity. See the Log RPC Activity docs for more information about using this option",
-          args: {
-            name: "network",
-          },
+            "Start/Connect to a Truffle develop session and log all RPC activity. You will need to open a different Truffle develop or console session to interact via the repl",
         },
-        {
-          name: ["--require", "-r"],
-          description:
-            "Preload console environment from required JavaScript file",
-          args: {
-            name: "file",
-            description:
-              'The default export must be an object with named keys that will be used to populate the console environment. For example, if your JavaScript is module.exports = { desert: "yes please!" } then breakfast will be available in the console with the value "yes please!."',
-            template: "filepaths",
-          },
-        },
-        {
-          name: "--require-none",
-          description:
-            "Do not load any user-defined JavaScript into the console environment. This option takes precedence over --require, -r, and values provided for console.require in your project's truffle-config.js",
-        },
+        ...requireOptions,
+        configOption,
       ],
     },
     {
       name: "exec",
-      description: "Execute a JS module within the Truffle environment",
+      description: "Execute a JS module within this Truffle environment",
       args: {
         name: "script.js",
         description:
-          "JavaScript file to be executed. Can include path information if the script does not exist in the current directory. (required)",
+          "JavaScript file to be executed. Can include path information if the script does not exist in the current directory",
         template: "filepaths",
       },
       options: [
         {
-          name: "--network",
-          description:
-            "Specify the network to use, using artifacts specific to that network",
-          args: {
-            name: "name",
-            description: "Network name must exist in the configuration",
-          },
-        },
-        {
           name: "--compile",
           description: "Compile contracts before executing the script",
         },
+        networkOption,
+        configOption,
       ],
     },
     {
       name: "help",
       description:
-        "Display a list of all commands or information about a specific command",
-      args: {
-        name: "command",
-        description: "Display usage information about the specified command",
-        suggestions: truffleCommands,
-      },
+        "List all commands or provide information about a specific command",
+      args: [
+        {
+          name: "command",
+          description: "Display usage information about the specified command",
+          isOptional: true,
+          suggestions: truffleCommands,
+        },
+        {
+          name: "subCommand",
+          description:
+            "Display usage information about the specified subcommand (only db has subcommands)",
+          isOptional: true,
+          suggestions: [{ name: "serve" }, { name: "query" }],
+        },
+      ],
     },
     {
       name: "init",
@@ -339,26 +544,21 @@ const completionSpec: Fig.Spec = {
         {
           name: "--force",
           description:
-            "Initialize project regardless of the current working directory's state. Be careful, this could overwrite existing files that have name conflicts",
+            "Initialize project in the current directory regardless of its state. Be careful, this will potentially overwrite files that exist in the directory",
           isDangerous: true,
         },
       ],
     },
     {
       name: "install",
-      description: "Install a package from the Ethereum Package Registry",
-      args: [
-        {
-          name: "package_name",
-          description:
-            "Name of the package as listed in the Ethereum Package Registry. (required)",
-        },
-        {
-          name: "@version",
-          description:
-            "When specified, will install a specific version of the package, otherwise will install the latest version",
-        },
-      ],
+      description:
+        "Removed upstream: the ethpm integration was disabled and the command only prints a notice",
+      deprecated: true,
+    },
+    {
+      name: "migrate",
+      description: "Run migrations to deploy contracts",
+      options: migrateOptions,
     },
     {
       name: "networks",
@@ -384,6 +584,7 @@ const completionSpec: Fig.Spec = {
             name: "version",
           },
         },
+        quietOption,
       ],
     },
     {
@@ -392,38 +593,17 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "contract_name",
         description:
-          "Name of the contract to print opcodes for. Must be a contract name, not a file name. (required)",
+          "Name of the contract to print opcodes for. Must be a contract name, not a file name",
       },
-    },
-    {
-      name: "publish",
-      description: "Publish a package to the Ethereum Package Registry",
-    },
-    {
-      name: "run",
-      description: "Run a third-party plugin command",
-      args: {
-        name: "command",
-        description:
-          "Name of a command defined by an installed plugin. (required)",
-      },
-    },
-    {
-      name: "version",
-      description: "Show version number and exit",
-    },
-    {
-      name: "watch",
-      description:
-        "Watch filesystem for changes and rebuild the project automatically",
     },
     {
       name: "preserve",
       description:
         "Save data to decentralized storage platforms like IPFS and Filecoin",
       args: {
-        name: "path",
+        name: "target-path",
         template: "filepaths",
+        isVariadic: true,
       },
       options: [
         {
@@ -437,109 +617,35 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--ipfs",
-          description: "Preserve to IPFS",
+          description:
+            "Preserve to IPFS (needs the @truffle/preserve-to-ipfs plugin)",
         },
         {
           name: "--filecoin",
-          description: "Preserve to Filecoin",
+          description:
+            "Preserve to Filecoin (needs the @truffle/preserve-to-filecoin plugin)",
         },
         {
           name: "--buckets",
-          description: "Preserve to Textile Buckets",
+          description:
+            "Preserve to Textile Buckets (needs the @truffle/preserve-to-buckets plugin)",
         },
       ],
     },
     {
-      name: "migrate",
-      description: "Run migrations to deploy contracts",
-      options: [
-        {
-          name: "--reset",
-          description:
-            "Run all migrations from the beginning, instead of running from the last completed migration",
-        },
-        {
-          name: "--f",
-          description: "Run contracts from a specific migration",
-          args: {
-            name: "number",
-            description:
-              "The number refers to the prefix of the migration file",
-          },
-        },
-        {
-          name: "--to",
-          description: "Run contracts to a specific migration",
-          args: {
-            name: "number",
-            description:
-              "The number refers to the prefix of the migration file",
-          },
-        },
-        {
-          name: "--network",
-          description:
-            "Specify the network to use, saving artifacts specific to that network",
-          args: {
-            name: "name",
-            description: "Network name must exist in the configuration",
-          },
-        },
-        {
-          name: "--compile-all",
-          description:
-            "Compile all contracts instead of intelligently choosing which contracts need to be compiled",
-        },
-        {
-          name: "--verbose-rpc",
-          description:
-            "Log communication between Truffle and the Ethereum client",
-        },
-        {
-          name: "--dry-run",
-          description:
-            "Fork the network specified and only perform a test migration",
-        },
-        {
-          name: "--skip-dry-run",
-          description:
-            "Skip the test migration performed before the real migration",
-        },
-        {
-          name: "--interactive",
-          description:
-            "Prompt to confirm that the user wants to proceed after the dry run",
-        },
-        {
-          name: "--describe-json",
-          description: "Prints additional status messages",
-        },
-      ],
+      name: "publish",
+      description:
+        "Removed upstream: the ethpm integration was disabled and the command only prints a notice",
+      deprecated: true,
     },
     {
-      name: "unbox",
-      description: "Download a Truffle Box, a pre-built Truffle project",
-      args: [
-        {
-          name: "box_name",
-          description: "Name of the Truffle Box. (required)",
-        },
-        {
-          name: "path",
-          isOptional: true,
-          generators: {
-            template: "filepaths",
-          },
-        },
-      ],
-      options: [
-        {
-          name: "--force",
-          description:
-            "Unbox project in the current directory regardless of its state. Be careful, this will potentially overwrite files that exist in the directory",
-          isDangerous: true,
-        },
-      ],
+      name: "run",
+      description: "Run a third-party command",
+      args: {
+        name: "command",
+        description: "Name of the third-party command to run",
+        isOptional: true,
+      },
     },
     {
       name: "test",
@@ -549,32 +655,25 @@ const completionSpec: Fig.Spec = {
         description:
           "Name of the test file to be run. Can include path information if the file does not exist in the current directory",
         template: "filepaths",
+        isOptional: true,
+        isVariadic: true,
       },
       options: [
+        compileAllOption,
         {
-          name: "--compile-all",
-          description:
-            "Compile all contracts instead of intelligently choosing which contracts need to be compiled",
+          name: "--compile-none",
+          description: "Do not compile any contracts before running the tests",
         },
         {
           name: "--compile-all-debug",
           description:
-            "Like --compile-all, but compiles contracts in debug mode for extra information. Has no effect on Solidity <0.6.3",
+            "Compile all contracts and do so in debug mode for extra revert info. May cause errors on large contracts",
         },
         {
-          name: "--network",
-          description:
-            "Specify the network to use, using artifacts specific to that network",
-          args: {
-            name: "name",
-            description: "Network name must exist in the configuration",
-          },
+          name: "--migrate-none",
+          description: "Do not migrate any contracts before running the tests",
         },
-        {
-          name: "--verbose-rpc",
-          description:
-            "Log communication between Truffle and the Ethereum client",
-        },
+        verboseRpcOption,
         {
           name: "--show-events",
           description: "Log all contract events",
@@ -582,31 +681,102 @@ const completionSpec: Fig.Spec = {
         {
           name: "--debug",
           description:
-            "Provides global debug() function for in-test debugging. Usable with Javascript tests only; implies --compile-all",
+            "Provides global debug() function for in-test debugging. JS tests only; implies --compile-all",
         },
         {
           name: "--debug-global",
           description:
-            "Allows one to rename the debug() function to something else",
+            'Specify global identifier for debug function. Default: "debug"',
           args: {
             name: "identifier",
+            default: "debug",
           },
         },
         {
+          name: "--runner-output-only",
+          description: "Suppress all output except for test runner output",
+        },
+        {
           name: ["--bail", "-b"],
-          description:
-            "Bail after the first test failure. May be abbreviated -b",
+          description: "Bail after first test failure",
         },
         {
           name: ["--stacktrace", "-t"],
           description:
-            "Allows for mixed Javascript-and-Solidity stacktraces when a Truffle Contract transaction or deployment reverts. Does not apply to calls or gas estimates. Implies --compile-all. May be abbreviated -t. Warning: This option is still somewhat experimental",
+            "Allows for mixed JS/Solidity stacktraces when a Truffle Contract transaction or deployment reverts. Does not apply to calls or gas estimates. Implies --compile-all. Experimental",
         },
         {
           name: "--stacktrace-extra",
           description: "Shortcut for --stacktrace --compile-all-debug",
         },
+        {
+          name: ["--grep", "-g"],
+          description:
+            "Use mocha's grep option while running tests. This option only runs tests that match the supplied regex/string",
+          args: {
+            name: "regex",
+          },
+        },
+        {
+          name: ["--reporter", "-r"],
+          description:
+            "Specify the type of mocha reporter to use during testing",
+          args: {
+            name: "name",
+            default: "spec",
+          },
+        },
+        networkOption,
+        configOption,
       ],
+    },
+    {
+      name: "unbox",
+      description: "Download a Truffle Box, a pre-built Truffle project",
+      args: [
+        {
+          name: "box_name",
+          description:
+            "Name of the truffle box. If no box_name is specified, a default truffle box will be downloaded",
+          isOptional: true,
+        },
+        {
+          name: "destination",
+          description:
+            "Path to the directory in which you would like to unbox the project files. If destination is not provided, this defaults to the current directory",
+          isOptional: true,
+          template: "folders",
+        },
+      ],
+      options: [
+        {
+          name: "--force",
+          description:
+            "Unbox project in the current directory regardless of its state. Be careful, this will potentially overwrite files that exist in the directory",
+          isDangerous: true,
+        },
+        quietOption,
+      ],
+    },
+    {
+      name: "version",
+      description: "Show version number and exit",
+    },
+    {
+      name: "watch",
+      description:
+        "Watch filesystem for changes and rebuild the project automatically",
+    },
+  ],
+  options: [
+    {
+      name: "--help",
+      description: "Show help for Truffle or for the given command",
+      isPersistent: true,
+    },
+    {
+      name: ["--version", "-v"],
+      description: "Show version number and exit",
     },
   ],
 };
