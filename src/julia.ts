@@ -1,4 +1,7 @@
-// Julia v1.13.4 (gh release view -R JuliaLang/julia, 2026-11-19). Source: src/jloptions.c at v1.13.4 (opts, opts_hidden, longopts)
+// Julia v1.13.4 (latest stable: git tag v1.13.4 + Homebrew formula, checked 2026-11-20). Source: static read of JuliaLang/julia at v1.13.4:
+// src/jloptions.c (usage text, opts_hidden, longopts + parser cases), doc/src/manual/command-line-interface.md, doc/man/julia.1,
+// doc/src/manual/distributed-computing.md; binary not run. Added --trace-dispatch plus the undocumented hidden flags
+// --worker, --bind-to, --rr-detach, --lisp.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const yesNo: Fig.Suggestion[] = [{ name: "yes" }, { name: "no" }];
@@ -455,6 +458,16 @@ const completionSpec: Fig.Spec = {
       dependsOn: ["--trace-compile"],
     },
     {
+      name: "--trace-dispatch",
+      description:
+        "Print precompile statements for methods dispatched during execution or save to stderr or a path",
+      args: {
+        name: "stderr|name",
+        suggestions: [{ name: "stderr" }],
+        template: "filepaths",
+      },
+    },
+    {
       name: "--task-metrics",
       description: "Enable collection of per-task timing data",
       args: { suggestions: yesNo },
@@ -506,6 +519,32 @@ const completionSpec: Fig.Spec = {
     {
       name: "--gc-sweep-always-full",
       description: "Make the GC always do a full sweep of the heap",
+    },
+    // internal flags that are in longopts but not in the help output
+    {
+      name: "--worker",
+      description:
+        "Start as a Distributed worker, optionally with the cluster cookie (read from stdin if omitted)",
+      hidden: true,
+      requiresSeparator: true,
+      args: { name: "cookie", isOptional: true },
+    },
+    {
+      name: "--bind-to",
+      description:
+        "Address (and optional port) a Distributed worker listens on",
+      hidden: true,
+      args: { name: "bind_addr[:port]" },
+    },
+    {
+      name: "--rr-detach",
+      description: "Detach from the rr recorder if running under rr",
+      hidden: true,
+    },
+    {
+      name: "--lisp",
+      description: "Start the femtolisp REPL (must be the first argument)",
+      hidden: true,
     },
   ],
   args: {
