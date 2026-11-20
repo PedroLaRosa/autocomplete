@@ -1,5 +1,7 @@
-// adb 1.0.41, Android SDK Platform-Tools 37.0.1 (developer.android.com release notes, 2026-11-19).
-// Source: AOSP packages/modules/adb client/commandline.cpp, client/adb_install.cpp and docs/user/adb.1.md
+// adb 1.0.41, Android SDK Platform-Tools 37.0.1 (Homebrew android-platform-tools cask, 2026-11-20).
+// Source: AOSP packages/modules/adb client/commandline.cpp, client/adb_install.cpp, docs/user/adb.1.md read statically
+// at the 26Q2-release commit 9084198 (pinned by nmeum/android-tools 37.0.0p1) and at GrapheneOS mirror tag 2026111800
+// (client sources identical). Not run: the platform-tools 37.0.1 binary was not available, so any change made only in 37.0.1 is unchecked.
 const installOptions: Fig.Option[] = [
   {
     name: "-l",
@@ -184,6 +186,19 @@ const reverseConnectionSuggestions: Fig.Suggestion[] = [
   },
 ];
 
+const protoFormatOptions = (exclusiveWith: string[] = []): Fig.Option[] => [
+  {
+    name: "--proto-text",
+    description: "Output as text protobuf",
+    exclusiveOn: [...exclusiveWith, "--proto-binary"],
+  },
+  {
+    name: "--proto-binary",
+    description: "Output as binary protobuf",
+    exclusiveOn: [...exclusiveWith, "--proto-text"],
+  },
+];
+
 const completionSpec: Fig.Spec = {
   name: "adb",
   description: "Android Debug Bridge",
@@ -246,6 +261,7 @@ const completionSpec: Fig.Spec = {
       description: "Sideload the given full OTA package",
       args: {
         name: "OTAPACKAGE",
+        template: "filepaths",
       },
     },
     {
@@ -443,7 +459,8 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: "-k",
-          description: "Keep the data and cache directories",
+          description:
+            "Keep the data and cache directories (the adb client currently refuses this; use `adb shell cmd package uninstall -k`)",
         },
       ],
       args: {
@@ -452,7 +469,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "bugreport",
-      description: "Write bugreport to given PATH [default=bugreport.zip];",
+      description:
+        "Write bugreport to given PATH [default=bugreport.zip]; if PATH is a directory, the bug report is saved in that directory",
       args: {
         name: "PATH",
         isOptional: true,
@@ -571,6 +589,16 @@ const completionSpec: Fig.Spec = {
         {
           name: "services",
           description: "List all discovered services",
+        },
+        {
+          name: "track-services",
+          description: "Stream discovered services",
+          options: protoFormatOptions(),
+        },
+        {
+          name: "list-known-hosts",
+          description: "Show ADB Wi-Fi paired devices",
+          options: protoFormatOptions(),
         },
       ],
     },
@@ -762,7 +790,67 @@ const completionSpec: Fig.Spec = {
       name: "host-features",
       description: "List features supported by adb server",
     },
-    // ponytail: undocumented but accepted commands; internal plumbing (abb, raw, inc-server, server, ...) left out
+    // ponytail: undocumented but accepted commands; internal plumbing (abb, raw, inc-server, server, ls, backup, restore, ...) left out
+    {
+      name: "transport-id",
+      description: "Print the transport id of the selected device",
+      hidden: true,
+    },
+    {
+      name: "reboot-bootloader",
+      description:
+        "Reboot the device into the bootloader (same as reboot bootloader)",
+      hidden: true,
+    },
+    {
+      name: "reboot-fastboot",
+      description: "Reboot the device into userspace fastboot (fastbootd)",
+      hidden: true,
+    },
+    {
+      name: "rescue",
+      description: "Interact with a device in rescue mode",
+      hidden: true,
+      subcommands: [
+        {
+          name: "getprop",
+          description: "Print system properties of the device in rescue mode",
+          args: {
+            name: "PROPERTY",
+            isOptional: true,
+          },
+        },
+        {
+          name: "install",
+          description: "Install an OTA package on the device in rescue mode",
+          args: {
+            name: "OTAPACKAGE",
+            template: "filepaths",
+          },
+        },
+        {
+          name: "wipe",
+          description: "Wipe the device in rescue mode",
+          args: {
+            name: "TARGET",
+            suggestions: ["userdata"],
+          },
+        },
+      ],
+    },
+    {
+      name: "track-jdwp",
+      description:
+        "Continuously list pids of processes hosting a JDWP transport as they change",
+      hidden: true,
+    },
+    {
+      name: "track-app",
+      description:
+        "Continuously list debuggable and profileable app processes as they change",
+      hidden: true,
+      options: protoFormatOptions(),
+    },
     {
       name: "exec-out",
       description:
@@ -785,24 +873,15 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "track-devices",
-      description: "Continuously list connected devices as they change",
-      hidden: true,
+      description:
+        "Same as the devices command, but does not return; it sends updates when the list of devices changes",
       options: [
         {
           name: "-l",
-          description: "Long output",
+          description: "Use legacy long output",
           exclusiveOn: ["--proto-text", "--proto-binary"],
         },
-        {
-          name: "--proto-text",
-          description: "Output as text protobuf",
-          exclusiveOn: ["-l", "--proto-binary"],
-        },
-        {
-          name: "--proto-binary",
-          description: "Output as binary protobuf",
-          exclusiveOn: ["-l", "--proto-text"],
-        },
+        ...protoFormatOptions(["-l"]),
       ],
     },
     {
