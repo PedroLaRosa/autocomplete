@@ -1,7 +1,70 @@
+// curl v8.23.0 (git tag curl-8_23_0 of 2026-10-14, latest stable; Homebrew formula agrees; 8.24.0 is only rc, 2026-11-20).
+// Source: read statically, binary not run: docs/cmdline-opts/*.md front matter (long/short names, args,
+// help text, Multi, Category) and the alias table in src/tool_getparam.c (arg types, deprecated no-ops, hidden aliases).
+// Not covered: `--no-<name>` negations of boolean options and the `--expand-<name>` prefix forms.
+
+const certTypes = ["DER", "PEM", "ENG", "PROV", "P12"];
+
+const keyTypes = ["DER", "PEM", "ENG"];
+
+const requestMethods = [
+  "GET",
+  "HEAD",
+  "POST",
+  "PUT",
+  "DELETE",
+  "CONNECT",
+  "OPTIONS",
+  "TRACE",
+  "PATCH",
+];
+
+const headerSuggestions = [
+  "Content-Type: application/json",
+  "Content-Type: application/x-www-form-urlencoded",
+];
+
+// `--help` accepts "all", "category", a help category or an option name
+const helpSubjects = [
+  "all",
+  "category",
+  "auth",
+  "connection",
+  "curl",
+  "deprecated",
+  "dns",
+  "file",
+  "ftp",
+  "global",
+  "http",
+  "imap",
+  "important",
+  "ldap",
+  "mqtt",
+  "output",
+  "pop3",
+  "post",
+  "proxy",
+  "scp",
+  "sftp",
+  "smtp",
+  "ssh",
+  "telnet",
+  "tftp",
+  "timeout",
+  "tls",
+  "upload",
+  "verbose",
+];
+
+const fileArg = (name: string): Fig.Arg => ({ name, template: "filepaths" });
+
+const folderArg = (name: string): Fig.Arg => ({ name, template: "folders" });
+
 const completionSpec: Fig.Spec = {
   name: "curl",
   description: "Transfer a URL",
-  args: { name: "URL", template: "history" },
+  args: { name: "URL", template: "history", isVariadic: true },
   options: [
     {
       name: ["-a", "--append"],
@@ -12,15 +75,15 @@ const completionSpec: Fig.Spec = {
       description: "Client certificate file and password",
       args: {
         name: "certificate[:password]",
-        generators: {
-          getQueryTerm: ":",
-        },
+        template: "filepaths",
+        generators: { getQueryTerm: ":" },
       },
     },
     {
       name: ["-K", "--config"],
       description: "Read config from a file",
-      args: { name: "file", template: "filepaths" },
+      args: fileArg("file"),
+      isRepeatable: true,
     },
     {
       name: ["-C", "--continue-at"],
@@ -29,17 +92,18 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-b", "--cookie"],
-      description: "Send cookies from string/file",
-      args: { name: "data or filename", template: "filepaths" },
+      description: "Send cookies from string/load from file",
+      args: fileArg("data|filename"),
+      isRepeatable: true,
     },
     {
       name: ["-c", "--cookie-jar"],
-      description: "Write cookies to <filename> after operation",
-      args: { name: "filename", template: "filepaths" },
+      description: "Save cookies to <filename> after operation",
+      args: fileArg("filename"),
     },
     {
       name: ["-d", "--data"],
-      description: "HTTP POST data",
+      description: "Post data",
       insertValue: "-d '{cursor}'",
       args: { name: "data" },
       isRepeatable: true,
@@ -48,21 +112,21 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-D", "--dump-header"],
       description: "Write the received headers to <filename>",
-      args: { name: "filename", template: "filepaths" },
+      args: fileArg("filename"),
     },
     {
       name: ["-f", "--fail"],
-      description: "Fail silently (no output at all) on HTTP errors",
+      description: "Fail fast with no output on HTTP errors",
     },
     {
       name: ["-F", "--form"],
       description: "Specify multipart MIME data",
-      args: { name: "content" },
+      args: { name: "name=content" },
       isRepeatable: true,
     },
     {
       name: ["-P", "--ftp-port"],
-      description: "Use PORT instead of PASV",
+      description: "Send PORT instead of PASV",
       args: { name: "address" },
     },
     {
@@ -71,29 +135,24 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-g", "--globoff"],
-      description: "Disable URL sequences and ranges using {} and []",
+      description: "Disable URL globbing with {} and []",
     },
     { name: ["-I", "--head"], description: "Show document info only" },
     {
       name: ["-H", "--header"],
       description: "Pass custom header(s) to server",
-      args: {
-        name: "header/file",
-        suggestions: [
-          { name: "Content-Type: application/json" },
-          { name: "Content-Type: application/x-www-form-urlencoded" },
-        ],
-      },
+      args: { name: "header/@file", suggestions: headerSuggestions },
+      isRepeatable: true,
     },
-    { name: ["-h", "--help"], description: "This help text" },
-    { name: ["-0", "--http1.0"], description: "Use HTTP 1.0" },
     {
-      name: ["-i", "--include"],
-      description: "Include protocol response headers in the output",
+      name: ["-h", "--help"],
+      description: "Get help for commands",
+      args: { name: "subject", isOptional: true, suggestions: helpSubjects },
     },
+    { name: ["-0", "--http1.0"], description: "Use HTTP/1.0" },
     {
       name: ["-k", "--insecure"],
-      description: "Allow insecure server connections when using SSL",
+      description: "Allow insecure server connections",
     },
     { name: ["-4", "--ipv4"], description: "Resolve names to IPv4 addresses" },
     { name: ["-6", "--ipv6"], description: "Resolve names to IPv6 addresses" },
@@ -106,16 +165,17 @@ const completionSpec: Fig.Spec = {
     { name: ["-M", "--manual"], description: "Display the full manual" },
     {
       name: ["-m", "--max-time"],
-      description: "Maximum time allowed for the transfer",
+      description: "Maximum time allowed for transfer",
       args: { name: "seconds" },
     },
     {
       name: ["-n", "--netrc"],
-      description: "Must read .netrc for user name and password",
+      description: "Must read .netrc for username and password",
     },
     {
       name: ["-:", "--next"],
-      description: "Make next URL use its separate set of options",
+      description: "Make next URL use separate options",
+      isRepeatable: true,
     },
     {
       name: ["-N", "--no-buffer"],
@@ -124,7 +184,12 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-o", "--output"],
       description: "Write to file instead of stdout",
-      args: { name: "file", template: "filepaths" },
+      args: fileArg("file"),
+      isRepeatable: true,
+    },
+    {
+      name: ["-Z", "--parallel"],
+      description: "Perform transfers in parallel",
     },
     {
       name: ["-#", "--progress-bar"],
@@ -132,7 +197,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-x", "--proxy"],
-      description: "[protocol://]host[:port] Use this proxy",
+      description: "Use this proxy",
+      args: { name: "[protocol://]host[:port]" },
     },
     {
       name: ["-U", "--proxy-user"],
@@ -141,11 +207,13 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-p", "--proxytunnel"],
-      description: "Operate through an HTTP proxy tunnel (using CONNECT)",
+      description: "HTTP proxy tunnel (using CONNECT)",
     },
     {
       name: ["-Q", "--quote"],
       description: "Send command(s) to server before transfer",
+      args: { name: "command" },
+      isRepeatable: true,
     },
     {
       name: ["-r", "--range"],
@@ -163,33 +231,25 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-O", "--remote-name"],
-      description: "Write output to a file named as the remote file",
+      description: "Write output to file named as remote file",
+      isRepeatable: true,
     },
     {
       name: ["-R", "--remote-time"],
-      description: "Set the remote file's time on the local output",
+      description: "Set remote file's time on local output",
     },
     {
       name: ["-X", "--request"],
-      description: "Specify request command to use",
-      args: {
-        name: "command",
-        suggestions: [
-          { name: "GET" },
-          { name: "HEAD" },
-          { name: "POST" },
-          { name: "PUT" },
-          { name: "DELETE" },
-          { name: "CONNECT" },
-          { name: "OPTIONS" },
-          { name: "TRACE" },
-          { name: "PATCH" },
-        ],
-      },
+      description: "Specify request method to use",
+      args: { name: "method", suggestions: requestMethods },
     },
     {
       name: ["-S", "--show-error"],
       description: "Show error even when -s is used",
+    },
+    {
+      name: ["-i", "--show-headers"],
+      description: "Show response headers in output",
     },
     { name: ["-s", "--silent"], description: "Silent mode" },
     {
@@ -202,23 +262,25 @@ const completionSpec: Fig.Spec = {
       description: "Trigger 'speed-limit' abort after this time",
       args: { name: "seconds" },
     },
-    { name: ["-2", "--sslv2"], description: "Use SSLv2" },
-    { name: ["-3", "--sslv3"], description: "Use SSLv3" },
+    { name: ["-2", "--sslv2"], description: "SSLv2", deprecated: true },
+    { name: ["-3", "--sslv3"], description: "SSLv3", deprecated: true },
     {
       name: ["-t", "--telnet-option"],
       description: "Set telnet option",
-      args: { name: "val" },
+      args: { name: "opt=val" },
+      isRepeatable: true,
     },
     {
       name: ["-z", "--time-cond"],
       description: "Transfer based on a time condition",
       args: { name: "time" },
     },
-    { name: ["-1", "--tlsv1"], description: "Use TLSv1.0 or greater" },
+    { name: ["-1", "--tlsv1"], description: "TLSv1.0 or greater" },
     {
       name: ["-T", "--upload-file"],
       description: "Transfer local FILE to destination",
-      args: { name: "file", template: "filepaths" },
+      args: fileArg("file"),
+      isRepeatable: true,
     },
     { name: ["-B", "--use-ascii"], description: "Use ASCII/text transfer" },
     {
@@ -238,7 +300,7 @@ const completionSpec: Fig.Spec = {
     { name: ["-V", "--version"], description: "Show version number and quit" },
     {
       name: ["-w", "--write-out"],
-      description: "Use output FORMAT after completion",
+      description: "Output FORMAT after completion",
       args: { name: "format" },
     },
     {
@@ -248,91 +310,110 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--alt-svc",
-      description: "Name> Enable alt-svc with this cache file",
-      args: { name: "file", template: "filepaths" },
+      description: "Enable alt-svc with this cache file",
+      args: fileArg("filename"),
+      isRepeatable: true,
     },
     { name: "--anyauth", description: "Pick any authentication method" },
-    { name: "--basic", description: "Use HTTP Basic Authentication" },
+    {
+      name: "--aws-sigv4",
+      description: "AWS V4 signature auth",
+      args: { name: "provider1[:prvdr2[:reg[:srv]]]" },
+    },
+    { name: "--basic", description: "HTTP Basic Authentication" },
+    { name: "--ca-native", description: "Load CA certs from the OS" },
     {
       name: "--cacert",
       description: "CA certificate to verify peer against",
-      args: { name: "file", template: "filepaths" },
+      args: fileArg("file"),
     },
     {
       name: "--capath",
       description: "CA directory to verify peer against",
-      args: { name: "dir", template: "folders" },
+      args: folderArg("dir"),
     },
     {
       name: "--cert-status",
-      description: "Verify the status of the server certificate",
+      description: "Verify server cert status OCSP-staple",
     },
     {
       name: "--cert-type",
-      description: "Certificate file type",
-      args: {
-        name: "type",
-        suggestions: [{ name: "DER" }, { name: "PEM" }, { name: "ENG" }],
-      },
+      description: "Certificate type (DER/PEM/ENG/PROV/P12)",
+      args: { name: "type", suggestions: certTypes },
     },
     {
       name: "--ciphers",
-      description: "Of ciphers> SSL ciphers to use",
+      description: "TLS 1.2 (1.1, 1.0) ciphers to use",
       args: { name: "list" },
     },
     { name: "--compressed", description: "Request compressed response" },
     { name: "--compressed-ssh", description: "Enable SSH compression" },
     {
       name: "--connect-timeout",
-      description: "Maximum time allowed for connection",
+      description: "Maximum time allowed to connect",
       args: { name: "seconds" },
     },
     {
       name: "--connect-to",
-      description: "Connect to host",
+      description: "Connect to host2 instead of host1",
       args: { name: "HOST1:PORT1:HOST2:PORT2" },
+      isRepeatable: true,
     },
     {
       name: "--create-dirs",
       description: "Create necessary local directory hierarchy",
     },
+    {
+      name: "--create-file-mode",
+      description: "File mode for created files",
+      args: { name: "mode" },
+    },
     { name: "--crlf", description: "Convert LF to CRLF in upload" },
     {
       name: "--crlfile",
-      description: "Get a CRL list in PEM format from the given file",
-      args: { name: "file", template: "filepaths" },
+      description: "Certificate Revocation list",
+      args: fileArg("file"),
+    },
+    {
+      name: "--curves",
+      description: "TLS key exchange algorithms (EC) to request",
+      args: { name: "list" },
     },
     {
       name: "--data-ascii",
       description: "HTTP POST ASCII data",
       args: { name: "data" },
+      isRepeatable: true,
     },
     {
       name: "--data-binary",
       description: "HTTP POST binary data",
       args: { name: "data" },
+      isRepeatable: true,
     },
     {
       name: "--data-raw",
       description: "HTTP POST data, '@' allowed",
       args: { name: "data" },
+      isRepeatable: true,
     },
     {
       name: "--data-urlencode",
-      description: "HTTP POST data url encoded",
+      description: "HTTP POST data URL encoded",
       args: { name: "data" },
+      isRepeatable: true,
     },
     {
       name: "--delegation",
       description: "GSS-API delegation permission",
-      args: { name: "LEVEL" },
+      args: { name: "LEVEL", suggestions: ["none", "policy", "always"] },
     },
-    { name: "--digest", description: "Use HTTP Digest Authentication" },
+    { name: "--digest", description: "HTTP Digest Authentication" },
     { name: "--disable-eprt", description: "Inhibit using EPRT or LPRT" },
     { name: "--disable-epsv", description: "Inhibit using EPSV" },
     {
       name: "--disallow-username-in-url",
-      description: "Disallow username in url",
+      description: "Disallow username in URL",
     },
     {
       name: "--dns-interface",
@@ -355,14 +436,35 @@ const completionSpec: Fig.Spec = {
       args: { name: "addresses" },
     },
     {
+      name: "--doh-cert-status",
+      description: "Verify DoH server cert status OCSP-staple",
+    },
+    {
+      name: "--doh-insecure",
+      description: "Allow insecure DoH server connections",
+    },
+    {
       name: "--doh-url",
-      description: "Resolve host names over DOH",
+      description: "Resolve hostnames over DoH",
       args: { name: "URL" },
+    },
+    {
+      name: "--dump-ca-embed",
+      description: "Write the embedded CA bundle to standard output",
+    },
+    {
+      name: "--ech",
+      description: "Configure ECH",
+      args: {
+        name: "config",
+        suggestions: ["false", "grease", "true", "hard"],
+      },
     },
     {
       name: "--egd-file",
       description: "EGD socket path for random data",
-      args: { name: "file", template: "filepaths" },
+      args: fileArg("file"),
+      deprecated: true,
     },
     {
       name: "--engine",
@@ -371,34 +473,39 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--etag-compare",
-      description:
-        "Make a conditional HTTP request for the ETag read from the given file",
-      args: { name: "file" },
+      description: "Load ETag from file",
+      args: fileArg("file"),
     },
     {
       name: "--etag-save",
-      description: "Save an HTTP ETag to the specified file",
-      args: { name: "file" },
+      description: "Parse incoming ETag and save to a file",
+      args: fileArg("file"),
     },
     {
       name: "--expect100-timeout",
       description: "How long to wait for 100-continue",
       args: { name: "seconds" },
     },
-    {
-      name: "--fail-early",
-      description: "Fail on first transfer error, do not continue",
-    },
+    { name: "--fail-early", description: "Fail on first transfer error" },
     {
       name: "--fail-with-body",
-      description:
-        "On HTTP errors, return an error and also output any HTML response",
+      description: "Fail on HTTP errors but save the body",
     },
-    { name: "--false-start", description: "Enable TLS False Start" },
+    {
+      name: "--false-start",
+      description: "Enable TLS False Start",
+      deprecated: true,
+    },
+    { name: "--follow", description: "Follow redirects per spec" },
+    {
+      name: "--form-escape",
+      description: "Escape form fields using backslash",
+    },
     {
       name: "--form-string",
       description: "Specify multipart MIME data",
-      args: { name: "string" },
+      args: { name: "name=string" },
+      isRepeatable: true,
     },
     {
       name: "--ftp-account",
@@ -417,29 +524,40 @@ const completionSpec: Fig.Spec = {
     {
       name: "--ftp-method",
       description: "Control CWD usage",
-      args: { name: "method" },
+      args: { name: "method", suggestions: ["multicwd", "nocwd", "singlecwd"] },
     },
-    { name: "--ftp-pasv", description: "Use PASV/EPSV instead of PORT" },
+    { name: "--ftp-pasv", description: "Send PASV/EPSV instead of PORT" },
     { name: "--ftp-pret", description: "Send PRET before PASV" },
     { name: "--ftp-skip-pasv-ip", description: "Skip the IP address for PASV" },
+    {
+      name: "--ftp-ssl",
+      description: "Try SSL/TLS (same as --ssl)",
+      hidden: true,
+    },
     { name: "--ftp-ssl-ccc", description: "Send CCC after authenticating" },
     {
       name: "--ftp-ssl-ccc-mode",
       description: "Set CCC mode",
-      args: {
-        name: "mode",
-        suggestions: [{ name: "active" }, { name: "passive" }],
-      },
+      args: { name: "active/passive", suggestions: ["active", "passive"] },
     },
     {
       name: "--ftp-ssl-control",
-      description: "Require SSL/TLS for FTP login, clear for transfer",
+      description: "Require TLS for login, clear for transfer",
+    },
+    {
+      name: "--ftp-ssl-reqd",
+      description: "Require SSL/TLS (same as --ssl-reqd)",
+      hidden: true,
     },
     {
       name: "--happy-eyeballs-timeout-ms",
-      description:
-        "How long to wait in milliseconds for IPv6 before trying IPv4",
-      args: { name: "milliseconds" },
+      description: "Time for IPv6 before IPv4",
+      args: { name: "ms" },
+    },
+    {
+      name: "--haproxy-clientip",
+      description: "Set address in HAProxy PROXY",
+      args: { name: "ip" },
     },
     {
       name: "--haproxy-protocol",
@@ -447,24 +565,119 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--hostpubmd5",
-      description: "Acceptable MD5 hash of the host public key",
+      description: "Acceptable MD5 hash of host public key",
       args: { name: "md5" },
     },
-    { name: "--http0.9", description: "Allow HTTP 0.9 responses" },
-    { name: "--http1.1", description: "Use HTTP 1.1" },
-    { name: "--http2", description: "Use HTTP 2" },
+    {
+      name: "--hostpubsha256",
+      description: "Acceptable SHA256 hash of host public key",
+      args: { name: "sha256" },
+    },
+    {
+      name: "--hsts",
+      description: "Enable HSTS with this cache file",
+      args: fileArg("filename"),
+      isRepeatable: true,
+    },
+    { name: "--http0.9", description: "Allow HTTP/0.9 responses" },
+    { name: "--http1.1", description: "Use HTTP/1.1" },
+    { name: "--http2", description: "Use HTTP/2" },
     {
       name: "--http2-prior-knowledge",
-      description: "Use HTTP 2 without HTTP/1.1 Upgrade",
+      description: "Use HTTP/2 without HTTP/1.1 Upgrade",
+    },
+    { name: "--http3", description: "Use HTTP/3" },
+    { name: "--http3-only", description: "Use HTTP/3 only" },
+    {
+      name: "--httpsig-algo",
+      description: "Algorithm for HTTP Message Signatures (experimental)",
+      args: { name: "algorithm", suggestions: ["ed25519", "hmac-sha256"] },
+    },
+    {
+      name: "--httpsig-headers",
+      description:
+        "Components to sign for HTTP Message Signatures (experimental)",
+      args: { name: "components" },
+    },
+    {
+      name: "--httpsig-key",
+      description: "Key for HTTP Message Signatures (experimental)",
+      args: fileArg("key/file"),
+    },
+    {
+      name: "--httpsig-keyid",
+      description: "Key identifier for HTTP Message Signatures (experimental)",
+      args: { name: "id" },
     },
     {
       name: "--ignore-content-length",
       description: "Ignore the size of the remote resource",
     },
     {
+      name: "--include",
+      description: "Include protocol response headers in the output",
+      hidden: true,
+    },
+    {
       name: "--interface",
-      description: "Use network INTERFACE (or address)",
+      description: "Use network interface",
       args: { name: "name" },
+    },
+    {
+      name: "--ip-tos",
+      description: "Set IP Type of Service or Traffic Class",
+      args: {
+        name: "string",
+        suggestions: [
+          "CS0",
+          "CS1",
+          "CS2",
+          "CS3",
+          "CS4",
+          "CS5",
+          "CS6",
+          "CS7",
+          "AF11",
+          "AF12",
+          "AF13",
+          "AF21",
+          "AF22",
+          "AF23",
+          "AF31",
+          "AF32",
+          "AF33",
+          "AF41",
+          "AF42",
+          "AF43",
+          "EF",
+          "VOICE-ADMIT",
+          "ECT1",
+          "ECT0",
+          "CE",
+          "LE",
+          "LOWCOST",
+          "LOWDELAY",
+          "THROUGHPUT",
+          "RELIABILITY",
+          "MINCOST",
+        ],
+      },
+    },
+    {
+      name: "--ipfs-gateway",
+      description: "Gateway for IPFS",
+      args: { name: "URL" },
+    },
+    {
+      name: "--json",
+      description: "HTTP POST JSON",
+      args: { name: "data" },
+      isRepeatable: true,
+    },
+    {
+      name: "--keepalive-cnt",
+      description: "Maximum number of keepalive probes",
+      args: { name: "integer" },
     },
     {
       name: "--keepalive-time",
@@ -473,26 +686,29 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--key",
-      description: "Private key file name",
-      args: { name: "key" },
+      description: "Private key filename",
+      args: fileArg("key"),
     },
     {
       name: "--key-type",
-      description: "Private key file type",
-      args: {
-        name: "type",
-        suggestions: [{ name: "DER" }, { name: "PEM" }, { name: "ENG" }],
-      },
+      description: "Private key file type (DER/PEM/ENG)",
+      args: { name: "type", suggestions: keyTypes },
+    },
+    {
+      name: "--knownhosts",
+      description: "Specify knownhosts path",
+      args: fileArg("file"),
     },
     {
       name: "--krb",
       description: "Enable Kerberos with security <level>",
       args: { name: "level" },
+      deprecated: true,
     },
     {
       name: "--libcurl",
-      description: "Dump libcurl equivalent code of this command line",
-      args: { name: "file", template: "filepaths" },
+      description: "Generate libcurl code for this command line",
+      args: fileArg("file"),
     },
     {
       name: "--limit-rate",
@@ -501,12 +717,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--local-port",
-      description: "Force use of RANGE for local port numbers",
-      args: { name: "num/range" },
+      description: "Use a local port number within RANGE",
+      args: { name: "range" },
     },
     {
       name: "--location-trusted",
-      description: "Like --location, and send auth to other hosts",
+      description: "As --location, but send secrets to other hosts",
     },
     {
       name: "--login-options",
@@ -527,6 +743,11 @@ const completionSpec: Fig.Spec = {
       name: "--mail-rcpt",
       description: "Mail to this address",
       args: { name: "address" },
+      isRepeatable: true,
+    },
+    {
+      name: "--mail-rcpt-allowfails",
+      description: "Allow RCPT TO command to fail",
     },
     {
       name: "--max-filesize",
@@ -541,7 +762,9 @@ const completionSpec: Fig.Spec = {
     {
       name: "--metalink",
       description: "Process given URLs as metalink XML file",
+      deprecated: true,
     },
+    { name: "--mptcp", description: "Enable Multipath TCP" },
     {
       name: "--negotiate",
       description: "Use HTTP Negotiate (SPNEGO) authentication",
@@ -549,25 +772,38 @@ const completionSpec: Fig.Spec = {
     {
       name: "--netrc-file",
       description: "Specify FILE for netrc",
-      args: { name: "filename", template: "filepaths" },
+      args: fileArg("filename"),
     },
     { name: "--netrc-optional", description: "Use either .netrc or URL" },
     { name: "--no-alpn", description: "Disable the ALPN TLS extension" },
     {
+      name: "--no-clobber",
+      description: "Do not overwrite files that already exist",
+    },
+    {
       name: "--no-keepalive",
       description: "Disable TCP keepalive on the connection",
     },
-    { name: "--no-npn", description: "Disable the NPN TLS extension" },
+    {
+      name: "--no-npn",
+      description: "Disable the NPN TLS extension",
+      deprecated: true,
+    },
+    {
+      name: "--no-progress-meter",
+      description: "Do not show the progress meter",
+    },
     { name: "--no-sessionid", description: "Disable SSL session-ID reusing" },
     {
       name: "--noproxy",
       description: "List of hosts which do not use proxy",
       args: { name: "no-proxy-list" },
     },
-    { name: "--ntlm", description: "Use HTTP NTLM authentication" },
+    { name: "--ntlm", description: "HTTP NTLM authentication" },
     {
       name: "--ntlm-wb",
-      description: "Use HTTP NTLM authentication with winbind",
+      description: "HTTP NTLM authentication with winbind",
+      deprecated: true,
     },
     {
       name: "--oauth2-bearer",
@@ -575,8 +811,32 @@ const completionSpec: Fig.Spec = {
       args: { name: "token" },
     },
     {
+      name: "--out-null",
+      description: "Discard response data into the void",
+      isRepeatable: true,
+    },
+    {
+      name: "--output-dir",
+      description: "Directory to save files in",
+      args: folderArg("dir"),
+    },
+    {
+      name: "--parallel-immediate",
+      description: "Do not wait for multiplexing",
+    },
+    {
+      name: "--parallel-max",
+      description: "Maximum concurrency for parallel transfers",
+      args: { name: "num" },
+    },
+    {
+      name: "--parallel-max-host",
+      description: "Maximum connections to a single host",
+      args: { name: "num" },
+    },
+    {
       name: "--pass",
-      description: "Pass phrase for the private key",
+      description: "Passphrase for the private key",
       args: { name: "phrase" },
     },
     {
@@ -585,24 +845,25 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--pinnedpubkey",
-      description: "FILE/HASHES Public key to verify peer against",
+      description: "Public key to verify peer against",
       args: { name: "hashes" },
     },
     {
       name: "--post301",
-      description: "Do not switch to GET after following a 301",
+      description: "Do not switch to GET after a 301 redirect",
     },
     {
       name: "--post302",
-      description: "Do not switch to GET after following a 302",
+      description: "Do not switch to GET after a 302 redirect",
     },
     {
       name: "--post303",
-      description: "Do not switch to GET after following a 303",
+      description: "Do not switch to GET after a 303 redirect",
     },
     {
       name: "--preproxy",
-      description: "[protocol://]host[:port] Use this proxy first",
+      description: "Use this proxy first",
+      args: { name: "[protocol://]host[:port]" },
     },
     {
       name: "--proto",
@@ -628,75 +889,70 @@ const completionSpec: Fig.Spec = {
       description: "Use Basic authentication on the proxy",
     },
     {
+      name: "--proxy-ca-native",
+      description: "Load CA certs from the OS to verify proxy",
+    },
+    {
       name: "--proxy-cacert",
-      description: "CA certificate to verify peer against for proxy",
-      args: { name: "file", template: "filepaths" },
+      description: "CA certificates to verify proxy against",
+      args: fileArg("file"),
     },
     {
       name: "--proxy-capath",
-      description: "CA directory to verify peer against for proxy",
-      args: { name: "dir", template: "folders" },
+      description: "CA directory to verify proxy against",
+      args: folderArg("dir"),
     },
     {
       name: "--proxy-cert",
       description: "Set client certificate for proxy",
-      args: { name: "cert[:passwd]" },
+      args: { name: "cert[:passwd]", template: "filepaths" },
     },
     {
       name: "--proxy-cert-type",
       description: "Client certificate type for HTTPS proxy",
-      args: { name: "type" },
+      args: { name: "type", suggestions: certTypes },
     },
     {
       name: "--proxy-ciphers",
-      description: "SSL ciphers to use for proxy",
+      description: "TLS 1.2 (1.1, 1.0) ciphers to use for proxy",
       args: { name: "list" },
     },
     {
       name: "--proxy-crlfile",
       description: "Set a CRL list for proxy",
-      args: { name: "file", template: "filepaths" },
+      args: fileArg("file"),
     },
-    {
-      name: "--proxy-digest",
-      description: "Use Digest authentication on the proxy",
-    },
+    { name: "--proxy-digest", description: "Digest auth with the proxy" },
     {
       name: "--proxy-header",
       description: "Pass custom header(s) to proxy",
-      args: {
-        name: "header/file",
-        suggestions: [
-          { name: "Content-Type: application/json" },
-          { name: "Content-Type: application/x-www-form-urlencoded" },
-        ],
-      },
+      args: { name: "header/@file", suggestions: headerSuggestions },
+      isRepeatable: true,
     },
+    { name: "--proxy-http2", description: "Use HTTP/2 with HTTPS proxy" },
+    { name: "--proxy-http3", description: "Use HTTP/3 with HTTPS proxy" },
     {
       name: "--proxy-insecure",
-      description: "Do HTTPS proxy connections without verifying the proxy",
+      description: "Skip HTTPS proxy cert verification",
     },
     {
       name: "--proxy-key",
       description: "Private key for HTTPS proxy",
-      args: { name: "key" },
+      args: fileArg("key"),
     },
     {
       name: "--proxy-key-type",
       description: "Private key file type for proxy",
-      args: { name: "type" },
+      args: { name: "type", suggestions: keyTypes },
     },
     {
       name: "--proxy-negotiate",
-      description: "Use HTTP Negotiate (SPNEGO) authentication on the proxy",
+      description: "HTTP Negotiate (SPNEGO) auth with the proxy",
     },
-    {
-      name: "--proxy-ntlm",
-      description: "Use NTLM authentication on the proxy",
-    },
+    { name: "--proxy-ntlm", description: "NTLM authentication with the proxy" },
     {
       name: "--proxy-pass",
-      description: "Pass phrase for the private key for HTTPS proxy",
+      description: "Passphrase for private key for HTTPS proxy",
       args: { name: "phrase" },
     },
     {
@@ -711,29 +967,36 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--proxy-ssl-allow-beast",
-      description: "Allow security flaw for interop for HTTPS proxy",
+      description: "Allow this security flaw for HTTPS proxy",
+    },
+    {
+      name: "--proxy-ssl-auto-client-cert",
+      description: "Auto client certificate for proxy",
     },
     {
       name: "--proxy-tls13-ciphers",
-      description: "List> TLS 1.3 proxy cipher suites",
-      args: { name: "ciphersuite" },
+      description: "TLS 1.3 proxy cipher suites",
+      args: { name: "list" },
     },
     {
       name: "--proxy-tlsauthtype",
       description: "TLS authentication type for HTTPS proxy",
       args: { name: "type" },
+      deprecated: true,
     },
     {
       name: "--proxy-tlspassword",
       description: "TLS password for HTTPS proxy",
       args: { name: "string" },
+      deprecated: true,
     },
     {
       name: "--proxy-tlsuser",
       description: "TLS username for HTTPS proxy",
       args: { name: "name" },
+      deprecated: true,
     },
-    { name: "--proxy-tlsv1", description: "Use TLSv1 for HTTPS proxy" },
+    { name: "--proxy-tlsv1", description: "TLSv1 for HTTPS proxy" },
     {
       name: "--proxy1.0",
       description: "Use HTTP/1.0 proxy on given port",
@@ -741,27 +1004,36 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--pubkey",
-      description: "SSH Public key file name",
-      args: { name: "key", template: "filepaths" },
+      description: "SSH Public key filename",
+      args: fileArg("key"),
     },
     {
       name: "--random-file",
       description: "File for reading random data from",
-      args: { name: "file", template: "filepaths" },
+      args: fileArg("file"),
+      deprecated: true,
     },
-    { name: "--raw", description: 'Do HTTP "raw"; no transfer decoding' },
+    {
+      name: "--rate",
+      description: "Request rate for serial transfers",
+      args: { name: "max request rate" },
+    },
+    { name: "--raw", description: "Do HTTP raw; no transfer decoding" },
     {
       name: "--remote-name-all",
-      description: "Use the remote file name for all URLs",
+      description: "Use the remote filename for all URLs",
     },
+    { name: "--remove-on-error", description: "Remove output file on errors" },
     {
       name: "--request-target",
       description: "Specify the target for this request",
+      args: { name: "path" },
     },
     {
       name: "--resolve",
-      description: "Resolve the host+port to this address",
-      args: { name: "host:port:address[,address]..." },
+      description: "Resolve host+port to address",
+      args: { name: "[+]host:port:addr[,addr]..." },
+      isRepeatable: true,
     },
     {
       name: "--retry",
@@ -769,8 +1041,12 @@ const completionSpec: Fig.Spec = {
       args: { name: "num" },
     },
     {
+      name: "--retry-all-errors",
+      description: "Retry all errors (with --retry)",
+    },
+    {
       name: "--retry-connrefused",
-      description: "Retry on connection refused (use with --retry)",
+      description: "Retry on connection refused (with --retry)",
     },
     {
       name: "--retry-delay",
@@ -783,13 +1059,27 @@ const completionSpec: Fig.Spec = {
       args: { name: "seconds" },
     },
     {
+      name: "--sasl-authzid",
+      description: "Identity for SASL PLAIN authentication",
+      args: { name: "identity" },
+    },
+    {
       name: "--sasl-ir",
-      description: "Enable initial response in SASL authentication",
+      description: "Initial response in SASL authentication",
     },
     {
       name: "--service-name",
       description: "SPNEGO service name",
       args: { name: "name" },
+    },
+    {
+      name: "--sigalgs",
+      description: "TLS signature algorithms to use",
+      args: { name: "list" },
+    },
+    {
+      name: "--skip-existing",
+      description: "Skip download if local file already exists",
     },
     {
       name: "--socks4",
@@ -808,7 +1098,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--socks5-basic",
-      description: "Enable username/password auth for SOCKS5 proxies",
+      description: "Username/password auth for SOCKS5 proxies",
     },
     {
       name: "--socks5-gssapi",
@@ -825,24 +1115,38 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "--socks5-hostname",
-      description: "SOCKS5 proxy, pass host name to proxy",
+      description: "SOCKS5 proxy, pass hostname to proxy",
       args: { name: "host[:port]" },
     },
-    { name: "--ssl", description: "Try SSL/TLS" },
-    {
-      name: "--ssl-auto-client-cert",
-      description: "Obtain and use a client certificate automatically",
-    },
+    { name: "--ssl", description: "Try enabling TLS" },
     {
       name: "--ssl-allow-beast",
       description: "Allow security flaw to improve interop",
+    },
+    {
+      name: "--ssl-auto-client-cert",
+      description: "Use auto client certificate (Schannel)",
     },
     {
       name: "--ssl-no-revoke",
       description: "Disable cert revocation checks (Schannel)",
     },
     { name: "--ssl-reqd", description: "Require SSL/TLS" },
-    { name: "--stderr", description: "Where to redirect stderr" },
+    {
+      name: "--ssl-revoke-best-effort",
+      description: "Ignore missing cert CRL dist points",
+    },
+    {
+      name: "--ssl-sessions",
+      description:
+        "Load/save SSL session tickets from/to this file (experimental)",
+      args: fileArg("filename"),
+    },
+    {
+      name: "--stderr",
+      description: "Where to redirect stderr",
+      args: fileArg("file"),
+    },
     {
       name: "--styled-output",
       description: "Enable styled output for HTTP headers",
@@ -852,7 +1156,7 @@ const completionSpec: Fig.Spec = {
       description: "Suppress proxy CONNECT response headers",
     },
     { name: "--tcp-fastopen", description: "Use TCP Fast Open" },
-    { name: "--tcp-nodelay", description: "Use the TCP_NODELAY option" },
+    { name: "--tcp-nodelay", description: "Set TCP_NODELAY" },
     {
       name: "--tftp-blksize",
       description: "Set TFTP BLKSIZE option",
@@ -860,26 +1164,44 @@ const completionSpec: Fig.Spec = {
     },
     { name: "--tftp-no-options", description: "Do not send any TFTP options" },
     {
+      name: "--tls-earlydata",
+      description: "Allow use of TLSv1.3 early data (0RTT)",
+    },
+    {
       name: "--tls-max",
-      description: "Set maximum allowed TLS version",
-      args: { name: "VERSION" },
+      description: "Maximum allowed TLS version",
+      args: {
+        name: "VERSION",
+        suggestions: ["default", "1.0", "1.1", "1.2", "1.3"],
+      },
     },
     {
       name: "--tls13-ciphers",
-      description: "Of TLS 1.3 ciphersuites> TLS 1.3 cipher suites to use",
+      description: "TLS 1.3 cipher suites to use",
       args: { name: "list" },
     },
     {
       name: "--tlsauthtype",
       description: "TLS authentication type",
       args: { name: "type" },
+      deprecated: true,
     },
-    { name: "--tlspassword", description: "TLS password" },
-    { name: "--tlsuser", description: "TLS user name", args: { name: "name" } },
-    { name: "--tlsv1.0", description: "Use TLSv1.0 or greater" },
-    { name: "--tlsv1.1", description: "Use TLSv1.1 or greater" },
-    { name: "--tlsv1.2", description: "Use TLSv1.2 or greater" },
-    { name: "--tlsv1.3", description: "Use TLSv1.3 or greater" },
+    {
+      name: "--tlspassword",
+      description: "TLS password",
+      args: { name: "string" },
+      deprecated: true,
+    },
+    {
+      name: "--tlsuser",
+      description: "TLS username",
+      args: { name: "name" },
+      deprecated: true,
+    },
+    { name: "--tlsv1.0", description: "TLSv1.0 or greater" },
+    { name: "--tlsv1.1", description: "TLSv1.1 or greater" },
+    { name: "--tlsv1.2", description: "TLSv1.2 or greater" },
+    { name: "--tlsv1.3", description: "TLSv1.3 or greater" },
     {
       name: "--tr-encoding",
       description: "Request compressed transfer encoding",
@@ -887,12 +1209,22 @@ const completionSpec: Fig.Spec = {
     {
       name: "--trace",
       description: "Write a debug trace to FILE",
-      args: { name: "file", template: "filepaths" },
+      args: fileArg("file"),
     },
     {
       name: "--trace-ascii",
       description: "Like --trace, but without hex output",
-      args: { name: "file", template: "filepaths" },
+      args: fileArg("file"),
+    },
+    {
+      name: "--trace-config",
+      description: "Details to log in trace/verbose output",
+      args: { name: "string" },
+      isRepeatable: true,
+    },
+    {
+      name: "--trace-ids",
+      description: "Transfer + connection ids in verbose output",
     },
     {
       name: "--trace-time",
@@ -901,9 +1233,36 @@ const completionSpec: Fig.Spec = {
     {
       name: "--unix-socket",
       description: "Connect through this Unix domain socket",
-      args: { name: "path" },
+      args: fileArg("path"),
     },
-    { name: "--url", description: "URL to work with", args: { name: "url" } },
+    {
+      name: "--upload-flags",
+      description: "IMAP upload behavior",
+      args: { name: "flags" },
+    },
+    {
+      name: "--url",
+      description: "URL(s) to work with",
+      args: { name: "url/file" },
+      isRepeatable: true,
+    },
+    {
+      name: "--url-query",
+      description: "Add a URL query part",
+      args: { name: "data" },
+      isRepeatable: true,
+    },
+    {
+      name: "--variable",
+      description: "Set variable",
+      args: { name: "[%]name=text/@file" },
+      isRepeatable: true,
+    },
+    {
+      name: "--vlan-priority",
+      description: "Set VLAN priority",
+      args: { name: "priority" },
+    },
     {
       name: "--xattr",
       description: "Store metadata in extended file attributes",
