@@ -1,4 +1,4 @@
-// Infracost v0.10.50 (GitHub release infracost/infracost, 2026-11-16). Source: cmd/infracost/*.go at v0.10.50
+// Infracost v0.10.50 (legacy CLI, GitHub release infracost/infracost 2026-11-13, verified 2026-11-20). Source: cmd/infracost/*.go at v0.10.50
 const jsonFormatOption: Fig.Option = {
   name: "--format",
   description: "Output format: json",
