@@ -1,6 +1,6 @@
-// Rome v12.1.3 (npm `rome` latest, published 2023-05-30; no newer release exists, 2026-11-20). Source: static read of the bpaf CLI
-// definitions in crates/rome_cli and crates/rome_service/src/configuration plus the `--help` snapshots in crates/rome_cli/tests/snapshots
-// at tag cli/v12.1.3 of rome/tools. The binary was not run. The project continued as Biome (see the biome spec, if present).
+// Rome v12.1.3 (npm `rome` latest, published 2023-05-30; 2026-11-20). Source: static read of the bpaf 0.8 CLI definitions in
+// crates/rome_cli and crates/rome_service/src/configuration plus the `--help` snapshots in crates/rome_cli/tests/snapshots
+// at tag cli/v12.1.3 of rome/tools. The binary was not run. 12.1.3 is the last published release (no later cli/v* tag or npm version).
 
 const boolean: Fig.Arg = {
   name: "boolean",
