@@ -1,4 +1,4 @@
-// CocoaPods v1.17.0 (GitHub release CocoaPods/CocoaPods, 2026-07-06). Source: lib/cocoapods/command/*.rb at 1.17.0 and the bundled cocoapods-{trunk,plugins,search,try,deintegrate} gems
+// CocoaPods v1.17.0 (latest stable on rubygems.org and GitHub tag, released 2026-07-06; verified 2026-11-20). Source: lib/cocoapods/command/*.rb at tag 1.17.0 plus the bundled gems read statically: cocoapods-trunk 1.6.0, cocoapods-plugins 1.0.0, cocoapods-search 1.0.1, cocoapods-try 1.2.0, cocoapods-deintegrate 1.0.5 and CLAide 1.1.0 (global options)
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const POD_ICON =
@@ -364,6 +364,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "NAME.podspec|DIRECTORY|http://PATH/NAME.podspec",
             isOptional: true,
+            isVariadic: true,
             generators: podSpecAndFoldersGenerator,
           },
         },
@@ -454,6 +455,10 @@ const completionSpec: Fig.Spec = {
       ],
       args: {
         name: "XCODEPROJ",
+        description:
+          "Xcode project to generate targets from (defaults to the only .xcodeproj in the current directory)",
+        isOptional: true,
+        template: "folders",
       },
     },
     {
@@ -829,6 +834,7 @@ const completionSpec: Fig.Spec = {
           args: {
             name: "PODSPEC_PATHS",
             isOptional: true,
+            isVariadic: true,
             generators: podSpecAndFoldersGenerator,
           },
         },
@@ -1381,6 +1387,7 @@ const completionSpec: Fig.Spec = {
       args: {
         name: "POD_NAMES",
         isOptional: true,
+        isVariadic: true,
       },
     },
     {
@@ -1412,22 +1419,35 @@ const completionSpec: Fig.Spec = {
   ],
   options: [
     {
+      name: "--version",
+      description: "Show the version of the tool",
+    },
+    {
+      name: "--allow-root",
+      description: "Allows CocoaPods to run as root",
+      icon: "🔐",
+    },
+    {
       name: "--silent",
       icon: "🔇",
       description: "Show nothing",
+      isPersistent: true,
     },
     {
       name: "--verbose",
       icon: "🔊",
       description: "Show more debugging information",
+      isPersistent: true,
     },
     {
       name: "--no-ansi",
       description: "Show output without ANSI codes",
+      isPersistent: true,
     },
     {
       name: "--help",
       description: "Show help banner of specified command",
+      isPersistent: true,
     },
   ],
 };
