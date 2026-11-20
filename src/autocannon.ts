@@ -1,10 +1,16 @@
+// autocannon v9.0.0 (npm latest, published 2026-11-06, 2026-11-20). Source: statically read the npm 9.0.0 tarball
+// (help.txt, README.md, autocannon.js argument parser and defaults, lib/*.js); the package was not executed.
+// Notes: -L default is 1000 ms per the parser defaults (help.txt says "1"); --on-port is a boolean flag
+// (the command to start follows --); --json replaces the stale --jsonPath name.
 const completionSpec: Fig.Spec = {
   name: "autocannon",
   description: "Fast HTTP/1.1 benchmarking tool written in Node.js",
   icon: "https://raw.githubusercontent.com/mcollina/autocannon/master/autocannon-logo-icon-100px.png",
   args: {
     name: "URL",
-    description: "The URL to benchmark",
+    description:
+      "Any valid HTTP or HTTPS URL. A path is accepted when the PORT environment variable is set",
+    isVariadic: true,
   },
   options: [
     {
@@ -35,7 +41,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-a", "--amount"],
       description:
-        "The number of requests to make before exiting the benchmark",
+        "The number of requests to make before exiting the benchmark. If set, duration is ignored",
       exclusiveOn: ["-d", "--duration"],
       args: {
         name: "NUM",
@@ -47,7 +53,7 @@ const completionSpec: Fig.Spec = {
         "The number of milliseconds to elapse between taking samples. This controls the sample interval, & therefore the total number of samples, which affects statistical analyses",
       args: {
         name: "NUM",
-        default: "1",
+        default: "1000",
       },
     },
     {
@@ -56,6 +62,7 @@ const completionSpec: Fig.Spec = {
         "A path to a Unix Domain Socket or a Windows Named Pipe. A URL is still required to send the correct Host header and path",
       args: {
         name: "PATH",
+        template: "filepaths",
       },
     },
     {
@@ -63,21 +70,20 @@ const completionSpec: Fig.Spec = {
       description: "Number of worker threads to use to fire requests",
       args: {
         name: "NUM",
-        default: "1",
       },
     },
     {
       name: ["-W", "--warmup"],
       description:
-        "Use a warm up interval before starting sampling. This enables startup processes to finish and traffic to normalize before sampling begins",
+        "Use a warm up interval before starting sampling. This enables startup processes to finish and traffic to normalize before sampling begins. Use the -c and -d sub args, e.g. `--warmup [ -c 1 -d 3 ]`",
       args: [
         {
           name: "-c",
-          default: "1",
+          description: "Connections to use during the warm up",
         },
         {
           name: "-d",
-          default: "3",
+          description: "Seconds to run the warm up",
         },
       ],
     },
@@ -85,9 +91,6 @@ const completionSpec: Fig.Spec = {
       name: "--on-port",
       description:
         "Start the command listed after -- on the command line. When it starts listening on a port, start sending requests to that port. A URL is still required to send requests to the correct path. The hostname can be omitted, `localhost` will be used by default",
-      args: {
-        name: "PORT",
-      },
     },
     {
       name: ["-m", "--method"],
@@ -125,27 +128,28 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-b", "--body"],
-      description: "The body of the request",
-      dependsOn: ["-H", "--headers"],
+      description:
+        "The body of the request. This option needs to be used with -H/--headers in some frameworks",
       args: {
         name: "BODY",
       },
     },
     {
       name: ["-F", "--form"],
+      description:
+        "Upload a form (multipart/form-data). The form options can be a JSON string or a path to a JSON file containing the form options",
       args: {
         name: "FORM",
+        template: "filepaths",
       },
     },
     {
       name: ["-i", "--input"],
-      description: "The body of the request",
-      dependsOn: ["-H", "--headers"],
+      description:
+        "Read the body of the request from a file. See -b/--body for more details",
       args: {
         name: "FILE",
-        generators: {
-          template: "filepaths",
-        },
+        template: "filepaths",
       },
     },
     {
@@ -159,7 +163,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--har",
       description:
-        "When provided, Autocannon will use requests from the HAR file",
+        "When provided, Autocannon will use requests from the HAR file. Only requests to the domains of the given URLs are used, and -m, -F, -i and -b are ignored",
       args: {
         name: "FILE",
         template: "filepaths",
@@ -170,7 +174,6 @@ const completionSpec: Fig.Spec = {
       description: "The number of failures before initiating a bailout",
       args: {
         name: "NUM",
-        default: "0",
       },
     },
     {
@@ -193,7 +196,7 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-R", "--overallRate"],
       description:
-        "The max number of requests to make per second from all connections",
+        "The max number of requests to make per second from all connections. The connection rate takes precedence if both are set",
       args: {
         name: "NUM",
       },
@@ -222,10 +225,10 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-I", "--idReplacement"],
       description:
-        "Enable replacement of [<id>] with a randomly generated ID within the request body. default: false",
+        "Enable replacement of [<id>] with a randomly generated ID within the request body, e.g. /items/[<id>]. default: false",
     },
     {
-      name: ["-j", "--jsonPath"],
+      name: ["-j", "--json"],
       description:
         "Print the output as newline delimited JSON. This will cause the progress bar and results not to be rendered",
     },
