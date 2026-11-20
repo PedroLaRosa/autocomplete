@@ -1,5 +1,5 @@
-// Taskwarrior v3.5.0 (GitHub release, 2026-08-16). Source: src/commands/Cmd*.cpp,
-// src/main.cpp and the default reports/aliases in src/Context.cpp at tag v3.5.0
+// Taskwarrior v3.5.0 (GitHub release 2026-08-16, checked 2026-11-20). Source: src/commands/Cmd*.cpp,
+// src/main.cpp, the default reports/aliases in src/Context.cpp and doc/man/task.1.in at tag v3.5.0
 const RECURRING_STRINGS = [
   "daily",
   "day",
@@ -293,6 +293,28 @@ const modifications: Fig.Generator = {
     ];
     return filters;
   },
+};
+
+// script helper commands (task(1) "HELPER SUBCOMMANDS"), meant for add-ons and shell completion
+const helperCommand = (
+  name: string,
+  description: string,
+  args?: Fig.Arg | Fig.Arg[],
+  deprecated?: boolean
+): Fig.Subcommand => ({
+  name,
+  description,
+  hidden: true,
+  ...(deprecated && { deprecated }),
+  ...(args && { args }),
+});
+
+const helperFilters: Fig.Arg = {
+  name: "filters",
+  description: "Task search criteria",
+  isOptional: true,
+  isVariadic: true,
+  generators: filters,
 };
 
 const completionSpec: Fig.Spec = {
@@ -1064,6 +1086,85 @@ const completionSpec: Fig.Spec = {
       name: ["synchronize", "sync"],
       description: "Synchronizes data with the configured sync server",
     },
+    helperCommand(
+      "_aliases",
+      "Generates a list of all aliases, for autocompletion purposes"
+    ),
+    helperCommand("_columns", "Displays only a list of supported columns"),
+    helperCommand(
+      "_commands",
+      "Generates a list of all commands, for autocompletion purposes"
+    ),
+    helperCommand(
+      "_config",
+      "Lists all supported configuration variables, for completion purposes"
+    ),
+    helperCommand(
+      "_context",
+      "Lists all supported contexts, for completion purposes"
+    ),
+    helperCommand(
+      "_get",
+      "Accesses and displays DOM references, e.g. 2.due.year or rc.<name>",
+      { name: "DOM", isVariadic: true }
+    ),
+    helperCommand(
+      "_ids",
+      "Shows only the IDs of matching tasks as a list. Deprecated in favor of _unique",
+      helperFilters,
+      true
+    ),
+    helperCommand(
+      "_projects",
+      "Shows only a list of all project names used. Deprecated in favor of _unique",
+      helperFilters,
+      true
+    ),
+    helperCommand(
+      "_show",
+      "Shows all configuration settings in a machine-readable format"
+    ),
+    helperCommand(
+      "_tags",
+      "Shows only a list of all tags used. Deprecated in favor of _unique",
+      helperFilters,
+      true
+    ),
+    helperCommand("_udas", "Shows only the defined UDA names, as a list"),
+    helperCommand("_unique", "Reports a unique set of attribute values", [
+      { name: "attribute", description: "Attribute to list, e.g. project" },
+      helperFilters,
+    ]),
+    helperCommand(
+      "_urgency",
+      "Displays the urgency measure of a task",
+      helperFilters
+    ),
+    helperCommand(
+      "_uuids",
+      "Shows only the UUIDs of matching tasks, among all tasks, as a list. Deprecated in favor of _unique",
+      helperFilters,
+      true
+    ),
+    helperCommand("_version", "Shows only the Taskwarrior version number"),
+    helperCommand(
+      "_zshattributes",
+      "Generates a list of all attributes, for zsh autocompletion purposes"
+    ),
+    helperCommand(
+      "_zshcommands",
+      "Generates a list of all commands, for zsh autocompletion purposes"
+    ),
+    helperCommand(
+      "_zshids",
+      "Shows the IDs and descriptions of matching tasks",
+      helperFilters
+    ),
+    helperCommand(
+      "_zshuuids",
+      "Shows the UUIDs and descriptions of matching tasks",
+      helperFilters
+    ),
   ],
   options: [
     {

@@ -1,3 +1,6 @@
+// task: go-task v3.54.0 and Taskwarrior v3.5.0 (latest GitHub tags + Homebrew formulae, checked 2026-11-20). Source: go-task
+// internal/flags/flags.go, completion.go and the CLI docs at v3.54.0; Taskwarrior src/commands/Cmd*.cpp, src/Context.cpp and
+// doc/man/task.1.in at v3.5.0. This file only picks one of the two specs by the output of `task --version`.
 import goTask from "./task/go-task";
 import taskWarrior from "./task/taskwarrior";
 
