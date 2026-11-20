@@ -1,6 +1,8 @@
-// Vercel CLI v66.2.0 (npm "latest", 2026-11-18). Source: command structs
-// (`commandsStructs`, `globalCommandOptions`) read statically from the
-// @vercel/cli-support@66.2.0 bundle, the JS build of the CLI.
+// Vercel CLI v66.5.0 (npm "latest", published 2026-11-19, checked 2026-11-20).
+// Source: command structs (`commandsStructs`, `globalCommandOptions`) read
+// statically (parsed, never executed) from the @vercel/cli-support@66.5.0
+// bundle, the JS build of the CLI, and diffed against 66.2.0. Hidden
+// experimental commands (`board`) are only stubbed.
 
 // `--json` output shapes ({envs:[{key}]}, {domains:[{name}]}, {teams:[{slug}]})
 // read from the CLI source; anything else yields no suggestions.
@@ -29,6 +31,41 @@ const domainList = jsonList(
   "name"
 );
 const teamList = jsonList(["vercel", "teams", "ls", "--json"], "teams", "slug");
+
+const managedRulesets = [
+  "owasp",
+  "crs",
+  "bot-protection",
+  "ai-bots",
+  "traffic-sources",
+  "vercel-ruleset",
+];
+
+const budgetTypes = ["team", "organization", "project", "product"];
+
+const ciLogLevels = [
+  "trace",
+  "debug",
+  "command",
+  "info",
+  "warn",
+  "error",
+  "systemError",
+  "fatal",
+];
+
+const kmsAlgorithms = [
+  "RS256",
+  "RS384",
+  "RS512",
+  "PS256",
+  "PS384",
+  "PS512",
+  "ES256",
+  "ES384",
+  "ES512",
+  "EdDSA",
+];
 
 const jsonOption: Fig.Option = {
   name: "--json",
@@ -149,6 +186,11 @@ const confirmOption: Fig.Option = {
 const dryRunOption: Fig.Option = {
   name: "--dry-run",
   description: "Show what would change without writing any files",
+};
+
+const setupDryRunOption: Fig.Option = {
+  name: "--dry-run",
+  description: "Preview configuration changes without applying them",
 };
 
 const projectOption2: Fig.Option = {
@@ -2913,9 +2955,10 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "--type",
                   description:
-                    'Only budgets of these types: <BUDGET_SCOPES.join(", ")>. Repeat or separate with commas for several',
+                    "Only budgets of these types: team, organization, project, product. Repeat or separate with commas for several",
                   args: {
                     name: "type",
+                    suggestions: budgetTypes,
                   },
                   isRepeatable: true,
                 },
@@ -3062,9 +3105,10 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "--type",
                   description:
-                    'Only budgets of these types: <BUDGET_SCOPES.join(", ")>. Repeat or separate with commas for several',
+                    "Only budgets of these types: team, organization, project, product. Repeat or separate with commas for several",
                   args: {
                     name: "type",
+                    suggestions: budgetTypes,
                   },
                   isRepeatable: true,
                 },
@@ -3120,9 +3164,10 @@ const completionSpec: Fig.Spec = {
                     {
                       name: "--type",
                       description:
-                        'Only budgets of these types: <BUDGET_SCOPES.join(", ")>. Repeat or separate with commas for several',
+                        "Only budgets of these types: team, organization, project, product. Repeat or separate with commas for several",
                       args: {
                         name: "type",
+                        suggestions: budgetTypes,
                       },
                       isRepeatable: true,
                     },
@@ -3171,9 +3216,16 @@ const completionSpec: Fig.Spec = {
                 {
                   name: "--status",
                   description:
-                    'Only show invoices with this status, repeatable: <INVOICE_STATUSES.join(", ")> (default: open, paid, uncollectible)',
+                    "Only show invoices with this status, repeatable: draft, open, paid, uncollectible, void (default: open, paid, uncollectible)",
                   args: {
                     name: "status",
+                    suggestions: [
+                      "draft",
+                      "open",
+                      "paid",
+                      "uncollectible",
+                      "void",
+                    ],
                   },
                   isRepeatable: true,
                 },
@@ -4407,9 +4459,10 @@ const completionSpec: Fig.Spec = {
             {
               name: "--level",
               description:
-                'Only show log lines with this level (<CI_LOG_LEVELS.join(", ")>); can be repeated',
+                "Only show log lines with this level (trace, debug, command, info, warn, error, systemError, fatal); can be repeated",
               args: {
                 name: "level",
+                suggestions: ciLogLevels,
               },
               isRepeatable: true,
             },
@@ -4493,9 +4546,10 @@ const completionSpec: Fig.Spec = {
             {
               name: "--level",
               description:
-                'Only show log lines with this level (<CI_LOG_LEVELS.join(", ")>); can be repeated',
+                "Only show log lines with this level (trace, debug, command, info, warn, error, systemError, fatal); can be repeated",
               args: {
                 name: "level",
+                suggestions: ciLogLevels,
               },
               isRepeatable: true,
             },
@@ -4963,6 +5017,112 @@ const completionSpec: Fig.Spec = {
           ],
         },
       ],
+    },
+    {
+      name: "drives",
+      description: "Manage persistent drives for a project",
+      subcommands: [
+        {
+          name: ["list", "ls"],
+          description: "List drives for a project",
+          options: [
+            projectOption,
+            jsonOption,
+            {
+              name: ["-n", "--limit"],
+              description: "Number of drives to return, up to 50 (default: 50)",
+              args: {
+                name: "number",
+              },
+            },
+            nextOption,
+            {
+              name: "--name-prefix",
+              description: "Filter by name prefix and sort by name",
+              args: {
+                name: "prefix",
+              },
+            },
+            {
+              name: "--sort-order",
+              description: "Sort order: asc or desc (default: desc)",
+              args: {
+                name: "order",
+                suggestions: ["asc", "desc"],
+              },
+            },
+          ],
+        },
+        {
+          name: "get-or-create",
+          description: "Create a drive if it does not exist, or retrieve it",
+          args: {
+            name: "name",
+          },
+          options: [
+            projectOption,
+            jsonOption,
+            {
+              name: "--max-size",
+              description:
+                "Maximum size in bytes or binary units, such as 200GiB or 2TiB. Fixed at creation (default: 1 TiB, or 1 GiB on Hobby)",
+              args: {
+                name: "size",
+              },
+            },
+            {
+              name: "--region",
+              description: "Region where the drive is created (default: iad1)",
+              args: {
+                name: "region",
+              },
+            },
+          ],
+        },
+        {
+          name: "fork",
+          description: "Fork a drive with its data, maximum size, and region",
+          args: [
+            {
+              name: "drive",
+            },
+            {
+              name: "name",
+            },
+          ],
+          options: [projectOption, jsonOption],
+        },
+        {
+          name: ["delete", "rm", "remove", "del"],
+          description: "Permanently delete one or more unattached drives",
+          args: {
+            name: "name",
+            isVariadic: true,
+          },
+          options: [
+            projectOption,
+            jsonOption,
+            {
+              name: "--confirm-name",
+              description:
+                "Approve deletion by repeating this option for each drive name",
+              args: {
+                name: "name",
+              },
+              isRepeatable: true,
+            },
+            {
+              name: "--effects-digest",
+              description:
+                "The effects digest from the preview. Agents must pass it; nothing changes if the effects changed since",
+              args: {
+                name: "digest",
+              },
+            },
+          ],
+        },
+      ],
+      options: [jsonOption],
     },
     {
       name: "deploy",
@@ -7328,21 +7488,23 @@ const completionSpec: Fig.Spec = {
         {
           name: "managed-rulesets",
           description:
-            "Manage WAF managed rulesets, such as OWASP Core Ruleset, and their rule groups",
+            "Manage WAF managed rulesets, such as OWASP Core Ruleset, Bot Protection, and AI Bots",
           subcommands: [
             {
               name: ["list", "ls"],
               description:
-                "List WAF managed rulesets, such as OWASP Core Ruleset, and the action of each rule group",
+                "List WAF managed rulesets, such as OWASP Core Ruleset and Bot Protection, and their actions",
               options: [projectOption, jsonOption],
             },
             {
               name: "enable",
-              description: "Turn on a managed ruleset",
+              description:
+                "Turn on a managed ruleset. OWASP Core Ruleset starts with its default rule groups; Bot Protection and AI Bots use their saved action, or Log",
               args: {
                 name: "ruleset",
                 description:
-                  "Owasp (or crs), traffic-sources, or vercel-ruleset",
+                  "Owasp (or crs), bot-protection, ai-bots, traffic-sources, or vercel-ruleset",
+                suggestions: managedRulesets,
               },
               options: [projectOption, jsonOption, yesOption],
             },
@@ -7352,34 +7514,38 @@ const completionSpec: Fig.Spec = {
               args: {
                 name: "ruleset",
                 description:
-                  "Owasp (or crs), traffic-sources, or vercel-ruleset",
+                  "Owasp (or crs), bot-protection, ai-bots, traffic-sources, or vercel-ruleset",
+                suggestions: managedRulesets,
               },
               options: [projectOption, jsonOption, yesOption],
             },
             {
               name: "update",
               description:
-                "Change the action of one rule group in a managed ruleset",
+                "Change the action of one rule group in a managed ruleset, or of a ruleset without groups such as Bot Protection",
               args: {
                 name: "ruleset",
                 description:
-                  "Owasp (or crs), traffic-sources, or vercel-ruleset",
+                  "Owasp (or crs), bot-protection, ai-bots, traffic-sources, or vercel-ruleset",
+                suggestions: managedRulesets,
               },
               options: [
                 projectOption,
                 {
                   name: "--group",
-                  description: "Rule group ID, such as sqli or xss",
+                  description:
+                    "Rule group ID, such as sqli or xss, or an AI Bots category. Omit for a ruleset without groups",
                   args: {
                     name: "group",
                   },
                 },
                 {
                   name: "--action",
-                  description: "Action for the group: log, deny, or off",
+                  description:
+                    "Action for the group: log, deny, or off. Some rulesets also accept challenge. A ruleset without groups takes its own actions, such as off, log, or challenge for Bot Protection",
                   args: {
                     name: "action",
-                    suggestions: ["log", "deny", "off"],
+                    suggestions: ["log", "deny", "off", "challenge"],
                   },
                 },
                 jsonOption,
@@ -8107,17 +8273,27 @@ const completionSpec: Fig.Spec = {
             {
               name: "--granularity",
               description:
-                'Time bucket size: <FLAG_EVALUATIONS_GRANULARITIES.join(", ")> (default: auto)',
+                "Time bucket size: 1m, 5m, 15m, 1h, 4h, 1d (default: auto)",
               args: {
                 name: "size",
+                suggestions: ["1m", "5m", "15m", "1h", "4h", "1d"],
               },
             },
             {
               name: "--group-by",
               description:
-                'Dimensions to group by (repeatable): <FLAG_EVALUATIONS_DIMENSION_NAMES.join(", ")> (default: variant for one flag, flag for the whole project)',
+                "Dimensions to group by (repeatable): variant, flag, sdk-key, client, environment, reason, datafile-revision (default: variant for one flag, flag for the whole project)",
               args: {
                 name: "dim",
+                suggestions: [
+                  "variant",
+                  "flag",
+                  "sdk-key",
+                  "client",
+                  "environment",
+                  "reason",
+                  "datafile-revision",
+                ],
               },
               isRepeatable: true,
             },
@@ -10674,9 +10850,10 @@ const completionSpec: Fig.Spec = {
             {
               name: "--algorithm",
               description:
-                'Signing algorithm: <KMS_ALGORITHMS.join(", ")> (default: RS512)',
+                "Signing algorithm: RS256, RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512, EdDSA (default: RS512)",
               args: {
                 name: "algorithm",
+                suggestions: kmsAlgorithms,
               },
             },
             {
@@ -10718,9 +10895,10 @@ const completionSpec: Fig.Spec = {
             {
               name: "--algorithm",
               description:
-                'Signing algorithm: <KMS_ALGORITHMS.join(", ")> (required for RSA keys, otherwise derived from the key)',
+                "Signing algorithm: RS256, RS384, RS512, PS256, PS384, PS512, ES256, ES384, ES512, EdDSA (required for RSA keys, otherwise derived from the key)",
               args: {
                 name: "algorithm",
+                suggestions: kmsAlgorithms,
               },
             },
             {
@@ -11981,13 +12159,64 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "page-integrity",
-      description: "Check Page Integrity status and review your inventory",
+      description:
+        "Monitor and block the scripts, headers, and connections your pages load",
       options: [jsonOption],
       subcommands: [
         {
           name: "status",
           description: "Show monitoring, blocking, and what needs review",
           options: [jsonOption, projectOption],
+        },
+        {
+          name: "enable",
+          description: "Start monitoring paths in report-only mode",
+          options: [
+            {
+              name: "--path",
+              description:
+                "Path pattern to monitor, such as /checkout/:path*. Repeat for more paths",
+              args: {
+                name: "pattern",
+              },
+              isRepeatable: true,
+            },
+            {
+              name: "--exact",
+              description: "Exact path to monitor. Repeat for more paths",
+              args: {
+                name: "path",
+              },
+              isRepeatable: true,
+            },
+            {
+              name: "--regex",
+              description:
+                "Regular expression for the paths to monitor. Repeat for more",
+              args: {
+                name: "regex",
+              },
+              isRepeatable: true,
+            },
+            {
+              name: ["-y", "--yes"],
+              description: "Reuse the saved paths without asking",
+            },
+            jsonOption,
+            projectOption,
+          ],
+        },
+        {
+          name: "disable",
+          description: "Stop monitoring and turn off blocking",
+          options: [
+            {
+              name: ["-y", "--yes"],
+              description: "Skip the confirmation prompt",
+            },
+            jsonOption,
+            projectOption,
+          ],
         },
         {
           name: ["scripts", "script"],
@@ -12005,6 +12234,21 @@ const completionSpec: Fig.Spec = {
                 {
                   name: ["-a", "--all"],
                   description: "Include auto-approved scripts",
+                },
+                {
+                  name: "--status",
+                  description:
+                    "Only show scripts with these statuses: pending, approved, rejected, auto-approved. Repeatable and comma-separated",
+                  args: {
+                    name: "status",
+                    suggestions: [
+                      "pending",
+                      "approved",
+                      "rejected",
+                      "auto-approved",
+                    ],
+                  },
+                  isRepeatable: true,
                 },
               ],
             },
@@ -12027,7 +12271,22 @@ const completionSpec: Fig.Spec = {
             {
               name: ["list", "ls"],
               description: "List Page Integrity headers for a project",
-              options: [jsonOption, limitOption, nextOption, projectOption],
+              options: [
+                jsonOption,
+                limitOption,
+                nextOption,
+                projectOption,
+                {
+                  name: "--status",
+                  description:
+                    "Only show headers with these statuses: pending, approved, rejected. Repeatable and comma-separated",
+                  args: {
+                    name: "status",
+                    suggestions: ["pending", "approved", "rejected"],
+                  },
+                  isRepeatable: true,
+                },
+              ],
             },
             {
               name: "inspect",
@@ -12055,6 +12314,21 @@ const completionSpec: Fig.Spec = {
                 {
                   name: ["-a", "--all"],
                   description: "Include auto-approved connections",
+                },
+                {
+                  name: "--status",
+                  description:
+                    "Only show connections with these statuses: pending, approved, rejected, auto-approved. Repeatable and comma-separated",
+                  args: {
+                    name: "status",
+                    suggestions: [
+                      "pending",
+                      "approved",
+                      "rejected",
+                      "auto-approved",
+                    ],
+                  },
+                  isRepeatable: true,
                 },
               ],
             },
@@ -12198,8 +12472,14 @@ const completionSpec: Fig.Spec = {
                 "Show only projects whose production traffic is paused",
             },
             {
+              name: ["-a", "--all"],
+              description:
+                "Show the projects from every page (can't be used with --limit or --next)",
+            },
+            {
               name: ["-q", "--query"],
-              description: "Search projects by name (substring match)",
+              description:
+                "Search projects by name or domain on the server (returns at most 300 projects)",
               args: {
                 name: "text",
               },
@@ -12250,9 +12530,15 @@ const completionSpec: Fig.Spec = {
             {
               name: "--role",
               description:
-                'Project role when adding a member: <PROJECT_MEMBER_ROLES.join(", ")>',
+                "Project role when adding a member: ADMIN, PROJECT_DEVELOPER, PROJECT_VIEWER, PROJECT_GUEST",
               args: {
                 name: "role",
+                suggestions: [
+                  "ADMIN",
+                  "PROJECT_DEVELOPER",
+                  "PROJECT_VIEWER",
+                  "PROJECT_GUEST",
+                ],
               },
             },
           ],
@@ -12969,6 +13255,11 @@ const completionSpec: Fig.Spec = {
             name: "environment",
             suggestions: ["production", "preview"],
           },
+        },
+        {
+          name: "--approve-commit-author",
+          description:
+            "If the deployment was blocked because its commit author isn't a member or is a Viewer, add them to the team as a Developer so the redeploy can build. This may add a paid seat to the team",
         },
         targetOption,
         jsonOption,
@@ -14520,32 +14811,29 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--agent",
-          description:
-            "Select a coding agent (repeatable); plugin setup supports claude-code, codex, and opencode",
+          description: "Select a coding agent (repeatable)",
           args: {
             name: "name",
           },
           isRepeatable: true,
         },
-        dryRunOption,
+        setupDryRunOption,
         yesOption,
       ],
       subcommands: [
         {
           name: "plugin",
-          description:
-            "Install or update the Vercel plugin for Claude Code, Codex, and OpenCode",
+          description: "Install the Vercel plugin for detected coding agents",
           options: [
             {
               name: "--agent",
-              description:
-                "Select claude-code, codex, or opencode (repeatable)",
+              description: "Select a coding agent (repeatable)",
               args: {
                 name: "name",
               },
               isRepeatable: true,
             },
-            dryRunOption,
+            setupDryRunOption,
             yesOption,
           ],
         },
@@ -14565,7 +14853,7 @@ const completionSpec: Fig.Spec = {
             keyOption,
             reconfigureOption,
             noSessionMigrationOption,
-            dryRunOption,
+            setupDryRunOption,
             yesOption,
           ],
         },
@@ -14583,7 +14871,7 @@ const completionSpec: Fig.Spec = {
                 template: "filepaths",
               },
             },
-            dryRunOption,
+            setupDryRunOption,
             formatOption,
             jsonOption,
           ],
@@ -14633,7 +14921,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--type",
               description:
-                'Only list stores of one type (e.g. <listStorageProviderTypes().join(", ")>, integration)',
+                "Only list stores of one type (e.g. blob, global-config, integration)",
               args: {
                 name: "type",
               },
@@ -14644,18 +14932,17 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "create",
-          description:
-            'Create a storage resource (<listStorageProviderTypes().join(", ")>)',
+          description: "Create a storage resource (blob, global-config)",
           args: {
             name: "name",
           },
           options: [
             {
               name: "--type",
-              description:
-                'Store type: <listStorageProviderTypes().join(", ")>',
+              description: "Store type: blob, global-config",
               args: {
                 name: "type",
+                suggestions: ["blob", "global-config"],
               },
             },
             {
@@ -14696,7 +14983,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--type",
               description:
-                'Only match stores of one type when several share a name (e.g. <listStorageProviderTypes().join(", ")>, integration)',
+                "Only match stores of one type when several share a name (e.g. blob, global-config, integration)",
               args: {
                 name: "type",
               },
@@ -14716,7 +15003,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--type",
               description:
-                'Only match stores of one type when several share a name (e.g. <listStorageProviderTypes().join(", ")>, integration)',
+                "Only match stores of one type when several share a name (e.g. blob, global-config, integration)",
               args: {
                 name: "type",
               },
