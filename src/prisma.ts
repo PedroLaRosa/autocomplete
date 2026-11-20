@@ -1,5 +1,5 @@
-// Prisma v7.10.1 (GitHub "Latest" release, npm "prev" tag, 2026-10-15). Source: arg parsers and *-completion.ts in prisma/prisma packages/cli and packages/migrate at tag 7.10.1, docs cli/v7
-// ponytail: npm "latest" is the 8.0.0 RC, a new CLI from prisma/prisma-cli (auth, project, service, contract, migration...) that drops generate, studio and migrate dev; its own spec once it ships stable
+// Prisma v7.10.1 (latest stable: GitHub "Latest" release and npm "prev" tag, published 2026-10-15; re-verified 2026-11-20). Source: arg parsers and *-completion.ts in prisma/prisma packages/cli and packages/migrate at tag 7.10.1, @prisma/cli-dev 0.16.28 (prisma dev), docs cli/v7
+// ponytail: npm "latest" is the 8.0.0-rc.34 prerelease, a new CLI from prisma/prisma-cli (auth, project, service, contract, migration...) that drops generate, studio and migrate dev; its own spec once it ships stable
 
 const commonOptions: Fig.Option = {
   name: ["-h", "--help"],
@@ -64,10 +64,17 @@ const completionSpec: Fig.Spec = {
   description:
     "Prisma is a modern DB toolkit to query, migrate and model your database",
   icon: "https://raw.githubusercontent.com/prisma/docs/main/src/images/favicon-16x16.png",
+  options: [
+    commonOptions,
+    {
+      name: "--preview-feature",
+      description: "Run Preview Prisma commands",
+    },
+  ],
   subcommands: [
     {
       name: "init",
-      description: "Setup Prisma for your app",
+      description: "Set up Prisma for your app",
       options: [
         commonOptions,
         {
@@ -302,7 +309,7 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "format",
-      description: "Format your schema",
+      description: "Format your Prisma schema",
       options: [
         ...baseOptions,
         {
@@ -314,6 +321,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "migrate",
       description: "Migrate your database",
+      options: [commonOptions, configOption],
       subcommands: [
         {
           name: "dev",
@@ -473,6 +481,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "db",
       description: "Manage your database schema and lifecycle",
+      options: [commonOptions, configOption],
       subcommands: [
         {
           name: "pull",
@@ -511,7 +520,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "push",
           description:
-            "This command pushes the state of your Prisma schema file to the database without using migrations files",
+            "Push the state from your Prisma schema to the database during prototyping, without migration files",
           options: [
             ...baseOptions,
             urlOption,
@@ -563,7 +572,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: ["version", "-v"],
+      name: ["version", "-v", "--version"],
       description: "Print current version of Prisma components",
       options: [
         commonOptions,
@@ -582,6 +591,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "platform",
       description: "Prisma Data Platform commands",
+      options: [commonOptions],
       subcommands: [
         {
           name: "status",
@@ -599,6 +609,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "postgres",
       description: "Manage Prisma Postgres databases",
+      options: [commonOptions],
       subcommands: [
         {
           name: "link",
