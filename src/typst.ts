@@ -1,4 +1,6 @@
-// Typst v0.15.1 (gh release typst/typst, 2026-07-17). Source: crates/typst-cli/src/args.rs at v0.15.1
+// Typst v0.15.1 (gh release typst/typst 2026-07-17, still the newest stable on crates.io typst-cli and
+// Homebrew on 2026-11-20). Source: crates/typst-cli/src/args.rs and compile.rs at v0.15.1, read
+// statically (the binary was not run).
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const typArg: Fig.Arg = {
@@ -92,7 +94,7 @@ const processOptions: Fig.Option[] = [
   {
     name: ["-j", "--jobs"],
     description:
-      "Number of parallel jobs spawned during compilation. Defaults to number of CPUs",
+      "Number of parallel jobs spawned during compilation. Defaults to number of CPUs. Setting it to 1 disables parallelism",
     args: { name: "jobs" },
   },
   {
@@ -168,7 +170,7 @@ const compileOptions: Fig.Option[] = [
   {
     name: "--ppi",
     description: "The PPI (pixels per inch) to use for PNG export",
-    args: { name: "ppi", default: "144.0" },
+    args: { name: "ppi", default: "144" },
   },
   {
     name: "--make-deps",
@@ -197,7 +199,7 @@ const compileOptions: Fig.Option[] = [
   {
     name: "--open",
     description:
-      "Opens the output file with the default viewer or a specific program after compilation",
+      "Opens the output file with the default viewer or a specific program after compilation. Ignored if output is stdout",
     args: { name: "viewer", isOptional: true },
   },
   {
