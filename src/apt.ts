@@ -1,6 +1,8 @@
-// apt v3.3.8 (latest tag on salsa.debian.org/apt-team/apt, 2026-11-19). Source:
-// cmdline/apt.cc command table and per-command help, apt-private/private-cmndline.cc
-// option tables, doc/apt.8.xml and doc/apt-get.8.xml at tag 3.3.8.
+// apt v3.3.8 (Debian unstable upload 2026-11-16 per tracker.debian.org and the Homebrew apt formula, 2026-11-20).
+// Source: apt 3.3.7 source tarball from the Ubuntu archive (the 3.3.8 source is not reachable from here and the
+// 3.3.8 release is reported as performance and docs only): cmdline/apt.cc command table and per-command help,
+// apt-private/private-cmndline.cc option tables, doc/apt.8.xml and doc/apt-get.8.xml.
+// Only a user-facing subset of the shared apt-get common options is listed per command; config-only ones are left out.
 
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
@@ -149,6 +151,19 @@ const commonOptions: Fig.Option[] = [
   {
     name: "--only-upgrade",
     description: "Only upgrade packages that are already installed",
+  },
+  {
+    name: "--no-upgrade",
+    description:
+      "Don't upgrade packages named on the command line that are already installed",
+  },
+  {
+    name: "--no-remove",
+    description: "Abort if any packages would have to be removed",
+  },
+  {
+    name: "--mark-auto",
+    description: "Mark newly installed packages as automatically installed",
   },
   {
     name: "--allow-change-held-packages",
