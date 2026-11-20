@@ -1,7 +1,13 @@
-// conda v26.10.0 (GitHub release, 2026-11-06). Source: argparse parsers in
-// conda/conda@26.10.0 (conda/cli/*.py, conda/cli/helpers.py, conda/plugins),
-// `tos` from anaconda/conda-anaconda-tos@0.3.0. conda-build/conda-index
-// plugin commands (build, convert, ...) are kept as stubs.
+// conda v26.10.0 (latest stable GitHub tag, released 2026-11-06; verified 2026-11-20).
+// Source: argparse parsers read statically from conda/conda@26.10.0
+// (conda/cli/*.py, conda/cli/helpers.py, conda/plugins), `tos` from
+// anaconda/conda-anaconda-tos@0.3.0, and the plugins that conda 26.10.0's
+// recipe bundles: conda-libmamba-solver@26.10.1 (`repoquery`),
+// conda-self@0.3.0 (`self`, `base-protection` check), conda-pypi@0.13.1
+// (`pypi`, `external-packages` check), conda-lockfiles@0.2.2 (lockfile
+// formats), conda-rattler-solver and conda-pycosat-solver (solver names).
+// conda-build/conda-index plugin commands (build, ...) are kept as stubs; the
+// `convert` flags were checked against conda-build@26.9.1.
 
 const getInstalledPackages: Fig.Generator = {
   script: ["conda", "list"],
@@ -105,8 +111,16 @@ const subdirs = [
   "zos-z",
 ];
 
-// ponytail: built-in format plugins only; other plugins can register more
-// (`conda export --help` lists what is installed).
+// ponytail: formats of conda's built-in plugins plus the conda-lockfiles plugin
+// that conda 26.10 bundles; other plugins can register more (`conda export
+// --help` lists what is installed).
+const lockfileFormats = [
+  "conda-lock-v1",
+  "conda-lock",
+  "rattler-lock-v6",
+  "pixi",
+  "pixi-lock-v6",
+];
 const inputFormats = [
   "cep-24",
   "environment-yaml",
@@ -116,6 +130,7 @@ const inputFormats = [
   "requirements.txt",
   "requirements",
   "reqs",
+  ...lockfileFormats,
 ];
 const exportFormats = [
   "environment-yaml",
@@ -128,6 +143,7 @@ const exportFormats = [
   "requirements",
   "reqs",
   "txt",
+  ...lockfileFormats,
 ];
 
 const name_options: Fig.Option[] = [
@@ -283,7 +299,15 @@ const solver_mode_options: Fig.Option[] = [
 const solverOption: Fig.Option = {
   name: "--solver",
   description: "Choose which solver backend to use",
-  args: { name: "solver", suggestions: ["libmamba", "classic"] },
+  args: {
+    name: "solver",
+    suggestions: [
+      { name: "rattler", description: "Default solver since conda 26.10" },
+      "libmamba",
+      "classic",
+      "pycosat",
+    ],
+  },
 };
 
 const update_modifier_options: Fig.Option[] = [
@@ -571,6 +595,41 @@ const tosActionOptions: Fig.Option[] = [
   jsonOption,
 ];
 
+const repoqueryOptions: Fig.Option[] = [
+  {
+    name: ["-p", "--platform"],
+    description:
+      "Platform/subdir to search packages for. Defaults to current platform",
+    args: { name: "platform", suggestions: subdirs },
+  },
+  {
+    name: "--no-installed",
+    description: "Do not search currently installed packages",
+  },
+  { name: "--pretty", description: "Prettier output with more details" },
+  {
+    name: ["-a", "--all-channels"],
+    description: "Look at all channels (for depends / whoneeds)",
+  },
+  { name: "--use-cache-only", description: "Search in pkgs_dirs too" },
+  ...channel_options,
+  ...networking_options,
+  ...json_options,
+];
+
+const repoqueryTreeOptions: Fig.Option[] = [
+  {
+    name: ["-t", "--tree"],
+    description: "Show dependencies in a tree-like format",
+  },
+  { name: "--recursive", description: "Show dependencies recursively" },
+];
+
+const repoquerySpecArg: Fig.Arg = {
+  name: "specs",
+  description: "The target package(s)",
+};
+
 const completionSpec: Fig.Spec = {
   name: "conda",
   description:
@@ -811,12 +870,21 @@ const completionSpec: Fig.Spec = {
             description: "Detect packages with modified files",
           },
           {
+            name: "base-protection",
+            description:
+              "Check whether the base environment is marked as frozen",
+          },
+          {
             name: "consistency",
             description: "Check for missing or inconsistent dependencies",
           },
           {
             name: "environment-txt",
             description: "Verify environment is registered in environments.txt",
+          },
+          {
+            name: "external-packages",
+            description: "List packages not installed by conda",
           },
           {
             name: "file-locking",
@@ -1239,6 +1307,105 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "pypi",
+      description: "Install Python distribution packages as conda packages",
+      options: [...name_options, ...output_options],
+      subcommands: [
+        {
+          name: "install",
+          description: "Install Python distribution packages as conda packages",
+          args: {
+            name: "PACKAGE",
+            description: "Python distribution packages to install",
+            isOptional: true,
+            isVariadic: true,
+          },
+          options: [
+            {
+              name: "--ignore-channels",
+              description:
+                "Do not search default or .condarc channels. Will search the configured package indexes",
+            },
+            {
+              name: ["-i", "--index-url"],
+              description:
+                "Package index URL to use instead of PyPI. Can be used multiple times",
+              isRepeatable: true,
+              args: { name: "url" },
+            },
+            ...output_options,
+            ...name_options,
+            {
+              name: ["-e", "--editable"],
+              description:
+                "Build and install PROJECT_PATH in editable mode using PEP 660. Can be used multiple times",
+              isRepeatable: true,
+              args: { name: "PROJECT_PATH", template: "folders" },
+            },
+          ],
+        },
+        {
+          name: "convert",
+          description:
+            "Build and convert local Python sdists, wheels or projects to conda packages",
+          args: {
+            name: "PROJECT",
+            description: "Convert named path as conda package",
+            template: ["filepaths", "folders"],
+          },
+          options: [
+            {
+              name: "--output-folder",
+              description:
+                "Folder to write output package(s). Defaults to ./conda-pypi-output",
+              args: { name: "folder", template: "folders" },
+            },
+            {
+              name: ["-e", "--editable"],
+              description:
+                "Build an editable package linking PROJECT to the target conda environment when installed",
+            },
+            {
+              name: ["-t", "--test-dir"],
+              description:
+                "Directory containing test files to inject into the conda package. Must be structured as a conda test directory for the tests to work",
+              args: { name: "directory", template: "folders" },
+            },
+            {
+              name: "--name-mapping",
+              description:
+                "Path to json file containing pypi to conda name mapping",
+              args: { name: "file", template: "filepaths" },
+            },
+            {
+              name: "--build-number",
+              description:
+                "Build number for the converted package. Defaults to the leading digits of the wheel filename build tag, or 0 if absent",
+              args: { name: "number" },
+            },
+          ],
+        },
+        {
+          name: "index",
+          description:
+            "Index a directory of `.whl` files to generate repodata.json",
+          args: {
+            name: "DIRECTORY",
+            description: "Directory containing .whl files to index",
+            template: "folders",
+          },
+          options: [
+            {
+              name: "--base-url",
+              description:
+                "Base URL for the channel (e.g. https://packages.example.com/). When omitted, each entry uses a file:// URI for each wheel file",
+              args: { name: "url" },
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: ["remove", "uninstall"],
       description:
         "Remove a list of packages from a specified conda environment",
@@ -1249,6 +1416,30 @@ const completionSpec: Fig.Spec = {
         generators: getInstalledPackages,
       },
       options: remove_options,
+    },
+    {
+      name: "repoquery",
+      description: "Advanced search for repodata",
+      subcommands: [
+        {
+          name: "whoneeds",
+          description: "Show packages that depend on this package",
+          args: repoquerySpecArg,
+          options: [...repoqueryOptions, ...repoqueryTreeOptions],
+        },
+        {
+          name: "depends",
+          description: "Show dependencies of this package",
+          args: repoquerySpecArg,
+          options: [...repoqueryOptions, ...repoqueryTreeOptions],
+        },
+        {
+          name: "search",
+          description: "Show all available package versions",
+          args: { ...repoquerySpecArg, isVariadic: true },
+          options: repoqueryOptions,
+        },
+      ],
     },
     {
       name: "rename",
@@ -1314,6 +1505,114 @@ const completionSpec: Fig.Spec = {
         ...channel_options,
         ...networking_options,
         ...json_options,
+      ],
+    },
+    {
+      name: "self",
+      description: "Manage conda and its plugins in the base environment",
+      options: [
+        {
+          name: ["-V", "--version"],
+          description: "Show the 'conda-self' version number and exit",
+        },
+      ],
+      subcommands: [
+        {
+          name: "install",
+          description: "Install conda plugins in the base environment",
+          args: {
+            name: "specs",
+            description: "Conda plugins to install",
+            isVariadic: true,
+          },
+          options: [
+            ...output_options,
+            {
+              name: "--force-reinstall",
+              description:
+                "Reinstall each requested package even if it is already installed",
+            },
+          ],
+        },
+        {
+          name: "remove",
+          description: "Remove conda plugins from the base environment",
+          args: {
+            name: "specs",
+            description: "Conda plugins to remove",
+            isVariadic: true,
+          },
+          options: [
+            ...output_options,
+            {
+              name: "--force",
+              description:
+                "Bypass conda-self's check for permanent packages and their dependencies. Conda still applies its own transaction checks. Confirmation is still required unless --yes is passed",
+            },
+          ],
+        },
+        {
+          name: "reset",
+          description: "Reset the base environment",
+          options: [
+            ...output_options,
+            {
+              name: "--snapshot",
+              description:
+                "Reset mode for the base environment. If not set, base-protection is used when its snapshot file exists, otherwise installer-updated when the installer snapshot file exists, otherwise current",
+              args: {
+                name: "mode",
+                suggestions: [
+                  {
+                    name: "current",
+                    description:
+                      "Remove all conda packages except conda, conda-self, installed conda plugins, configured permanent packages and their dependencies",
+                  },
+                  {
+                    name: "installer-exact",
+                    description:
+                      "Restore exactly the conda packages recorded by the installer. May downgrade updated packages",
+                  },
+                  {
+                    name: "installer-updated",
+                    description:
+                      "Keep what current keeps plus installed packages named in the installer snapshot. Does not update or install missing packages",
+                  },
+                  {
+                    name: "base-protection",
+                    description:
+                      "Restore exactly the conda packages recorded by `conda doctor -n base base-protection --fix` before protecting base",
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        {
+          name: "update",
+          description:
+            "Update conda, one conda plugin, or all packages in the base environment",
+          options: [
+            ...output_options,
+            {
+              name: "--force-reinstall",
+              description:
+                "Uninstall and reinstall each requested package, even if it is already installed",
+            },
+            {
+              name: "--plugin",
+              description: "Name of a conda plugin to update",
+              args: { name: "plugin" },
+              exclusiveOn: ["--all"],
+            },
+            {
+              name: "--all",
+              description:
+                "Update all installed packages in the base environment",
+              exclusiveOn: ["--plugin"],
+            },
+          ],
+        },
       ],
     },
     {
@@ -1409,6 +1708,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-p", "--platform"],
           description: "Platform to convert the packages to",
+          isRepeatable: true,
           args: {
             suggestions: [
               { name: "osx-64" },
@@ -1423,6 +1723,7 @@ const completionSpec: Fig.Spec = {
               { name: "linux-aarch64" },
               { name: "win-32" },
               { name: "win-64" },
+              { name: "win-arm64" },
               { name: "all" },
             ],
           },
