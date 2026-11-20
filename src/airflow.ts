@@ -1,6 +1,10 @@
-// Apache Airflow v3.4.0 (PyPI "latest", 2026-11-06). Source: tag 3.4.0 of
-// apache/airflow: airflow-core/src/airflow/cli/cli_config.py plus the provider
-// CLI definitions for celery, cncf.kubernetes and fab (providers/*/cli/definition.py)
+// Apache Airflow v3.4.0 (PyPI "latest", released 2026-11-06; verified 2026-11-20).
+// Source (read statically, not run): tag 3.4.0 of apache/airflow,
+// airflow-core/src/airflow/cli/cli_config.py, plus the provider CLI definitions
+// (providers/*/cli/definition.py) at each provider's latest PyPI release tag:
+// celery 4.0.0, cncf.kubernetes 11.0.0, fab 3.11.0, edge3 5.1.1, amazon 9.40.0
+// (aws-auth-manager) and keycloak 0.12.0 (keycloak-auth-manager). Those are the
+// only providers with a `cli:` section in provider.yaml.
 import { keyValueList, valueList } from "@tabsmith/autocomplete-generators";
 
 const opt = (
@@ -230,6 +234,82 @@ const requiredQueues: Fig.Option = {
   isRequired: true,
 };
 
+// Kubernetes provider
+const kubernetesTeam = opt(
+  "--team",
+  "Team name for multi-team configuration",
+  "team"
+);
+
+// Edge provider
+const edgeHostname = opt(
+  ["-H", "--edge-hostname"],
+  "Set the hostname of worker if you have multiple workers on a single machine",
+  "hostname"
+);
+const requiredEdgeHostname: Fig.Option = {
+  ...edgeHostname,
+  isRequired: true,
+};
+const requiredEdgeConcurrency: Fig.Option = {
+  ...opt(
+    ["-c", "--concurrency"],
+    "The number of worker processes. Must be a positive integer",
+    "concurrency"
+  ),
+  isRequired: true,
+};
+const requiredEdgeComments: Fig.Option = {
+  ...opt(
+    ["-c", "--comments"],
+    "Maintenance comments to report reason",
+    "comments"
+  ),
+  isRequired: true,
+};
+const requiredEdgeQueues: Fig.Option = {
+  ...opt(
+    ["-q", "--queues"],
+    "Comma delimited list of queues to add or remove",
+    "queues"
+  ),
+  isRequired: true,
+};
+
+// Keycloak provider
+const keycloakAuth: Fig.Option[] = [
+  opt(
+    "--username",
+    "Username associated to the user used to create resources",
+    "username"
+  ),
+  opt(
+    "--password",
+    "Password associated to the user used to create resources. If not provided, you will be prompted to enter it",
+    { name: "password", isOptional: true }
+  ),
+  opt(
+    "--user-realm",
+    "Realm name where the user used to create resources is (default: master)",
+    "realm"
+  ),
+  opt(
+    "--client-id",
+    "ID of the client used to create resources (default: admin-cli)",
+    "client_id"
+  ),
+];
+const keycloakTeams = opt(
+  "--teams",
+  "Comma-separated list of team names",
+  "teams"
+);
+const keycloakDryRun = opt(
+  "--dry-run",
+  "Perform a dry run without creating any resources"
+);
+const keycloakTeam: Fig.Arg = { name: "team", description: "Team name" };
+
 // FAB provider
 const username = opt(["-u", "--username"], "Username of the user", "username");
 const email = opt(["-e", "--email"], "Email of the user", "email");
@@ -367,6 +447,35 @@ const completionSpec: Fig.Spec = {
             opt("--name", "Asset name", "name"),
             opt("--uri", "Asset URI", "uri"),
             ...outputVerbose,
+          ],
+        },
+      ],
+    },
+    {
+      name: "aws-auth-manager",
+      description:
+        "Manage resources used by AWS auth manager (Amazon provider only)",
+      subcommands: [
+        {
+          name: "init-avp",
+          description:
+            "Initialize Amazon Verified resources to be used by AWS manager",
+          options: [
+            opt(
+              "--policy-store-description",
+              "Policy store description (default: Airflow)",
+              "description"
+            ),
+            dryRun,
+          ],
+        },
+        {
+          name: "update-avp-schema",
+          description:
+            "Update Amazon Verified permissions policy store schema to the latest version",
+          options: [
+            opt("--policy-store-id", "Policy store ID", "policy_store_id"),
+            dryRun,
           ],
         },
       ],
@@ -1172,6 +1281,148 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "edge",
+      description: "Edge Worker components (EdgeExecutor only)",
+      subcommands: [
+        {
+          name: "add-worker-queues",
+          description: "Add queues to an edge worker",
+          options: [requiredEdgeHostname, requiredEdgeQueues],
+        },
+        {
+          name: "list-workers",
+          description: "Query the db to list all registered edge workers",
+          options: [
+            output,
+            opt(["-s", "--state"], "State of the edge worker", {
+              name: "state",
+              isVariadic: true,
+            }),
+            opt(
+              "--worker-name-pattern",
+              "Optional glob pattern to filter workers by name, e.g. 'prod-*'. Lists all workers if omitted",
+              "PATTERN"
+            ),
+            opt(
+              ["-q", "--queues"],
+              "Comma delimited list of queues to serve, serve all queues if not provided",
+              "queues"
+            ),
+          ],
+        },
+        {
+          name: "maintenance",
+          description: "Set or Unset maintenance mode of local edge worker",
+          args: {
+            name: "maintenance",
+            description: "Desired maintenance state",
+            suggestions: ["on", "off"],
+          },
+          options: [
+            opt(
+              ["-c", "--comments"],
+              "Maintenance comments to report reason. Required if maintenance is turned on",
+              "comments"
+            ),
+            opt(
+              ["-w", "--wait"],
+              "Wait until edge worker has reached desired state"
+            ),
+            pid,
+            verbose,
+          ],
+        },
+        {
+          name: "remote-edge-worker-exit-maintenance",
+          description: "Remove remote edge worker from maintenance",
+          options: [requiredEdgeHostname],
+        },
+        {
+          name: "remote-edge-worker-request-maintenance",
+          description: "Put remote edge worker on maintenance",
+          options: [requiredEdgeHostname, requiredEdgeComments],
+        },
+        {
+          name: "remote-edge-worker-update-maintenance-comment",
+          description: "Update maintenance comments of the remote edge worker",
+          options: [requiredEdgeHostname, requiredEdgeComments],
+        },
+        {
+          name: "remove-remote-edge-worker",
+          description: "Remove remote edge worker entry from db",
+          options: [requiredEdgeHostname],
+        },
+        {
+          name: "remove-worker-queues",
+          description: "Remove queues from an edge worker",
+          options: [requiredEdgeHostname, requiredEdgeQueues],
+        },
+        {
+          name: "set-worker-concurrency",
+          description: "Set the concurrency of a remote edge worker",
+          options: [requiredEdgeHostname, requiredEdgeConcurrency],
+        },
+        {
+          name: "shutdown-all-workers",
+          description: "Request graceful shutdown of all edge workers",
+          options: [
+            opt(
+              ["-y", "--yes"],
+              "Skip confirmation prompt and proceed with shutdown"
+            ),
+          ],
+        },
+        {
+          name: "shutdown-remote-edge-worker",
+          description: "Initiate the shutdown of the remote edge worker",
+          options: [requiredEdgeHostname],
+        },
+        {
+          name: "status",
+          description: "Check for Airflow Local Edge Worker status",
+          options: [pid, verbose],
+        },
+        {
+          name: "stop",
+          description: "Stop a running local Airflow Edge Worker",
+          options: [
+            opt(["-w", "--wait"], "Wait until edge worker is shut down"),
+            pid,
+            verbose,
+          ],
+        },
+        {
+          name: "worker",
+          description: "Start Airflow Edge Worker",
+          options: [
+            opt(
+              ["-c", "--concurrency"],
+              "The number of worker processes",
+              "concurrency"
+            ),
+            opt(
+              ["-q", "--queues"],
+              "Comma delimited list of queues to serve, serve all queues if not provided",
+              "queues"
+            ),
+            opt(
+              ["-t", "--team-name"],
+              "Team name for the experimental multi-team feature. If omitted, the worker operates as a default-team worker",
+              "team"
+            ),
+            edgeHostname,
+            ...daemonOpts,
+            opt(
+              ["-u", "--umask"],
+              "Set the umask of edge worker in daemon mode",
+              "umask"
+            ),
+            verbose,
+          ],
+        },
+      ],
+    },
+    {
       name: "fab-db",
       description: "Manage FAB (FAB auth manager only)",
       subcommands: [
@@ -1258,6 +1509,52 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "keycloak-auth-manager",
+      description:
+        "Manage resources used by Keycloak auth manager (Keycloak auth manager only)",
+      subcommands: [
+        {
+          name: "add-user-to-team",
+          description: "Add a Keycloak user to a team group",
+          args: [
+            {
+              name: "target_username",
+              description: "Username to add to the team",
+            },
+            keycloakTeam,
+          ],
+          options: keycloakAuth,
+        },
+        {
+          name: "create-all",
+          description:
+            "Create all entities (scopes, resources and permissions) in Keycloak",
+          options: [...keycloakAuth, keycloakTeams, keycloakDryRun],
+        },
+        {
+          name: "create-permissions",
+          description: "Create permissions in Keycloak",
+          options: [...keycloakAuth, keycloakTeams, keycloakDryRun],
+        },
+        {
+          name: "create-resources",
+          description: "Create resources in Keycloak",
+          options: [...keycloakAuth, keycloakTeams, keycloakDryRun],
+        },
+        {
+          name: "create-scopes",
+          description: "Create scopes in Keycloak",
+          options: [...keycloakAuth, keycloakDryRun],
+        },
+        {
+          name: "create-team",
+          description: "Create Keycloak team group, resources, and permissions",
+          args: keycloakTeam,
+          options: [...keycloakAuth, keycloakDryRun],
+        },
+      ],
+    },
+    {
       name: "kubernetes",
       description: "Tools to help run the KubernetesExecutor",
       subcommands: [
@@ -1266,7 +1563,11 @@ const completionSpec: Fig.Spec = {
           description:
             "Clean up Kubernetes pods in evicted/failed/succeeded/pending states",
           options: [
-            opt("--namespace", "Kubernetes Namespace", "namespace"),
+            opt(
+              "--namespace",
+              "Kubernetes Namespace (default: `[kubernetes_executor] namespace` in configuration, the team's with --team)",
+              "namespace"
+            ),
             opt(
               "--min-pending-minutes",
               "Clean up pending pods older than this many minutes (default: 30)",
@@ -1276,6 +1577,16 @@ const completionSpec: Fig.Spec = {
               "--min-completed-minutes",
               "Minimum age in minutes of a completed pod before it is deleted (default: 1)",
               "minutes"
+            ),
+            kubernetesTeam,
+            opt(
+              "--executor",
+              "With --team, the team's executor whose pods to clean up, by alias, module path or class name",
+              "executor"
+            ),
+            opt(
+              "--allow-shared-namespace",
+              "With --team, clean up even if another team's or a global KubernetesExecutor uses the same namespace"
             ),
             verbose,
           ],
@@ -1292,7 +1603,7 @@ const completionSpec: Fig.Spec = {
               "The output for generated yaml files",
               { name: "output_path", template: "folders" }
             ),
-            opt("--team", "Team name for multi-team configuration", "team"),
+            kubernetesTeam,
             verbose,
           ],
         },
