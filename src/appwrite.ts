@@ -1,6 +1,8 @@
-// Appwrite CLI v28.14.0 (GitHub release appwrite/sdk-for-cli, 2026-11-18).
-// Source: the cobra command tree in internal/cmd of appwrite/sdk-for-cli
-// 28.14.0; service commands are read from internal/cmd/services/*.go.
+// Appwrite CLI v28.14.0 (npm appwrite-cli "latest" and git tag 28.14.0 of appwrite/sdk-for-cli, released 2026-11-18; re-verified 2026-11-20).
+// Source: static read of the Go/cobra command tree in internal/cmd of appwrite/sdk-for-cli at tag 28.14.0 (hand-written commands plus
+// internal/cmd/services/*.go): every command path, alias, flag, shorthand, required flag, repeatable flag and enum was compared with this
+// spec, and enum suggestions that the flag help lists explicitly (provider, output, interval, dimensions, response-type, compression,
+// encryption, template deployment type, environment resources, MFA type) were added. The binary was not run.
 
 const icon =
   "https://raw.githubusercontent.com/appwrite/appwrite/master/public/images/icon.svg";
@@ -1195,7 +1197,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--type",
               description: "Type of authenticator",
-              args: { name: "type" },
+              args: { name: "type", suggestions: ["totp"] },
               isRequired: true,
             },
           ],
@@ -1626,7 +1628,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--provider",
               description: "OAuth2 provider that issued the ID token",
-              args: { name: "provider" },
+              args: { name: "provider", suggestions: ["apple", "google"] },
               isRequired: true,
             },
             {
@@ -1845,7 +1847,77 @@ const completionSpec: Fig.Spec = {
             {
               name: "--provider",
               description: "OAuth2 Provider",
-              args: { name: "provider" },
+              args: {
+                name: "provider",
+                suggestions: [
+                  "amazon",
+                  "apple",
+                  "appwrite",
+                  "atlassian",
+                  "auth0",
+                  "authentik",
+                  "autodesk",
+                  "bitbucket",
+                  "bitly",
+                  "box",
+                  "cloudflare",
+                  "dailymotion",
+                  "discord",
+                  "disqus",
+                  "dropbox",
+                  "etsy",
+                  "facebook",
+                  "figma",
+                  "fusionauth",
+                  "github",
+                  "gitlab",
+                  "google",
+                  "huggingface",
+                  "instagram",
+                  "kakao",
+                  "keycloak",
+                  "kick",
+                  "line",
+                  "linear",
+                  "linkedin",
+                  "microsoft",
+                  "naver",
+                  "netlify",
+                  "notion",
+                  "oidc",
+                  "okta",
+                  "patreon",
+                  "paypal",
+                  "paypalSandbox",
+                  "podio",
+                  "railway",
+                  "reddit",
+                  "resend",
+                  "roblox",
+                  "salesforce",
+                  "slack",
+                  "spotify",
+                  "strava",
+                  "stripe",
+                  "tiktok",
+                  "tradeshift",
+                  "tradeshiftBox",
+                  "twitch",
+                  "vercel",
+                  "vipps",
+                  "vippsSandbox",
+                  "vk",
+                  "webflow",
+                  "wordpress",
+                  "workos",
+                  "x",
+                  "yahoo",
+                  "yammer",
+                  "yandex",
+                  "zoho",
+                  "zoom",
+                ],
+              },
               isRequired: true,
             },
             {
@@ -2463,12 +2535,42 @@ const completionSpec: Fig.Spec = {
             {
               name: "--interval",
               description: "Time bucket size",
-              args: { name: "interval" },
+              args: { name: "interval", suggestions: ["1h", "1d", "1w", "1m"] },
             },
             {
               name: "--dimensions",
               description: "Dimension to break the metrics down by",
-              args: { name: "dimensions" },
+              args: {
+                name: "dimensions",
+                suggestions: [
+                  "country",
+                  "region",
+                  "city",
+                  "browser",
+                  "browserVersion",
+                  "operatingSystem",
+                  "operatingSystemVersion",
+                  "device",
+                  "screenSize",
+                  "referrerSource",
+                  "channel",
+                  "utmSource",
+                  "utmMedium",
+                  "utmCampaign",
+                  "utmContent",
+                  "utmTerm",
+                  "page",
+                  "hostname",
+                  "entryPage",
+                  "exitPage",
+                  "trafficType",
+                  "botName",
+                  "botCategory",
+                  "userId",
+                  "eventName",
+                  "props",
+                ],
+              },
               isRepeatable: true,
             },
             {
@@ -9278,7 +9380,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--type",
               description: "Type for the reference provided",
-              args: { name: "type" },
+              args: { name: "type", suggestions: ["commit", "branch", "tag"] },
               isRequired: true,
             },
             {
@@ -11081,7 +11183,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--encryption",
               description: "Encryption type",
-              args: { name: "encryption" },
+              args: { name: "encryption", suggestions: ["ssl", "tls"] },
             },
             { name: "--auto-tls", description: "Enable SMTP AutoTLS feature" },
             {
@@ -11151,7 +11253,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--encryption",
               description: "Encryption type",
-              args: { name: "encryption" },
+              args: { name: "encryption", suggestions: ["ssl", "tls"] },
             },
             { name: "--auto-tls", description: "Enable SMTP AutoTLS feature" },
             {
@@ -14267,7 +14369,10 @@ const completionSpec: Fig.Spec = {
             {
               name: "--response-type",
               description: "OAuth2 / OIDC response type",
-              args: { name: "response-type" },
+              args: {
+                name: "response-type",
+                suggestions: ["code", "id_token", "code id_token"],
+              },
             },
             {
               name: "--scope",
@@ -14350,7 +14455,10 @@ const completionSpec: Fig.Spec = {
             {
               name: "--response-type",
               description: "OAuth2 / OIDC response type",
-              args: { name: "response-type" },
+              args: {
+                name: "response-type",
+                suggestions: ["code", "id_token", "code id_token"],
+              },
             },
             {
               name: "--scope",
@@ -16680,7 +16788,25 @@ const completionSpec: Fig.Spec = {
               name: "--resources",
               description:
                 "Resources to copy from the project into the environment, by type",
-              args: { name: "resources" },
+              args: {
+                name: "resources",
+                suggestions: [
+                  "database",
+                  "table",
+                  "column",
+                  "index",
+                  "bucket",
+                  "team",
+                  "function",
+                  "site",
+                  "row",
+                  "file",
+                  "user",
+                  "membership",
+                  "deployment",
+                  "site-deployment",
+                ],
+              },
               isRepeatable: true,
             },
             {
@@ -21342,7 +21468,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--type",
               description: "Type for the reference provided",
-              args: { name: "type" },
+              args: { name: "type", suggestions: ["commit", "branch", "tag"] },
               isRequired: true,
             },
             {
@@ -21769,7 +21895,10 @@ const completionSpec: Fig.Spec = {
             {
               name: "--compression",
               description: "Compression algorithm chosen for compression",
-              args: { name: "compression" },
+              args: {
+                name: "compression",
+                suggestions: ["none", "gzip", "zstd"],
+              },
             },
             {
               name: "--encryption",
@@ -21857,7 +21986,10 @@ const completionSpec: Fig.Spec = {
             {
               name: "--compression",
               description: "Compression algorithm chosen for compression",
-              args: { name: "compression" },
+              args: {
+                name: "compression",
+                suggestions: ["none", "gzip", "zstd"],
+              },
             },
             {
               name: "--encryption",
@@ -22151,7 +22283,19 @@ const completionSpec: Fig.Spec = {
               name: "--output",
               description:
                 "Output format type (jpeg, jpg, png, gif, webp, heic and avif)",
-              args: { name: "output" },
+              args: {
+                name: "output",
+                suggestions: [
+                  "jpeg",
+                  "jpg",
+                  "png",
+                  "gif",
+                  "webp",
+                  "heic",
+                  "avif",
+                  "auto",
+                ],
+              },
             },
             {
               name: "--token",
