@@ -1,4 +1,8 @@
-// webpack-cli v7.3.1 + webpack v5.112.2 (GitHub releases / npm, 2026-11-19). Source: webpack-cli OPTIONS.md (`webpack --help=verbose`) and packages/webpack-cli/src/webpack-cli.ts
+// webpack-cli v7.3.1 + webpack v5.113.0 + webpack-dev-server v6.1.0 (npm latest, 2026-11-20). Source (read statically, nothing run): webpack-cli
+// OPTIONS.md (`webpack --help=verbose`), SERVE-OPTIONS-v6.md and packages/webpack-cli/src/webpack-cli.ts for commands, aliases and CLI-only flags
+// (incl. `serve --dev-server-per-compiler`). Core flags and descriptions regenerated from webpack 5.113.0 schemas/WebpackOptions.json (and webpack-dev-server
+// 6.1.0 lib/options.json for `serve`) with a re-implementation of lib/config/cli.js getArguments + webpack-cli makeOption, which reproduces the 5.112.2
+// OPTIONS.md flag set and descriptions exactly.
 const WebpackConfigFileArgument: Fig.SingleOrArray<Fig.Arg> = [
   {
     name: "config-path",
@@ -67,6 +71,485 @@ const completionSpec: Fig.Spec = {
       name: ["serve", "server", "s"],
       description:
         "Run the webpack dev server and watch for source file changes while serving",
+      options: [
+        {
+          name: "--dev-server-per-compiler",
+          description:
+            "Serve each compiler only by the dev server from its own configuration in multi-compiler mode, instead of serving all compilers by every dev server",
+        },
+        {
+          name: "--allowed-hosts",
+          description:
+            "Allows to enumerate the hosts from which access to the dev server are allowed (useful when you are proxying dev server, by default is 'auto')",
+          args: {
+            name: "value",
+            isVariadic: true,
+            suggestions: ["auto", "all"],
+          },
+        },
+        {
+          name: "--allowed-hosts-reset",
+          description:
+            "Clear all items provided in 'allowedHosts' configuration. Allows to enumerate the hosts from which access to the dev server are allowed (useful when you are proxying dev server, by default is 'auto')",
+        },
+        {
+          name: "--bonjour",
+          description:
+            "Allows to broadcasts dev server via ZeroConf networking on start",
+        },
+        {
+          name: "--no-bonjour",
+          description:
+            "Disallows to broadcasts dev server via ZeroConf networking on start",
+        },
+        {
+          name: "--no-client",
+          description: "Disables client script",
+        },
+        {
+          name: "--client-logging",
+          description: "Allows to set log level in the browser",
+          args: {
+            name: "value",
+            suggestions: ["none", "error", "warn", "info", "log", "verbose"],
+          },
+        },
+        {
+          name: "--client-overlay",
+          description:
+            "Enables a full-screen overlay in the browser when there are compiler errors or warnings",
+        },
+        {
+          name: "--no-client-overlay",
+          description:
+            "Disables the full-screen overlay in the browser when there are compiler errors or warnings",
+        },
+        {
+          name: "--client-overlay-errors",
+          description:
+            "Enables a full-screen overlay in the browser when there are compiler errors",
+        },
+        {
+          name: "--no-client-overlay-errors",
+          description:
+            "Disables the full-screen overlay in the browser when there are compiler errors",
+        },
+        {
+          name: "--client-overlay-warnings",
+          description:
+            "Enables a full-screen overlay in the browser when there are compiler warnings",
+        },
+        {
+          name: "--no-client-overlay-warnings",
+          description:
+            "Disables the full-screen overlay in the browser when there are compiler warnings",
+        },
+        {
+          name: "--client-overlay-runtime-errors",
+          description:
+            "Enables a full-screen overlay in the browser when there are uncaught runtime errors",
+        },
+        {
+          name: "--no-client-overlay-runtime-errors",
+          description:
+            "Disables the full-screen overlay in the browser when there are uncaught runtime errors",
+        },
+        {
+          name: "--client-overlay-trusted-types-policy-name",
+          description:
+            "The name of a Trusted Types policy for the overlay. Defaults to 'webpack-dev-server#overlay'",
+          args: {
+            name: "value",
+          },
+        },
+        {
+          name: "--client-progress",
+          description:
+            "Displays compilation progress in the browser. Options include 'linear' and 'circular' for visual indicators",
+          args: {
+            name: "value",
+            isOptional: true,
+            suggestions: ["linear", "circular"],
+          },
+        },
+        {
+          name: "--no-client-progress",
+          description: "Does not display compilation progress in the browser",
+        },
+        {
+          name: "--client-reconnect",
+          description:
+            "Tells dev-server the number of times it should try to reconnect the client",
+          args: {
+            name: "value",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--no-client-reconnect",
+          description: "Tells dev-server to not to try to reconnect the client",
+        },
+        {
+          name: "--client-web-socket-transport",
+          description:
+            "Allows to set custom web socket transport to communicate with dev server",
+          args: {
+            name: "value",
+            suggestions: ["ws", "sse"],
+          },
+        },
+        {
+          name: "--client-web-socket-url",
+          description:
+            "Allows to specify URL to web socket server (useful when you're proxying dev server and client script does not always know where to connect to)",
+          args: {
+            name: "value",
+          },
+        },
+        {
+          name: "--client-web-socket-url-hostname",
+          description:
+            "Tells clients connected to devServer to use the provided hostname",
+          args: {
+            name: "value",
+          },
+        },
+        {
+          name: "--client-web-socket-url-pathname",
+          description:
+            "Tells clients connected to devServer to use the provided path to connect",
+          args: {
+            name: "value",
+          },
+        },
+        {
+          name: "--client-web-socket-url-password",
+          description:
+            "Tells clients connected to devServer to use the provided password to authenticate",
+          args: {
+            name: "value",
+          },
+        },
+        {
+          name: "--client-web-socket-url-port",
+          description:
+            "Tells clients connected to devServer to use the provided port",
+          args: {
+            name: "value",
+          },
+        },
+        {
+          name: "--client-web-socket-url-protocol",
+          description:
+            "Tells clients connected to devServer to use the provided protocol",
+          args: {
+            name: "value",
+            suggestions: ["auto"],
+          },
+        },
+        {
+          name: "--client-web-socket-url-username",
+          description:
+            "Tells clients connected to devServer to use the provided username to authenticate",
+          args: {
+            name: "value",
+          },
+        },
+        {
+          name: "--compress",
+          description: "Enables gzip compression for everything served",
+        },
+        {
+          name: "--no-compress",
+          description: "Disables gzip compression for everything served",
+        },
+        {
+          name: "--history-api-fallback",
+          description:
+            "Allows to proxy requests through a specified index page (by default 'index.html'), useful for Single Page Applications that utilise the HTML5 History API",
+        },
+        {
+          name: "--no-history-api-fallback",
+          description:
+            "Disallows to proxy requests through a specified index page",
+        },
+        {
+          name: "--host",
+          description: "Allows to specify a hostname to use",
+          args: {
+            name: "value",
+            suggestions: ["local-ip", "local-ipv4", "local-ipv6"],
+          },
+        },
+        {
+          name: "--hot",
+          description: "Enables Hot Module Replacement",
+          args: {
+            name: "value",
+            isOptional: true,
+            suggestions: ["only"],
+          },
+        },
+        {
+          name: "--no-hot",
+          description: "Disables Hot Module Replacement",
+        },
+        {
+          name: "--ipc",
+          description: "Listen to a unix socket",
+          args: {
+            name: "value",
+            isOptional: true,
+          },
+        },
+        {
+          name: "--live-reload",
+          description:
+            "Enables reload/refresh the page(s) when file changes are detected (enabled by default)",
+        },
+        {
+          name: "--no-live-reload",
+          description:
+            "Disables reload/refresh the page(s) when file changes are detected (enabled by default)",
+        },
+        {
+          name: "--open",
+          description:
+            "Allows to configure dev server to open the browser(s) and page(s) after server had been started (set it to true to open your default browser)",
+          args: {
+            name: "value",
+            isOptional: true,
+            isVariadic: true,
+          },
+        },
+        {
+          name: "--no-open",
+          description: "Does not open the default browser",
+        },
+        {
+          name: "--open-target",
+          description: "Opens specified page in browser",
+          args: {
+            name: "value",
+            isVariadic: true,
+          },
+        },
+        {
+          name: "--open-app-name",
+          description: "Open specified browser",
+          args: {
+            name: "value",
+            isVariadic: true,
+          },
+        },
+        {
+          name: "--open-reset",
+          description:
+            "Clear all items provided in 'open' configuration. Allows to configure dev server to open the browser(s) and page(s) after server had been started (set it to true to open your default browser)",
+        },
+        {
+          name: "--open-target-reset",
+          description:
+            "Clear all items provided in 'open.target' configuration. Opens specified page in browser",
+        },
+        {
+          name: "--open-app-name-reset",
+          description:
+            "Clear all items provided in 'open.app.name' configuration. Open specified browser",
+        },
+        {
+          name: "--port",
+          description: "Allows to specify a port to use",
+          args: {
+            name: "value",
+            suggestions: ["auto"],
+          },
+        },
+        {
+          name: "--server-type",
+          description: "Allows to set server and options (by default 'http')",
+          args: {
+            name: "value",
+            suggestions: ["http", "https", "http2"],
+          },
+        },
+        {
+          name: "--server-options-passphrase",
+          description: "Passphrase for a pfx file",
+          args: {
+            name: "value",
+          },
+        },
+        {
+          name: "--server-options-request-cert",
+          description: "Request for an SSL certificate",
+        },
+        {
+          name: "--no-server-options-request-cert",
+          description: "Does not request for an SSL certificate",
+        },
+        {
+          name: "--server-options-ca",
+          description:
+            "Path to an SSL CA certificate or content of an SSL CA certificate",
+          args: {
+            name: "value",
+            isVariadic: true,
+            template: ["filepaths"],
+          },
+        },
+        {
+          name: "--server-options-ca-reset",
+          description:
+            "Clear all items provided in 'server.options.ca' configuration. Path to an SSL CA certificate or content of an SSL CA certificate",
+        },
+        {
+          name: "--server-options-cert",
+          description:
+            "Path to an SSL certificate or content of an SSL certificate",
+          args: {
+            name: "value",
+            isVariadic: true,
+            template: ["filepaths"],
+          },
+        },
+        {
+          name: "--server-options-cert-reset",
+          description:
+            "Clear all items provided in 'server.options.cert' configuration. Path to an SSL certificate or content of an SSL certificate",
+        },
+        {
+          name: "--server-options-crl",
+          description:
+            "Path to PEM formatted CRLs (Certificate Revocation Lists) or content of PEM formatted CRLs (Certificate Revocation Lists)",
+          args: {
+            name: "value",
+            isVariadic: true,
+            template: ["filepaths"],
+          },
+        },
+        {
+          name: "--server-options-crl-reset",
+          description:
+            "Clear all items provided in 'server.options.crl' configuration. Path to PEM formatted CRLs (Certificate Revocation Lists) or content of PEM formatted CRLs (Certificate Revocation Lists)",
+        },
+        {
+          name: "--server-options-key",
+          description: "Path to an SSL key or content of an SSL key",
+          args: {
+            name: "value",
+            isVariadic: true,
+            template: ["filepaths"],
+          },
+        },
+        {
+          name: "--server-options-key-reset",
+          description:
+            "Clear all items provided in 'server.options.key' configuration. Path to an SSL key or content of an SSL key",
+        },
+        {
+          name: "--server-options-pfx",
+          description: "Path to an SSL pfx file or content of an SSL pfx file",
+          args: {
+            name: "value",
+            isVariadic: true,
+            template: ["filepaths"],
+          },
+        },
+        {
+          name: "--server-options-pfx-reset",
+          description:
+            "Clear all items provided in 'server.options.pfx' configuration. Path to an SSL pfx file or content of an SSL pfx file",
+        },
+        {
+          name: "--static",
+          description:
+            "Allows to configure options for serving static files from directory (by default 'public' directory)",
+          args: {
+            name: "value",
+            isOptional: true,
+            isVariadic: true,
+          },
+        },
+        {
+          name: "--no-static",
+          description:
+            "Disallows to configure options for serving static files from directory",
+        },
+        {
+          name: "--static-directory",
+          description: "Directory for static contents",
+          args: {
+            name: "value",
+            isVariadic: true,
+            template: ["folders"],
+          },
+        },
+        {
+          name: "--static-public-path",
+          description:
+            "The static files will be available in the browser under this public path",
+          args: {
+            name: "value",
+            isVariadic: true,
+          },
+        },
+        {
+          name: "--static-serve-index",
+          description:
+            "Tells dev server to use serveIndex middleware when enabled",
+        },
+        {
+          name: "--no-static-serve-index",
+          description: "Does not tell dev server to use serveIndex middleware",
+        },
+        {
+          name: "--static-watch",
+          description: "Watches for files in static content directory",
+        },
+        {
+          name: "--no-static-watch",
+          description: "Does not watch for files in static content directory",
+        },
+        {
+          name: "--static-reset",
+          description:
+            "Clear all items provided in 'static' configuration. Allows to configure options for serving static files from directory (by default 'public' directory)",
+        },
+        {
+          name: "--static-public-path-reset",
+          description:
+            "Clear all items provided in 'static.publicPath' configuration. The static files will be available in the browser under this public path",
+        },
+        {
+          name: "--watch-files",
+          description:
+            "Allows to configure list of globs/directories/files to watch for file changes",
+          args: {
+            name: "value",
+            isVariadic: true,
+            template: ["filepaths", "folders"],
+          },
+        },
+        {
+          name: "--watch-files-reset",
+          description:
+            "Clear all items provided in 'watchFiles' configuration. Allows to configure list of globs/directories/files to watch for file changes",
+        },
+        {
+          name: "--no-web-socket-server",
+          description: "Disallows to set web socket server and options",
+        },
+        {
+          name: "--web-socket-server-type",
+          description:
+            "Allows to set web socket server and options (by default 'ws')",
+          args: {
+            name: "value",
+            suggestions: ["ws"],
+          },
+        },
+      ],
     },
     {
       name: ["version", "v"],
@@ -728,7 +1211,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--experiments-typescript",
       description:
-        "Enable the built-in TypeScript support only when Node.js supports it (>= 22.6) and no loader is registered for TypeScript files. Enable/disable the built-in TypeScript support",
+        "Enable the built-in TypeScript support only when no loader is registered for TypeScript files. Enable/disable the built-in TypeScript support",
       args: {
         name: "value",
         isOptional: true,
@@ -1498,6 +1981,15 @@ const completionSpec: Fig.Spec = {
       description: "Negative 'module-parser-css-named-exports' option",
     },
     {
+      name: "--module-parser-css-parse-errors",
+      description:
+        "Report each CSS parse error (CSS Syntax Level 3 §4, §5) the stylesheet holds: a build error where end of input cuts a token or rule short, a build warning for one the parser reads past. Off by default",
+    },
+    {
+      name: "--no-module-parser-css-parse-errors",
+      description: "Negative 'module-parser-css-parse-errors' option",
+    },
+    {
       name: "--module-parser-css-url",
       description:
         "Enable/disable `url()`/`image-set()`/`src()`/`image()` functions handling",
@@ -1777,6 +2269,15 @@ const completionSpec: Fig.Spec = {
     {
       name: "--no-module-parser-css-auto-named-exports",
       description: "Negative 'module-parser-css-auto-named-exports' option",
+    },
+    {
+      name: "--module-parser-css-auto-parse-errors",
+      description:
+        "Report each CSS parse error (CSS Syntax Level 3 §4, §5) the stylesheet holds: a build error where end of input cuts a token or rule short, a build warning for one the parser reads past. Off by default",
+    },
+    {
+      name: "--no-module-parser-css-auto-parse-errors",
+      description: "Negative 'module-parser-css-auto-parse-errors' option",
     },
     {
       name: "--module-parser-css-auto-pure",
@@ -2071,6 +2572,15 @@ const completionSpec: Fig.Spec = {
       description: "Negative 'module-parser-css-global-named-exports' option",
     },
     {
+      name: "--module-parser-css-global-parse-errors",
+      description:
+        "Report each CSS parse error (CSS Syntax Level 3 §4, §5) the stylesheet holds: a build error where end of input cuts a token or rule short, a build warning for one the parser reads past. Off by default",
+    },
+    {
+      name: "--no-module-parser-css-global-parse-errors",
+      description: "Negative 'module-parser-css-global-parse-errors' option",
+    },
+    {
       name: "--module-parser-css-global-url",
       description:
         "Enable/disable `url()`/`image-set()`/`src()`/`image()` functions handling",
@@ -2355,6 +2865,15 @@ const completionSpec: Fig.Spec = {
       description: "Negative 'module-parser-css-module-named-exports' option",
     },
     {
+      name: "--module-parser-css-module-parse-errors",
+      description:
+        "Report each CSS parse error (CSS Syntax Level 3 §4, §5) the stylesheet holds: a build error where end of input cuts a token or rule short, a build warning for one the parser reads past. Off by default",
+    },
+    {
+      name: "--no-module-parser-css-module-parse-errors",
+      description: "Negative 'module-parser-css-module-parse-errors' option",
+    },
+    {
       name: "--module-parser-css-module-pure",
       description:
         "Enable strict pure mode: every selector must contain at least one local class or id selector",
@@ -2556,9 +3075,18 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--module-parser-html-parse-errors",
+      description:
+        "Report each HTML parse error the page holds, by its WHATWG or html5lib name: a build error where end of input cuts a tag, comment or doctype short, a build warning for one the parser reads past. Off by default",
+    },
+    {
+      name: "--no-module-parser-html-parse-errors",
+      description: "Negative 'module-parser-html-parse-errors' option",
+    },
+    {
       name: "--module-parser-html-sources",
       description:
-        'A source entry: either the string `"..."` to inline the built-in default sources, or an object describing a `tag`/`attribute` pair to extract and how to bundle it. Configure extraction of URL-like attribute values (e.g. `<img src>`, `<link href>`, `<script src>`) as webpack dependencies. `true` (default) uses the built-in source list; `false` disables extraction entirely so attributes are left untouched and `<script src>` / `<link rel="modulepreload">` / `<link rel="stylesheet">` no longer become compilation entries; an array lets you customize which `tag`/`attribute` pairs are treated as URLs and how they are bundled. Use the string `"..."` inside the array to inline the defaults. Inline `<script>` and `<style>` bodies are always processed. Use `webpackIgnore` comments or `IgnorePlugin` to skip individual URLs',
+        'A source entry: either the string `"..."` to inline the built-in default sources, or an object describing a `tag`/`attribute` pair to extract and how to bundle it. Configure extraction of URL-like attribute values (e.g. `<img src>`, `<link href>`, `<script src>`) as webpack dependencies. `true` (default) uses the built-in source list; `false` disables extraction entirely so attributes are left untouched and `<script src>` / `<link rel="modulepreload">` / `<link rel="stylesheet">` no longer become compilation entries; an array lets you customize which `tag`/`attribute` pairs are treated as URLs and how they are bundled. Use the string `"..."` inside the array to inline the defaults. Inline `<script>` and `<style>` bodies are always processed; one whose `lang` names another language is a `data:` module typed as that language\'s files (`<style lang="scss">` as `text/x-scss`, `<script lang="ts">` as `text/typescript`), and any other valid media-type name as `text/x-<lang>`, so a `mimetype` rule runs its loader. A `<style module>` body is a CSS module, and the page\'s `class` and `id` values, the ids its `for`, `form`, `list`, `headers`, `itemref`, `popovertarget`, `commandfor`, `interestfor` and `aria-*` reference attributes name, its same-page `href="#id"` links, SVG `url(#id)` references and SMIL `id.event` timings are rewritten with the names it and any linked stylesheet that is a CSS module declare (see `cssModules`); `<style module="card">` or `<link rel="stylesheet" module="card">` names a module, read as `card.btn`; a page with neither is left as it is. Use `webpackIgnore` comments or `IgnorePlugin` to skip individual URLs',
       args: {
         name: "value",
         isOptional: true,
@@ -6633,6 +7161,41 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "--module-rules-use-source-test",
+      description:
+        "Run the loader's normal function only when its current input matches this condition, the same kind of condition 'test' takes. Input that is not valid UTF-8 text always runs it",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--module-rules-use-source-test-glob",
+      description:
+        "A glob pattern matched against a path, using `/` as path separator on every OS; a `!` prefix excludes what it matches",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--module-rules-use-source-test-not",
+      description: "Logical NOT",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--module-rules-use-source-test-not-glob",
+      description:
+        "A glob pattern matched against a path, using `/` as path separator on every OS; a `!` prefix excludes what it matches",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
       name: "--module-rules-use",
       description: "A loader request",
       args: {
@@ -7289,7 +7852,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--optimization-minimize-html-minify-conditional-comments",
       description:
-        "Minify the markup inside a downlevel-hidden conditional comment (`<!--[if IE]> … <![endif]-->`). Off by default: the body is minified on its own, so a context-sensitive decision inside it — which end tags are optional, where a table cell may sit — is taken as though it started a document rather than where the comment sits. Only browsers older than IE10 read these at all",
+        "Minify the markup inside a downlevel-hidden conditional comment (`<!--[if IE]> … <![endif]-->`). Off by default. The body is minified on its own with every tag it spells kept, and one whose print would still add, drop or move a tag — a wrapper another comment closes, a row of the table it sits in — is left as written, as it is read where the comment sits rather than as a document. Only browsers older than IE10 read these at all",
     },
     {
       name: "--no-optimization-minimize-html-minify-conditional-comments",
@@ -7393,7 +7956,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--optimization-minimize-html-remove-redundant-attributes",
       description:
-        'Drop an attribute whose value is the one the element already defaults to. Off by default: an attribute a page no longer carries is one `getAttribute` and every attribute selector read differently, whichever tier dropped it. `true` (or `"smart"`) drops only markers on elements that render nothing — `<script type=text/javascript>`, `<script language=javascript>`, `<script charset=utf-8>`, `<style type=text/css>`, `<link type=text/css>`, `<link media=all>` — so no rule that styles the page stops applying, which is what `@swc/html` does by default. `"all"` also drops spec defaults such as `<input type=text>` and `<form method=get>`, which reaches further still: an attribute selector matches the content attribute, not the reflected default, so `input[type=text]` stops matching',
+        'Drop an attribute whose value is the one the element already defaults to. Off by default: an attribute a page no longer carries is one `getAttribute` and every attribute selector read differently, whichever tier dropped it. `true` (or `"smart"`) drops only markers on elements that render nothing — `<script type=text/javascript>`, `<script language=javascript>`, `<script charset=utf-8>` on a page that declares UTF-8, `<style type=text/css>`, `<link type=text/css>`, `<link media=all>` — so no rule that styles the page stops applying, which is what `@swc/html` does by default. `"all"` also drops spec defaults such as `<input type=text>` and `<form method=get>`, which reaches further still: an attribute selector matches the content attribute, not the reflected default, so `input[type=text]` stops matching',
       args: {
         name: "value",
         isOptional: true,
@@ -7442,6 +8005,420 @@ const completionSpec: Fig.Spec = {
       description: "Negative 'optimization-minimize-xml' option",
     },
     {
+      name: "--optimization-minimize-xml-angle-precision",
+      description:
+        "With `convertTransforms`, round the angle each SVG transform turns by to this many decimal places, a whole number from 0 to 15, as svgo's `degPrecision` does, and recompose what remains within `precision`. Off by default because the drawing turns by what the rounding drops",
+      args: {
+        name: "value",
+      },
+    },
+    {
+      name: "--optimization-minimize-xml-apply-transforms",
+      description:
+        "Bake each SVG path's `transform` into its path data, rounded to `precision` decimals (3 when unset), scaling a stroke the transform scales. Off by default because rounding moves points; skip paths with IDs, styles, markers, clip paths, masks, filters or `url()` paints, arcs under a skew, and documents with stylesheets, scripts or animations",
+    },
+    {
+      name: "--no-optimization-minimize-xml-apply-transforms",
+      description:
+        "Negative 'optimization-minimize-xml-apply-transforms' option",
+    },
+    {
+      name: "--optimization-minimize-xml-cleanup-ids",
+      description:
+        "Remove SVG IDs nothing in the document references and rename the rest to the shortest names, rewriting `href`, `url()` and ID-list references. Off by default because a reference from outside the document, such as a sprite's `file.svg#icon` or a page's `getElementById`, stops resolving; skip stylesheets, scripts, animations, duplicate IDs, `xml:id` and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-xml-cleanup-ids",
+      description: "Negative 'optimization-minimize-xml-cleanup-ids' option",
+    },
+    {
+      name: "--optimization-minimize-xml-cleanup-structure",
+      description:
+        "Collapse SVG groups, hoist identical context-free inherited attributes or move them to sole graphics children, inline validated presentation declarations and remove empty text, unnamed definitions and exact redundant attributes. Off by default because consumers can observe structure and attribute presence; preserve IDs and skip stylesheets, scripts, animations and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-xml-cleanup-structure",
+      description:
+        "Negative 'optimization-minimize-xml-cleanup-structure' option",
+    },
+    {
+      name: "--optimization-minimize-xml-collapse-attribute-whitespace",
+      description:
+        "Trim every SVG attribute value and collapse each run of whitespace in it to one space, as svgo's `cleanupAttrs` does, `xmlns` included. Off by default because a value whose spaces mean something, such as a `data-` attribute or a namespace name, changes",
+    },
+    {
+      name: "--no-optimization-minimize-xml-collapse-attribute-whitespace",
+      description:
+        "Negative 'optimization-minimize-xml-collapse-attribute-whitespace' option",
+    },
+    {
+      name: "--optimization-minimize-xml-collapse-whitespace",
+      description:
+        "Remove whitespace-only text in known SVG containers, under `xml:space` too since that lays out text alone, preserving text content and foreign content, and kept where a stylesheet reads `:empty` or is unread. On by default, since that text renders nothing; `false` keeps it for scripts, and for the stylesheets of a page that inlines the SVG, which read whitespace nodes",
+    },
+    {
+      name: "--no-optimization-minimize-xml-collapse-whitespace",
+      description:
+        "Negative 'optimization-minimize-xml-collapse-whitespace' option",
+    },
+    {
+      name: "--optimization-minimize-xml-comments",
+      description:
+        'Which comments survive. `"some"`, the default, keeps an XML legal notice: a comment opening with `!` or annotated `@license` or `@preserve`; `true` (or `"all"`) keeps every comment and `false` keeps none; a string is read as a regular expression source, and it, a `RegExp` or a `(comment) => boolean` predicate is asked about each comment\'s own text and keeps the ones it accepts, standing in for the default rule rather than beside it. A `<?…?>` processing instruction is no comment and stays whatever this says. A predicate is handed to the minimizer\'s worker pool as source, so it must not close over anything',
+      args: {
+        name: "value",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--no-optimization-minimize-xml-comments",
+      description: "Negative 'optimization-minimize-xml-comments' option",
+    },
+    {
+      name: "--optimization-minimize-xml-convert-curves-to-arcs",
+      description:
+        "With `shortenPathData`, write SVG path cubic curves that stay within `precision` decimals (3 when unset) of one circle as arcs of it, joining neighbors on the same circle, other cubics as quadratics within that error, and nearly flat circular arcs as lines. `\"loose\"` fits as svgo's `makeArcs` does instead: at a curve's quarter points, against its unrounded ends, writing the rounded radius unchecked, so arcs can stray past the precision. Off by default because the arc is a true circle, not the curve; skip documents with markers, stylesheets, scripts or animations",
+      args: {
+        name: "value",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--no-optimization-minimize-xml-convert-curves-to-arcs",
+      description:
+        "Negative 'optimization-minimize-xml-convert-curves-to-arcs' option",
+    },
+    {
+      name: "--optimization-minimize-xml-convert-shapes",
+      description:
+        "Convert leaf SVG lines, polylines and polygons to shorter paths with identical coordinates and vertices, and equal-radius ellipses to circles. Off by default because consumers can observe element types; skip documents with stylesheets, scripts, animations or DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-xml-convert-shapes",
+      description: "Negative 'optimization-minimize-xml-convert-shapes' option",
+    },
+    {
+      name: "--optimization-minimize-xml-convert-transforms",
+      description:
+        "With `shortenNumbers`, recompose each SVG transform list as the shortest list whose matrix matches it within `precision` decimals (3 when unset), such as a `matrix()` becoming `rotate(-45 261.757 -252.243)`. Off by default because the result is rounded, not exact",
+    },
+    {
+      name: "--no-optimization-minimize-xml-convert-transforms",
+      description:
+        "Negative 'optimization-minimize-xml-convert-transforms' option",
+    },
+    {
+      name: "--optimization-minimize-xml-inline-style-pseudo-classes",
+      description: "A pseudo-class, with or without its colon",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--optimization-minimize-xml-inline-style-pseudo-classes-reset",
+      description:
+        "Clear all items provided in 'optimization.minimize.xml.inlineStylePseudoClasses' configuration. With `inlineStyles`, inline rules whose selectors use these pseudo-classes, such as `:hover`, as if they always held, as svgo's `usePseudos` does. Off by default because a style meant for a state then always applies",
+    },
+    {
+      name: "--optimization-minimize-xml-inline-styles",
+      description:
+        "Move the rules of SVG stylesheets into the style attributes of the elements they match, in cascade order before each element's own, then drop the stylesheets and the classes they named, where every selector uses types, classes, IDs, attributes, tree-structural pseudo-classes or `:not()` and the result is no larger. Off by default because scripts and external CSS can observe classes and stylesheets",
+    },
+    {
+      name: "--no-optimization-minimize-xml-inline-styles",
+      description: "Negative 'optimization-minimize-xml-inline-styles' option",
+    },
+    {
+      name: "--optimization-minimize-xml-merge-disjoint-paths",
+      description:
+        "Merge adjacent SVG paths of any shape with the same attributes whose bounds, stroke included, do not overlap, outside IDs, styles, markers, dashes, clips, masks, filters and `url()` paint. Off by default because anti-aliasing can blend a pixel both paths reach differently once merged",
+    },
+    {
+      name: "--no-optimization-minimize-xml-merge-disjoint-paths",
+      description:
+        "Negative 'optimization-minimize-xml-merge-disjoint-paths' option",
+    },
+    {
+      name: "--optimization-minimize-xml-merge-paths",
+      description:
+        "Merge adjacent disjoint axis-aligned SVG lines with explicit opaque crisp-edge strokes, no fill, dashes or markers. Skip compositing, transformed or ID-bearing ancestors; identical paint remains eligible during color cleanup. Off by default because consumers can observe element boundaries; skip stylesheets, scripts, animations and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-xml-merge-paths",
+      description: "Negative 'optimization-minimize-xml-merge-paths' option",
+    },
+    {
+      name: "--optimization-minimize-xml-precision",
+      description:
+        "Round SVG geometry, path data, transforms and presentation numbers to this many decimal places, a whole number from 0 to 15, wherever `shortenNumbers` and `shortenPathData` shorten them. Path points round where they land, so error never accumulates, and curves and arcs that draw straight lines become lines. Off by default because rounding moves geometry; svgo rounds to 3",
+      args: {
+        name: "value",
+      },
+    },
+    {
+      name: "--optimization-minimize-xml-remove-attributes",
+      description:
+        "An `element:attribute:value` pattern of attributes to remove",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--optimization-minimize-xml-remove-attributes-reset",
+      description:
+        "Clear all items provided in 'optimization.minimize.xml.removeAttributes' configuration. Remove attributes matching `element:attribute:value` patterns, each part a case-insensitive regular expression matched whole, `*` matching anything; a missing element or value part matches any. Off by default because only the author knows which attributes the image can lose",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-deprecated-attributes",
+      description:
+        "Write an SVG element's `xml:lang` as `lang` in place of a `lang` it overrides; `\"unsafe\"` drops `xml:lang` instead, as svgo's `removeUnsafe` does, losing the language it names. Off by default because SVG 1.1 readers know only `xml:lang`",
+      args: {
+        name: "value",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-deprecated-attributes",
+      description:
+        "Negative 'optimization-minimize-xml-remove-deprecated-attributes' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-descriptions",
+      description:
+        "Remove SVG `desc` elements. Off by default because they describe the image for assistive technology",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-descriptions",
+      description:
+        "Negative 'optimization-minimize-xml-remove-descriptions' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-dimensions",
+      description:
+        "Remove the root SVG element's `width` and `height`, moving plain ones into a missing `viewBox`, so the image scales to whatever box it is placed in. Off by default because the image loses its intrinsic size",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-dimensions",
+      description:
+        "Negative 'optimization-minimize-xml-remove-dimensions' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-doctype",
+      description:
+        "Remove a DOCTYPE without an internal subset where no entity reference needs one. Off by default because a validating consumer reads the DTD it names",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-doctype",
+      description: "Negative 'optimization-minimize-xml-remove-doctype' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-editor-data",
+      description:
+        "Remove elements and attributes in known editor namespaces within SVG, preserving namespace declarations and unrelated XML data. Off by default because editor data may be needed to edit the image",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-editor-data",
+      description:
+        "Negative 'optimization-minimize-xml-remove-editor-data' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-elements-class",
+      description: "A class whose elements are removed",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--optimization-minimize-xml-remove-elements-class-reset",
+      description:
+        "Clear all items provided in 'optimization.minimize.xml.removeElements.class' configuration. Classes whose elements are removed",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-elements-id",
+      description: "An ID whose element is removed",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--optimization-minimize-xml-remove-elements-id-reset",
+      description:
+        "Clear all items provided in 'optimization.minimize.xml.removeElements.id' configuration. IDs whose elements are removed",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-empty-attributes",
+      description:
+        "Remove empty `class`, `id` and `style` attributes on SVG elements unless the DTD declares them, and other unprefixed empty SVG attributes that read as absent, keeping links, languages, conditional tests, ARIA, data and event attributes. Off by default because selectors and scripts can observe attribute presence",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-empty-attributes",
+      description:
+        "Negative 'optimization-minimize-xml-remove-empty-attributes' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-empty-elements",
+      description:
+        "Remove empty SVG `g` and `defs` containers having only namespace declarations, preserving other attributes and DTD defaults. Off by default because selectors and scripts can observe document structure",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-empty-elements",
+      description:
+        "Negative 'optimization-minimize-xml-remove-empty-elements' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-hidden-elements",
+      description:
+        'Remove ID-free SVG content that renders nothing: `display="none"`, zero opacity outside clip paths, zero-size rectangles, circles, ellipses and images, paths and point lists that draw nothing, shapes that paint neither fill nor stroke, uses of what draws nothing, `tref` elements without a reference, and subtrees under `visibility="hidden"` that never set it back. Off by default because such content can still be read, and zero opacity still receives pointer events; skip what a style, a `switch` or (for opacity and sizes) an ancestor\'s filter, mask or clip path can observe, and documents with stylesheets, scripts, animations or DTDs',
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-hidden-elements",
+      description:
+        "Negative 'optimization-minimize-xml-remove-hidden-elements' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-metadata",
+      description:
+        "Remove SVG `metadata` elements and their contents, preserving `title`, `desc` and the document element. Off by default because metadata can carry licensing and application data",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-metadata",
+      description:
+        "Negative 'optimization-minimize-xml-remove-metadata' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-off-canvas-paths",
+      description:
+        "Remove unnamed SVG paths whose bounds, stroke included, lie wholly outside the root `viewBox`, outside transforms, filters, markers and styles. Off by default because a viewport of another aspect ratio letterboxes the `viewBox` and shows what lies past it",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-off-canvas-paths",
+      description:
+        "Negative 'optimization-minimize-xml-remove-off-canvas-paths' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-raster-images",
+      description:
+        "Remove SVG `image` elements referencing JPEG, PNG or GIF images. Off by default because those images disappear from the drawing",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-raster-images",
+      description:
+        "Negative 'optimization-minimize-xml-remove-raster-images' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-scripts",
+      description:
+        "Remove `script` elements, event handler and `srcdoc` attributes, `javascript:` and `vbscript:` URLs and links to HTML or SVG `data:` documents, for SVG that must not run code. Off by default because the image loses its behavior",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-scripts",
+      description: "Negative 'optimization-minimize-xml-remove-scripts' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-titles",
+      description:
+        "Remove SVG `title` elements. Off by default because they name the image for assistive technology and tooltips",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-titles",
+      description: "Negative 'optimization-minimize-xml-remove-titles' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-unknown-attributes",
+      description:
+        'Remove unprefixed attributes that no SVG, ARIA or animation specification defines from the SVG elements, keeping `data-`, `aria-`, `role` and event handler attributes; `"unsafe"` drops `role` too, as svgo does by default, though assistive technology reads it. Off by default because scripts and CSS outside the document can read them; skip documents with stylesheets or scripts',
+      args: {
+        name: "value",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-unknown-attributes",
+      description:
+        "Negative 'optimization-minimize-xml-remove-unknown-attributes' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-unknown-elements",
+      description:
+        "Remove SVG-namespace elements that no SVG specification defines, with their content, which renders nothing; a `switch` child stays. Off by default because scripts and CSS selectors outside the document can still find them",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-unknown-elements",
+      description:
+        "Negative 'optimization-minimize-xml-remove-unknown-elements' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-unused-namespaces",
+      description:
+        "Remove unused prefixed namespace declarations within SVG, preserving default namespaces and prefixes referenced in names or content. On by default, since no name uses them; `false` keeps them for scripts that read namespace declarations",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-unused-namespaces",
+      description:
+        "Negative 'optimization-minimize-xml-remove-unused-namespaces' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-view-box",
+      description:
+        "Remove the root SVG element's `viewBox` where it restates its plain `width` and `height`. Off by default because the image then no longer scales when CSS gives it another size",
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-view-box",
+      description:
+        "Negative 'optimization-minimize-xml-remove-view-box' option",
+    },
+    {
+      name: "--optimization-minimize-xml-remove-xlink",
+      description:
+        'Spell `xlink:href` as the SVG 2 `href` where an element has no `href`, a link\'s `xlink:show` as `target` and an `xlink:title` as a `title` child, and drop `xlink:type="simple"`, so the XLink namespace declaration can go. Off by default because browsers before SVG 2 read only `xlink:href`',
+    },
+    {
+      name: "--no-optimization-minimize-xml-remove-xlink",
+      description: "Negative 'optimization-minimize-xml-remove-xlink' option",
+    },
+    {
+      name: "--optimization-minimize-xml-reuse-paths",
+      description:
+        "Reuse unidentified duplicate leaf SVG paths without transforms through existing IDs and SVG 2 href references, preserving IDs and target element types. Require explicit context-free fill and stroke; compare identical authored paint before color cleanup. Off by default because consumers can observe element types; skip stylesheets, scripts, animations, duplicate IDs and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-xml-reuse-paths",
+      description: "Negative 'optimization-minimize-xml-reuse-paths' option",
+    },
+    {
+      name: "--optimization-minimize-xml-shorten-colors",
+      description:
+        "Shorten opaque SVG presentation colors using the CSS minifier, preserving paint servers, contextual colors and DTD-declared values. On by default, as `minimize.html` normalizes attribute spellings; `false` keeps the source spelling where a selector or script reads it",
+    },
+    {
+      name: "--no-optimization-minimize-xml-shorten-colors",
+      description: "Negative 'optimization-minimize-xml-shorten-colors' option",
+    },
+    {
+      name: "--optimization-minimize-xml-shorten-numbers",
+      description:
+        "Shorten SVG geometry and transform decimals and separators without rounding, changing units or rewriting exponent notation. Preserve DTD-declared values. On by default, as `minimize.html` normalizes attribute spellings; `false` keeps the source spelling where a selector or script reads it",
+    },
+    {
+      name: "--no-optimization-minimize-xml-shorten-numbers",
+      description:
+        "Negative 'optimization-minimize-xml-shorten-numbers' option",
+    },
+    {
+      name: "--optimization-minimize-xml-shorten-path-data",
+      description:
+        "Compact SVG path numbers, repeated commands and separators without rounding, preserving arc flags and DTD-declared values; drop segments that draw nothing, such as a line back to the start before `z`, where no marker, stylesheet, script, animation or ID can observe them. On by default, as `minimize.html` normalizes attribute spellings; `false` keeps the source spelling where a selector or script reads it",
+    },
+    {
+      name: "--no-optimization-minimize-xml-shorten-path-data",
+      description:
+        "Negative 'optimization-minimize-xml-shorten-path-data' option",
+    },
+    {
       name: "--optimization-minimize-xml-sort-attributes",
       description:
         "Print attributes with the document's commonest names first, breaking ties by case-sensitive name. Off by default: consumers observing attribute order see the new order",
@@ -7450,6 +8427,25 @@ const completionSpec: Fig.Spec = {
       name: "--no-optimization-minimize-xml-sort-attributes",
       description:
         "Negative 'optimization-minimize-xml-sort-attributes' option",
+    },
+    {
+      name: "--optimization-minimize-xml-sort-definitions",
+      description:
+        "Sort adjacent SVG resource definitions within defs by type and ID, preserving IDs and references. Off by default because consumers can observe order; skip stylesheets, scripts, animations, duplicate IDs and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-xml-sort-definitions",
+      description:
+        "Negative 'optimization-minimize-xml-sort-definitions' option",
+    },
+    {
+      name: "--optimization-minimize-xml-sort-symbols",
+      description:
+        "Sort adjacent SVG symbol definitions by ID, preserving IDs and references. Off by default because consumers can observe definition order; skip documents with stylesheets, scripts, animations, duplicate IDs or DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-xml-sort-symbols",
+      description: "Negative 'optimization-minimize-xml-sort-symbols' option",
     },
     {
       name: "--no-optimization-minimize-options-css",
@@ -7833,7 +8829,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--optimization-minimize-options-html-minify-conditional-comments",
       description:
-        "Minify the markup inside a downlevel-hidden conditional comment (`<!--[if IE]> … <![endif]-->`). Off by default: the body is minified on its own, so a context-sensitive decision inside it — which end tags are optional, where a table cell may sit — is taken as though it started a document rather than where the comment sits. Only browsers older than IE10 read these at all",
+        "Minify the markup inside a downlevel-hidden conditional comment (`<!--[if IE]> … <![endif]-->`). Off by default. The body is minified on its own with every tag it spells kept, and one whose print would still add, drop or move a tag — a wrapper another comment closes, a row of the table it sits in — is left as written, as it is read where the comment sits rather than as a document. Only browsers older than IE10 read these at all",
     },
     {
       name: "--no-optimization-minimize-options-html-minify-conditional-comments",
@@ -7937,7 +8933,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "--optimization-minimize-options-html-remove-redundant-attributes",
       description:
-        'Drop an attribute whose value is the one the element already defaults to. Off by default: an attribute a page no longer carries is one `getAttribute` and every attribute selector read differently, whichever tier dropped it. `true` (or `"smart"`) drops only markers on elements that render nothing — `<script type=text/javascript>`, `<script language=javascript>`, `<script charset=utf-8>`, `<style type=text/css>`, `<link type=text/css>`, `<link media=all>` — so no rule that styles the page stops applying, which is what `@swc/html` does by default. `"all"` also drops spec defaults such as `<input type=text>` and `<form method=get>`, which reaches further still: an attribute selector matches the content attribute, not the reflected default, so `input[type=text]` stops matching',
+        'Drop an attribute whose value is the one the element already defaults to. Off by default: an attribute a page no longer carries is one `getAttribute` and every attribute selector read differently, whichever tier dropped it. `true` (or `"smart"`) drops only markers on elements that render nothing — `<script type=text/javascript>`, `<script language=javascript>`, `<script charset=utf-8>` on a page that declares UTF-8, `<style type=text/css>`, `<link type=text/css>`, `<link media=all>` — so no rule that styles the page stops applying, which is what `@swc/html` does by default. `"all"` also drops spec defaults such as `<input type=text>` and `<form method=get>`, which reaches further still: an attribute selector matches the content attribute, not the reflected default, so `input[type=text]` stops matching',
       args: {
         name: "value",
         isOptional: true,
@@ -7986,6 +8982,431 @@ const completionSpec: Fig.Spec = {
       description: "Negative 'optimization-minimize-options-xml' option",
     },
     {
+      name: "--optimization-minimize-options-xml-angle-precision",
+      description:
+        "With `convertTransforms`, round the angle each SVG transform turns by to this many decimal places, a whole number from 0 to 15, as svgo's `degPrecision` does, and recompose what remains within `precision`. Off by default because the drawing turns by what the rounding drops",
+      args: {
+        name: "value",
+      },
+    },
+    {
+      name: "--optimization-minimize-options-xml-apply-transforms",
+      description:
+        "Bake each SVG path's `transform` into its path data, rounded to `precision` decimals (3 when unset), scaling a stroke the transform scales. Off by default because rounding moves points; skip paths with IDs, styles, markers, clip paths, masks, filters or `url()` paints, arcs under a skew, and documents with stylesheets, scripts or animations",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-apply-transforms",
+      description:
+        "Negative 'optimization-minimize-options-xml-apply-transforms' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-cleanup-ids",
+      description:
+        "Remove SVG IDs nothing in the document references and rename the rest to the shortest names, rewriting `href`, `url()` and ID-list references. Off by default because a reference from outside the document, such as a sprite's `file.svg#icon` or a page's `getElementById`, stops resolving; skip stylesheets, scripts, animations, duplicate IDs, `xml:id` and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-cleanup-ids",
+      description:
+        "Negative 'optimization-minimize-options-xml-cleanup-ids' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-cleanup-structure",
+      description:
+        "Collapse SVG groups, hoist identical context-free inherited attributes or move them to sole graphics children, inline validated presentation declarations and remove empty text, unnamed definitions and exact redundant attributes. Off by default because consumers can observe structure and attribute presence; preserve IDs and skip stylesheets, scripts, animations and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-cleanup-structure",
+      description:
+        "Negative 'optimization-minimize-options-xml-cleanup-structure' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-collapse-attribute-whitespace",
+      description:
+        "Trim every SVG attribute value and collapse each run of whitespace in it to one space, as svgo's `cleanupAttrs` does, `xmlns` included. Off by default because a value whose spaces mean something, such as a `data-` attribute or a namespace name, changes",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-collapse-attribute-whitespace",
+      description:
+        "Negative 'optimization-minimize-options-xml-collapse-attribute-whitespace' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-collapse-whitespace",
+      description:
+        "Remove whitespace-only text in known SVG containers, under `xml:space` too since that lays out text alone, preserving text content and foreign content, and kept where a stylesheet reads `:empty` or is unread. On by default, since that text renders nothing; `false` keeps it for scripts, and for the stylesheets of a page that inlines the SVG, which read whitespace nodes",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-collapse-whitespace",
+      description:
+        "Negative 'optimization-minimize-options-xml-collapse-whitespace' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-comments",
+      description:
+        'Which comments survive. `"some"`, the default, keeps an XML legal notice: a comment opening with `!` or annotated `@license` or `@preserve`; `true` (or `"all"`) keeps every comment and `false` keeps none; a string is read as a regular expression source, and it, a `RegExp` or a `(comment) => boolean` predicate is asked about each comment\'s own text and keeps the ones it accepts, standing in for the default rule rather than beside it. A `<?…?>` processing instruction is no comment and stays whatever this says. A predicate is handed to the minimizer\'s worker pool as source, so it must not close over anything',
+      args: {
+        name: "value",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-comments",
+      description:
+        "Negative 'optimization-minimize-options-xml-comments' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-convert-curves-to-arcs",
+      description:
+        "With `shortenPathData`, write SVG path cubic curves that stay within `precision` decimals (3 when unset) of one circle as arcs of it, joining neighbors on the same circle, other cubics as quadratics within that error, and nearly flat circular arcs as lines. `\"loose\"` fits as svgo's `makeArcs` does instead: at a curve's quarter points, against its unrounded ends, writing the rounded radius unchecked, so arcs can stray past the precision. Off by default because the arc is a true circle, not the curve; skip documents with markers, stylesheets, scripts or animations",
+      args: {
+        name: "value",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-convert-curves-to-arcs",
+      description:
+        "Negative 'optimization-minimize-options-xml-convert-curves-to-arcs' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-convert-shapes",
+      description:
+        "Convert leaf SVG lines, polylines and polygons to shorter paths with identical coordinates and vertices, and equal-radius ellipses to circles. Off by default because consumers can observe element types; skip documents with stylesheets, scripts, animations or DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-convert-shapes",
+      description:
+        "Negative 'optimization-minimize-options-xml-convert-shapes' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-convert-transforms",
+      description:
+        "With `shortenNumbers`, recompose each SVG transform list as the shortest list whose matrix matches it within `precision` decimals (3 when unset), such as a `matrix()` becoming `rotate(-45 261.757 -252.243)`. Off by default because the result is rounded, not exact",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-convert-transforms",
+      description:
+        "Negative 'optimization-minimize-options-xml-convert-transforms' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-inline-style-pseudo-classes",
+      description: "A pseudo-class, with or without its colon",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--optimization-minimize-options-xml-inline-style-pseudo-classes-reset",
+      description:
+        "Clear all items provided in 'optimization.minimizeOptions.xml.inlineStylePseudoClasses' configuration. With `inlineStyles`, inline rules whose selectors use these pseudo-classes, such as `:hover`, as if they always held, as svgo's `usePseudos` does. Off by default because a style meant for a state then always applies",
+    },
+    {
+      name: "--optimization-minimize-options-xml-inline-styles",
+      description:
+        "Move the rules of SVG stylesheets into the style attributes of the elements they match, in cascade order before each element's own, then drop the stylesheets and the classes they named, where every selector uses types, classes, IDs, attributes, tree-structural pseudo-classes or `:not()` and the result is no larger. Off by default because scripts and external CSS can observe classes and stylesheets",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-inline-styles",
+      description:
+        "Negative 'optimization-minimize-options-xml-inline-styles' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-merge-disjoint-paths",
+      description:
+        "Merge adjacent SVG paths of any shape with the same attributes whose bounds, stroke included, do not overlap, outside IDs, styles, markers, dashes, clips, masks, filters and `url()` paint. Off by default because anti-aliasing can blend a pixel both paths reach differently once merged",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-merge-disjoint-paths",
+      description:
+        "Negative 'optimization-minimize-options-xml-merge-disjoint-paths' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-merge-paths",
+      description:
+        "Merge adjacent disjoint axis-aligned SVG lines with explicit opaque crisp-edge strokes, no fill, dashes or markers. Skip compositing, transformed or ID-bearing ancestors; identical paint remains eligible during color cleanup. Off by default because consumers can observe element boundaries; skip stylesheets, scripts, animations and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-merge-paths",
+      description:
+        "Negative 'optimization-minimize-options-xml-merge-paths' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-precision",
+      description:
+        "Round SVG geometry, path data, transforms and presentation numbers to this many decimal places, a whole number from 0 to 15, wherever `shortenNumbers` and `shortenPathData` shorten them. Path points round where they land, so error never accumulates, and curves and arcs that draw straight lines become lines. Off by default because rounding moves geometry; svgo rounds to 3",
+      args: {
+        name: "value",
+      },
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-attributes",
+      description:
+        "An `element:attribute:value` pattern of attributes to remove",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-attributes-reset",
+      description:
+        "Clear all items provided in 'optimization.minimizeOptions.xml.removeAttributes' configuration. Remove attributes matching `element:attribute:value` patterns, each part a case-insensitive regular expression matched whole, `*` matching anything; a missing element or value part matches any. Off by default because only the author knows which attributes the image can lose",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-deprecated-attributes",
+      description:
+        "Write an SVG element's `xml:lang` as `lang` in place of a `lang` it overrides; `\"unsafe\"` drops `xml:lang` instead, as svgo's `removeUnsafe` does, losing the language it names. Off by default because SVG 1.1 readers know only `xml:lang`",
+      args: {
+        name: "value",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-deprecated-attributes",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-deprecated-attributes' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-descriptions",
+      description:
+        "Remove SVG `desc` elements. Off by default because they describe the image for assistive technology",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-descriptions",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-descriptions' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-dimensions",
+      description:
+        "Remove the root SVG element's `width` and `height`, moving plain ones into a missing `viewBox`, so the image scales to whatever box it is placed in. Off by default because the image loses its intrinsic size",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-dimensions",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-dimensions' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-doctype",
+      description:
+        "Remove a DOCTYPE without an internal subset where no entity reference needs one. Off by default because a validating consumer reads the DTD it names",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-doctype",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-doctype' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-editor-data",
+      description:
+        "Remove elements and attributes in known editor namespaces within SVG, preserving namespace declarations and unrelated XML data. Off by default because editor data may be needed to edit the image",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-editor-data",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-editor-data' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-elements-class",
+      description: "A class whose elements are removed",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-elements-class-reset",
+      description:
+        "Clear all items provided in 'optimization.minimizeOptions.xml.removeElements.class' configuration. Classes whose elements are removed",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-elements-id",
+      description: "An ID whose element is removed",
+      args: {
+        name: "value",
+        isVariadic: true,
+      },
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-elements-id-reset",
+      description:
+        "Clear all items provided in 'optimization.minimizeOptions.xml.removeElements.id' configuration. IDs whose elements are removed",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-empty-attributes",
+      description:
+        "Remove empty `class`, `id` and `style` attributes on SVG elements unless the DTD declares them, and other unprefixed empty SVG attributes that read as absent, keeping links, languages, conditional tests, ARIA, data and event attributes. Off by default because selectors and scripts can observe attribute presence",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-empty-attributes",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-empty-attributes' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-empty-elements",
+      description:
+        "Remove empty SVG `g` and `defs` containers having only namespace declarations, preserving other attributes and DTD defaults. Off by default because selectors and scripts can observe document structure",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-empty-elements",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-empty-elements' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-hidden-elements",
+      description:
+        'Remove ID-free SVG content that renders nothing: `display="none"`, zero opacity outside clip paths, zero-size rectangles, circles, ellipses and images, paths and point lists that draw nothing, shapes that paint neither fill nor stroke, uses of what draws nothing, `tref` elements without a reference, and subtrees under `visibility="hidden"` that never set it back. Off by default because such content can still be read, and zero opacity still receives pointer events; skip what a style, a `switch` or (for opacity and sizes) an ancestor\'s filter, mask or clip path can observe, and documents with stylesheets, scripts, animations or DTDs',
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-hidden-elements",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-hidden-elements' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-metadata",
+      description:
+        "Remove SVG `metadata` elements and their contents, preserving `title`, `desc` and the document element. Off by default because metadata can carry licensing and application data",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-metadata",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-metadata' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-off-canvas-paths",
+      description:
+        "Remove unnamed SVG paths whose bounds, stroke included, lie wholly outside the root `viewBox`, outside transforms, filters, markers and styles. Off by default because a viewport of another aspect ratio letterboxes the `viewBox` and shows what lies past it",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-off-canvas-paths",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-off-canvas-paths' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-raster-images",
+      description:
+        "Remove SVG `image` elements referencing JPEG, PNG or GIF images. Off by default because those images disappear from the drawing",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-raster-images",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-raster-images' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-scripts",
+      description:
+        "Remove `script` elements, event handler and `srcdoc` attributes, `javascript:` and `vbscript:` URLs and links to HTML or SVG `data:` documents, for SVG that must not run code. Off by default because the image loses its behavior",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-scripts",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-scripts' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-titles",
+      description:
+        "Remove SVG `title` elements. Off by default because they name the image for assistive technology and tooltips",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-titles",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-titles' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-unknown-attributes",
+      description:
+        'Remove unprefixed attributes that no SVG, ARIA or animation specification defines from the SVG elements, keeping `data-`, `aria-`, `role` and event handler attributes; `"unsafe"` drops `role` too, as svgo does by default, though assistive technology reads it. Off by default because scripts and CSS outside the document can read them; skip documents with stylesheets or scripts',
+      args: {
+        name: "value",
+        isOptional: true,
+      },
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-unknown-attributes",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-unknown-attributes' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-unknown-elements",
+      description:
+        "Remove SVG-namespace elements that no SVG specification defines, with their content, which renders nothing; a `switch` child stays. Off by default because scripts and CSS selectors outside the document can still find them",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-unknown-elements",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-unknown-elements' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-unused-namespaces",
+      description:
+        "Remove unused prefixed namespace declarations within SVG, preserving default namespaces and prefixes referenced in names or content. On by default, since no name uses them; `false` keeps them for scripts that read namespace declarations",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-unused-namespaces",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-unused-namespaces' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-view-box",
+      description:
+        "Remove the root SVG element's `viewBox` where it restates its plain `width` and `height`. Off by default because the image then no longer scales when CSS gives it another size",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-view-box",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-view-box' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-remove-xlink",
+      description:
+        'Spell `xlink:href` as the SVG 2 `href` where an element has no `href`, a link\'s `xlink:show` as `target` and an `xlink:title` as a `title` child, and drop `xlink:type="simple"`, so the XLink namespace declaration can go. Off by default because browsers before SVG 2 read only `xlink:href`',
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-remove-xlink",
+      description:
+        "Negative 'optimization-minimize-options-xml-remove-xlink' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-reuse-paths",
+      description:
+        "Reuse unidentified duplicate leaf SVG paths without transforms through existing IDs and SVG 2 href references, preserving IDs and target element types. Require explicit context-free fill and stroke; compare identical authored paint before color cleanup. Off by default because consumers can observe element types; skip stylesheets, scripts, animations, duplicate IDs and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-reuse-paths",
+      description:
+        "Negative 'optimization-minimize-options-xml-reuse-paths' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-shorten-colors",
+      description:
+        "Shorten opaque SVG presentation colors using the CSS minifier, preserving paint servers, contextual colors and DTD-declared values. On by default, as `minimize.html` normalizes attribute spellings; `false` keeps the source spelling where a selector or script reads it",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-shorten-colors",
+      description:
+        "Negative 'optimization-minimize-options-xml-shorten-colors' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-shorten-numbers",
+      description:
+        "Shorten SVG geometry and transform decimals and separators without rounding, changing units or rewriting exponent notation. Preserve DTD-declared values. On by default, as `minimize.html` normalizes attribute spellings; `false` keeps the source spelling where a selector or script reads it",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-shorten-numbers",
+      description:
+        "Negative 'optimization-minimize-options-xml-shorten-numbers' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-shorten-path-data",
+      description:
+        "Compact SVG path numbers, repeated commands and separators without rounding, preserving arc flags and DTD-declared values; drop segments that draw nothing, such as a line back to the start before `z`, where no marker, stylesheet, script, animation or ID can observe them. On by default, as `minimize.html` normalizes attribute spellings; `false` keeps the source spelling where a selector or script reads it",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-shorten-path-data",
+      description:
+        "Negative 'optimization-minimize-options-xml-shorten-path-data' option",
+    },
+    {
       name: "--optimization-minimize-options-xml-sort-attributes",
       description:
         "Print attributes with the document's commonest names first, breaking ties by case-sensitive name. Off by default: consumers observing attribute order see the new order",
@@ -7994,6 +9415,26 @@ const completionSpec: Fig.Spec = {
       name: "--no-optimization-minimize-options-xml-sort-attributes",
       description:
         "Negative 'optimization-minimize-options-xml-sort-attributes' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-sort-definitions",
+      description:
+        "Sort adjacent SVG resource definitions within defs by type and ID, preserving IDs and references. Off by default because consumers can observe order; skip stylesheets, scripts, animations, duplicate IDs and DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-sort-definitions",
+      description:
+        "Negative 'optimization-minimize-options-xml-sort-definitions' option",
+    },
+    {
+      name: "--optimization-minimize-options-xml-sort-symbols",
+      description:
+        "Sort adjacent SVG symbol definitions by ID, preserving IDs and references. Off by default because consumers can observe definition order; skip documents with stylesheets, scripts, animations, duplicate IDs or DTDs",
+    },
+    {
+      name: "--no-optimization-minimize-options-xml-sort-symbols",
+      description:
+        "Negative 'optimization-minimize-options-xml-sort-symbols' option",
     },
     {
       name: "--optimization-module-ids",
@@ -8310,6 +9751,26 @@ const completionSpec: Fig.Spec = {
     {
       name: "--no-optimization-used-exports",
       description: "Negative 'optimization-used-exports' option",
+    },
+    {
+      name: "--output-allow-outside",
+      description:
+        "Absolute path of a directory outside of 'output.path' where files may be written, copied and cleaned. Where files may be written, copied and cleaned outside of 'output.path'. 'true' allows anywhere, 'false' nowhere, and a list allows only inside those directories. When unset, assets plugins emit there are still written (refused with 'experiments.futureDefaults'), while 'output.copy' and 'output.clean' stay inside 'output.path'",
+      args: {
+        name: "value",
+        isOptional: true,
+        isVariadic: true,
+        template: ["folders"],
+      },
+    },
+    {
+      name: "--no-output-allow-outside",
+      description: "Negative 'output-allow-outside' option",
+    },
+    {
+      name: "--output-allow-outside-reset",
+      description:
+        "Clear all items provided in 'output.allowOutside' configuration. Where files may be written, copied and cleaned outside of 'output.path'. 'true' allows anywhere, 'false' nowhere, and a list allows only inside those directories. When unset, assets plugins emit there are still written (refused with 'experiments.futureDefaults'), while 'output.copy' and 'output.clean' stay inside 'output.path'",
     },
     {
       name: "--output-asset-module-filename",
