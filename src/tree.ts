@@ -1,4 +1,6 @@
-// tree v2.3.2 (Homebrew stable, 2026-11-19). Source: `tree --help` and `man tree`
+// tree v2.3.2 (upstream Old-Man-Programmer/tree tag 2.3.2, 2026-03-16, also Homebrew stable; verified 2026-11-20).
+// Source: usage()/option parser in tree.c and doc/tree.1 at tag 2.3.2, read statically (not run);
+// --acl and --selinux exist on Linux builds only
 const completionSpec: Fig.Spec = {
   name: "tree",
   description: "Display directories as trees (with optional color/HTML output)",
@@ -191,6 +193,15 @@ const completionSpec: Fig.Spec = {
       description: "Print device ID number to which each file belongs",
     },
     {
+      name: "--acl",
+      description:
+        "Print permissions with a + if an ACL is present (Linux only, implies -p)",
+    },
+    {
+      name: "--selinux",
+      description: "Print the SELinux security label if present (Linux only)",
+    },
+    {
       name: "-v",
       description: "Sort files alphanumerically by version",
     },
@@ -221,7 +232,6 @@ const completionSpec: Fig.Spec = {
     {
       name: "--sort",
       description: "Select sort",
-      requiresSeparator: true,
       args: {
         name: "type",
         suggestions: ["name", "version", "size", "mtime", "ctime", "none"],
