@@ -1,7 +1,11 @@
-// Angular CLI v22.3.0 (npm "latest", 2026-11-19). Source: angular/angular-cli
+// Angular CLI v22.3.0 (npm "latest", 2026-11-20). Source: angular/angular-cli
 // v22.3.0 command modules (packages/angular/cli/src/commands), @schematics/angular
 // schemas and the @angular/build application, dev-server, unit-test and
-// extract-i18n builder schemas (the builders `ng new` sets up)
+// extract-i18n builder schemas (the builders `ng new` sets up). Re-checked
+// 2026-11-20 against the git tag and the npm tarballs (schemas identical):
+// all 19 root commands, every non-hidden schematic option, alias and enum.
+// Hidden options (--path, --experimental-tool, --dump-virtual-files) and
+// object-typed builder options the CLI does not expose are left out.
 
 interface ProjectDetails {
   projectType: string;
@@ -885,7 +889,7 @@ const completionSpec: Fig.Spec = {
             projectsOption,
             functional,
             {
-              name: "--implements",
+              name: ["--implements", "--guardType"],
               description: "Specifies the type(s) of guard to create",
               args: {
                 name: "implements",
