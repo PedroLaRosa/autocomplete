@@ -1,6 +1,21 @@
-// simctl from Xcode 27, CoreSimulator-1171.7 (keith/zsh-xcode-completions
-// specs/simctl.txt @ bef240f2, 2026-10-02). Source: that repo's dump of
-// `xcrun simctl help <subcommand>`; Xcode is not installed here.
+// simctl from Xcode 27, CoreSimulator-1171.7 (re-verified 2026-11-20). Source:
+// keith/zsh-xcode-completions specs/simctl.txt @ bef240f2 (2026-10-02), a dump of
+// `xcrun simctl help <subcommand>` that also covers the undocumented/internal
+// subcommands (marked hidden here). Xcode is not installed here, so simctl was not
+// run; Apple's Xcode 27.1 and 27.2 release notes (the newest found) mention no simctl CLI changes.
+
+const archArgs: Fig.Arg = {
+  name: "arch",
+  suggestions: ["arm64", "x86_64"],
+};
+
+const maskOption: Fig.Option = {
+  name: "--mask",
+  description:
+    "For non-rectangular displays, handle the mask by policy: ignored: The mask is ignored and the unmasked framebuffer is saved. alpha: The mask is used as premultiplied alpha. black: The mask is rendered black",
+  requiresSeparator: "=",
+  args: { name: "policy", suggestions: ["ignored", "alpha", "black"] },
+};
 
 const jsonOptions: Fig.Option[] = [
   {
@@ -30,7 +45,7 @@ const archOption: Fig.Option = {
   name: ["-a", "--arch"],
   description:
     "Specify an architecture to use when spawning a universal binary",
-  args: { name: "arch", suggestions: ["arm64", "x86_64"] },
+  args: archArgs,
 };
 
 const displayOption: Fig.Option = {
@@ -55,6 +70,10 @@ const completionSpec: Fig.Spec = {
       description: "Use the simulator profiles at the given path",
       args: { name: "path", template: "folders" },
     },
+    {
+      name: "--version",
+      description: "Print the simctl and CoreSimulator version",
+    },
   ],
   subcommands: [
     {
@@ -69,6 +88,24 @@ const completionSpec: Fig.Spec = {
           name: "path",
           isVariadic: true,
         },
+      ],
+    },
+    {
+      name: "addphoto",
+      description: "Add photos to the photo library of a device",
+      hidden: true,
+      args: [
+        { name: "device" },
+        { name: "path", isVariadic: true, template: "filepaths" },
+      ],
+    },
+    {
+      name: "addvideo",
+      description: "Add videos to the photo library of a device",
+      hidden: true,
+      args: [
+        { name: "device" },
+        { name: "path", isVariadic: true, template: "filepaths" },
       ],
     },
     {
@@ -88,7 +125,7 @@ const completionSpec: Fig.Spec = {
           description:
             "Specify the architecture to use when booting the simulator (eg: 'arm64' or 'x86_64')",
           requiresSeparator: "=",
-          isRepeatable: true,
+          args: archArgs,
         },
         {
           name: "--disabledJob",
@@ -96,6 +133,7 @@ const completionSpec: Fig.Spec = {
             "Disables the given launchd job. Multiple jobs can be disabled by passing multiple flags",
           requiresSeparator: "=",
           isRepeatable: true,
+          args: { name: "job" },
         },
         {
           name: "--enabledJob",
@@ -103,6 +141,7 @@ const completionSpec: Fig.Spec = {
             "Enables the given launchd job when it would normally be disabled. Multiple jobs can be enabled by passing multiple flags",
           requiresSeparator: "=",
           isRepeatable: true,
+          args: { name: "job" },
         },
         checkedAllocationsOption,
       ],
@@ -165,6 +204,57 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "darwinup",
+      description:
+        "Invoke darwinup to install a root for the specified simulator runtime",
+      hidden: true,
+      args: [
+        {
+          name: "platform",
+          description:
+            "The Simulator platform. To target a runtime disk image, specify the path to that runtime instead (invalid with -s)",
+          suggestions: [
+            "iphonesimulator",
+            "watchsimulator",
+            "appletvsimulator",
+          ],
+        },
+        {
+          name: "command",
+          description: "See darwinup usage for additional commands",
+          suggestions: [
+            {
+              name: "install",
+              description: "Install the roots specified by the archives",
+            },
+            {
+              name: "list",
+              description:
+                "List the installed roots, optionally filtered by the archives",
+            },
+            {
+              name: "uninstall",
+              description: "Remove the roots specified by the archives",
+            },
+          ],
+        },
+        { name: "archive", isOptional: true, isVariadic: true },
+      ],
+      options: [
+        { name: "-f", description: "Force operation to succeed at all costs" },
+        {
+          name: "-n",
+          description:
+            "Dry run; prints arguments that would have been sent to darwinup",
+        },
+        {
+          name: "-s",
+          description: "Use the SDK root path instead of the runtime root",
+        },
+        { name: "-v", description: "More verbose output" },
+      ],
+    },
+    {
       name: "delete",
       description:
         "Delete specified devices, unavailable devices, or all devices",
@@ -203,12 +293,14 @@ const completionSpec: Fig.Spec = {
           description:
             "Specify a duration (in seconds) to wait for the log collection before timeout",
           requiresSeparator: "=",
+          args: { name: "duration" },
         },
         {
           name: "--output",
           description:
             "Specify the output directory. If not provided the temporary directory is used",
           requiresSeparator: "=",
+          args: { name: "path", template: "folders" },
         },
         {
           name: "--no-archive",
@@ -230,6 +322,7 @@ const completionSpec: Fig.Spec = {
             "Collect diagnostics only from the specified device. This option may be specified more than once to consider multiple devices. The --all-logs option causes all --udid options to be ignored",
           requiresSeparator: "=",
           isRepeatable: true,
+          args: { name: "device" },
         },
       ],
     },
@@ -367,13 +460,13 @@ const completionSpec: Fig.Spec = {
               description:
                 "Specifies the codec type: 'h264' or 'hevc'. Default is 'hevc'",
               requiresSeparator: "=",
+              args: { name: "codec", suggestions: ["h264", "hevc"] },
             },
             displayOption,
             {
-              name: "--mask",
+              ...maskOption,
               description:
                 "For non-rectangular displays, handle the mask by policy: ignored: The mask is ignored and the unmasked framebuffer is saved. alpha: Not supported, but retained for compatibility; the mask is rendered black. black: The mask is rendered black",
-              requiresSeparator: "=",
             },
             {
               name: "--force",
@@ -395,14 +488,13 @@ const completionSpec: Fig.Spec = {
               description:
                 "Can be 'png', 'tiff', 'bmp', 'gif', 'jpeg'. Default is png",
               requiresSeparator: "=",
+              args: {
+                name: "type",
+                suggestions: ["png", "tiff", "bmp", "gif", "jpeg"],
+              },
             },
             displayOption,
-            {
-              name: "--mask",
-              description:
-                "For non-rectangular displays, handle the mask by policy: ignored: The mask is ignored and the unmasked framebuffer is saved. alpha: The mask is used as premultiplied alpha. black: The mask is rendered black",
-              requiresSeparator: "=",
-            },
+            maskOption,
           ],
         },
         {
@@ -448,6 +540,12 @@ const completionSpec: Fig.Spec = {
           description: "Reset the keychain",
         },
       ],
+    },
+    {
+      name: "keyboard",
+      description: "Set the device's keyboard language",
+      hidden: true,
+      args: [{ name: "device" }, { name: "language" }],
     },
     {
       name: "launch",
@@ -509,6 +607,177 @@ const completionSpec: Fig.Spec = {
           description: "Terminate any running copy of the application",
         },
         checkedAllocationsOption,
+      ],
+    },
+    {
+      name: "legacyruntime",
+      description:
+        "Locate, copy, mount, and unmount simulator runtime disk images",
+      hidden: true,
+      options: [
+        {
+          name: "--cache-path",
+          description:
+            "Override the RuntimeImageCachePath user default for the runtime image cache location",
+          isPersistent: true,
+          args: { name: "path", template: "folders" },
+        },
+      ],
+      subcommands: [
+        {
+          name: "mount",
+          description:
+            "Locate a Simulator Runtime for the given train and build, copy the disk image locally, then mount it to make the runtime available to CoreSimulator",
+          args: { name: "train-build" },
+          options: [
+            {
+              name: "--internal",
+              description: "Select the internal runtime (default)",
+              exclusiveOn: ["--customer"],
+            },
+            {
+              name: "--customer",
+              description: "Select the customer (public) runtime",
+              exclusiveOn: ["--internal"],
+            },
+            {
+              name: "--shadow",
+              description:
+                "Manually specify a different shadow image. The same base image can be mounted multiple times with different shadow files so modifications to one mount path are not visible to others",
+              args: { name: "path", template: "filepaths" },
+            },
+            {
+              name: "--no-sparse",
+              description:
+                "Keep the original image format and partition size instead of converting to a sparse image with a 100GB partition",
+            },
+            {
+              name: "--writable",
+              description:
+                "Mount the image as writable directly instead of using a shadow file",
+            },
+            {
+              name: "--use-existing",
+              description:
+                "Use the image at the given path instead of downloading one",
+              args: { name: "path", template: "filepaths" },
+            },
+            {
+              name: "--no-mount",
+              description:
+                "Copy the image to the cache (if not present) but do not mount it. Prints the path of the image as the last line of output",
+            },
+            { name: "--no-copy" },
+            {
+              name: "--print-only",
+              description:
+                "Print the path to the image on the network but take no other action",
+            },
+            {
+              name: "--max-cache-size",
+              description:
+                "Override the RuntimeImageCacheMaxSizeGB user default, in GB",
+              args: { name: "size" },
+            },
+          ],
+        },
+        {
+          name: "unmount",
+          description:
+            "Unmount the Simulator Runtime if it is mounted. Any booted simulators will be shut down first",
+          args: { name: "train-build", suggestions: ["all"] },
+          options: [
+            {
+              name: "--force",
+              description: "Force-unmount even if the disk is busy",
+            },
+          ],
+        },
+        {
+          name: "cache",
+          description: "List or clear the cached runtime disk images",
+          subcommands: [
+            {
+              name: "list",
+              description: "Lists cached runtime disk images",
+            },
+            {
+              name: "clear",
+              description:
+                "Deletes all simulator runtime disk images (excludes runtimes bundled with Xcode or downloaded runtimes in /Library)",
+              options: [
+                {
+                  name: "--dry-run",
+                  description:
+                    "Print what would have been deleted without deleting anything",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: "pin",
+          description: "Pin a device to use a specific runtime",
+          args: { name: "device" },
+          options: [
+            {
+              name: "--latest",
+              exclusiveOn: ["--build", "--path"],
+            },
+            {
+              name: "--system",
+              description:
+                "Use the system policy. Customer OS: match SDK build if possible. All others use latest (default)",
+            },
+            {
+              name: "--newest",
+              description:
+                "Always use the newest build matching the semantic version",
+            },
+            {
+              name: "--build",
+              description:
+                "Pin the device to use a specific build of the runtime. If multiple runtimes match one is randomly chosen",
+              args: { name: "train-version" },
+              exclusiveOn: ["--latest", "--path"],
+            },
+            {
+              name: "--path",
+              description: "Pin the device to use a specific runtime by path",
+              args: { name: "path to runtime", template: "folders" },
+              exclusiveOn: ["--latest", "--build"],
+            },
+          ],
+        },
+        {
+          name: "info",
+          description:
+            "Show the path to the runtime (defaults to the iOS runtime bundled with the selected Xcode)",
+          args: [
+            { name: "path", isOptional: true, suggestions: ["path"] },
+            {
+              name: "platform or train-build",
+              isOptional: true,
+              suggestions: ["iOS", "tvOS", "watchOS"],
+            },
+          ],
+        },
+        {
+          name: "update_dyld_shared_cache",
+          description: "Update the dyld shared cache for a specific runtime",
+          args: {
+            name: "platform, train-build or path",
+            suggestions: ["iOS", "tvOS", "watchOS"],
+          },
+        },
+        {
+          name: "remove_dyld_shared_cache",
+          description: "Remove the dyld shared cache for a specific runtime",
+          args: {
+            name: "platform or train-build",
+            suggestions: ["iOS", "tvOS", "watchOS"],
+          },
+        },
       ],
     },
     {
@@ -631,6 +900,33 @@ const completionSpec: Fig.Spec = {
           description: "Enable or Disable verbose logging",
           suggestions: ["enable", "disable"],
         },
+      ],
+    },
+    {
+      name: "monitor",
+      description: "List notifications as they arrive",
+      hidden: true,
+    },
+    {
+      name: "notify_get_state",
+      description: "Get the state value of a darwin notification on a device",
+      hidden: true,
+      args: [{ name: "device" }, { name: "notification name" }],
+    },
+    {
+      name: "notify_post",
+      description: "Post a darwin notification on a device",
+      hidden: true,
+      args: [{ name: "device" }, { name: "notification name" }],
+    },
+    {
+      name: "notify_set_state",
+      description: "Set the state value of a darwin notification on a device",
+      hidden: true,
+      args: [
+        { name: "device" },
+        { name: "notification name" },
+        { name: "state" },
       ],
     },
     {
@@ -837,6 +1133,15 @@ const completionSpec: Fig.Spec = {
         {
           name: "name",
         },
+      ],
+    },
+    {
+      name: "reset",
+      description: "Reset a given archive or database",
+      hidden: true,
+      args: [
+        { name: "device" },
+        { name: "subsystem", suggestions: ["launch_services"] },
       ],
     },
     {
@@ -1079,43 +1384,72 @@ const completionSpec: Fig.Spec = {
               name: "--time",
               description:
                 "Set the date or time to a fixed value. If the string is a valid ISO date string it will also set the date on relevant devices",
+              args: { name: "string" },
             },
             {
               name: "--dataNetwork",
-              description:
-                "If specified must be one of 'hide', 'wifi', '3g', '4g', 'lte', 'lte-a', 'lte+', '5g', '5g+', '5g-uwb', or '5g-uc'",
+              description: "Set the data network type",
+              args: {
+                name: "dataNetworkType",
+                suggestions: [
+                  "hide",
+                  "wifi",
+                  "3g",
+                  "4g",
+                  "lte",
+                  "lte-a",
+                  "lte+",
+                  "5g",
+                  "5g+",
+                  "5g-uwb",
+                  "5g-uc",
+                ],
+              },
             },
             {
               name: "--wifiMode",
-              description:
-                "If specified must be one of 'searching', 'failed', or 'active'",
+              description: "Set the Wi-Fi mode",
+              args: {
+                name: "mode",
+                suggestions: ["searching", "failed", "active"],
+              },
             },
             {
               name: "--wifiBars",
-              description: "If specified must be 0-3",
+              description: "Set the number of Wi-Fi bars (0-3)",
+              args: { name: "int", suggestions: ["0", "1", "2", "3"] },
             },
             {
               name: "--cellularMode",
-              description:
-                "If specified must be one of 'notSupported', 'searching', 'failed', or 'active'",
+              description: "Set the cellular mode",
+              args: {
+                name: "mode",
+                suggestions: ["notSupported", "searching", "failed", "active"],
+              },
             },
             {
               name: "--cellularBars",
-              description: "If specified must be 0-4",
+              description: "Set the number of cellular bars (0-4)",
+              args: { name: "int", suggestions: ["0", "1", "2", "3", "4"] },
             },
             {
               name: "--operatorName",
               description:
                 "Set the cellular operator/carrier name. Use '' for the empty string",
+              args: { name: "string" },
             },
             {
               name: "--batteryState",
-              description:
-                "If specified must be one of 'charging', 'charged', or 'discharging'",
+              description: "Set the battery state",
+              args: {
+                name: "state",
+                suggestions: ["charging", "charged", "discharging"],
+              },
             },
             {
               name: "--batteryLevel",
-              description: "If specified must be 0-100",
+              description: "Set the battery level (0-100)",
+              args: { name: "int" },
             },
           ],
         },
@@ -1143,35 +1477,47 @@ const completionSpec: Fig.Spec = {
         {
           name: "appearance",
           description:
-            "When invoked without arguments prints the current user interface appearance style:\nlight\nThe Light appearance style.\ndark\nThe Dark appearance style.\nunsupported\nThe platform or runtime version do not support appearance styles.\nunknown\nThe current style is unknown or there was an error detecting it",
-          additionalSuggestions: ["light", "dark"],
+            "Print the current user interface appearance style (light, dark, unsupported or unknown), or set it to light or dark",
+          args: {
+            name: "style",
+            isOptional: true,
+            suggestions: ["light", "dark"],
+          },
         },
         {
           name: "increase_contrast",
           description:
-            "When invoked without arguments prints whether the Increase Contrast mode is currently enabled:\nenabled\nIncrease Contrast is enabled.\ndisabled\nIncrease Contrast is disabled.\nunsupported\nThe platform or runtime version do not support the Increase Contrast setting.\nunknown\nThe current setting is unknown or there was an error detecting it",
-          additionalSuggestions: ["enabled", "disabled"],
+            "Print whether Increase Contrast mode is enabled (enabled, disabled, unsupported or unknown), or enable or disable it",
+          args: {
+            name: "state",
+            isOptional: true,
+            suggestions: ["enabled", "disabled"],
+          },
         },
         {
           name: "content_size",
           description:
-            "When invoked without arguments prints the current preferred content size category, from the following possible values:",
-          additionalSuggestions: [
-            "extra-small",
-            "small",
-            "medium",
-            "large",
-            "extra-large",
-            "extra-extra-large",
-            "extra-extra-extra-large",
-            "accessibility-medium",
-            "accessibility-large",
-            "accessibility-extra-large",
-            "accessibility-extra-extra-large",
-            "accessibility-extra-extra-extra-large",
-            "unknown",
-            "unsupported",
-          ],
+            "Print the current preferred content size category, or set it. 'increment' or 'decrement' selects the category one step larger or smaller than the current one",
+          args: {
+            name: "size",
+            isOptional: true,
+            suggestions: [
+              "increment",
+              "decrement",
+              "extra-small",
+              "small",
+              "medium",
+              "large",
+              "extra-large",
+              "extra-extra-large",
+              "extra-extra-extra-large",
+              "accessibility-medium",
+              "accessibility-large",
+              "accessibility-extra-large",
+              "accessibility-extra-extra-large",
+              "accessibility-extra-extra-extra-large",
+            ],
+          },
         },
       ],
     },
