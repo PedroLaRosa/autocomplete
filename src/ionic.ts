@@ -1,11 +1,106 @@
-// Ionic CLI v7.2.1 (npm @ionic/cli, 2026-11-19). Source: ionic-team/ionic-cli
-// packages/@ionic/cli/src/commands and ionic-docs scripts/data/cli.json
+// Ionic CLI v7.2.1 (npm @ionic/cli latest, git tag @ionic/cli@7.2.1, 2026-11-20). Source: ionic-team/ionic-cli at 7.2.1,
+// packages/@ionic/cli/src/commands and lib (command tree, options, defaults, global options, Angular and React project
+// runners) cross-checked with ionic-docs scripts/data/cli.json. Options that only exist for one project type (React:
+// --public-url, --ci, --https, ...) are included for the commands that pass them on.
 // ponytail: left out share, state and telemetry (stubs that only throw
 // "has been removed"), git clone (no-op, run body commented out) and ionitron
+const reactCiOption: Fig.Option = {
+  name: "--ci",
+  description: "Treat warnings as build failures, test runner does not watch",
+};
+
+// Options of the React project type build runner (react-scripts)
+const reactBuildOptions: Fig.Option[] = [
+  {
+    name: "--public-url",
+    description: "The URL at which the app will be served",
+    args: {
+      name: "url",
+    },
+  },
+  reactCiOption,
+  {
+    name: "--no-source-map",
+    description: "Do not generate source maps",
+  },
+  {
+    name: "--no-inline-runtime-chunk",
+    description:
+      "Do not include the runtime script in index.html (import instead)",
+  },
+];
+
+// Options of the React project type serve runner (react-scripts)
+const reactServeOptions: Fig.Option[] = [
+  {
+    name: "--https",
+    description: "Use HTTPS for the dev server",
+  },
+  {
+    name: "--react-editor",
+    description: "Specify the editor that opens files upon crash",
+    args: {
+      name: "editor",
+    },
+  },
+];
+
 const completionSpec = {
   name: "ionic",
   description:
     "The Ionic command-line interface (CLI) is the go-to tool for developing Ionic apps",
+  options: [
+    {
+      name: ["--help", "-h"],
+      description: "Display help for commands",
+      isPersistent: true,
+    },
+    {
+      name: ["--version", "-v"],
+      description: "Print the CLI version",
+    },
+    {
+      name: "--verbose",
+      description: "Print debug log messages",
+      isPersistent: true,
+    },
+    {
+      name: "--quiet",
+      description: "Only print warning and error log messages",
+      isPersistent: true,
+    },
+    {
+      name: "--no-interactive",
+      description:
+        "Disable interactivity such as progress indicators and prompts",
+      isPersistent: true,
+    },
+    {
+      name: "--no-color",
+      description: "Disable colors in stdout",
+      isPersistent: true,
+    },
+    {
+      name: "--confirm",
+      description: "Automatically answer YES to confirmation prompts",
+      isPersistent: true,
+    },
+    {
+      name: "--project",
+      description: "The project ID to use in a multi-app configuration setup",
+      args: {
+        name: "id",
+      },
+      isPersistent: true,
+      hidden: true,
+    },
+    {
+      name: "--json",
+      description: "Use JSON when operating with stdout, if possible",
+      isPersistent: true,
+      hidden: true,
+    },
+  ],
   subcommands: [
     {
       name: "build",
@@ -46,6 +141,8 @@ const completionSpec = {
           name: "--watch",
           description: "Rebuild when files change",
         },
+
+        ...reactBuildOptions,
       ],
       description:
         "Build web assets and prepare your app for any platform targets",
@@ -212,6 +309,7 @@ const completionSpec = {
           description: "Use specific host for the dev server",
           args: {
             name: "host",
+            default: "localhost",
           },
         },
         {
@@ -227,7 +325,6 @@ const completionSpec = {
           description: "The host used for the browser or web view",
           args: {
             name: "host",
-            default: "localhost",
           },
         },
         {
@@ -244,7 +341,13 @@ const completionSpec = {
             "Specifies the browser to use (safari, firefox, google chrome)",
           args: {
             name: "browser",
-            suggestions: ["safari", "firefox", "google chrome"],
+            suggestions: [
+              "safari",
+              "firefox",
+              "google chrome",
+              "google-chrome",
+              "chrome",
+            ],
           },
         },
         {
@@ -285,6 +388,9 @@ const completionSpec = {
           name: "--source-map",
           description: "Output sourcemaps",
         },
+
+        ...reactServeOptions,
+        reactCiOption,
       ],
       description: "Start a local dev server for app dev/testing",
     },
@@ -490,6 +596,8 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -530,6 +638,8 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -630,6 +740,8 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -670,6 +782,8 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -1125,6 +1239,8 @@ const completionSpec = {
               name: "--source-map",
               description: "Output source maps",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -1294,6 +1410,9 @@ const completionSpec = {
               name: "--source-map",
               description: "Output source maps",
             },
+
+            ...reactBuildOptions,
+            ...reactServeOptions,
           ],
           args: {
             name: "platform",
@@ -1317,7 +1436,16 @@ const completionSpec = {
               description:
                 "Add, remove, or update a platform; ls, check, or save all project platforms",
               isOptional: true,
-              suggestions: ["add", "remove", "update", "ls", "check", "save"],
+              suggestions: [
+                "add",
+                "remove",
+                "rm",
+                "update",
+                "ls",
+                "list",
+                "check",
+                "save",
+              ],
             },
             {
               name: "platform",
@@ -1351,7 +1479,7 @@ const completionSpec = {
               description:
                 "Add or remove a plugin; ls or save all project plugins",
               isOptional: true,
-              suggestions: ["add", "remove", "ls", "save"],
+              suggestions: ["add", "remove", "rm", "ls", "list", "save"],
             },
             {
               name: "plugin",
@@ -1389,6 +1517,8 @@ const completionSpec = {
               name: "--watch",
               description: "Rebuild when files change",
             },
+
+            ...reactBuildOptions,
           ],
           args: {
             name: "platform",
@@ -1558,6 +1688,9 @@ const completionSpec = {
               name: "--source-map",
               description: "Output source maps",
             },
+
+            ...reactBuildOptions,
+            ...reactServeOptions,
           ],
           args: {
             name: "platform",
