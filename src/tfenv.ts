@@ -1,4 +1,5 @@
-// tfenv v3.2.2 (GitHub release tfutils/tfenv, 2026-04-28). Source: upstream libexec/ scripts, bin/tfenv and README
+// tfenv v3.2.2 (GitHub tag + Homebrew formula, released 2026-04-28, checked 2026-11-20). Source: upstream
+// libexec/ scripts (incl. the undocumented exec), lib/, bin/tfenv and README at tag v3.2.2
 const generators: Record<string, Fig.Generator> = {
   installedVersions: {
     script: ["tfenv", "list"],
@@ -103,6 +104,17 @@ const completionSpec: Fig.Spec = {
     {
       name: "pin",
       description: "Write the current active version to ./.terraform-version",
+    },
+    {
+      name: "exec",
+      description: "Run terraform with the selected version",
+      hidden: true,
+      args: {
+        name: "terraform args",
+        description: "Arguments passed to terraform, e.g. plan",
+        isOptional: true,
+        isVariadic: true,
+      },
     },
     {
       name: "min-required",
