@@ -1,5 +1,7 @@
-// rbenv v1.3.2 (GitHub release, 2025-01-08); install/uninstall from ruby-build
-// v20261119. Source: libexec/ usage headers and `--complete` handlers upstream
+// rbenv v1.3.2 (git tag and Homebrew formula, 2026-11-20); install/uninstall from
+// ruby-build v20261119 (git tag and Homebrew formula). Source: libexec/ usage
+// headers, `--complete` handlers and README of rbenv/rbenv, bin/rbenv-install
+// and bin/rbenv-uninstall of rbenv/ruby-build (read statically)
 
 const lines = (out: string) =>
   out
@@ -51,6 +53,11 @@ const completionSpec: Fig.Spec = {
   options: [
     { name: ["-v", "--version"], description: "Show the rbenv version" },
     { name: ["-h", "--help"], description: "Show help" },
+    {
+      name: "--debug",
+      description:
+        "Print debug information about rbenv internals (same as RBENV_DEBUG=1)",
+    },
   ],
   subcommands: [
     {
