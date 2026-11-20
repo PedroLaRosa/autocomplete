@@ -1,6 +1,11 @@
-// Yarn v4.18.1 (berry, GitHub release @yarnpkg/cli/4.18.1, 2026-09-24) and
-// v1.22.22 (classic, `yarn --version`). Source: berry command sources
-// (packages/plugin-*/sources/commands) at that tag, `yarn help <cmd>` for classic.
+// Yarn v4.18.1 (berry, npm @yarnpkg/cli latest = git tag @yarnpkg/cli/4.18.1, 2026-09-24)
+// and v1.22.22 (classic, newest tag of yarnpkg/yarn). Re-verified 2026-11-20 against both
+// by reading the sources statically (nothing was executed): berry command classes
+// (packages/plugin-*/sources/commands: `static paths` + `Option.*`) at the 4.18.1 tag, and
+// classic src/cli/index.js + src/cli/commands/*.js at v1.22.22. Every berry command path,
+// flag, arg shape and enum was diffed programmatically against this spec; the classic
+// per-command flags and subcommands were compared by hand. Still-accepted Yarn 1 aliases
+// (cache/licenses ls, owner/tag/team ls and rm, install -g/-S/...) are marked deprecated.
 import { npmScriptsGenerator, npmSearchGenerator } from "./npm";
 
 export const yarnScriptParserDirectives: Fig.Arg["parserDirectives"] = {
@@ -391,6 +396,37 @@ const rangeOptions: Fig.Option[] = [
   modeOption,
 ];
 
+// Yarn 1 `upgrade-interactive` flags (also used by `global upgrade-interactive`)
+const upgradeInteractiveOptions: Fig.Option[] = [
+  {
+    name: ["-S", "--scope"],
+    description: "Upgrade packages under the specified scope",
+    args: { name: "scope" },
+  },
+  {
+    name: "--latest",
+    description:
+      "List the latest version of packages, ignoring version ranges in package.json",
+  },
+  {
+    name: ["-E", "--exact"],
+    description: "Install exact version. Only used when --latest is specified",
+    dependsOn: ["--latest"],
+  },
+  {
+    name: ["-T", "--tilde"],
+    description:
+      "Install most recent release with the same minor version. Only used when --latest is specified",
+    dependsOn: ["--latest"],
+  },
+  {
+    name: ["-C", "--caret"],
+    description:
+      "Install most recent release with the same major version. Only used when --latest is specified",
+    dependsOn: ["--latest"],
+  },
+];
+
 const pluginSourcesOptions: Fig.Option[] = [
   {
     name: "--path",
@@ -716,7 +752,15 @@ const completionSpec: Fig.Spec = {
       args: [
         {
           name: "subcommand",
-          suggestions: ["public", "restricted", "grant", "revoke"],
+          suggestions: [
+            "public",
+            "restricted",
+            "grant",
+            "revoke",
+            "ls-packages",
+            "ls-collaborators",
+            "edit",
+          ],
         },
         { name: "args", isVariadic: true, isOptional: true },
       ],
@@ -761,7 +805,15 @@ const completionSpec: Fig.Spec = {
           name: ["-A", "--audit"],
           description: "Run vulnerability audit on installed packages",
         },
-        ...rangeOptions,
+        ...rangeOptions.map((option) =>
+          Array.isArray(option.name) && option.name.includes("--interactive")
+            ? {
+                ...option,
+                description:
+                  "Reuse the specified package from other workspaces in the project",
+              }
+            : option
+        ),
         {
           name: "--prefer-dev",
           description: "Add / upgrade a package to a dev dependency",
@@ -826,12 +878,12 @@ const completionSpec: Fig.Spec = {
           description: "Output usage information",
         },
         {
-          name: ["-i", "--init"],
+          name: ["-I", "--init"],
           description:
             "Creates the .yarnclean file if it does not exist, and adds the default entries",
         },
         {
-          name: ["-f", "--force"],
+          name: ["-F", "--force"],
           description: "If a .yarnclean file exists, run the clean process",
         },
       ],
@@ -867,6 +919,12 @@ const completionSpec: Fig.Spec = {
         {
           name: ["clean", "clear"],
           description: "Clear global cache",
+          args: {
+            name: "module",
+            description: "Only clear these packages from the cache (Yarn 1)",
+            isOptional: true,
+            isVariadic: true,
+          },
           options: [
             {
               name: "--mirror",
@@ -896,6 +954,11 @@ const completionSpec: Fig.Spec = {
               },
             },
           ],
+        },
+        {
+          name: "ls",
+          description: "Print out every cached package (use list instead)",
+          deprecated: true,
         },
       ],
     },
@@ -995,6 +1058,10 @@ const completionSpec: Fig.Spec = {
         {
           name: "list",
           description: "Displays the current configuration",
+        },
+        {
+          name: "current",
+          description: "Print the resolved configuration as JSON (Yarn 1)",
         },
       ],
     },
@@ -1254,12 +1321,7 @@ const completionSpec: Fig.Spec = {
           name: "upgrade-interactive",
           description:
             "Display the outdated packages before performing any upgrade",
-          options: [
-            {
-              name: "--latest",
-              description: "Use the version tagged latest in the registry",
-            },
-          ],
+          options: upgradeInteractiveOptions,
         },
       ],
       options: [
@@ -1273,7 +1335,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--latest",
-          description: "Bin prefix to use to install binaries",
+          description: "Upgrade to the latest version of packages",
         },
         {
           name: ["-h", "--help"],
@@ -1342,6 +1404,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "init",
       description: "Interactively creates or updates a package.json file",
+      args: {
+        name: "initializer",
+        description:
+          "Run the given create-* initializer through yarn dlx (Yarn 2+)",
+        isOptional: true,
+      },
       options: [
         ...commonOptions,
         {
@@ -1388,6 +1456,41 @@ const completionSpec: Fig.Spec = {
           description: "Run vulnerability audit on installed packages",
         },
         {
+          name: ["-g", "--global"],
+          description: "Deprecated (use yarn global add instead)",
+          deprecated: true,
+        },
+        {
+          name: ["-S", "--save"],
+          description: "Deprecated (use yarn add instead)",
+          deprecated: true,
+        },
+        {
+          name: ["-D", "--save-dev"],
+          description: "Deprecated (use yarn add --dev instead)",
+          deprecated: true,
+        },
+        {
+          name: ["-P", "--save-peer"],
+          description: "Deprecated (use yarn add --peer instead)",
+          deprecated: true,
+        },
+        {
+          name: ["-O", "--save-optional"],
+          description: "Deprecated (use yarn add --optional instead)",
+          deprecated: true,
+        },
+        {
+          name: ["-E", "--save-exact"],
+          description: "Deprecated (use yarn add --exact instead)",
+          deprecated: true,
+        },
+        {
+          name: ["-T", "--save-tilde"],
+          description: "Deprecated (use yarn add --tilde instead)",
+          deprecated: true,
+        },
+        {
           name: "--immutable",
           description:
             "Abort with an error exit code if the lockfile was to be modified",
@@ -1429,6 +1532,12 @@ const completionSpec: Fig.Spec = {
         {
           name: "list",
           description: "List licenses for installed packages",
+        },
+        {
+          name: "ls",
+          description:
+            "List licenses for installed packages (use list instead)",
+          deprecated: true,
         },
         {
           name: "generate-disclaimer",
@@ -1475,10 +1584,12 @@ const completionSpec: Fig.Spec = {
         {
           name: "--depth",
           description: "Restrict the depth of the dependencies",
+          args: { name: "depth" },
         },
         {
           name: "--pattern",
           description: "Filter the list of dependencies by the pattern",
+          args: { name: "pattern" },
         },
       ],
     },
@@ -1493,6 +1604,13 @@ const completionSpec: Fig.Spec = {
     {
       name: "node",
       description: "Run node with the hook already setup",
+      options: [
+        {
+          name: "--into",
+          description: "Set the cwd to the specified location (Yarn 1)",
+          args: { name: "path", template: "folders" },
+        },
+      ],
     },
     {
       name: "npm",
@@ -1747,6 +1865,29 @@ const completionSpec: Fig.Spec = {
             },
           ],
         },
+        {
+          name: "ls",
+          description:
+            "Lists all of the owners of a package (use list instead)",
+          deprecated: true,
+          args: {
+            name: "package",
+          },
+        },
+        {
+          name: "rm",
+          description:
+            "Removes the user as an owner of the package (use remove instead)",
+          deprecated: true,
+          args: [
+            {
+              name: "user",
+            },
+            {
+              name: "package",
+            },
+          ],
+        },
       ],
     },
     {
@@ -1754,7 +1895,7 @@ const completionSpec: Fig.Spec = {
       description: "Creates a compressed gzip archive of package dependencies",
       options: [
         {
-          name: "--filename",
+          name: ["-f", "--filename"],
           description:
             "Creates a compressed gzip archive of package dependencies and names the file filename",
           args: { name: "filename", template: "filepaths" },
@@ -1864,12 +2005,20 @@ const completionSpec: Fig.Spec = {
         {
           name: "set-version",
           description: "Will download the latest stable release",
-          options: [
-            {
-              name: "--rc",
-              description: "Download the latest rc release",
-            },
-          ],
+          args: {
+            name: "version",
+            description: "Yarn release, range or tag to download",
+            isOptional: true,
+            suggestions: [
+              "latest",
+              "rc",
+              "classic",
+              "nightly",
+              "berry",
+              "stable",
+              "canary",
+            ],
+          },
         },
       ],
     },
@@ -1880,6 +2029,11 @@ const completionSpec: Fig.Spec = {
       options: [
         ...commonOptions,
         { name: ["-h", "--help"], description: "Output usage information" },
+        {
+          name: "--new-version",
+          description: "New version",
+          args: { name: "version" },
+        },
         {
           name: "--major",
           description: "Auto-increment major version number",
@@ -2040,6 +2194,35 @@ const completionSpec: Fig.Spec = {
     {
       name: "tag",
       description: "Add, remove, or list tags on a package",
+      subcommands: [
+        {
+          name: "add",
+          description: "Add a tag to a specific version of a package",
+          args: [{ name: "package@version" }, { name: "tag" }],
+        },
+        {
+          name: "remove",
+          description: "Remove a tag from a package",
+          args: [{ name: "package" }, { name: "tag" }],
+        },
+        {
+          name: "list",
+          description: "List the tags of a package",
+          args: { name: "package", isOptional: true },
+        },
+        {
+          name: "rm",
+          description: "Remove a tag from a package (use remove instead)",
+          deprecated: true,
+          args: [{ name: "package" }, { name: "tag" }],
+        },
+        {
+          name: "ls",
+          description: "List the tags of a package (use list instead)",
+          deprecated: true,
+          args: { name: "package", isOptional: true },
+        },
+      ],
     },
     {
       name: "team",
@@ -2074,14 +2257,41 @@ const completionSpec: Fig.Spec = {
         {
           name: "remove",
           description: "Remove a user from a team they belong to",
-          args: {
-            name: "<scope:team> <user>",
-          },
+          args: [
+            {
+              name: "<scope:team>",
+            },
+            {
+              name: "<user>",
+            },
+          ],
         },
         {
           name: "list",
           description:
             "If performed on an organization name, will return a list of existing teams under that organization. If performed on a team, it will instead return a list of all users belonging to that particular team",
+          args: {
+            name: "<scope>|<scope:team>",
+          },
+        },
+        {
+          name: "rm",
+          description:
+            "Remove a user from a team they belong to (use remove instead)",
+          deprecated: true,
+          args: [
+            {
+              name: "<scope:team>",
+            },
+            {
+              name: "<user>",
+            },
+          ],
+        },
+        {
+          name: "ls",
+          description: "List teams or team members (use list instead)",
+          deprecated: true,
           args: {
             name: "<scope>|<scope:team>",
           },
@@ -2121,6 +2331,14 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-R", "--recursive"],
           description: "Unplug both direct and transitive dependencies",
+        },
+        {
+          name: "--clear",
+          description: "Delete the selected packages (Yarn 1)",
+        },
+        {
+          name: "--clear-all",
+          description: "Delete all unplugged packages (Yarn 1)",
         },
         jsonOption,
       ],
@@ -2197,6 +2415,7 @@ const completionSpec: Fig.Spec = {
           name: ["-T", "--tilde"],
           description:
             "Install most recent release with the same minor version. Only used when --latest is specified",
+          dependsOn: ["--latest"],
         },
         {
           name: ["-C", "--caret"],
@@ -2214,13 +2433,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "upgrade-interactive",
       description: "Upgrades packages in interactive mode",
-      options: [
-        {
-          name: "--latest",
-          description: "Use the version tagged latest in the registry",
-        },
-        modeOption,
-      ],
+      options: [...upgradeInteractiveOptions, modeOption],
     },
     {
       name: "version",
@@ -2369,8 +2582,6 @@ const completionSpec: Fig.Spec = {
           name: "--no-commit-hooks",
           description: "Bypass git hooks when committing new version",
         },
-        { name: "--access", description: "Access", args: { name: "access" } },
-        { name: "--tag", description: "Tag", args: { name: "tag" } },
       ],
     },
     {
@@ -2674,13 +2885,6 @@ const completionSpec: Fig.Spec = {
               description: "The version of the package to resolve",
             },
           ],
-          options: [
-            {
-              name: ["-s", "--save"],
-              description:
-                "Persist the resolution inside the top-level manifest",
-            },
-          ],
         },
         {
           name: "version",
@@ -2690,7 +2894,14 @@ const completionSpec: Fig.Spec = {
             description:
               "Use the specified version, which can also be a Yarn 2 build (e.g 2.0.0-rc.30) or a Yarn 1 build (e.g 1.22.1)",
             template: "filepaths",
-            suggestions: ["stable", "latest", "canary", "classic", "self"],
+            suggestions: [
+              "stable",
+              "latest",
+              "berry",
+              "canary",
+              "classic",
+              "self",
+            ],
           },
           options: [
             {
