@@ -1,5 +1,10 @@
-// Rush v5.182.1 (npm "latest", 2026-10-30). Source: rushstack main
-// libraries/rush-lib CommandLineHelp.test.ts.snap and RushCommandLineParser.ts
+// Rush v5.182.1 (npm @microsoft/rush "latest", published 2026-10-30; re-verified 2026-11-20).
+// Source: command/flag tables from the CommandLineHelp snapshot of the 5.182.1 release commit of
+// microsoft/rushstack (libraries/rush-lib/src/cli), cross-checked against the parameter definitions
+// in the published @microsoft/rush-lib 5.182.1 bundle. Not run. Unreleased main-branch changes
+// (PNPM catalog wording in "rush add") are left out. Commands defined only by a repo's own
+// command-line.json (import-strings, upload, --ship, --minimal) are intentionally not listed.
+// Conditional flags of custom phased commands (--watch, --install, --no-ipc) are not on build/rebuild.
 import stripJsonComments from "strip-json-comments";
 import { npmSearchGenerator } from "./npm";
 
@@ -44,48 +49,56 @@ const projectGenerator: Fig.Generator = {
 const PROJECT_SELECTION_OPTIONS: Fig.Option[] = [
   {
     name: ["-t", "--to"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--to" parameter expands this selection to include PROJECT and all its dependencies. "." can be used as shorthand for the project in the current working directory. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-T", "--to-except"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--to-except" parameter expands this selection to include all dependencies of PROJECT, but not PROJECT itself. "." can be used as shorthand for the project in the current working directory. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-f", "--from"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--from" parameter expands this selection to include PROJECT and all projects that depend on it, plus all dependencies of this set.  "." can be used as shorthand for the project in the current working directory. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-o", "--only"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--only" parameter expands this selection to include PROJECT; its dependencies are not added. "." can be used as shorthand for the project in the current working directory. Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-i", "--impacted-by"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--impacted-by" parameter expands this selection to include PROJECT and any projects that depend on PROJECT (and thus might be broken by changes to PROJECT). "." can be used as shorthand for the project in the current working directory. Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: ["-I", "--impacted-by-except"],
+    isRepeatable: true,
     args: { name: "PROJECT", generators: projectGenerator },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. Each "--impacted-by-except" parameter works the same as "--impacted-by" except that PROJECT itself is not added to the selection. "." can be used as shorthand for the project in the current working directory. Note that this parameter is "unsafe" as it may produce a selection that excludes some dependencies. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: "--to-version-policy",
+    isRepeatable: true,
     args: { name: "VERSION_POLICY_NAME" },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. The "--to-version-policy" parameter is equivalent to specifying "--to" for each of the projects belonging to VERSION_POLICY_NAME. For details, refer to the website article "Selecting subsets of projects"',
   },
   {
     name: "--from-version-policy",
+    isRepeatable: true,
     args: { name: "VERSION_POLICY_NAME" },
     description:
       'Normally all projects in the monorepo will be processed; adding this parameter will instead select a subset of projects. The "--from-version-policy" parameter is equivalent to specifying "--from" for each of the projects belonging to VERSION_POLICY_NAME.  For details, refer to the website article "Selecting subsets of projects"',
@@ -219,7 +232,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-p", "--package"],
           description:
-            'The name of the package which should be added as a dependency. A SemVer version specifier or a PNPM catalog reference (such as "catalog:") can be appended after an "@" sign',
+            'The name of the package which should be added as a dependency. A SemVer version specifier can be appended after an "@" sign. To add multiple packages, repeat the parameter, e.g. "rush add --package foo --package bar"',
           isRequired: true,
           isRepeatable: true,
           args: {
@@ -274,7 +287,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--verify-all",
           description:
-            'Validate all change files in the repository, not just those added in the current branch. Requires the "strictChangefileValidation" experiment to be enabled',
+            'Validate all change files in the repository, not just those added in the current branch. Reports errors for change files that reference nonexistent projects or target non-main projects in a lockstepped version policy. Requires the "strictChangefileValidation" experiment to be enabled',
         },
         {
           name: "--no-fetch",
@@ -385,7 +398,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["-t", "--target-folder"],
-          args: { name: "PATH" },
+          args: { name: "PATH", template: "folders" },
           description:
             'By default, files are deployed to the "common/deploy" folder inside the Rush repo. Use this parameter to specify a different location. WARNING: USE CAUTION WHEN COMBINING WITH "--overwrite". This parameter may alternatively be specified via the RUSH_DEPLOY_TARGET_FOLDER environment variable',
         },
@@ -599,7 +612,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--release-folder",
-          args: { name: "FOLDER" },
+          args: { name: "FOLDER", template: "folders" },
           description:
             "This parameter is used with --pack parameter to provide customized location for the tarballs instead of the default value",
         },
@@ -673,7 +686,8 @@ const completionSpec: Fig.Spec = {
         SKIP_UPDATE_OPTION,
         {
           name: ["-p", "--package"],
-          description: "The name of the package which should be removed",
+          description:
+            'The name of the package which should be removed. To remove multiple packages, repeat the parameter, e.g. "rush remove --package foo --package bar"',
           isRequired: true,
           isRepeatable: true,
           args: { name: "PACKAGE" },
@@ -826,7 +840,10 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--override-bump",
-          args: { name: "BUMPTYPE" },
+          args: {
+            name: "BUMPTYPE",
+            suggestions: ["prerelease", "patch", "preminor", "minor", "major"],
+          },
           description:
             "Overrides the bump type in the version-policy.json for the specified version policy. Valid BUMPTYPE values include: prerelease, patch, preminor, minor, major. This setting only works for lock-step version policy in bump action",
         },
@@ -875,6 +892,7 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--subspace",
+          isRepeatable: true,
           args: { name: "SUBSPACE_NAME" },
           description:
             "The name of the subspace to use for the hotlinked package",
