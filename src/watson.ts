@@ -1,22 +1,46 @@
-// https://tailordev.github.io/Watson/
-const listProjects: Fig.Generator = {
-  script: ["watson", "projects"],
-  postProcess: (output) => {
-    return output.split("\n").map((project) => ({
-      name: project,
-      icon: "🗂",
-    }));
-  },
-};
+// Watson v2.1.0 (latest release: PyPI td-watson 2.1.0 / GitHub jazzband/Watson tag 2.1.0, 2022-05-16, 2026-11-20).
+// Source: read statically (not run) from a shallow clone of jazzband/Watson: watson/cli.py (click definitions),
+// watson/autocompletion.py and docs/user-guide/configuration.md. Master only differs from the 2.1.0 tag by the
+// behavior of `start --at` with a running frame (no flag changes). No release since 2.1.0.
 
-const listTags: Fig.Generator = {
-  script: ["watson", "tags"],
-  postProcess: (output) => {
-    return output.split("\n").map((tag) => ({
-      name: tag,
-      icon: "🏷",
-    }));
-  },
+const projectIcon = "🗂";
+const tagIcon = "🏷";
+
+const nameGenerator = (
+  kind: "projects" | "tags",
+  icon: string,
+  prefix = ""
+): Fig.Generator => ({
+  script: ["watson", kind],
+  postProcess: (output) =>
+    output
+      .split("\n")
+      .filter((name) => name.trim() !== "")
+      .map((name) => ({ name: `${prefix}${name}`, icon })),
+});
+
+const listProjects = nameGenerator("projects", projectIcon);
+const listTags = nameGenerator("tags", tagIcon);
+// Tags are given as `+tag` on the command line of `start` and `add`
+const listPlusTags = nameGenerator("tags", tagIcon, "+");
+
+// The type of an object being renamed is the first argument of `watson rename`
+const listRenameTargets: Fig.Generator = {
+  script: (tokens) => [
+    "watson",
+    tokens[tokens.indexOf("rename") + 1] === "tag" ? "tags" : "projects",
+  ],
+  postProcess: (output, tokens) =>
+    output
+      .split("\n")
+      .filter((name) => name.trim() !== "")
+      .map((name) => ({
+        name,
+        icon:
+          tokens[tokens.indexOf("rename") + 1] === "tag"
+            ? tagIcon
+            : projectIcon,
+      })),
 };
 
 const listFrames: Fig.Generator = {
@@ -32,6 +56,196 @@ const listFrames: Fig.Generator = {
   },
 };
 
+const dateTimeArg = (description: string): Fig.Arg => ({
+  name: "DATETIME",
+  description,
+});
+
+const exampleDateTime = "A date and time. Ex: 2022-03-04 12:00:00";
+
+const confirmNewOptions: Fig.Option[] = [
+  {
+    name: ["--confirm-new-project", "-c"],
+    description: "Confirm addition of new project",
+  },
+  {
+    name: ["--confirm-new-tag", "-b"],
+    description: "Confirm creation of new tag",
+  },
+];
+
+const gapOptions = (extra: string[] = []): Fig.Option[] => [
+  {
+    name: ["--gap", "-g"],
+    description:
+      "Leave gap between end time of previous project and start time of the current",
+    exclusiveOn: ["--no-gap", ...extra],
+  },
+  {
+    name: ["--no-gap", "-G"],
+    description:
+      "Don't leave gap between end time of previous project and start time of the current",
+    exclusiveOn: ["--gap", ...extra],
+  },
+];
+
+const currentOptions = (what: "report" | "output"): Fig.Option[] => [
+  {
+    name: ["--current", "-c"],
+    description: `Include currently running frame in ${what}`,
+    exclusiveOn: ["--no-current"],
+  },
+  {
+    name: ["--no-current", "-C"],
+    description: `Don't include currently running frame in ${what}`,
+    exclusiveOn: ["--current"],
+  },
+];
+
+const pagerOptions: Fig.Option[] = [
+  {
+    name: ["--pager", "-g"],
+    description: "View output through a pager",
+    exclusiveOn: ["--no-pager"],
+  },
+  {
+    name: ["--no-pager", "-G"],
+    description: "Don't view output through a pager",
+    exclusiveOn: ["--pager"],
+  },
+];
+
+const outputFormatOptions: Fig.Option[] = [
+  {
+    name: ["--json", "-j"],
+    description: "Format output in JSON instead of plain text",
+    exclusiveOn: ["--csv", "--plain"],
+  },
+  {
+    name: ["--csv", "-s"],
+    description: "Format output in CSV instead of plain text",
+    exclusiveOn: ["--json", "--plain"],
+  },
+  {
+    name: "--plain",
+    description: "Format output in plain text (default)",
+    exclusiveOn: ["--json", "--csv"],
+    hidden: true,
+  },
+  ...pagerOptions,
+];
+
+const projectTagOptions = (verb: "Logs" | "Reports"): Fig.Option[] => [
+  {
+    name: ["--project", "-p"],
+    description: `${verb} activity only for the given project. You can add other projects by using this option several times`,
+    isRepeatable: true,
+    args: {
+      name: "PROJECT",
+      generators: listProjects,
+    },
+  },
+  {
+    name: ["--tag", "-T"],
+    description: `${verb} activity only for frames containing the given tag. You can add several tags by using this option multiple times`,
+    isRepeatable: true,
+    args: {
+      name: "TAG",
+      generators: listTags,
+    },
+  },
+];
+
+const ignoreOptions = (verb: "Logs" | "Reports"): Fig.Option[] => [
+  {
+    name: "--ignore-project",
+    description: `${verb} activity for all projects but the given ones. You can ignore several projects by using the option multiple times. Any given project will be ignored`,
+    isRepeatable: true,
+    args: {
+      name: "PROJECT",
+      generators: listProjects,
+    },
+  },
+  {
+    name: "--ignore-tag",
+    description: `${verb} activity for all tags but the given ones. You can ignore several tags by using the option multiple times. Any given tag will be ignored`,
+    isRepeatable: true,
+    args: {
+      name: "TAG",
+      generators: listTags,
+    },
+  },
+];
+
+// Shortcuts for common timespans, mutually exclusive with each other
+const periodShortcuts: { names: string[]; description: string }[] = [
+  {
+    names: ["--year", "-y"],
+    description: "Reports activity for the current year",
+  },
+  {
+    names: ["--month", "-m"],
+    description: "Reports activity for the current month",
+  },
+  {
+    names: ["--luna", "-l"],
+    description: "Reports activity for the current moon cycle",
+  },
+  {
+    names: ["--week", "-w"],
+    description: "Reports activity for the current week",
+  },
+  {
+    names: ["--day", "-d"],
+    description: "Reports activity for the current day",
+  },
+  { names: ["--all", "-a"], description: "Reports all activities" },
+];
+
+// `withRange`: the shortcuts also exclude `--from` and `--to` (`report` only)
+const periodOptions = (withRange: boolean): Fig.Option[] =>
+  periodShortcuts.map(({ names, description }) => ({
+    name: names,
+    description,
+    exclusiveOn: [
+      ...periodShortcuts.map((p) => p.names[0]).filter((n) => n !== names[0]),
+      ...(withRange ? ["--from", "--to"] : []),
+    ],
+  }));
+
+const rangeOptions = (
+  what: "log" | "report",
+  exclusiveWithPeriods: boolean
+): Fig.Option[] => {
+  const exclusive = exclusiveWithPeriods
+    ? { exclusiveOn: periodShortcuts.map((p) => p.names[0]) }
+    : {};
+  return [
+    {
+      name: ["--from", "-f"],
+      description: `The date from when the ${what} should start. Defaults to seven days ago`,
+      ...exclusive,
+      args: dateTimeArg(exampleDateTime),
+    },
+    {
+      name: ["--to", "-t"],
+      description: `The date at which the ${what} should stop (inclusive). Defaults to tomorrow`,
+      ...exclusive,
+      args: dateTimeArg(exampleDateTime),
+    },
+  ];
+};
+
+const atOption = (
+  verb: "Start" | "Stop",
+  exclusive: string[] = []
+): Fig.Option => ({
+  name: "--at",
+  description: `${verb} frame at this time. Must be in (YYYY-MM-DDT)?HH:MM(:SS)? format`,
+  ...(exclusive.length > 0 && { exclusiveOn: exclusive }),
+  args: dateTimeArg("The time. Ex: 2022-03-04T12:00:00 or 12:00"),
+});
+
 const completionSpec: Fig.Spec = {
   name: "watson",
   description: "A wonderful CLI to track your time",
@@ -41,29 +255,25 @@ const completionSpec: Fig.Spec = {
       description:
         "Add time to a project with tag(s) that was not tracked live",
       args: {
-        generators: [listProjects, listTags],
+        name: "PROJECT [+TAG...]",
+        description: "The project, followed by its tags as +tag",
+        isVariadic: true,
+        generators: [listProjects, listPlusTags],
       },
       options: [
         {
           name: ["--from", "-f"],
           description: "Date and time of start of tracked activity",
-          args: {
-            name: "DATETIME",
-            description: "The start time. Ex: 2022-03-04 12:00:00",
-          },
+          isRequired: true,
+          args: dateTimeArg(exampleDateTime),
         },
         {
           name: ["--to", "-t"],
           description: "Date and time of end of tracked activity",
-          args: {
-            name: "DATETIME",
-            description: "The start time. Ex: 2022-03-04 12:00:00",
-          },
+          isRequired: true,
+          args: dateTimeArg(exampleDateTime),
         },
-        {
-          name: ["--confirm-new-project", "-c"],
-          description: "Confirm creation of new tag",
-        },
+        ...confirmNewOptions,
       ],
     },
     {
@@ -71,72 +281,10 @@ const completionSpec: Fig.Spec = {
       description:
         "Display a report of the time spent on each project aggregated by day",
       options: [
-        {
-          name: ["--current", "-c"],
-          description: "Include currently running frame in report",
-          exclusiveOn: ["-C"],
-        },
-        {
-          name: ["--no-current", "-C"],
-          description: "Don't include currently running frame in report",
-          exclusiveOn: ["--current"],
-        },
-        {
-          name: ["--from", "-f"],
-          description:
-            "The date from when the reports should start. Defaults to seven days ago",
-          args: {
-            name: "DATETIME",
-            description: "The start time. Ex: 2022-03-04 12:00:00",
-          },
-        },
-        {
-          name: ["--to", "-t"],
-          description:
-            "The date at which the report should stop (inclusive). Defaults to tomorrow",
-          args: {
-            name: "DATETIME",
-            description: "The start time. Ex: 2022-03-04 12:00:00",
-          },
-        },
-        {
-          name: ["--project", "-p"],
-          description:
-            "Reports activity only for the given project. You can add other projects by using this option several times",
-          args: {
-            generators: listProjects,
-            name: "PROJECT",
-          },
-        },
-        {
-          name: ["--tag", "-T"],
-          description:
-            "Reports activity only for frames containing the given tag. You can add several tags by using this option multiple times",
-          args: {
-            generators: listTags,
-            name: "TAG",
-          },
-        },
-        {
-          name: ["--json", "-j"],
-          description: "Format output in JSON instead of plain text",
-          exclusiveOn: ["--csv", "--pager", "--no-pager"],
-        },
-        {
-          name: ["--csv", "-s"],
-          description: "Format output in CSV instead of plain text",
-          exclusiveOn: ["--json", "--pager", "--no-pager"],
-        },
-        {
-          name: ["--pager", "-g"],
-          description: "View output through a pager",
-          exclusiveOn: ["--csv", "--json", "--no-pager"],
-        },
-        {
-          name: ["--no-pager", "-G"],
-          description: "Don't view output through a pager",
-          exclusiveOn: ["--csv", "--pager", "--json"],
-        },
+        ...currentOptions("report"),
+        ...rangeOptions("report", false),
+        ...projectTagOptions("Reports"),
+        ...outputFormatOptions,
       ],
     },
     {
@@ -156,6 +304,7 @@ const completionSpec: Fig.Spec = {
       args: [
         {
           name: "SECTION.OPTION",
+          isOptional: true,
           suggestions: [
             {
               name: "backend.url",
@@ -215,17 +364,18 @@ const completionSpec: Fig.Spec = {
             {
               name: "options.time_format",
               description:
-                "Globally configure how time should be formatted. All python’s strftime directives are supported. Default: %H.%M:%S%z",
+                "Globally configure how time should be formatted. All python’s strftime directives are supported. Default: %H:%M:%S%z",
             },
             {
               name: "options.week_start",
               description:
-                "Globally configure which day corresponds to the start of a week. Allowable values are monday, tuesday, wednesday, thursday, friday, saturday, and sunday",
+                "Globally configure which day corresponds to the start of a week. Allowable values are monday, tuesday, wednesday, thursday, friday, saturday, and sunday. Default: monday",
             },
           ],
         },
         {
           name: "VALUE",
+          description: "The value to set. Omit it to display the current value",
           isOptional: true,
         },
       ],
@@ -234,19 +384,13 @@ const completionSpec: Fig.Spec = {
       name: "edit",
       description: "Edit a frame",
       args: {
-        name: "FRAME ID",
+        name: "ID",
+        description:
+          "Frame ID or position (ex: -2 for the second-to-last frame). Defaults to the current frame, or else the last recorded one",
+        isOptional: true,
         generators: listFrames,
       },
-      options: [
-        {
-          name: ["--confirm-new-project", "-c"],
-          description: "Confirm addition of new project",
-        },
-        {
-          name: ["--confirm-new-tag", "-b"],
-          description: "Confirm creation of new tag",
-        },
-      ],
+      options: confirmNewOptions,
     },
     {
       name: "frames",
@@ -257,22 +401,14 @@ const completionSpec: Fig.Spec = {
       description: "Display help information",
       args: {
         name: "COMMAND",
+        isOptional: true,
       },
     },
     {
       name: "log",
       description: "Display each recorded session during the given timespan",
       options: [
-        {
-          name: ["--current", "-c"],
-          description: "Include currently running frame in report",
-          exclusiveOn: ["--no-current"],
-        },
-        {
-          name: ["--no-current", "-C"],
-          description: "Don't include currently running frame in report",
-          exclusiveOn: ["--current"],
-        },
+        ...currentOptions("output"),
         {
           name: ["--reverse", "-r"],
           description: "Reverse the order of the days in output",
@@ -280,115 +416,14 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["--no-reverse", "-R"],
-          description: "Don't Reverse the order of the days in output",
+          description: "Don't reverse the order of the days in output",
           exclusiveOn: ["--reverse"],
         },
-        {
-          name: ["--from", "-f"],
-          description:
-            "The date from when the log should start. Defaults to seven days ago",
-          args: {
-            name: "DATETIME",
-          },
-        },
-        {
-          name: ["--to", "-t"],
-          description:
-            "The date at which the log should stop (inclusive). Defaults to tomorrow",
-          args: {
-            name: "DATETIME",
-          },
-        },
-        {
-          name: ["--year", "-y"],
-          description: "Reports activity for the current year",
-          exclusiveOn: ["--month", "--luna", "--week", "--day", "--all"],
-        },
-        {
-          name: ["--month", "-m"],
-          description: "Reports activity for the current month",
-          exclusiveOn: ["--year", "--luna", "--week", "--day", "--all"],
-        },
-        {
-          name: ["--luna", "-l"],
-          description: "Reports activity for the current moon cycle",
-          exclusiveOn: ["--year", "--month", "--week", "--day", "--all"],
-        },
-        {
-          name: ["--week", "-w"],
-          description: "Reports activity for the current week",
-          exclusiveOn: ["--year", "--month", "--luna", "--day", "--all"],
-        },
-        {
-          name: ["--day", "-d"],
-          description: "Reports activity for the current day",
-          exclusiveOn: ["--year", "--month", "--luna", "--week", "--all"],
-        },
-        {
-          name: ["--all", "-a"],
-          description: "Reports all activities",
-          exclusiveOn: ["--year", "--month", "--luna", "--week", "--day"],
-        },
-        {
-          name: ["--project", "-p"],
-          description:
-            "Logs activity only for the given project. You can add other projects by using this option several times",
-          args: {
-            name: "PROJECT",
-            generators: listProjects,
-            isVariadic: true,
-          },
-        },
-        {
-          name: ["--tag", "-T"],
-          description:
-            "Logs activity only for frames containing the given tag. You can add several tags by using this option multiple times",
-          args: {
-            name: "TAG",
-            generators: listTags,
-            isVariadic: true,
-          },
-        },
-        {
-          name: "--ignore-project",
-          description:
-            "Logs activity for all projects but the given ones. You can ignore several projects by using the option multiple times. Any given project will be ignored",
-          args: {
-            name: "PROJECT",
-            generators: listProjects,
-            isVariadic: true,
-          },
-        },
-        {
-          name: "--ignore-tag",
-          description:
-            "Logs activity for all tags but the given ones. You can ignore several tags by using the option multiple times. Any given tag will be ignored",
-          args: {
-            name: "TAG",
-            generators: listTags,
-            isVariadic: true,
-          },
-        },
-        {
-          name: ["--json", "-j"],
-          description: "Format output in JSON instead of plain text",
-          exclusiveOn: ["--csv"],
-        },
-        {
-          name: ["--csv", "-s"],
-          description: "Format output in CSV instead of plain text",
-          exclusiveOn: ["--json"],
-        },
-        {
-          name: ["--pager", "-g"],
-          description: "View output through a pager",
-          exclusiveOn: ["--no-pager"],
-        },
-        {
-          name: ["--no-pager", "-G"],
-          description: "Don't view output through a pager",
-          exclusiveOn: ["--pager"],
-        },
+        ...rangeOptions("log", false),
+        ...periodOptions(false),
+        ...projectTagOptions("Logs"),
+        ...ignoreOptions("Logs"),
+        ...outputFormatOptions,
       ],
     },
     {
@@ -397,6 +432,8 @@ const completionSpec: Fig.Spec = {
         "Perform a merge of the existing frames with a conflicting frames file.  When storing the frames on a file hosting service, there is the possibility that the frame file goes out-of-sync due to one or more of the connected clients going offline. This can cause the frames to diverge",
       args: {
         name: "FRAMES_WITH_CONFLICT",
+        description: "Path to the conflicting frames file",
+        template: "filepaths",
       },
       options: [
         {
@@ -421,7 +458,7 @@ const completionSpec: Fig.Spec = {
       options: [
         {
           name: ["-f", "--force"],
-          description: "Don’t ask for confirmation",
+          description: "Don't ask for confirmation",
         },
       ],
     },
@@ -430,22 +467,22 @@ const completionSpec: Fig.Spec = {
       description: "Rename a project or tag",
       args: [
         {
-          name: "type",
+          name: "TYPE",
           description: "Project or tag",
           suggestions: [
             {
               name: "project",
-              icon: "🗂",
+              icon: projectIcon,
             },
             {
               name: "tag",
-              icon: "🏷",
+              icon: tagIcon,
             },
           ],
         },
         {
           name: "OLD_NAME",
-          generators: [listProjects, listTags],
+          generators: listRenameTargets,
         },
         {
           name: "NEW_NAME",
@@ -456,132 +493,27 @@ const completionSpec: Fig.Spec = {
       name: "report",
       description: "Display a report of the time spent on each project",
       options: [
-        {
-          name: ["--current", "-c"],
-          description: "Include currently running frame in report",
-          exclusiveOn: ["--no-current"],
-        },
-        {
-          name: ["--no-current", "-C"],
-          description: "Don't include currently running frame in report",
-          exclusiveOn: ["--current"],
-        },
-        {
-          name: ["--from", "-f"],
-          description:
-            "The date from when the report should start. Defaults to seven days ago",
-          args: {
-            name: "DATETIME",
-          },
-        },
-        {
-          name: ["--to", "-t"],
-          description:
-            "The date at which the report should stop (inclusive). Defaults to tomorrow",
-          args: {
-            name: "DATETIME",
-          },
-        },
-        {
-          name: ["--year", "-y"],
-          description: "Reports activity for the current year",
-          exclusiveOn: ["--month", "--luna", "--week", "--day", "--all"],
-        },
-        {
-          name: ["--month", "-m"],
-          description: "Reports activity for the current month",
-          exclusiveOn: ["--year", "--luna", "--week", "--day", "--all"],
-        },
-        {
-          name: ["--luna", "-l"],
-          description: "Reports activity for the current moon cycle",
-          exclusiveOn: ["--year", "--month", "--week", "--day", "--all"],
-        },
-        {
-          name: ["--week", "-w"],
-          description: "Reports activity for the current week",
-          exclusiveOn: ["--year", "--month", "--luna", "--day", "--all"],
-        },
-        {
-          name: ["--day", "-d"],
-          description: "Reports activity for the current day",
-          exclusiveOn: ["--year", "--month", "--luna", "--week", "--all"],
-        },
-        {
-          name: ["--project", "-p"],
-          description:
-            "Reports activity only for the given project. You can add other projects by using this option several times",
-          args: {
-            name: "PROJECT",
-            generators: listProjects,
-          },
-        },
-        {
-          name: ["--tag", "-T"],
-          description:
-            "Reports activity only for frames containing the given tag. You can add several tags by using this option multiple times",
-          args: {
-            name: "TAG",
-            generators: listTags,
-          },
-        },
-        {
-          name: "--ignore-project",
-          description:
-            "Reports activity for all projects but the given ones. You can ignore several projects by using the option multiple times. Any given project will be ignored",
-          args: {
-            name: "PROJECT",
-            generators: listProjects,
-          },
-        },
-        {
-          name: "--ignore-tag",
-          description:
-            "Reports activity for all tags but the given ones. You can ignore several tags by using the option multiple times. Any given tag will be ignored",
-          args: {
-            name: "TAG",
-            generators: listTags,
-          },
-        },
-        {
-          name: ["--json", "-j"],
-          description: "Format output in JSON instead of plain text",
-          exclusiveOn: ["--csv"],
-        },
-        {
-          name: ["--csv", "-s"],
-          description: "Format output in CSV instead of plain text",
-          exclusiveOn: ["--json"],
-        },
-        {
-          name: ["--pager", "-g"],
-          description: "View output through a pager",
-          exclusiveOn: ["--no-pager"],
-        },
-        {
-          name: ["--no-pager", "-G"],
-          exclusiveOn: ["--pager"],
-          description: "Don't view output through a pager",
-        },
+        ...currentOptions("report"),
+        ...rangeOptions("report", true),
+        ...periodOptions(true),
+        ...projectTagOptions("Reports"),
+        ...ignoreOptions("Reports"),
+        ...outputFormatOptions,
       ],
     },
     {
       name: "restart",
       description: "Restart monitoring time for a previously stopped project",
       args: {
-        name: "FRAME",
+        name: "ID",
+        description:
+          "Frame ID or position (ex: -2 for the second-to-last frame). Defaults to the last recorded frame",
         isOptional: true,
         generators: listFrames,
       },
       options: [
-        {
-          name: "--at",
-          description:
-            "Start frame at this time. Must be in (YYYY-MM-DDT)?HH:MM(:SS)? format",
-          args: {
-            name: "DATETIME",
-          },
-        },
+        atOption("Start", ["--gap", "--no-gap"]),
+        ...gapOptions(["--at"]),
         {
           name: ["--stop", "-s"],
           description: "Stop an already running project",
@@ -589,8 +521,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["--no-stop", "-S"],
-          exclusiveOn: ["--stop"],
           description: "Don't stop an already running project",
+          exclusiveOn: ["--stop"],
         },
       ],
     },
@@ -599,39 +531,15 @@ const completionSpec: Fig.Spec = {
       description:
         "Start monitoring time for the given project. You can add tags indicating more specifically what you are working on with +tag",
       args: {
-        name: "ARGS",
+        name: "PROJECT [+TAG...]",
+        description: "The project, followed by its tags as +tag",
         isVariadic: true,
-        generators: [listProjects, listTags],
+        generators: [listProjects, listPlusTags],
       },
       options: [
-        {
-          name: "--at",
-          description:
-            "Start frame at this time. Must be in (YYYY-MM-DDT)?HH:MM(:SS)? format",
-          args: {
-            name: "DATETIME",
-          },
-        },
-        {
-          name: ["--gap", "-g"],
-          exclusiveOn: ["--no-gap"],
-          description:
-            "Leave gap between end time of previous project and start time of the current",
-        },
-        {
-          name: ["--no-gap", "-G"],
-          exclusiveOn: ["--gap"],
-          description:
-            "Don't leave gap between end time of previous project and start time of the current",
-        },
-        {
-          name: ["--confirm-new-project", "-c"],
-          description: "Confirm addition of new project",
-        },
-        {
-          name: ["--confirm-new-tag", "-b"],
-          description: "Confirm creation of new tag",
-        },
+        atOption("Start", ["--gap", "--no-gap"]),
+        ...gapOptions(["--at"]),
+        ...confirmNewOptions,
       ],
     },
     {
@@ -659,16 +567,7 @@ const completionSpec: Fig.Spec = {
     {
       name: "stop",
       description: "Stop monitoring time for the current project",
-      options: [
-        {
-          name: "--at",
-          description:
-            "Stop frame at this time. Must be in (YYYY-MM-DDT)?HH:MM(:SS)? format",
-          args: {
-            name: "DATETIME",
-          },
-        },
-      ],
+      options: [atOption("Stop")],
     },
     {
       name: "sync",
