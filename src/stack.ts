@@ -1,5 +1,6 @@
-// Stack v3.11.1 (GitHub latest release, 2026-06-13). Source: src/Stack/CLI.hs
-// and src/Stack/Options/*.hs at tag v3.11.1, plus docs/commands/*.md
+// Stack v3.11.1 (newest stable on GitHub tags, Hackage and Homebrew, 2026-11-20). Source: src/Stack/CLI.hs
+// and src/Stack/Options/*.hs at tag v3.11.1, plus docs/commands/*.md; re-verified
+// every command, flag, alias and enum against that source on 2026-11-20
 
 // --NAME and --no-NAME, as optparse-applicative's boolFlags generates them
 const bool = (name: string, what: string): Fig.Option[] => [
@@ -832,6 +833,14 @@ const completionSpec: Fig.Spec = {
           description:
             "Name of a template: [[service:]username/]template, a local filename such as foo.hsfiles, or a full URL",
           isOptional: true,
+        },
+        {
+          name: "DIR(S)",
+          description:
+            "Directories to include in the search for Cabal files, when initialising (default: current directory)",
+          isOptional: true,
+          isVariadic: true,
+          template: "folders",
         },
       ],
       options: [
