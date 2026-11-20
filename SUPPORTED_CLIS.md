@@ -6,741 +6,741 @@ The 738 CLIs tabsmith can autocomplete. "Last updated" is the date of the newest
 
 | CLI | Description | Last updated |
 | --- | --- | --- |
-| `-` | ZSH pre-command modifier that prepends a '-' to the argv[0] string | 2022-04-21 |
-| `@capgo/cli` | Manage packages and bundle versions in Capgo Cloud | 2023-10-27 |
-| `@fig/publish-spec` | Publish a spec to fig teams | 2022-06-28 |
-| `@magnolia/cli` | Magnolia CLI is a command line interface (CLI) tool to set up and facilitate light development with Magnolia | 2022-09-05 |
-| `@preset/cli` | Elegant, ecosystem-agnostic scaffolding tool | 2022-04-12 |
-| `@usermn/sdc` | "setup dominic's computer" cli tool | 2023-11-06 |
-| `@withfig/autocomplete-tools` | Dev tools for fig's autocomplete | 2023-04-24 |
-| `@wordpress/create-block` | Generates PHP, JS and CSS code for registering a WordPress plugin with blocks | 2023-04-22 |
-| `act` | Run GitHub actions locally by specifying the event name (e.g. `push`) or an action name directly | 2022-05-14 |
-| `adb` | Android Debug Bridge | 2021-09-17 |
-| `adr` | Manage Architectural Design Records | 2023-05-31 |
-| `afplay` | Audio File Play | 2022-05-30 |
-| `aftman` | A toolchain manager, enabling project-specific command line tools | 2022-06-19 |
-| `ag` | Recursively search for PATTERN in PATH. Like grep or ack, but faster | 2021-09-17 |
+| `-` | ZSH pre-command modifier that prepends a '-' to the argv[0] string | 2026-11-19 |
+| `@capgo/cli` | Manage packages and bundle versions in Capgo Cloud | 2026-11-20 |
+| `@fig/publish-spec` | Publish a spec to fig teams | 2026-11-19 |
+| `@magnolia/cli` | CLI for light development of Magnolia projects | 2026-11-20 |
+| `@preset/cli` | Elegant, ecosystem-agnostic scaffolding tool | 2026-11-19 |
+| `@usermn/sdc` | "setup dominic's computer" cli tool | 2026-11-19 |
+| `@withfig/autocomplete-tools` | Dev tools for fig's autocomplete | 2026-11-19 |
+| `@wordpress/create-block` | Generates PHP, JS and CSS code for registering a WordPress plugin with blocks | 2026-11-19 |
+| `act` | Run GitHub actions locally by specifying the event name (e.g. `push`) or an action name directly | 2026-11-19 |
+| `adb` | Android Debug Bridge | 2026-11-20 |
+| `adr` | Manage Architecture Decision Records | 2026-11-19 |
+| `afplay` | Audio File Play | 2026-11-19 |
+| `aftman` | A toolchain manager, enabling project-specific command line tools | 2026-11-19 |
+| `ag` | Recursively search for PATTERN in PATH. Like grep or ack, but faster | 2026-11-20 |
 | `agent` | Cursor CLI: AI coding agent in your terminal | 2026-11-03 |
-| `agrippa` | — | 2021-12-09 |
-| `airflow` | Subcommand | 2022-10-03 |
-| `aliases` | Bash aliases on steroids, dynamic alias functions for bash | 2023-01-11 |
-| `amplify` | A set of tools and services to help front-end web and mobile developers build scalable full stack applications | 2023-11-06 |
-| `ampx` | CLI for Amplify Gen 2 | 2025-02-19 |
-| `ansible` | Define and run a single Ansible task 'playbook' against a set of hosts | 2021-11-22 |
-| `ansible-config` | View ansible configuration | 2022-05-25 |
-| `ansible-doc` | Displays information on modules installed in Ansible libraries | 2023-11-06 |
-| `ansible-galaxy` | Perform various Role and Collection related operations | 2022-06-04 |
-| `ansible-lint` | Ansible static code analysis | 2022-06-20 |
-| `ansible-playbook` | Runs Ansible playbooks, executing the defined tasks on the targeted hosts | 2022-02-19 |
-| `ant` | A software tool for automating software build processes | 2023-11-06 |
-| `appwrite` | Appwrite - Open-Source End-to-End Backend Server | 2022-07-07 |
-| `apt` | Package manager for Debian-based Linux distributions | 2023-11-06 |
-| `arch` | Print architecture type or run select architecture | 2022-04-23 |
-| `arduino-cli` | Arduino Command Line Interface | 2024-01-19 |
-| `argo` | — | 2023-02-06 |
-| `asar` | A simple extensive tar-like archive format with indexing | 2022-10-10 |
-| `asciinema` | Terminal session recorder | 2024-05-04 |
-| `asdf` | Extendable version manager with support for Ruby, Node.js, Elixir, Erlang & more | 2023-11-06 |
-| `asr` | Asr efficiently copies disk images onto volumes, either directly or via a multicast network stream | 2022-12-12 |
-| `assimp` | Open Asset Import Library | 2023-11-06 |
-| `astro` | CLI provided by Astro to develop, build, and preview your project from a terminal window | 2023-05-07 |
+| `agrippa` | Generate frontend components without the boilerplate | 2026-11-19 |
+| `airflow` | Apache Airflow command-line interface | 2026-11-20 |
+| `aliases` | Bash aliases on steroids, dynamic alias functions for bash | 2026-11-19 |
+| `amplify` | A set of tools and services to help front-end web and mobile developers build scalable full stack applications | 2026-11-20 |
+| `ampx` | CLI for Amplify Gen 2 | 2026-11-20 |
+| `ansible` | Define and run a single Ansible task 'playbook' against a set of hosts | 2026-11-19 |
+| `ansible-config` | View ansible configuration | 2026-11-19 |
+| `ansible-doc` | Displays information on modules installed in Ansible libraries | 2026-11-19 |
+| `ansible-galaxy` | Perform various Role and Collection related operations | 2026-11-19 |
+| `ansible-lint` | Ansible static code analysis | 2026-11-19 |
+| `ansible-playbook` | Runs Ansible playbooks, executing the defined tasks on the targeted hosts | 2026-11-19 |
+| `ant` | A software tool for automating software build processes | 2026-11-19 |
+| `appwrite` | Appwrite is an open-source self-hosted backend server that abstracts and simplifies complex and repetitive development tasks behind a very simple REST API | 2026-11-20 |
+| `apt` | Package manager for Debian-based Linux distributions | 2026-11-20 |
+| `arch` | Print architecture type or run select architecture | 2026-11-19 |
+| `arduino-cli` | Arduino Command Line Interface | 2026-11-19 |
+| `argo` | Argo Workflows command line interface | 2026-11-20 |
+| `asar` | Manipulate asar archive files | 2026-11-19 |
+| `asciinema` | Terminal session recorder | 2026-11-19 |
+| `asdf` | Extendable version manager with support for Ruby, Node.js, Elixir, Erlang & more | 2026-11-20 |
+| `asr` | Asr efficiently copies disk images onto volumes, either directly or via a multicast network stream | 2026-11-19 |
+| `assimp` | Open Asset Import Library | 2026-11-19 |
+| `astro` | CLI provided by Astro to develop, build, and preview your project from a terminal window | 2026-11-19 |
 | `atlas` | CLI tool to manage MongoDB Atlas | 2026-11-13 |
-| `atuin` | Magical shell history | 2023-10-27 |
-| `authchanger` | Authchanger is a utility included with Jamf Connect to help you manage the authorization database used by macOS to determine how the login process progresses | 2022-10-10 |
-| `autocannon` | Fast HTTP/1.1 benchmarking tool written in Node.js | 2024-01-03 |
-| `autojump` | A faster way to navigate your filesystem | 2021-09-17 |
-| `aws` | — | 2024-12-11 |
-| `aws-vault` | A vault for securely storing and accessing AWS credentials in development environments | 2023-11-06 |
-| `awsume` | Awsume | 2022-10-04 |
-| `az` | — | 2024-04-29 |
-| `babel` | — | 2021-09-17 |
-| `banner` | Prints a large, high quality banner on the standard output | 2022-06-10 |
-| `barnard59` | — | 2024-06-10 |
-| `base32` | Base32 encode/decode data and print to standard output | 2022-05-31 |
-| `base64` | Encode and decode using Base64 representation | 2022-05-31 |
-| `basename` | Return filename portion of pathname | 2022-06-19 |
-| `basenc` | Encode/decode data and print to standard output | 2022-05-31 |
-| `bat` | A cat(1) clone with syntax highlighting and Git integration | 2023-11-06 |
-| `bazel` | Bazel the build system! | 2023-11-06 |
-| `bc` | An arbitrary precision calculator language | 2022-05-25 |
-| `bcd` | Bookmark directories and move to them | 2024-03-22 |
-| `bit` | Bit documentation: https://bit.dev/docs | 2023-09-28 |
-| `black` | Python code formatter | 2023-11-06 |
-| `blitz` | Blitz.js CLI is your single access point for interacting with your app, from database management to code generation | 2021-10-21 |
-| `bosh` | Bosh cli to managed your bosh deployment | 2023-11-06 |
-| `br` | Broot lets you explore file hierarchies with a tree-like view, manipulate files, launch actions, and define your own shortcuts. broot is best launched as br: this shell function gives you access to more commands, especially cd. The br shell function is interactively installed on first broot launch. Flags and options can be classically passed on launch but also written in the configuration file. Each flag has a counter-flag so that you can cancel at command line a flag which has been set in the configuration file | 2022-10-17 |
-| `brew` | Package manager for macOS | 2023-11-06 |
-| `broot` | Broot lets you explore file hierarchies with a tree-like view, manipulate files, launch actions, and define your own shortcuts. broot is best launched as br: this shell function gives you access to more commands, especially cd. The br shell function is interactively installed on first broot launch. Flags and options can be classically passed on launch but also written in the configuration file. Each flag has a counter-flag so that you can cancel at command line a flag which has been set in the configuration file | 2022-10-17 |
-| `browser-sync` | Keep multiple browsers & devices in sync when building websites | 2023-11-06 |
-| `btop` | Beautifuler htop (interactive process viewer) | 2022-08-18 |
-| `build-storybook` | Storybook build CLI tools | 2021-10-08 |
+| `atuin` | Magical shell history | 2026-11-20 |
+| `authchanger` | Authchanger is a utility included with Jamf Connect to help you manage the authorization database used by macOS to determine how the login process progresses | 2026-11-19 |
+| `autocannon` | Fast HTTP/1.1 benchmarking tool written in Node.js | 2026-11-20 |
+| `autojump` | A faster way to navigate your filesystem | 2026-11-19 |
+| `aws` | — | 2026-11-19 |
+| `aws-vault` | A vault for securely storing and accessing AWS credentials in development environments | 2026-11-19 |
+| `awsume` | Awsume | 2026-11-19 |
+| `az` | — | 2026-11-19 |
+| `babel` | — | 2026-11-19 |
+| `banner` | Prints a large, high quality banner on the standard output | 2026-11-19 |
+| `barnard59` | — | 2026-11-20 |
+| `base32` | Base32 encode/decode data and print to standard output | 2026-11-19 |
+| `base64` | Encode and decode using Base64 representation | 2026-11-19 |
+| `basename` | Return filename portion of pathname | 2026-11-19 |
+| `basenc` | Encode/decode data and print to standard output | 2026-11-19 |
+| `bat` | A cat(1) clone with syntax highlighting and Git integration | 2026-11-20 |
+| `bazel` | Bazel the build system! | 2026-11-20 |
+| `bc` | An arbitrary precision calculator language | 2026-11-19 |
+| `bcd` | Bookmark directories and move to them | 2026-11-19 |
+| `bit` | Bit documentation: https://bit.dev/docs | 2026-11-20 |
+| `black` | Python code formatter | 2026-11-19 |
+| `blitz` | Blitz.js CLI is your single access point for interacting with your app, from database management to code generation | 2026-11-19 |
+| `bosh` | Bosh cli to managed your bosh deployment | 2026-11-20 |
+| `br` | Broot lets you explore file hierarchies with a tree-like view, manipulate and preview files, launch actions, and define your own shortcuts. broot is best launched as br: this shell function gives you access to more commands, especially cd. The br shell function is interactively installed on first broot launch. Flags and options can be classically passed on launch but also written in the configuration file. Each flag has a counter-flag so that you can cancel at command line a flag which has been set in the configuration file | 2026-11-20 |
+| `brew` | Homebrew package manager for macOS and Linux | 2026-11-19 |
+| `broot` | Broot lets you explore file hierarchies with a tree-like view, manipulate and preview files, launch actions, and define your own shortcuts. broot is best launched as br: this shell function gives you access to more commands, especially cd. The br shell function is interactively installed on first broot launch. Flags and options can be classically passed on launch but also written in the configuration file. Each flag has a counter-flag so that you can cancel at command line a flag which has been set in the configuration file | 2026-11-20 |
+| `browser-sync` | Keep multiple browsers & devices in sync when building websites | 2026-11-19 |
+| `btop` | Resource monitor (interactive process viewer) | 2026-11-19 |
+| `build-storybook` | Storybook build CLI tools (removed in Storybook 7, use `storybook build`) | 2026-11-20 |
 | `bun` | A fast bundler, transpiler, JavaScript Runtime and package manager for web software | 2026-11-05 |
-| `bundle` | Ruby Dependency Management | 2023-11-06 |
-| `bunx` | — | 2023-11-06 |
-| `bw` | — | 2024-07-30 |
-| `bwdc` | Bitwarden Directory Connector | 2024-04-29 |
-| `bws` | — | 2024-03-28 |
-| `c++` | C++ compiler | 2022-08-31 |
-| `caffeinate` | Prevent the system from sleeping on behalf of a utility | 2021-10-28 |
-| `cal` | Displays a calendar and the date of Easter | 2022-10-09 |
-| `cap` | The Capacitor command-line interface (CLI) tool is used to develop Capacitor apps | 2022-08-27 |
-| `capacitor` | The Capacitor command-line interface (CLI) tool is used to develop Capacitor apps | 2023-11-06 |
-| `cargo` | CLI Interface for Cargo | 2024-11-21 |
-| `cat` | Concatenate and print files | 2022-11-23 |
-| `cci` | CumulusCI command line interface | 2023-11-30 |
-| `cd` | Change the shell working directory | 2024-03-27 |
-| `cdk` | AWS CDK CLI | 2023-05-10 |
-| `cdk8s` | CDK for K8s | 2023-01-11 |
-| `cf` | Cloudfoundry cli | 2023-11-06 |
-| `charm` | Do Charm stuff; run without arguments for a TUI or use the sub-commands like a pro | 2022-10-05 |
-| `checkov` | Checkov scans cloud infrastructure configurations to find misconfigurations before they're deployed | 2023-11-06 |
-| `chezmoi` | Manage your dotfiles across multiple diverse machines, securely | 2022-08-18 |
-| `chmod` | Change file modes or Access Control Lists | 2021-09-17 |
-| `chown` | Change the user and/or group ownership of a given file, directory, or symbolic link | 2023-11-06 |
-| `chsh` | Change your login shell | 2023-11-06 |
-| `cicada` | Write CI/CD Pipelines in TypeScript | 2023-04-27 |
-| `circleci` | CircleCI CLI | 2023-02-09 |
-| `cl` | — | 2024-04-29 |
-| `clang` | Clang LLVM compiler | 2023-02-06 |
-| `clang++` | Clang LLVM compiler for C++ | 2022-08-31 |
+| `bundle` | Ruby Dependency Management | 2026-11-20 |
+| `bunx` | Execute an npm package executable (CLI), installing if needed | 2026-11-20 |
+| `bw` | — | 2026-11-19 |
+| `bwdc` | Bitwarden Directory Connector | 2026-11-19 |
+| `bws` | Bitwarden Secrets CLI | 2026-11-19 |
+| `c++` | C++ compiler | 2026-11-20 |
+| `caffeinate` | Prevent the system from sleeping on behalf of a utility | 2026-11-19 |
+| `cal` | Displays a calendar and the date of Easter | 2026-11-19 |
+| `cap` | The Capacitor command-line interface (CLI) tool is used to develop Capacitor apps | 2026-11-20 |
+| `capacitor` | The Capacitor command-line interface (CLI) tool is used to develop Capacitor apps | 2026-11-20 |
+| `cargo` | CLI Interface for Cargo | 2026-11-20 |
+| `cat` | Concatenate and print files | 2026-11-19 |
+| `cci` | CumulusCI command line interface | 2026-11-19 |
+| `cd` | Change the shell working directory | 2026-11-19 |
+| `cdk` | AWS CDK CLI | 2026-11-20 |
+| `cdk8s` | CDK for K8s | 2026-11-20 |
+| `cf` | Cloud Foundry CLI | 2026-11-19 |
+| `charm` | Do Charm stuff; run without arguments for a TUI or use the sub-commands like a pro | 2026-11-19 |
+| `checkov` | Checkov scans cloud infrastructure configurations to find misconfigurations before they're deployed | 2026-11-20 |
+| `chezmoi` | Manage your dotfiles across multiple diverse machines, securely | 2026-11-19 |
+| `chmod` | Change file modes or Access Control Lists | 2026-11-19 |
+| `chown` | Change the user and/or group ownership of a given file, directory, or symbolic link | 2026-11-19 |
+| `chsh` | Change your login shell | 2026-11-19 |
+| `cicada` | Write CI/CD Pipelines in TypeScript | 2026-11-20 |
+| `circleci` | # CircleCI CLI | 2026-11-20 |
+| `cl` | — | 2026-11-19 |
+| `clang` | Clang LLVM compiler | 2026-11-19 |
+| `clang++` | Clang LLVM compiler for C++ | 2026-11-19 |
 | `claude` | Claude Code - starts an interactive session by default, use -p/--print for non-interactive output | 2026-11-06 |
-| `clear` | Clear the terminal screen | 2021-09-17 |
-| `cliff-jumper` | A small CLI tool to create a semantic release and git-cliff powered Changelog | 2023-06-15 |
-| `clilol` | A cli for omg.lol | 2023-05-02 |
-| `clion` | CLion cli | 2023-10-12 |
-| `clojure` | Use the Clojure tools to run Clojure programs on the JVM, start a REPL, or invoke a specific function with data | 2022-11-21 |
-| `cloudflared` | Cloudflared connects your machine or user identity to Cloudflare's global network | 2022-04-24 |
-| `cmake` | Command-line interface of the cross-platform buildsystem generator CMake | 2022-04-24 |
-| `coda` | Coda Local development CLI tool. It comes bundled with the Pack SDK and makes it easy to build and manage Packs from the CLI | 2024-06-25 |
-| `code` | Visual Studio Code | 2022-10-10 |
-| `code-insiders` | Visual Studio Code | 2021-09-17 |
+| `clear` | Clear the terminal screen | 2026-11-19 |
+| `cliff-jumper` | A small CLI tool to create a semantic release and git-cliff powered Changelog | 2026-11-19 |
+| `clilol` | A CLI for omg.lol | 2026-11-20 |
+| `clion` | CLion cli | 2026-11-19 |
+| `clojure` | Use the Clojure tools to run Clojure programs on the JVM, start a REPL, or invoke a specific function with data | 2026-11-19 |
+| `cloudflared` | Cloudflared connects your machine or user identity to Cloudflare's global network | 2026-11-20 |
+| `cmake` | Command-line interface of the cross-platform buildsystem generator CMake | 2026-11-20 |
+| `coda` | Coda Local development CLI tool. It comes bundled with the Pack SDK and makes it easy to build and manage Packs from the CLI | 2026-11-19 |
+| `code` | Visual Studio Code | 2026-11-20 |
+| `code-insiders` | Visual Studio Code | 2026-11-20 |
 | `codeburn` | See where your AI coding tokens go - by task, tool, model, and project | 2026-11-07 |
-| `codesign` | Create and manipulate code signatures | 2022-10-23 |
+| `codesign` | Create and manipulate code signatures | 2026-11-19 |
 | `codex` | OpenAI Codex CLI | 2026-11-03 |
-| `command` | Run an external command | 2022-04-19 |
-| `commercelayer` | — | 2024-04-29 |
-| `composer` | Composer Command | 2023-11-06 |
-| `conda` | Conda package manager | 2024-08-08 |
-| `copilot` | 👩‍✈️ Launch and manage containerized applications on AWS | 2023-11-06 |
-| `copyfile` | Oh-My-Zsh plugin that copies the contents of a file to the clipboard | 2022-08-08 |
-| `copypath` | Oh-My-Zsh plugin that copies the path of given directory or file to the clipboard | 2022-08-08 |
-| `cordova` | Manage your Cordova application | 2023-11-06 |
-| `cosign` | — | 2022-03-24 |
-| `cot` | Command-line utility for CotEditor | 2021-09-17 |
-| `cp` | Copy files and directories | 2021-09-17 |
-| `create-completion-spec` | Setup fig folder and create spec with the given name | 2022-06-06 |
-| `create-next-app` | — | 2022-05-31 |
-| `create-nx-workspace` | Create a new Nx workspace | 2021-10-31 |
-| `create-react-app` | Creates a new React project | 2021-11-22 |
-| `create-react-native-app` | Creates a new React Native project | 2021-09-17 |
-| `create-redwood-app` | — | 2023-10-27 |
-| `create-remix` | — | 2021-12-01 |
-| `create-t3-app` | A CLI for creating web applications with the t3 stack | 2023-03-23 |
-| `create-video` | CLI used to create remotion video project | 2021-10-04 |
-| `create-vite` | Create a new project powered by Vite | 2023-11-30 |
-| `create-web3-frontend` | Quickly create a Next.js project with wagmi and TailwindCSS ready to go | 2022-03-21 |
-| `croc` | Croc is a tool that allows any two computers to simply and securely transfer files and folders | 2022-05-12 |
-| `crontab` | Maintain crontab file for individual users | 2022-10-07 |
-| `csdx` | Content Stack CLI | 2022-10-22 |
-| `curl` | Transfer a URL | 2022-11-16 |
+| `command` | Run an external command | 2026-11-19 |
+| `commercelayer` | — | 2026-11-20 |
+| `composer` | Composer Command | 2026-11-19 |
+| `conda` | Conda is a tool for managing and deploying applications, environments and packages | 2026-11-20 |
+| `copilot` | 👩‍✈️ Launch and manage containerized applications on AWS | 2026-11-19 |
+| `copyfile` | Oh-My-Zsh plugin that copies the contents of a file to the clipboard | 2026-11-19 |
+| `copypath` | Oh-My-Zsh plugin that copies the path of given directory or file to the clipboard | 2026-11-19 |
+| `cordova` | Manage your Cordova application | 2026-11-20 |
+| `cosign` | A tool for Container Signing, Verification and Storage in an OCI registry | 2026-11-19 |
+| `cot` | Command-line utility for CotEditor | 2026-11-19 |
+| `cp` | Copy files and directories | 2026-11-19 |
+| `create-completion-spec` | Setup fig folder and create spec with the given name | 2026-11-19 |
+| `create-next-app` | Create Next.js-powered React apps with one command | 2026-11-19 |
+| `create-nx-workspace` | Create a new Nx workspace | 2026-11-19 |
+| `create-react-app` | Creates a new React project | 2026-11-19 |
+| `create-react-native-app` | Deprecated: prints a notice and exits with an error, use create-expo-app instead | 2026-11-19 |
+| `create-redwood-app` | Create a new Redwood project | 2026-11-19 |
+| `create-remix` | Deprecated: prints a notice pointing to create-react-router instead of creating a project | 2026-11-19 |
+| `create-t3-app` | A CLI for creating web applications with the t3 stack | 2026-11-19 |
+| `create-video` | CLI used to create remotion video project | 2026-11-19 |
+| `create-vite` | Create a new project powered by Vite | 2026-11-19 |
+| `create-web3-frontend` | Create a web3 frontend with Next.js, wagmi, RainbowKit and Tailwind CSS | 2026-11-20 |
+| `croc` | Securely transfer files or share a terminal | 2026-11-19 |
+| `crontab` | Maintain crontab file for individual users | 2026-11-19 |
+| `csdx` | Contentstack CLI | 2026-11-20 |
+| `curl` | Transfer a URL | 2026-11-20 |
 | `cursor-agent` | Cursor CLI: AI coding agent in your terminal | 2026-11-03 |
-| `cut` | Cut out selected portions of each line of a file | 2023-11-20 |
-| `cw` | Top level cli commands | 2024-04-18 |
-| `dapr` | Dapr CLI | 2024-06-18 |
-| `dart` | A command-line utility for Dart development | 2023-07-19 |
-| `date` | Display or set date and time | 2022-03-02 |
-| `dateseq` | Nifty command line date and time utilities; fast date calculations and conversion in the shell | 2022-04-24 |
-| `datree` | Datree can be used on the command line to run policies against Kubernetes manifests YAML files or Helm charts | 2022-06-19 |
-| `dbt` | CLI for dbt - Data Build Tool | 2023-04-22 |
-| `dcli` | Dashlane CLI | 2023-11-06 |
-| `dd` | Convert and copy a file | 2022-04-24 |
-| `ddev` | DDEV-Local local development environment | 2022-09-22 |
-| `ddosify` | High-performance load testing tool, written in Golang | 2023-01-02 |
-| `defaultbrowser` | Change your default browser from the CLI | 2023-11-06 |
-| `defaults` | Command line interface to a user's defaults | 2023-11-06 |
-| `degit` | Straightforward project scaffolding | 2023-11-06 |
-| `deno` | A modern JavaScript and TypeScript runtime | 2023-11-06 |
-| `deployctl` | Command line tool for Deno Deploy | 2023-11-06 |
-| `deta` | Deta CLI for managing Deta Micros | 2023-11-06 |
-| `df` | Display free disk space | 2021-10-05 |
-| `diff` | Compare files line by line | 2022-05-30 |
-| `dig` | Domain Information Groper | 2021-09-17 |
-| `direnv` | Unclutter your .profile | 2021-12-30 |
-| `dirname` | Return directory portion of pathname | 2022-06-19 |
-| `ditto` | Copy directory hierarchies, create and extract archives | 2023-02-06 |
-| `django-admin` | Utility script for the Django Web framework | 2021-09-17 |
-| `do` | Do the command | 2022-04-19 |
-| `do-release-upgrade` | Upgrade Ubuntu to latest release | 2023-01-13 |
+| `cut` | Cut out selected portions of each line of a file | 2026-11-19 |
+| `cw` | Top level cli commands | 2026-11-19 |
+| `dapr` | Dapr CLI | 2026-11-19 |
+| `dart` | A command-line utility for Dart development | 2026-11-20 |
+| `date` | Display or set date and time | 2026-11-19 |
+| `dateseq` | Generate a sequence of date/times from FIRST to LAST, optionally in steps of INCREMENT (dateutils) | 2026-11-19 |
+| `datree` | Policy management tool for your Kubernetes (deprecated upstream) | 2026-11-19 |
+| `dbt` | An ELT tool for managing your SQL transformations and data models | 2026-11-20 |
+| `dcli` | Dashlane CLI | 2026-11-19 |
+| `dd` | Convert and copy a file | 2026-11-19 |
+| `ddev` | DDEV local development environment | 2026-11-19 |
+| `ddosify` | Load test HTTP and streaming (SSE) APIs, LLM endpoints included | 2026-11-19 |
+| `defaultbrowser` | Change your default browser from the CLI | 2026-11-19 |
+| `defaults` | Command line interface to a user's defaults | 2026-11-19 |
+| `degit` | Straightforward project scaffolding | 2026-11-19 |
+| `deno` | A modern JavaScript and TypeScript runtime | 2026-11-19 |
+| `deployctl` | Command line tool for Deno Deploy | 2026-11-19 |
+| `deta` | Deta CLI for managing Deta Micros | 2026-11-20 |
+| `df` | Display free disk space | 2026-11-19 |
+| `diff` | Compare files line by line | 2026-11-19 |
+| `dig` | Domain Information Groper | 2026-11-19 |
+| `direnv` | Unclutter your .profile | 2026-11-20 |
+| `dirname` | Return directory portion of pathname | 2026-11-19 |
+| `ditto` | Copy directory hierarchies, create and extract archives | 2026-11-19 |
+| `django-admin` | Utility script for the Django Web framework | 2026-11-19 |
+| `do` | Start the body of a for, while, until or select loop | 2026-11-19 |
+| `do-release-upgrade` | Upgrade Ubuntu to latest release | 2026-11-19 |
 | `docker` | A self-sufficient runtime for containers | 2026-11-05 |
-| `docker-compose` | Define and run multi-container applications with Docker | 2023-12-19 |
-| `doctl` | The official DigitalOcean command line interface (CLI) | 2022-01-14 |
-| `dog` | A command-line DNS client | 2021-11-14 |
-| `doggo` | DNS Client for Humans | 2024-07-05 |
-| `doppler` | The official Doppler CLI | 2023-11-06 |
-| `dos2unix` | DOS to Unix file format converter | 2023-02-07 |
-| `dotenv` | Loads environment variables from .env | 2022-04-20 |
-| `dotenv-vault` | CLI for dotenv-vault | 2022-09-26 |
-| `dotnet` | The dotnet cli | 2023-11-06 |
-| `dotslash` | — | 2022-11-23 |
-| `dpkg` | Debian package management system | 2023-10-27 |
-| `dprint` | A pluggable and configurable code formatting platform written in Rust | 2022-10-23 |
-| `drush` | Drush is a command line shell and Unix scripting interface for Drupal | 2023-11-06 |
-| `dscacheutil` | Utility for managing the Directory Service cache | 2023-11-06 |
-| `dscl` | Directory Service command line utility | 2023-11-06 |
+| `docker-compose` | Define and run multi-container applications with Docker | 2026-11-19 |
+| `doctl` | Command line interface (CLI) for the DigitalOcean API | 2026-11-20 |
+| `dog` | A command-line DNS client | 2026-11-19 |
+| `doggo` | DNS Client for Humans | 2026-11-19 |
+| `doppler` | The official Doppler CLI | 2026-11-20 |
+| `dos2unix` | DOS to Unix file format converter | 2026-11-19 |
+| `dotenv` | Loads environment variables from .env | 2026-11-19 |
+| `dotenv-vault` | CLI for dotenv-vault | 2026-11-20 |
+| `dotnet` | The dotnet cli | 2026-11-19 |
+| `dotslash` | Fetch, cache and run the executable described by a DotSlash file | 2026-11-19 |
+| `dpkg` | Package manager for Debian | 2026-11-20 |
+| `dprint` | A pluggable and configurable code formatting platform written in Rust | 2026-11-19 |
+| `drush` | Drush is a command line shell and Unix scripting interface for Drupal | 2026-11-19 |
+| `dscacheutil` | Utility for managing the Directory Service cache | 2026-11-19 |
+| `dscl` | Directory Service command line utility | 2026-11-20 |
 | `dsh` | Boot a DeepSeek Harness profile: an ordered stack of plugin-bundle patch layers under your own overrides | 2026-11-07 |
-| `dtm` | DevStream is an open-source DevOps toolchain manager | 2023-11-06 |
-| `du` | Display disk usage statistics | 2021-10-17 |
-| `dust` | Like du but more intuitive | 2023-02-05 |
-| `eas` | EAS CLI is the command-line app that you will use to interact with EAS services from your terminal | 2023-02-10 |
-| `eb` | AWS Elastic Beanstalk | 2023-11-06 |
-| `echo` | Write arguments to the standard output | 2023-05-05 |
-| `electron` | Build cross platform desktop apps with JavaScript, HTML and CSS | 2021-09-17 |
-| `eleventy` | Eleventy is a simpler static site generator | 2022-02-27 |
-| `elif` | Execute if the previous condition returned 0 | 2022-04-19 |
-| `elixir` | Elixir Language | 2022-03-27 |
-| `elm` | Fig spec for the Elm language cli | 2023-11-06 |
-| `elm-format` | Format your code in the Elm idiomatic way | 2023-11-06 |
-| `elm-json` | Deal with your elm.json | 2023-11-06 |
-| `elm-review` | — | 2023-11-06 |
-| `else` | Execute this command if the test returned 1 | 2022-04-19 |
-| `emacs` | An extensible, customizable, free/libre text editor — and more | 2021-09-17 |
-| `enapter` | Cross-platform device management command-line tool for Enapter Energy Management System Toolkit | 2023-09-29 |
-| `encore` | Encore is the fastest way of developing backend applications | 2022-09-15 |
-| `env` | Set environment and execute command, or print environment | 2023-11-06 |
-| `envchain` | Set environment variables with macOS keychain or D-Bus secret service | 2023-11-06 |
-| `esbuild` | An extremely fast JavaScript bundler | 2023-11-06 |
-| `eslint` | Pluggable JavaScript linter | 2023-11-06 |
-| `exa` | A modern replacement for ls | 2022-08-18 |
-| `exec` | Replace the current shell with a program | 2022-04-19 |
-| `exercism` | Solve coding exercises in your chosen programming languages | 2022-01-11 |
-| `expo` | Tools for creating, running, and deploying Universal Expo and React Native apps | 2023-11-06 |
-| `expo-cli` | Tools for creating, running, and deploying Universal Expo and React Native apps | 2023-11-06 |
-| `export` | Export variables | 2022-04-21 |
-| `expressots` | ExpressoTS CLI | 2023-11-06 |
-| `eza` | A modern replacement for ls | 2024-12-31 |
-| `fastlane` | Fastlane is an open source platform aimed at simplifying Android and iOS deployment | 2022-02-04 |
-| `fastly` | A CLI for interacting with the Fastly platform | 2022-06-29 |
-| `fd` | A simple, fast and user-friendly alternative to 'find' | 2021-09-17 |
-| `fdisk` | Manipulate disk partition table | 2022-08-24 |
-| `ffmpeg` | Play, record, convert, and stream audio and video | 2023-11-06 |
-| `fig` | Top level cli commands | 2023-11-06 |
-| `figterm` | Fig's terminal layer | 2022-12-26 |
-| `file` | Determine file type | 2022-05-31 |
-| `fin` | Docksal command line utility | 2023-11-06 |
-| `find` | Walk a file hierarchy | 2021-09-17 |
-| `firebase` | — | 2023-11-06 |
-| `firefox` | Free open-source web browser developer by Mozilla | 2022-08-22 |
-| `fisher` | A plugin manager for Fish | 2023-11-06 |
-| `flutter` | Run flutter command | 2023-11-06 |
-| `fly` | The flyctl is a command-line interface for fly.io | 2022-05-05 |
-| `flyctl` | The flyctl is a command-line interface for fly.io | 2023-11-06 |
-| `fmt` | Simple text formatter | 2022-05-31 |
-| `fnm` | Fast Node Manager | 2023-11-06 |
-| `fold` | Fold long lines for finite width output device | 2022-05-30 |
-| `for` | Perform a set of commands multiple times | 2022-04-19 |
-| `forc` | Fuel Orchestrator | 2024-04-03 |
-| `forge` | A command line interface for managing Atlassian-hosted apps | 2021-12-10 |
-| `fvm` | Flutter Version Management: A cli to manage Flutter SDK versions | 2023-11-06 |
-| `fzf` | A general-purpose command-line fuzzy finder | 2021-09-17 |
-| `fzf-tmux` | Opens a fuzzy finder in a tmux pane | 2021-09-17 |
-| `g++` | The default C++ compiler for most linux distributions | 2022-08-31 |
-| `ganache-cli` | Fast Ethereum RPC client | 2021-09-17 |
-| `gatsby` | Gatsby CLI | 2022-10-19 |
-| `gcc` | The default compiler for most linux distributions | 2023-02-06 |
-| `gcloud` | Manage Google Cloud Platform resources and developer workflow | 2022-02-27 |
-| `gem` | Ruby package manager | 2023-11-06 |
+| `dtm` | DevStream is an open-source DevOps toolchain manager | 2026-11-20 |
+| `du` | Display disk usage statistics | 2026-11-19 |
+| `dust` | Like du but more intuitive | 2026-11-19 |
+| `eas` | EAS CLI is the command-line app that you will use to interact with EAS services from your terminal | 2026-11-19 |
+| `eb` | AWS Elastic Beanstalk command line interface | 2026-11-20 |
+| `echo` | Write arguments to the standard output | 2026-11-19 |
+| `electron` | Build cross platform desktop apps with JavaScript, HTML and CSS | 2026-11-19 |
+| `eleventy` | Eleventy is a simpler static site generator | 2026-11-19 |
+| `elif` | Test another condition if the previous ones returned non-zero | 2026-11-19 |
+| `elixir` | Elixir Language | 2026-11-19 |
+| `elm` | The Elm language compiler and package manager | 2026-11-19 |
+| `elm-format` | Format your code in the Elm idiomatic way | 2026-11-19 |
+| `elm-json` | Deal with your elm.json | 2026-11-19 |
+| `elm-review` | Analyze Elm projects for patterns forbidden by your configuration | 2026-11-19 |
+| `else` | Execute these commands if no preceding condition returned 0 | 2026-11-19 |
+| `emacs` | An extensible, customizable, free/libre text editor — and more | 2026-11-19 |
+| `enapter` | Cross-platform device management command-line tool for Enapter Energy Management System Toolkit | 2026-11-19 |
+| `encore` | Encore is the fastest way of developing backend applications | 2026-11-20 |
+| `env` | Set environment and execute command, or print environment | 2026-11-19 |
+| `envchain` | Set environment variables with macOS keychain or D-Bus secret service | 2026-11-19 |
+| `esbuild` | An extremely fast JavaScript bundler | 2026-11-20 |
+| `eslint` | Pluggable JavaScript linter | 2026-11-19 |
+| `exa` | A modern replacement for ls | 2026-11-19 |
+| `exec` | Replace the current shell with a program | 2026-11-19 |
+| `exercism` | Solve coding exercises in your chosen programming languages | 2026-11-19 |
+| `expo` | Expo CLI: start, run, prebuild and export Expo and React Native apps | 2026-11-19 |
+| `expo-cli` | Tools for creating, running, and deploying Universal Expo and React Native apps | 2026-11-19 |
+| `export` | Export variables | 2026-11-19 |
+| `expressots` | ExpressoTS CLI | 2026-11-19 |
+| `eza` | A modern replacement for ls | 2026-11-20 |
+| `fastlane` | Fastlane is an open source platform aimed at simplifying Android and iOS deployment | 2026-11-19 |
+| `fastly` | A CLI for interacting with the Fastly platform | 2026-11-19 |
+| `fd` | A program to find entries in your filesystem with regex and glob based matching | 2026-11-19 |
+| `fdisk` | Manipulate disk partition table | 2026-11-19 |
+| `ffmpeg` | Play, record, convert, and stream audio and video | 2026-11-19 |
+| `fig` | Top level cli commands | 2026-11-19 |
+| `figterm` | Fig's terminal layer | 2026-11-19 |
+| `file` | Determine file type | 2026-11-19 |
+| `fin` | Docksal command line utility | 2026-11-19 |
+| `find` | Walk a file hierarchy | 2026-11-19 |
+| `firebase` | Command-line interface for Firebase | 2026-11-20 |
+| `firefox` | Free open-source web browser developed by Mozilla | 2026-11-19 |
+| `fisher` | A plugin manager for Fish | 2026-11-19 |
+| `flutter` | Manage your Flutter app development | 2026-11-19 |
+| `fly` | The Fly.io command line interface | 2026-11-19 |
+| `flyctl` | The Fly.io command line interface | 2026-11-19 |
+| `fmt` | Simple text formatter | 2026-11-19 |
+| `fnm` | A fast and simple Node.js manager | 2026-11-20 |
+| `fold` | Fold long lines for finite width output device | 2026-11-19 |
+| `for` | Execute commands once for each item in a list, or with the arithmetic form for ((init; condition; step)) | 2026-11-19 |
+| `forc` | Fuel Orchestrator | 2026-11-19 |
+| `forge` | A command line interface for managing Atlassian-hosted apps | 2026-11-20 |
+| `fvm` | Flutter Version Management: A cli to manage Flutter SDK versions | 2026-11-19 |
+| `fzf` | A general-purpose command-line fuzzy finder | 2026-11-19 |
+| `fzf-tmux` | Opens a fuzzy finder in a tmux pane | 2026-11-19 |
+| `g++` | The default C++ compiler for most linux distributions | 2026-11-20 |
+| `ganache-cli` | Fast Ethereum RPC client for testing and development | 2026-11-19 |
+| `gatsby` | Gatsby CLI | 2026-11-19 |
+| `gcc` | The default compiler for most linux distributions | 2026-11-20 |
+| `gcloud` | Manage Google Cloud resources and developer workflow | 2026-11-19 |
+| `gem` | Ruby package manager | 2026-11-19 |
 | `gh` | Work seamlessly with GitHub from the command line | 2026-11-07 |
-| `ghq` | 'ghq' provides a way to organize remote repository clones, like go get does. When you clone a remote repository by ghq get, ghq makes a directory under a specific root directory (by default ~/ghq) using the remote repository URL’s host and path | 2023-03-26 |
-| `gibo` | Easy access to gitignore boilerplates | 2023-11-06 |
+| `ghq` | 'ghq' provides a way to organize remote repository clones, like go get does. When you clone a remote repository by ghq get, ghq makes a directory under a specific root directory (by default ~/ghq) using the remote repository URL’s host and path | 2026-11-19 |
+| `gibo` | Easy access to gitignore boilerplates | 2026-11-19 |
 | `git` | Distributed version control system | 2026-11-05 |
-| `git-cliff` | A highly customizable changelog generator ⛰️ | 2023-11-06 |
-| `git-flow` | A collection of Git extensions to provide high-level repository operations for Vincent Driessen's branching model | 2023-11-06 |
-| `git-profile` | Switch profiles | 2023-11-06 |
-| `git-quick-stats` | Git quick statistics is a simple and efficient way to access various statistics in git repository | 2023-07-27 |
-| `github` | Open a git repository in GitHub Desktop | 2021-09-17 |
-| `glow` | Render markdown on the CLI, with pizzazz! | 2022-10-29 |
-| `gltfjsx` | GLTF to JSX converter | 2021-09-17 |
-| `go` | Go is a tool for managing Go source code | 2023-11-06 |
-| `goctl` | A cli tool to generate go-zero code | 2022-06-12 |
-| `goland` | GoLand cli | 2023-10-12 |
-| `googler` | Google from the command-line | 2021-09-17 |
-| `goreleaser` | Deliver Go binaries as fast and easily as possible | 2024-02-06 |
-| `goto` | — | 2023-11-06 |
-| `gource` | Gource is an OpenGL-based 3D visualisation tool for source control repositories | 2023-11-06 |
-| `gpg` | Encryption and signing tool | 2023-11-06 |
-| `gradle` | Gradle is an open-source build automation tool that is designed to be flexible enough to build almost any type of software | 2021-09-17 |
-| `graphcdn` | GraphCDN CLI | 2021-09-17 |
-| `grep` | Matches patterns in input text. Supports simple patterns and regular expressions | 2022-10-11 |
-| `grex` | Command-line tool for generating regular expressions from user-provided test cases | 2021-09-17 |
-| `gron` | Gron is a tool to make it easier to understand big blobs of JSON | 2023-07-27 |
-| `gt` | Graphite.dev CLI | 2023-10-12 |
-| `gum` | A tool for glamorous shell scripts | 2022-10-13 |
-| `hardhat` | Ethereum development environment | 2021-09-17 |
-| `hasura` | Hasura GraphQL engine command line tool | 2021-09-17 |
-| `hb-service` | The hb-service command is provided by homebridge-config-ui-x | 2022-04-24 |
-| `head` | Output the first part of files | 2021-09-17 |
-| `helm` | The Helm package manager for Kubernetes | 2022-08-24 |
-| `helmfile` | Deploy helm charts | 2023-02-06 |
-| `herd` | Herd is a blazing fast, native Laravel and PHP development environment for macOS. It provides everything that you need to get started with Laravel development | 2024-10-14 |
+| `git-cliff` | A highly customizable changelog generator ⛰️ | 2026-11-19 |
+| `git-flow` | A collection of Git extensions to provide high-level repository operations for Vincent Driessen's branching model | 2026-11-19 |
+| `git-profile` | Manage multiple Git identities per repository | 2026-11-19 |
+| `git-quick-stats` | Git quick statistics is a simple and efficient way to access various statistics in git repository | 2026-11-19 |
+| `github` | Open a git repository in GitHub Desktop | 2026-11-19 |
+| `glow` | Render markdown on the CLI, with pizzazz! | 2026-11-19 |
+| `gltfjsx` | GLTF to JSX converter | 2026-11-19 |
+| `go` | Go is a tool for managing Go source code | 2026-11-20 |
+| `goctl` | A cli tool to generate go-zero code | 2026-11-19 |
+| `goland` | GoLand cli | 2026-11-19 |
+| `googler` | Google from the command-line | 2026-11-19 |
+| `goreleaser` | Release engineering, simplified | 2026-11-20 |
+| `goto` | — | 2026-11-19 |
+| `gource` | Gource is an OpenGL-based 3D visualisation tool for source control repositories | 2026-11-20 |
+| `gpg` | OpenPGP encryption and signing tool | 2026-11-20 |
+| `gradle` | Gradle is an open-source build automation tool that is designed to be flexible enough to build almost any type of software | 2026-11-20 |
+| `graphcdn` | Stellate (formerly GraphCDN) CLI | 2026-11-19 |
+| `grep` | Matches patterns in input text. Supports simple patterns and regular expressions | 2026-11-20 |
+| `grex` | Command-line tool for generating regular expressions from user-provided test cases | 2026-11-19 |
+| `gron` | Gron is a tool to make it easier to understand big blobs of JSON | 2026-11-19 |
+| `gt` | Graphite CLI | 2026-11-20 |
+| `gum` | A tool for glamorous shell scripts | 2026-11-20 |
+| `hardhat` | Ethereum development environment | 2026-11-19 |
+| `hasura` | Hasura GraphQL engine command line tool | 2026-11-20 |
+| `hb-service` | The hb-service command is provided by homebridge-config-ui-x | 2026-11-19 |
+| `head` | Output the first part of files | 2026-11-19 |
+| `helm` | The Helm package manager for Kubernetes | 2026-11-20 |
+| `helmfile` | Declaratively deploy your Kubernetes manifests, Kustomize configs, and Charts as Helm releases in one shot | 2026-11-19 |
+| `herd` | Herd is a blazing fast, native Laravel and PHP development environment for macOS. It provides everything that you need to get started with Laravel development | 2026-11-19 |
 | `hermes` | Hermes Agent by Nous Research - the self-improving AI agent | 2026-11-03 |
-| `heroku` | Makes it easy to create and manage your Heroku apps directly from the terminal | 2024-04-16 |
-| `hexo` | Command line interface for Hexo, a static site generator | 2023-11-06 |
-| `homey` | — | 2023-02-06 |
-| `hop` | Interact with Hop in your terminal | 2022-07-26 |
-| `hostname` | Set or print name of current host system | 2022-06-24 |
-| `htop` | Improved top (interactive process viewer) | 2021-09-28 |
-| `http` | HTTPie: command-line HTTP client for the API era | 2022-05-30 |
-| `https` | HTTPie: command-line HTTP client for the API era | 2021-09-17 |
-| `httpy` | Programmable command-line HTTP client for the API | 2022-04-03 |
-| `hub` | Distributed version control system | 2021-09-17 |
-| `hugo` | Hugo builds your site | 2023-11-06 |
-| `hx` | A post-modern text editor | 2022-04-06 |
-| `hyper` | Hyper is an Electron-based terminal | 2023-11-06 |
-| `hyperfine` | A command-line benchmarking tool | 2022-12-09 |
-| `ibus` | — | 2023-11-06 |
-| `iconv` | Character set conversion | 2023-11-06 |
-| `id` | The id utility displays the user and group names and numeric IDs, of the calling process, to the standard output. If the real and effective IDs are different, both are displayed, otherwise only the real ID is displayed. If a user (login name or user ID) is specified, the user and group IDs of that user are displayed. In this case, the real and effective IDs are assumed to be the same | 2023-11-06 |
-| `idea` | InteliJ IDEA cli | 2023-10-12 |
-| `iex` | Elixir Interactive Shell | 2022-03-27 |
-| `if` | Conditionally execute based on the return value of a command | 2022-04-19 |
-| `ignite-cli` | Ignite is a CLI that helps you spin up a new React Native app using a battle-tested tech stack | 2023-11-06 |
-| `infracost` | Cloud cost estimates for Terraform | 2023-11-30 |
-| `install` | The file(s) are copied to the target file or directory. If the destination is a directory, then the file is copied into directory with its original filename. If the target file already exists, it is either renamed to file.old if the -b option is given or overwritten if permissions allow. An alternate backup suffix may be specified via the -B option's argument | 2022-06-13 |
-| `ionic` | The Ionic command-line interface (CLI) is the go-to tool for developing Ionic apps | 2021-09-17 |
-| `ipatool` | IPATool is a command line tool that allows you to search for iOS apps on the App Store and download a copy of the app package, known as an ipa file | 2023-11-06 |
-| `j` | A faster way to navigate your filesystem | 2023-11-06 |
-| `java` | Launch a Java application | 2022-07-22 |
-| `jenv` | Manage your Java environment | 2023-11-06 |
-| `jest` | A delightful JavaScript Testing Framework with a focus on simplicity | 2022-04-24 |
-| `jmeter` | Apache JMeter - 100% Java Load Testing Tool | 2022-10-22 |
-| `join` | The join utility performs an 'equality join' on the specified files and writes the result to the standard output. The 'join field' is the field in each file by which the files are compared. The first field in each line is used by default. There is one line in the output for each pair of lines in file1 and file2 which have identical join fields. Each output line consists of the join field, the remaining fields from file1 and then the remaining fields from file2 | 2022-06-13 |
-| `jq` | Command-line JSON processor | 2021-09-17 |
-| `julia` | The Julia Programming Language | 2021-12-30 |
-| `jupyter` | An interactive computing environment for notebook programming | 2021-11-20 |
-| `just` | Just a command runner | 2023-11-06 |
-| `k3d` | K3d is a lightweight wrapper to run k3s in Docker | 2024-04-29 |
-| `k6` | Grafana k6 is an open-source load testing tool that makes performance testing easy | 2023-04-24 |
-| `k9s` | K9s is a terminal based UI to interact with your Kubernetes clusters | 2023-11-06 |
-| `kafkactl` | Command-line interface for Apache Kafka | 2022-12-08 |
-| `kamal` | Deploy web apps anywhere | 2024-01-04 |
-| `kdoctor` | Tool that helps to set up the environment for Kotlin Multiplatform Mobile app development | 2023-09-28 |
-| `keytool` | Key and Certificate Management Tool | 2021-12-15 |
-| `kill` | Terminate or signal a process | 2025-03-07 |
-| `killall` | Kill processes by name | 2023-11-06 |
-| `kind` | Kubernetes IN Docker - local clusters for testing Kubernetes | 2023-11-06 |
-| `kitty` | — | 2023-01-02 |
-| `klist` | Reads and displays the current tickets in the credential cache (also known as the ticket file) | 2023-02-07 |
-| `knex` | SQL query builder for JavaScript | 2022-01-14 |
-| `kool` | Cloud and docker environments made easy | 2023-11-06 |
-| `kotlinc` | Kotlin compiler for JVM | 2024-10-03 |
-| `kubecolor` | — | 2021-09-17 |
-| `kubectl` | — | 2024-08-01 |
-| `kubectx` | Switch between Kubernetes-contexts | 2023-11-06 |
-| `kubens` | Switch between Kubernetes-namespaces | 2023-11-06 |
-| `laravel` | Laravel Installer | 2021-09-17 |
-| `launchctl` | Interfaces with launchd | 2023-11-06 |
-| `ldd` | Print shared library dependencies | 2022-08-16 |
-| `leaf` | Create and interact with your leaf projects | 2023-04-05 |
-| `lerna` | A tool for managing JavaScript projects with multiple packages | 2023-11-06 |
-| `less` | Opposite of more | 2022-12-06 |
-| `lima` | Lima is an alias for "limactl shell $LIMA_INSTANCE" | 2021-10-16 |
-| `limactl` | Control the Lima(Linux virtual machines) | 2023-11-06 |
-| `ln` | Create (default hard) symbolic links to files | 2021-09-17 |
-| `locust` | Locust is an easy to use, scriptable and scalable Python-based performance testing tool | 2022-10-11 |
-| `login` | Begin session on the system | 2023-11-06 |
-| `lp` | Print files | 2022-04-03 |
-| `lpass` | Command line interface for LastPass | 2022-05-25 |
-| `ls` | List directory contents | 2023-10-26 |
-| `lsblk` | List block devices | 2022-08-22 |
-| `lsd` | An ls command with a lot of pretty colors and some other stuff | 2021-09-17 |
-| `lsof` | List open files | 2023-11-06 |
-| `luz` | A next-generation build system for Apple Darwin-based systems | 2023-02-13 |
-| `lvim` | Hyperextensible Vim-based text editor | 2024-10-03 |
-| `m` | Swiss Army Knife for macOS | 2023-11-06 |
-| `mackup` | Mackup | 2023-11-06 |
-| `magento` | Open-source E-commerce | 2023-11-06 |
-| `maigret` | Maigret is an easy-to-use and powerful OSINT tool for collecting a dossier on a person by username only | 2022-10-04 |
-| `mailsy` | ⚡️ Quickly generate a disposable email straight from terminal | 2022-09-13 |
-| `make` | — | 2023-11-06 |
-| `mamba` | Mamba is a reimplementation of the conda package manager in C++ | 2023-11-06 |
-| `man` | Format and display the on-line manual pages | 2023-11-06 |
-| `mas` | A simple command line interface for the Mac App Store | 2022-03-08 |
-| `mask` | — | 2023-11-06 |
-| `mdfind` | Finds files matching a given query | 2023-11-06 |
-| `mdls` | Lists the metadata attributes for the specified file | 2022-10-16 |
-| `meroxa` | The Meroxa CLI | 2023-04-14 |
-| `meteor` | Run the meteor command-line tool | 2023-11-06 |
-| `mgnl` | Magnolia CLI is a command line interface (CLI) tool to set up and facilitate light development with Magnolia | 2022-09-05 |
-| `micro` | A modern and intuitive terminal-based text editor | 2022-03-02 |
-| `mikro-orm` | TypeScript ORM for Node.js based on Data Mapper, Unit of Work and Identity Map patterns. Supports MongoDB, MySQL, MariaDB, PostgreSQL and SQLite databases | 2022-05-06 |
-| `minectl` | Create Minecraft Server on different cloud provider | 2023-02-19 |
-| `minikube` | Minikube provisions and manages local Kubernetes clusters optimized for development workflows | 2022-01-27 |
-| `mix` | Build tool for Elixir | 2023-11-06 |
-| `mkdir` | Make directories | 2025-05-05 |
-| `mkdocs` | Project documentation with Markdown | 2024-07-30 |
-| `mkfifo` | Make FIFOs (first-in, first-out) | 2022-06-19 |
-| `mkinitcpio` | Create an initial ramdisk environment | 2023-11-06 |
-| `mknod` | Create device special file | 2022-06-19 |
-| `mob` | Fast git handover for remote collaboration with mob.sh | 2022-05-08 |
-| `molecule` | Molecule aids in the development and testing of Ansible roles | 2022-06-22 |
+| `heroku` | Makes it easy to create and manage your Heroku apps directly from the terminal | 2026-11-20 |
+| `hexo` | Command line interface for Hexo, a static site generator | 2026-11-20 |
+| `homey` | — | 2026-11-19 |
+| `hop` | Interact with Hop in your terminal | 2026-11-19 |
+| `hostname` | Set or print name of current host system | 2026-11-19 |
+| `htop` | Improved top (interactive process viewer) | 2026-11-19 |
+| `http` | HTTPie: command-line HTTP client for the API era | 2026-11-19 |
+| `https` | HTTPie: command-line HTTP client for the API era | 2026-11-19 |
+| `httpy` | Modern, user-friendly, programmable command-line HTTP client for the API | 2026-11-19 |
+| `hub` | Make git easier with GitHub | 2026-11-19 |
+| `hugo` | Build your project | 2026-11-20 |
+| `hx` | A post-modern text editor | 2026-11-19 |
+| `hyper` | Hyper is an Electron-based terminal | 2026-11-19 |
+| `hyperfine` | A command-line benchmarking tool | 2026-11-19 |
+| `ibus` | Intelligent Input Bus command line utility | 2026-11-19 |
+| `iconv` | Character set conversion | 2026-11-19 |
+| `id` | The id utility displays the user and group names and numeric IDs, of the calling process, to the standard output. If the real and effective IDs are different, both are displayed, otherwise only the real ID is displayed. If a user (login name or user ID) is specified, the user and group IDs of that user are displayed. In this case, the real and effective IDs are assumed to be the same | 2026-11-19 |
+| `idea` | IntelliJ IDEA cli | 2026-11-19 |
+| `iex` | Elixir Interactive Shell | 2026-11-19 |
+| `if` | Conditionally execute commands based on the exit status of a command list | 2026-11-19 |
+| `ignite-cli` | Ignite is a CLI that helps you spin up a new React Native app using a battle-tested tech stack | 2026-11-19 |
+| `infracost` | Shift FinOps Left: Prevent cloud waste and budget overruns before every deploy | 2026-11-20 |
+| `install` | Install binaries: copy (or link) files to a target file or directory, optionally setting their mode, owner, group and flags | 2026-11-19 |
+| `ionic` | The Ionic command-line interface (CLI) is the go-to tool for developing Ionic apps | 2026-11-20 |
+| `ipatool` | IPATool is a command line tool that allows you to search for iOS apps on the App Store and download a copy of the app package, known as an ipa file | 2026-11-19 |
+| `j` | A faster way to navigate your filesystem | 2026-11-19 |
+| `java` | Launch a Java application | 2026-11-19 |
+| `jenv` | Manage your Java environment | 2026-11-20 |
+| `jest` | A delightful JavaScript Testing Framework with a focus on simplicity | 2026-11-20 |
+| `jmeter` | Apache JMeter - 100% Java Load Testing Tool | 2026-11-19 |
+| `join` | Perform an equality join on two files, writing lines whose join fields are identical to the standard output | 2026-11-19 |
+| `jq` | Command-line JSON processor | 2026-11-19 |
+| `julia` | The Julia Programming Language | 2026-11-20 |
+| `jupyter` | An interactive computing environment for notebook programming | 2026-11-19 |
+| `just` | Just a command runner | 2026-11-19 |
+| `k3d` | K3d is a lightweight wrapper to run k3s in Docker | 2026-11-19 |
+| `k6` | Grafana k6 is an easy-to-use, open-source load and performance testing tool | 2026-11-20 |
+| `k9s` | K9s is a terminal based UI to interact with your Kubernetes clusters | 2026-11-19 |
+| `kafkactl` | Command-line interface for Apache Kafka | 2026-11-20 |
+| `kamal` | Deploy web apps anywhere | 2026-11-20 |
+| `kdoctor` | Tool that helps to set up the environment for Kotlin Multiplatform Mobile app development | 2026-11-19 |
+| `keytool` | Key and Certificate Management Tool | 2026-11-20 |
+| `kill` | Terminate or signal a process | 2026-11-19 |
+| `killall` | Kill processes by name | 2026-11-19 |
+| `kind` | Kind is a tool for managing local Kubernetes clusters | 2026-11-20 |
+| `kitty` | — | 2026-11-20 |
+| `klist` | Reads and displays the current tickets in the credential cache (also known as the ticket file) | 2026-11-19 |
+| `knex` | SQL query builder for JavaScript | 2026-11-19 |
+| `kool` | Cloud native environments made easy | 2026-11-20 |
+| `kotlinc` | Kotlin compiler for JVM | 2026-11-19 |
+| `kubecolor` | Colorize kubectl output | 2026-11-19 |
+| `kubectl` | Kubernetes command-line tool | 2026-11-20 |
+| `kubectx` | Switch between Kubernetes-contexts | 2026-11-19 |
+| `kubens` | Switch between Kubernetes-namespaces | 2026-11-19 |
+| `laravel` | Laravel Installer | 2026-11-19 |
+| `launchctl` | Interfaces with launchd | 2026-11-19 |
+| `ldd` | Print shared library dependencies | 2026-11-19 |
+| `leaf` | Create and interact with your leaf projects | 2026-11-19 |
+| `lerna` | A tool for managing JavaScript projects with multiple packages | 2026-11-20 |
+| `less` | Opposite of more | 2026-11-19 |
+| `lima` | Lima is an alias for "limactl shell $LIMA_INSTANCE" | 2026-11-20 |
+| `limactl` | Lima: Linux virtual machines | 2026-11-20 |
+| `ln` | Link files (hard links by default, symbolic links with -s) | 2026-11-19 |
+| `locust` | Locust is an easy to use, scriptable and scalable Python-based performance testing tool | 2026-11-19 |
+| `login` | Log into the computer | 2026-11-19 |
+| `lp` | Print files | 2026-11-19 |
+| `lpass` | Command line interface for LastPass | 2026-11-19 |
+| `ls` | List directory contents | 2026-11-19 |
+| `lsblk` | List block devices | 2026-11-19 |
+| `lsd` | An ls command with a lot of pretty colors and some other stuff | 2026-11-19 |
+| `lsof` | List open files | 2026-11-20 |
+| `luz` | A next-generation build system for Apple Darwin-based systems | 2026-11-19 |
+| `lvim` | IDE layer for Neovim with sane defaults | 2026-11-19 |
+| `m` | Swiss Army Knife for macOS | 2026-11-19 |
+| `mackup` | Keep your application settings in sync | 2026-11-19 |
+| `magento` | Open-source E-commerce | 2026-11-19 |
+| `maigret` | Maigret is an easy-to-use and powerful OSINT tool for collecting a dossier on a person by username only | 2026-11-19 |
+| `mailsy` | ⚡️ Quickly generate a disposable email straight from terminal | 2026-11-19 |
+| `make` | — | 2026-11-19 |
+| `mamba` | Mamba is a reimplementation of the conda package manager in C++ | 2026-11-19 |
+| `man` | Format and display the on-line manual pages | 2026-11-19 |
+| `mas` | Mac App Store command-line interface | 2026-11-19 |
+| `mask` | A CLI task runner defined by a simple markdown file | 2026-11-19 |
+| `mdfind` | Finds files matching a given query | 2026-11-19 |
+| `mdls` | Lists the metadata attributes for the specified file | 2026-11-19 |
+| `meroxa` | The Meroxa CLI | 2026-11-20 |
+| `meteor` | Run the meteor command-line tool | 2026-11-20 |
+| `mgnl` | CLI for light development of Magnolia projects | 2026-11-20 |
+| `micro` | A modern and intuitive terminal-based text editor | 2026-11-20 |
+| `mikro-orm` | TypeScript ORM for Node.js based on Data Mapper, Unit of Work and Identity Map patterns | 2026-11-19 |
+| `minectl` | Create Minecraft Server on different cloud provider | 2026-11-19 |
+| `minikube` | Minikube provisions and manages local Kubernetes clusters optimized for development workflows | 2026-11-20 |
+| `mix` | Build tool for Elixir | 2026-11-20 |
+| `mkdir` | Make directories | 2026-11-19 |
+| `mkdocs` | Project documentation with Markdown | 2026-11-19 |
+| `mkfifo` | Make FIFOs (first-in, first-out) | 2026-11-19 |
+| `mkinitcpio` | Create an initial ramdisk environment | 2026-11-19 |
+| `mknod` | Make device special file | 2026-11-19 |
+| `mob` | Fast git handover for remote collaboration with mob.sh | 2026-11-19 |
+| `molecule` | Molecule aids in the development and testing of Ansible roles | 2026-11-19 |
 | `mongocli` | CLI tool to manage your MongoDB Cloud | 2026-11-13 |
-| `mongoimport` | Import data from a JSON, CSV, or TSV file into a MongoDB instance | 2022-10-10 |
+| `mongoimport` | Import data from a JSON, CSV, or TSV file into a MongoDB instance | 2026-11-20 |
 | `mongosh` | The MongoDB Shell, a JavaScript and Node.js REPL for interacting with MongoDB deployments | 2026-11-13 |
-| `more` | Opposite of less | 2023-02-06 |
-| `mosh` | — | 2022-05-10 |
-| `mount` | Mount disks and manage subtrees | 2023-11-06 |
-| `multipass` | Create, control and connect to Ubuntu instances | 2023-11-06 |
-| `mv` | Move & rename files and folders | 2021-09-17 |
-| `mvn` | Maven - a Java based project management and comprehension tool | 2021-11-27 |
-| `mypy` | Mypy is a static type checker for Python | 2023-09-28 |
-| `mysql` | Mysql is a terminal-based front-end to MySQL | 2022-05-30 |
-| `n` | Node version management | 2023-11-06 |
-| `nano` | Nano's ANOther editor, an enhanced free Pico clone | 2021-09-17 |
-| `nativescript` | The NativeScript CLI lets you create, build, and deploy NativeScript based apps on iOS and Android devices | 2021-09-17 |
-| `nc` | Arbitrary TCP and UDP connections and listens | 2022-05-23 |
-| `ncal` | Displays a calendar and the date of Easter | 2022-10-08 |
-| `ncu` | Upgrade your npm package.json dependencies to the latest versions, ignoring specified versions | 2023-04-23 |
-| `neofetch` | The most complete system information CLI tool | 2022-08-18 |
-| `nest` | Nest CLI | 2022-01-22 |
-| `netlify` | Netlify command line tool | 2021-10-14 |
-| `networkQuality` | Measure the different aspects of network quality | 2023-11-06 |
-| `networksetup` | Configuration tool for network settings in System Preferences | 2024-08-08 |
-| `newman` | Newman is a command-line collection runner for Postman | 2022-06-09 |
-| `next` | Next.js CLI to start, build and export your application | 2021-09-17 |
-| `nextflow` | Nextflow enables scalable and reproducible scientific workflows using software containers. It allows the adaptation of pipelines written in the most common scripting languages | 2023-11-06 |
-| `ng` | CLI interface for Angular | 2023-11-06 |
-| `nginx` | Nginx (pronounced ``engine x'') is an HTTP and reverse proxy server, a mail proxy server, and a generic TCP/UDP proxy server. It is known for its high performance, stability, rich feature set, simple configuration, and low resource consumption | 2022-05-10 |
-| `ngrok` | Tunnel local ports to public URLs and inspect traffic | 2021-10-09 |
-| `nhost` | Nhost's command-line | 2021-10-14 |
-| `ni` | Use the right package manager - install | 2021-11-07 |
-| `nl` | Line numbering filter | 2022-05-31 |
-| `nmap` | Network exploration tool and security / port scanner | 2023-09-28 |
-| `nocorrect` | ZSH pre-command modifier that disables correction | 2022-04-21 |
-| `node` | Run the node interpreter | 2025-03-07 |
-| `noglob` | ZSH pre-command modifier that disables glob expansion | 2022-04-21 |
-| `northflank` | Manage your Northflank resources from the command line | 2023-05-10 |
-| `np` | A better npm publish | 2023-04-26 |
+| `more` | Display the contents of a file in a terminal | 2026-11-19 |
+| `mosh` | Mobile shell, a remote terminal that supports roaming and intermittent connectivity | 2026-11-20 |
+| `mount` | Mount disks and manage subtrees | 2026-11-19 |
+| `multipass` | Create, control and connect to Ubuntu instances | 2026-11-20 |
+| `mv` | Move & rename files and folders | 2026-11-19 |
+| `mvn` | Maven - a Java based project management and comprehension tool | 2026-11-19 |
+| `mypy` | Mypy is a static type checker for Python | 2026-11-20 |
+| `mysql` | Mysql is a terminal-based front-end to MySQL | 2026-11-20 |
+| `n` | Node version management | 2026-11-19 |
+| `nano` | Nano's ANOther text editor, inspired by Pico | 2026-11-19 |
+| `nativescript` | The NativeScript CLI lets you create, build, and deploy NativeScript based apps on iOS, Android and visionOS devices | 2026-11-19 |
+| `nc` | Arbitrary TCP and UDP connections and listens | 2026-11-19 |
+| `ncal` | Displays a calendar and the date of Easter | 2026-11-19 |
+| `ncu` | Upgrade your npm package.json dependencies to the latest versions, ignoring specified versions | 2026-11-19 |
+| `neofetch` | The most complete system information CLI tool | 2026-11-20 |
+| `nest` | Nest CLI | 2026-11-19 |
+| `netlify` | Netlify command line tool | 2026-11-19 |
+| `networkQuality` | Measure the different aspects of network quality | 2026-11-19 |
+| `networksetup` | Configuration tool for network settings in System Preferences | 2026-11-19 |
+| `newman` | Newman is a command-line collection runner for Postman | 2026-11-19 |
+| `next` | Next.js CLI to develop, build and start your application | 2026-11-19 |
+| `nextflow` | Nextflow enables scalable and reproducible scientific workflows using software containers. It allows the adaptation of pipelines written in the most common scripting languages | 2026-11-19 |
+| `ng` | CLI interface for Angular | 2026-11-20 |
+| `nginx` | HTTP and reverse proxy server, mail proxy server, and generic TCP/UDP proxy server | 2026-11-19 |
+| `ngrok` | Tunnel local ports to public URLs and inspect traffic | 2026-11-19 |
+| `nhost` | Nhost CLI tool | 2026-11-19 |
+| `ni` | Use the right package manager - install | 2026-11-19 |
+| `nl` | Line numbering filter | 2026-11-19 |
+| `nmap` | Network exploration tool and security / port scanner | 2026-11-19 |
+| `nocorrect` | ZSH pre-command modifier that disables correction | 2026-11-19 |
+| `node` | Run the node interpreter | 2026-11-20 |
+| `noglob` | ZSH pre-command modifier that disables glob expansion | 2026-11-19 |
+| `northflank` | Manage your Northflank resources from the command line | 2026-11-19 |
+| `np` | A better npm publish | 2026-11-19 |
 | `npm` | Node package manager | 2026-11-05 |
-| `npx` | Execute binaries from npm packages | 2024-12-31 |
-| `nr` | Use the right package manager - run | 2022-07-26 |
-| `nrm` | Use the right package manage - remove | 2022-07-26 |
-| `ns` | The NativeScript CLI lets you create, build, and deploy NativeScript based apps on iOS and Android devices | 2023-11-06 |
-| `nu` | Use the right package manage - upgrade | 2021-11-07 |
-| `nuxi` | Nuxt 3 CLI | 2022-10-12 |
-| `nuxt` | — | 2021-09-17 |
-| `nvim` | Hyperextensible Vim-based text editor | 2022-09-15 |
-| `nvm` | Node Package Manager | 2025-03-07 |
-| `nx` | Fig completions for Nx by Nrwl | 2023-11-30 |
-| `nylas` | A command line interface for Nylas's API | 2022-05-29 |
-| `oci` | Oracle Cloud Infrastructure CLI | 2024-12-31 |
-| `od` | Octal, decimal, hex, ASCII dump | 2022-05-30 |
-| `oh-my-posh` | — | 2024-09-25 |
-| `okta` | The Okta CLI is the easiest way to get started with Okta! | 2022-01-25 |
-| `okteto` | Okteto - Remote Development Environments powered by Kubernetes | 2023-11-06 |
-| `ollama` | A command-line tool for managing and deploying machine learning models | 2024-12-30 |
+| `npx` | Execute binaries from npm packages | 2026-11-20 |
+| `nr` | Use the right package manager - run | 2026-11-19 |
+| `nrm` | Use the right package manager - uninstall | 2026-11-19 |
+| `ns` | The NativeScript CLI lets you create, build, and deploy NativeScript based apps on iOS, Android and visionOS devices | 2026-11-19 |
+| `nu` | Use the right package manager - upgrade | 2026-11-19 |
+| `nuxi` | Nuxt CLI | 2026-11-20 |
+| `nuxt` | Nuxt CLI | 2026-11-20 |
+| `nvim` | Hyperextensible Vim-based text editor | 2026-11-19 |
+| `nvm` | Node Version Manager | 2026-11-20 |
+| `nx` | Smart monorepos, fast builds (Nx by Nrwl) | 2026-11-19 |
+| `nylas` | Email, calendar, and contacts from your terminal | 2026-11-19 |
+| `oci` | Oracle Cloud Infrastructure command line interface | 2026-11-20 |
+| `od` | Octal, decimal, hex, ASCII dump | 2026-11-19 |
+| `oh-my-posh` | Tool to render your prompt | 2026-11-19 |
+| `okta` | The Okta CLI helps you configure your applications to use Okta | 2026-11-19 |
+| `okteto` | The Okteto Command Line Interface is a unified tool to manage Development Environments | 2026-11-20 |
+| `ollama` | Large language model runner | 2026-11-19 |
 | `omz` | Oh My Zsh | 2026-11-13 |
-| `onboardbase` | Onboardbase manages app secrets and credentials securely with team work and contractors in mind | 2022-02-02 |
-| `op` | Official 1Password CLI | 2023-11-06 |
-| `opa` | Open Policy Agent (OPA) | 2022-01-20 |
-| `open` | Open files, apps, or URLs using default application | 2023-11-06 |
+| `onboardbase` | Onboardbase manages app secrets and credentials securely with team work and contractors in mind | 2026-11-19 |
+| `op` | Official 1Password CLI | 2026-11-19 |
+| `opa` | Open Policy Agent (OPA) | 2026-11-19 |
+| `open` | Open files, apps, or URLs using default application | 2026-11-19 |
 | `openclaw` | OpenClaw personal AI assistant CLI | 2026-11-03 |
 | `opencode` | The open source AI coding agent | 2026-11-03 |
-| `osascript` | Execute OSA scripts (AppleScript, JavaScript, etc.) | 2022-04-23 |
-| `osqueryi` | Your OS as a high-performance relational database | 2022-09-03 |
-| `oxlint` | A high performance linter for the Oxidation Compiler | 2024-08-08 |
-| `pac` | Power Platform CLI | 2023-11-30 |
-| `pageres` | Capture website screenshots | 2021-09-17 |
-| `palera1n` | Jailbreaking tool for iOS/iPadOS 15.x-16.x arm64 | 2023-06-02 |
-| `pandoc` | A universal document converter | 2023-11-06 |
-| `paper` | The Paper CLI | 2022-11-16 |
-| `pass` | Pass - stores, retrieves, generates, and synchronizes passwords securely | 2023-11-06 |
-| `passwd` | Modify a user's password | 2023-11-06 |
-| `paste` | The paste utility concatenates the corresponding lines of the given input files, replacing all but the last file's newline characters with a single tab character, and writes the resulting lines to standard output. If end-of-file is reached on an input file while other input files still contain data, the file is treated as if it were an endless source of empty lines | 2022-06-12 |
-| `pathchk` | Check pathnames for POSIX portability | 2022-06-19 |
-| `pdfunite` | Combine multiple pdfs | 2021-12-30 |
-| `pg_dump` | Dumps a database as a text file or to other formats | 2022-10-09 |
-| `pgcli` | — | 2022-07-20 |
-| `php` | Run the PHP interpreter | 2024-07-30 |
-| `phpstorm` | PhpStorm cli | 2023-10-12 |
-| `phpunit` | The PHPUnit is a command-line test runner that can be invoked through the phpunit command | 2023-02-14 |
-| `phpunit-watcher` | Automatically rerun PHPUnit tests when source code changes | 2023-11-06 |
+| `osascript` | Execute OSA scripts (AppleScript, JavaScript, etc.) | 2026-11-19 |
+| `osqueryi` | Your OS as a high-performance relational database | 2026-11-19 |
+| `oxlint` | A high performance linter for the Oxidation Compiler | 2026-11-20 |
+| `pac` | Microsoft Power Platform CLI | 2026-11-20 |
+| `pageres` | Capture website screenshots | 2026-11-19 |
+| `palera1n` | Jailbreaking tool for iOS/iPadOS/tvOS 15-26 and bridgeOS 5-10 arm64 | 2026-11-19 |
+| `pandoc` | A universal document converter | 2026-11-20 |
+| `paper` | The Paper CLI | 2026-11-19 |
+| `pass` | Pass - stores, retrieves, generates, and synchronizes passwords securely | 2026-11-19 |
+| `passwd` | Modify a user's password | 2026-11-19 |
+| `paste` | Merge corresponding or subsequent lines of files | 2026-11-19 |
+| `pathchk` | Check whether pathnames are valid or portable | 2026-11-19 |
+| `pdfunite` | Combine multiple pdfs | 2026-11-19 |
+| `pg_dump` | Dumps a database as a text file or to other formats | 2026-11-19 |
+| `pgcli` | — | 2026-11-19 |
+| `php` | Run the PHP interpreter | 2026-11-20 |
+| `phpstorm` | PhpStorm cli | 2026-11-19 |
+| `phpunit` | The PHPUnit is a command-line test runner that can be invoked through the phpunit command | 2026-11-20 |
+| `phpunit-watcher` | Automatically rerun PHPUnit tests when source code changes | 2026-11-20 |
 | `pi` | AI coding agent with read, bash, edit, write tools | 2026-11-03 |
-| `pijul` | A distributed version control system that is at the same time theoretically sound, fast and easy to learn and use | 2023-10-27 |
-| `ping` | Send ICMP ECHO_REQUEST to network hosts | 2022-10-08 |
-| `pip` | Python package manager | 2023-11-06 |
-| `pip3` | Python package manager | 2022-03-09 |
-| `pipenv` | Python package manager | 2022-10-14 |
-| `pipx` | Install and Run Python Applications in Isolated Environments | 2023-11-06 |
-| `pkg-config` | Return metainformation about installed libraries | 2022-10-23 |
-| `pkgutil` | Query and manipulate for macOS Installer packages and receipts | 2023-11-06 |
-| `pkill` | Send the specified signal (by default SIGTERM) to each specified process | 2022-10-11 |
-| `planter` | — | 2023-10-12 |
-| `playwright` | — | 2023-05-10 |
-| `plutil` | Check the syntax of property list files, or convert a plist file from one format to another. Specifying - as an input file reads from stdin | 2023-09-28 |
-| `pm2` | Daemon process manager | 2022-04-27 |
-| `pmset` | Power management settings | 2022-04-26 |
+| `pijul` | A distributed version control system that is at the same time theoretically sound, fast and easy to learn and use | 2026-11-19 |
+| `ping` | Send ICMP ECHO_REQUEST to network hosts | 2026-11-19 |
+| `pip` | Python package manager | 2026-11-20 |
+| `pip3` | Python package manager | 2026-11-19 |
+| `pipenv` | Python Development Workflow for Humans | 2026-11-19 |
+| `pipx` | Install and Run Python Applications in Isolated Environments | 2026-11-19 |
+| `pkg-config` | Return metainformation about installed libraries | 2026-11-19 |
+| `pkgutil` | Query and manipulate macOS Installer packages and receipts | 2026-11-19 |
+| `pkill` | Send the specified signal (by default SIGTERM) to each specified process | 2026-11-19 |
+| `planter` | — | 2026-11-19 |
+| `playwright` | Playwright CLI | 2026-11-19 |
+| `plutil` | Check the syntax of property list files, or convert a plist file from one format to another. Specifying - as an input file reads from stdin | 2026-11-19 |
+| `pm2` | Daemon process manager | 2026-11-20 |
+| `pmset` | Power management settings | 2026-11-19 |
 | `pnpm` | Fast, disk space efficient package manager | 2026-11-05 |
-| `pnpx` | Execute binaries from npm packages | 2021-09-17 |
-| `pocketbase` | PocketBase CLI | 2022-09-02 |
-| `pod` | CocoaPods, the Cocoa library package manager | 2021-12-30 |
-| `podman` | Manage containers, pods, and images with Podman | 2023-12-04 |
-| `poetry` | Poetry is a tool for dependency management and packaging in Python | 2023-07-25 |
-| `pre-commit` | Pre-commit | 2023-11-06 |
-| `premake` | Premake CLI | 2023-10-12 |
-| `preset` | Elegant, ecosystem-agnostic scaffolding tool | 2022-04-12 |
-| `prettier` | Run Prettier from the command line | 2022-02-27 |
-| `prisma` | Prisma is a modern DB toolkit to query, migrate and model your database | 2024-06-17 |
-| `pro` | Manage Ubuntu Pro services from Canonical | 2022-12-12 |
-| `progressline` | ⏳Track commands progress in a compact one-line format | 2024-09-17 |
-| `projj` | Manage repository easily | 2023-11-06 |
-| `pry` | Interactive Ruby | 2023-07-28 |
-| `ps` | Report a snapshot of the current processes | 2021-09-17 |
-| `pscale` | Pscale is a CLI library for communicating with PlanetScale's API | 2023-02-06 |
-| `psql` | Psql is a terminal-based front-end to PostgreSQL | 2021-09-17 |
-| `publish` | — | 2022-03-16 |
-| `pulumi` | Pulumi's open source infrastructure as code SDK enables you to create, deploy, and manage infrastructure on any cloud, using your favorite languages | 2023-11-06 |
-| `pushd` | Change the current directory, and push the old current directory onto the directory stack | 2021-09-17 |
-| `pwd` | Return working directory name | 2021-09-17 |
-| `pycharm` | PyCharm cli | 2023-10-12 |
-| `pyenv` | Pyenv | 2023-11-06 |
-| `pytest` | — | 2023-02-06 |
-| `python` | Run the python interpreter | 2023-11-06 |
-| `python3` | Run the python interpreter | 2023-11-06 |
-| `q` | The Amazon Q CLI | 2024-04-26 |
-| `qodana` | Run Qodana as fast as possible, with minimum effort required | 2022-04-26 |
-| `quasar` | Quasar Framework CLI | 2022-10-26 |
-| `quickmail` | Quickmail is a terminal-based solution to send mails | 2023-11-06 |
-| `r` | Start R or invoke an R tool using CMD | 2023-11-06 |
-| `rails` | Ruby on Rails CLI | 2024-01-12 |
-| `railway` | CLI for managing Railway Apps | 2023-04-22 |
-| `rake` | A ruby build program with capabilities similar to make | 2023-11-06 |
-| `rancher` | The Rancher CLI (Command Line Interface) is a unified tool that you can use to interact with Rancher | 2023-11-06 |
-| `rbenv` | Pick a Ruby version for your application and guarantee that your development environment matches production | 2023-11-06 |
-| `rclone` | The Swiss army knife of cloud storage | 2023-11-06 |
-| `react-native` | Command line tools that ship with react-native in form of the @react-native-community/cli package | 2023-11-06 |
-| `readlink` | Display file status | 2022-06-19 |
-| `redwood` | Redwood provides a first-class CLI that helps you at every stage of development, from your first commit to your first deploy | 2023-11-06 |
-| `remix` | Remix CLI to start, build and export your application | 2022-01-13 |
-| `remotion` | Create videos programmatically in React | 2024-01-19 |
-| `repeat` | Interpret the result as a number and repeat the commands this many times | 2022-04-19 |
-| `rg` | Recursively searches current directory for lines matching a pattern | 2024-03-22 |
-| `rich` | Rich text and formatting in the terminal | 2023-09-28 |
-| `rm` | Remove directory entries | 2021-09-17 |
-| `rmdir` | Remove directories | 2022-02-19 |
-| `robot` | CLI for running Robot Framework automation tests | 2023-11-06 |
-| `rojo` | Enables professional-grade development tools for Roblox developers | 2022-10-23 |
-| `rollup` | Next-generation ES module bundler | 2022-04-26 |
-| `rome` | Rome CLI | 2023-04-05 |
-| `rscript` | Scripting Front-End for R | 2022-04-24 |
-| `rsync` | Rsync is a file transfer program capable of efficient remote update via a fast differencing algorithm | 2022-10-16 |
-| `rubocop` | A Ruby static code analyzer and formatter, based on the community Ruby style guide | 2024-01-09 |
-| `ruby` | Interpreted object-oriented scripting language | 2022-07-12 |
-| `rubymine` | RubyMine cli | 2023-10-12 |
-| `ruff` | Ruff: An extremely fast Python linter | 2024-12-11 |
-| `rugby` | Cache Cocoa 🌱 pods for faster rebuild and indexing Xcode project. https://github.com/swiftyfinch/Rugby | 2023-11-06 |
-| `rush` | Multi-Project Build Tool | 2023-11-06 |
-| `rushx` | Run arbitrary package scripts for rush project. analogous to npm run | 2022-07-26 |
-| `rustc` | CLI for rustc | 2021-09-17 |
-| `rustrover` | RustRover cli | 2023-10-12 |
-| `rustup` | The Rust toolchain installer | 2023-11-06 |
-| `rvm` | Ruby version manager | 2022-10-14 |
-| `sake` | 🍶 Swift-based utility for managing project commands, inspired by Make | 2025-03-07 |
-| `sam` | AWS Serverless Application Model CLI | 2024-03-18 |
-| `sanity` | Sanity CLI tool for managing Sanity installations, managing plugins, schemas and datasets | 2022-09-01 |
-| `sapphire` | CLI for the Sapphire Framework | 2022-10-04 |
-| `scarb` | Scarb, The build toolchain and package manager for Cairo and Starknet ecosystems | 2023-11-06 |
-| `scc` | Sloc, Cloc and Code. Count lines of code in a directory with complexity estimation | 2023-11-06 |
-| `scp` | Copies files or directories between hosts on a network | 2022-05-30 |
-| `screen` | Screen manager with VT100/ANSI terminal emulation | 2022-06-04 |
-| `sed` | Stream editor | 2021-09-17 |
-| `seq` | Print sequences of numbers. (Defaults to increments of 1) | 2022-10-10 |
-| `sequelize` | The Sequelize Command Line Interface | 2021-10-07 |
-| `serve` | Static file serving and directory listing | 2021-09-27 |
-| `serverless` | Zero-friction serverless development | 2023-11-06 |
-| `sfdx` | — | 2022-02-27 |
-| `sftp` | OpenSSH secure file transfer | 2022-05-31 |
-| `sha1sum` | Print or check SHA1 (160-bit) checksums | 2022-12-26 |
-| `shadcn-ui` | Shadcn UI CLI | 2023-11-06 |
-| `shasum` | Print or Check SHA Checksums | 2024-12-31 |
-| `shell-config` | — | 2023-09-28 |
-| `shelve` | Shelve CLI a command-line interface designed for the Shelve platform. This tool enables users to authenticate with Shelve, facilitating the seamless transfer of environment variables for project collaboration within a team directly through the terminal interface | 2024-09-17 |
-| `shopify` | Shopify CLI is a command-line interface tool that helps you build Shopify apps and themes. It quickly generates Shopify apps, themes, and custom storefronts. You can also use it to automate many common development tasks. Visit https://shopify.dev/apps/tools/cli to know more | 2023-11-06 |
-| `shortcuts` | Command-line utility for running shortcuts | 2023-11-06 |
-| `shred` | Overwrite a file to hide its contents, and optionally delete it | 2022-06-19 |
-| `sidekiq` | Background job framework for Ruby | 2023-06-02 |
-| `simctl` | — | 2023-01-13 |
-| `sips` | Scriptable image processing system | 2022-02-27 |
-| `sl` | A highly advanced animation program for curing your bad habit of mistyping | 2023-02-10 |
-| `sls` | Zero-friction serverless development | 2023-03-27 |
-| `snaplet` | Create and share PostgreSQL snapshots with schema, data transformation, and preview databases for collaborative development (see: https://docs.snaplet.dev) | 2023-11-06 |
-| `softwareupdate` | Software Update checks for new and updated versions of your software based on information about your computer and current software | 2023-11-06 |
-| `sort` | Sort or merge records (lines) of text and binary files | 2023-09-28 |
-| `source` | Source files in shell | 2021-09-17 |
-| `space` | Deta Space CLI for mananging Deta Space projects | 2023-04-14 |
-| `speedtest` | — | 2022-09-08 |
-| `speedtest-cli` | Command line interface for testing internet bandwidth using speedtest.net | 2022-09-08 |
-| `splash` | Get stunning wallpapers from Unsplash | 2021-09-17 |
-| `split` | The split utility reads the given file and breaks it up into files of 1000 lines each (if no options are specified), leaving the file unchanged. If file is a single dash ('-') or absent, split reads from the standard input | 2022-06-12 |
-| `spotify` | CLI to use Spotify from the terminal | 2022-02-07 |
-| `spring` | The Spring Boot CLI is a command line tool that you can use to bootstrap a new project from start.spring.io or encode a password | 2023-11-06 |
-| `sqlfluff` | A dialect-flexible and configurable SQL linter | 2022-09-26 |
-| `sqlite3` | A command line interface for SQLite version 3 | 2022-01-26 |
-| `sqlmesh` | SQLMesh command line tool | 2024-12-03 |
-| `src` | Interact with Sourcegraph from the command line | 2022-05-30 |
-| `ssh` | Log into a remote machine | 2025-03-07 |
-| `ssh-keygen` | Generates, manages and converts authentication keys for ssh | 2022-10-04 |
-| `st2` | CLI for StackStorm event-driven automation platform | 2022-07-23 |
-| `sta` | Generate api via swagger scheme | 2022-12-08 |
-| `stack` | The Haskell Tool Stack | 2023-10-12 |
-| `starkli` | Starkli, a ⚡ blazing ⚡ fast ⚡ CLI tool for Starknet powered by 🦀 starknet-rs 🦀 | 2023-08-10 |
-| `start-storybook` | Storybook start CLI tools | 2022-05-30 |
-| `stat` | Display file status | 2022-06-19 |
-| `steadybit` | Command-line interface to interact with the Steadybit API | 2022-04-23 |
-| `stencil` | CLI to build Stencil projects and generate components | 2022-09-13 |
-| `stepzen` | The StepZen CLI is the primary way to build, deploy and test your schemas on StepZen | 2023-11-06 |
-| `stow` | Manage farms of symbolic links | 2022-09-26 |
-| `streamlit` | Streamlit | 2022-08-07 |
-| `stripe` | CLI interface for Stripe.com | 2022-02-27 |
-| `su` | — | 2022-02-27 |
-| `subl` | Sublime Text | 2021-12-30 |
-| `sudo` | Execute a command as the superuser or another user | 2021-09-17 |
-| `suitecloud` | SuiteCloud CLI | 2023-05-10 |
-| `supabase` | Supabase CLI | 2023-10-18 |
-| `surreal` | SurrealDB is the ultimate cloud database for tomorrow's applications - https://surrealdb.com/ | 2022-10-23 |
-| `svn` | The first content tracker | 2023-10-18 |
-| `svokit` | Runs built svokit project | 2022-12-26 |
-| `svtplay-dl` | Download videos from your favourite play services | 2023-11-06 |
-| `sw_vers` | Print macOS version information | 2022-10-06 |
-| `swagger-typescript-api` | Generate api via swagger scheme | 2022-12-08 |
-| `swc` | SWC is a super-fast compiler written in rust; producing widely-supported javascript from modern standards and typescript | 2021-12-01 |
-| `swift` | Swift compiler | 2022-10-09 |
-| `symfony` | Symfony Binary | 2022-10-24 |
-| `sysctl` | Get or set kernel state | 2023-11-06 |
-| `systemctl` | — | 2023-11-06 |
+| `pnpx` | Run a package in a temporary environment | 2026-11-20 |
+| `pocketbase` | PocketBase CLI | 2026-11-19 |
+| `pod` | CocoaPods, the Cocoa library package manager | 2026-11-20 |
+| `podman` | Manage containers, pods, and images with Podman | 2026-11-19 |
+| `poetry` | Poetry is a tool for dependency management and packaging in Python | 2026-11-20 |
+| `pre-commit` | Pre-commit | 2026-11-19 |
+| `premake` | Premake CLI | 2026-11-19 |
+| `preset` | Elegant, ecosystem-agnostic scaffolding tool | 2026-11-19 |
+| `prettier` | Run Prettier from the command line | 2026-11-20 |
+| `prisma` | Prisma is a modern DB toolkit to query, migrate and model your database | 2026-11-20 |
+| `pro` | Manage Ubuntu Pro services from Canonical | 2026-11-19 |
+| `progressline` | ⏳Track commands progress in a compact one-line format | 2026-11-19 |
+| `projj` | Manage git repositories with directory conventions | 2026-11-19 |
+| `pry` | Interactive Ruby | 2026-11-19 |
+| `ps` | Report a snapshot of the current processes | 2026-11-19 |
+| `pscale` | A CLI for PlanetScale | 2026-11-20 |
+| `psql` | PostgreSQL interactive terminal | 2026-11-19 |
+| `publish` | Interact with the Publish static site generator from the command line | 2026-11-19 |
+| `pulumi` | Pulumi's open source infrastructure as code SDK enables you to create, deploy, and manage infrastructure on any cloud, using your favorite languages | 2026-11-19 |
+| `pushd` | Change the current directory, and push the old current directory onto the directory stack | 2026-11-19 |
+| `pwd` | Return working directory name | 2026-11-19 |
+| `pycharm` | PyCharm cli | 2026-11-19 |
+| `pyenv` | Simple Python version management | 2026-11-19 |
+| `pytest` | — | 2026-11-20 |
+| `python` | Run the python interpreter | 2026-11-19 |
+| `python3` | Run the python interpreter | 2026-11-20 |
+| `q` | The Amazon Q CLI | 2026-11-19 |
+| `qodana` | Run Qodana as fast as possible, with minimum effort required | 2026-11-19 |
+| `quasar` | Quasar Framework CLI | 2026-11-19 |
+| `quickmail` | A command line interface to send mail without any hassle | 2026-11-19 |
+| `r` | Start R or invoke an R tool using CMD | 2026-11-19 |
+| `rails` | Ruby on Rails CLI | 2026-11-20 |
+| `railway` | Interact with Railway via CLI | 2026-11-19 |
+| `rake` | A ruby build program with capabilities similar to make | 2026-11-19 |
+| `rancher` | Rancher CLI, managing containers one UTF-8 character at a time | 2026-11-20 |
+| `rbenv` | Pick a Ruby version for your application and guarantee that your development environment matches production | 2026-11-20 |
+| `rclone` | The Swiss army knife of cloud storage | 2026-11-20 |
+| `react-native` | Command line tools that ship with react-native in form of the @react-native-community/cli package | 2026-11-19 |
+| `readlink` | Display the target of a symbolic link | 2026-11-19 |
+| `redwood` | Redwood provides a first-class CLI that helps you at every stage of development, from your first commit to your first deploy | 2026-11-20 |
+| `remix` | The Remix web framework CLI | 2026-11-19 |
+| `remotion` | Create videos programmatically in React | 2026-11-19 |
+| `repeat` | Interpret the result as a number and repeat the commands this many times | 2026-11-19 |
+| `rg` | Recursively searches current directory for lines matching a pattern | 2026-11-19 |
+| `rich` | Rich text and formatting in the terminal | 2026-11-19 |
+| `rm` | Remove directory entries | 2026-11-19 |
+| `rmdir` | Remove directories | 2026-11-19 |
+| `robot` | CLI for running Robot Framework automation tests | 2026-11-20 |
+| `rojo` | Enables professional-grade development tools for Roblox developers | 2026-11-19 |
+| `rollup` | Next-generation ES module bundler | 2026-11-20 |
+| `rome` | Rome official CLI to check the health of your project or single files | 2026-11-20 |
+| `rscript` | Scripting Front-End for R | 2026-11-19 |
+| `rsync` | Rsync is a file transfer program capable of efficient remote update via a fast differencing algorithm | 2026-11-20 |
+| `rubocop` | A Ruby static code analyzer and formatter, based on the community Ruby style guide | 2026-11-20 |
+| `ruby` | Interpreted object-oriented scripting language | 2026-11-19 |
+| `rubymine` | RubyMine cli | 2026-11-19 |
+| `ruff` | Ruff: An extremely fast Python linter and code formatter | 2026-11-20 |
+| `rugby` | Cache Cocoa 🌱 pods for faster rebuild and indexing Xcode project. https://github.com/swiftyfinch/Rugby | 2026-11-20 |
+| `rush` | Multi-Project Build Tool | 2026-11-20 |
+| `rushx` | Run arbitrary package scripts for rush project. analogous to npm run | 2026-11-19 |
+| `rustc` | Compiler for the Rust programming language | 2026-11-20 |
+| `rustrover` | RustRover cli | 2026-11-19 |
+| `rustup` | The Rust toolchain installer | 2026-11-19 |
+| `rvm` | Ruby version manager | 2026-11-19 |
+| `sake` | 🍶 Swift-based utility for managing command execution with dependencies and conditions, inspired by Make | 2026-11-19 |
+| `sam` | AWS Serverless Application Model CLI | 2026-11-20 |
+| `sanity` | Sanity CLI tool for managing Sanity projects and organizations | 2026-11-20 |
+| `sapphire` | CLI for the Sapphire Framework | 2026-11-19 |
+| `scarb` | Scarb, The build toolchain and package manager for Cairo and Starknet ecosystems | 2026-11-20 |
+| `scc` | Sloc, Cloc and Code. Count lines of code in a directory with complexity estimation | 2026-11-19 |
+| `scp` | Copies files or directories between hosts on a network | 2026-11-19 |
+| `screen` | Screen manager with VT100/ANSI terminal emulation | 2026-11-19 |
+| `sed` | Stream editor | 2026-11-19 |
+| `seq` | Print sequences of numbers | 2026-11-19 |
+| `sequelize` | The Sequelize Command Line Interface | 2026-11-19 |
+| `serve` | Static file serving and directory listing | 2026-11-19 |
+| `serverless` | Zero-friction serverless development | 2026-11-20 |
+| `sfdx` | The Salesforce CLI | 2026-11-19 |
+| `sftp` | OpenSSH secure file transfer | 2026-11-19 |
+| `sha1sum` | Print or check SHA1 (160-bit) checksums | 2026-11-19 |
+| `shadcn-ui` | Build your component library with the shadcn CLI | 2026-11-19 |
+| `shasum` | Print or Check SHA Checksums | 2026-11-19 |
+| `shell-config` | CLI tool for MacOS setup | 2026-11-19 |
+| `shelve` | Shelve CLI a command-line interface designed for the Shelve platform. This tool enables users to authenticate with Shelve, facilitating the seamless transfer of environment variables for project collaboration within a team directly through the terminal interface | 2026-11-19 |
+| `shopify` | A CLI tool to build for the Shopify platform | 2026-11-19 |
+| `shortcuts` | Command-line utility for running shortcuts | 2026-11-19 |
+| `shred` | Overwrite a file to hide its contents, and optionally delete it | 2026-11-19 |
+| `sidekiq` | Background job framework for Ruby | 2026-11-19 |
+| `simctl` | Command line utility to control the Simulator | 2026-11-20 |
+| `sips` | Scriptable image processing system | 2026-11-19 |
+| `sl` | A highly advanced animation program for curing your bad habit of mistyping | 2026-11-19 |
+| `sls` | Zero-friction serverless development | 2026-11-20 |
+| `snaplet` | Capture, subset, transform and restore PostgreSQL snapshots (see: https://docs.snaplet.dev) | 2026-11-20 |
+| `softwareupdate` | Software Update checks for new and updated versions of your software based on information about your computer and current software | 2026-11-19 |
+| `sort` | Sort or merge records (lines) of text and binary files | 2026-11-19 |
+| `source` | Execute commands from a file in the current shell | 2026-11-19 |
+| `space` | Deta Space CLI | 2026-11-19 |
+| `speedtest` | Command line interface for testing internet bandwidth using speedtest.net | 2026-11-20 |
+| `speedtest-cli` | Command line interface for testing internet bandwidth using speedtest.net | 2026-11-20 |
+| `splash` | Download Unsplash wallpapers and set them as your wallpaper | 2026-11-20 |
+| `split` | The split utility reads the given file and breaks it up into files of 1000 lines each (if no options are specified), leaving the file unchanged. If file is a single dash ('-') or absent, split reads from the standard input | 2026-11-19 |
+| `spotify` | CLI to use Spotify from the terminal | 2026-11-19 |
+| `spring` | The Spring Boot CLI is a command line tool that you can use to bootstrap a new project from start.spring.io or encode a password | 2026-11-20 |
+| `sqlfluff` | A dialect-flexible and configurable SQL linter | 2026-11-20 |
+| `sqlite3` | A command line interface for SQLite version 3 | 2026-11-19 |
+| `sqlmesh` | SQLMesh command line tool | 2026-11-19 |
+| `src` | Interact with Sourcegraph from the command line | 2026-11-20 |
+| `ssh` | Log into a remote machine | 2026-11-19 |
+| `ssh-keygen` | Generates, manages and converts authentication keys for ssh | 2026-11-19 |
+| `st2` | CLI for StackStorm event-driven automation platform | 2026-11-19 |
+| `sta` | Generate the API client for Fetch or Axios from an OpenAPI Specification | 2026-11-20 |
+| `stack` | The Haskell Tool Stack | 2026-11-20 |
+| `starkli` | Starkli, a ⚡ blazing ⚡ fast ⚡ CLI tool for Starknet powered by 🦀 starknet-rs 🦀 | 2026-11-19 |
+| `start-storybook` | Storybook start CLI tools (removed in Storybook 7, use `storybook dev`) | 2026-11-20 |
+| `stat` | Display file status | 2026-11-19 |
+| `steadybit` | Command-line interface to interact with the Steadybit API | 2026-11-19 |
+| `stencil` | CLI to build Stencil projects and generate components | 2026-11-19 |
+| `stepzen` | The StepZen CLI is the primary way to build, deploy and test your schemas on StepZen | 2026-11-19 |
+| `stow` | Manage farms of symbolic links | 2026-11-19 |
+| `streamlit` | Streamlit | 2026-11-19 |
+| `stripe` | A CLI to help you integrate Stripe with your application | 2026-11-19 |
+| `su` | Substitute user identity | 2026-11-19 |
+| `subl` | Sublime Text | 2026-11-19 |
+| `sudo` | Execute a command as the superuser or another user | 2026-11-19 |
+| `suitecloud` | SuiteCloud CLI | 2026-11-20 |
+| `supabase` | Supabase CLI | 2026-11-20 |
+| `surreal` | Start, query, import and export SurrealDB from the command line | 2026-11-20 |
+| `svn` | Subversion command-line client | 2026-11-19 |
+| `svokit` | Runs built svokit project | 2026-11-19 |
+| `svtplay-dl` | Download videos from your favourite play services | 2026-11-19 |
+| `sw_vers` | Print macOS system version information | 2026-11-19 |
+| `swagger-typescript-api` | Generate the API client for Fetch or Axios from an OpenAPI Specification | 2026-11-20 |
+| `swc` | SWC is a super-fast compiler written in rust; producing widely-supported javascript from modern standards and typescript | 2026-11-19 |
+| `swift` | Swift compiler | 2026-11-19 |
+| `symfony` | Symfony CLI helps developers manage projects, from local code to remote infrastructure | 2026-11-20 |
+| `sysctl` | Get or set kernel state | 2026-11-19 |
+| `systemctl` | Control the systemd system and service manager | 2026-11-20 |
 | `tabsmith` | IDE-style autocomplete for your terminal | 2026-11-03 |
-| `tac` | Concatenate and print files in reverse | 2022-05-31 |
-| `tail` | Display the last part of a file | 2021-09-17 |
-| `tailcall` | TailCall CLI for managing and optimizing GraphQL configurations | 2024-08-07 |
-| `tailscale` | — | 2023-11-06 |
-| `tailwindcss` | Tailwindcss CLI tools | 2022-02-21 |
-| `tangram` | — | 2021-10-05 |
-| `taplo` | Tool for validation, formatting, and querying TOML documents with a jq-like fashion | 2022-11-23 |
-| `tar` | Manipulating archive files | 2022-04-24 |
-| `task` | — | 2023-11-06 |
-| `tb` | Tinybird CLI | 2023-02-20 |
-| `tccutil` | Manage the privacy database | 2022-03-30 |
-| `tee` | Duplicate standard input | 2022-06-19 |
-| `terraform` | Terraform CLI | 2023-11-06 |
-| `terragrunt` | Terragrunt CLI | 2023-11-06 |
-| `tfenv` | Terraform version manager | 2023-11-06 |
-| `tfsec` | Tfsec is a simple tool to detect potential security vulnerabilities in your terraformed infrastructure | 2023-11-06 |
-| `then` | Execute this command if the test returned 0 | 2022-04-19 |
-| `time` | Time how long a command takes! | 2022-02-27 |
-| `tkn` | CLI for tekton pipelines | 2023-03-09 |
-| `tldr` | A simpler man page than the existing man page | 2023-11-06 |
-| `tmutil` | Time Machine utility | 2022-09-23 |
-| `tmux` | A terminal multiplexer | 2023-11-06 |
-| `tmuxinator` | Create and manage tmux sessions easily | 2023-11-06 |
-| `tns` | The NativeScript CLI lets you create, build, and deploy NativeScript based apps on iOS and Android devices | 2021-09-17 |
-| `tokei` | Count your code, quickly | 2023-11-06 |
-| `top` | Display Linux tasks | 2022-02-27 |
-| `touch` | Change file access and modification times | 2022-02-19 |
-| `tr` | Translate characters | 2022-05-31 |
-| `traceroute` | Print the route packets take to network host | 2022-01-20 |
-| `trap` | Automatically execute commands after receiving signals by processes or the operating system | 2023-11-06 |
-| `trash` | Trash, move files/folders to the trash | 2021-09-17 |
-| `tree` | Display directories as trees (with optional color/HTML output) | 2022-08-26 |
-| `trex` | Advanced package management for deno, based on import_map.json | 2023-11-06 |
-| `trivy` | A simple and comprehensive vulnerability scanner | 2022-04-03 |
-| `truffle` | A world class development environment, testing framework and asset pipeline for blockchains using the Ethereum Virtual Machine (EVM), aiming to make life as a developer easier | 2021-10-02 |
-| `truncate` | Shrink or extend the size of a file to the specified size | 2022-06-19 |
-| `trunk` | An all-in-one tool for scalably checking, formatting, and monitoring code | 2022-06-15 |
-| `ts-node` | Run the TypeScript interpreter for Node.JS | 2022-07-26 |
-| `tsc` | CLI tool for TypeScript compiler | 2021-12-30 |
-| `tsh` | TSH: Teleport Authentication Gateway Client | 2023-11-06 |
-| `tsuru` | Tsuru is the command line utility used by application developers, that will allow users to create, list, bind and manage apps | 2023-11-06 |
-| `tsx` | Run TypeScript file using tsx | 2022-08-25 |
-| `tuist` | Generate, build and test your Xcode projects. For more info please see https://docs.tuist.io/ | 2022-08-23 |
-| `turbo` | Turborepo is a high-performance build system for JavaScript and TypeScript codebases | 2023-11-06 |
-| `twiggy` | A code-size profiler for WebAssembly | 2022-04-04 |
-| `twilio` | Manage your Twilio resources from your terminal | 2023-09-28 |
-| `typeorm` | TypeORM CLI | 2022-04-19 |
-| `typos` | Source code spelling correction | 2022-08-31 |
-| `typst` | The Typst compiler | 2023-11-30 |
-| `ua` | Manage Ubuntu Pro services from Canonical | 2022-12-12 |
-| `ubuntu-advantage` | Manage Ubuntu Pro services from Canonical | 2022-12-12 |
-| `uname` | Print operating system name | 2022-10-05 |
-| `uniq` | Report or omit repeated line | 2022-02-27 |
-| `unix2dos` | Unix to DOS text file format convertor | 2023-02-07 |
-| `unset` | Named variable shall be undefined | 2023-11-06 |
-| `until` | Repeat a command until this is true | 2022-04-19 |
-| `unzip` | Extract compressed files in a ZIP archive | 2021-09-17 |
-| `uv` | An extremely fast Python package manager | 2024-12-31 |
-| `v` | The V Programming Language | 2023-11-06 |
-| `vale` | A syntax-aware linter for prose built with speed and extensibility in mind | 2022-04-24 |
-| `valet` | Valet is a Laravel development environment for macOS minimalists | 2023-11-06 |
-| `vapor` | Vapor Toolbox (Server-side Swift web framework) | 2022-01-09 |
-| `vault` | Interact with HashiCorp Vault | 2022-06-09 |
-| `vela` | A Highly Extensible Platform Engine based on Kubernetes and Open Application Model | 2023-02-06 |
-| `vercel` | CLI Interface for Vercel.com | 2023-11-06 |
-| `vi` | Vi[m] is an one of two powerhouse text editors in the Unix world, the other being EMACS | 2023-11-30 |
-| `vim` | Vi IMproved, a programmer's text editor | 2023-02-06 |
-| `vimr` | VimR — Neovim GUI for macOS in Swift | 2022-04-09 |
-| `visudo` | Visudo edits the sudoers file, which defines the users and groups with administrator rights | 2022-10-16 |
-| `vite` | Native ESM-powered web dev build tool | 2023-11-06 |
-| `volta` | The JavaScript Launcher | 2022-02-27 |
-| `vr` | The npm-style script runner for Deno | 2023-11-06 |
-| `vsce` | The Visual Studio Code Extension Manager | 2023-11-06 |
-| `vtex` | Fig autocomplete for VTEX IO's CLI - VTEX IO's CLI allows you to perform any action necessary to your development process, such as linking local files to the VTEX platform, managing workspaces, and releasing new app versions | 2022-05-30 |
-| `vue` | Vue cli tools | 2021-09-17 |
-| `vultr-cli` | Official command line interface for the Vultr API | 2023-11-06 |
-| `w` | Display who is logged in and what they are doing | 2022-05-25 |
-| `wasm-bindgen` | Generate bindings between WebAssembly and JavaScript | 2022-03-28 |
-| `wasm-pack` | — | 2022-04-04 |
-| `watchman` | A file watching service | 2022-10-10 |
-| `watson` | A wonderful CLI to track your time | 2023-11-06 |
-| `wc` | World, line, character, and byte count | 2021-09-30 |
-| `wd` | Warp to directories without using cd | 2023-11-06 |
-| `webpack` | — | 2022-07-05 |
-| `webstorm` | WebStorm cli | 2023-10-12 |
-| `wezterm` | Wez's Terminal Emulator | 2022-08-21 |
-| `wget` | A non-interactive network retriever | 2021-09-17 |
-| `whence` | For each name, indicate how it should be interpreted | 2022-04-19 |
-| `where` | For each name, indicate how it should be interpreted | 2022-04-19 |
-| `whereis` | Locate the binary, source, and manual page files for a command | 2022-10-05 |
-| `which` | Locate a program in the user's PATH | 2023-11-06 |
-| `while` | Repeat a command while this is true | 2022-04-19 |
-| `who` | Display who is logged in | 2022-05-26 |
-| `whois` | Query a database for information about a domain registrant | 2021-09-27 |
-| `wifi-password` | People ask you for the Wi-Fi password. Answer quickly. macOS only | 2023-11-06 |
-| `wing` | — | 2022-12-07 |
-| `wp` | WP-CLI is the command-line interface for WordPress | 2024-04-29 |
-| `wrangler` | Wrangler CLI for Cloudflare Workers | 2022-05-30 |
-| `wrk` | Wrk - a HTTP benchmarking tool | 2021-09-17 |
-| `wscat` | Communicate over websocket | 2022-06-30 |
-| `xargs` | Execute a command with whitespace-delimited strings (from stdin) as arguments | 2022-02-27 |
-| `xc` | List tasks from an xc-compatible markdown file | 2023-11-06 |
-| `xcode-select` | Active developer directory for Xcode tools | 2021-09-17 |
-| `xcodebuild` | Build Xcode projects | 2022-02-27 |
-| `xcodeproj` | Xcodeproj lets you create and modify Xcode projects | 2022-04-24 |
-| `xcodes` | Manage the Xcode versions installed on your Mac | 2024-06-25 |
-| `xcrun` | Find and execute the named command line tool from the active xCode developer directory | 2023-01-13 |
-| `xdg-mime` | Command line tool for querying information about file type handling and adding descriptions for new file types | 2022-08-17 |
-| `xdg-open` | Opens a file or URL in the user's preferred application | 2022-08-17 |
-| `xed` | Xcode text editor invocation tool | 2022-01-06 |
-| `xxd` | Make a hexdump or do the reverse | 2023-03-08 |
-| `yalc` | Work with yarn/npm packages locally like a boss | 2023-11-06 |
-| `yank` | Yank terminal output to clipboard | 2022-01-15 |
-| `yarn` | Manage packages and run scripts | 2025-03-07 |
-| `ykman` | Configure your YubiKey via the command line | 2023-11-06 |
-| `yo` | Yeoman generator | 2023-11-06 |
-| `yomo` | CLI interface for YoMo | 2023-04-17 |
-| `youtube-dl` | Download videos from YouTube | 2023-11-06 |
-| `z` | — | 2024-03-22 |
-| `zapier` | The Zapier CLI is a developer-focused way to create and maintain Zapier integrations. See more at https://github.com/zapier/zapier-platform | 2022-02-27 |
-| `zed` | A lightning-fast, collaborative code editor written in Rust | 2022-10-12 |
-| `zellij` | A terminal workspace with batteries included | 2025-01-14 |
-| `zig` | Zig is a general-purpose programming language and toolchain for maintaining robust, optimal, and reusable software | 2023-01-11 |
-| `zip` | Package and compress (archive) files into zip file | 2021-09-17 |
-| `zipcloak` | Encrypt entries in a zipfile | 2023-01-13 |
-| `zoxide` | A smarter cd command for your terminal | 2022-07-06 |
+| `tac` | Concatenate and print files in reverse | 2026-11-19 |
+| `tail` | Display the last part of a file | 2026-11-19 |
+| `tailcall` | TailCall CLI for managing and optimizing GraphQL configurations | 2026-11-19 |
+| `tailscale` | The easiest, most secure way to use WireGuard | 2026-11-20 |
+| `tailwindcss` | Tailwindcss CLI tools | 2026-11-19 |
+| `tangram` | — | 2026-11-19 |
+| `taplo` | Tool for validation, formatting, and querying TOML documents with a jq-like fashion | 2026-11-20 |
+| `tar` | Manipulating archive files | 2026-11-19 |
+| `task` | — | 2026-11-20 |
+| `tb` | Tinybird Forward CLI | 2026-11-20 |
+| `tccutil` | Manage the privacy database | 2026-11-19 |
+| `tee` | Duplicate standard input | 2026-11-19 |
+| `terraform` | Terraform CLI | 2026-11-20 |
+| `terragrunt` | Orchestration tool that allows Infrastructure as Code written in OpenTofu/Terraform to scale | 2026-11-20 |
+| `tfenv` | Terraform version manager | 2026-11-20 |
+| `tfsec` | Tfsec is a simple tool to detect potential security vulnerabilities in your terraformed infrastructure | 2026-11-19 |
+| `then` | Execute these commands if the preceding condition returned 0 | 2026-11-19 |
+| `time` | Time how long a command takes, reporting real, user and system time | 2026-11-19 |
+| `tkn` | CLI for tekton pipelines | 2026-11-20 |
+| `tldr` | A simpler man page than the existing man page | 2026-11-19 |
+| `tmutil` | Time Machine utility | 2026-11-19 |
+| `tmux` | A terminal multiplexer | 2026-11-19 |
+| `tmuxinator` | Create and manage tmux sessions easily | 2026-11-20 |
+| `tns` | The NativeScript CLI lets you create, build, and deploy NativeScript based apps on iOS, Android and visionOS devices | 2026-11-19 |
+| `tokei` | Count your code, quickly | 2026-11-19 |
+| `top` | Display sorted information about processes | 2026-11-19 |
+| `touch` | Change file access and modification times | 2026-11-19 |
+| `tr` | Translate characters | 2026-11-19 |
+| `traceroute` | Print the route packets take to network host | 2026-11-19 |
+| `trap` | Automatically execute commands after receiving signals by processes or the operating system | 2026-11-19 |
+| `trash` | Move files and directories to the user trash folder | 2026-11-19 |
+| `tree` | Display directories as trees (with optional color/HTML output) | 2026-11-20 |
+| `trex` | Advanced package management for deno, based on import_map.json | 2026-11-20 |
+| `trivy` | Unified security scanner | 2026-11-20 |
+| `truffle` | A world class development environment, testing framework and asset pipeline for blockchains using the Ethereum Virtual Machine (EVM), aiming to make life as a developer easier | 2026-11-20 |
+| `truncate` | Shrink or extend the size of a file to the specified size | 2026-11-19 |
+| `trunk` | An all-in-one tool for scalably checking, formatting, and monitoring code | 2026-11-19 |
+| `ts-node` | Run the TypeScript interpreter for Node.JS | 2026-11-20 |
+| `tsc` | CLI tool for TypeScript compiler | 2026-11-20 |
+| `tsh` | Teleport command line client | 2026-11-20 |
+| `tsuru` | Tsuru is the command line utility used by application developers, that will allow users to create, list, bind and manage apps | 2026-11-20 |
+| `tsx` | Run TypeScript file using tsx | 2026-11-19 |
+| `tuist` | Build better apps faster | 2026-11-20 |
+| `turbo` | Turborepo is a high-performance build system for JavaScript and TypeScript codebases | 2026-11-19 |
+| `twiggy` | A code-size profiler for WebAssembly | 2026-11-19 |
+| `twilio` | Manage your Twilio resources from your terminal | 2026-11-20 |
+| `typeorm` | TypeORM CLI | 2026-11-19 |
+| `typos` | Source code spelling correction | 2026-11-19 |
+| `typst` | The Typst compiler | 2026-11-20 |
+| `ua` | Manage Ubuntu Pro services from Canonical | 2026-11-19 |
+| `ubuntu-advantage` | Manage Ubuntu Pro services from Canonical | 2026-11-19 |
+| `uname` | Print operating system name | 2026-11-19 |
+| `uniq` | Report or omit repeated line | 2026-11-19 |
+| `unix2dos` | Unix to DOS text file format converter | 2026-11-19 |
+| `unset` | Unset values and attributes of shell variables and functions | 2026-11-19 |
+| `until` | Repeat a command until this is true | 2026-11-19 |
+| `unzip` | Extract compressed files in a ZIP archive | 2026-11-19 |
+| `uv` | An extremely fast Python package manager | 2026-11-19 |
+| `v` | The V Programming Language | 2026-11-19 |
+| `vale` | A syntax-aware linter for prose built with speed and extensibility in mind | 2026-11-20 |
+| `valet` | Valet is a Laravel development environment for macOS minimalists | 2026-11-20 |
+| `vapor` | Vapor Toolbox (Server-side Swift web framework) | 2026-11-19 |
+| `vault` | Interact with HashiCorp Vault | 2026-11-19 |
+| `vela` | A highly extensible platform engine based on Kubernetes and the Open Application Model | 2026-11-20 |
+| `vercel` | The command-line interface for Vercel | 2026-11-20 |
+| `vi` | Vi[m] is one of two powerhouse text editors in the Unix world, the other being EMACS | 2026-11-19 |
+| `vim` | Vi IMproved, a programmer's text editor | 2026-11-19 |
+| `vimr` | VimR — Neovim GUI for macOS in Swift | 2026-11-19 |
+| `visudo` | Edit the sudoers file safely, which defines the users and groups with administrator rights | 2026-11-19 |
+| `vite` | Native ESM-powered web dev build tool | 2026-11-19 |
+| `volta` | The JavaScript Launcher | 2026-11-19 |
+| `vr` | The npm-style script runner for Deno | 2026-11-19 |
+| `vsce` | The Visual Studio Code Extension Manager | 2026-11-20 |
+| `vtex` | VTEX IO's CLI - perform any action necessary to your development process, such as linking local files to the VTEX platform, managing workspaces, and releasing new app versions | 2026-11-19 |
+| `vue` | Vue cli tools | 2026-11-20 |
+| `vultr-cli` | Official command line interface for the Vultr API | 2026-11-20 |
+| `w` | Display who is logged in and what they are doing | 2026-11-19 |
+| `wasm-bindgen` | Generate bindings between WebAssembly and JavaScript | 2026-11-19 |
+| `wasm-pack` | Pack and publish your wasm | 2026-11-19 |
+| `watchman` | A file watching service | 2026-11-19 |
+| `watson` | A wonderful CLI to track your time | 2026-11-20 |
+| `wc` | Word, line, character, and byte count | 2026-11-19 |
+| `wd` | Warp to directories without using cd | 2026-11-19 |
+| `webpack` | The build tool for modern web applications | 2026-11-20 |
+| `webstorm` | WebStorm cli | 2026-11-19 |
+| `wezterm` | Wez's Terminal Emulator | 2026-11-19 |
+| `wget` | A non-interactive network retriever | 2026-11-20 |
+| `whence` | For each name, indicate how it should be interpreted | 2026-11-19 |
+| `where` | For each name, indicate how it would be interpreted as a command (equivalent to whence -ca) | 2026-11-19 |
+| `whereis` | Locate the binary, source, and manual page files for a command | 2026-11-19 |
+| `which` | Locate a program file in the user's PATH | 2026-11-19 |
+| `while` | Repeat a command while this is true | 2026-11-19 |
+| `who` | Display who is logged in | 2026-11-19 |
+| `whois` | Query a database for information about a domain registrant | 2026-11-19 |
+| `wifi-password` | People ask you for the Wi-Fi password. Answer quickly. macOS only | 2026-11-19 |
+| `wing` | The Wing programming language toolchain | 2026-11-19 |
+| `wp` | WP-CLI is the command-line interface for WordPress | 2026-11-20 |
+| `wrangler` | Command-line interface for all things Cloudflare Workers | 2026-11-20 |
+| `wrk` | HTTP benchmarking tool | 2026-11-19 |
+| `wscat` | Communicate over websocket | 2026-11-19 |
+| `xargs` | Execute a command with whitespace-delimited strings (from stdin) as arguments | 2026-11-19 |
+| `xc` | Run tasks from an xc-compatible markdown or org file | 2026-11-20 |
+| `xcode-select` | Manage the active developer directory for Xcode and BSD tools | 2026-11-19 |
+| `xcodebuild` | Build Xcode projects and workspaces | 2026-11-20 |
+| `xcodeproj` | Xcodeproj lets you create and modify Xcode projects from Ruby | 2026-11-19 |
+| `xcodes` | Manage the Xcodes installed on your Mac | 2026-11-19 |
+| `xcrun` | Find and execute the named command line tool from the active xCode developer directory | 2026-11-19 |
+| `xdg-mime` | Command line tool for querying information about file type handling and adding descriptions for new file types | 2026-11-19 |
+| `xdg-open` | Open a file or URL in the user's preferred application | 2026-11-19 |
+| `xed` | Xcode text editor invocation tool | 2026-11-19 |
+| `xxd` | Make a hexdump or do the reverse | 2026-11-19 |
+| `yalc` | Work with yarn/npm packages locally like a boss | 2026-11-19 |
+| `yank` | Yank terminal output to clipboard | 2026-11-19 |
+| `yarn` | Manage packages and run scripts | 2026-11-20 |
+| `ykman` | Configure your YubiKey via the command line | 2026-11-19 |
+| `yo` | Yeoman generator | 2026-11-19 |
+| `yomo` | A QUIC-based runtime for AI LLM tool routing and serverless execution | 2026-11-19 |
+| `youtube-dl` | Download videos from YouTube | 2026-11-19 |
+| `z` | — | 2026-11-19 |
+| `zapier` | The Zapier CLI is a developer-focused way to create and maintain Zapier integrations. See more at https://github.com/zapier/zapier-platform | 2026-11-20 |
+| `zed` | A lightning-fast, collaborative code editor written in Rust | 2026-11-19 |
+| `zellij` | A terminal workspace with batteries included | 2026-11-20 |
+| `zig` | Zig is a general-purpose programming language and toolchain for maintaining robust, optimal, and reusable software | 2026-11-19 |
+| `zip` | Package and compress (archive) files into zip file | 2026-11-19 |
+| `zipcloak` | Encrypt entries in a zipfile | 2026-11-19 |
+| `zoxide` | A smarter cd command for your terminal | 2026-11-19 |
