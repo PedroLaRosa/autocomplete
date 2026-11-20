@@ -1,7 +1,12 @@
-// Microsoft Power Platform CLI (pac) v2.15.1 (NuGet Microsoft.PowerApps.CLI, 2026-11-19).
-// Source: generated reference docs for v2.14 (MicrosoftDocs/power-platform,
-// power-platform/developer/cli/reference) and the 2.15.1 release notes, which
-// add no commands or flags. Aliases from the env, pages, copilot and power-fx docs.
+// Microsoft Power Platform CLI (pac) v2.15.1 (NuGet Microsoft.PowerApps.CLI, latest stable, 2026-11-20).
+// Source: pac.doc.json shipped in the 2.15.1 Microsoft.PowerApps.CLI.Tool (net10.0)
+// and Microsoft.PowerApps.CLI (Windows) packages: every command, flag, alias,
+// switch, required flag and enum compared. The generated reference docs
+// (MicrosoftDocs/power-platform, power-platform/developer/cli/reference) cover
+// pac test run, which neither pac.doc.json lists (the verb ships in
+// bolt.module.tests.dll). A string-only `--record` flag in that DLL has no help
+// text and is left out. The noun aliases (org, powerpages, paportal, pfx,
+// virtual-agent) are confirmed in the 2.15.1 assemblies.
 
 const backupRetentionPeriodDays: Fig.Suggestion[] = [
   { name: "7", description: "7" },
@@ -3305,6 +3310,11 @@ const completionSpec: Fig.Spec = {
               description:
                 "Path to the project directory. Defaults to the current working directory",
               args: { name: "project-dir" },
+            },
+            {
+              name: ["--overwrite", "-o"],
+              description:
+                "Replace the cloud copies of items that also changed in the cloud since your last pull",
             },
           ],
         },
