@@ -1,5 +1,9 @@
-// Helm v4.3.2 (GitHub release, 2026-11-13). Source: cobra command and flag
-// definitions in helm/helm pkg/cmd/*.go and pkg/cli/environment.go at v4.3.2
+// Helm v4.3.2 (latest stable git tag of helm/helm, re-verified 2026-11-20).
+// Source: cobra command and flag definitions in helm/helm pkg/cmd/*.go and
+// pkg/cli/environment.go at v4.3.2, read statically (binary not run). Audit
+// 2026-11-20 removed `helm list --all/-a` (no such flag in v4) and the s3 and
+// unittest stubs (third-party plugins, not part of helm). Positional arguments
+// are not modelled.
 
 const output: Fig.Option = {
   name: ["--output", "-o"],
@@ -583,10 +587,6 @@ const subcommands: Fig.Subcommand[] = [
     description: "List releases",
     options: [
       {
-        name: ["--all", "-a"],
-        description: "Show all releases without any filter applied",
-      },
-      {
         name: ["--all-namespaces", "-A"],
         description: "List releases across all namespaces",
       },
@@ -947,7 +947,6 @@ const subcommands: Fig.Subcommand[] = [
       waitForJobs,
     ],
   },
-  { name: "s3", description: "Manage chart repositories on Amazon S3" },
   {
     name: "search",
     description: "Search for a keyword in charts",
@@ -1168,7 +1167,6 @@ const subcommands: Fig.Subcommand[] = [
       wait,
     ],
   },
-  { name: "unittest", description: "Unittest for helm charts" },
   {
     name: "upgrade",
     description: "Upgrade a release",
