@@ -1,4 +1,4 @@
-// Vale v3.27.0 (GitHub release errata-ai/vale, 2026-11-19). Source: cmd/vale/flag.go and command.go at v3.27.0
+// Vale v3.28.1 (git tag + Homebrew formula, repo moved to vale-cli/vale, 2026-11-20). Source: cmd/vale/{flag,api,command,info,main}.go at v3.28.1, diffed against v3.27.0 (CLI surface unchanged)
 const completionSpec: Fig.Spec = {
   name: "vale",
   description:
@@ -108,6 +108,28 @@ const completionSpec: Fig.Spec = {
         { name: "root", template: "filepaths" },
         { name: "config", template: "filepaths" },
       ],
+    },
+    {
+      name: "install",
+      description: "Install a style package from a URL",
+      hidden: true,
+      args: [{ name: "name" }, { name: "url" }],
+    },
+    {
+      name: "help",
+      description: "Print the help message, or a command's own help",
+      args: {
+        name: "command",
+        isOptional: true,
+        suggestions: [
+          "ls-config",
+          "ls-metrics",
+          "ls-dirs",
+          "ls-vars",
+          "sync",
+          "test",
+        ],
+      },
     },
     {
       name: "host-install",
@@ -240,6 +262,18 @@ const completionSpec: Fig.Spec = {
       name: "--mode-compat",
       description: "Prioritize local Vale configurations",
       hidden: true,
+    },
+    {
+      name: "--mode-rev-compat",
+      description: "Prioritize remote Vale configurations",
+      hidden: true,
+    },
+    {
+      name: "--built",
+      description: "A post-processed file path",
+      requiresSeparator: true,
+      hidden: true,
+      args: { name: "path", template: "filepaths" },
     },
     {
       name: "--sort",
