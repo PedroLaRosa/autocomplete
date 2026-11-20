@@ -1,5 +1,9 @@
-// dbt-core v1.12.7 (PyPI "dbt-core" / GitHub latest release, 2026-11-12).
-// Source: core/dbt/cli/main.py and core/dbt/cli/params.py at tag v1.12.7
+// dbt-core v1.12.7 (PyPI "dbt-core" latest stable) + dbt v2.0.11 (dbt-labs/dbt-core git tag v2.0.11), verified 2026-11-20.
+// Source: v1 core/dbt/cli/{main,params}.py at v1.12.7; v2 crates/dbt-clap-core/src/{lib,commands}.rs, crates/dbt-features/src/cli.rs
+// and crates/dbt-common/src/{io_args,node_selector}.rs at v2.0.11 (static source read, binaries not run).
+// dbt v2 (Rust) is now the default `dbt` for new installs; its extra commands, flags and values say "(dbt v2)" / "Only in dbt v2".
+// Unlabelled options exist in dbt Core v1 (many are also accepted by v2 as hidden compat flags). Hidden/internal flags omitted.
+// Not covered: v2 `--host`/`--port` on non-docs commands, `internal`, and commands of the full proprietary dbt distribution.
 
 const toggle = (
   flag: string,
@@ -15,6 +19,12 @@ const yamlArg = (name: string): Fig.Arg => ({
   description: "A short YAML string eg. '{my_variable: my_value}'",
 });
 
+const onlyV1 = (...names: string[]): Fig.Suggestion[] =>
+  names.map((name) => ({ name, description: "Only in dbt Core v1" }));
+
+const onlyV2 = (...names: string[]): Fig.Suggestion[] =>
+  names.map((name) => ({ name, description: "Only in dbt v2" }));
+
 const selectionArg: Fig.Arg = {
   name: "selector",
   isVariadic: true,
@@ -23,6 +33,7 @@ const selectionArg: Fig.Arg = {
     "tag:",
     "group:",
     "access:",
+    ...onlyV2("function:"),
     "source:",
     "path:",
     "file:",
@@ -44,7 +55,7 @@ const selectionArg: Fig.Arg = {
   ],
 };
 
-const resourceTypes = [
+const resourceTypes: (string | Fig.Suggestion)[] = [
   "metric",
   "semantic_model",
   "saved_query",
@@ -58,10 +69,59 @@ const resourceTypes = [
   "snapshot",
   "seed",
   "default",
+  ...onlyV2("check"),
 ];
 
-const logFormats = ["text", "debug", "json", "default"];
-const logLevels = ["debug", "info", "warn", "error", "none"];
+const displayFormats = [
+  "table",
+  "csv",
+  "tsv",
+  "json",
+  "ndjson",
+  "yml",
+  "selector",
+  "name",
+  "path",
+];
+
+const showOptions = [
+  "progress",
+  "progresshydrate",
+  "progressparse",
+  "progressrender",
+  "progressanalyze",
+  "progressrun",
+  "completed",
+  "inputfiles",
+  "manifest",
+  "schedule",
+  "nodes",
+  "instructions",
+  "sourcedschemas",
+  "schema",
+  "data",
+  "verdict",
+  "stats",
+  "lineage",
+  "all",
+  "none",
+];
+
+const logFormats: (string | Fig.Suggestion)[] = [
+  "text",
+  "json",
+  "default",
+  ...onlyV1("debug"),
+  ...onlyV2("otel"),
+];
+const logLevels: (string | Fig.Suggestion)[] = [
+  "debug",
+  "info",
+  "warn",
+  "error",
+  ...onlyV1("none"),
+  ...onlyV2("off", "trace"),
+];
 
 const profilesDir: Fig.Option = {
   name: "--profiles-dir",
@@ -90,7 +150,8 @@ const targetPath: Fig.Option = {
 
 const threads: Fig.Option = {
   name: "--threads",
-  description: "Number of threads to use, overriding profiles.yml",
+  description:
+    "Number of threads to use, overriding profiles.yml (0 uses all CPUs in dbt v2)",
   args: { name: "threads" },
 };
 
@@ -161,21 +222,119 @@ const sample: Fig.Option = {
   args: { name: "window", description: "E.g. '3 days' or a YAML dict" },
 };
 
-const show: Fig.Option = {
-  name: "--show",
-  description: "Show a sample of the loaded data in the terminal",
-};
-
 const storeFailures: Fig.Option = {
   name: "--store-failures",
   description: "Store test results (failing rows) in the database",
 };
 
 const compileOutput: Fig.Option = {
-  name: "--output",
-  description: "Output format",
-  args: { name: "format", suggestions: ["json", "text"], default: "text" },
+  name: ["--output", "--format"],
+  description:
+    "Output format (default: text in dbt Core v1, table in dbt v2; --format is only in dbt v2)",
+  args: {
+    name: "format",
+    suggestions: [
+      "json",
+      ...onlyV1("text"),
+      ...onlyV2(...displayFormats.filter((format) => format !== "json")),
+    ],
+  },
 };
+
+const displayOutput: Fig.Option = {
+  name: ["--output", "--format"],
+  description: "Display rows in different formats (dbt v2)",
+  args: { name: "format", suggestions: displayFormats, default: "table" },
+};
+
+const limit: Fig.Option = {
+  name: "--limit",
+  description: "Limit the number of shown rows, -1 removes the limit (dbt v2)",
+  args: { name: "rows", default: "10" },
+};
+
+const staticAnalysis: Fig.Option = {
+  name: "--static-analysis",
+  description:
+    "Enable or disable SQL analysis, or run SQL in unsafe mode (dbt v2)",
+  args: {
+    name: "mode",
+    suggestions: ["off", "baseline", "strict"],
+    default: "baseline",
+  },
+};
+
+const forceNodeSelection: Fig.Option = {
+  name: "--force-node-selection",
+  description: "Force node selection (dbt v2)",
+};
+
+const stateMode: Fig.Option = {
+  name: ["--state-mode", "--run-cache-mode"],
+  description:
+    "The mode to use for dbt State, not with --force-node-selection (dbt v2; --run-cache-mode is a deprecated alias)",
+  args: {
+    name: "mode",
+    suggestions: ["noop", "read-write", "write-only"],
+    default: "read-write",
+  },
+};
+
+const sampling: Fig.Option[] = [
+  {
+    name: "--with-sample",
+    description: "Use the samples as given in this YAML/JSON file (dbt v2)",
+    args: {
+      name: "default|FILE",
+      suggestions: ["default"],
+      template: "filepaths",
+    },
+  },
+  {
+    name: "--sampled",
+    description:
+      "Add source selectors to sample, e.g. source:raw.events (dbt v2)",
+    isRepeatable: true,
+    args: { name: "selector", isVariadic: true },
+  },
+];
+
+const adapter: Fig.Option = {
+  name: "--adapter",
+  description:
+    "Run against a non-default adapter the target declares, e.g. lakecompute (dbt v2)",
+  args: { name: "adapter" },
+};
+
+const schemaOption = (name: string, form: "pre" | "post"): Fig.Option => ({
+  name,
+  description: `Show the ${form}-Jinja-transformation form of the JSON schema for the specified types (dbt v2)`,
+  isRepeatable: true,
+  args: {
+    name: "type",
+    isOptional: true,
+    isVariadic: true,
+    suggestions: [
+      "selector",
+      "schema",
+      "project",
+      "profile",
+      "dbt_cloud",
+      "packages",
+      "dependencies",
+      "telemetry",
+      "catalogs",
+    ],
+  },
+});
+
+const nodeTargets = (description: string): Fig.Arg => ({
+  name: "node",
+  description,
+  isOptional: true,
+  isVariadic: true,
+  template: "filepaths",
+});
 
 const inline: Fig.Option = {
   name: "--inline",
@@ -356,6 +515,117 @@ const globalOptions: Fig.Option[] = (
       "upload-to-artifacts-ingest-api",
       "Upload the artifacts to the dbt Cloud API"
     ),
+    {
+      name: "--show",
+      description:
+        "Show a sample of the loaded data in the terminal (dbt Core v1), or choose the artifacts to show (dbt v2)",
+      args: {
+        name: "options",
+        isOptional: true,
+        isVariadic: true,
+        suggestions: showOptions,
+      },
+    },
+    {
+      name: "--packages-install-path",
+      description: "The directory to install packages (dbt v2)",
+      args: { name: "directory", template: "folders" },
+    },
+    {
+      name: "--ai-provider",
+      description:
+        "The AI coding agents to install package skills for, as a comma-separated list (dbt v2)",
+      args: { name: "providers", suggestions: ["claude"] },
+    },
+    {
+      name: "--compute",
+      description: "Execution backend to use (dbt v2)",
+      args: {
+        name: "backend",
+        suggestions: [
+          { name: "remote", description: "Execute on the remote warehouse" },
+          { name: "inline", description: "Run computations in-process" },
+          {
+            name: "sidecar",
+            description: "Run computations in a separate, ephemeral worker",
+          },
+          {
+            name: "service",
+            description: "Run via the remote compute service",
+          },
+        ],
+        default: "remote",
+      },
+    },
+    {
+      name: "--write-catalog",
+      description: "Write a catalog.json file to the target directory (dbt v2)",
+    },
+    {
+      name: "--metadata-dir",
+      description: "Directory for metadata parquet output (dbt v2)",
+      args: { name: "directory", template: "folders" },
+    },
+    {
+      name: "--generate-info-schema",
+      description:
+        "Write the dbt information schema to target/info_schema/ (dbt v2)",
+    },
+    {
+      name: "--info-schema-dir",
+      description: "Directory for information schema parquet output (dbt v2)",
+      args: { name: "directory", template: "folders" },
+    },
+    {
+      name: "--dirty",
+      description:
+        "Select only nodes whose source files changed since the last partial parse, plus their dependents (dbt v2)",
+    },
+    {
+      name: "--feature",
+      description:
+        "Turn on an unstable feature flag, NAME or NAME=true|false (dbt v2)",
+      isRepeatable: true,
+      args: { name: "feature" },
+    },
+    ...toggle(
+      "manage-state",
+      "Enable service-backed dbt State without legacy task-cache coordination (dbt v2)"
+    ),
+    {
+      name: "--invocation-id",
+      description:
+        "Override the invocation ID with a UUID string or integer (dbt v2)",
+      args: { name: "id" },
+    },
+    {
+      name: "--parent-span-id",
+      description:
+        "Set the parent span ID for trace correlation, 16-character hex or u64 (dbt v2)",
+      args: { name: "id" },
+    },
+    {
+      name: "--otel-file-name",
+      description:
+        "File name for OTEL telemetry written under the log path (dbt v2)",
+      args: { name: "file" },
+    },
+    {
+      name: "--otel-parquet-file-name",
+      description:
+        "File name for OTEL telemetry written as Parquet under the target path (dbt v2)",
+      args: { name: "file" },
+    },
+    {
+      name: "--use-v2-compatible-package-downloads",
+      description:
+        "Use v2-compatible downloads when installing packages from Package Hub (dbt v2)",
+    },
+    {
+      name: "--require-hub-verified-downloads",
+      description:
+        "Require and verify a Hub-provided sha1 checksum when installing packages from Package Hub (dbt v2)",
+    },
   ] satisfies Fig.Option[]
 ).map((option) => ({ ...option, isPersistent: true }));
 
@@ -371,8 +641,9 @@ const listCommand: Fig.Subcommand = {
     resourceType,
     excludeResourceType,
     {
-      name: "--output",
-      description: "Output format: JSON or a newline-delimited list",
+      name: ["--output", "--format"],
+      description:
+        "Output format: JSON or a newline-delimited list (--format is only in dbt v2)",
       args: {
         name: "format",
         suggestions: ["json", "name", "path", "selector"],
@@ -399,6 +670,10 @@ const freshnessCommand: Fig.Subcommand = {
         "Output path for the JSON report (default: target/sources.json)",
       args: { name: "file", template: "filepaths" },
     },
+    {
+      name: "--check-all",
+      description: "Check freshness of all sources (dbt v2)",
+    },
   ],
 };
 
@@ -418,14 +693,44 @@ const completionSpec: Fig.Spec = {
         resourceType,
         excludeResourceType,
         sample,
-        show,
         storeFailures,
+        forceNodeSelection,
+        stateMode,
+        staticAnalysis,
+        displayOutput,
+        limit,
+        {
+          name: "--skip-checks",
+          description:
+            "Skip parse-time project quality checks, models still compile and run (dbt v2)",
+        },
+        ...sampling,
       ],
+    },
+    {
+      name: "check",
+      description:
+        "Run project quality checks against the dbt metadata index (dbt v2)",
+      args: {
+        name: "check",
+        description:
+          "Names of specific checks to run (the file stem, without .sql), all discovered checks if omitted",
+        isOptional: true,
+        isVariadic: true,
+      },
+      options: [...selection, staticAnalysis],
     },
     {
       name: "clean",
       description:
         "Delete all folders in the clean-targets list (usually dbt_packages and target)",
+      args: {
+        name: "file",
+        description: "Clean the target directory specified by file (dbt v2)",
+        isOptional: true,
+        isVariadic: true,
+        template: ["filepaths", "folders"],
+      },
       options: [
         ...project,
         ...toggle(
@@ -444,6 +749,9 @@ const completionSpec: Fig.Spec = {
       name: "compile",
       description:
         "Generate executable SQL from source, model, test, and analysis files",
+      args: nodeTargets(
+        "Compile the given nodes, identified by paths, and all their upstreams (dbt v2)"
+      ),
       options: [
         ...selection,
         ...empty,
@@ -451,6 +759,11 @@ const completionSpec: Fig.Spec = {
         fullRefresh,
         compileOutput,
         inline,
+        resourceType,
+        excludeResourceType,
+        limit,
+        staticAnalysis,
+        ...sampling,
       ],
     },
     {
@@ -523,6 +836,18 @@ const completionSpec: Fig.Spec = {
               description:
                 "Generate an additional static_index.html with manifest and catalog built in",
             },
+            {
+              name: "--output-dir",
+              description:
+                "Directory to write the static docs site to (dbt v2)",
+              args: { name: "directory", template: "folders" },
+            },
+            {
+              name: "--duckdb-cdn-base",
+              description:
+                "Base URL the browser loads DuckDB-WASM from at runtime (dbt v2)",
+              args: { name: "url" },
+            },
           ],
         },
         {
@@ -541,12 +866,22 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--port",
-              description: "Port number for the docs server",
-              args: { name: "port", default: "8080" },
+              description:
+                "Port number for the docs server (default: 8080 in dbt Core v1, 8580 in dbt v2)",
+              args: { name: "port" },
+            },
+            {
+              name: "--no-open",
+              description: "Do not open a browser tab on startup (dbt v2)",
             },
           ],
         },
       ],
+    },
+    {
+      name: "freshness",
+      description: "Check freshness of resources (dbt v2)",
+      options: [...selection, resourceType, excludeResourceType],
     },
     {
       name: "init",
@@ -562,10 +897,50 @@ const completionSpec: Fig.Spec = {
           name: "--skip-debug",
           description: "Skip running dbt debug after project initialization",
         },
+        {
+          name: "--project-name",
+          description: "The name of the project to create (dbt v2)",
+          args: { name: "name", default: "jaffle_shop" },
+        },
+        {
+          name: "--v2-upgrade",
+          description: "Run the dbt v2 onboarding and upgrade flow (dbt v2)",
+        },
+        {
+          name: "--sample",
+          description: "The sample project to initialize with (dbt v2)",
+          args: {
+            name: "template",
+            suggestions: ["jaffle-shop", "moms-flower-shop"],
+            default: "jaffle-shop",
+          },
+        },
       ],
+    },
+    {
+      name: "lint",
+      description: "Lint models (dbt v2, requires the full dbt distribution)",
     },
     listCommand,
     { ...listCommand, name: "ls", hidden: true },
+    {
+      name: "login",
+      description: "Authenticate with dbt platform (dbt v2)",
+      subcommands: [
+        {
+          name: "status",
+          description: "Show current authentication status",
+        },
+      ],
+    },
+    {
+      name: "man",
+      description: "Create reference documentation (dbt v2)",
+      options: [
+        schemaOption("--schema", "post"),
+        schemaOption("--pre-schema", "pre"),
+      ],
+    },
     {
       name: "parse",
       description: "Parse the project and provide information on performance",
@@ -574,13 +949,25 @@ const completionSpec: Fig.Spec = {
     {
       name: "retry",
       description: "Retry the nodes that failed in the previous run",
-      options: [...withThreads, fullRefresh],
+      options: [...withThreads, fullRefresh, staticAnalysis],
     },
     {
       name: "run",
       description:
         "Compile SQL and execute against the current target database",
-      options: [...selection, ...empty, ...eventTime, fullRefresh, sample],
+      options: [
+        ...selection,
+        ...empty,
+        ...eventTime,
+        fullRefresh,
+        sample,
+        forceNodeSelection,
+        stateMode,
+        staticAnalysis,
+        displayOutput,
+        limit,
+        ...sampling,
+      ],
     },
     {
       name: "run-operation",
@@ -598,12 +985,20 @@ const completionSpec: Fig.Spec = {
           description: "Execute ad-hoc SQL/Jinja directly, without a macro",
           args: { name: "sql" },
         },
+        adapter,
       ],
     },
     {
       name: "seed",
       description: "Load data from csv files into your data warehouse",
-      options: [...selection, ...empty, fullRefresh, show],
+      options: [
+        ...selection,
+        ...empty,
+        fullRefresh,
+        forceNodeSelection,
+        stateMode,
+        staticAnalysis,
+      ],
     },
     {
       name: "show",
@@ -616,16 +1011,49 @@ const completionSpec: Fig.Spec = {
         compileOutput,
         inline,
         {
-          name: "--limit",
-          description: "Limit the number of results returned",
-          args: { name: "limit", default: "5" },
+          ...limit,
+          description:
+            "Limit the number of results returned (default: 5 in dbt Core v1, 10 in dbt v2; -1 removes the limit in dbt v2)",
+          args: { name: "limit" },
         },
+        resourceType,
+        excludeResourceType,
+        staticAnalysis,
+        {
+          name: "--info",
+          description:
+            "Query a dbt information schema view, e.g. models or dag_nodes, instead of the warehouse (dbt v2)",
+          args: { name: "view" },
+        },
+        {
+          name: "--query-id",
+          description:
+            "Fetch the result of a previously completed LakeCompute query by query id (dbt v2)",
+          args: { name: "id" },
+        },
+        {
+          name: "--unchecked",
+          description:
+            "Skip local type checking of the show target, now the default (dbt v2)",
+          deprecated: true,
+        },
+        adapter,
+        ...sampling,
       ],
     },
     {
       name: "snapshot",
       description: "Execute snapshots defined in your project",
-      options: [...selection, ...empty],
+      args: nodeTargets(
+        "Snapshot the given nodes, same as --select node_1 ... node_n (dbt v2)"
+      ),
+      options: [
+        ...selection,
+        ...empty,
+        forceNodeSelection,
+        stateMode,
+        staticAnalysis,
+      ],
     },
     {
       name: "source",
@@ -636,9 +1064,108 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
+      name: "state",
+      description: "Utilities for dbt State (dbt v2)",
+      subcommands: [
+        {
+          name: "explain",
+          description: "Explain dbt State (dbt v2)",
+          options: [
+            {
+              name: ["-v", "--verbose"],
+              description: "Enable more detailed output",
+            },
+            {
+              name: ["-l", "--log-file"],
+              description: "Log file path",
+              args: { name: "file", template: "filepaths" },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "system",
+      description: "System management subcommands (dbt v2)",
+      subcommands: [
+        {
+          name: "install-drivers",
+          description:
+            "Preinstall all supported database drivers into the local cache",
+        },
+        {
+          name: "upgrade-distribution",
+          description:
+            "Upgrade a dbt v2 OSS installation to dbt v2 proprietary",
+          options: [
+            {
+              name: ["-y", "--yes"],
+              description:
+                "Skip the confirmation prompt and proceed automatically",
+            },
+            {
+              name: "--package-manager",
+              description:
+                "Python package manager to sync the rewritten manifest with, overriding automatic detection",
+              args: {
+                name: "manager",
+                suggestions: [
+                  "uv",
+                  "poetry",
+                  "pdm",
+                  "pipenv",
+                  "conda",
+                  "hatch",
+                  "pip",
+                  "pipx",
+                  "rye",
+                  "asdf",
+                  "mise",
+                  "pyenv",
+                ],
+              },
+            },
+          ],
+        },
+        {
+          name: "update",
+          description: "Informative-only update command for dbt v2 OSS",
+          hidden: true,
+        },
+        {
+          name: "uninstall",
+          description: "Informative-only uninstall command for dbt v2 OSS",
+          hidden: true,
+        },
+      ],
+    },
+    {
       name: "test",
       description: "Run tests on data in deployed models",
-      options: [...selection, resourceType, excludeResourceType, storeFailures],
+      args: nodeTargets(
+        "Test the given nodes, same as --select node_1 ... node_n (dbt v2)"
+      ),
+      options: [
+        ...selection,
+        resourceType,
+        excludeResourceType,
+        storeFailures,
+        forceNodeSelection,
+        stateMode,
+        staticAnalysis,
+        displayOutput,
+        limit,
+        ...sampling,
+      ],
+    },
+    {
+      name: "completions",
+      description: "Generate shell completion scripts (dbt v2)",
+      hidden: true,
+      args: {
+        name: "shell",
+        suggestions: ["bash", "elvish", "fish", "powershell", "zsh"],
+      },
     },
   ],
   options: globalOptions,
