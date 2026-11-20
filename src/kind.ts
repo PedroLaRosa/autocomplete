@@ -1,4 +1,4 @@
-// kind v0.33.0 (GitHub release, 2026-08-26). Source: cobra commands in pkg/cmd/kind at tag v0.33.0
+// kind v0.33.0 (latest stable: Go proxy + Homebrew formula + git tags, released 2026-08-26; re-verified 2026-11-20). Source: cobra commands and flags in pkg/cmd/kind at tag v0.33.0 (static read, binary not run)
 const ClusterGenerator: Fig.Generator = {
   script: ["kind", "get", "clusters"],
   postProcess: (out) => {
@@ -284,6 +284,7 @@ const completionSpec: Fig.Spec = {
           description: "Loads docker image from archive into nodes",
           args: {
             name: "IMAGE.tar",
+            isVariadic: true,
             template: "filepaths",
           },
           options: [nameOption("The cluster context name"), nodesOption],
