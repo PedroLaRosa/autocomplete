@@ -1,5 +1,5 @@
-// Trex v1.13.1 (GitHub release crewdevio/Trex, 2023-08-18; repo dormant since). Source: cli.ts,
-// utils/info.ts and handlers at tag v1.13.1, 2026-11-19
+// Trex v1.13.1 (newest tag/release of crewdevio/Trex, 2023-08-18; repo dormant since; verified 2026-11-20).
+// Source: cli.ts, utils/info.ts, commands/run.ts, handlers/* and README.md at tag v1.13.1.
 const dependenciesGenerator: Fig.Generator = {
   script: ["cat", "import_map.json"],
   postProcess: function (out) {
@@ -80,8 +80,9 @@ const trexOptions: Record<string, Fig.Option> = {
         description: "[user]/[repo or repo@tag/branch]/[path/to/file]",
       },
       {
-        name: "Package Name",
-        description: "Prefered package alias",
+        name: "package name",
+        description: "Package alias (defaults to the repository name)",
+        isOptional: true,
       },
     ],
   },
@@ -147,10 +148,18 @@ const completionSpec: Fig.Spec = {
           description: "Verbose output in --watch mode (rsap)",
         },
       ],
-      args: {
-        name: "script alias",
-        generators: scriptsGenerator,
-      },
+      args: [
+        {
+          name: "script alias",
+          generators: scriptsGenerator,
+        },
+        {
+          name: "args",
+          description: "Arguments passed to the script alias",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
     },
     {
       name: "purge",
@@ -189,9 +198,18 @@ const completionSpec: Fig.Spec = {
           },
         },
       ],
-      args: {
-        name: "cli tool",
-      },
+      args: [
+        {
+          name: "cli tool",
+          description: "Module name from deno.land/x, eg: aleph@v0.2.28",
+        },
+        {
+          name: "args",
+          description: "Arguments passed to the cli tool",
+          isOptional: true,
+          isVariadic: true,
+        },
+      ],
     },
     {
       name: "check",
