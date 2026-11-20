@@ -1,3 +1,4 @@
+// Checkov v3.4.6 (PyPI latest, 2026-11-20). Source: checkov/common/util/ext_argument_parser.py, OUTPUT_CHOICES in runner_registry.py and checkov_runners in check_type.py at tag 3.4.6, read statically (not run)
 const branches: Fig.Generator = {
   script: ["git", "branch", "--no-color"],
   postProcess: (output) => {
@@ -9,6 +10,53 @@ const branches: Fig.Generator = {
     });
   },
 };
+
+const frameworks = [
+  "ansible",
+  "argo_workflows",
+  "arm",
+  "azure_pipelines",
+  "bicep",
+  "bitbucket_pipelines",
+  "cdk",
+  "circleci_pipelines",
+  "cloudformation",
+  "dockerfile",
+  "github_configuration",
+  "github_actions",
+  "gitlab_configuration",
+  "gitlab_ci",
+  "bitbucket_configuration",
+  "helm",
+  "json",
+  "yaml",
+  "kubernetes",
+  "kustomize",
+  "openapi",
+  "sca_package",
+  "sca_image",
+  "secrets",
+  "serverless",
+  "terraform",
+  "terraform_json",
+  "terraform_plan",
+  "sast",
+  "sast_python",
+  "sast_java",
+  "sast_javascript",
+  "sast_typescript",
+  "sast_golang",
+  "3d_policy",
+];
+
+const severities = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
+
+const boolSuggestions = ["true", "false"];
+
+const checkIdsArgs = (name: string): Fig.Arg => ({
+  name,
+  suggestions: severities,
+});
 
 const completionSpec: Fig.Spec = {
   name: "checkov",
@@ -24,38 +72,80 @@ const completionSpec: Fig.Spec = {
       description: "Show the version of checkov",
     },
     {
-      name: "--quiet",
-      description: "CLI output, display only failed checks",
-    },
-    {
-      name: "--compact",
-      description: "CLI output, do not display code blocks",
-    },
-    {
-      name: ["--list", "-l"],
-      description: "List checks",
-    },
-    {
-      name: "--no-guide",
+      name: "--support",
       description:
-        "Do not fetch Bridgecrew platform IDs and guidelines for the checkov output report. Note: this prevents Bridgecrew platform check IDs from being used anywhere in the CLI",
+        "Enable debug logs and upload the logs to the server. Requires a Bridgecrew or Prisma Cloud API key",
       dependsOn: ["--bc-api-key"],
-    },
-    {
-      name: "--output-bc-ids",
-      description:
-        "Print Bridgecrew platform IDs (BC...) instead of Checkov IDs (CKV...), if the check exists in the platform",
-      dependsOn: ["--bc-api-key"],
-      exclusiveOn: ["--no-guide"],
     },
     {
       name: ["--directory", "-d"],
       description: "IaC root directory (can not be used together with --file)",
       exclusiveOn: ["--file"],
+      isRepeatable: true,
       args: {
         name: "Directory",
         template: "folders",
       },
+    },
+    {
+      name: "--add-check",
+      description: "Generate a new check via CLI prompt",
+    },
+    {
+      name: ["--file", "-f"],
+      description:
+        "File to scan (can not be used together with --directory). Checkov filters the runners based on the file type, which you can further limit with --skip-framework",
+      exclusiveOn: ["--directory"],
+      isRepeatable: true,
+      args: {
+        name: "FILE",
+        isVariadic: true,
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--skip-path",
+      description:
+        "Path (file or directory) to skip, using regular expression logic, relative to current working directory. Word boundaries are not implicit; i.e., specifying 'dir1' will skip any directory or subdirectory named 'dir1'. Ignored with -f. Can be specified multiple times",
+      isRepeatable: true,
+      args: {
+        name: "SKIP_PATH",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--external-checks-dir",
+      description:
+        "Directory for custom checks to be loaded. Can be repeated. This runs Python code from the directory, so only use trusted directories",
+      isRepeatable: true,
+      args: {
+        name: "EXTERNAL_CHECKS_DIR",
+        template: "folders",
+      },
+    },
+    {
+      name: "--external-checks-git",
+      description:
+        "GitHub URL of external checks to be added. You can specify a subdirectory after a double-slash // and a ref with ?ref=tags/tagName, ?ref=heads/branchName or ?ref=commit_id. Cannot be used together with --external-checks-dir",
+      exclusiveOn: ["--external-checks-dir"],
+      isRepeatable: true,
+      args: {
+        name: "EXTERNAL_CHECKS_GIT",
+      },
+    },
+    {
+      name: "--external-checks-public-key",
+      description:
+        "Path to a PEM-encoded ECDSA P-256 public key used to verify every .py file loaded from external checks. Can be specified multiple times to rotate keys. You may also use the environment variable: CKV_EXTERNAL_CHECKS_PUBLIC_KEY",
+      isRepeatable: true,
+      args: {
+        name: "PUBLIC_KEY",
+        template: "filepaths",
+      },
+    },
+    {
+      name: ["--list", "-l"],
+      description: "List checks",
     },
     {
       name: ["--output", "-o"],
@@ -66,103 +156,80 @@ const completionSpec: Fig.Spec = {
         name: "FORMAT",
         suggestions: [
           "cli",
+          "csv",
           "cyclonedx",
+          "cyclonedx_json",
           "json",
           "junitxml",
           "github_failed_only",
+          "gitlab_sast",
           "sarif",
+          "spdx",
         ],
       },
     },
     {
+      name: "--output-file-path",
+      description:
+        "Name of the output folder to save the chosen output formats. Use -o cli -o junitxml --output-file-path console,results.xml to print the CLI output to the console and the JUnit XML output to results.xml",
+      args: {
+        name: "OUTPUT_FILE_PATH",
+      },
+    },
+    {
+      name: "--output-bc-ids",
+      description:
+        "Print Bridgecrew platform IDs (BC...) instead of Checkov IDs (CKV...), if the check exists in the platform",
+    },
+    {
+      name: "--include-all-checkov-policies",
+      description:
+        "When running with an API key, include policies that only exist in Checkov and not in the Prisma Cloud platform. Has no effect without an API key",
+    },
+    {
+      name: "--quiet",
+      description:
+        "In case of CLI output, display only failed checks. Also disables progress bars",
+    },
+    {
+      name: "--compact",
+      description: "In case of CLI output, do not display code blocks",
+    },
+    {
       name: "--framework",
-      description: "IaC frameworks to include checks for",
+      description:
+        "Filter scan to run only on specific infrastructure as code frameworks. Defaults to all frameworks. Enter as a comma-separated list or repeat the flag. You may also use the environment variable: CKV_FRAMEWORK",
+      isRepeatable: true,
       args: {
         name: "FRAMEWORKS",
         isVariadic: true,
-        suggestions: [
-          "arm",
-          "cloudformation",
-          "dockerfile",
-          "github_configuration",
-          "gitlab_configuration",
-          "helm",
-          "json",
-          "kubernetes",
-          "kustomize",
-          "sca_package",
-          "secrets",
-          "serverless",
-          "terraform",
-          "terraform_plan",
-          "all",
-        ],
+        suggestions: ["all", ...frameworks],
       },
     },
     {
       name: "--skip-framework",
-      description: "IaC frameworks to exclude checks for",
+      description:
+        "Filter scan to skip specific infrastructure as code frameworks. Enter as a comma-separated list or repeat the flag. Cannot include values that are also included in --framework",
+      isRepeatable: true,
       args: {
         name: "FRAMEWORKS",
         isVariadic: true,
-        suggestions: [
-          "arm",
-          "cloudformation",
-          "dockerfile",
-          "github_configuration",
-          "gitlab_configuration",
-          "helm",
-          "json",
-          "kubernetes",
-          "kustomize",
-          "sca_package",
-          "secrets",
-          "serverless",
-          "terraform",
-          "terraform_plan",
-          "all",
-        ],
-      },
-    },
-    {
-      name: "--add-check",
-      description: "Generate a new check via CLI prompt",
-    },
-    {
-      name: ["--file", "-f"],
-      description: "IaC file(can not be used together with --directory)",
-      exclusiveOn: ["--directory"],
-      args: {
-        name: "FILE",
-        template: "filepaths",
-      },
-    },
-    {
-      name: "--skip-path",
-      description:
-        "Path (file or directory) to skip, using regular expression logic, relative to current working directory. Word boundaries are not implicit; i.e., specifying 'dir1' will skip any directory or subdirectory named 'dir1'. Ignored with -f. Can be specified multiple times",
-      exclusiveOn: ["--file"],
-      isRepeatable: true,
-      args: {
-        name: "SKIP_PATH",
-        template: "filepaths",
+        suggestions: frameworks,
       },
     },
     {
       name: ["--check", "-c"],
       description:
-        "Filter scan to run only on a specific check identifier (allowlist). You can specify multiple checks separated by comma delimiter. You may also use the environment variable: CKV_CHECK",
-      args: {
-        name: "CHECKS",
-      },
+        "Checks to run; any other checks will be skipped. Enter one or more items separated by commas, each a Checkov check ID (CKV_AWS_123), a BC check ID (BC_AWS_GENERAL_123), or a severity. You may also use the environment variable: CKV_CHECK",
+      isRepeatable: true,
+      args: checkIdsArgs("CHECKS"),
     },
     {
       name: "--skip-check",
       description:
-        "Filter scan to run all check except a specific check identifier (denylist). You can specify multiple checks separated by comma delimiter. You may also use the environment variable: CKV_SKIP_CHECK",
-      args: {
-        name: "CHECKS",
-      },
+        "Checks to skip; any other checks will be run. Enter one or more items separated by commas, each a Checkov check ID (CKV_AWS_123), a BC check ID (BC_AWS_GENERAL_123), or a severity. You may also use the environment variable: CKV_SKIP_CHECK",
+      isRepeatable: true,
+      args: checkIdsArgs("CHECKS"),
     },
     {
       name: "--run-all-external-checks",
@@ -170,23 +237,47 @@ const completionSpec: Fig.Spec = {
         "Run all external checks (loaded via --external-checks options) even if the checks are not present in the --check list. This allows you to always ensure that new checks present in the external source are used. If an external check is included in --skip-check, it will still be skipped",
     },
     {
-      name: "--external-checks-dir",
-      description: "Directory for custom checks to be loaded. Can be repeated",
+      name: ["--soft-fail", "-s"],
+      description:
+        "Runs checks but always returns a 0 exit code. --soft-fail-on and --hard-fail-on override this option when they match a result",
+    },
+    {
+      name: "--soft-fail-on",
+      description:
+        "Exits with a 0 exit code if only the specified items fail. Enter one or more items separated by commas, each a check ID or a severity",
       isRepeatable: true,
-      args: {
-        name: "EXTERNAL_CHECKS_DIR",
-      },
+      args: checkIdsArgs("CHECKS"),
+    },
+    {
+      name: "--hard-fail-on",
+      description:
+        "Exits with a non-zero exit code for specified checks. Enter one or more items separated by commas, each a check ID or a severity",
+      isRepeatable: true,
+      args: checkIdsArgs("CHECKS"),
     },
     {
       name: "--bc-api-key",
       description:
-        "Bridgecrew API key. You may also use the environment variable: BC_API_KEY",
+        "Bridgecrew API key or Prisma Cloud Access Key (see --prisma-api-url). You may also use the environment variable: BC_API_KEY",
       args: {
         name: "BC_API_KEY",
       },
     },
     {
-      name: "--docker-image",
+      name: "--prisma-api-url",
+      description:
+        "The Prisma Cloud API URL. Requires --bc-api-key to be a Prisma Cloud Access Key in the format <access_key_id>::<secret_key>. You may also use the environment variable: PRISMA_API_URL",
+      args: {
+        name: "PRISMA_API_URL",
+      },
+    },
+    {
+      name: "--skip-results-upload",
+      description:
+        "Do not upload scan results to the platform to view in the console. Results are only available locally",
+    },
+    {
+      name: ["--docker-image", "--image"],
       description:
         "Scan docker images by name or ID. Only works with --bc-api-key flag",
       dependsOn: ["--bc-api-key"],
@@ -199,12 +290,13 @@ const completionSpec: Fig.Spec = {
       description: "Path to the Dockerfile of the scanned docker image",
       args: {
         name: "DOCKERFILE_PATH",
+        template: "filepaths",
       },
     },
     {
       name: "--repo-id",
       description:
-        "Identity string of the repository, with form <repo_owner>/<repo_name>",
+        "Identity string of the repository, with form <repo_owner>/<repo_name>. Required when using the platform integration (API key)",
       args: {
         name: "REPO_ID",
       },
@@ -213,46 +305,42 @@ const completionSpec: Fig.Spec = {
       name: ["--branch", "-b"],
       description:
         "Selected branch of the persisted repository. Only has effect when using the --bc-api-key flag",
-      dependsOn: ["--bc-api-key"],
       args: {
         name: "BRANCH",
+        default: "master",
         generators: branches,
       },
     },
     {
-      name: "--skip-fixes",
+      name: "--skip-download",
       description:
-        "Do not download fixed resource templates from Bridgecrew. Only has an effect when using the --bc-api-key flag",
-      dependsOn: ["--bc-api-key"],
+        "Do not download any data from Prisma Cloud. This omits doc links, severities, custom policies and suppressions, and prevents BC platform IDs from being available",
     },
     {
-      name: "--skip-suppressions",
+      name: "--use-enforcement-rules",
       description:
-        "Do not download preconfigured suppressions from the Bridgecrew platform. Code comment suppressions will still be honored. Only has an effect when using the --bc-api-key flag",
-      dependsOn: ["--bc-api-key"],
-    },
-    {
-      name: "--skip-policy-download",
-      description:
-        "Do not download custom policies configured in the Bridgecrew platform. Only has an effect when using the --bc-api-key flag",
+        "Use the Enforcement rules configured in the platform for hard / soft fail logic. Requires a BC or PC platform API key",
       dependsOn: ["--bc-api-key"],
     },
     {
       name: "--download-external-modules",
       description:
-        "Download external terraform modules from public git repositories and terraform registry. You may also use the environment variable: DOWNLOAD_EXTERNAL_MODULES]",
+        "Download external terraform modules from public git repositories and terraform registry. You may also use the environment variable: DOWNLOAD_EXTERNAL_MODULES",
       args: {
         name: "DOWNLOAD_EXTERNAL_MODULES",
+        suggestions: boolSuggestions,
       },
     },
     {
       name: "--var-file",
       description:
-        "Variable files to load in addition to the default files (see https://www.terraform.io/docs/language/values/variables.html#variable-definitions-tfvars-files). Currently only supported for source Terraform (.tf file), and Helm chart scans. Requires using --directory, NOT --file",
+        "Variable files to load in addition to the default files (see https://www.terraform.io/docs/language/values/variables.html#variable-definitions-tfvars-files). Currently only supported for source Terraform (.tf file), and Helm chart scans. Requires using --directory, not --file. You may also use the environment variable: CKV_VAR_FILE",
       dependsOn: ["--directory"],
       exclusiveOn: ["--file"],
+      isRepeatable: true,
       args: {
         name: "VAR_FILE",
+        template: "filepaths",
       },
     },
     {
@@ -261,30 +349,42 @@ const completionSpec: Fig.Spec = {
         "Set the path for the download external terraform modules. You may also use the environment variable: EXTERNAL_MODULES_DIR",
       args: {
         name: "EXTERNAL_MODULES_DIR",
+        template: "folders",
       },
     },
     {
       name: "--evaluate-variables",
-      description: "Evaluate the values of variables and locals",
+      description:
+        "Evaluate the values of variables and locals. You may also use the environment variable: CKV_EVAL_VARS",
       args: {
         name: "EVALUATE_VARIABLES",
+        default: "true",
+        suggestions: boolSuggestions,
       },
     },
     {
       name: ["--ca-certificate", "-ca"],
       description:
-        "Custom CA (bundle) fila. You may also use the environment variablee: CA_CERTIFICATE",
+        "Custom CA certificate (bundle) file. You may also use the environment variable: BC_CA_BUNDLE",
       args: {
         name: "CA_CERTIFICATE",
+        template: "filepaths",
       },
+    },
+    {
+      name: "--no-cert-verify",
+      description:
+        "Skip SSL certificate verification. Dangerous: invalid and falsified certificates cannot be detected, only use for testing",
     },
     {
       name: "--repo-root-for-plan-enrichment",
       description:
-        "Directory containing the hcl code used to generate a given plan file. Use with -f FILE",
+        "Directory containing the hcl code used to generate a given plan file. Use with -f",
       dependsOn: ["--file"],
+      isRepeatable: true,
       args: {
         name: "REPO_ROOT_FOR_PLAN_ENRICHMENT",
+        template: "folders",
       },
     },
     {
@@ -299,213 +399,138 @@ const completionSpec: Fig.Spec = {
       name: "--create-config",
       description:
         "Takes the current command line args and writes them out to a config file at the given path",
-      dependsOn: ["--directory"],
       args: {
         name: "CONFIG_FILE",
+        template: "filepaths",
       },
     },
     {
       name: "--show-config",
       description:
-        "Prints all arguments and config settings and where they came from (eg. commandline, config file, environment variable or default)",
+        "Prints all args and config settings and where they came from (eg. commandline, config file, environment variable or default)",
     },
     {
       name: "--create-baseline",
       description:
-        "Save all current results to a '.checkov.baseline' file so future runs will only flag new findings. Works only with `--directory` flag",
+        "Alongside outputting the findings, save all results to a '.checkov.baseline' file so future runs will not re-flag the same noise. Works only with `--directory` flag",
       dependsOn: ["--directory"],
     },
     {
       name: "--baseline",
       description:
-        "Use a '.checkov.baseline' file to compare current results with a known baseline. Report will include only failed checks that are newwith respect to the provided baseline. See --create-baseline",
+        "Use a '.checkov.baseline' file to compare current results with a known baseline. Report will include only failed checks that are new with respect to the provided baseline. See --create-baseline",
       args: {
         name: "BASELINE",
-      },
-    },
-    {
-      name: ["--soft-fail", "-s"],
-      description: "Runs checks but suppresses the error code",
-    },
-    {
-      name: "--soft-fail-on",
-      description:
-        "Exits with a 0 exit code for specified checks. You can specify multiple checks separated by comma delimiter",
-      args: {
-        name: "CHECKS",
-      },
-    },
-    {
-      name: "--hard-fail-on",
-      description:
-        "Exits with a non-zero exit code for specified checks. You can specify multiple checks separated by comma delimiter",
-      args: {
-        name: "CHECKS",
-      },
-    },
-    {
-      name: "--min-cve-severity",
-      description: "Set minimum severity to return a non-zero exit code",
-      args: {
-        name: "MIN_SEVERITY",
-        suggestions: ["critical", "high", "medium", "low", "none"],
-      },
-    },
-    {
-      name: "--skip-cve-package",
-      description:
-        "Ignore specific open source package when SCA scanning for CVEs in package dependencies. Can be used multiple times to skip multiple packages",
-      isRepeatable: true,
-      args: {
-        name: "SKIP_CVE_PACKAGE",
-      },
-    },
-    {
-      name: "--use-enforcement-rules",
-      description:
-        "Use the Enforcement rules configured in the platform for hard / soft fail logic",
-      args: {
-        name: "USE_ENFORCEMENT_RULES",
-      },
-    },
-    {
-      name: "--support",
-      description: "Enable debug logs and upload the logs to the server",
-      dependsOn: ["--bc-api-key"],
-      args: {
-        name: "SUPPORT",
-      },
-    },
-    {
-      name: "--summary-position",
-      description:
-        "Chose whether the summary will be appended on top or on bottom",
-      args: {
-        name: "SUMMARY_POSITION",
-        suggestions: ["top", "bottom"],
-      },
-    },
-    {
-      name: "--skip-resources-without-violations",
-      description: "Exclude extra resources (resources without violations)",
-      args: {
-        name: "SKIP_RESOURCES_WITHOUT_VIOLATIONS",
-      },
-    },
-    {
-      name: "--skip-download",
-      description: "Do not download any data from Prisma Cloud",
-      args: {
-        name: "SKIP_DOWNLOAD",
-      },
-    },
-    {
-      name: "--secrets-history-timeout",
-      description: "Maximum time to run the history scan",
-      args: {
-        name: "SECRETS_HISTORY_TIMEOUT",
-      },
-    },
-    {
-      name: "--scan-secrets-history",
-      description: "Will scan the history of commits for secrets",
-      args: {
-        name: "SCAN_SECRETS_HISTORY",
-      },
-    },
-    {
-      name: "--prisma-api-url",
-      description: "The Prisma Cloud API URL",
-      args: {
-        name: "PRISMA_API_URL",
-      },
-    },
-    {
-      name: "--policy-metadata-filter",
-      description:
-        "Comma separated key:value string to filter policies based on Prisma Cloud policy metadata",
-      args: {
-        name: "POLICY_METADATA_FILTER",
-      },
-    },
-    {
-      name: "--output-file-path",
-      description:
-        "Name of the output folder to save the chosen output formats",
-      args: {
-        name: "OUTPUT_FILE_PATH",
+        template: "filepaths",
       },
     },
     {
       name: "--output-baseline-as-skipped",
       description:
         "Output checks that are skipped due to baseline file presence",
-      args: {
-        name: "OUTPUT_BASELINE_AS_SKIPPED",
-      },
     },
     {
-      name: "--openai-api-key",
+      name: "--skip-cve-package",
       description:
-        "Add an OpenAI API key to enhance finding guidelines. This will send Code to OpenAI",
+        "Filter scan to run on all packages but a specific package identifier (denylist). Can be specified multiple times to skip multiple packages",
+      isRepeatable: true,
       args: {
-        name: "OPENAI_API_KEY",
+        name: "SKIP_CVE_PACKAGE",
       },
     },
     {
-      name: "--no-fail-on-crash",
-      description: "Return exit code 0 instead of 2",
-      args: {
-        name: "NO_FAIL_ON_CRASH",
-      },
-    },
-    {
-      name: "--mask",
+      name: "--policy-metadata-filter",
       description:
-        "Each entry in the list will be used for masking the desired attribute",
+        "Comma separated key:value string to filter policies based on Prisma Cloud policy metadata, e.g. policy.label=label1,cloud.type=aws. You may also use the environment variable: CKV_POLICY_METADATA_FILTER",
       args: {
-        name: "MASK",
+        name: "POLICY_METADATA_FILTER",
       },
     },
     {
-      name: "--include-all-checkov-policies",
+      name: "--policy-metadata-filter-exception",
       description:
-        "When running with an API key, Checkov will omit any policies that do not exist in the Bridgecrew or Prisma Cloud platform",
+        "Comma separated key:value string to exclude filtered policies based on Prisma Cloud policy metadata. Exceptions override any policies selected by --policy-metadata-filter. You may also use the environment variable: CKV_POLICY_METADATA_FILTER_EXCEPTION",
       args: {
-        name: "INCLUDE_ALL_CHECKOV_POLICIES",
+        name: "POLICY_METADATA_FILTER_EXCEPTION",
       },
     },
     {
-      name: "--external-checks-git",
-      description: "GitHub URL of external checks to be added",
+      name: "--secrets-scan-file-type",
+      description: "Not in use",
+      deprecated: true,
+      isRepeatable: true,
       args: {
-        name: "EXTERNAL_CHECKS_GIT",
+        name: "FILE_TYPE",
       },
     },
     {
       name: "--enable-secret-scan-all-files",
       description: "Enable secret scan for all files",
-      args: {
-        name: "ENABLE_SECRET_SCAN_ALL_FILES",
-      },
-    },
-    {
-      name: "--deep-analysis",
-      description: "Enable combine TF graph and TF Plan graph",
-      args: {
-        name: "DEEP_ANALYSIS",
-      },
     },
     {
       name: "--block-list-secret-scan",
       description: "List of files to filter out from the secret scanner",
-      dependsOn: ["--repo-root-for-plan-enrichment"],
+      isRepeatable: true,
       args: {
         name: "BLOCK_LIST_SECRET_SCAN",
+        template: "filepaths",
+      },
+    },
+    {
+      name: "--summary-position",
+      description:
+        "Choose whether the summary will be appended on top (before the checks results) or on bottom (after check results)",
+      args: {
+        name: "SUMMARY_POSITION",
+        default: "top",
+        suggestions: ["top", "bottom"],
+      },
+    },
+    {
+      name: "--skip-resources-without-violations",
+      description:
+        "Exclude extra resources (resources without violations) from report output",
+    },
+    {
+      name: "--deep-analysis",
+      description:
+        "Combine the TF Plan and TF graphs to make connections not available in either",
+    },
+    {
+      name: "--no-fail-on-crash",
+      description:
+        "Return exit code 0 instead of 2. You may also use the environment variable: CKV_NO_FAIL_ON_CRASH",
+    },
+    {
+      name: "--mask",
+      description:
+        "Mask the desired attribute for a resource type (<resource_type>:<variable>) or for all resources (<variable>). One entry can contain several variables separated with a comma. Can be specified multiple times",
+      isRepeatable: true,
+      args: {
+        name: "MASK",
+      },
+    },
+    {
+      name: "--scan-secrets-history",
+      description: "Scan the history of commits for secrets",
+    },
+    {
+      name: "--secrets-history-timeout",
+      description: "Maximum time to stop the scan",
+      args: {
+        name: "SECRETS_HISTORY_TIMEOUT",
+        default: "12h",
+      },
+    },
+    {
+      name: "--custom-tool-name",
+      description:
+        "Add a tool name to tag your output with, useful when integrating with other tools such as uploading SARIF files to GitHub code scanning",
+      args: {
+        name: "CUSTOM_TOOL_NAME",
+        default: "Checkov",
       },
     },
   ],
-  // Only uncomment if checkov takes an argument
-  // args: {}
 };
 export default completionSpec;
