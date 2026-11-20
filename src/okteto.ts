@@ -1,5 +1,8 @@
-// Okteto v3.25.0 (GitHub release okteto/okteto, 2026-11-05). Source: cobra
-// command definitions in main.go and cmd/ at tag 3.25.0 (CLI not installed here)
+// Okteto v3.25.0 (GitHub release okteto/okteto 2026-11-05, latest stable and Homebrew formula, re-verified 2026-11-20).
+// Source: cobra command and flag definitions in main.go and cmd/ at tag 3.25.0 (CLI not installed here).
+// Verified every command, alias and flag (long/short names) against the source; hidden commands (kubetoken,
+// registrytoken, remote-run, generate-schema) are left out, and `context update-kubeconfig` was removed because
+// it is no longer registered under `context` (only `okteto kubeconfig` calls it).
 
 const contexts: Fig.Generator = {
   script: ["okteto", "context", "list"],
@@ -269,12 +272,6 @@ const subcommands: Fig.Subcommand[] = [
         name: "delete",
         description: "Delete one or more Okteto Contexts",
         args: { name: "context", isVariadic: true, generators: contexts },
-      },
-      {
-        name: "update-kubeconfig",
-        description:
-          "Download credentials for the Kubernetes cluster selected via 'okteto context'",
-        hidden: true,
       },
     ],
     options: [
