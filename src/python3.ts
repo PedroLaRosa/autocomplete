@@ -1,5 +1,7 @@
-// Python v3.15.2 (python3 --version on PATH, 2026-11-19). Source: `python3 --help-all`
-// and Doc/using/cmdline.rst on the CPython 3.15 branch
+// Python v3.15.2 (latest stable CPython: git tag v3.15.2 and Homebrew python@3.15, 2026-11-20).
+// Source: usage text in Python/initconfig.c (what `python3 --help-all` prints), Python/getopt.c,
+// Doc/using/cmdline.rst and Doc/using/configure.rst at tag v3.15.2. Read statically, not run:
+// the sandbox only has python 3.13.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const xOptions: [string, string][] = [
@@ -34,6 +36,7 @@ const xOptions: [string, string][] = [
   ["perf_jit", "Support the Linux perf profiler with DWARF support"],
   ["presite=", "Module or module:func to run before site (debug builds only)"],
   ["pycache_prefix=", "Write .pyc files to a parallel tree at PATH"],
+  ["pystats", "Enable pystats collection at startup (--enable-pystats builds)"],
   ["showrefcount", "Output the total reference count (debug builds only)"],
   ["thread_inherit_context=0", "Threads start with an empty context"],
   ["thread_inherit_context=1", "Threads inherit the caller's context"],
