@@ -1,5 +1,8 @@
-// Argo Workflows v4.1.6 (GitHub release "Latest", 2026-10-22). Source:
-// docs/cli/*.md at tag v4.1.6 of argoproj/argo-workflows
+// Argo Workflows v4.1.6 (latest stable git tag and Homebrew formula, verified
+// 2026-11-20). Source: docs/cli/*.md at tag v4.1.6 of argoproj/argo-workflows,
+// cross-checked against the cobra definitions in cmd/argo/commands (same
+// commands and flags; required flags taken from the Go source, output enums
+// from the generated docs)
 
 const sharedArgs = {
   WORKFLOW: {
@@ -27,9 +30,12 @@ const nameOrUidOptions: Fig.Option[] = [
   },
 ];
 
-const outputOption = (formats: string[]): Fig.Option => ({
+const outputOption = (
+  formats: string[],
+  description = `Output format. One of: ${formats.join("|")}`
+): Fig.Option => ({
   name: ["--output", "-o"],
-  description: `Output format. One of: ${formats.join("|")}`,
+  description,
   args: { name: "string", suggestions: formats },
 });
 
@@ -109,6 +115,7 @@ const syncLimitOptions: Fig.Option[] = [
   {
     name: "--type",
     description: "Type of sync limit (database or configmap)",
+    isRequired: true,
     args: { name: "string", suggestions: ["database", "configmap"] },
   },
 ];
@@ -125,7 +132,7 @@ let globalOptions: Fig.Option[] = [
   {
     name: "--argo-http1",
     description:
-      "If True, Use the HTTP client. Defaults to the ARGO_HTTP1 environment variable",
+      "If true, use the HTTP client. Defaults to the ARGO_HTTP1 environment variable",
   },
   {
     name: ["--argo-server", "-s"],
@@ -145,7 +152,8 @@ let globalOptions: Fig.Option[] = [
   {
     name: "--as-group",
     description:
-      "Group to impersonate for the operation, This flag can be repeated to specify multiple groups",
+      "Group to impersonate for the operation, this flag can be repeated to specify multiple groups",
+    isRepeatable: true,
     args: {
       name: "stringArray",
     },
@@ -220,12 +228,12 @@ let globalOptions: Fig.Option[] = [
   {
     name: "--insecure-skip-tls-verify",
     description:
-      "If True, The server's certificate will not be checked for validity. This will make your HTTPS connections insecure",
+      "If true, the server's certificate will not be checked for validity. This will make your HTTPS connections insecure",
   },
   {
     name: ["--insecure-skip-verify", "-k"],
     description:
-      "If true the Argo Server's certificate will not be checked for validity. This will make your HTTPS connections insecure. Defaults to the ARGO_INSECURE_SKIP_VERIFY environment variable",
+      "If true, the Argo Server's certificate will not be checked for validity. This will make your HTTPS connections insecure. Defaults to the ARGO_INSECURE_SKIP_VERIFY environment variable",
   },
   {
     name: "--instanceid",
@@ -262,7 +270,7 @@ let globalOptions: Fig.Option[] = [
   },
   {
     name: ["--namespace", "-n"],
-    description: "If present the namespace scope for this CLI request",
+    description: "If present, the namespace scope for this CLI request",
     args: {
       name: "string",
     },
@@ -276,7 +284,7 @@ let globalOptions: Fig.Option[] = [
   },
   {
     name: "--proxy-url",
-    description: "This URL will be used to connect via proxy",
+    description: "If provided, this URL will be used to connect via proxy",
     args: {
       name: "string",
     },
@@ -284,7 +292,7 @@ let globalOptions: Fig.Option[] = [
   {
     name: "--request-timeout",
     description:
-      "The length of time to wait before giving up on a single server request. Non-zero values should contain a corresponding time unit (e.g. 1s, 2m)",
+      'The length of time to wait before giving up on a single server request. Non-zero values should contain a corresponding time unit (e.g. 1s, 2m, 3h). A value of zero means don\'t timeout requests (default "0")',
     args: {
       name: "string",
     },
@@ -292,7 +300,7 @@ let globalOptions: Fig.Option[] = [
   {
     name: ["--secure", "-e"],
     description:
-      "Whether or not the server is using TLS with the Argo Server. Defaults to the ARGO_SECURE environment variable. (default true)",
+      "Whether or not the server is using TLS with the Argo Server. Defaults to the ARGO_SECURE environment variable (default true)",
   },
   {
     name: "--server",
@@ -304,7 +312,7 @@ let globalOptions: Fig.Option[] = [
   {
     name: "--tls-server-name",
     description:
-      "If Provided, This name will be used to validate server certificate. If this is not provided",
+      "If provided, this name will be used to validate server certificate. If this is not provided, hostname used to contact the server is used",
     args: {
       name: "string",
     },
@@ -332,7 +340,7 @@ let globalOptions: Fig.Option[] = [
   },
   {
     name: ["--verbose", "-v"],
-    description: "Enabled verbose logging i.e. --loglevel debug",
+    description: "Enabled verbose logging, i.e. --loglevel debug",
   },
 ];
 
@@ -361,14 +369,10 @@ const completionSpec: Fig.Spec = {
           args: sharedArgs.WORKFLOW,
           options: [
             ...nameOrUidOptions,
-            {
-              name: ["--output", "-o"],
-              description:
-                'Output format. One of: json|yaml|wide (default "wide")',
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(
+              ["json", "yaml", "wide"],
+              'Output format. One of: json|yaml|wide (default "wide")'
+            ),
           ],
         },
         {
@@ -387,19 +391,14 @@ const completionSpec: Fig.Spec = {
               name: ["--help", "-h"],
               description: "Help for list",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                'Output format. One of: name|json|yaml|wide (default "wide")',
-              args: {
-                name: "string",
-                suggestions: ["name", "json", "yaml", "wide"],
-              },
-            },
+            outputOption(
+              ["name", "json", "yaml", "wide"],
+              'Output format. One of: name|json|yaml|wide (default "wide")'
+            ),
             {
               name: ["--selector", "-l"],
               description:
-                "Selector (label query) to filter on not including uninitialized ones supports '=' '==' and '!='.(e.g. -l key1=value1,key2=value2)",
+                "Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
               args: {
                 name: "string",
               },
@@ -422,6 +421,7 @@ const completionSpec: Fig.Spec = {
               name: ["--selector", "-l"],
               description:
                 "Selector (label query) to query on, allows 1 value (e.g. -l key1)",
+              isRequired: true,
               args: {
                 name: "string",
               },
@@ -437,7 +437,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--field-selector",
               description:
-                "Selector (field query) to filter on supports '=' '==' and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
+                "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
               args: {
                 name: "string",
               },
@@ -455,17 +455,12 @@ const completionSpec: Fig.Spec = {
               description:
                 "Re-use successful steps & outputs from the previous run",
             },
-            {
-              name: ["--output", "-o"],
-              description: "Output format. One of: name|json|yaml|wide",
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(["name", "json", "yaml", "wide"]),
             {
               name: ["--parameter", "-p"],
               description:
                 "Input parameter to override on the original workflow spec",
+              isRepeatable: true,
               args: {
                 name: "stringArray",
               },
@@ -480,7 +475,7 @@ const completionSpec: Fig.Spec = {
             {
               name: ["--selector", "-l"],
               description:
-                "Selector (label query) to filter on not including uninitialized ones supports '=' '==' and '!='.(e.g. -l key1=value1,key2=value2)",
+                "Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
               args: {
                 name: "string",
               },
@@ -488,12 +483,12 @@ const completionSpec: Fig.Spec = {
             {
               name: ["--wait", "-w"],
               description:
-                "Wait for the workflow to complete only works when a single workflow is resubmitted",
+                "Wait for the workflow to complete, only works when a single workflow is resubmitted",
             },
             {
               name: "--watch",
               description:
-                "Watch the workflow until it completes only works when a single workflow is resubmitted",
+                "Watch the workflow until it completes, only works when a single workflow is resubmitted",
             },
           ],
         },
@@ -505,7 +500,8 @@ const completionSpec: Fig.Spec = {
             ...nameOrUidOptions,
             {
               name: "--field-selector",
-              description: "Selector (field query) to filter on, supports '='",
+              description:
+                "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
               args: {
                 name: "string",
               },
@@ -521,22 +517,17 @@ const completionSpec: Fig.Spec = {
             {
               name: "--node-field-selector",
               description:
-                "Selector of nodes to reset eg: --node-field-selector inputs.paramaters.myparam.value=abc",
+                "Selector of nodes to reset, eg: --node-field-selector inputs.parameters.myparam.value=abc",
               args: {
                 name: "string",
               },
             },
-            {
-              name: ["--output", "-o"],
-              description: "Output format. One of: name|json|yaml|wide",
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(["name", "json", "yaml", "wide"]),
             {
               name: ["--parameter", "-p"],
               description:
                 "Input parameter to override on the original workflow spec",
+              isRepeatable: true,
               args: {
                 name: "stringArray",
               },
@@ -549,7 +540,7 @@ const completionSpec: Fig.Spec = {
             {
               name: ["--selector", "-l"],
               description:
-                "Selector (label query) to filter on not including uninitialized ones supports '=' '=='",
+                "Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
               args: {
                 name: "string",
               },
@@ -557,12 +548,12 @@ const completionSpec: Fig.Spec = {
             {
               name: ["--wait", "-w"],
               description:
-                "Wait for the workflow to complete only works when a single workflow is retried",
+                "Wait for the workflow to complete, only works when a single workflow is retried",
             },
             {
               name: "--watch",
               description:
-                "Watch the workflow until it completes only works when a single workflow is retried",
+                "Watch the workflow until it completes, only works when a single workflow is retried",
             },
           ],
         },
@@ -591,13 +582,7 @@ const completionSpec: Fig.Spec = {
               name: ["--help", "-h"],
               description: "Help for create",
             },
-            {
-              name: ["--output", "-o"],
-              description: "Output format. One of: name|json|yaml|wide",
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(["name", "json", "yaml", "wide"]),
             {
               name: "--strict",
               description: "Perform strict workflow validation (default true)",
@@ -646,14 +631,10 @@ const completionSpec: Fig.Spec = {
               name: ["--help", "-h"],
               description: "Help for lint",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                'Linting results output format. One of: pretty|simple (default "pretty")',
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(
+              ["pretty", "simple"],
+              'Linting results output format. One of: pretty|simple (default "pretty")'
+            ),
             {
               name: "--strict",
               description: "Perform strict workflow validation (default true)",
@@ -668,13 +649,7 @@ const completionSpec: Fig.Spec = {
               name: ["--help", "-h"],
               description: "Help for list",
             },
-            {
-              name: ["--output", "-o"],
-              description: "Output format. One of: wide|name",
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(["wide", "name"]),
           ],
         },
         templateUpdate("cluster workflow template"),
@@ -702,11 +677,10 @@ const completionSpec: Fig.Spec = {
           name: "--no-color",
           description: "Disable colorized output",
         },
-        {
-          name: ["--output", "-o"],
-          description: 'Output format. One of: yaml|json (default "yaml")',
-          args: { name: "string", suggestions: ["yaml", "json"] },
-        },
+        outputOption(
+          ["yaml", "json"],
+          'Output format. One of: yaml|json (default "yaml")'
+        ),
       ],
     },
     {
@@ -735,7 +709,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--path",
           description:
-            'Use variables {workflowName} {nodeId} {templateName} {artifactName} and {namespace} to create a customized path to store the artifacts; example: {workflowName}/{templateName}/{artifactName} (default "{namespace}/{workflowName}/{nodeId}/outputs/{artifactName}")',
+            'Use variables {workflowName}, {nodeId}, {templateName}, {artifactName}, and {namespace} to create a customized path to store the artifacts; example: {workflowName}/{templateName}/{artifactName} (default "{namespace}/{workflowName}/{nodeId}/outputs/{artifactName}")',
           args: {
             name: "string",
           },
@@ -772,13 +746,13 @@ const completionSpec: Fig.Spec = {
             },
             {
               name: "--end",
-              description: "End date",
+              description: "End Date",
               args: { name: "string" },
             },
             {
               name: "--format",
               description:
-                'Date format for schedule time value (default "Mon, 02 Jan 2006 15:04:05 MST")',
+                'Date format for Schedule time value (default "Mon, 02 Jan 2006 15:04:05 MST")',
               args: { name: "string" },
             },
             {
@@ -853,14 +827,10 @@ const completionSpec: Fig.Spec = {
               name: ["--help", "-h"],
               description: "Help for lint",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                'Linting results output format. One of: pretty|simple (default "pretty")',
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(
+              ["pretty", "simple"],
+              'Linting results output format. One of: pretty|simple (default "pretty")'
+            ),
             {
               name: "--strict",
               description: "Perform strict validation (default true)",
@@ -883,7 +853,7 @@ const completionSpec: Fig.Spec = {
             {
               name: ["--selector", "-l"],
               description:
-                "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
+                "Selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2). Matching objects must satisfy all of the specified label constraints",
               args: {
                 name: "string",
               },
@@ -935,12 +905,12 @@ const completionSpec: Fig.Spec = {
         {
           name: "--dry-run",
           description:
-            "Do not delete the workflow only print what would happen",
+            "Do not delete the workflow, only print what would happen",
         },
         {
           name: "--field-selector",
           description:
-            "Selector (field query) to filter on supports '=' '==' and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
+            "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
           args: {
             name: "string",
           },
@@ -956,7 +926,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--older",
           description:
-            "Delete completed workflows finished before the specified duration (e.g. 10m 3h 1d)",
+            "Delete completed workflows finished before the specified duration (e.g. 10m, 3h, 1d)",
           args: {
             name: "string",
           },
@@ -983,7 +953,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--selector", "-l"],
           description:
-            "Selector (label query) to filter on not including uninitialized ones supports '=''=='and '!='.(e.g. -l key1=value1,key2=value2)",
+            "Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
           args: {
             name: "string",
           },
@@ -991,6 +961,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--status",
           description: "Delete by status (comma separated)",
+          isRepeatable: true,
           args: {
             name: "strings",
           },
@@ -1030,7 +1001,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--node-field-selector",
           description:
-            "Selector of node to display, Eg: --node-field-selector phase=abc",
+            "Selector of node to display, eg: --node-field-selector phase=abc",
           args: {
             name: "string",
           },
@@ -1063,6 +1034,7 @@ const completionSpec: Fig.Spec = {
           name: "--kinds",
           description:
             "Which kinds will be linted. Can be: workflows|workflowtemplates|cronworkflows|clusterworkflowtemplates (default [all])",
+          isRepeatable: true,
           args: {
             name: "strings",
           },
@@ -1076,14 +1048,10 @@ const completionSpec: Fig.Spec = {
           description:
             "Perform offline linting. References to other resources are resolved from the provided args",
         },
-        {
-          name: ["--output", "-o"],
-          description:
-            'Linting results output format. One of: pretty|simple (default "pretty")',
-          args: {
-            name: "string",
-          },
-        },
+        outputOption(
+          ["pretty", "simple"],
+          'Linting results output format. One of: pretty|simple (default "pretty")'
+        ),
         {
           name: "--strict",
           description: "Perform strict workflow validation (default true)",
@@ -1114,7 +1082,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--field-selector",
           description:
-            "Selector (field query) to filter on supports '=' '==' and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
+            "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
           args: {
             name: "string",
           },
@@ -1130,7 +1098,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--older",
           description:
-            "List completed workflows finished before the specified duration (e.g. 10m 3h 1d)",
+            "List completed workflows finished before the specified duration (e.g. 10m, 3h, 1d)",
           args: {
             name: "string",
           },
@@ -1155,7 +1123,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--selector", "-l"],
           description:
-            "Selector (label query) to filter on not including uninitialized ones supports '=' '==' and '!='.(e.g. -l key1=value1,key2=value2)",
+            "Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
           args: {
             name: "string",
           },
@@ -1171,6 +1139,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--status",
           description: "Filter by status (comma separated)",
+          isRepeatable: true,
           args: {
             name: "strings",
           },
@@ -1231,7 +1200,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--since",
           description:
-            "Only return logs newer than a relative duration like 5s 2m or 3h. Defaults to all logs. Only one of since-time / since may be used",
+            "Only return logs newer than a relative duration like 5s, 2m, or 3h. Defaults to all logs. Only one of since-time / since may be used",
           args: {
             name: "duration",
           },
@@ -1247,7 +1216,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--tail",
           description:
-            "If set the number of lines from the end of the logs to show. If not specified logs are shown from the creation of the container or sinceSeconds or sinceTime (default -1)",
+            "If set, the number of lines from the end of the logs to show. If not specified, logs are shown from the creation of the container or sinceSeconds or sinceTime (default -1)",
           args: {
             name: "int",
           },
@@ -1269,7 +1238,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["--message", "-m"],
-          description: 'Set the message of a node eg: --message "Hello World"',
+          description:
+            'Set the message of a node, eg: --message "Hello, world!"',
           args: {
             name: "string",
           },
@@ -1277,7 +1247,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--node-field-selector",
           description:
-            "Selector of node to set eg: --node-field-selector inputs.paramaters.myparam.value=abc",
+            "Selector of node to set, eg: --node-field-selector inputs.parameters.myparam.value=abc",
           args: {
             name: "string",
           },
@@ -1285,14 +1255,15 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--output-parameter", "-p"],
           description:
-            'Set a "supplied" output parameter of node eg: --output-parameter parameter-name="Hello world!"',
+            'Set a "supplied" output parameter of node, eg: --output-parameter parameter-name="Hello, world!"',
+          isRepeatable: true,
           args: {
             name: "stringArray",
           },
         },
         {
           name: "--phase",
-          description: "Phase to set the node to eg: --phase Succeeded",
+          description: "Phase to set the node to, eg: --phase Succeeded",
           args: {
             name: "string",
           },
@@ -1307,7 +1278,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--field-selector",
           description:
-            "Selector (field query) to filter on: supports '=' '==' and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
+            "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
           args: {
             name: "string",
           },
@@ -1325,17 +1296,12 @@ const completionSpec: Fig.Spec = {
           description:
             "Re-use successful steps & outputs from the previous run",
         },
-        {
-          name: ["--output", "-o"],
-          description: "Output format. One of: name|json|yaml|wide",
-          args: {
-            name: "string",
-          },
-        },
+        outputOption(["name", "json", "yaml", "wide"]),
         {
           name: ["--parameter", "-p"],
           description:
             "Input parameter to override on the original workflow spec",
+          isRepeatable: true,
           args: {
             name: "stringArray",
           },
@@ -1349,7 +1315,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: ["--selector", "-l"],
-          description: "Selector (label query) to filter on",
+          description:
+            "Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
           args: {
             name: "string",
           },
@@ -1378,7 +1345,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--node-field-selector",
           description:
-            "Selector of node to resume, Eg: --node-field-selector inputs.paramaters.myparam.value=abc",
+            "Selector of node to resume, eg: --node-field-selector inputs.parameters.myparam.value=abc",
           args: { name: "string" },
         },
       ],
@@ -1391,7 +1358,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--field-selector",
           description:
-            "Selector (field query) to filter on, Supports '='; '=='; and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
+            "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
           args: {
             name: "string",
           },
@@ -1407,22 +1374,17 @@ const completionSpec: Fig.Spec = {
         {
           name: "--node-field-selector",
           description:
-            "Selector of nodes to reset; eg: --node-field-selector inputs.paramaters.myparam.value=abc",
+            "Selector of nodes to reset, eg: --node-field-selector inputs.parameters.myparam.value=abc",
           args: {
             name: "string",
           },
         },
-        {
-          name: ["--output", "-o"],
-          description: "Output format. One of: name|json|yaml|wide",
-          args: {
-            name: "string",
-          },
-        },
+        outputOption(["name", "json", "yaml", "wide"]),
         {
           name: ["--parameter", "-p"],
           description:
             "Input parameter to override on the original workflow spec",
+          isRepeatable: true,
           args: {
             name: "stringArray",
           },
@@ -1435,7 +1397,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--selector", "-l"],
           description:
-            "Selector (label query) to filter on; not including uninitialized ones supports '=' '==' and '!='.(e.g. -l key1=value1,key2=value2)",
+            "Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
           args: {
             name: "string",
           },
@@ -1443,12 +1405,12 @@ const completionSpec: Fig.Spec = {
         {
           name: ["--wait", "-w"],
           description:
-            "Wait for the workflow to complete only works when a single workflow is retried",
+            "Wait for the workflow to complete, only works when a single workflow is retried",
         },
         {
           name: "--watch",
           description:
-            "Watch the workflow until it completes only works when a single workflow is retried",
+            "Watch the workflow until it completes, only works when a single workflow is retried",
         },
       ],
     },
@@ -1483,7 +1445,8 @@ const completionSpec: Fig.Spec = {
         {
           name: "--auth-mode",
           description:
-            "API server authentication mode. Any 1 or more length permutation of: client server sso (default [client])",
+            "API server authentication mode. Any 1 or more length permutation of: client,server,sso (default [client])",
+          isRepeatable: true,
           args: {
             name: "stringArray",
           },
@@ -1534,7 +1497,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--hsts",
           description:
-            "Whether or not we should add a HTTP Secure Transport Security header. This only has effect if secure is enabled. (default true)",
+            "Whether or not we should add a HTTP Secure Transport Security header. This only has effect if secure is enabled (default true)",
         },
         {
           name: "--kube-api-burst",
@@ -1555,7 +1518,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--managed-namespace",
           description:
-            "Namespace that watches default to the installation namespace",
+            "Namespace that watches, default to the installation namespace",
           args: {
             name: "string",
           },
@@ -1582,7 +1545,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--x-frame-options",
           description:
-            'Set X-Frame-Options header in HTTP responses. (default "DENY")',
+            'Set X-Frame-Options header in HTTP responses (default "DENY")',
           args: {
             name: "string",
           },
@@ -1598,12 +1561,12 @@ const completionSpec: Fig.Spec = {
         {
           name: "--dry-run",
           description:
-            "If true, only stop the workflows that would be stopped, without stopping them",
+            "If true, only print the workflows that would be stopped, without stopping them",
         },
         {
           name: "--field-selector",
           description:
-            "Selector (field query) to filter on  supports '='  '=='  and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
+            "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
           args: {
             name: "string",
           },
@@ -1622,7 +1585,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--node-field-selector",
           description:
-            "Selector of node to stop eg: --node-field-selector inputs.paramaters.myparam.value=abc",
+            "Selector of node to stop, eg: --node-field-selector inputs.parameters.myparam.value=abc",
           args: {
             name: "string",
           },
@@ -1630,7 +1593,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-l", "--selector"],
           description:
-            "Selector (label query) to filter on not including uninitialized ones supports '=' '==' and '!='.(e.g. -l key1=value1, key2=value2)",
+            "Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
           args: {
             name: "string",
           },
@@ -1657,7 +1620,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--from",
           description:
-            "Submit from an existing kind/name E.g. --from=cronwf/hello-world-cwf",
+            "Submit from an existing kind/name E.g., --from=cronwf/hello-world-cwf",
           args: {
             name: "kind/name",
           },
@@ -1695,21 +1658,16 @@ const completionSpec: Fig.Spec = {
         {
           name: "--node-field-selector",
           description:
-            "Selector of node to display eg: --node-field-selector phase=abc",
+            "Selector of node to display, eg: --node-field-selector phase=abc",
           args: {
             name: "string",
           },
         },
-        {
-          name: ["-o", "--output"],
-          description: "Output format. One of: name|json|yaml|wide",
-          args: {
-            name: "string",
-          },
-        },
+        outputOption(["name", "json", "yaml", "wide"]),
         {
           name: ["-p", "--parameter"],
           description: "Pass an input parameter",
+          isRepeatable: true,
           args: {
             name: "stringArray",
           },
@@ -1752,7 +1710,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--status",
           description:
-            "Filter by status (Pending Running Succeeded Skipped Failed Error). Should only be used with --watch",
+            "Filter by status (Pending, Running, Succeeded, Skipped, Failed, Error). Should only be used with --watch",
           args: {
             name: "string",
           },
@@ -1795,6 +1753,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--limit",
               description: "Sync limit",
+              isRequired: true,
               args: { name: "int32" },
             },
           ],
@@ -1820,6 +1779,7 @@ const completionSpec: Fig.Spec = {
             {
               name: "--limit",
               description: "New sync limit",
+              isRequired: true,
               args: { name: "int32" },
             },
           ],
@@ -1845,13 +1805,7 @@ const completionSpec: Fig.Spec = {
               name: ["--help", "-h"],
               description: "Help for create",
             },
-            {
-              name: ["--output", "-o"],
-              description: "Output format. One of: name|json|yaml|wide",
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(["name", "json", "yaml", "wide"]),
             {
               name: "--strict",
               description: "Perform strict workflow validation (default true)",
@@ -1900,14 +1854,10 @@ const completionSpec: Fig.Spec = {
               name: ["--help", "-h"],
               description: "Help for lint",
             },
-            {
-              name: ["--output", "-o"],
-              description:
-                'Linting results output format. One of: pretty|simple (default "pretty")',
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(
+              ["pretty", "simple"],
+              'Linting results output format. One of: pretty|simple (default "pretty")'
+            ),
             {
               name: "--strict",
               description: "Perform strict workflow validation (default true)",
@@ -1926,13 +1876,7 @@ const completionSpec: Fig.Spec = {
               name: ["--help", "-h"],
               description: "Help for list",
             },
-            {
-              name: ["--output", "-o"],
-              description: "Output format. One of: wide|name",
-              args: {
-                name: "string",
-              },
-            },
+            outputOption(["wide", "name"]),
             {
               name: ["--selector", "-l"],
               description:
@@ -1957,12 +1901,12 @@ const completionSpec: Fig.Spec = {
         {
           name: "--dry-run",
           description:
-            "Do not terminate the workflow only print what would happen",
+            "Do not terminate the workflow, only print what would happen",
         },
         {
           name: "--field-selector",
           description:
-            "Selector (field query) to filter on supports '=' '==' and '!='.(e.g. --field-selector key1=value1key2=value2). The server only supports a limited number of field queries per type",
+            "Selector (field query) to filter on, supports '=', '==', and '!='.(e.g. --field-selector key1=value1,key2=value2). The server only supports a limited number of field queries per type",
           args: {
             name: "string",
           },
@@ -1974,7 +1918,7 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-l", "--selector"],
           description:
-            "Selector (label query) to filter on not including uninitialized ones supports '=' '==' and '!='.(e.g. -l key1=value1key2=value2)",
+            "Selector (label query) to filter on, not including uninitialized ones, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2)",
           args: {
             name: "string",
           },
@@ -2024,7 +1968,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--node-field-selector",
           description:
-            "Selector of node to display eg: --node-field-selector phase=abc",
+            "Selector of node to display, eg: --node-field-selector phase=abc",
           args: {
             name: "string",
           },
