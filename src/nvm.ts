@@ -1,4 +1,5 @@
-// nvm v0.41.0 (gh release view -R nvm-sh/nvm, 2026-11-19). Source: `nvm --help` text and option parsing in nvm.sh@v0.41.0
+// nvm v0.41.0 (latest tag v0.41.0, Homebrew nvm 0.41.0, 2026-11-20). Source: `nvm --help` text, option parsing and command dispatch in nvm.sh@v0.41.0, shipped bash_completion and README (static read, not run)
+// Also covers commands and flags accepted by nvm.sh but absent from `nvm --help`: help, debug, clear-cache, command aliases (i, list, list-remote, copy-packages), install -j and --copy-packages-from, use --delete-prefix, -h and -v
 
 // args
 const version: Fig.Arg = {
@@ -102,7 +103,7 @@ const completionSpec: Fig.Spec = {
   description: "Node Version Manager",
   subcommands: [
     {
-      name: "install",
+      name: ["install", "i"],
       description:
         "Download and install a <version>. Uses .nvmrc if version is omitted; otherwise errors",
       args: { ...version, isOptional: true },
@@ -119,7 +120,15 @@ const completionSpec: Fig.Spec = {
           exclusiveOn: ["-s"],
         },
         {
-          name: "--reinstall-packages-from",
+          name: "-j",
+          description:
+            "Number of parallel `make` jobs to use when building from source",
+          args: {
+            name: "jobs",
+          },
+        },
+        {
+          name: ["--reinstall-packages-from", "--copy-packages-from"],
           description:
             "When installing, reinstall packages installed in <version>",
           requiresSeparator: true,
@@ -198,7 +207,18 @@ const completionSpec: Fig.Spec = {
       description:
         "Modify PATH to use <version>. Uses .nvmrc if version is omitted; otherwise errors",
       args: versionOrCurrent,
-      options: [silent, lts, ltsWithName, only, save],
+      options: [
+        silent,
+        lts,
+        ltsWithName,
+        only,
+        save,
+        {
+          name: "--delete-prefix",
+          description:
+            "Remove incompatible `prefix` and `globalconfig` settings from the npmrc files of the version being used",
+        },
+      ],
     },
     {
       name: "exec",
@@ -220,14 +240,14 @@ const completionSpec: Fig.Spec = {
         "Display the active node version (resolved via $PATH; not affected by .nvmrc)",
     },
     {
-      name: "ls",
+      name: ["ls", "list"],
       description:
         "List installed versions, matching a given <version> if provided",
       args: version,
       options: [noColors, noAlias, only],
     },
     {
-      name: "ls-remote",
+      name: ["ls-remote", "list-remote"],
       description:
         "List remote versions available for install, matching a given <version> if provided",
       args: version,
@@ -319,7 +339,7 @@ const completionSpec: Fig.Spec = {
         "Attempt to upgrade to the latest working `npm` on the current node version",
     },
     {
-      name: "reinstall-packages",
+      name: ["reinstall-packages", "copy-packages"],
       description:
         "Reinstall global `npm` packages contained in <version> to current version",
       args: version,
@@ -366,6 +386,21 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
+      name: "debug",
+      description:
+        "Print environment and tool diagnostics for bug reports (shell, OS, curl, wget, git, node, npm)",
+    },
+    {
+      name: "clear-cache",
+      description: "Empty the nvm cache (use `nvm cache clear`)",
+      deprecated: true,
+    },
+    {
+      name: "help",
+      description: "Show help page",
+      options: [noColors],
+    },
+    {
       name: "set-colors",
       description:
         'Set five text colors using format "yMeBg". Available when supported',
@@ -374,11 +409,11 @@ const completionSpec: Fig.Spec = {
   ],
   options: [
     {
-      name: "--help",
+      name: ["--help", "-h"],
       description: "Show help page",
     },
     {
-      name: "--version",
+      name: ["--version", "-v"],
       description: "Print out the installed version of nvm",
     },
     noColors,
