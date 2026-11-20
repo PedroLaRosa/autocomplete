@@ -1,5 +1,6 @@
-// Multipass v1.17.2 (GitHub release canonical/multipass, 2026-11-18). Source:
-// src/client/cli/cmd/*.cpp, argparser.cpp and docs/reference/settings at tag v1.17.2
+// Multipass v1.17.2 (latest stable tag of canonical/multipass, matches the Homebrew cask, 2026-11-20).
+// Source: src/client/cli/client.cpp, src/client/cli/cmd/*.cpp (all 33 commands), argparser.cpp,
+// constants.h and docs/reference/{command-line-interface,settings} at tag v1.17.2 (static read, not run)
 const sharedOpts: Record<string, Fig.Option> = {
   help: {
     name: ["-h", "--help"],
@@ -139,6 +140,7 @@ const settingKeys = [
   "client.primary-name",
   "local.bridged-network",
   "local.driver",
+  "local.image.mirror",
   "local.passphrase",
   "local.privileged-mounts",
 ];
@@ -397,7 +399,7 @@ const completionSpec: Fig.Spec = {
           description:
             "Disk space to allocate. Positive integers, in bytes, or " +
             "decimals, with K, M, G suffix. " +
-            "Minimum: 512M, default: 5G",
+            "Minimum: 1G, default: 5G",
           args: {
             name: "disk",
             default: "5G",
@@ -408,7 +410,7 @@ const completionSpec: Fig.Spec = {
           description:
             "Amount of memory to allocate. Positive integers, in " +
             "bytes, or decimals, with K, M, G suffix. " +
-            "Minimum: 128M, default: 1G",
+            "Minimum: 512M, default: 1G",
           args: {
             name: "memory",
             default: "1G",
@@ -439,7 +441,10 @@ const completionSpec: Fig.Spec = {
           name: "--network",
           description:
             "Add a network interface to the instance, where <spec> is " +
-            'in the "key=value,key=value" format',
+            'in the "key=value,key=value" format, with the keys name ' +
+            "(required, see the networks command; 'bridged' uses " +
+            "local.bridged-network), mode (auto|manual, default: auto) " +
+            "and mac (default: random). A bare <name> means name=<name>",
           isRepeatable: true,
           args: {
             name: "spec",
@@ -710,6 +715,7 @@ const completionSpec: Fig.Spec = {
           name: ["-t", "--time"],
           description:
             "Time from now, in minutes, to delay shutdown of the instance",
+          exclusiveOn: ["-c", "--cancel", "--force"],
           args: {
             name: "time",
             default: "0",
@@ -718,12 +724,14 @@ const completionSpec: Fig.Spec = {
         {
           name: ["-c", "--cancel"],
           description: "Cancel a pending delayed shutdown",
+          exclusiveOn: ["-t", "--time", "--force"],
         },
         {
           name: "--force",
           description:
             "Force the instance to shut down immediately. Warning: this could " +
             "potentially corrupt a running instance, so use with caution",
+          exclusiveOn: ["-t", "--time", "-c", "--cancel"],
         },
       ],
       args: {
