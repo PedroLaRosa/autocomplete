@@ -1,29 +1,47 @@
+// RuboCop v1.92.3 (latest on RubyGems / upstream tag v1.92.3, 2026-11-20). Source: lib/rubocop/options.rb (option parser, OptionsHelp texts, validations),
+// lib/rubocop/formatter/formatter_set.rb and lib/rubocop/cli/command/*.rb read statically from the rubocop-1.92.3 gem; the gem was not executed.
+// Output of `rubocop --show-cops`: "# Available cops (N) + config ...", then per department
+// "# Department 'Style' (N):", then per cop an optional "# Supports --autocorrect" comment,
+// a "Dept/CopName:" line at column 0 and its indented configuration, followed by a blank line.
+const copNamesFrom = (out: string): string[] =>
+  out
+    .split("\n")
+    .filter((line) => /^[A-Z][A-Za-z0-9]*\/[A-Za-z0-9]+:$/.test(line))
+    .map((line) => line.slice(0, -1));
+
 const copsGenerator: Fig.Generator = {
   script: ["rubocop", "--show-cops"],
-  postProcess: function (out) {
-    const cops = out.split("\n\n").map((cop) => {
-      const lines = cop.split("\n");
-      const nameIndex = lines.findIndex((line) => !line.startsWith("#"));
-      const autocorrect = lines
-        .slice(0, nameIndex)
-        .find((line) => line === "# Supports --autocorrect");
+  postProcess: (out) => copNamesFrom(out).map((name) => ({ name })),
+};
 
-      const restOfLines = lines.slice(nameIndex);
-
-      return {
-        autocorrect,
-        name: restOfLines[0].slice(0, -1),
-        enabled:
-          restOfLines
-            .find((line) => line.includes("Enabled:"))
-            ?.split("Enabled:")?.[1]
-            ?.trim() === "true",
-      };
-    });
-
-    return cops.map((cop) => ({ name: cop.name }));
+// `--only` and `--except` also accept whole departments (e.g. `Style`)
+const copsAndDepartmentsGenerator: Fig.Generator = {
+  script: ["rubocop", "--show-cops"],
+  postProcess: (out) => {
+    const cops = copNamesFrom(out);
+    const departments = [...new Set(cops.map((name) => name.split("/")[0]))];
+    return [
+      ...departments.map((name) => ({ name, description: "Department" })),
+      ...cops.map((name) => ({ name })),
+    ];
   },
 };
+
+// Options defined as `--[no-]name` in RuboCop
+const toggleOptions = (
+  name: string,
+  description: string,
+  noDescription: string,
+  extra: Partial<Fig.Option> = {}
+): Fig.Option[] => [
+  { name: `--${name}`, description, exclusiveOn: [`--no-${name}`], ...extra },
+  {
+    name: `--no-${name}`,
+    description: noDescription,
+    exclusiveOn: [`--${name}`],
+    ...extra,
+  },
+];
 
 const completionSpec: Fig.Spec = {
   name: "rubocop",
@@ -45,12 +63,18 @@ const completionSpec: Fig.Spec = {
     { name: "--safe", description: "Run only safe cops" },
     {
       name: "--except",
-      args: { name: "COP", isVariadic: true, generators: copsGenerator },
+      args: {
+        name: "COP1,COP2,...",
+        generators: copsAndDepartmentsGenerator,
+      },
       description: "Exclude the given cop(s)",
     },
     {
       name: "--only",
-      args: { name: "COP", isVariadic: true, generators: copsGenerator },
+      args: {
+        name: "COP1,COP2,...",
+        generators: copsAndDepartmentsGenerator,
+      },
       description: "Run only the given cop(s)",
     },
     {
@@ -65,9 +89,26 @@ const completionSpec: Fig.Spec = {
     { name: "--disable-pending-cops", description: "Run without pending cops" },
     { name: "--enable-pending-cops", description: "Run with pending cops" },
     {
+      name: "--disable-all-cops",
+      description:
+        "Run with all cops disabled by default, except `Lint/Syntax`. Overrides `AllCops/EnabledByDefault` and `AllCops/DisabledByDefault` in config files",
+      exclusiveOn: ["--enable-all-cops"],
+    },
+    {
+      name: "--enable-all-cops",
+      description:
+        "Run with all cops enabled, including those disabled by default. Overrides `AllCops/EnabledByDefault` and `AllCops/DisabledByDefault` in config files",
+      exclusiveOn: ["--disable-all-cops"],
+    },
+    ...toggleOptions(
+      "preview",
+      "Opt in to unstable behavior: cops that are `Enabled: preview`, and changes to existing cops that are not the default yet. Overrides `AllCops: Preview`",
+      "Opt out of unstable behavior. Overrides `AllCops: Preview`"
+    ),
+    {
       name: "--ignore-disable-comments",
       description:
-        "Run cops even when they are disabled locally by a `rubocop:disable` directive",
+        "Report offenses even if they have been manually disabled with a `rubocop:disable` or `rubocop:todo` directive",
     },
     {
       name: "--force-exclusion",
@@ -94,21 +135,38 @@ const completionSpec: Fig.Spec = {
         "Use default configuration even if configuration files are present in the directory tree",
     },
     {
-      name: ["--stdin", "-s"],
+      name: "--changed",
+      args: { name: "REVISION", default: "HEAD", isOptional: true },
+      description:
+        "Inspect only the files that differ from a git revision, defaulting to HEAD. Untracked files count as changed. Pass a revision with `--changed=REVISION`",
+      exclusiveOn: ["-s", "--stdin"],
+    },
+    {
+      name: ["-s", "--stdin"],
       args: { name: "FILE", template: "filepaths" },
       description:
         "Pipe source from STDIN, using FILE in offense reports. This is useful for editor integration",
     },
     {
+      name: "--editor-mode",
+      description:
+        "Optimize real-time feedback in editors, adjusting behaviors for editing experience",
+    },
+    {
       name: ["-P", "--parallel"],
       description:
-        "Use available CPUs to execute inspection in parallel default true",
+        "Use available CPUs to execute inspection in parallel. Default is true. You can specify the number of parallel processes using the $PARALLEL_PROCESSOR_COUNT environment variable",
       exclusiveOn: ["--no-parallel"],
     },
     {
       name: "--no-parallel",
-      description: "Disable parallel inspection (default: false)",
+      description: "Disable parallel inspection",
       exclusiveOn: ["-P", "--parallel"],
+    },
+    {
+      name: "--raise-cop-error",
+      description:
+        "Raise cop-related errors with cause and location. This is used to prevent cops from failing silently. Default is false",
     },
     {
       name: "--fail-level",
@@ -124,13 +182,14 @@ const completionSpec: Fig.Spec = {
           { name: "F", displayName: "fatal" },
         ],
       },
-      description: "Minimum severity for exit with error code",
+      description:
+        "Minimum severity for exit with error code. Overrides `AllCops: FailLevel` in the configuration",
     },
 
     // Caching:
     {
       name: ["-C", "--cache"],
-      args: { name: "FLAG" },
+      args: { name: "FLAG", suggestions: ["true", "false"] },
       description:
         "Use result caching (FLAG=true) or don't (FLAG=false), default determined by configuration parameter AllCops: UseCache",
     },
@@ -139,6 +198,19 @@ const completionSpec: Fig.Spec = {
       args: { name: "DIR", template: "folders" },
       description:
         "Set the cache root directory. Takes precedence over the configuration parameter AllCops: CacheRootDirectory and the $RUBOCOP_CACHE_ROOT environment variable",
+    },
+
+    // LSP Option:
+    {
+      name: "--lsp",
+      description: "Start a language server listening on STDIN",
+    },
+
+    // MCP Option:
+    {
+      name: "--mcp",
+      description:
+        "Start an MCP (Model Context Protocol) server that communicates over stdio",
     },
 
     // Server Options:
@@ -151,16 +223,21 @@ const completionSpec: Fig.Spec = {
       name: "--server",
       exclusiveOn: ["--no-server"],
       description:
-        "If a server process has not been started yet, start the server process and execute inspection with server.  Default is true.  You can specify the server host and port with the $RUBOCOP_SERVER_HOST and the $RUBOCOP_SERVER_PORT environment variables",
+        "If a server process has not been started yet, start the server process and execute inspection with server. Default is false. You can specify the server host and port with the $RUBOCOP_SERVER_HOST and the $RUBOCOP_SERVER_PORT environment variables",
     },
     { name: "--restart-server", description: "Restart server process" },
     { name: "--start-server", description: "Start server process" },
     { name: "--stop-server", description: "Stop server process" },
     { name: "--server-status", description: "Show server status" },
+    {
+      name: "--no-detach",
+      description: "Run the server process in the foreground",
+    },
 
     // Output Options:
     {
       name: ["-f", "--format"],
+      isRepeatable: true,
       args: {
         name: "FORMATTER",
         default: "p",
@@ -179,6 +256,7 @@ const completionSpec: Fig.Spec = {
           { name: "pa", displayName: "[pa]cman" },
           { name: "p", displayName: "[p]rogress" },
           { name: "q", displayName: "[q]uiet" },
+          { name: "sa", displayName: "[sa]rif" },
           { name: "s", displayName: "[s]imple" },
           { name: "t", displayName: "[t]ap" },
           { name: "w", displayName: "[w]orst" },
@@ -190,13 +268,12 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-D", "--display-cop-names"],
-      description: "Display cop names in offense messages.  Default is true",
+      description: "Display cop names in offense messages. Default is true",
       exclusiveOn: ["--no-display-cop-names"],
     },
     {
       name: "--no-display-cop-names",
-      description:
-        "Disable displaying cop names in offense messages. Default false",
+      description: "Do not display cop names in offense messages",
       exclusiveOn: ["-D", "--display-cop-names"],
     },
     {
@@ -209,9 +286,10 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-o", "--out"],
+      isRepeatable: true,
       args: { name: "FILE", template: "filepaths" },
       description:
-        "Write output to a file instead of STDOUT.  This option applies to the previously specified --format, or the default format if no format is specified",
+        "Write output to a file instead of STDOUT. This option applies to the previously specified --format, or the default format if no format is specified",
     },
     {
       name: "--stderr",
@@ -238,6 +316,17 @@ const completionSpec: Fig.Spec = {
       description:
         "Only output safe-correctable offense messages when combined with --display-only-correctable",
     },
+    {
+      name: "--display-suppressed",
+      description:
+        "Also output offenses suppressed by directive comments. They do not affect the exit code",
+    },
+    {
+      name: "--max-offenses-per-cop",
+      args: { name: "COUNT" },
+      description:
+        "Report at most COUNT offenses per cop across the whole run, so a single noisy cop cannot bury the rest. Offenses beyond the limit are not reported and do not count towards the totals",
+    },
 
     // Autocorrection:
     {
@@ -245,14 +334,36 @@ const completionSpec: Fig.Spec = {
       description: "Autocorrect offenses (only when it's safe)",
     },
     {
+      name: "--auto-correct",
+      description: "Autocorrect offenses (deprecated, use --autocorrect)",
+      deprecated: true,
+    },
+    {
+      name: "--safe-auto-correct",
+      description: "Autocorrect offenses (deprecated, use --autocorrect)",
+      deprecated: true,
+    },
+    {
       name: ["-A", "--autocorrect-all"],
       description: "Autocorrect offenses (safe and unsafe)",
+    },
+    {
+      name: "--auto-correct-all",
+      description:
+        "Autocorrect offenses, safe and unsafe (deprecated, use --autocorrect-all)",
+      deprecated: true,
     },
     {
       name: "--disable-uncorrectable",
       dependsOn: ["-a", "--autocorrect"],
       description:
-        "Annotates any offenses that do not support autocorrect with `rubocop:todo` comments",
+        "Used with --autocorrect to annotate any offenses that do not support autocorrect with `rubocop:todo` comments",
+    },
+    {
+      name: "--diff",
+      description:
+        "Print a unified diff of what autocorrection would change, without writing any files. Turns on safe autocorrection unless a mode was already given with -a, -A or -x",
+      exclusiveOn: ["--auto-gen-config"],
     },
 
     // Config Generation:
@@ -266,27 +377,44 @@ const completionSpec: Fig.Spec = {
         "Regenerate the TODO configuration file using the last configuration. If there is no existing TODO file, acts like --auto-gen-config",
     },
     {
+      name: "--report-unused-todo-entries",
+      description:
+        "Also report TODO configuration file entries that are no longer needed, and fail if any are found",
+    },
+    {
       name: "--exclude-limit",
       args: { name: "COUNT", default: "15" },
       description:
-        "Set the limit for how many files to explicitly exclude.  If there are more files than the limit, the cop will be disabled instead. Default is 15",
-    },
-    {
-      name: "--offense-counts",
-      description:
-        "Include offense counts in configuration file generated by --auto-gen-config.  Default is true",
+        "Set the limit for how many files to explicitly exclude. If there are more files than the limit, the cop will be disabled instead. Default is 15",
       dependsOn: ["--auto-gen-config"],
     },
     {
-      name: "--auto-gen-only-exclude",
-      description:
-        "Generate only Exclude parameters and not Max when running --auto-gen-config, except if the number of files with offenses is bigger than exclude-limit. Default is false",
+      name: "--no-exclude-limit",
+      description: "Do not set the limit for how many files to exclude",
     },
-    {
-      name: "--auto-gen-timestamp",
-      description:
-        "Include the date and time when the --auto-gen-config was run in the file it generates. Default is true",
-    },
+    ...toggleOptions(
+      "offense-counts",
+      "Include offense counts in configuration file generated by --auto-gen-config. Default is true",
+      "Do not include offense counts in configuration file generated by --auto-gen-config",
+      { dependsOn: ["--auto-gen-config"] }
+    ),
+    ...toggleOptions(
+      "auto-gen-only-exclude",
+      "Generate only Exclude parameters and not Max when running --auto-gen-config, except if the number of files with offenses is bigger than exclude-limit. Default is false",
+      "Generate Max parameters as well as Exclude parameters when running --auto-gen-config",
+      { dependsOn: ["--auto-gen-config"] }
+    ),
+    ...toggleOptions(
+      "auto-gen-timestamp",
+      "Include the date and time when the --auto-gen-config was run in the file it generates. Default is true",
+      "Do not include the date and time when the --auto-gen-config was run in the file it generates",
+      { dependsOn: ["--auto-gen-config"] }
+    ),
+    ...toggleOptions(
+      "auto-gen-enforced-style",
+      "Add a setting to the TODO configuration file to enforce the style used, rather than a per-file exclusion, if one style is used in all files for cop with EnforcedStyle as a configurable option when the --auto-gen-config was run in the file it generates. Default is true",
+      "Do not add a setting to the TODO configuration file to enforce the style used"
+    ),
 
     // Additional Modes:
     {
@@ -294,16 +422,35 @@ const completionSpec: Fig.Spec = {
       description: "List all files RuboCop will inspect",
     },
     {
+      name: "--list-enabled-cops-for",
+      args: { name: "PATH", template: ["filepaths", "folders"] },
+      description: "List which cops will inspect a given file or directory",
+    },
+    {
       name: "--show-cops",
-      args: { name: "COP", isVariadic: true, generators: copsGenerator },
+      args: {
+        name: "COP1,COP2,...",
+        isOptional: true,
+        generators: copsGenerator,
+      },
       description:
-        "Shows the given cops, or all cops by default, and their configurations for the current directory",
+        "Show the given cops, or all cops by default, and their configurations for the current directory. You can use `*` as a wildcard",
     },
     {
       name: "--show-docs-url",
-      args: { name: "COP", isVariadic: true, generators: copsGenerator },
+      args: {
+        name: "COP1,COP2,...",
+        isOptional: true,
+        generators: copsGenerator,
+      },
       description:
         "Display url to documentation for the given cops, or base url by default",
+    },
+    {
+      name: "--explain",
+      args: { name: "COP1,COP2,...", generators: copsGenerator },
+      description:
+        "Explain what the given cops do: their description, configuration, whether they correct, and the examples from their own documentation",
     },
 
     // General Options:
@@ -313,13 +460,20 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-c", "--config"],
-      args: { name: "file", template: "filepaths" },
+      args: { name: "FILE", template: "filepaths" },
       description: "Specify configuration file",
     },
     { name: ["-d", "--debug"], description: "Display debug info" },
     {
+      name: "--plugin",
+      isRepeatable: true,
+      args: { name: "FILE", template: "filepaths" },
+      description: "Load a RuboCop plugin",
+    },
+    {
       name: ["-r", "--require"],
-      args: { name: "file", template: "filepaths" },
+      isRepeatable: true,
+      args: { name: "FILE", template: "filepaths" },
       description: "Require Ruby file",
     },
     {
@@ -337,6 +491,10 @@ const completionSpec: Fig.Spec = {
       name: ["-V", "--verbose-version"],
       description: "Display verbose version",
     },
+
+    // Profiling Options (not available on JRuby and Windows):
+    { name: "--profile", description: "Profile rubocop" },
+    { name: "--memory", description: "Profile rubocop memory usage" },
   ],
 };
 
