@@ -3,6 +3,8 @@
 // commander definitions, lib/API/Startup.js, Extra.js, LogManagement.js,
 // pm2-plus/PM2IO.js, lib/completion.js, CHANGELOG.md). The binary was not run.
 // Not covered: the separate pm2-runtime, pm2-dev and pm2-docker binaries.
+// Commands absent from 7.1.2 CLI.js and removed here: snapshot, profile,
+// gracefulReload, web, gc, interact (register is now an alias of plus).
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const generators: Record<string, Fig.Generator> = {
