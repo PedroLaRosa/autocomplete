@@ -1,3 +1,5 @@
+// Heroku CLI versioned spec. Latest: v11.14.0 (npm heroku latest, Homebrew formula agrees, 2026-11-20).
+// Source of 11.14.0.ts: oclif.manifest.json of heroku@11.14.0 and its bundled @oclif plugins (see header there).
 import { createVersionedSpec } from "@tabsmith/autocomplete-helpers";
 
 const versionRegex = /heroku\/([0-9]+\.[0-9]+\.[0-9]+)/;

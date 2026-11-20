@@ -1,4 +1,7 @@
-// Heroku CLI v11.14.0 (npm heroku, 2026-11-18). Source: oclif.manifest.json of heroku@11.14.0 and its bundled @oclif plugins
+// Heroku CLI v11.14.0 (npm heroku latest, Homebrew formula agrees, 2026-11-20). Source: oclif.manifest.json of heroku@11.14.0
+// plus the manifests of its bundled @oclif plugins (commands, help, plugins, search, update, version, which); every visible
+// command, flag, alias, enum and argument was cross-checked. Hidden commands (autocomplete:*, console, dashboard,
+// git:credentials, rake, spaces:hosts) and hidden flags are left out; hidden aliases (create, open, restart, scale, ...) are extra names.
 import { getAppGenerator } from "./shared";
 
 const promptOption: Fig.Option = {
@@ -1952,7 +1955,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "addon_name" },
     },
     {
-      name: "addons:create",
+      name: ["addons:create", "addons:add"],
       description: "Create a new add-on resource\n",
       options: [
         {
@@ -1991,7 +1994,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "service:plan" },
     },
     {
-      name: "addons:destroy",
+      name: ["addons:destroy", "addons:remove"],
       description: "Permanently destroy an add-on resource\n",
       options: [
         {
@@ -3886,7 +3889,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "database", isOptional: true },
     },
     {
-      name: "pg:cache-hit",
+      name: ["pg:cache-hit", "pg:cache_hit"],
       description: "Show index and table hit rate",
       options: [
         {
@@ -3989,7 +3992,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "pg:index-size",
+      name: ["pg:index-size", "pg:index_size"],
       description: "Show the size of indexes, descending by size",
       options: [
         {
@@ -4013,7 +4016,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "pg:index-usage",
+      name: ["pg:index-usage", "pg:index_usage"],
       description:
         "Calculates your index hit rate (effective databases are at 99% and up)",
       options: [
@@ -4038,7 +4041,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "pg:long-running-queries",
+      name: ["pg:long-running-queries", "pg:long_running_queries"],
       description:
         "Show all queries longer than five minutes by descending duration",
       options: [
@@ -4087,7 +4090,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "pg:records-rank",
+      name: ["pg:records-rank", "pg:records_rank"],
       description:
         "Show all tables and the number of rows in each ordered by number of rows descending",
       options: [
@@ -4112,7 +4115,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "pg:seq-scans",
+      name: ["pg:seq-scans", "pg:seq_scans"],
       description:
         "Show the count of sequential scans by table descending by order",
       options: [
@@ -4137,7 +4140,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "pg:stats-reset",
+      name: ["pg:stats-reset", "pg:stats_reset"],
       description: "Calls the Postgres functions pg_stat_reset()",
       options: [
         {
@@ -4161,7 +4164,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "pg:table-indexes-size",
+      name: ["pg:table-indexes-size", "pg:table_indexes_size"],
       description:
         "Show the total size of all the indexes on each table, descending by size",
       options: [
@@ -4211,7 +4214,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "pg:total-index-size",
+      name: ["pg:total-index-size", "pg:total_index_size"],
       description: "Show the total size of all indexes in MB",
       options: [
         {
@@ -4284,7 +4287,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "pg:user-connections",
+      name: ["pg:user-connections", "pg:user_connections"],
       description: "Returns the number of connections per credential",
       options: [
         {
@@ -4844,7 +4847,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "spaces:peerings:info",
+      name: ["spaces:peerings:info", "spaces:peering:info"],
       description:
         "Display the information necessary to initiate a peering connection",
       options: [
@@ -5135,7 +5138,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "url", description: "URL to replace the log drain with" },
     },
     {
-      name: "spaces:trusted-ips:add",
+      name: ["spaces:trusted-ips:add", "trusted-ips:add"],
       description: "Add one range to the list of trusted IP ranges",
       options: [
         {
@@ -5154,7 +5157,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "source", description: "IP address in CIDR notation" },
     },
     {
-      name: "spaces:trusted-ips",
+      name: ["spaces:trusted-ips", "trusted-ips"],
       description: "List trusted IP ranges for a space",
       options: [
         { name: "--json", description: "Output in json format" },
@@ -5167,7 +5170,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "spaces:trusted-ips:remove",
+      name: ["spaces:trusted-ips:remove", "trusted-ips:remove"],
       description: "Remove a range from the list of trusted IP ranges",
       options: [
         {
@@ -5545,7 +5548,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "apps",
+      name: ["apps", "list", "apps:list"],
       description: "List your apps\n",
       options: [
         { name: ["-A", "--all"], description: "Include apps in all teams" },
@@ -5561,7 +5564,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "apps:create",
+      name: ["apps:create", "create"],
       description: "Creates a new app\n",
       options: [
         {
@@ -5609,7 +5612,7 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "apps:destroy",
+      name: ["apps:destroy", "destroy", "apps:delete"],
       description:
         "Permanently destroy an app\nThis will also destroy all add-ons on the app",
       options: [
@@ -5698,7 +5701,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "apps:info",
+      name: ["apps:info", "info"],
       description:
         "Show detailed app information\n$ heroku apps:info\n=== example\nGit URL:   https://git.heroku.com/example.git\nRepo Size: 5M\n...\n\n$ heroku apps:info --shell\ngit_url=https://git.heroku.com/example.git\nrepo_size=5000000\n",
       options: [
@@ -5721,7 +5724,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "apps:open",
+      name: ["apps:open", "open"],
       description: "Open the app in a web browser\n",
       options: [
         {
@@ -5740,7 +5743,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "path", isOptional: true },
     },
     {
-      name: "apps:rename",
+      name: ["apps:rename", "rename"],
       description:
         "Rename an app\nThis will locally update the git remote if it is set to the old app",
       options: [
@@ -5760,7 +5763,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "newname" },
     },
     {
-      name: "apps:stacks",
+      name: ["apps:stacks", "stack"],
       description: "Show the list of available stacks\n",
       options: [
         {
@@ -5778,7 +5781,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "apps:stacks:set",
+      name: ["apps:stacks:set", "stack:set"],
       description: "Set the stack of an app\n",
       options: [
         {
@@ -5806,7 +5809,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "config:set",
+      name: ["config:set", "config:add"],
       description: "Set one or more config vars\n",
       options: [
         {
@@ -6319,7 +6322,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "ps:restart",
+      name: ["ps:restart", "restart"],
       description: "Restart an app dyno or process type",
       options: [
         {
@@ -6349,7 +6352,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "dyno", isOptional: true },
     },
     {
-      name: "ps:scale",
+      name: ["ps:scale", "scale"],
       description:
         "Scale dyno quantity up or down\nAppending a size (eg. web=2:Standard-2X) allows simultaneous scaling and resizing.\n\nOmitting any arguments will display the app's current dyno formation, in a\nformat suitable for passing back into ps:scale",
       options: [
@@ -6368,7 +6371,7 @@ const completionSpec: Fig.Spec = {
       ],
     },
     {
-      name: "ps:stop",
+      name: ["ps:stop", "stop", "kill"],
       description: "Stop an app dyno or process type",
       options: [
         {
@@ -6398,7 +6401,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "dyno", isOptional: true },
     },
     {
-      name: "ps:type",
+      name: ["ps:type", "resize", "dyno:type"],
       description:
         "Manage dyno sizes\n\nCalled with no arguments shows the current dyno size.\n\nCalled with one argument sets the size.\nWhere SIZE is one of eco|basic|standard-1x|standard-2x|performance\n\nCalled with 1..n TYPE=SIZE arguments sets the quantity per type.\n",
       options: [
@@ -6481,7 +6484,7 @@ const completionSpec: Fig.Spec = {
       args: { name: "release", isOptional: true },
     },
     {
-      name: "releases:rollback",
+      name: ["releases:rollback", "rollback"],
       description: "Roll back to a previous release",
       options: [
         {
