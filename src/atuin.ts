@@ -1,11 +1,15 @@
-// Atuin v18.24.8 (GitHub release atuinsh/atuin, 2026-11-13). Source: clap
-// derives in crates/atuin/src/command, crates/atuin-ai and crates/atuin-pty-proxy
-// at tag v18.24.8, help text from crates/atuin/i18n/en-US/atuin.ftl.
+// Atuin v18.25.0 (GitHub release atuinsh/atuin, tag v18.25.0 of 2026-11-20,
+// also the latest on crates.io and Homebrew, 2026-11-20). Source: clap derives
+// in crates/atuin/src/command, crates/atuin-ai and crates/atuin-pty-proxy at
+// tag v18.25.0 (read statically and diffed against v18.24.8, the binary was not
+// run), help text from crates/atuin/i18n/en-US/atuin.ftl.
 // Default features (client, sync, daemon, ai, pty-proxy, octavo) plus
 // self-update (`atuin update`, official installer builds only).
+// Commands that upstream hides and that only print "now part of `atuin setup`"
+// (`hook install`, `mcp install`, `config enable|disable`, `threads enable`)
+// are left out; so are hidden flags (`setup --hub|--backfill|--upload-threads`).
 
-// Agent harnesses known to `atuin hook install`, `atuin threads --harness`
-// and `atuin resume --in`
+// Agent harnesses known to `atuin threads --harness`
 const harnesses: Fig.Suggestion[] = [
   { name: "amp" },
   { name: ["claude-code", "claude"] },
@@ -17,6 +21,22 @@ const harnesses: Fig.Suggestion[] = [
   { name: "opencode" },
   { name: "pi" },
   { name: "omp" },
+];
+
+// Agents `atuin resume --in` can write a session for (every harness but amp)
+const continueTargets = harnesses.filter((harness) => harness.name !== "amp");
+
+// Agents `atuin hook` and `atuin setup --agents` take, with copilot's aliases
+const agents: Fig.Suggestion[] = harnesses.map((harness) =>
+  harness.name === "copilot"
+    ? { name: ["copilot", "github-copilot", "copilot-cli"] }
+    : harness
+);
+
+// `--<flag>` and `--no-<flag>`, as `atuin setup` has them
+const setupToggle = (flag: string, on: string, off: string): Fig.Option[] => [
+  { name: `--${flag}`, description: on },
+  { name: `--no-${flag}`, description: off },
 ];
 
 const filterModes = [
@@ -150,7 +170,7 @@ const resumeSpec: Omit<Fig.Subcommand, "name"> = {
       description:
         "Continue the thread QUERY names in another agent, as a new session there",
       exclusiveOn: ["--fork", "--as-is", "--switch"],
-      args: { name: "HARNESS", suggestions: harnesses },
+      args: { name: "HARNESS", suggestions: continueTargets },
     },
     {
       name: "--fork",
@@ -192,6 +212,79 @@ const resumeSpec: Omit<Fig.Subcommand, "name"> = {
     },
   ],
 };
+
+// Subcommands of `atuin threads`, which `atuin ai session` still takes
+const threadsSubcommands: Fig.Subcommand[] = [
+  {
+    name: "list",
+    description: "List captured threads, newest first",
+    options: [styleOption],
+  },
+  {
+    name: "show",
+    description:
+      "Show a thread and its messages. Accepts an id, a harness id or `latest`",
+    args: { name: "ID|latest", suggestions: ["latest"] },
+    options: [styleOption],
+  },
+  {
+    name: "search",
+    description:
+      "Full-text search across captured threads, most relevant first",
+    args: {
+      name: "QUERY",
+      description:
+        "Words to look for in thread titles, message text, reasoning, and tool calls; all must appear. Quote words to find them together, in that order. Use `--` before a query that starts with `-`",
+      isVariadic: true,
+    },
+    options: [
+      harnessOption("Only search threads from this harness"),
+      {
+        name: "--limit",
+        description: "Maximum threads to return; 0 for unbounded",
+        args: { name: "N", default: "10" },
+      },
+      styleOption,
+    ],
+  },
+  {
+    name: "tail",
+    description:
+      "Follow threads and messages as they are recorded (until interrupted)",
+    options: [styleOption],
+  },
+  {
+    name: "import",
+    description:
+      "Import every thread the agents have on this machine, including those capture leaves alone",
+    options: [
+      harnessOption("Only import threads from this harness"),
+      styleOption,
+    ],
+  },
+  {
+    name: "push",
+    description:
+      "Capture messages an agent hands over, one JSON object per line on stdin",
+    options: [
+      {
+        ...harnessOption("The harness the thread is from"),
+        isRequired: true,
+      },
+      {
+        name: "--session",
+        description: "The thread's id, as its harness names it",
+        isRequired: true,
+        args: { name: "SESSION" },
+      },
+    ],
+  },
+  {
+    name: "resume",
+    description: "Pick a captured thread and resume it",
+    ...resumeSpec,
+  },
+];
 
 const completionSpec: Fig.Spec = {
   name: "atuin",
@@ -249,7 +342,8 @@ const completionSpec: Fig.Spec = {
         },
         {
           name: "--after",
-          description: "Only include results after this date",
+          description:
+            "Only include results after this date; see `--before` for how it is interpreted",
           args: {
             name: "AFTER",
           },
@@ -369,7 +463,8 @@ const completionSpec: Fig.Spec = {
           description: "Full-text search over captured command output",
           args: {
             name: "QUERY",
-            description: "Words to search for; all must appear",
+            description:
+              "Words to search for; all must appear. Quote words to find them together, in that order. Use `--` before a query that starts with `-`",
             isVariadic: true,
           },
           options: [
@@ -381,10 +476,31 @@ const completionSpec: Fig.Spec = {
             {
               name: ["--context", "-C"],
               description:
-                "Show only the matching lines, with this many lines of context on either side",
+                "Show only the matching lines, with this many lines of context on either side; without it, each match's whole output",
               args: { name: "CONTEXT" },
             },
-            styleOption,
+            {
+              ...styleOption,
+              description: "How matches are rendered",
+              args: {
+                name: "STYLE",
+                default: "auto",
+                suggestions: [
+                  "auto",
+                  "plain",
+                  "pretty",
+                  {
+                    name: "json",
+                    description: "A single JSON array of match objects",
+                  },
+                  {
+                    name: "ndjson",
+                    description:
+                      "Newline-delimited JSON: one match object per line",
+                  },
+                ],
+              },
+            },
           ],
         },
       ],
@@ -641,7 +757,8 @@ const completionSpec: Fig.Spec = {
             dryRunOption,
             {
               name: ["--before", "-b"],
-              description: "Only delete results added before this date",
+              description:
+                "Only delete results added before this date, read in the configured timezone unless it carries an explicit offset",
               isRequired: true,
               args: { name: "BEFORE" },
             },
@@ -665,39 +782,76 @@ const completionSpec: Fig.Spec = {
             "Set up without asking, as the flags say: sync is off unless `--sync` says otherwise",
         },
         {
-          name: "--no-shell-history",
-          description: "Don't capture your shell history",
-        },
-        {
-          name: "--no-threads",
-          description: "Don't capture your conversations with your agents",
-        },
-        {
-          name: "--no-agent-history",
-          description: "Don't capture the commands your agents run",
-        },
-        {
-          name: "--no-ctrl-r",
-          description: "Leave ctrl-r to your shell",
-        },
-        {
-          name: "--no-up-arrow",
-          description: "Leave the up arrow to your shell",
-        },
-        {
-          name: "--no-mcp",
-          description: "Don't let your agents search Atuin over MCP",
-        },
-        {
-          name: "--sync",
+          name: "--only",
           description:
-            "Where to sync: `cloud`, `off`, or your own server's address",
-          args: { name: "cloud|off|URL", suggestions: ["cloud", "off"] },
+            "Change only what the flags say, without asking, and leave the rest as it is",
         },
         {
           name: "--no-import",
           description:
             "Don't import the shell history and threads already on this machine",
+        },
+        ...setupToggle(
+          "shell-history",
+          "Capture your shell history",
+          "Don't capture your shell history"
+        ),
+        {
+          name: "--shells",
+          description:
+            "The shells to hook into: zsh, bash, fish and powershell",
+          isRepeatable: true,
+          args: {
+            name: "SHELL",
+            suggestions: ["zsh", "bash", "fish", "powershell"],
+          },
+        },
+        ...setupToggle(
+          "output-capture",
+          "Capture what your commands print",
+          "Don't capture what your commands print"
+        ),
+        ...setupToggle(
+          "threads",
+          "Capture your conversations with your agents",
+          "Don't capture your conversations with your agents"
+        ),
+        ...setupToggle(
+          "agent-history",
+          "Capture the commands your agents run",
+          "Don't capture the commands your agents run"
+        ),
+        {
+          name: "--agents",
+          description: "The agents to hook into and connect",
+          isRepeatable: true,
+          args: { name: "AGENT", suggestions: agents },
+        },
+        ...setupToggle(
+          "ctrl-r",
+          "Search with ctrl-r",
+          "Leave ctrl-r to your shell"
+        ),
+        ...setupToggle(
+          "up-arrow",
+          "Search with the up arrow",
+          "Leave the up arrow to your shell"
+        ),
+        ...setupToggle(
+          "mcp",
+          "Let your agents search Atuin over MCP",
+          "Don't let your agents search Atuin over MCP"
+        ),
+        ...setupToggle(
+          "daemon",
+          "Run the daemon, which thread and output capture need",
+          "Stop the daemon, and keep it off"
+        ),
+        {
+          name: "--sync",
+          description:
+            "Where to sync: `cloud`, `off`, or your own server's address",
+          args: { name: "cloud|off|URL", suggestions: ["cloud", "off"] },
         },
       ],
     },
@@ -718,13 +872,9 @@ const completionSpec: Fig.Spec = {
           description: "Disable the binding of the Up Arrow key to atuin",
         },
         {
-          name: "--disable-ai",
-          description: "Disable the binding of ? to Atuin AI",
-        },
-        {
           name: "--bind-ai-resume",
           description:
-            "Bind CTRL-] to atuin threads resume (zsh, bash and fish; off by default)",
+            "Bind CTRL-] to atuin threads resume (zsh, bash and fish; off by default: it replaces the shell's own binding)",
         },
       ],
     },
@@ -1141,49 +1291,28 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: "hook",
-      description: "Manage AI-agent shell hooks",
-      subcommands: [
-        {
-          name: "install",
-          description:
-            "Install hooks for an AI agent to capture commands in atuin history",
-          args: { name: "AGENT", suggestions: harnesses },
-        },
-      ],
+      description: "Record the commands an AI agent runs, from its hooks",
+      args: {
+        name: "AGENT",
+        description: "Which agent's hook format to parse",
+        suggestions: agents,
+      },
     },
     {
       name: "ai",
-      description: "Run the AI assistant",
+      description:
+        "The old name of `atuin threads`; the AI assistant itself was removed",
+      hidden: true,
       subcommands: [
         {
-          name: "inline",
-          description: "Inline completion mode with small TUI overlay",
-          args: {
-            name: "COMMAND",
-            description: "Current command line to complete",
-            isOptional: true,
-          },
-          options: [
-            {
-              name: ["--verbose", "-v"],
-              description: "Enable verbose logging",
-              isPersistent: true,
-            },
-            {
-              name: "--api-endpoint",
-              description:
-                "Custom API endpoint; defaults to reading from the `ai.endpoint` setting",
-              isPersistent: true,
-              args: { name: "API_ENDPOINT" },
-            },
-            {
-              name: "--api-token",
-              description:
-                "Custom API token; defaults to reading from the `ai.api_token` setting",
-              isPersistent: true,
-              args: { name: "API_TOKEN" },
-            },
-          ],
+          name: "session",
+          description: "The old name of `atuin threads`",
+          subcommands: threadsSubcommands,
+        },
+        {
+          name: "resume",
+          description: "Pick a captured thread and resume it",
+          ...resumeSpec,
         },
       ],
     },
@@ -1191,81 +1320,7 @@ const completionSpec: Fig.Spec = {
       name: "threads",
       description:
         "Search, read and resume your coding agents' captured threads",
-      subcommands: [
-        {
-          name: "list",
-          description: "List captured threads, newest first",
-          options: [styleOption],
-        },
-        {
-          name: "show",
-          description:
-            "Show a thread and its messages. Accepts an id, a harness id or `latest`",
-          args: { name: "ID|latest", suggestions: ["latest"] },
-          options: [styleOption],
-        },
-        {
-          name: "search",
-          description:
-            "Full-text search across captured threads, most relevant first",
-          args: {
-            name: "QUERY",
-            description:
-              "Words to look for in thread titles, message text, reasoning, and tool calls",
-            isVariadic: true,
-          },
-          options: [
-            harnessOption("Only search threads from this harness"),
-            {
-              name: "--limit",
-              description: "Maximum threads to return; 0 for unbounded",
-              args: { name: "N", default: "10" },
-            },
-            styleOption,
-          ],
-        },
-        {
-          name: "tail",
-          description:
-            "Follow threads and messages as they are recorded (until interrupted)",
-          options: [styleOption],
-        },
-        {
-          name: "import",
-          description: "Import every thread the agents have on this machine",
-          options: [
-            harnessOption("Only import threads from this harness"),
-            styleOption,
-          ],
-        },
-        {
-          name: "push",
-          description:
-            "Capture messages an agent hands over, one JSON object per line on stdin",
-          options: [
-            {
-              ...harnessOption("The harness the thread is from"),
-              isRequired: true,
-            },
-            {
-              name: "--session",
-              description: "The thread's id, as its harness names it",
-              isRequired: true,
-              args: { name: "SESSION" },
-            },
-          ],
-        },
-        {
-          name: "resume",
-          description: "Pick a captured thread and resume it",
-          ...resumeSpec,
-        },
-        {
-          name: "enable",
-          description:
-            "Turn thread capture on (short for `atuin config enable threads`)",
-        },
-      ],
+      subcommands: threadsSubcommands,
     },
     {
       name: "resume",
@@ -1277,26 +1332,6 @@ const completionSpec: Fig.Spec = {
       name: "mcp",
       description:
         "Start an MCP server exposing history search to AI tools (stdio)",
-      subcommands: [
-        {
-          name: "install",
-          description: "Connect AI agents to atuin's MCP server",
-          args: {
-            name: "AGENT",
-            description:
-              "Agent to connect; omit to connect all agents with existing config files",
-            isOptional: true,
-            suggestions: [
-              "claude-code",
-              "codex",
-              "grok",
-              "opencode",
-              "pi",
-              "omp",
-            ],
-          },
-        },
-      ],
     },
     {
       name: "wrapped",
@@ -1356,38 +1391,11 @@ const completionSpec: Fig.Spec = {
                 suggestions: ["auto", "string", "boolean", "integer", "float"],
               },
             },
+            {
+              name: "--force",
+              description: "Set the key even if Atuin does not recognize it",
+            },
           ],
-        },
-        {
-          name: "enable",
-          description: "Enable a feature, along with everything it depends on",
-          args: {
-            name: "FEATURE",
-            suggestions: [
-              {
-                name: "daemon",
-                description: "The background daemon and daemon-backed search",
-              },
-              {
-                name: "output-capture",
-                description:
-                  "Command output capture, via the daemon and the pty proxy",
-              },
-              {
-                name: ["threads", "ai-sessions"],
-                description:
-                  "Capture your AI coding agents' threads, to search and resume them",
-              },
-            ],
-          },
-        },
-        {
-          name: "disable",
-          description: "Disable a feature, leaving its dependencies enabled",
-          args: {
-            name: "FEATURE",
-            suggestions: ["daemon", "output-capture", "threads"],
-          },
         },
         {
           name: "print",
@@ -1399,6 +1407,11 @@ const completionSpec: Fig.Spec = {
               "Print the value of a specific key and all its children",
             isOptional: true,
           },
+        },
+        {
+          name: "check",
+          description:
+            "Check your configuration for settings that Atuin does not recognize",
         },
         {
           name: "types",
