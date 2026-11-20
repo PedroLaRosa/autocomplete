@@ -1,6 +1,9 @@
-// Rollup v4.68.7 (GitHub release, 2026-11-18). Source: cli/help.md and
-// docs/command-line-interface at the v4.68.7 tag, plus `--jsx`/`--treeshake`
-// presets from docs/configuration-options.
+// Rollup v4.68.7 (npm latest and GitHub tag v4.68.7, verified 2026-11-20).
+// Source: cli/help.md, cli/cli.ts, src/utils/options/mergeOptions.ts and
+// docs/command-line-interface at the v4.68.7 tag, plus the CLI rows (flags,
+// presets, enums) of docs/configuration-options that help.md omits (--jsx.*,
+// --treeshake presets, --experimental*, --virtualDirname,
+// --preserveEntrySignatures). Read statically, not run.
 import { filepaths } from "@tabsmith/autocomplete-generators";
 
 const watchHooks: Fig.Option[] = [
@@ -81,6 +84,11 @@ const completionSpec: Fig.Spec = {
     {
       name: ["-m", "--sourcemap"],
       description: "Generate sourcemap (`-m inline` for inline map)",
+      args: {
+        name: "mode",
+        isOptional: true,
+        suggestions: ["inline", "hidden"],
+      },
     },
     {
       name: ["-n", "--name"],
@@ -218,6 +226,25 @@ const completionSpec: Fig.Spec = {
       description: "Do not add __esModule property",
     },
     {
+      name: "--experimentalCacheExpiry",
+      description:
+        "Number of runs after which unused cached plugin assets are removed",
+      args: {
+        name: "numberOfRuns",
+      },
+    },
+    {
+      name: "--experimentalLogSideEffects",
+      description: "Log the first side effect found in every file",
+    },
+    {
+      name: "--experimentalMinChunkSize",
+      description: "Minimal chunk size target in bytes for code-splitting",
+      args: {
+        name: "size",
+      },
+    },
+    {
       name: "--exports",
       args: {
         name: "mode",
@@ -232,6 +259,12 @@ const completionSpec: Fig.Spec = {
     {
       name: "--no-externalImportAttributes",
       description: 'Omit import attributes in "es" output',
+    },
+    {
+      name: "--no-externalImportAssertions",
+      description:
+        'Omit import assertions in "es" output (use --no-externalImportAttributes instead)',
+      deprecated: true,
     },
     {
       name: "--no-externalLiveBindings",
@@ -348,6 +381,51 @@ const completionSpec: Fig.Spec = {
       description: "Do not handle JSX syntax",
     },
     {
+      name: "--jsx.factory",
+      description: "Function used to create JSX elements",
+      args: {
+        name: "factory",
+      },
+    },
+    {
+      name: "--jsx.fragment",
+      description: "Element function used to create JSX fragments",
+      args: {
+        name: "fragment",
+      },
+    },
+    {
+      name: "--jsx.importSource",
+      description: "Where to import the JSX factory and fragment from",
+      args: {
+        name: "library",
+      },
+    },
+    {
+      name: "--jsx.jsxImportSource",
+      description:
+        'Where to import the jsx, jsxs and Fragment helpers from in "automatic" mode',
+      args: {
+        name: "library",
+      },
+    },
+    {
+      name: "--jsx.mode",
+      description: "How JSX is processed",
+      args: {
+        name: "mode",
+        suggestions: ["preserve", "classic", "automatic"],
+      },
+    },
+    {
+      name: "--jsx.preset",
+      description: "JSX preset to use while overriding some options",
+      args: {
+        name: "value",
+        suggestions: ["preserve", "preserve-react", "react", "react-jsx"],
+      },
+    },
+    {
       name: "--logLevel",
       description: "Which kind of logs to display",
       args: {
@@ -384,6 +462,14 @@ const completionSpec: Fig.Spec = {
     {
       name: "--perf",
       description: "Display performance timings",
+    },
+    {
+      name: "--preserveEntrySignatures",
+      description: "Control whether entry chunks keep the entry module exports",
+      args: {
+        name: "mode",
+        suggestions: ["strict", "allow-extension"],
+      },
     },
     {
       name: "--no-preserveEntrySignatures",
@@ -451,8 +537,12 @@ const completionSpec: Fig.Spec = {
       },
     },
     {
-      name: "--stdin=ext",
+      name: "--stdin",
       description: "Specify file extension used for stdin input",
+      requiresSeparator: true,
+      args: {
+        name: "ext",
+      },
     },
     {
       name: "--no-stdin",
@@ -495,6 +585,16 @@ const completionSpec: Fig.Spec = {
       description: "Manually declare functions as pure",
       args: {
         name: "names",
+      },
+    },
+    {
+      name: "--treeshake.moduleSideEffects",
+      description:
+        "Module side effect handling (`no-external` only removes external imports)",
+      args: {
+        name: "value",
+        isOptional: true,
+        suggestions: ["no-external"],
       },
     },
     {
@@ -555,6 +655,13 @@ const completionSpec: Fig.Spec = {
     {
       name: "--validate",
       description: "Validate output",
+    },
+    {
+      name: "--virtualDirname",
+      description: "Directory name for virtual files emitted by plugins",
+      args: {
+        name: "dirname",
+      },
     },
   ],
 };
