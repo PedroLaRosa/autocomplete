@@ -1,4 +1,4 @@
-// npx bundled with npm v12.2.3 (npm view npm version, 2026-11-19). Source: npm/cli bin/npx-cli.js, lib/commands/exec.js, docs/commands/npm-exec.md
+// npx bundled with npm v12.2.3 (npm registry latest and git tag v12.2.3, 2026-11-20). Source: npm/cli@v12.2.3 bin/npx-cli.js, lib/commands/exec.js, workspaces/config definitions, docs/commands/npm-exec.md and npx.md (static read, not run)
 import autocannon from "./autocannon";
 import { npmSearchGenerator } from "./npm";
 
@@ -248,6 +248,7 @@ const completionSpec: Fig.Spec = {
       name: "--allow-scripts",
       description:
         "Comma-separated list of packages whose install scripts are allowed to run",
+      isRepeatable: true,
       args: {
         name: "package-list",
       },
