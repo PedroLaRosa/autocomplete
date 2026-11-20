@@ -1,3 +1,16 @@
+// Vue CLI (@vue/cli) v5.0.9 (npm latest, published 2025-08-21; the project is in maintenance mode, 2026-11-20).
+// Source: static read of the npm tarball (bin/vue.js, lib/*.js) and commander 7.2.0 help strings; the binary was not run.
+// `vue serve` and `vue build` are aliases of the project's npm scripts since v5 (the v4 global-service file mode is gone).
+
+const registryOption: Fig.Option = {
+  name: "--registry",
+  description:
+    "Use specified npm registry when installing dependencies (only for npm)",
+  args: {
+    name: "url",
+  },
+};
+
 const completionSpec: Fig.Spec = {
   name: "vue",
   description: "Vue cli tools",
@@ -32,6 +45,7 @@ const completionSpec: Fig.Spec = {
           description: "Use specified npm client when installing dependencies",
           args: {
             name: "command",
+            suggestions: ["yarn", "pnpm", "npm"],
           },
         },
         {
@@ -47,6 +61,7 @@ const completionSpec: Fig.Spec = {
           description: "Force git initialization with initial commit message",
           args: {
             name: "message",
+            isOptional: true,
           },
         },
         {
@@ -66,23 +81,19 @@ const completionSpec: Fig.Spec = {
           description: "Use git clone when fetching remote preset",
         },
         {
-          name: ["-X", "--proxy"],
+          name: ["-x", "--proxy"],
           description: "Use specified proxy when creating project",
           args: {
             name: "proxyUrl",
           },
         },
         {
-          name: ["-b", "--bar"],
+          name: ["-b", "--bare"],
           description: "Scaffold project without beginner instructions",
         },
         {
           name: "--skipGetStarted",
           description: 'Skip displaying "Get started" instructions',
-        },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
         },
       ],
     },
@@ -90,51 +101,43 @@ const completionSpec: Fig.Spec = {
       name: "add",
       description:
         "Install a plugin and invoke its generator in an already created project",
-      args: {
-        name: "plugin",
-      },
-      options: [
+      args: [
         {
-          name: "--registry",
-          description:
-            "Use specified npm registry when installing dependencies (only for npm)",
-          args: {
-            name: "url",
-          },
+          name: "plugin",
         },
         {
-          name: ["-h", "--help"],
-          description: "Output usage information",
+          name: "pluginOptions",
+          description: "Options passed on to the plugin generator",
+          isOptional: true,
         },
       ],
+      options: [registryOption],
     },
     {
       name: "invoke",
       description:
         "Invoke the generator of a plugin in an already created project",
-      args: {
-        name: "plugin",
-      },
-      options: [
+      args: [
         {
-          name: "--registry",
-          description:
-            "Use specified npm registry when installing dependencies (only for npm)",
-          args: {
-            name: "url",
-          },
+          name: "plugin",
         },
         {
-          name: ["-h", "--help"],
-          description: "Output usage information",
+          name: "pluginOptions",
+          description: "Options passed on to the plugin generator",
+          isOptional: true,
         },
       ],
+      options: [registryOption],
     },
     {
       name: "inspect",
       description:
         "Inspect the webpack config in a project with vue-cli-service",
-      args: {},
+      args: {
+        name: "paths",
+        isOptional: true,
+        isVariadic: true,
+      },
       options: [
         {
           name: "--mode",
@@ -168,77 +171,21 @@ const completionSpec: Fig.Spec = {
           name: ["-v", "--verbose"],
           description: "Show full function definitions in output",
         },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
-        },
       ],
     },
     {
       name: "serve",
-      description:
-        "Serve a .js or .vue file in development mode with zero config",
+      description: 'Alias of "npm run serve" in the current project',
       args: {
-        template: "filepaths",
+        name: "args",
+        description: "Arguments passed on to the serve script",
+        isOptional: true,
+        isVariadic: true,
       },
-      options: [
-        {
-          name: ["-o", "--open"],
-          description: "Open browser",
-        },
-        {
-          name: ["-c", "--copy"],
-          description: "Copy local url to clipboard",
-        },
-        {
-          name: ["-p", "--port"],
-          description:
-            "Port used by the server (default: 8080 or next available port)",
-          args: {
-            name: "port",
-          },
-        },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
-        },
-      ],
     },
     {
       name: "build",
-      description:
-        "Build a .js or .vue file in production mode with zero config",
-      args: {
-        template: "filepaths",
-      },
-      options: [
-        {
-          name: ["-t", "--target"],
-          description: "Build target (app | lib | wc | wc-async, default: app)",
-          args: {
-            name: "target",
-          },
-        },
-        {
-          name: ["-n", "--name"],
-          description:
-            "Name for lib or web-component mode (default: entry filename)",
-          args: {
-            name: "name",
-          },
-        },
-        {
-          name: ["-d", "--destination"],
-          description: "Output directory (default: dist)",
-          args: {
-            name: "dir",
-          },
-        },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
-        },
-      ],
+      description: 'Alias of "npm run build" in the current project',
     },
     {
       name: "ui",
@@ -271,10 +218,6 @@ const completionSpec: Fig.Spec = {
           name: "--headless",
           description: "Don't open browser on start and output port",
         },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
-        },
       ],
     },
     {
@@ -298,10 +241,6 @@ const completionSpec: Fig.Spec = {
           name: "--offline",
           description: "Use cached template",
         },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
-        },
       ],
     },
     {
@@ -309,6 +248,7 @@ const completionSpec: Fig.Spec = {
       description: "Inspect and modify the config",
       args: {
         name: "value",
+        isOptional: true,
       },
       options: [
         {
@@ -322,7 +262,7 @@ const completionSpec: Fig.Spec = {
           name: ["-s", "--set"],
           description: "Set option value",
           args: {
-            name: "value",
+            name: "path",
           },
         },
         {
@@ -340,10 +280,6 @@ const completionSpec: Fig.Spec = {
           name: "--json",
           description: "Outputs JSON result only",
         },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
-        },
       ],
     },
     {
@@ -356,10 +292,6 @@ const completionSpec: Fig.Spec = {
           description:
             "Also check for alpha / beta / rc versions when upgrading",
         },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
-        },
       ],
     },
     {
@@ -367,6 +299,7 @@ const completionSpec: Fig.Spec = {
       description: "(experimental) upgrade vue cli service / plugins",
       args: {
         name: "plugin-name",
+        isOptional: true,
       },
       options: [
         {
@@ -399,11 +332,7 @@ const completionSpec: Fig.Spec = {
         {
           name: "--next",
           description:
-            "Also check for alpha / beta /rc versions when upgrading",
-        },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
+            "Also check for alpha / beta / rc versions when upgrading",
         },
       ],
     },
@@ -413,30 +342,30 @@ const completionSpec: Fig.Spec = {
         "(experimental) run migrator for an already-installed cli plugin",
       args: {
         name: "plugin-name",
+        isOptional: true,
       },
       options: [
         {
           name: ["-f", "--from"],
           description: "The base version for the migrator to migrate from",
+          isRequired: true,
           args: {
             name: "version",
           },
-        },
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
         },
       ],
     },
     {
       name: "info",
       description: "Print debugging information about your environment",
-      options: [
-        {
-          name: ["-h", "--help"],
-          description: "Output usage information",
-        },
-      ],
+    },
+    {
+      name: "help",
+      description: "Display help for command",
+      args: {
+        name: "command",
+        isOptional: true,
+      },
     },
   ],
   options: [
@@ -446,7 +375,8 @@ const completionSpec: Fig.Spec = {
     },
     {
       name: ["-h", "--help"],
-      description: "Output usage information",
+      description: "Display help for command",
+      isPersistent: true,
     },
   ],
 };
