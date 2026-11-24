@@ -101,7 +101,7 @@
     "@tabsmith/autocomplete-generators": "2.4.0",
     "@tabsmith/autocomplete-helpers": "2.0.0",
     "semver": "7.8.6",
-    "strip-json-comments": "5.0.3",
+    "strip-json-comments": "5.1.0",
     "yaml": "2.9.1"
   },
   "publishConfig": {
